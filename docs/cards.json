@@ -1,0 +1,80 @@
+[
+  {
+    "id": "1_zahard",
+    "name": "Zahard",
+    "title": "King of the Tower",
+    "rarity": "legendary",
+    "abilities": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
+    "passive": "Enemy fishermen deal -2 damage",
+    "hitPoints": 10,
+    "cost": 5,
+    "positions": ["Fisherman"],
+    "traits": [],
+    "affiliations": ["Great Warriors", "Irregulars"]
+  },
+  {
+    "id": "2_jue_viole_grace",
+    "name": "Jue Viole Grace",
+    "title": "Slayer Candidate",
+    "rarity": "epic",
+    "abilities": ["Deal 2 damage to 3 enemies", "Spend 1 shinsu to deal 7 damage to an enemy"],
+    "passive": "When I take damage, refill 1 shinsu",
+    "hitPoints": 5,
+    "cost": 3,
+    "positions": ["Wave Controller"],
+    "traits": [],
+    "affiliations": ["FUG", "Irregulars"]
+  },
+  {
+    "id": "3_khun",
+    "name": "Khun",
+    "title": "Strategist",
+    "rarity": "rare",
+    "abilities": [],
+    "passive": "When I take damage, deal 1 damage to an enemy",
+    "hitPoints": 5,
+    "cost": 2,
+    "positions": ["Light Bearer"],
+    "traits": [],
+    "affiliations": ["Khun Family"]
+  },
+  {
+    "id": "4_rak_compressed",
+    "name": "Rak (compressed)",
+    "title": "Alligator",
+    "rarity": "common",
+    "actions": [],
+    "passive": "I am always angry",
+    "hitPoints": 5,
+    "cost": 1,
+    "positions": ["Spear Bearer"],
+    "traits": [],
+    "affiliations": []
+  },
+  {
+    "id": "5_ship_leesoo",
+    "name": "Ship Leesoo",
+    "title": "-",
+    "rarity": "rare",
+    "actions": [],
+    "passive": "-",
+    "hitPoints": 5,
+    "cost": 1,
+    "positions": ["Scout"],
+    "traits": [],
+    "affiliations": []
+  },
+  {
+    "id": "6_white_background",
+    "name": "white",
+    "title": "white",
+    "rarity": "rare",
+    "actions": ["be white. WHITE!!"],
+    "passive": "i am always white",
+    "hitPoints": 20,
+    "cost": 3,
+    "positions": ["Fisherman"],
+    "traits": [],
+    "affiliations": ["The Whites"]
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "name": "shinsu-duel",
+  "version": "1.0.0",
+  "description": "a 1v1 card game based on SIU's Tower of God",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "start": "parcel src/index.html"
+  },
+  "author": "Ricardo Figueiredo",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel": "^2.13.3"
+  }
+}
