@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Play</title>
+    <link rel="stylesheet" href="styles/global.css" />
+    <link rel="stylesheet" href="styles/rules.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Play Against</h1>
+      <button type="button" id="friendBtn">Friend</button>
+      <button type="button" id="botBtn">Bot</button>
+
+      <div id="friend-container" style="display: none">
+        <h2>Friend Options</h2>
+        <button type="button" id="createRoomBtn">Create a Room</button>
+        <button type="button" id="enterRoomBtn">Enter Room Code</button>
+      </div>
+
+      <div id="bot-container" style="display: none">
+        <h2>Bot Options</h2>
+        <button type="button" id="easyModeBtn">Easy Mode</button>
+        <button type="button" id="hardModeBtn">Hard Mode</button>
+      </div>
+    </div>
+
+    <script src="scripts/play.js"></script>
+  </body>
+</html>
