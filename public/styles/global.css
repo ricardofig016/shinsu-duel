@@ -22,6 +22,10 @@ h1 {
   margin-bottom: 20px;
 }
 
+.hidden {
+  display: none;
+}
+
 .buttons-container {
   display: flex;
   flex-direction: column;
@@ -42,4 +46,10 @@ button {
 .button:hover,
 button:hover {
   background-color: var(--primary-color-dark);
+}
+
+.button.active,
+button.active {
+  background-color: var(--primary-color-dark);
+  border: 2px solid var(--primary-color);
 }

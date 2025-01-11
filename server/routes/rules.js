@@ -3,11 +3,7 @@ import path from "path";
 
 const router = express.Router();
 
-router.get("/play", (req, res) => {
-  res.sendFile(path.resolve("public/pages/play.html"));
-});
-
-router.get("/rules", (req, res) => {
+router.get("/", (req, res) => {
   res.sendFile(path.resolve("public/pages/rules.html"));
 });
 
