@@ -1,9 +1,18 @@
 <nav>
   <ul>
-    <li><a href="/play">Play</a></li>
-    <li><a href="/rules">Rules</a></li>
-    <li id="auth-section">
-      <!-- Authentication section will be dynamically updated -->
+    <li><a class="button" href="/">Home</a></li>
+    <li><a class="button" href="/play">Play</a></li>
+    <li><a class="button" href="/rules">Rules</a></li>
+  </ul>
+  <ul>
+    <li>
+      <div id="loggedin-container">
+        <span id="username-span"></span>
+        <button type="button" id="logout-btn">Logout</button>
+      </div>
+      <div id="loggedout-container">
+        <button type="button" id="login-btn">Login</button>
+      </div>
     </li>
   </ul>
 </nav>

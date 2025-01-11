@@ -9,21 +9,27 @@
   </head>
   <body>
     <div class="navbar-container"></div>
-    <div class="container">
+    <div class="container-vertical">
       <h1>Play Against</h1>
-      <button type="button" id="friend-btn">Friend</button>
-      <button type="button" id="bot-btn">Bot</button>
-
-      <div id="friend-container" class="hidden">
-        <h2>PvP Options</h2>
-        <button type="button" id="create-room-btn">Create a Room</button>
-        <button type="button" id="enter-room-btn">Enter a Room</button>
+      <div class="container-horizontal">
+        <button type="button" id="friend-btn">Friend</button>
+        <button type="button" id="bot-btn">Bot</button>
       </div>
 
-      <div id="bot-container" class="hidden">
+      <div id="friend-container" class="container-vertical hidden">
+        <h2>PvP Options</h2>
+        <div class="container-horizontal">
+          <button type="button" id="create-room-btn">Create a Room</button>
+          <button type="button" id="enter-room-btn">Enter a Room</button>
+        </div>
+      </div>
+
+      <div id="bot-container" class="container-vertical hidden">
         <h2>PvE Options</h2>
-        <button type="button" id="easy-mode-btn">Easy Mode</button>
-        <button type="button" id="hard-mode-btn">Hard Mode</button>
+        <div class="container-horizontal">
+          <button type="button" id="easy-mode-btn">Easy Mode</button>
+          <button type="button" id="hard-mode-btn">Hard Mode</button>
+        </div>
       </div>
     </div>
 

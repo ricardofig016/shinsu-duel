@@ -1,13 +1,12 @@
 const load = async (container) => {
-  const authSection = container.querySelector("#auth-section");
   const authResponse = await fetch("/auth/status");
   const authStatus = await authResponse.json();
 
   if (authStatus.isAuthenticated) {
-    authSection.innerHTML = `
-          <span>Welcome, ${authStatus.username}</span>
-          <button id="logout-btn">Logout</button>
-        `;
+    container.querySelector("#loggedin-container").classList.remove("hidden");
+    container.querySelector("#loggedout-container").classList.add("hidden");
+
+    container.querySelector("#username-span").innerText = authStatus.username;
     container.querySelector("#logout-btn").addEventListener("click", async () => {
       const response = await fetch("/auth/logout", { method: "POST" });
       if (response.status === 200) {
@@ -17,9 +16,9 @@ const load = async (container) => {
       }
     });
   } else {
-    authSection.innerHTML = `
-          <button id="login-btn">Login</button>
-        `;
+    container.querySelector("#loggedin-container").classList.add("hidden");
+    container.querySelector("#loggedout-container").classList.remove("hidden");
+
     container.querySelector("#login-btn").addEventListener("click", async () => {
       const username = prompt("Enter Your Username:");
       if (username) {

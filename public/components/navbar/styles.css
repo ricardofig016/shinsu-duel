@@ -1,3 +1,27 @@
 nav {
-  background-color: red;
+  font-family: "Arial", sans-serif;
+  background-color: #1e1e2f;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+nav li {
+  margin: 0 1rem;
+}
+
+span {
+  color: #b3b3b3;
+  margin-right: 1rem;
+  font-size: 1rem;
 }
