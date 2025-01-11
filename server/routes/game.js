@@ -46,7 +46,7 @@ router.get("/:roomCode", isAuthenticated, (req, res) => {
     logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
     return res.status(403).send("Access denied");
   }
-  return res.sendFile(path.resolve("public/pages/game.html"));
+  return res.sendFile(path.resolve("public/pages/game/index.html"));
 });
 
 router.post("/:roomCode/join", isAuthenticated, (req, res) => {
