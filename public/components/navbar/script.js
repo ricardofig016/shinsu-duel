@@ -1,5 +1,5 @@
-(async () => {
-  const authSection = document.getElementById("auth-section");
+const load = async (container) => {
+  const authSection = container.querySelector("#auth-section");
   const authResponse = await fetch("/auth/status");
   const authStatus = await authResponse.json();
 
@@ -8,10 +8,9 @@
           <span>Welcome, ${authStatus.username}</span>
           <button id="logout-btn">Logout</button>
         `;
-    document.getElementById("logout-btn").addEventListener("click", async () => {
+    container.querySelector("#logout-btn").addEventListener("click", async () => {
       const response = await fetch("/auth/logout", { method: "POST" });
       if (response.status === 200) {
-        alert("Logout successful");
         window.location.reload();
       } else {
         alert("Logout failed. Please try again.");
@@ -21,7 +20,7 @@
     authSection.innerHTML = `
           <button id="login-btn">Login</button>
         `;
-    document.getElementById("login-btn").addEventListener("click", async () => {
+    container.querySelector("#login-btn").addEventListener("click", async () => {
       const username = prompt("Enter Your Username:");
       if (username) {
         const response = await fetch("/auth/login", {
@@ -30,7 +29,6 @@
           body: JSON.stringify({ username }),
         });
         if (response.status === 200) {
-          alert("Login successful");
           window.location.reload();
         } else {
           alert("Login failed. Please try again.");
@@ -38,5 +36,7 @@
       }
     });
   }
-  console.log("navbar script loaded");
-})();
+  console.log("Navbar loaded");
+};
+
+export default load;

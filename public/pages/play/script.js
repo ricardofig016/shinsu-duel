@@ -1,15 +1,4 @@
-const loadNavbar = async () => {
-  const navbarContainer = document.getElementById("navbar-container");
-  if (!navbarContainer) return;
-
-  const response = await fetch("/templates/navbar/index.html");
-  const navbarHtml = await response.text();
-  navbarContainer.innerHTML = navbarHtml;
-
-  const scriptElement = document.createElement("script");
-  scriptElement.src = "/templates/navbar/script.js";
-  document.body.appendChild(scriptElement);
-};
+import { loadComponent } from "/util/component-util.js";
 
 const setupModeSelection = () => {
   const friendButton = document.getElementById("friend-btn");
@@ -80,8 +69,8 @@ const setupPvP = () => {
   });
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadNavbar();
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadComponent("navbar");
   setupModeSelection();
   setupPvE();
   setupPvP();
