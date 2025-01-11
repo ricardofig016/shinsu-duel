@@ -12,7 +12,7 @@ const load = async (container) => {
       if (response.status === 200) {
         window.location.reload();
       } else {
-        alert("Logout failed. Please try again.");
+        alert(await response.text());
       }
     });
   } else {
@@ -30,12 +30,11 @@ const load = async (container) => {
         if (response.status === 200) {
           window.location.reload();
         } else {
-          alert("Login failed. Please try again.");
+          alert(await response.text());
         }
       }
     });
   }
-  console.log("Navbar loaded");
 };
 
 export default load;

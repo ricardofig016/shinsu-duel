@@ -1,4 +1,4 @@
-import { loadComponent } from "/util/component-util.js";
+import { loadComponent } from "/utils/component-util.js";
 
 const setupModeSelection = () => {
   const friendButton = document.getElementById("friend-btn");
@@ -41,6 +41,7 @@ const setupPvP = () => {
         }
       }
     } catch (error) {
+      console.error(error);
       alert(
         "An error occurred while entering the room.\nPlease check your network connection and try again."
       );
@@ -49,7 +50,7 @@ const setupPvP = () => {
 
   document.getElementById("create-room-btn").addEventListener("click", async () => {
     try {
-      const response = await fetch("/game/create-room", { method: "POST" });
+      const response = await fetch("/game/createRoom", { method: "POST" });
       if (response.status === 200) {
         const roomCode = await response.text();
         await joinRoom(roomCode);
@@ -57,6 +58,7 @@ const setupPvP = () => {
         alert(await response.text());
       }
     } catch (error) {
+      console.error(error);
       alert(
         "An error occurred while creating the room.\nPlease check your network connection and try again."
       );

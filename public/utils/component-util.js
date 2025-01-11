@@ -5,13 +5,11 @@ const components = {
 };
 
 export const loadComponent = async (component) => {
-  console.log(`Loading ${component}...`);
   if (!components[component]) return;
 
   if (!components[component].html) {
     const response = await fetch(`/components/${component}/index.html`);
     components[component].html = await response.text();
-    console.log(`${component} ready to load`);
   }
 
   const componentContainers = document.querySelectorAll(`.${component}-container`);

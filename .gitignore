@@ -2,6 +2,9 @@ node_modules/
 
 dist/
 
+server/data/rooms.json
+server/data/users.json
+
 logs/
 *.log
 
