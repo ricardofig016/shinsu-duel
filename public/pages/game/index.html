@@ -8,8 +8,26 @@
     <link rel="stylesheet" href="/pages/game/styles.css" />
   </head>
   <body>
-    <div class="container-vertical">
-      <h1>Game Page</h1>
+    <div id="game-container">
+      <!-- opponent -->
+      <div id="opponent-side" class="container-horizontal">
+        <div class="deck-lighthouse-container container-vertical"></div>
+        <div class="board-container container-vertical">
+          <div class="backline-container container-horizontal"></div>
+          <div class="frontline-container container-horizontal"></div>
+        </div>
+        <div class="hand-shinsu-container container-vertical"></div>
+      </div>
+      <hr />
+      <!-- player -->
+      <div id="player-side" class="container-horizontal">
+        <div class="deck-lighthouse-container container-vertical"></div>
+        <div class="board-container container-vertical">
+          <div class="frontline-container container-horizontal"></div>
+          <div class="backline-container container-horizontal"></div>
+        </div>
+        <div class="hand-shinsu-container container-vertical"></div>
+      </div>
     </div>
 
     <script type="module" src="/pages/game/script.js"></script>

@@ -6,7 +6,6 @@ export const readJsonFile = async (filePath) => {
     return JSON.parse(data);
   } catch (error) {
     if (error.code === "ENOENT") {
-      // File does not exist, create it and populate with an empty JSON object
       await writeJsonFile(filePath, {});
       return {};
     } else {

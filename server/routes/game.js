@@ -17,11 +17,8 @@ const logger = winston.createLogger({
 });
 
 const isAuthenticated = (req, res, next) => {
-  if (req.session.username) {
-    return next();
-  } else {
-    res.status(403).send("Access denied, please login.");
-  }
+  if (req.session.username) return next();
+  return res.status(403).send("Access denied, please login.");
 };
 
 // routes
@@ -30,11 +27,20 @@ router.get("/", (req, res) => {
 });
 
 router.post("/createRoom", isAuthenticated, async (req, res) => {
-  const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const { opponent, difficulty } = req.body;
+  if (!["bot", "friend"].includes(opponent))
+    return res.status(400).send("Invalid opponent type. Must be 'bot' or 'friend'");
+  if (opponent === "bot" && !["easy", "hard"].includes(difficulty))
+    return res.status(400).send("Invalid difficulty. Must be 'easy' or 'hard'");
+
   const rooms = await readJsonFile(roomsFilePath);
-  rooms[roomCode] = { players: [] };
+  let roomCode;
+  do roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  while (rooms[roomCode]);
+  rooms[roomCode] = { players: [], opponent, difficulty: opponent === "bot" ? difficulty : null };
+
   await writeJsonFile(roomsFilePath, rooms);
-  logger.info(`Room created with code: ${roomCode}`);
+  logger.info(`Room created with code: ${roomCode}, opponent: ${opponent}, difficulty: ${difficulty}`);
   res.send(roomCode);
 });
 

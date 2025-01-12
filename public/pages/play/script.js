@@ -20,55 +20,62 @@ const setupModeSelection = () => {
 };
 
 const setupPvE = () => {
-  document.getElementById("easy-mode-btn").addEventListener("click", () => {
-    alert("Easy Mode selected.");
+  document.getElementById("easy-mode-btn").addEventListener("click", async () => {
+    const roomCode = await createRoom("bot", "easy");
+    await joinRoom(roomCode);
   });
 
-  document.getElementById("hard-mode-btn").addEventListener("click", () => {
-    alert("Hard Mode selected.");
+  document.getElementById("hard-mode-btn").addEventListener("click", async () => {
+    const roomCode = await createRoom("bot", "hard");
+    await joinRoom(roomCode);
   });
 };
 
 const setupPvP = () => {
-  const joinRoom = async (roomCode) => {
-    try {
-      if (roomCode) {
-        const response = await fetch(`/game/${roomCode}/join`, { method: "POST" });
-        if (response.status !== 200) {
-          alert(await response.text());
-        } else {
-          window.location.href = `/game/${roomCode}`;
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      alert(
-        "An error occurred while entering the room.\nPlease check your network connection and try again."
-      );
-    }
-  };
-
   document.getElementById("create-room-btn").addEventListener("click", async () => {
-    try {
-      const response = await fetch("/game/createRoom", { method: "POST" });
-      if (response.status === 200) {
-        const roomCode = await response.text();
-        await joinRoom(roomCode);
-      } else {
-        alert(await response.text());
-      }
-    } catch (error) {
-      console.error(error);
-      alert(
-        "An error occurred while creating the room.\nPlease check your network connection and try again."
-      );
-    }
+    const roomCode = await createRoom("friend");
+    await joinRoom(roomCode);
   });
 
   document.getElementById("enter-room-btn").addEventListener("click", async () => {
     const roomCode = prompt("Enter Room Code:");
     await joinRoom(roomCode);
   });
+};
+
+const createRoom = async (opponent, difficulty = null) => {
+  try {
+    const response = await fetch("/game/createRoom", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ opponent, difficulty }),
+    });
+    if (response.status === 200) {
+      const roomCode = await response.text();
+      return roomCode;
+    } else {
+      alert(await response.text());
+    }
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while creating the room. Please try again.");
+  }
+};
+
+const joinRoom = async (roomCode) => {
+  try {
+    if (roomCode) {
+      const response = await fetch(`/game/${roomCode}/join`, { method: "POST" });
+      if (response.status !== 200) {
+        alert(await response.text());
+      } else {
+        window.location.href = `/game/${roomCode}`;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while entering the room.\nPlease check your network connection and try again.");
+  }
 };
 
 document.addEventListener("DOMContentLoaded", async () => {

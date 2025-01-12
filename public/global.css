@@ -3,6 +3,12 @@
   --primary-color-dark: #0056b3;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   height: 100vh;
