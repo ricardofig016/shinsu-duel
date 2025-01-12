@@ -12,30 +12,37 @@ hr {
   height: 100%;
   width: 100%;
   gap: 0;
-  background-image: url("/assets/images/board-background.png");
+  background-image: url("/assets/images/board/background.png");
   background-size: cover;
   background-position: center;
 }
 
-#opponent-side,
-#player-side {
+#opponent-container,
+#player-container {
   width: 100%;
   gap: 0;
   flex: 1;
+}
+
+.combat-indicator-container {
+  height: 100%;
+  gap: 0;
+  flex: 0 0 4%;
+  border: 1px solid blueviolet;
 }
 
 .deck-lighthouse-container,
 .hand-shinsu-container {
   height: 100%;
   gap: 0;
-  flex: 1;
+  flex: 0 0 23%;
   border: 1px solid green;
 }
 
 .board-container {
   height: 100%;
   gap: 4px;
-  flex: 2;
+  flex: 0 0 50%;
   border: 1px solid cyan;
 }
 

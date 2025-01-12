@@ -25,12 +25,12 @@ router.post("/login", async (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).send("Username is required");
 
-  const usernameRegex = /^[a-zA-Z0-9_]{3,18}$/;
+  const usernameRegex = /^[a-zA-Z0-9_]{3,28}$/;
   if (!usernameRegex.test(username))
     return res
       .status(400)
       .send(
-        "Invalid username, must be 3-18 characters long and contain only letters, numbers, and underscores"
+        "Invalid username, must be 3-28 characters long and contain only letters, numbers, and underscores"
       );
 
   const users = await readJsonFile(usersFilePath);
