@@ -1,0 +1,39 @@
+.card-frame {
+  width: 30rem;
+  height: 45rem;
+  padding: 0.5rem;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+}
+
+h1 {
+  width: 100%;
+  color: white;
+}
+
+.card-artwork-frame {
+  width: 100%;
+  flex: 0 0 42.86%;
+  padding: 0.5rem;
+  background-image: url("/assets/images/card/artwork-frame.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-artwork {
+  width: 100%;
+  height: 100%;
+  background-image: url("/assets/images/cards/placeholder.png");
+  background-size: cover;
+  background-position: center;
+}

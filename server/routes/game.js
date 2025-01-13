@@ -17,6 +17,7 @@ const logger = winston.createLogger({
 });
 
 const isAuthenticated = (req, res, next) => {
+  return next(); // TODO: remove this line (for testing purposes only)
   if (req.session.username) return next();
   return res.status(403).send("Access denied, please login.");
 };
@@ -53,6 +54,7 @@ router.get("/:roomCode", isAuthenticated, async (req, res) => {
     return res.status(404).send("Invalid room code");
   }
   if (!rooms[roomCode].players.includes(username)) {
+    return res.sendFile(path.resolve("public/pages/game/index.html")); // TODO: remove this line (for testing purposes only)
     logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
     return res.status(403).send("Access denied");
   }
