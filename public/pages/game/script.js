@@ -1,5 +1,9 @@
 import { loadComponent } from "/utils/component-util.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadComponent("card-vertical", { cardId: 1 });
+  const cardContainers = document.getElementsByClassName("card-vertical-component");
+  for (let i = 0; i < cardContainers.length; i++) {
+    const container = cardContainers[i];
+    await loadComponent(container, "card-vertical", { cardId: i });
+  }
 });

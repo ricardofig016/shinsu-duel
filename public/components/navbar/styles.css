@@ -14,10 +14,12 @@ nav ul {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex-direction: row;
+  gap: 2rem;
 }
 
 nav li {
-  margin: 0 1rem;
+  margin: 0;
 }
 
 span {

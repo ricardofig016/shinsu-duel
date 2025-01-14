@@ -79,7 +79,8 @@ const joinRoom = async (roomCode) => {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadComponent("navbar");
+  const navbarContainer = document.getElementById("navbar-component");
+  await loadComponent(navbarContainer, "navbar");
   setupModeSelection();
   setupPvE();
   setupPvP();
