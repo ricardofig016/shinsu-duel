@@ -14,6 +14,7 @@
   width: 100%;
   height: 100%;
   padding: 1rem;
+  gap: 0.5rem;
   border-radius: 4px;
   justify-content: space-between;
   background-image: url("/assets/images/card/background.png");
@@ -42,13 +43,14 @@
   width: 100%;
   height: 100%;
   border-radius: 4px;
-  background-image: url("/assets/images/artworks/placeholder.png");
+  background-image: url("/assets/images/placeholder.png");
   background-size: cover;
   background-position: center;
 }
+
 .card-traits-affiliations {
   width: 100%;
-  height: 5%;
+  height: 7%;
 }
 
 .card-traits-frame,
@@ -76,6 +78,10 @@
   background-position: center;
 }
 
+.card-traits img {
+  height: 70%;
+}
+
 .card-abilities {
   width: 100%;
   flex: 1;
@@ -95,7 +101,6 @@
 }
 
 .card-shinsu,
-.card-positions,
 .card-hp {
   width: 5rem;
   height: 5rem;
@@ -111,11 +116,21 @@
   background-image: url("/assets/images/card/shinsu-frame.png");
 }
 
-.card-positions {
-  flex: 1;
-  /* background-image: url("/assets/images/card/shinsu-frame.png"); */
-}
-
 .card-hp {
   background-image: url("/assets/images/card/hp-frame.png");
+}
+
+.card-positions {
+  flex: 1;
+  height: 70%;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.card-positions li {
+  height: 100%;
+  background-image: url("/assets/images/placeholder.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
