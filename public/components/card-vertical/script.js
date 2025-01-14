@@ -1,3 +1,3 @@
-const load = async (container, { cardId }) => {};
+const load = async (container, { id, position, hp }) => {};
 
 export default load;
