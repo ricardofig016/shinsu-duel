@@ -1,6 +1,5 @@
-[
-  {
-    "id": 0,
+{
+  "0": {
     "name": "Jue Viole Grace",
     "rarity": "epic",
     "abilities": ["Deal 2 damage to 3 enemies", "Spend 1 shinsu to deal 7 damage to an enemy"],
@@ -8,11 +7,10 @@
     "hp": 5,
     "cost": 3,
     "positionCodes": ["wavecontroller"],
-    "traits": [],
+    "traitCodes": ["burned", "sharpshooter"],
     "affiliations": ["FUG", "Irregulars"]
   },
-  {
-    "id": 1,
+  "1": {
     "name": "Zahard",
     "rarity": "legendary",
     "abilities": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
@@ -20,11 +18,10 @@
     "hp": 10,
     "cost": 5,
     "positionCodes": ["fisherman"],
-    "traits": [],
+    "traitCodes": ["burned"],
     "affiliations": ["Great Warriors", "Irregulars"]
   },
-  {
-    "id": 2,
+  "2": {
     "name": "Khun Aguero Agnes",
     "rarity": "rare",
     "abilities": ["hello :)"],
@@ -32,11 +29,10 @@
     "hp": 5,
     "cost": 2,
     "positionCodes": ["lightbearer"],
-    "traits": [],
+    "traitCodes": [],
     "affiliations": ["Khun Family"]
   },
-  {
-    "id": 3,
+  "3": {
     "name": "Rak Wraithraiser",
     "rarity": "common",
     "abilities": [],
@@ -44,11 +40,10 @@
     "hp": 5,
     "cost": 1,
     "positionCodes": ["spearbearer"],
-    "traits": [],
+    "traitCodes": [],
     "affiliations": []
   },
-  {
-    "id": 4,
+  "4": {
     "name": "Ship Leesoo",
     "rarity": "rare",
     "abilities": [],
@@ -56,7 +51,7 @@
     "hp": 5,
     "cost": 1,
     "positionCodes": ["scout"],
-    "traits": [],
+    "traitCodes": [],
     "affiliations": []
   }
-]
+}

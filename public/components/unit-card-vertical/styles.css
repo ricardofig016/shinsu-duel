@@ -82,6 +82,38 @@
   height: 70%;
 }
 
+.card-traits-tooltip-frame {
+  width: 100%;
+  scale: 1.05;
+  padding: 0.3rem;
+  border-radius: 4px;
+  top: 0.5rem;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-traits-tooltip {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  gap: 0;
+}
+
+.card-traits-tooltip-row {
+  flex: 1;
+  width: 100%;
+  padding: 0.3rem 0;
+  justify-content: center;
+}
+
+.card-traits-tooltip-row img {
+  height: 1.56rem;
+}
+
 .card-abilities {
   width: 100%;
   flex: 1;

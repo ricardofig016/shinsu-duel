@@ -1,6 +1,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import { getIconPath } from "../utils/file-util.js";
 
 const router = express.Router();
 
@@ -12,11 +13,10 @@ const positions = {
   spearbearer: "Spear Bearer",
   wavecontroller: "Wave Controller",
 };
-const traits = {};
 
 const getCardData = (id) => {
   const cards = JSON.parse(fs.readFileSync(path.resolve("server/data/cards.json"), "utf-8"));
-  return cards.find((card) => card.id === parseInt(id));
+  return cards[id];
 };
 
 const getCardArtworkPath = (id) => {
@@ -26,25 +26,18 @@ const getCardArtworkPath = (id) => {
   return file ? `/assets/images/artworks/${file}` : placeholderImagePath;
 };
 
-const getPositionIconPath = (positionCode) => {
-  const directoryPath = path.resolve("public/assets/icons/positions/");
-  const files = fs.readdirSync(directoryPath);
-  const file = files.find((file) => file === `${positionCode}.png`);
-  return file ? `/assets/icons/positions/${file}` : placeholderImagePath;
-  return icons;
-};
-
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   let data = getCardData(id);
   if (!data) return res.status(404).send(`Card with id ${id} not found`);
 
   data.artworkPath = getCardArtworkPath(id);
+
   data.positions = {};
   for (let code of data.positionCodes) {
     data.positions[code] = {};
     data.positions[code].name = positions[code];
-    data.positions[code].iconPath = getPositionIconPath(code);
+    data.positions[code].iconPath = getIconPath(code, "positions");
   }
 
   res.json(data);

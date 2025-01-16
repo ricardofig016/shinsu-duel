@@ -1,4 +1,5 @@
 import fs from "fs-extra";
+import path from "path";
 
 export const readJsonFile = async (filePath) => {
   try {
@@ -20,4 +21,11 @@ export const writeJsonFile = async (filePath, data) => {
   } catch (error) {
     throw error;
   }
+};
+
+export const getIconPath = (fileName, folderName) => {
+  const directoryPath = path.resolve(`public/assets/icons/${folderName}/`);
+  const files = fs.readdirSync(directoryPath);
+  const file = files.find((file) => file === `${fileName}.png`);
+  return file ? `/assets/icons/${folderName}/${file}` : placeholderImagePath;
 };

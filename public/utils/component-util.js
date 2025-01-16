@@ -1,9 +1,9 @@
 import loadNavbar from "/components/navbar/script.js";
-import loadCardVertical from "/components/card-vertical/script.js";
+import loadCardVertical from "/components/unit-card-vertical/script.js";
 
 const components = {
   navbar: { load: loadNavbar },
-  "card-vertical": { load: loadCardVertical },
+  "unit-card-vertical": { load: loadCardVertical },
 };
 
 export const loadComponent = async (container, component, data = null) => {

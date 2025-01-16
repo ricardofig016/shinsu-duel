@@ -23,24 +23,31 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _Tower of Go
     - [Unit Cards Mechanics](#unit-cards-mechanics)
     - [Support Cards Mechanics](#support-cards-mechanics)
   - [Deck Building Rules](#deck-building-rules)
+  - [Game Vocabulary](#game-vocabulary)
+    - [List of Keywords](#list-of-keywords)
+    - [List of Traits](#list-of-traits)
+    - [List of Affiliations](#list-of-affiliations)
   - [Future Features](#future-features)
     - [Team Leader](#team-leader)
     - [Evolution](#evolution)
 
 ## Overview
 
-Shinsu Duel is a tactical card game where players compete to destroy each other’s **lighthouses**, which serve as their nexus. Players use **unit cards** to attack, defend, and control the battlefield, while **support cards** provide additional strategic depth. The game is inspired by the lore, characters, and objects from _Tower of God_.
+Shinsu Duel is a tactical card game where players compete to destroy each other’s **lighthouses**. Players use **unit cards** to attack, defend, and control the battlefield, while **support cards** provide additional strategic depth. The game is inspired by the lore, characters, and objects from _Tower of God_.
 
 ## Card Types
 
 ### Unit Cards
 
-- Represent characters from _Tower of God_ (e.g., Zahard, Rak, Urek, Prince).
+Unit cards represent characters from _Tower of God_ (e.g., Zahard, Rak, Urek, Prince).
+
 - **Key Features**:
   - Can be deployed to the battlefield.
-  - Have stats like HP, shinsu cost, and abilities.
-  - Fill specific positions (e.g., Fisherman, Scout).
-- **Abilities**: Units may have active and passive abilities, as well as traits and affiliations.
+  - Have stats like HP and shinsu cost.
+  - Fill specific positions.
+  - Have traits and affiliations
+  - Can only target backline enemies when the enemy frontline is empty
+  - Can only target the lighthouses when the enemy board is empty
 
 ### Support Cards
 
@@ -49,7 +56,7 @@ Shinsu Duel is a tactical card game where players compete to destroy each other�
   - **Equipment** (e.g., Green April, Androssi's Shield, Zahard’s Ring)
   - **Spells** (e.g., Ignition spells)
   - **Consumables** (e.g., Lightning Pill)
-- Typically used to enhance units, manipulate the battlefield, or provide other strategic advantages.
+- Typically used to enhance or evolve units, manipulate the battlefield, or provide other strategic advantages.
 
 ## Objective
 
@@ -63,12 +70,12 @@ The primary objective is to **destroy the opponent’s lighthouses**. Each light
 - **Recharge Rules**:
   - Players start with 1 shinsu in round 1.
   - Shinsu increases by 1 per round until round 10 (maximum of 10 shinsu per round).
-  - Unspent shinsu grants half (rounded down) as bonus shinsu in the next round.
-  - **Maximum Shinsu Cap**: 12.
+  - Up to 2 unspent shinsu can be recycled and used next round.
+  - **Maximum Shinsu Cap**: 12 (10 round shinsu + 2 recycled shinsu).
 
 ### Lighthouses
 
-- Each player starts with 5 lighthouses (default).
+- Each player starts with 20 lighthouses.
 - Players can gain additional lighthouses with no upper limit.
 - Losing all lighthouses ends the game.
 
@@ -124,9 +131,14 @@ The board is divided into:
   - Shinsu Cost (top-left circle).
   - HP (heart icon).
 - **Abilities**:
-  - Active abilities (limited by position).
+  - Active abilities.
   - Passive effects (always active).
-- **Positions**: Indicate where units can be deployed on the field.
+- **Positions** indicate where units can be deployed on the field. Each position generally has a role on the team:
+  - **Fisherman**: tank damage and deal damage.
+  - **Light Bearer**: provide support in the form of utility, buffs and lighthouses.
+  - **Scout**: provide support in the form of debuffs, damaging protected enemy units and interfere with enemy synergy.
+  - **Spear Bearer**: deal massive amounts of damage.
+  - **Wave Controller**: deal area damage and provide shinsu related support and shinsu related debuffs.
 - **Traits and Affiliations**: Additional modifiers and synergies.
 
 ### Support Cards Mechanics
@@ -144,6 +156,50 @@ The board is divided into:
 - **Starting Hand**:
   - Players draw 5 cards and may mulligan any number of them.
 
+## Game Vocabulary
+
+### List of Keywords
+
+- Cleanse: Remove every negative trait
+- Destroy n: Remove n enemy lighthouses
+- Fast: You can take another action after using this ability/spell
+- Silence: Remove every positive trait
+- Spend n: Spend n shinsu to play this ability
+
+### List of Traits
+
+- **Positive**:
+  - Barrier: Negate all damage the next time I take damage
+  - Creator n: When I am deployed, create n lighthouses
+  - Dealer: Draw a card at the start of every round
+  - Immune: Cleanse and I am immune to negative effects
+  - Last One Standing: If I am the only ally unit, I have +4 HP and deal +4 damage
+  - Lethal: When I damage another unit, kill it
+  - Pierce n: Destroy n when I deal damage
+  - Reflect: When I take damage, deal 1 damage to my attacker
+  - Regenerate: Restore me to full HP at the end of each round
+  - Resilient: Take -1 damage from all sources
+  - Ruthless: Deal +1 damage for each lighthouse the opponent has lost
+  - Sharpshooter: Can target any enemy
+  - Strong: Deal +1 damage
+  - Taunt: Enemies are forced to target me, if I am targetable
+- **Negative**:
+  - Burned n: Every round end, take n damage
+  - Cursed n: Take n damage when I use an ability
+  - Doomed: Die at the end of this round
+  - Exhausted: Deal -1 damage
+  - Ghost: Don't prevent the enemy from targeting what's behind me
+  - Heavy: Abilities that cost shinsu cost +1 shinsu
+  - Poisoned: Every turn end, take 1 damage
+  - Rooted: Can't switch positions
+  - Stunned: Can't use abilities
+  - Weak: Take +1 damage from all sources
+
+### List of Affiliations
+
+-
+-
+
 ## Future Features
 
 ### Team Leader
@@ -155,5 +211,3 @@ The board is divided into:
 
 - Some units may evolve under specific conditions.
 - Evolution improves a unit’s stats and abilities (e.g., Khun Ran evolves when given the Lightning Pill).
-
-Shinsu Duel combines strategy, resource management, and thematic elements from _Tower of God_ to deliver a unique and engaging CCG experience. Stay tuned for updates and additional features!
