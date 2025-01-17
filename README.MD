@@ -172,24 +172,24 @@ The board is divided into:
    - **Positive**:
      - Barrier: Negate all damage the next time I take damage
      - Bloodthirsty: When I kill a unit, restore 2 HP
-     - Creator n: When I am deployed, create n lighthouses
+     - Creator: When I am deployed, create 1 lighthouse
      - Dealer: Draw a card at the start of every round
      - Immune: Cleanse and I am immune to negative effects
      - Last One Standing: If I am the only ally unit, I have +4 HP and deal +4 damage
      - Lethal: When I damage another unit, kill it
-     - Pierce n: Destroy n when I deal damage
+     - Pierce: Destroy 1 enemy lighthouse when I deal damage
      - Reflect: When I take damage, deal 1 damage to my attacker
      - Regenerate: Restore me to full HP at the end of each round
      - Resilient: Take -1 damage from all sources
-     - Ruthless: Deal +1 damage for each lighthouse the opponent has lost
+     - Ruthless: I deal +1 damage for each lighthouse you have destroyed
      - Sharpshooter: Can target any enemy
-     - Strong: Deal +1 damage
+     - Strong: I deal +1 damage
      - Taunt: Enemies are forced to target me, if I am targetable
    - **Negative**:
-     - Burned n: Every round end, take n damage
-     - Cursed n: Take n damage when I use an ability
+     - Burned: I take 1 damage every round end
+     - Cursed: I take 1 damage when I use an ability
      - Doomed: Die at the end of this round
-     - Exhausted: Deal -1 damage
+     - Exhausted: I deal -1 damage
      - Ghost: Don't prevent the enemy from targeting what's behind me
      - Heavy: Abilities that cost shinsu cost +1 shinsu
      - Poisoned: Every turn end, take 1 damage
