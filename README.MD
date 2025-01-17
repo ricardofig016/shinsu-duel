@@ -25,7 +25,7 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _Tower of Go
   - [Deck Building Rules](#deck-building-rules)
   - [Game Vocabulary](#game-vocabulary)
     - [List of Keywords](#list-of-keywords)
-    - [List of Traits](#list-of-traits)
+    - [Traits](#traits)
     - [List of Affiliations](#list-of-affiliations)
   - [Future Features](#future-features)
     - [Team Leader](#team-leader)
@@ -166,34 +166,44 @@ The board is divided into:
 - Silence: Remove every positive trait
 - Spend n: Spend n shinsu to play this ability
 
-### List of Traits
+### Traits
 
-- **Positive**:
-  - Barrier: Negate all damage the next time I take damage
-  - Creator n: When I am deployed, create n lighthouses
-  - Dealer: Draw a card at the start of every round
-  - Immune: Cleanse and I am immune to negative effects
-  - Last One Standing: If I am the only ally unit, I have +4 HP and deal +4 damage
-  - Lethal: When I damage another unit, kill it
-  - Pierce n: Destroy n when I deal damage
-  - Reflect: When I take damage, deal 1 damage to my attacker
-  - Regenerate: Restore me to full HP at the end of each round
-  - Resilient: Take -1 damage from all sources
-  - Ruthless: Deal +1 damage for each lighthouse the opponent has lost
-  - Sharpshooter: Can target any enemy
-  - Strong: Deal +1 damage
-  - Taunt: Enemies are forced to target me, if I am targetable
-- **Negative**:
-  - Burned n: Every round end, take n damage
-  - Cursed n: Take n damage when I use an ability
-  - Doomed: Die at the end of this round
-  - Exhausted: Deal -1 damage
-  - Ghost: Don't prevent the enemy from targeting what's behind me
-  - Heavy: Abilities that cost shinsu cost +1 shinsu
-  - Poisoned: Every turn end, take 1 damage
-  - Rooted: Can't switch positions
-  - Stunned: Can't use abilities
-  - Weak: Take +1 damage from all sources
+1. **List of Traits**
+   - **Positive**:
+     - Barrier: Negate all damage the next time I take damage
+     - Bloodthirsty: When I kill a unit, restore 2 HP
+     - Creator n: When I am deployed, create n lighthouses
+     - Dealer: Draw a card at the start of every round
+     - Immune: Cleanse and I am immune to negative effects
+     - Last One Standing: If I am the only ally unit, I have +4 HP and deal +4 damage
+     - Lethal: When I damage another unit, kill it
+     - Pierce n: Destroy n when I deal damage
+     - Reflect: When I take damage, deal 1 damage to my attacker
+     - Regenerate: Restore me to full HP at the end of each round
+     - Resilient: Take -1 damage from all sources
+     - Ruthless: Deal +1 damage for each lighthouse the opponent has lost
+     - Sharpshooter: Can target any enemy
+     - Strong: Deal +1 damage
+     - Taunt: Enemies are forced to target me, if I am targetable
+   - **Negative**:
+     - Burned n: Every round end, take n damage
+     - Cursed n: Take n damage when I use an ability
+     - Doomed: Die at the end of this round
+     - Exhausted: Deal -1 damage
+     - Ghost: Don't prevent the enemy from targeting what's behind me
+     - Heavy: Abilities that cost shinsu cost +1 shinsu
+     - Poisoned: Every turn end, take 1 damage
+     - Rooted: Can't switch positions
+     - Stunned: Can't use abilities
+     - Weak: Take +1 damage from all sources
+2. **Color Coding**:
+   - **Positive**:
+     - Defensive Buffs (<span style="color: #ffff00;">Yellow</span>)
+     - Damage Buffs (<span style="color: #ffa500;">Orange</span>)
+     - Utility Buffs + HP Gain (<span style="color: #00ffff;">Blue</span>)
+   - **Nagetive**:
+     - Damage-Dealing Debuffs (<span style="color: #ff0000;">Red</span>)
+     - Utility Debuffs (<span style="color: #aa00ff;">Purple</span>)
 
 ### List of Affiliations
 

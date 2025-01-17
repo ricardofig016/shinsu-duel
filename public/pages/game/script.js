@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cardContainers = document.getElementsByClassName("unit-card-vertical-component");
   const traitCodes = [
     "barrier",
+    "bloodthirsty",
     "burned",
     "creator",
     "cursed",
