@@ -6,13 +6,6 @@ import { getIconPath } from "../utils/file-util.js";
 const router = express.Router();
 
 const placeholderImagePath = "/assets/images/placeholder.png";
-const positions = {
-  fisherman: "Fisherman",
-  lightbearer: "Light Bearer",
-  scout: "Scout",
-  spearbearer: "Spear Bearer",
-  wavecontroller: "Wave Controller",
-};
 
 const getCardData = (id) => {
   const cards = JSON.parse(fs.readFileSync(path.resolve("server/data/cards.json"), "utf-8"));
@@ -32,13 +25,6 @@ router.get("/:id", (req, res) => {
   if (!data) return res.status(404).send(`Card with id ${id} not found`);
 
   data.artworkPath = getCardArtworkPath(id);
-
-  data.positions = {};
-  for (let code of data.positionCodes) {
-    data.positions[code] = {};
-    data.positions[code].name = positions[code];
-    data.positions[code].iconPath = getIconPath(code, "positions");
-  }
 
   res.json(data);
 });

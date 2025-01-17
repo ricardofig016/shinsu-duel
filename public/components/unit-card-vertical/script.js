@@ -2,6 +2,7 @@ import { loadComponent } from "/utils/component-util.js";
 
 let cardData = {};
 let traitData = {};
+let positionData = {};
 
 const loadTraits = async (container, traitCodes) => {
   // fetch trait data
@@ -33,7 +34,13 @@ const loadTraits = async (container, traitCodes) => {
       break;
     }
     img.src = traitData[code].iconPath;
-    await addTooltip(img, traitData[code].name, traitData[code].description, traitData[code].iconPath);
+    await addTooltip(
+      container,
+      img,
+      traitData[code].name,
+      traitData[code].description,
+      traitData[code].iconPath
+    );
     traitsList.appendChild(img);
   }
   if (traitCodes.length === 0) traitsList.innerText = "Traits";
@@ -47,7 +54,13 @@ const loadTraits = async (container, traitCodes) => {
     const code = traitCodes[i];
     const img = document.createElement("img");
     img.src = traitData[code].iconPath;
-    await addTooltip(img, traitData[code].name, traitData[code].description, traitData[code].iconPath);
+    await addTooltip(
+      container,
+      img,
+      traitData[code].name,
+      traitData[code].description,
+      traitData[code].iconPath
+    );
     tooltipRow.appendChild(img);
     // end of row
     if (i % 4 === 2 || i === traitCodes.length - 1) {
@@ -68,20 +81,34 @@ const loadAbilities = (container, abilities) => {
   }
 };
 
-const loadPositions = (container, positionCodes, positionData) => {
+const loadPositions = async (container, positionCodes) => {
+  // fetch position data
+  if (Object.keys(positionData).length === 0) {
+    const response = await fetch(`/positions/`);
+    if (!response.ok) return console.error(await response.text());
+    positionData = await response.json();
+  }
+
   const positionsList = container.querySelector(".card-positions");
   positionsList.innerHTML = "";
   for (let code of positionCodes) {
     const li = document.createElement("li");
     li.style.backgroundImage = `url("${positionData[code].iconPath}")`;
+    await addTooltip(
+      container,
+      li,
+      positionData[code].name,
+      positionData[code].description,
+      positionData[code].iconPath
+    );
     positionsList.appendChild(li);
   }
 };
 
-const addTooltip = async (hoverContainer, title, text, iconPath) => {
+const addTooltip = async (container, hoverContainer, title, text, iconPath = null) => {
   const tooltipComponent = document.createElement("div");
   tooltipComponent.classList.add("tooltip-component");
-  document.body.appendChild(tooltipComponent);
+  container.appendChild(tooltipComponent);
   await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, text, iconPath });
 };
 
@@ -94,22 +121,29 @@ const load = async (container, { id, traitCodes = null, placedPosition = null, c
   }
 
   // name
-  container.querySelector(".card-name").innerText = cardData[id].name;
+  const nameContainer = container.querySelector(".card-name");
+  nameContainer.innerText = cardData[id].name;
+  if (cardData[id].sobriquet)
+    await addTooltip(container, nameContainer, cardData[id].name, cardData[id].sobriquet);
   // artwork
   container.querySelector(".card-artwork").style.backgroundImage = `url("${cardData[id].artworkPath}")`;
   // traits
   await loadTraits(container, traitCodes || cardData[id].traitCodes);
   // affiliations
   // abilities
-  loadAbilities(container, cardData[id].abilities);
+  await loadAbilities(container, cardData[id].abilities);
   // shinsu
-  container.querySelector(".card-shinsu").innerText = cardData[id].cost;
+  const shinsuContainer = container.querySelector(".card-shinsu");
+  shinsuContainer.innerText = cardData[id].cost;
+  await addTooltip(container, shinsuContainer, "Shinsu", "The cost of playing this card");
   // positions
-  let positionCodes = Object.keys(cardData[id].positions);
-  if (placedPosition && cardData[id].positions[placedPosition]) positionCodes = [placedPosition];
-  loadPositions(container, positionCodes, cardData[id].positions);
+  let positionCodes = cardData[id].positionCodes;
+  if (placedPosition && placedPosition in cardData[id].positionCodes) positionCodes = [placedPosition];
+  await loadPositions(container, positionCodes);
   // hp
-  container.querySelector(".card-hp").innerText = currentHp || cardData[id].hp;
+  const hpContainer = container.querySelector(".card-hp");
+  hpContainer.innerText = currentHp || cardData[id].hp;
+  await addTooltip(container, hpContainer, "HP", "The current hit points of this unit card");
 };
 
 export default load;

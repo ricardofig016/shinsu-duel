@@ -8,6 +8,7 @@
   background-position: center;
   color: white;
   overflow: hidden;
+  cursor: default;
 }
 
 .card {

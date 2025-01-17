@@ -12,6 +12,7 @@
   },
   "1": {
     "name": "Zahard",
+    "sobriquet": "King of the Tower",
     "rarity": "legendary",
     "abilities": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
     "passive": "Enemy fishermen deal -2 damage",
@@ -40,7 +41,7 @@
     "hp": 5,
     "cost": 1,
     "positionCodes": ["spearbearer"],
-    "traitCodes": [],
+    "traitCodes": ["resilient"],
     "affiliations": []
   },
   "4": {
@@ -52,6 +53,18 @@
     "cost": 1,
     "positionCodes": ["scout"],
     "traitCodes": [],
+    "affiliations": []
+  },
+  "5": {
+    "name": "Evankhell",
+    "sobriquet": "The Infernal Evankhell",
+    "rarity": "common",
+    "abilities": ["FIRE MUAHAHAHHAHAHAH", "THOU SHALL BURN", "FEEL THE WRATH OF THE ANCIENT FLAMES"],
+    "passive": "I am immune to fire",
+    "hp": 15,
+    "cost": 8,
+    "positionCodes": ["wavecontroller", "fisherman"],
+    "traitCodes": ["ruthless", "lastonestanding"],
     "affiliations": []
   }
 }

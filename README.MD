@@ -171,7 +171,7 @@ The board is divided into:
 1. **List of Traits**
    - **Positive**:
      - Barrier: Negate all damage the next time I take damage
-     - Bloodthirsty: When I kill a unit, restore 2 HP
+     - Bloodthirsty: When I kill a unit, restore 1 HP
      - Creator: When I am deployed, create 1 lighthouse
      - Dealer: Draw a card at the start of every round
      - Immune: Cleanse and I am immune to negative effects

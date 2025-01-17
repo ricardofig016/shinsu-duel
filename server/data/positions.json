@@ -1,0 +1,22 @@
+{
+  "fisherman": {
+    "name": "Fisherman",
+    "description": "Fishermen are suited for close to medium-range combats and are the main offence of the team. They generally possess the most destructive power in man-to-man fights and tend to use Reel or Needles as their primary weapon."
+  },
+  "lightbearer": {
+    "name": "Light Bearer",
+    "description": "Lightbearers use exploring devices called Lighthouses to gain information on the battle or the surroundings. They gather information and formulate plans with the help of such information as they command their Lighthouse."
+  },
+  "scout": {
+    "name": "Scout",
+    "description": "Scouts move ahead of the group, observe the environment and situation, and aid the Fishermen as secondary offence. They are usually lightly armed for the intention to be agile and swift in movement and thinking."
+  },
+  "spearbearer": {
+    "name": "Spear Bearer",
+    "description": "Spear Bearers attack from long distance and snipe the opponent using Spears as their primary weapon. They do not tend to be very powerful in a melee, but are very valuable due to their pinpoint attacking from a distance."
+  },
+  "wavecontroller": {
+    "name": "Wave Controller",
+    "description": "Wave Controllers help their allies in battle by attacking the enemy or aiding the team by manipulating Shinsu. This position is rare compared to the others and requires an expert and specialized manipulation of Shinsu."
+  }
+}

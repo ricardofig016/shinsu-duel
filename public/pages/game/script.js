@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   for (let i = 0; i < cardContainers.length; i++) {
     const container = cardContainers[i];
     // randomize the card info
-    const randomId = Math.floor(Math.random() * 5);
+    const randomId = Math.floor(Math.random() * 6);
     const randomCodeNumber = Math.floor(Math.random() * 16);
     const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
     const selectedTraitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);

@@ -49,7 +49,7 @@ router.get("/:roomCode", isAuthenticated, async (req, res) => {
   const { roomCode } = req.params;
   const username = req.session.username;
   const rooms = await readJsonFile(roomsFilePath);
-  if (!rooms[roomCode]) {
+  if (!roomCode || !rooms[roomCode]) {
     logger.warn(`Invalid access attempt to inexistant room: ${roomCode} by user: ${username}`);
     return res.status(404).send("Invalid room code");
   }
