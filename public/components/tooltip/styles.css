@@ -1,0 +1,44 @@
+.tooltip-frame {
+  padding: 0.3rem;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 1;
+  display: none;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  /* transition: all 0.5s; */
+}
+
+.tooltip-frame.active,
+.tooltip-frame:hover {
+  display: block;
+}
+
+.tooltip-content {
+  height: 100%;
+  width: 100%;
+  border-radius: 4px;
+  padding: 1rem;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.tooltip-icon-title-container {
+  height: 2rem;
+}
+
+img {
+  height: 100%;
+  object-fit: cover;
+}
+
+h2 {
+  margin: 0;
+}
+
+hr {
+  height: 2px;
+}

@@ -1,3 +1,5 @@
+import { loadComponent } from "/utils/component-util.js";
+
 let cardData = {};
 let traitData = {};
 
@@ -31,7 +33,7 @@ const loadTraits = async (container, traitCodes) => {
       break;
     }
     img.src = traitData[code].iconPath;
-    img.title = `${traitData[code].name}: ${traitData[code].description}`;
+    await addTooltip(img, traitData[code].name, traitData[code].description, traitData[code].iconPath);
     traitsList.appendChild(img);
   }
   if (traitCodes.length === 0) traitsList.innerText = "Traits";
@@ -43,12 +45,9 @@ const loadTraits = async (container, traitCodes) => {
   tooltipRow.classList.add("card-traits-tooltip-row", "container-horizontal");
   for (let i = 3; i < traitCodes.length; i++) {
     const code = traitCodes[i];
-    console.info(i);
-    console.info(code);
-    console.info(traitData[code]);
     const img = document.createElement("img");
     img.src = traitData[code].iconPath;
-    img.title = `${traitData[code].name}: ${traitData[code].description}`;
+    await addTooltip(img, traitData[code].name, traitData[code].description, traitData[code].iconPath);
     tooltipRow.appendChild(img);
     // end of row
     if (i % 4 === 2 || i === traitCodes.length - 1) {
@@ -77,6 +76,13 @@ const loadPositions = (container, positionCodes, positionData) => {
     li.style.backgroundImage = `url("${positionData[code].iconPath}")`;
     positionsList.appendChild(li);
   }
+};
+
+const addTooltip = async (hoverContainer, title, text, iconPath) => {
+  const tooltipComponent = document.createElement("div");
+  tooltipComponent.classList.add("tooltip-component");
+  document.body.appendChild(tooltipComponent);
+  await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, text, iconPath });
 };
 
 const load = async (container, { id, traitCodes = null, placedPosition = null, currentHp = null }) => {
