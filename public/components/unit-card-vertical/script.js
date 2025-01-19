@@ -2,6 +2,7 @@ import { loadComponent } from "/utils/component-util.js";
 
 let cardData = {};
 let traitData = {};
+let affiliationData = {};
 let positionData = {};
 
 const loadTraits = async (container, traitCodes) => {
@@ -25,7 +26,6 @@ const loadTraits = async (container, traitCodes) => {
     const img = document.createElement("img");
     if (i + 1 >= rowSize && traitCodes.length > rowSize) {
       img.src = "/assets/icons/ellipsis.png";
-      img.classList.add("show-all-traits");
       img.addEventListener("mouseover", () => traitsTooltipFrame.classList.add("show"));
       img.addEventListener("mouseout", () =>
         setTimeout(() => traitsTooltipFrame.classList.remove("show"), 200)
@@ -68,6 +68,41 @@ const loadTraits = async (container, traitCodes) => {
       tooltipRow = document.createElement("div");
       tooltipRow.classList.add("card-traits-tooltip-row", "container-horizontal");
     }
+  }
+};
+
+const loadAffiliations = async (container, affiliationCodes) => {
+  // fetch affiliation data
+  if (Object.keys(affiliationData).length === 0) {
+    const response = await fetch(`/affiliations/`);
+    if (!response.ok) return console.error(await response.text());
+    affiliationData = await response.json();
+  }
+
+  // remove invalid affiliation codes
+  affiliationCodes = affiliationCodes.filter((code) => affiliationData[code]);
+  if (affiliationCodes.length === 0) return;
+
+  // first affiliation
+  const affiliationsContainer = container.querySelector(".card-affiliations");
+  affiliationsContainer.innerHTML = affiliationData[affiliationCodes[0]].name;
+  if (affiliationCodes.length === 1) return;
+
+  // hover to show tooltip
+  const affiliationsTooltipFrame = container.querySelector(".card-affiliations-tooltip-frame");
+  affiliationsContainer.addEventListener("mouseover", () => affiliationsTooltipFrame.classList.add("show"));
+  affiliationsContainer.addEventListener("mouseout", () =>
+    setTimeout(() => affiliationsTooltipFrame.classList.remove("show"), 200)
+  );
+
+  // load affiliations
+  const affiliationsTooltip = container.querySelector(".card-affiliations-tooltip");
+  affiliationsTooltip.innerHTML = "";
+  for (let i = 1; i < affiliationCodes.length; i++) {
+    const code = affiliationCodes[i];
+    const p = document.createElement("p");
+    p.innerText = affiliationData[code].name;
+    affiliationsTooltip.appendChild(p);
   }
 };
 
@@ -130,6 +165,7 @@ const load = async (container, { id, traitCodes = null, placedPosition = null, c
   // traits
   await loadTraits(container, traitCodes || cardData[id].traitCodes);
   // affiliations
+  await loadAffiliations(container, cardData[id].affiliationCodes);
   // abilities
   await loadAbilities(container, cardData[id].abilities);
   // shinsu
