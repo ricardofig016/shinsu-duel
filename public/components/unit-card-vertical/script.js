@@ -5,33 +5,6 @@ let traitData = {};
 let affiliationData = {};
 let positionData = {};
 
-const sizeSetup = (container, isSmall) => {
-  const cardFrame = container.querySelector(".card-frame");
-  const setSize = (size) => {
-    cardFrame.classList.remove("card-small", "card-big");
-    cardFrame.classList.add(size);
-  };
-
-  setSize(isSmall ? "card-small" : "card-big");
-
-  // right click to enlarge
-  cardFrame.addEventListener("contextmenu", (event) => {
-    event.preventDefault();
-    if (isSmall) {
-      setSize("card-big");
-      isSmall = !isSmall;
-    }
-  });
-
-  // click anywhere to shrink
-  document.addEventListener("click", () => {
-    if (!isSmall) {
-      setSize("card-small");
-      isSmall = !isSmall;
-    }
-  });
-};
-
 const loadTraits = async (container, traitCodes) => {
   // fetch trait data
   if (Object.keys(traitData).length === 0) {
@@ -186,7 +159,39 @@ const load = async (
   }
 
   //size
-  sizeSetup(container, isSmall);
+  const cardFrame = container.querySelector(".card-frame");
+  cardFrame.classList.remove("card-small", "card-big");
+  cardFrame.classList.add(isSmall ? "card-small" : "card-big");
+  if (isSmall) {
+    cardFrame.addEventListener("contextmenu", async (event) => {
+      event.preventDefault();
+      // setTimeout(() => {}, 50);
+      const cardComponent = document.createElement("div");
+      cardComponent.classList.add("unit-card-vertical-component");
+      container.appendChild(cardComponent);
+      await loadComponent(cardComponent, "unit-card-vertical", {
+        id,
+        traitCodes,
+        placedPosition,
+        currentHp,
+        isSmall: false,
+      });
+    });
+  } else {
+    document.addEventListener("click", async (event) => {
+      if (event.target !== cardFrame && !cardFrame.contains(event.target)) {
+        container.remove();
+      }
+    });
+    let removeCount = 0;
+    document.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      if (event.target !== cardFrame && !cardFrame.contains(event.target) && removeCount > 0) {
+        container.remove();
+      }
+      removeCount++;
+    });
+  }
 
   // name
   const nameContainer = container.querySelector(".card-name");
