@@ -40,6 +40,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadComponent(container, "unit-card-vertical", {
       id: randomId,
       traitCodes: selectedTraitCodes,
+      placedPosition: null,
+      currentHp: null,
+      isSmall: true,
     });
   }
 });

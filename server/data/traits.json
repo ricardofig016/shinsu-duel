@@ -1,7 +1,7 @@
 {
   "barrier": { "name": "Barrier", "description": "Negate all damage the next time I take damage" },
   "bloodthirsty": { "name": "Bloodthirsty", "description": "When I kill a unit, restore 1 HP" },
-  "burned": { "name": "Burned", "description": "Every round end, I take 1 damage" },
+  "burned": { "name": "Burned", "description": "I take 1 damage every round end" },
   "creator": { "name": "Creator", "description": "When I am deployed, create 1 lighthouse" },
   "cursed": { "name": "Cursed", "description": "I take 1 damage when I use an ability" },
   "dealer": { "name": "Dealer", "description": "Draw a card at the start of every round" },

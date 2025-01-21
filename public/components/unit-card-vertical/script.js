@@ -5,6 +5,33 @@ let traitData = {};
 let affiliationData = {};
 let positionData = {};
 
+const sizeSetup = (container, isSmall) => {
+  const cardFrame = container.querySelector(".card-frame");
+  const setSize = (size) => {
+    cardFrame.classList.remove("card-small", "card-big");
+    cardFrame.classList.add(size);
+  };
+
+  setSize(isSmall ? "card-small" : "card-big");
+
+  // right click to enlarge
+  cardFrame.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    if (isSmall) {
+      setSize("card-big");
+      isSmall = !isSmall;
+    }
+  });
+
+  // click anywhere to shrink
+  document.addEventListener("click", () => {
+    if (!isSmall) {
+      setSize("card-small");
+      isSmall = !isSmall;
+    }
+  });
+};
+
 const loadTraits = async (container, traitCodes) => {
   // fetch trait data
   if (Object.keys(traitData).length === 0) {
@@ -147,13 +174,19 @@ const addTooltip = async (container, hoverContainer, title, text, iconPath = nul
   await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, text, iconPath });
 };
 
-const load = async (container, { id, traitCodes = null, placedPosition = null, currentHp = null }) => {
+const load = async (
+  container,
+  { id, traitCodes = null, placedPosition = null, currentHp = null, isSmall = false }
+) => {
   if (id === null) return;
   if (!cardData[id]) {
     const response = await fetch(`/cards/${id}`);
     if (!response.ok) return console.error(await response.text());
     cardData[id] = await response.json();
   }
+
+  //size
+  sizeSetup(container, isSmall);
 
   // name
   const nameContainer = container.querySelector(".card-name");
@@ -174,7 +207,7 @@ const load = async (container, { id, traitCodes = null, placedPosition = null, c
   await addTooltip(container, shinsuContainer, "Shinsu", "The cost of playing this card");
   // positions
   let positionCodes = cardData[id].positionCodes;
-  if (placedPosition && placedPosition in cardData[id].positionCodes) positionCodes = [placedPosition];
+  if (placedPosition && positionCodes.includes(placedPosition)) positionCodes = [placedPosition];
   await loadPositions(container, positionCodes);
   // hp
   const hpContainer = container.querySelector(".card-hp");
