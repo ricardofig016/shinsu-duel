@@ -29,31 +29,40 @@ hr {
   flex: 1;
 }
 
-.combat-indicator-container {
+.combat-indicators-container {
   height: 100%;
   gap: 0;
   flex: 0 0 4%;
-  /* border: 1px solid blueviolet; */
 }
 
-.deck-lighthouse-container,
+.deck-lighthouse-container {
+  height: 100%;
+  gap: 0;
+  flex: 0 0 16%;
+}
 .hand-shinsu-container {
   height: 100%;
   gap: 0;
-  flex: 0 0 23%;
-  /* border: 1px solid green; */
+  flex: 0 0 34%;
+}
+
+.deck-container,
+.lighthouse-container,
+.hand-container,
+.shinsu-container {
+  flex: 1;
+  width: 100%;
+  gap: 0;
 }
 
 .board-container {
   height: 100%;
-  gap: 4px;
-  flex: 0 0 50%;
-  /* border: 1px solid cyan; */
+  gap: 0;
+  flex: 0 0 46%;
 }
 
 .backline-container,
 .frontline-container {
   width: 100%;
   flex: 1;
-  /* border: 1px solid red; */
 }

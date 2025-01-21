@@ -1,6 +1,21 @@
 import { loadComponent } from "/utils/component-util.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
+const addBorderToDivs = () => {
+  const divs = document.querySelectorAll("div");
+  divs.forEach((div) => {
+    const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+    console.log(randomColor);
+    div.style.border = `1px solid ${randomColor}`;
+  });
+};
+
+const createRandomCards = async (amount) => {
+  const handContainer = document.getElementById("player-container").querySelector(".hand-container");
+  for (let i = 0; i < amount; i++) {
+    const newDiv = document.createElement("div");
+    newDiv.classList.add("unit-card-vertical-component");
+    handContainer.appendChild(newDiv);
+  }
   const cardContainers = document.getElementsByClassName("unit-card-vertical-component");
   const traitCodes = [
     "barrier",
@@ -45,4 +60,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       isSmall: true,
     });
   }
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // debugging
+  addBorderToDivs();
+  await createRandomCards(3);
 });

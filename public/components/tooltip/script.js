@@ -6,13 +6,15 @@ const load = async (container, { hoverContainer, title, text, iconPath = null })
 
   const tooltipFrame = container.querySelector(".tooltip-frame");
   hoverContainer.addEventListener("mousemove", (event) => {
-    if (event.pageY > window.innerHeight / 2) {
-      tooltipFrame.style.top = `${event.pageY - tooltipFrame.offsetHeight - 5}px`;
-      tooltipFrame.style.left = `${event.pageX + 5}px`;
-    } else {
-      tooltipFrame.style.top = `${event.pageY + 10}px`;
-      tooltipFrame.style.left = `${event.pageX + 10}px`;
-    }
+    const offset = 8;
+    let top = event.pageY;
+    let left = event.pageX;
+    if (event.pageY > window.innerHeight / 2) top -= tooltipFrame.offsetHeight + offset;
+    else top += offset;
+    if (event.pageX > window.innerWidth / 2) left -= tooltipFrame.offsetWidth + offset;
+    else left += offset;
+    tooltipFrame.style.top = `${top}px`;
+    tooltipFrame.style.left = `${left}px`;
   });
   hoverContainer.addEventListener("mouseover", () => tooltipFrame.classList.add("active"));
   hoverContainer.addEventListener("mouseout", () => tooltipFrame.classList.remove("active"));
