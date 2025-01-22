@@ -66,3 +66,12 @@ hr {
   width: 100%;
   flex: 1;
 }
+
+.hand-container {
+  gap: 0;
+  justify-content: start;
+  /* overflow: hidden; */
+}
+
+.hand-container .unit-card-vertical-component {
+}

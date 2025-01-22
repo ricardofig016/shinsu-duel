@@ -17,7 +17,8 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f0f0f0;
-  /* overflow: hidden;  TODO: Uncomment this line to hide the scrollbar */
+  /* TODO: Uncomment this line to hide the scrollbar */
+  overflow: hidden;
 }
 
 .hidden {
