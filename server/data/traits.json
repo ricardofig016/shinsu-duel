@@ -4,7 +4,7 @@
   "burned": { "name": "Burned", "description": "I take 1 damage every round end" },
   "creator": { "name": "Creator", "description": "When I am deployed, create 1 lighthouse" },
   "cursed": { "name": "Cursed", "description": "I take 1 damage when I use an ability" },
-  "dealer": { "name": "Dealer", "description": "Draw a card at the start of every round" },
+  "dealer": { "name": "Dealer", "description": "Draw 1 card at the start of every round" },
   "doomed": { "name": "Doomed", "description": "I will die at the end of this round" },
   "exhausted": { "name": "Exhausted", "description": "I deal -1 damage" },
   "ghost": { "name": "Ghost", "description": "I don't prevent the enemy from targeting what's behind me" },

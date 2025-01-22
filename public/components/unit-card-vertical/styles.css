@@ -9,7 +9,7 @@
   color: white;
   overflow: hidden;
   cursor: default;
-  transition: scale 0.2s;
+  transition: scale 0.2s, transform 0.2s;
 }
 
 .card-frame.card-big {
@@ -25,7 +25,15 @@
 }
 
 .card-frame.card-small:hover {
-  scale: 1.5;
+  scale: 1.6;
+}
+
+#opponent-container .card-frame.card-small:hover {
+  transform: translateY(3.5rem);
+}
+
+#player-container .card-frame.card-small:hover {
+  transform: translateY(-3.5rem);
 }
 
 .card {

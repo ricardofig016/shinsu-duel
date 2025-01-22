@@ -165,7 +165,6 @@ const load = async (
   if (isSmall) {
     cardFrame.addEventListener("contextmenu", async (event) => {
       event.preventDefault();
-      // setTimeout(() => {}, 50);
       const cardComponent = document.createElement("div");
       cardComponent.classList.add("unit-card-vertical-component");
       container.appendChild(cardComponent);
@@ -179,16 +178,13 @@ const load = async (
     });
   } else {
     document.addEventListener("click", async (event) => {
-      if (event.target !== cardFrame && !cardFrame.contains(event.target)) {
-        container.remove();
-      }
+      if (event.target !== cardFrame && !cardFrame.contains(event.target)) container.remove();
     });
     let removeCount = 0;
     document.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      if (event.target !== cardFrame && !cardFrame.contains(event.target) && removeCount > 0) {
+      if (event.target !== cardFrame && !cardFrame.contains(event.target) && removeCount > 0)
         container.remove();
-      }
       removeCount++;
     });
   }
