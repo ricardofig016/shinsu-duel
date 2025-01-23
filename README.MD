@@ -70,8 +70,8 @@ The primary objective is to **destroy the opponent’s lighthouses**. Each light
 - **Recharge Rules**:
   - Players start with 1 shinsu in round 1.
   - Shinsu increases by 1 per round until round 10 (maximum of 10 shinsu per round).
-  - Up to 2 unspent shinsu can be recycled and used next round.
-  - **Maximum Shinsu Cap**: 12 (10 round shinsu + 2 recycled shinsu).
+  - Up to 2 unspent shinsu can be recharged and used next round.
+  - **Maximum Shinsu Cap**: 12 (10 round shinsu + 2 recharged shinsu).
 
 ### Lighthouses
 

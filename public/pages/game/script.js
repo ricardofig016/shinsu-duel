@@ -45,7 +45,7 @@ const loadHands = async () => {
       handContainers[hand].appendChild(newDiv);
       // randomize the card info
       const maxId = 6;
-      const randomId = Math.floor(Math.random() * maxId + 1);
+      const randomId = Math.floor(Math.random() * (maxId + 1));
       const randomCodeNumber = Math.floor(Math.random() * 16);
       const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
       const selectedTraitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
@@ -84,9 +84,39 @@ const loadHands = async () => {
   window.addEventListener("resize", alignCards);
 };
 
+const loadShinsu = async () => {
+  const maxNormalShinsu = 10;
+  const maxRechargedShinsu = 2;
+
+  const createRandomShinsu = () => {
+    const spentShinsu = Math.floor(Math.random() * (maxNormalShinsu + 1));
+    const availableShinsu = Math.floor(Math.random() * (spentShinsu + 1));
+    const rechargedShinsu = Math.floor(Math.random() * (maxRechargedShinsu + 1));
+    console.log(availableShinsu, spentShinsu, rechargedShinsu);
+    return { availableShinsu, spentShinsu, rechargedShinsu };
+  };
+
+  const shinsuContainers = document.querySelectorAll(".shinsu-container");
+  shinsuContainers.forEach((shinsuContainer) => {
+    // debugging
+    const { availableShinsu, spentShinsu, rechargedShinsu } = createRandomShinsu();
+    // normal shinsu
+    let shinsuCircles = Array.from(shinsuContainer.querySelectorAll(".shinsu-circle"));
+    for (let i = 0; i < availableShinsu; i++) shinsuCircles[i].classList.add("available");
+    for (let i = availableShinsu; i < spentShinsu; i++) shinsuCircles[i].classList.add("spent");
+    for (let i = spentShinsu; i < maxNormalShinsu; i++) shinsuCircles[i].classList.add("unavailable");
+    // recharged shinsu
+    for (let i = maxNormalShinsu; i < maxNormalShinsu + rechargedShinsu; i++)
+      shinsuCircles[i].classList.add("available");
+    for (let i = maxNormalShinsu + rechargedShinsu; i < maxNormalShinsu + maxRechargedShinsu; i++)
+      shinsuCircles[i].classList.add("spent");
+  });
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
   // debugging
-  addBorderToDivs();
+  // addBorderToDivs();
 
   await loadHands();
+  await loadShinsu();
 });

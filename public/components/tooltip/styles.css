@@ -28,15 +28,15 @@
   background-position: center;
 }
 
-img {
+.tooltip-frame img {
   height: 2rem;
   object-fit: cover;
 }
 
-h2 {
+.tooltip-frame h2 {
   margin: 0;
 }
 
-hr {
-  height: 2px;
+.tooltip-frame hr {
+  min-height: 2px;
 }

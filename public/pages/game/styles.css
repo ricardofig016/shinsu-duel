@@ -1,14 +1,3 @@
-hr {
-  width: 100%;
-  height: 6px;
-  margin: 0;
-  padding: 0;
-  background-image: url("/assets/images/card/frame.png");
-  background-size: cover;
-  background-position: center;
-  border: none;
-}
-
 #game-container {
   display: flex;
   flex-direction: column;
@@ -20,6 +9,17 @@ hr {
   background-image: url("/assets/images/board/background.png");
   background-size: cover;
   background-position: center;
+}
+
+hr {
+  width: 100%;
+  min-height: 6px;
+  margin: 0;
+  padding: 0;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  border: none;
 }
 
 #opponent-container,
@@ -48,8 +48,7 @@ hr {
 
 .deck-container,
 .lighthouse-container,
-.hand-container,
-.shinsu-container {
+.hand-container {
   flex: 1;
   width: 100%;
   gap: 0;
@@ -71,4 +70,38 @@ hr {
   gap: 0;
   justify-content: start;
   /* overflow: hidden; */
+}
+
+.shinsu-container {
+  flex: 1;
+  width: 100%;
+  justify-content: center;
+}
+
+/* .normal-shinsu {
+} */
+
+.shinsu-circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid black;
+  background-size: cover;
+  background-position: center;
+  background-image: url("/assets/images/placeholder.png");
+}
+.shinsu-circle.available {
+  background-image: url("/assets/icons/shinsu-states/available.png");
+}
+.shinsu-circle.unavailable {
+  background-image: url("/assets/icons/shinsu-states/unavailable.png");
+}
+.shinsu-circle.spent {
+  background-image: url("/assets/icons/shinsu-states/spent.png");
+}
+
+.shinsu-separator {
+  width: 2px;
+  height: 45%;
+  background-color: black;
 }
