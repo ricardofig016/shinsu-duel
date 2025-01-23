@@ -8,9 +8,8 @@ const addBorderToDivs = () => {
   });
 };
 
-const loadHand = async () => {
+const loadHands = async () => {
   const handContainers = document.querySelectorAll(".hand-container");
-  const handContainerWidth = handContainers[0].offsetWidth;
   const createRandomCards = async (amount, hand) => {
     const traitCodes = [
       "barrier",
@@ -60,31 +59,34 @@ const loadHand = async () => {
       });
     }
   };
+  const alignCards = () => {
+    const handContainerWidth = window.innerWidth - handContainers[0].getBoundingClientRect().left;
+    handContainers.forEach((hand) => {
+      const cards = hand.querySelectorAll(".unit-card-vertical-component");
+      if (cards.length === 0) return;
+      const cardWidth = cards[0].offsetWidth;
+      if (cards.length * cardWidth < handContainerWidth) {
+        hand.style.justifyContent = "center";
+      } else {
+        const cardOffset = (handContainerWidth - cardWidth) / (cards.length - 1);
+        cards.forEach((card, index) => {
+          if (index !== 0) card.style.marginLeft = `${-cardWidth + cardOffset}px`;
+        });
+      }
+    });
+  };
 
   // debugging
   await createRandomCards(Math.floor(Math.random() * 11), 0);
   await createRandomCards(Math.floor(Math.random() * 11), 1);
 
-  // offset cards
-  handContainers.forEach((hand) => {
-    const cards = hand.querySelectorAll(".unit-card-vertical-component");
-    if (cards.length === 0) return;
-    const cardWidth = cards[0].offsetWidth;
-    if (cards.length * cardWidth < handContainerWidth) {
-      hand.style.justifyContent = "center";
-    } else {
-      const cardOffset = (handContainerWidth - cardWidth) / (cards.length - 1);
-      cards.forEach((card, index) => {
-        if (index !== 0) card.style.marginLeft = `${-cardWidth + cardOffset}px`;
-      });
-    }
-  });
+  alignCards();
+  window.addEventListener("resize", alignCards);
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
   // debugging
   addBorderToDivs();
 
-  // hand
-  await loadHand();
+  await loadHands();
 });
