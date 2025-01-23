@@ -1,5 +1,7 @@
 import { loadComponent } from "/utils/component-util.js";
 
+let gameData = { player: {}, opponent: {} };
+
 const addBorderToDivs = () => {
   const divs = document.querySelectorAll("div");
   divs.forEach((div) => {
@@ -8,66 +10,74 @@ const addBorderToDivs = () => {
   });
 };
 
+const getRandomPlayerData = () => {
+  let playerData = {};
+
+  // combat indicators
+
+  // hands
+  playerData.hand = [];
+  const traitCodes = [
+    "barrier",
+    "bloodthirsty",
+    "burned",
+    "creator",
+    "cursed",
+    "dealer",
+    "doomed",
+    "exhausted",
+    "ghost",
+    "heavy",
+    "immune",
+    "lastonestanding",
+    "lethal",
+    "pierce",
+    "poisoned",
+    "reflect",
+    "regenerate",
+    "resilient",
+    "rooted",
+    "ruthless",
+    "sharpshooter",
+    "strong",
+    "stunned",
+    "taunt",
+    "weak",
+  ];
+  const cardAmount = Math.floor(Math.random() * 11);
+  const maxId = 6;
+  const maxTraitCodes = 15;
+  for (let i = 0; i < cardAmount; i++) {
+    let card = {};
+    card.id = Math.floor(Math.random() * (maxId + 1));
+    const randomCodeNumber = Math.floor(Math.random() * (maxTraitCodes + 1));
+    const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
+    card.traitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
+    playerData.hand.push(card);
+  }
+  console.log(playerData.hand);
+
+  // shinsu
+  playerData.shinsu = {};
+  playerData.shinsu.spent = Math.floor(Math.random() * 11);
+  playerData.shinsu.available = Math.floor(Math.random() * (playerData.shinsu.spent + 1));
+  playerData.shinsu.recharged = Math.floor(Math.random() * 3);
+
+  return playerData;
+};
+
+const loadCombatIndicators = async () => {};
+
 const loadHands = async () => {
-  const handContainers = document.querySelectorAll(".hand-container");
-  const createRandomCards = async (amount, hand) => {
-    const traitCodes = [
-      "barrier",
-      "bloodthirsty",
-      "burned",
-      "creator",
-      "cursed",
-      "dealer",
-      "doomed",
-      "exhausted",
-      "ghost",
-      "heavy",
-      "immune",
-      "lastonestanding",
-      "lethal",
-      "pierce",
-      "poisoned",
-      "reflect",
-      "regenerate",
-      "resilient",
-      "rooted",
-      "ruthless",
-      "sharpshooter",
-      "strong",
-      "stunned",
-      "taunt",
-      "weak",
-    ];
-    for (let i = 0; i < amount; i++) {
-      // create div
-      const newDiv = document.createElement("div");
-      newDiv.classList.add("unit-card-vertical-component");
-      handContainers[hand].appendChild(newDiv);
-      // randomize the card info
-      const maxId = 6;
-      const randomId = Math.floor(Math.random() * (maxId + 1));
-      const randomCodeNumber = Math.floor(Math.random() * 16);
-      const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
-      const selectedTraitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
-      // load card component
-      await loadComponent(newDiv, "unit-card-vertical", {
-        id: randomId,
-        traitCodes: selectedTraitCodes,
-        placedPosition: null,
-        currentHp: null,
-        isSmall: true,
-      });
-    }
-  };
   const alignCards = () => {
-    const handContainerWidth = window.innerWidth - handContainers[0].getBoundingClientRect().left;
-    handContainers.forEach((hand) => {
-      const cards = hand.querySelectorAll(".unit-card-vertical-component");
+    const handContainers = document.querySelectorAll(".hand-container");
+    handContainers.forEach((handContainer) => {
+      const handContainerWidth = window.innerWidth - handContainer.getBoundingClientRect().left;
+      const cards = handContainer.querySelectorAll(".unit-card-vertical-component");
       if (cards.length === 0) return;
       const cardWidth = cards[0].offsetWidth;
-      if (cards.length * cardWidth < handContainerWidth) {
-        hand.style.justifyContent = "center";
-      } else {
+      if (cards.length * cardWidth < handContainerWidth) handContainer.style.justifyContent = "center";
+      else {
         const cardOffset = (handContainerWidth - cardWidth) / (cards.length - 1);
         cards.forEach((card, index) => {
           if (index !== 0) card.style.marginLeft = `${-cardWidth + cardOffset}px`;
@@ -76,9 +86,23 @@ const loadHands = async () => {
     });
   };
 
-  // debugging
-  await createRandomCards(Math.floor(Math.random() * 11), 0);
-  await createRandomCards(Math.floor(Math.random() * 11), 1);
+  for (let player in gameData) {
+    for (let card of gameData[player].hand) {
+      // create div
+      const handContainer = document.querySelector(`#${player}-container .hand-container`);
+      const newDiv = document.createElement("div");
+      newDiv.classList.add("unit-card-vertical-component");
+      handContainer.appendChild(newDiv);
+      // load card component
+      await loadComponent(newDiv, "unit-card-vertical", {
+        id: card.id,
+        traitCodes: card.traitCodes,
+        placedPosition: null,
+        currentHp: null,
+        isSmall: true,
+      });
+    }
+  }
 
   alignCards();
   window.addEventListener("resize", alignCards);
@@ -87,36 +111,34 @@ const loadHands = async () => {
 const loadShinsu = async () => {
   const maxNormalShinsu = 10;
   const maxRechargedShinsu = 2;
-
-  const createRandomShinsu = () => {
-    const spentShinsu = Math.floor(Math.random() * (maxNormalShinsu + 1));
-    const availableShinsu = Math.floor(Math.random() * (spentShinsu + 1));
-    const rechargedShinsu = Math.floor(Math.random() * (maxRechargedShinsu + 1));
-    console.log(availableShinsu, spentShinsu, rechargedShinsu);
-    return { availableShinsu, spentShinsu, rechargedShinsu };
-  };
-
-  const shinsuContainers = document.querySelectorAll(".shinsu-container");
-  shinsuContainers.forEach((shinsuContainer) => {
-    // debugging
-    const { availableShinsu, spentShinsu, rechargedShinsu } = createRandomShinsu();
+  for (let player in gameData) {
+    const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
     // normal shinsu
     let shinsuCircles = Array.from(shinsuContainer.querySelectorAll(".shinsu-circle"));
-    for (let i = 0; i < availableShinsu; i++) shinsuCircles[i].classList.add("available");
-    for (let i = availableShinsu; i < spentShinsu; i++) shinsuCircles[i].classList.add("spent");
-    for (let i = spentShinsu; i < maxNormalShinsu; i++) shinsuCircles[i].classList.add("unavailable");
-    // recharged shinsu
-    for (let i = maxNormalShinsu; i < maxNormalShinsu + rechargedShinsu; i++)
-      shinsuCircles[i].classList.add("available");
-    for (let i = maxNormalShinsu + rechargedShinsu; i < maxNormalShinsu + maxRechargedShinsu; i++)
+    for (let i = 0; i < gameData[player].shinsu.available; i++) shinsuCircles[i].classList.add("available");
+    for (let i = gameData[player].shinsu.available; i < gameData[player].shinsu.spent; i++)
       shinsuCircles[i].classList.add("spent");
-  });
+    for (let i = gameData[player].shinsu.spent; i < maxNormalShinsu; i++)
+      shinsuCircles[i].classList.add("unavailable");
+    // recharged shinsu
+    for (let i = maxNormalShinsu; i < maxNormalShinsu + gameData[player].shinsu.recharged; i++)
+      shinsuCircles[i].classList.add("available");
+    for (
+      let i = maxNormalShinsu + gameData[player].shinsu.recharged;
+      i < maxNormalShinsu + maxRechargedShinsu;
+      i++
+    )
+      shinsuCircles[i].classList.add("spent");
+  }
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
   // debugging
   // addBorderToDivs();
+  gameData.opponent = getRandomPlayerData();
+  gameData.player = getRandomPlayerData();
 
+  await loadCombatIndicators();
   await loadHands();
   await loadShinsu();
 });
