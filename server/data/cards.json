@@ -74,7 +74,9 @@
       "Deal 1 damage to an enemy",
       "Deal 1 damage to an enemy",
       "Deal 1 damage to an enemy",
-      "Deal 1 damage to an enemy"
+      "Deal 2 damage to an enemy",
+      "Deal 1 damage to an enemy",
+      "Deal 2 damage to an enemy"
     ],
     "passive": "aaaaaaaa",
     "hp": 1,

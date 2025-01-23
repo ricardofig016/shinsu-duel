@@ -109,11 +109,30 @@ const loadAffiliations = async (container, affiliationCodes) => {
 const loadAbilities = (container, abilities) => {
   const abilitiesList = container.querySelector(".card-abilities");
   abilitiesList.innerHTML = "";
+  const maxSize = { width: abilitiesList.scrollWidth, height: abilitiesList.scrollHeight };
+  let fontSize = 2; // base font size
+  const minFontSize = 1;
+  let currentSize = { width: 0, height: 0 };
+  let listItems = [];
+
+  // create list items
   for (let ability of abilities) {
     const li = document.createElement("li");
     li.innerText = ability;
     abilitiesList.appendChild(li);
+    listItems.push(li);
   }
+
+  // adjust font size
+  do {
+    if (fontSize < minFontSize) break;
+    for (let item of listItems) item.style.fontSize = `${fontSize}em`;
+    fontSize -= 0.2;
+    currentSize = { width: abilitiesList.scrollWidth, height: abilitiesList.scrollHeight };
+  } while (currentSize.width > maxSize.width || currentSize.height > maxSize.height);
+
+  // set max height
+  abilitiesList.style.maxHeight = `${maxSize.height}px`;
 };
 
 const loadPositions = async (container, positionCodes) => {

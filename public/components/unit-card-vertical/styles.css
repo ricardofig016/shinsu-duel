@@ -146,13 +146,14 @@
   height: 1.56em;
 }
 
+.card-affiliations-tooltip p {
+  margin: 0.3em;
+}
+
 .card-abilities {
   width: 100%;
   flex: 1;
-}
-
-.card-affiliations-tooltip p {
-  margin: 0.3em;
+  gap: 0.5em;
 }
 
 .card-abilities li {
