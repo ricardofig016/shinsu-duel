@@ -8,7 +8,7 @@
     "cost": 3,
     "positionCodes": ["wavecontroller"],
     "traitCodes": ["burned", "sharpshooter"],
-    "affiliationCodes": ["fug", "irregulars"]
+    "affiliationCodes": ["fug"]
   },
   "1": {
     "name": "Zahard",
@@ -20,7 +20,7 @@
     "cost": 5,
     "positionCodes": ["fisherman"],
     "traitCodes": ["burned"],
-    "affiliationCodes": ["greatwarriors", "irregulars"]
+    "affiliationCodes": ["greatwarriors"]
   },
   "2": {
     "name": "Khun Aguero Agnes",
@@ -66,5 +66,21 @@
     "positionCodes": ["wavecontroller", "fisherman"],
     "traitCodes": ["ruthless", "lastonestanding"],
     "affiliationCodes": []
+  },
+  "6": {
+    "name": "Rachel",
+    "rarity": "epic",
+    "abilities": [
+      "Deal 1 damage to an enemy",
+      "Deal 1 damage to an enemy",
+      "Deal 1 damage to an enemy",
+      "Deal 1 damage to an enemy"
+    ],
+    "passive": "aaaaaaaa",
+    "hp": 1,
+    "cost": 1,
+    "positionCodes": ["lightbearer"],
+    "traitCodes": ["dealer", "creator"],
+    "affiliationCodes": ["teamrachel"]
   }
 }

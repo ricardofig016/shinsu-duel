@@ -45,7 +45,8 @@ const loadHand = async () => {
       newDiv.classList.add("unit-card-vertical-component");
       handContainers[hand].appendChild(newDiv);
       // randomize the card info
-      const randomId = Math.floor(Math.random() * 6);
+      const maxId = 6;
+      const randomId = Math.floor(Math.random() * maxId + 1);
       const randomCodeNumber = Math.floor(Math.random() * 16);
       const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
       const selectedTraitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
@@ -59,10 +60,10 @@ const loadHand = async () => {
       });
     }
   };
+
   // debugging
-  const deb = 4;
-  await createRandomCards(deb, 0);
-  await createRandomCards(deb + 1, 1);
+  await createRandomCards(Math.floor(Math.random() * 11), 0);
+  await createRandomCards(Math.floor(Math.random() * 11), 1);
 
   // offset cards
   handContainers.forEach((hand) => {
