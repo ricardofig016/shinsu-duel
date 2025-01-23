@@ -53,6 +53,7 @@
   width: 100%;
   text-align: left;
   margin: 0;
+  white-space: nowrap;
 }
 
 .card-artwork-frame {
@@ -162,6 +163,11 @@
   align-items: center;
   text-align: center;
   overflow: hidden;
+  transition: scale 0.1s;
+}
+
+.card-abilities li:hover {
+  scale: 1.08;
 }
 
 .card-stats {

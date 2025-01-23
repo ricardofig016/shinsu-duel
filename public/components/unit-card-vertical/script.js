@@ -5,6 +5,12 @@ let traitData = {};
 let affiliationData = {};
 let positionData = {};
 
+const loadName = async (container, name, sobriquet) => {
+  const nameContainer = container.querySelector(".card-name");
+  nameContainer.innerText = name;
+  if (sobriquet) await addTooltip(container, nameContainer, name, sobriquet);
+};
+
 const loadTraits = async (container, traitCodes) => {
   // fetch trait data
   if (Object.keys(traitData).length === 0) {
@@ -120,6 +126,7 @@ const loadAbilities = (container, abilities) => {
     const li = document.createElement("li");
     li.innerText = ability;
     abilitiesList.appendChild(li);
+    li.addEventListener("click", () => console.log(ability));
     listItems.push(li);
   }
 
@@ -209,10 +216,7 @@ const load = async (
   }
 
   // name
-  const nameContainer = container.querySelector(".card-name");
-  nameContainer.innerText = cardData[id].name;
-  if (cardData[id].sobriquet)
-    await addTooltip(container, nameContainer, cardData[id].name, cardData[id].sobriquet);
+  await loadName(container, cardData[id].name, cardData[id].sobriquet);
   // artwork
   container.querySelector(".card-artwork").style.backgroundImage = `url("${cardData[id].artworkPath}")`;
   // traits
