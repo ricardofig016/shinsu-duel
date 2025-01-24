@@ -1,4 +1,4 @@
-import { loadComponent } from "/utils/component-util.js";
+import { loadComponent, addTooltip } from "/utils/component-util.js";
 
 let cardData = {};
 let traitData = {};
@@ -164,13 +164,6 @@ const loadPositions = async (container, positionCodes) => {
     );
     positionsList.appendChild(li);
   }
-};
-
-const addTooltip = async (container, hoverContainer, title, text, iconPath = null) => {
-  const tooltipComponent = document.createElement("div");
-  tooltipComponent.classList.add("tooltip-component");
-  container.appendChild(tooltipComponent);
-  await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, text, iconPath });
 };
 
 const load = async (

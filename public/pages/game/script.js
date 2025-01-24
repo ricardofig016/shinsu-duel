@@ -1,4 +1,4 @@
-import { loadComponent } from "/utils/component-util.js";
+import { loadComponent, addTooltip } from "/utils/component-util.js";
 
 let gameData = { player: {}, opponent: {} };
 
@@ -14,6 +14,17 @@ const getRandomPlayerData = () => {
   let playerData = {};
 
   // combat indicators
+  const positions = ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"];
+  const positionAmount = Math.floor(Math.random() * 6);
+  playerData.combatIndicatorCodes = [];
+  for (let i = 0; i < positionAmount; i++) {
+    const randomIndex = Math.floor(Math.random() * positions.length);
+    playerData.combatIndicatorCodes.push(positions[randomIndex]);
+    positions.splice(randomIndex, 1);
+  }
+  // console.log(positionAmount);
+  // console.log(positions);
+  // console.log(playerData.combatIndicatorCodes);
 
   // hands
   playerData.hand = [];
@@ -55,7 +66,6 @@ const getRandomPlayerData = () => {
     card.traitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
     playerData.hand.push(card);
   }
-  console.log(playerData.hand);
 
   // shinsu
   playerData.shinsu = {};
@@ -66,7 +76,18 @@ const getRandomPlayerData = () => {
   return playerData;
 };
 
-const loadCombatIndicators = async () => {};
+const loadCombatIndicators = async () => {
+  for (let player in gameData) {
+    const indicatorsContainer = document.querySelector(`#${player}-container .combat-indicators-container`);
+    for (let code of gameData[player].combatIndicatorCodes) {
+      const newImg = document.createElement("img");
+      newImg.src = `/assets/icons/positions/${code}.png`;
+      newImg.alt = code;
+      await addTooltip(indicatorsContainer, newImg, code, code, newImg.src);
+      indicatorsContainer.appendChild(newImg);
+    }
+  }
+};
 
 const loadHands = async () => {
   const alignCards = () => {

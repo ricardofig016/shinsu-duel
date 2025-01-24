@@ -31,8 +31,13 @@ hr {
 
 .combat-indicators-container {
   height: 100%;
-  gap: 0;
-  flex: 0 0 4%;
+  flex: 0 0 2%;
+  justify-content: center;
+}
+
+.combat-indicators-container img {
+  width: 100%;
+  height: auto;
 }
 
 .deck-lighthouse-container {
