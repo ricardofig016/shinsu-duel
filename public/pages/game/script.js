@@ -103,7 +103,13 @@ const loadCombatIndicators = async () => {
       const newImg = document.createElement("img");
       newImg.src = `/assets/icons/positions/${code}.png`;
       newImg.alt = code;
-      await addTooltip(indicatorsContainer, newImg, code, code, newImg.src);
+      await addTooltip(
+        indicatorsContainer,
+        newImg,
+        data.positions[code].name,
+        data.positions[code].description,
+        newImg.src
+      );
       indicatorsContainer.appendChild(newImg);
     }
   }
@@ -180,6 +186,21 @@ const loadShinsu = async () => {
       i++
     )
       shinsuCircles[i].classList.add("spent");
+    // tooltips
+    const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
+    await addTooltip(
+      shinsuContainer,
+      normalContainer,
+      "Shinsu",
+      "The resource that lets you play cards and use certain abilities"
+    );
+    const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
+    await addTooltip(
+      shinsuContainer,
+      rechargedContainer,
+      "Recharged Shinsu",
+      "The shinsu that wasn't used last turn"
+    );
   }
 };
 

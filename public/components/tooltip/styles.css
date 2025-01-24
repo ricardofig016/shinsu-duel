@@ -30,7 +30,7 @@
 
 .tooltip-frame img {
   height: 2rem;
-  object-fit: cover;
+  width: auto;
 }
 
 .tooltip-frame h2 {
