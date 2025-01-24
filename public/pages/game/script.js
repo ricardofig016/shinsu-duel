@@ -1,6 +1,26 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
 
-let gameData = { player: {}, opponent: {} };
+let data;
+
+const prepareData = async () => {
+  // init
+  data = {};
+  data.game = {};
+  data.game.player = {};
+  data.game.opponent = {};
+  data.cards = {};
+
+  // fetch data
+  data.traits = await fetchFromPath("traits");
+  data.affiliations = await fetchFromPath("affiliations");
+  data.positions = await fetchFromPath("positions");
+};
+
+const fetchFromPath = async (path) => {
+  const response = await fetch(`/${path}/`);
+  if (!response.ok) return console.error(await response.text());
+  return await response.json();
+};
 
 const addBorderToDivs = () => {
   const divs = document.querySelectorAll("div");
@@ -77,9 +97,9 @@ const getRandomPlayerData = () => {
 };
 
 const loadCombatIndicators = async () => {
-  for (let player in gameData) {
+  for (let player in data.game) {
     const indicatorsContainer = document.querySelector(`#${player}-container .combat-indicators-container`);
-    for (let code of gameData[player].combatIndicatorCodes) {
+    for (let code of data.game[player].combatIndicatorCodes) {
       const newImg = document.createElement("img");
       newImg.src = `/assets/icons/positions/${code}.png`;
       newImg.alt = code;
@@ -107,13 +127,19 @@ const loadHands = async () => {
     });
   };
 
-  for (let player in gameData) {
-    for (let card of gameData[player].hand) {
+  for (let player in data.game) {
+    for (let card of data.game[player].hand) {
       // create div
       const handContainer = document.querySelector(`#${player}-container .hand-container`);
       const newDiv = document.createElement("div");
       newDiv.classList.add("unit-card-vertical-component");
       handContainer.appendChild(newDiv);
+      // fetch card data
+      if (!data.cards[card.id]) {
+        const response = await fetch(`/cards/${card.id}`);
+        if (!response.ok) return console.error(await response.text());
+        data.cards[card.id] = await response.json();
+      }
       // load card component
       await loadComponent(newDiv, "unit-card-vertical", {
         id: card.id,
@@ -121,6 +147,10 @@ const loadHands = async () => {
         placedPosition: null,
         currentHp: null,
         isSmall: true,
+        cardData: data.cards[card.id],
+        traitData: data.traits,
+        affiliationData: data.affiliations,
+        positionData: data.positions,
       });
     }
   }
@@ -132,20 +162,20 @@ const loadHands = async () => {
 const loadShinsu = async () => {
   const maxNormalShinsu = 10;
   const maxRechargedShinsu = 2;
-  for (let player in gameData) {
+  for (let player in data.game) {
     const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
     // normal shinsu
     let shinsuCircles = Array.from(shinsuContainer.querySelectorAll(".shinsu-circle"));
-    for (let i = 0; i < gameData[player].shinsu.available; i++) shinsuCircles[i].classList.add("available");
-    for (let i = gameData[player].shinsu.available; i < gameData[player].shinsu.spent; i++)
+    for (let i = 0; i < data.game[player].shinsu.available; i++) shinsuCircles[i].classList.add("available");
+    for (let i = data.game[player].shinsu.available; i < data.game[player].shinsu.spent; i++)
       shinsuCircles[i].classList.add("spent");
-    for (let i = gameData[player].shinsu.spent; i < maxNormalShinsu; i++)
+    for (let i = data.game[player].shinsu.spent; i < maxNormalShinsu; i++)
       shinsuCircles[i].classList.add("unavailable");
     // recharged shinsu
-    for (let i = maxNormalShinsu; i < maxNormalShinsu + gameData[player].shinsu.recharged; i++)
+    for (let i = maxNormalShinsu; i < maxNormalShinsu + data.game[player].shinsu.recharged; i++)
       shinsuCircles[i].classList.add("available");
     for (
-      let i = maxNormalShinsu + gameData[player].shinsu.recharged;
+      let i = maxNormalShinsu + data.game[player].shinsu.recharged;
       i < maxNormalShinsu + maxRechargedShinsu;
       i++
     )
@@ -154,10 +184,12 @@ const loadShinsu = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await prepareData();
+
   // debugging
   // addBorderToDivs();
-  gameData.opponent = getRandomPlayerData();
-  gameData.player = getRandomPlayerData();
+  data.game.opponent = getRandomPlayerData();
+  data.game.player = getRandomPlayerData();
 
   await loadCombatIndicators();
   await loadHands();
