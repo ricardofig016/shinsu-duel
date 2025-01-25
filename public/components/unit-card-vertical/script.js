@@ -154,12 +154,14 @@ const load = async (
     }
   };
 
-  // check for missing data
-  if (id === null) return console.log("missing id:", id);
-  if (!cardData) return console.log("missing card data for id: ", id, cardData);
-  if (!traitData) return console.log("missing trait data for id: ", id, traitData);
-  if (!affiliationData) return console.log("missing affiliation data for id: ", id, affiliationData);
-  if (!positionData) return console.log("missing position data for id: ", id, positionData);
+  // display card back
+  if (id === null || !cardData || !traitData || !affiliationData || !positionData) {
+    const cardFrame = container.querySelector(".card-frame");
+    cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
+    cardFrame.classList.add("card-small");
+    cardFrame.innerHTML = "";
+    return;
+  }
 
   // size
   const cardFrame = container.querySelector(".card-frame");
@@ -185,7 +187,8 @@ const load = async (
     });
   } else {
     document.addEventListener("click", async (event) => {
-      if (event.target !== cardFrame && !cardFrame.contains(event.target)) container.remove();
+      // if (event.target !== cardFrame && !cardFrame.contains(event.target))
+      container.remove();
     });
     let removeCount = 0;
     document.addEventListener("contextmenu", (event) => {

@@ -13,8 +13,7 @@
   /* transition: all 0.5s; */
 }
 
-.tooltip-frame.active,
-.tooltip-frame:hover {
+.tooltip-frame.active {
   display: block;
 }
 

@@ -30,41 +30,52 @@ const addBorderToDivs = () => {
   });
 };
 
-const getRandomPlayerData = () => {
-  let playerData = {};
+const getRandomGameData = () => {
+  let gameData = {};
+  for (let player in data.game) {
+    let playerData = {};
 
-  // combat indicators
-  const positions = ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"];
-  const positionAmount = Math.floor(Math.random() * 6);
-  playerData.combatIndicatorCodes = [];
-  for (let i = 0; i < positionAmount; i++) {
-    const randomIndex = Math.floor(Math.random() * positions.length);
-    playerData.combatIndicatorCodes.push(positions[randomIndex]);
-    positions.splice(randomIndex, 1);
+    // combat indicators
+    const positions = ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"];
+    const positionAmount = Math.floor(Math.random() * 6);
+    playerData.combatIndicatorCodes = [];
+    for (let i = 0; i < positionAmount; i++) {
+      const randomIndex = Math.floor(Math.random() * positions.length);
+      playerData.combatIndicatorCodes.push(positions[randomIndex]);
+      positions.splice(randomIndex, 1);
+    }
+    playerData.combatIndicatorCodes.sort();
+
+    // hands
+    playerData.hand = [];
+    const traitCodes = Object.keys(data.traits);
+    const cardAmount = Math.floor(Math.random() * 11);
+    const maxId = 6;
+    const maxTraitCodes = 15;
+    for (let i = 0; i < cardAmount; i++) {
+      let card = {};
+      card.id = Math.floor(Math.random() * (maxId + 1));
+      const randomCodeNumber = Math.floor(Math.random() * (maxTraitCodes + 1));
+      const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
+      card.traitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
+      if (player === "opponent" && Math.random() < 0.8) {
+        console.log(player);
+        console.log("empty card!!");
+        card = {};
+      } // 80% chance of empty card
+      playerData.hand.push(card);
+    }
+
+    // shinsu
+    playerData.shinsu = {};
+    playerData.shinsu.normalSpent = Math.floor(Math.random() * 11);
+    playerData.shinsu.normalAvailable = Math.floor(Math.random() * (10 - playerData.shinsu.normalSpent + 1));
+    playerData.shinsu.recharged = Math.floor(Math.random() * 3);
+
+    gameData[player] = playerData;
+    console.log(gameData[player].hand);
   }
-
-  // hands
-  playerData.hand = [];
-  const traitCodes = Object.keys(data.traits);
-  const cardAmount = Math.floor(Math.random() * 11);
-  const maxId = 6;
-  const maxTraitCodes = 15;
-  for (let i = 0; i < cardAmount; i++) {
-    let card = {};
-    card.id = Math.floor(Math.random() * (maxId + 1));
-    const randomCodeNumber = Math.floor(Math.random() * (maxTraitCodes + 1));
-    const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
-    card.traitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
-    playerData.hand.push(card);
-  }
-
-  // shinsu
-  playerData.shinsu = {};
-  playerData.shinsu.spent = Math.floor(Math.random() * 11);
-  playerData.shinsu.available = Math.floor(Math.random() * (playerData.shinsu.spent + 1));
-  playerData.shinsu.recharged = Math.floor(Math.random() * 3);
-
-  return playerData;
+  return gameData;
 };
 
 const loadCombatIndicators = async () => {
@@ -74,6 +85,7 @@ const loadCombatIndicators = async () => {
       const newImg = document.createElement("img");
       newImg.src = `/assets/icons/positions/${code}.png`;
       newImg.alt = code;
+      indicatorsContainer.appendChild(newImg);
       await addTooltip(
         indicatorsContainer,
         newImg,
@@ -81,7 +93,6 @@ const loadCombatIndicators = async () => {
         data.positions[code].description,
         newImg.src
       );
-      indicatorsContainer.appendChild(newImg);
     }
   }
 };
@@ -112,7 +123,7 @@ const loadHands = async () => {
       newDiv.classList.add("unit-card-vertical-component");
       handContainer.appendChild(newDiv);
       // fetch card data
-      if (!data.cards[card.id]) {
+      if (card.id !== undefined && !data.cards[card.id]) {
         const response = await fetch(`/cards/${card.id}`);
         if (!response.ok) return console.error(await response.text());
         data.cards[card.id] = await response.json();
@@ -141,21 +152,19 @@ const loadShinsu = async () => {
   const maxRechargedShinsu = 2;
   for (let player in data.game) {
     const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
+    const shinsu = data.game[player].shinsu;
     // normal shinsu
     let shinsuCircles = Array.from(shinsuContainer.querySelectorAll(".shinsu-circle"));
-    for (let i = 0; i < data.game[player].shinsu.available; i++) shinsuCircles[i].classList.add("available");
-    for (let i = data.game[player].shinsu.available; i < data.game[player].shinsu.spent; i++)
+    console.log("shinsu.normalAvailable: ", shinsu.normalAvailable);
+    for (let i = 0; i < shinsu.normalAvailable; i++) shinsuCircles[i].classList.add("available");
+    for (let i = shinsu.normalAvailable; i < shinsu.normalAvailable + shinsu.normalSpent; i++)
       shinsuCircles[i].classList.add("spent");
-    for (let i = data.game[player].shinsu.spent; i < maxNormalShinsu; i++)
+    for (let i = shinsu.normalAvailable + shinsu.normalSpent; i < maxNormalShinsu; i++)
       shinsuCircles[i].classList.add("unavailable");
     // recharged shinsu
-    for (let i = maxNormalShinsu; i < maxNormalShinsu + data.game[player].shinsu.recharged; i++)
+    for (let i = maxNormalShinsu; i < maxNormalShinsu + shinsu.recharged; i++)
       shinsuCircles[i].classList.add("available");
-    for (
-      let i = maxNormalShinsu + data.game[player].shinsu.recharged;
-      i < maxNormalShinsu + maxRechargedShinsu;
-      i++
-    )
+    for (let i = maxNormalShinsu + shinsu.recharged; i < maxNormalShinsu + maxRechargedShinsu; i++)
       shinsuCircles[i].classList.add("spent");
     // tooltips
     const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
@@ -179,11 +188,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   await prepareData();
 
   // debugging
-  addBorderToDivs();
-  data.game.opponent = getRandomPlayerData();
-  data.game.player = getRandomPlayerData();
+  // addBorderToDivs();
+  data.game = getRandomGameData();
 
   await loadCombatIndicators();
   await loadHands();
   await loadShinsu();
+
+  // for (let player in data.game) {
+  //   console.log(data.game[player].shinsu);
+  // }
 });
