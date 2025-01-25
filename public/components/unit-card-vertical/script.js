@@ -109,8 +109,8 @@ const load = async (
 
   const loadAbilities = (container, abilities) => {
     const abilitiesList = container.querySelector(".card-abilities");
-    abilitiesList.innerHTML = "";
     const maxSize = { width: abilitiesList.scrollWidth, height: abilitiesList.scrollHeight };
+    abilitiesList.innerHTML = "";
     let fontSize = 2; // base font size
     const minFontSize = 1;
     let currentSize = { width: 0, height: 0 };

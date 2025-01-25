@@ -11,27 +11,31 @@
   background-position: center;
 }
 
-hr {
+.side-container {
   width: 100%;
-  min-height: 6px;
-  margin: 0;
-  padding: 0;
-  background-image: url("/assets/images/card/frame.png");
-  background-size: cover;
-  background-position: center;
-  border: none;
-}
-
-#opponent-container,
-#player-container {
-  width: 100%;
-  gap: 0;
+  gap: 1%;
   flex: 1;
+}
+.side-container > * {
+  height: 100%;
+  flex: 0 0 0;
+  gap: 0;
+}
+.side-container > :nth-child(1) {
+  flex-basis: 2.5%;
+}
+.side-container > :nth-child(2) {
+  flex-basis: 16%;
+}
+.side-container > :nth-child(3) {
+  flex-basis: 46%;
+}
+.side-container > :nth-child(4) {
+  flex-basis: 34%;
 }
 
 .combat-indicators-container {
-  height: 100%;
-  flex: 0 0 2%;
+  gap: 1rem;
   justify-content: center;
 }
 
@@ -40,29 +44,12 @@ hr {
   height: auto;
 }
 
-.deck-lighthouse-container {
-  height: 100%;
-  gap: 0;
-  flex: 0 0 16%;
-}
-.hand-shinsu-container {
-  height: 100%;
-  gap: 0;
-  flex: 0 0 34%;
-}
-
 .deck-container,
 .lighthouse-container,
 .hand-container {
   flex: 1;
   width: 100%;
   gap: 0;
-}
-
-.board-container {
-  height: 100%;
-  gap: 0;
-  flex: 0 0 46%;
 }
 
 .backline-container,
@@ -74,7 +61,6 @@ hr {
 .hand-container {
   gap: 0;
   justify-content: start;
-  /* overflow: hidden; */
 }
 
 .shinsu-container {
@@ -82,9 +68,6 @@ hr {
   width: 100%;
   justify-content: center;
 }
-
-/* .normal-shinsu {
-} */
 
 .shinsu-circle {
   width: 2rem;
@@ -109,4 +92,15 @@ hr {
   width: 2px;
   height: 45%;
   background-color: black;
+}
+
+hr {
+  width: 100%;
+  min-height: 6px;
+  margin: 0;
+  padding: 0;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  border: none;
 }

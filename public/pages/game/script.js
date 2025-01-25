@@ -6,8 +6,8 @@ const prepareData = async () => {
   // init
   data = {};
   data.game = {};
-  data.game.player = {};
   data.game.opponent = {};
+  data.game.player = {};
   data.cards = {};
 
   // fetch data
@@ -42,39 +42,10 @@ const getRandomPlayerData = () => {
     playerData.combatIndicatorCodes.push(positions[randomIndex]);
     positions.splice(randomIndex, 1);
   }
-  // console.log(positionAmount);
-  // console.log(positions);
-  // console.log(playerData.combatIndicatorCodes);
 
   // hands
   playerData.hand = [];
-  const traitCodes = [
-    "barrier",
-    "bloodthirsty",
-    "burned",
-    "creator",
-    "cursed",
-    "dealer",
-    "doomed",
-    "exhausted",
-    "ghost",
-    "heavy",
-    "immune",
-    "lastonestanding",
-    "lethal",
-    "pierce",
-    "poisoned",
-    "reflect",
-    "regenerate",
-    "resilient",
-    "rooted",
-    "ruthless",
-    "sharpshooter",
-    "strong",
-    "stunned",
-    "taunt",
-    "weak",
-  ];
+  const traitCodes = Object.keys(data.traits);
   const cardAmount = Math.floor(Math.random() * 11);
   const maxId = 6;
   const maxTraitCodes = 15;
@@ -208,7 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await prepareData();
 
   // debugging
-  // addBorderToDivs();
+  addBorderToDivs();
   data.game.opponent = getRandomPlayerData();
   data.game.player = getRandomPlayerData();
 
