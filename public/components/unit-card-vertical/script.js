@@ -15,7 +15,7 @@ const load = async (
   }
 ) => {
   const loadName = async (container, name, sobriquet) => {
-    const nameContainer = container.querySelector(".card-name");
+    const nameContainer = container.querySelector(".unit-card-vertical-name");
     nameContainer.innerText = name;
     if (sobriquet) await addTooltip(container, nameContainer, name, sobriquet);
   };
@@ -26,8 +26,8 @@ const load = async (
 
     // load main traits
     const rowSize = 4;
-    const traitsList = container.querySelector(".card-traits");
-    const traitsTooltipFrame = container.querySelector(".card-traits-tooltip-frame");
+    const traitsList = container.querySelector(".unit-card-vertical-traits");
+    const traitsTooltipFrame = container.querySelector(".unit-card-vertical-traits-tooltip-frame");
     traitsList.innerHTML = "";
     for (let i = 0; i < traitCodes.length; i++) {
       const code = traitCodes[i];
@@ -54,10 +54,10 @@ const load = async (
     if (traitCodes.length === 0) traitsList.innerText = "Traits";
 
     // load tooltip traits
-    const traitsTooltip = container.querySelector(".card-traits-tooltip");
+    const traitsTooltip = container.querySelector(".unit-card-vertical-traits-tooltip");
     traitsTooltip.innerHTML = "";
     let tooltipRow = document.createElement("div"); // first row
-    tooltipRow.classList.add("card-traits-tooltip-row", "container-horizontal");
+    tooltipRow.classList.add("unit-card-vertical-traits-tooltip-row", "container-horizontal");
     for (let i = 3; i < traitCodes.length; i++) {
       const code = traitCodes[i];
       const img = document.createElement("img");
@@ -74,7 +74,7 @@ const load = async (
       if (i % 4 === 2 || i === traitCodes.length - 1) {
         traitsTooltip.appendChild(tooltipRow);
         tooltipRow = document.createElement("div");
-        tooltipRow.classList.add("card-traits-tooltip-row", "container-horizontal");
+        tooltipRow.classList.add("unit-card-vertical-traits-tooltip-row", "container-horizontal");
       }
     }
   };
@@ -85,19 +85,21 @@ const load = async (
     if (affiliationCodes.length === 0) return;
 
     // first affiliation
-    const affiliationsContainer = container.querySelector(".card-affiliations");
+    const affiliationsContainer = container.querySelector(".unit-card-vertical-affiliations");
     affiliationsContainer.innerHTML = affiliationData[affiliationCodes[0]].name;
     if (affiliationCodes.length === 1) return;
 
     // hover to show tooltip
-    const affiliationsTooltipFrame = container.querySelector(".card-affiliations-tooltip-frame");
+    const affiliationsTooltipFrame = container.querySelector(
+      ".unit-card-vertical-affiliations-tooltip-frame"
+    );
     affiliationsContainer.addEventListener("mouseover", () => affiliationsTooltipFrame.classList.add("show"));
     affiliationsContainer.addEventListener("mouseout", () =>
       setTimeout(() => affiliationsTooltipFrame.classList.remove("show"), 200)
     );
 
     // load affiliations
-    const affiliationsTooltip = container.querySelector(".card-affiliations-tooltip");
+    const affiliationsTooltip = container.querySelector(".unit-card-vertical-affiliations-tooltip");
     affiliationsTooltip.innerHTML = "";
     for (let i = 1; i < affiliationCodes.length; i++) {
       const code = affiliationCodes[i];
@@ -108,7 +110,7 @@ const load = async (
   };
 
   const loadAbilities = (container, abilities) => {
-    const abilitiesList = container.querySelector(".card-abilities");
+    const abilitiesList = container.querySelector(".unit-card-vertical-abilities");
     const maxSize = { width: abilitiesList.scrollWidth, height: abilitiesList.scrollHeight };
     abilitiesList.innerHTML = "";
     let fontSize = 2; // base font size
@@ -138,7 +140,7 @@ const load = async (
   };
 
   const loadPositions = async (container, positionCodes) => {
-    const positionsList = container.querySelector(".card-positions");
+    const positionsList = container.querySelector(".unit-card-vertical-positions");
     positionsList.innerHTML = "";
     for (let code of positionCodes) {
       const li = document.createElement("li");
@@ -156,17 +158,17 @@ const load = async (
 
   // display card back
   if (id === null || !cardData || !traitData || !affiliationData || !positionData) {
-    const cardFrame = container.querySelector(".card-frame");
+    const cardFrame = container.querySelector(".unit-card-vertical-frame");
     cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
-    cardFrame.classList.add("card-small", "no-hover");
+    cardFrame.classList.add("unit-card-vertical-small", "no-hover");
     cardFrame.innerHTML = "";
     return;
   }
 
   // size
-  const cardFrame = container.querySelector(".card-frame");
-  cardFrame.classList.remove("card-small", "card-big");
-  cardFrame.classList.add(isSmall ? "card-small" : "card-big");
+  const cardFrame = container.querySelector(".unit-card-vertical-frame");
+  cardFrame.classList.remove("unit-card-vertical-small", "unit-card-vertical-big");
+  cardFrame.classList.add(isSmall ? "unit-card-vertical-small" : "unit-card-vertical-big");
   if (isSmall) {
     cardFrame.addEventListener("contextmenu", async (event) => {
       event.preventDefault();
@@ -202,7 +204,9 @@ const load = async (
   // name
   await loadName(container, cardData.name, cardData.sobriquet);
   // artwork
-  container.querySelector(".card-artwork").style.backgroundImage = `url("${cardData.artworkPath}")`;
+  container.querySelector(
+    ".unit-card-vertical-artwork"
+  ).style.backgroundImage = `url("${cardData.artworkPath}")`;
   // traits
   await loadTraits(container, traitCodes || cardData.traitCodes);
   // affiliations
@@ -210,7 +214,7 @@ const load = async (
   // abilities
   await loadAbilities(container, cardData.abilities);
   // shinsu
-  const shinsuContainer = container.querySelector(".card-shinsu");
+  const shinsuContainer = container.querySelector(".unit-card-vertical-shinsu");
   shinsuContainer.innerText = cardData.cost;
   await addTooltip(container, shinsuContainer, "Shinsu", "The cost of playing this card");
   // positions
@@ -218,7 +222,7 @@ const load = async (
   if (placedPosition && positionCodes.includes(placedPosition)) positionCodes = [placedPosition];
   await loadPositions(container, positionCodes);
   // hp
-  const hpContainer = container.querySelector(".card-hp");
+  const hpContainer = container.querySelector(".unit-card-vertical-hp");
   hpContainer.innerText = currentHp || cardData.hp;
   await addTooltip(container, hpContainer, "HP", "The current hit points of this unit card");
 };
