@@ -158,7 +158,7 @@ const load = async (
   if (id === null || !cardData || !traitData || !affiliationData || !positionData) {
     const cardFrame = container.querySelector(".card-frame");
     cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
-    cardFrame.classList.add("card-small");
+    cardFrame.classList.add("card-small", "no-hover");
     cardFrame.innerHTML = "";
     return;
   }

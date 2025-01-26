@@ -53,6 +53,35 @@
   gap: 0;
 }
 
+.deck-container {
+  position: relative;
+  flex: 0 0 55%;
+}
+
+.deck-card {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.lighthouse-container {
+  justify-content: center;
+  overflow: hidden;
+}
+.lighthouse-container img {
+  width: auto;
+  height: auto;
+  max-width: 70%;
+  max-height: 70%;
+}
+.lighthouse-container h1 {
+  width: 30%;
+  font-size: 3rem;
+  margin: 0;
+  color: white;
+}
+
 .backline-container,
 .frontline-container {
   width: 100%;
@@ -97,11 +126,11 @@
 
 hr {
   width: 100%;
-  min-height: 6px;
+  min-height: 8px;
   margin: 0;
   padding: 0;
   background-image: url("/assets/images/card/frame.png");
   background-size: cover;
   background-position: center;
-  border: none;
+  border: 1px solid black;
 }

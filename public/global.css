@@ -1,3 +1,17 @@
+@font-face {
+  font-family: "Roboto";
+  src: url("/assets/fonts/Roboto-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "New Rocker";
+  src: url("/assets/fonts/NewRocker-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --primary-color: #007bff;
   --primary-color-dark: #0056b3;
@@ -11,7 +25,7 @@
 
 html,
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Roboto", Arial, sans-serif;
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -19,6 +33,14 @@ body {
   background-color: #f0f0f0;
   /* TODO: Uncomment this line to hide the scrollbar */
   overflow: hidden;
+}
+
+h1 {
+  font-size: 3em;
+  margin: 0;
+  padding: 0;
+  font-family: "New Rocker", Arial, sans-serif;
+  font-weight: normal;
 }
 
 .hidden {

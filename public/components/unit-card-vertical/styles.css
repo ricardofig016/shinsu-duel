@@ -24,15 +24,15 @@
   font-size: 0.3rem;
 }
 
-.card-frame.card-small:hover {
+.card-frame.card-small:not(.no-hover):hover {
   scale: 1.6;
 }
 
-#opponent-container .card-frame.card-small:hover {
+#opponent-container .card-frame.card-small:not(.no-hover):hover {
   transform: translateY(3.5rem);
 }
 
-#player-container .card-frame.card-small:hover {
+#player-container .card-frame.card-small:not(.no-hover):hover {
   transform: translateY(-3.5rem);
 }
 
@@ -179,7 +179,7 @@
 .card-hp {
   width: 3em;
   height: 3em;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
   display: flex;
   justify-content: center;

@@ -36,7 +36,7 @@
   "3": {
     "name": "Rak Wraithraiser",
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["nomnomnomnom", "i like chocolate bars :)", "all my friends are turtles :("],
     "passive": "I am always angry",
     "hp": 5,
     "cost": 1,

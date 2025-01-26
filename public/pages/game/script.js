@@ -46,6 +46,14 @@ const getRandomGameData = () => {
     }
     playerData.combatIndicatorCodes.sort();
 
+    // deck
+    playerData.deck = {};
+    playerData.deck.size = Math.floor(Math.random() * 21);
+
+    // lighthouses
+    playerData.lighthouses = {};
+    playerData.lighthouses.amount = Math.floor(Math.random() * 21);
+
     // hands
     playerData.hand = [];
     const traitCodes = Object.keys(data.traits);
@@ -58,11 +66,7 @@ const getRandomGameData = () => {
       const randomCodeNumber = Math.floor(Math.random() * (maxTraitCodes + 1));
       const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
       card.traitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
-      if (player === "opponent" && Math.random() < 0.8) {
-        console.log(player);
-        console.log("empty card!!");
-        card = {};
-      } // 80% chance of empty card
+      if (player === "opponent" && Math.random() < 0.8) card = {}; // 80% chance of empty card
       playerData.hand.push(card);
     }
 
@@ -73,7 +77,6 @@ const getRandomGameData = () => {
     playerData.shinsu.recharged = Math.floor(Math.random() * 3);
 
     gameData[player] = playerData;
-    console.log(gameData[player].hand);
   }
   return gameData;
 };
@@ -94,6 +97,40 @@ const loadCombatIndicators = async () => {
         newImg.src
       );
     }
+  }
+};
+
+const loadDecks = async () => {
+  const basePosition = [0, 50];
+  const positionOffset = 0.2;
+  const maxDeckSize = 20;
+  for (let player in data.game) {
+    const deckContainer = document.querySelector(`#${player}-container .deck-container`);
+    const cardAmount = Math.min(data.game[player].deck.size, maxDeckSize);
+    for (let i = 0; i < cardAmount; i++) {
+      const newDiv = document.createElement("div");
+      newDiv.classList.add("unit-card-vertical-component", "deck-card");
+      deckContainer.appendChild(newDiv);
+      await loadComponent(newDiv, "unit-card-vertical", {});
+      newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
+      newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
+      if (i === cardAmount - 1)
+        await addTooltip(document.body, newDiv, "Deck", `${data.game[player].deck.size} cards remaining`);
+    }
+  }
+};
+
+const loadLightHouses = async () => {
+  for (let player in data.game) {
+    const lighthouseContainer = document.querySelector(`#${player}-container .lighthouse-container`);
+    const lighthouseAmount = data.game[player].lighthouses.amount;
+    lighthouseContainer.querySelector("h1").textContent = lighthouseAmount;
+    await addTooltip(
+      lighthouseContainer,
+      lighthouseContainer.querySelector("img"),
+      "Lighthouses",
+      "If you run out of lighthouses, you lose the game"
+    );
   }
 };
 
@@ -155,7 +192,6 @@ const loadShinsu = async () => {
     const shinsu = data.game[player].shinsu;
     // normal shinsu
     let shinsuCircles = Array.from(shinsuContainer.querySelectorAll(".shinsu-circle"));
-    console.log("shinsu.normalAvailable: ", shinsu.normalAvailable);
     for (let i = 0; i < shinsu.normalAvailable; i++) shinsuCircles[i].classList.add("available");
     for (let i = shinsu.normalAvailable; i < shinsu.normalAvailable + shinsu.normalSpent; i++)
       shinsuCircles[i].classList.add("spent");
@@ -192,6 +228,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   data.game = getRandomGameData();
 
   await loadCombatIndicators();
+  await loadDecks();
+  await loadLightHouses();
   await loadHands();
   await loadShinsu();
 

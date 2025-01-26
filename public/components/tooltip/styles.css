@@ -38,4 +38,5 @@
 
 .tooltip-frame hr {
   min-height: 2px;
+  border: none;
 }
