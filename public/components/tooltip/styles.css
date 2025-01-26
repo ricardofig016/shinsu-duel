@@ -28,12 +28,14 @@
 }
 
 .tooltip-frame img {
-  height: 2rem;
+  height: 2.5em;
   width: auto;
 }
 
-.tooltip-frame h2 {
+.tooltip-frame h1 {
   margin: 0;
+  font-size: 2rem;
+  flex: 1;
 }
 
 .tooltip-frame hr {

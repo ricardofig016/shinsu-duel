@@ -36,7 +36,7 @@ const getRandomGameData = () => {
     let playerData = {};
 
     // combat indicators
-    const positions = ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"];
+    const positions = Object.keys(data.positions);
     const positionAmount = Math.floor(Math.random() * 6);
     playerData.combatIndicatorCodes = [];
     for (let i = 0; i < positionAmount; i++) {

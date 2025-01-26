@@ -1,6 +1,6 @@
 const load = async (container, { hoverContainer, title, text, iconPath = null }) => {
-  if (!iconPath) container.querySelector(".tooltip-icon").style.display = "none";
-  if (iconPath) container.querySelector(".tooltip-icon").src = iconPath;
+  if (!iconPath) container.querySelector(".tooltip-icon").remove();
+  else container.querySelector(".tooltip-icon").src = iconPath;
   container.querySelector(".tooltip-title").innerText = title;
   container.querySelector(".tooltip-text").innerText = text;
 
