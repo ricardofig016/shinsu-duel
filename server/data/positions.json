@@ -1,30 +1,30 @@
 {
   "fisherman": {
     "name": "Fisherman",
-    "description": "Fishermen are suited for close to medium-range combats and are the main offence of the team. They generally possess the most destructive power in man-to-man fights and tend to use Reel or Needles as their primary weapon."
+    "description": "Durable frontline units that tank damage and deal consistent damage to enemies"
   },
   "landmark": {
     "name": "Landmark",
-    "description": "TBA"
+    "description": "Special units that apply continuous effects to the entire battlefield"
   },
   "lightbearer": {
     "name": "Light Bearer",
-    "description": "Lightbearers use Lighthouses to gain information on the battle or the surroundings. They gather information and formulate plans with the help of such information as they command their Lighthouse."
+    "description": "Strategic support units specializing in utility, buffs, and lighthouses"
   },
   "scout": {
     "name": "Scout",
-    "description": "Scouts move ahead of the group, observe the environment and situation, and aid the Fishermen as secondary offence. They are usually lightly armed for the intention to be agile and swift in movement and thinking."
+    "description": "Disruptive units that excel at applying debuffs and breaking enemy synergy"
   },
   "shinheuh": {
     "name": "Shinheuh",
-    "description": "TBA"
+    "description": "Special units summoned by Animas to attack on their behalf"
   },
   "spearbearer": {
     "name": "Spear Bearer",
-    "description": "Spear Bearers attack from long distance and snipe the opponent using Spears as their primary weapon. They do not tend to be very powerful in a melee, but are very valuable due to their pinpoint attacking from a distance."
+    "description": "Long-range damage dealers designed to deal massive amounts of damage"
   },
   "wavecontroller": {
     "name": "Wave Controller",
-    "description": "Wave Controllers help their allies in battle by attacking the enemy or aiding the team by manipulating Shinsu. This position is rare compared to the others and requires an expert and specialized manipulation of Shinsu."
+    "description": "Shinsu-focused units that deal area damage and provide shinsu-related buffs and debuffs"
   }
 }
