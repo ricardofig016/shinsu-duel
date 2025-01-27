@@ -22,9 +22,9 @@ export const loadComponent = async (container, component, data = null) => {
   await components[component].load(container, data);
 };
 
-export const addTooltip = async (container, hoverContainer, title, text, iconPath = null) => {
+export const addTooltip = async (container, hoverContainer, title, textList, iconPath = null) => {
   const tooltipComponent = document.createElement("div");
   tooltipComponent.classList.add("tooltip-component");
   container.appendChild(tooltipComponent);
-  await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, text, iconPath });
+  await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, textList, iconPath });
 };

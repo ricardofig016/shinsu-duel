@@ -1,8 +1,10 @@
-const load = async (container, { hoverContainer, title, text, iconPath = null }) => {
+const load = async (container, { hoverContainer, title, textList, iconPath = null }) => {
   if (!iconPath) container.querySelector(".tooltip-icon").remove();
   else container.querySelector(".tooltip-icon").src = iconPath;
   container.querySelector(".tooltip-title").innerText = title;
-  container.querySelector(".tooltip-text").innerText = text;
+  const tooltipTextContainer = container.querySelector(".tooltip-text");
+  if (typeof textList === "string") tooltipTextContainer.innerHTML = `<p>${textList}</p>`;
+  else tooltipTextContainer.innerHTML = textList.map((text) => `<p>${text}</p>`).join("");
 
   const tooltipFrame = container.querySelector(".tooltip-frame");
   hoverContainer.addEventListener("mousemove", (event) => {

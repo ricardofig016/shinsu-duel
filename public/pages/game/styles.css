@@ -118,7 +118,7 @@
 .frontline-container > * {
   height: 100%;
   flex: 1;
-  max-width: 25%;
+  max-width: 11rem;
 }
 #opponent-container .frontline-container {
   border-bottom: none;

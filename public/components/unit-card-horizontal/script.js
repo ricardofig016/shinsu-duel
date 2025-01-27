@@ -50,9 +50,10 @@ const load = async (
   });
 
   // artwork
-  container.querySelector(
-    ".unit-card-horizontal-artwork"
-  ).style.backgroundImage = `url("${cardData.artworkPath}")`;
+  const artworkContainer = container.querySelector(".unit-card-horizontal-artwork");
+  artworkContainer.style.backgroundImage = `url("${cardData.artworkPath}")`;
+  console.log(cardData.abilities);
+  await addTooltip(container, artworkContainer, cardData.name, cardData.abilities);
   // position
   const positionContainer = container.querySelector(".unit-card-horizontal-position");
   positionContainer.innerHTML = "";

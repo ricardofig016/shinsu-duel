@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadHands();
   await loadShinsu();
 
-  for (let player in data.game) {
-    console.log(data.game[player].field);
-  }
+  // for (let player in data.game) {
+  //   console.log(data.game[player].field);
+  // }
 });
