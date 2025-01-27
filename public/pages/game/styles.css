@@ -107,10 +107,18 @@
   width: 100%;
   flex: 1;
   border: 1px solid black;
+  gap: 0.3rem;
+  padding: 0.3rem;
   background-image: url("/assets/images/board/background.png");
   background-size: auto 100vh;
   background-attachment: fixed;
   background-position: center;
+}
+.backline-container > *,
+.frontline-container > * {
+  height: 100%;
+  flex: 1;
+  max-width: 25%;
 }
 #opponent-container .frontline-container {
   border-bottom: none;

@@ -5,7 +5,7 @@ const load = async (
   {
     id = null,
     traitCodes = null,
-    placedPosition = null,
+    placedPositionCode = null,
     currentHp = null,
     isSmall = false,
     cardData,
@@ -178,7 +178,7 @@ const load = async (
       await loadComponent(cardComponent, "unit-card-vertical", {
         id,
         traitCodes,
-        placedPosition,
+        placedPositionCode,
         currentHp,
         isSmall: false,
         cardData,
@@ -219,7 +219,7 @@ const load = async (
   await addTooltip(container, shinsuContainer, "Shinsu", "The cost of playing this card");
   // positions
   let positionCodes = cardData.positionCodes;
-  if (placedPosition && positionCodes.includes(placedPosition)) positionCodes = [placedPosition];
+  if (placedPositionCode && positionCodes.includes(placedPositionCode)) positionCodes = [placedPositionCode];
   await loadPositions(container, positionCodes);
   // hp
   const hpContainer = container.querySelector(".unit-card-vertical-hp");

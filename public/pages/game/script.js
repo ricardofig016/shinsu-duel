@@ -8,9 +8,9 @@ const prepareData = async () => {
   data.game = {};
   data.game.opponent = {};
   data.game.player = {};
-  data.cards = {};
 
   // fetch data
+  data.cards = await fetchFromPath("cards");
   data.traits = await fetchFromPath("traits");
   data.affiliations = await fetchFromPath("affiliations");
   data.positions = await fetchFromPath("positions");
@@ -54,12 +54,30 @@ const getRandomGameData = () => {
     playerData.lighthouses = {};
     playerData.lighthouses.amount = Math.floor(Math.random() * 21);
 
-    // hands
-    playerData.hand = [];
+    // field
+    playerData.field = { frontline: [], backline: [] };
+    // console.log(data.cards);
     const traitCodes = Object.keys(data.traits);
-    const cardAmount = Math.floor(Math.random() * 11);
     const maxId = 6;
     const maxTraitCodes = 15;
+    for (let line of Object.keys(playerData.field)) {
+      const cardAmount = Math.floor(Math.random() * 6);
+      for (let i = 0; i < cardAmount; i++) {
+        let card = {};
+        card.id = Math.floor(Math.random() * (maxId + 1));
+        const randomCodeNumber = Math.floor(Math.random() * (maxTraitCodes + 1));
+        const shuffledTraitCodes = traitCodes.sort(() => 0.5 - Math.random());
+        card.traitCodes = shuffledTraitCodes.slice(0, randomCodeNumber);
+        // console.log(data.cards[card.id]);
+        const positionCodes = data.cards[card.id].positionCodes;
+        card.placedPositionCode = positionCodes[Math.floor(Math.random() * positionCodes.length)];
+        playerData.field[line].push(card);
+      }
+    }
+
+    // hand
+    playerData.hand = [];
+    const cardAmount = Math.floor(Math.random() * 11);
     for (let i = 0; i < cardAmount; i++) {
       let card = {};
       card.id = Math.floor(Math.random() * (maxId + 1));
@@ -134,6 +152,32 @@ const loadLightHouses = async () => {
   }
 };
 
+const loadFields = async () => {
+  for (let player in data.game) {
+    for (let line in data.game[player].field) {
+      for (let card of data.game[player].field[line]) {
+        // create div
+        const handContainer = document.querySelector(`#${player}-container .${line}-container`);
+        const newDiv = document.createElement("div");
+        newDiv.classList.add("unit-card-horizontal-component");
+        handContainer.appendChild(newDiv);
+        // load card component
+        await loadComponent(newDiv, "unit-card-horizontal", {
+          id: card.id,
+          traitCodes: card.traitCodes,
+          placedPositionCode: card.placedPositionCode,
+          currentHp: null,
+          isSmall: true,
+          cardData: data.cards[card.id],
+          traitData: data.traits,
+          affiliationData: data.affiliations,
+          positionData: data.positions,
+        });
+      }
+    }
+  }
+};
+
 const loadHands = async () => {
   const alignCards = () => {
     const handContainers = document.querySelectorAll(".hand-container");
@@ -159,17 +203,11 @@ const loadHands = async () => {
       const newDiv = document.createElement("div");
       newDiv.classList.add("unit-card-vertical-component");
       handContainer.appendChild(newDiv);
-      // fetch card data
-      if (card.id !== undefined && !data.cards[card.id]) {
-        const response = await fetch(`/cards/${card.id}`);
-        if (!response.ok) return console.error(await response.text());
-        data.cards[card.id] = await response.json();
-      }
       // load card component
       await loadComponent(newDiv, "unit-card-vertical", {
         id: card.id,
         traitCodes: card.traitCodes,
-        placedPosition: null,
+        placedPositionCode: null,
         currentHp: null,
         isSmall: true,
         cardData: data.cards[card.id],
@@ -181,6 +219,7 @@ const loadHands = async () => {
   }
 
   alignCards();
+  setTimeout(alignCards, 200);
   window.addEventListener("resize", alignCards);
 };
 
@@ -230,10 +269,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadCombatIndicators();
   await loadDecks();
   await loadLightHouses();
+  await loadFields();
   await loadHands();
   await loadShinsu();
 
-  // for (let player in data.game) {
-  //   console.log(data.game[player].shinsu);
-  // }
+  for (let player in data.game) {
+    console.log(data.game[player].field);
+  }
 });

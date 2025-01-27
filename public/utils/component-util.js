@@ -1,15 +1,17 @@
 import loadNavbar from "/components/navbar/script.js";
 import loadTooltip from "/components/tooltip/script.js";
+import loadUnitCardHorizontal from "/components/unit-card-horizontal/script.js";
 import loadUnitCardVertical from "/components/unit-card-vertical/script.js";
 
 const components = {
   navbar: { load: loadNavbar },
   tooltip: { load: loadTooltip },
+  "unit-card-horizontal": { load: loadUnitCardHorizontal },
   "unit-card-vertical": { load: loadUnitCardVertical },
 };
 
 export const loadComponent = async (container, component, data = null) => {
-  if (!components[component] || !container) return;
+  if (!components[component] || !container) console.error("Invalid component or container");
 
   if (!components[component].html) {
     const response = await fetch(`/components/${component}/index.html`);
