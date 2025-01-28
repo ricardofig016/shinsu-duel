@@ -188,16 +188,9 @@ const load = async (
       });
     });
   } else {
-    document.addEventListener("click", async (event) => {
+    document.addEventListener("mousedown", (event) => {
       // if (event.target !== cardFrame && !cardFrame.contains(event.target))
       container.remove();
-    });
-    let removeCount = 0;
-    document.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-      if (event.target !== cardFrame && !cardFrame.contains(event.target) && removeCount > 0)
-        container.remove();
-      removeCount++;
     });
   }
 

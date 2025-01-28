@@ -1,30 +1,37 @@
 {
   "fisherman": {
     "name": "Fisherman",
-    "description": "Durable frontline units that tank damage and deal consistent damage to enemies"
+    "description": "Durable frontline units that tank damage and deal consistent damage to enemies",
+    "line": "frontline"
   },
   "landmark": {
     "name": "Landmark",
-    "description": "Special units that apply continuous effects to the entire battlefield"
+    "description": "Special units that apply continuous effects to the entire battlefield",
+    "line": "backline"
   },
   "lightbearer": {
     "name": "Light Bearer",
-    "description": "Strategic support units specializing in utility, buffs, and lighthouses"
+    "description": "Strategic support units specializing in utility, buffs, and lighthouses",
+    "line": "backline"
   },
   "scout": {
     "name": "Scout",
-    "description": "Disruptive units that excel at applying debuffs and breaking enemy synergy"
+    "description": "Disruptive units that excel at applying debuffs and breaking enemy synergy",
+    "line": "frontline"
   },
   "shinheuh": {
     "name": "Shinheuh",
-    "description": "Special units summoned by Animas to attack on their behalf"
+    "description": "Special units summoned by Animas to attack on their behalf",
+    "line": "frontline"
   },
   "spearbearer": {
     "name": "Spear Bearer",
-    "description": "Long-range damage dealers designed to deal massive amounts of damage"
+    "description": "Long-range damage dealers designed to deal massive amounts of damage",
+    "line": "backline"
   },
   "wavecontroller": {
     "name": "Wave Controller",
-    "description": "Shinsu-focused units that deal area damage and provide shinsu-related buffs and debuffs"
+    "description": "Shinsu-focused units that deal area damage and provide shinsu-related buffs and debuffs",
+    "line": "frontline"
   }
 }

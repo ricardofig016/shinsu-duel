@@ -37,7 +37,7 @@ const getRandomGameData = () => {
 
     // combat indicators
     const positions = Object.keys(data.positions);
-    const positionAmount = Math.floor(Math.random() * 6);
+    const positionAmount = Math.floor(Math.random() * 7);
     playerData.combatIndicatorCodes = [];
     for (let i = 0; i < positionAmount; i++) {
       const randomIndex = Math.floor(Math.random() * positions.length);
@@ -56,7 +56,6 @@ const getRandomGameData = () => {
 
     // field
     playerData.field = { frontline: [], backline: [] };
-    // console.log(data.cards);
     const traitCodes = Object.keys(data.traits);
     const maxId = 6;
     const maxTraitCodes = 15;
@@ -153,14 +152,15 @@ const loadLightHouses = async () => {
 };
 
 const loadFields = async () => {
+  // field cards
   for (let player in data.game) {
     for (let line in data.game[player].field) {
       for (let card of data.game[player].field[line]) {
         // create div
-        const handContainer = document.querySelector(`#${player}-container .${line}-container`);
+        const lineContainer = document.querySelector(`#${player}-container .${line}-container`);
         const newDiv = document.createElement("div");
         newDiv.classList.add("unit-card-horizontal-component");
-        handContainer.appendChild(newDiv);
+        lineContainer.appendChild(newDiv);
         // load card component
         await loadComponent(newDiv, "unit-card-horizontal", {
           id: card.id,
@@ -174,6 +174,18 @@ const loadFields = async () => {
           positionData: data.positions,
         });
       }
+    }
+  }
+  // position drop zones
+  for (let line of ["frontline", "backline"]) {
+    const lineContainer = document.querySelector(`#player-container .${line}-container`);
+    const positionCodes = Object.keys(data.positions).filter((code) => data.positions[code].line === line);
+    for (let code of positionCodes) {
+      const dropZoneContainer = document.createElement("div");
+      dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
+      dropZoneContainer.innerHTML = `<div class="position-drop-zone-icon" style="background-image: url(${data.positions[code].iconPath})"></div>`;
+      dropZoneContainer.dataset.positionCode = code;
+      lineContainer.appendChild(dropZoneContainer);
     }
   }
 };
@@ -215,11 +227,50 @@ const loadHands = async () => {
         affiliationData: data.affiliations,
         positionData: data.positions,
       });
+      // drag
+      if (player === "opponent") continue;
+      newDiv.addEventListener("mousedown", (event) => {
+        if (event.button !== 0) return; // left click
+        // create dragging card
+        const cardDrag = newDiv.cloneNode(true);
+        const innerCard = cardDrag.querySelector(".unit-card-vertical-component");
+        if (innerCard) cardDrag.removeChild(innerCard);
+        cardDrag.classList.add("card-dragging");
+        document.body.appendChild(cardDrag);
+        // position dragging card
+        cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
+        cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
+        document.body.classList.add("no-interaction");
+        // hide original card
+        newDiv.classList.add("invisible");
+        // show drop zones
+        const dropZones = document.querySelectorAll(`.position-drop-zone`);
+        const positionCodes = data.cards[card.id].positionCodes;
+        dropZones.forEach((zone) => {
+          if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
+        });
+        // events
+        const onMouseMove = (event) => {
+          cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
+          cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
+        };
+        const onMouseUp = (event) => {
+          // remove dragging card
+          document.body.removeChild(cardDrag);
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+          document.body.classList.remove("no-interaction");
+          newDiv.classList.remove("invisible");
+          // hide drop zones
+          dropZones.forEach((zone) => zone.classList.add("hidden"));
+        };
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
     }
   }
 
-  alignCards();
-  setTimeout(alignCards, 200);
+  setTimeout(alignCards, 0);
   window.addEventListener("resize", alignCards);
 };
 

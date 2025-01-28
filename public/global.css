@@ -31,8 +31,12 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f0f0f0;
-  /* TODO: Uncomment this line to hide the scrollbar */
   overflow: hidden;
+}
+body.no-interaction {
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 h1 {
@@ -45,6 +49,9 @@ h1 {
 
 .hidden {
   display: none !important;
+}
+.invisible {
+  visibility: hidden !important;
 }
 
 .container-horizontal,
