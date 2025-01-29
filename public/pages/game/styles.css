@@ -138,7 +138,7 @@
   border-radius: 0.8rem;
 }
 .position-drop-zone:hover {
-  box-shadow: 0 0 10px 5px rgba(255, 255, 0, 1) inset;
+  box-shadow: 0 0 10px 5px rgb(255, 255, 0) inset;
 }
 .position-drop-zone-icon {
   height: 100%;
@@ -152,6 +152,9 @@
 .hand-container {
   gap: 0;
   justify-content: start;
+}
+.hand-container .focused:not(.no-focus) {
+  z-index: 2;
 }
 
 .shinsu-container {

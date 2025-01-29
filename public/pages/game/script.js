@@ -191,29 +191,14 @@ const loadFields = async () => {
 };
 
 const loadHands = async () => {
-  const alignCards = () => {
-    const handContainers = document.querySelectorAll(".hand-container");
-    handContainers.forEach((handContainer) => {
-      const handContainerWidth = window.innerWidth - handContainer.getBoundingClientRect().left;
-      const cards = handContainer.querySelectorAll(".unit-card-vertical-component");
-      if (cards.length === 0) return;
-      const cardWidth = cards[0].offsetWidth;
-      if (cards.length * cardWidth < handContainerWidth) handContainer.style.justifyContent = "center";
-      else {
-        const cardOffset = (handContainerWidth - cardWidth) / (cards.length - 1);
-        cards.forEach((card, index) => {
-          if (index !== 0) card.style.marginLeft = `${-cardWidth + cardOffset}px`;
-        });
-      }
-    });
-  };
-
   for (let player in data.game) {
+    const handContainer = document.querySelector(`#${player}-container .hand-container`);
+    // load cards
     for (let card of data.game[player].hand) {
       // create div
-      const handContainer = document.querySelector(`#${player}-container .hand-container`);
       const newDiv = document.createElement("div");
       newDiv.classList.add("unit-card-vertical-component");
+      if (card.id === undefined) newDiv.classList.add("no-focus");
       handContainer.appendChild(newDiv);
       // load card component
       await loadComponent(newDiv, "unit-card-vertical", {
@@ -268,8 +253,45 @@ const loadHands = async () => {
         document.addEventListener("mouseup", onMouseUp);
       });
     }
+    // focused card
+    const cardComponents = handContainer.querySelectorAll(".unit-card-vertical-component");
+    handContainer.addEventListener("mousemove", (event) => {
+      let closestCard = null;
+      let closestDistance = Infinity;
+      cardComponents.forEach((card) => {
+        card.classList.remove("focused");
+        const cardRect = card.getBoundingClientRect();
+        const cardCenterX = cardRect.left + cardRect.width / 2;
+        const distance = Math.abs(event.clientX - cardCenterX);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestCard = card;
+        }
+      });
+      if (closestCard) closestCard.classList.add("focused");
+    });
+    handContainer.addEventListener("mouseleave", () => {
+      cardComponents.forEach((card) => card.classList.remove("focused"));
+    });
   }
 
+  // align cards
+  const alignCards = () => {
+    const handContainers = document.querySelectorAll(".hand-container");
+    handContainers.forEach((handContainer) => {
+      const handContainerWidth = window.innerWidth - handContainer.getBoundingClientRect().left;
+      const cards = handContainer.querySelectorAll(".unit-card-vertical-component");
+      if (cards.length === 0) return;
+      const cardWidth = cards[0].offsetWidth;
+      if (cards.length * cardWidth < handContainerWidth) handContainer.style.justifyContent = "center";
+      else {
+        const cardOffset = (handContainerWidth - cardWidth) / (cards.length - 1);
+        cards.forEach((card, index) => {
+          if (index !== 0) card.style.marginLeft = `${-cardWidth + cardOffset}px`;
+        });
+      }
+    });
+  };
   setTimeout(alignCards, 0);
   window.addEventListener("resize", alignCards);
 };

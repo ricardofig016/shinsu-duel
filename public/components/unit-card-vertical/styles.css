@@ -9,7 +9,7 @@
   color: white;
   overflow: hidden;
   cursor: default;
-  transition: scale 0.2s, transform 0.2s;
+  transition: scale 0.1s, transform 0.1s;
 }
 
 .unit-card-vertical-frame.unit-card-vertical-big {
@@ -17,7 +17,7 @@
   bottom: 50%;
   right: 50%;
   transform: translate(50%, 50%);
-  z-index: 2;
+  z-index: 3;
 }
 
 .unit-card-vertical-frame.unit-card-vertical-small {
