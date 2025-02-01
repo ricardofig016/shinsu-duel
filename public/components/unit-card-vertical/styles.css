@@ -32,7 +32,7 @@
   transform: translateY(3.5rem);
 }
 
-#player-container .unit-card-vertical-frame.unit-card-vertical-small:not(.no-hover):hover {
+#you-container .unit-card-vertical-frame.unit-card-vertical-small:not(.no-hover):hover {
   transform: translateY(-3.5rem);
 }
 

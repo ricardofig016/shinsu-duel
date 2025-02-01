@@ -4,7 +4,7 @@ import winston from "winston";
 import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 
 const router = express.Router();
-const roomsFilePath = path.resolve("server/data/rooms.json");
+export const roomsFilePath = path.resolve("server/data/rooms.json");
 
 // middleware
 const logger = winston.createLogger({
@@ -16,9 +16,16 @@ const logger = winston.createLogger({
   ],
 });
 
+let flag = false;
 const isAuthenticated = (req, res, next) => {
-  return next(); // TODO: remove this line (for testing purposes only)
   if (req.session.username) return next();
+  // TODO: remove this else statement (for testing purposes only)
+  else {
+    const usernames = ["tester1", "tester2"];
+    req.session.username = usernames[flag ? 1 : 0];
+    flag = !flag;
+    return next();
+  }
   return res.status(403).send("Access denied, please login.");
 };
 
@@ -54,7 +61,7 @@ router.get("/:roomCode", isAuthenticated, async (req, res) => {
     return res.status(404).send("Invalid room code");
   }
   if (!rooms[roomCode].players.includes(username)) {
-    return res.sendFile(path.resolve("public/pages/game/index.html")); // TODO: remove this line (for testing purposes only)
+    // return res.sendFile(path.resolve("public/pages/game/index.html")); // TODO: remove this line (for testing purposes only)
     logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
     return res.status(403).send("Access denied");
   }

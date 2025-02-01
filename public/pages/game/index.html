@@ -17,7 +17,7 @@
           <div class="deck-container"></div>
           <div class="lighthouse-container container-horizontal">
             <img src="/assets/images/lighthouses/red3.png" alt="lighthouse" />
-            <h1>18</h1>
+            <h1>0</h1>
           </div>
         </div>
         <div class="board-container">
@@ -26,41 +26,46 @@
             <div class="frontline-container container-horizontal"></div>
           </div>
         </div>
-        <div class="hand-shinsu-container container-vertical">
+        <div class="hand-shinsu-username-container container-vertical">
           <div class="hand-container container-horizontal"></div>
-          <div class="shinsu-container container-horizontal">
-            <div class="normal-shinsu container-vertical">
-              <div class="normal-shinsu-row container-horizontal">
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
+          <div class="shinsu-username-container container-horizontal">
+            <div class="shinsu-container container-horizontal">
+              <div class="normal-shinsu container-vertical">
+                <div class="normal-shinsu-row container-horizontal">
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                </div>
+                <div class="normal-shinsu-row container-horizontal">
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                </div>
               </div>
-              <div class="normal-shinsu-row container-horizontal">
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
+              <div class="shinsu-separator"></div>
+              <div class="recharged-shinsu container-vertical">
                 <div class="shinsu-circle"></div>
                 <div class="shinsu-circle"></div>
               </div>
             </div>
-            <div class="shinsu-separator"></div>
-            <div class="recharged-shinsu container-vertical">
-              <div class="shinsu-circle"></div>
-              <div class="shinsu-circle"></div>
+            <div class="username-frame">
+              <div class="username-container"><h2>opponent</h2></div>
             </div>
           </div>
         </div>
       </div>
       <hr />
-      <!-- player -->
-      <div id="player-container" class="side-container container-horizontal">
+      <!-- you -->
+      <div id="you-container" class="side-container container-horizontal">
         <div class="combat-indicators-container container-vertical"></div>
         <div class="deck-lighthouse-container container-vertical">
           <div class="lighthouse-container container-horizontal">
             <img src="/assets/images/lighthouses/blue3.png" alt="lighthouse" />
-            <h1>7</h1>
+            <h1>0</h1>
           </div>
           <div class="deck-container"></div>
         </div>
@@ -70,28 +75,33 @@
             <div class="backline-container container-horizontal"></div>
           </div>
         </div>
-        <div class="hand-shinsu-container container-vertical">
-          <div class="shinsu-container container-horizontal">
-            <div class="normal-shinsu container-vertical">
-              <div class="normal-shinsu-row container-horizontal">
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
+        <div class="hand-shinsu-username-container container-vertical">
+          <div class="shinsu-username-container container-horizontal">
+            <div class="shinsu-container container-horizontal">
+              <div class="normal-shinsu container-vertical">
+                <div class="normal-shinsu-row container-horizontal">
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                </div>
+                <div class="normal-shinsu-row container-horizontal">
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                  <div class="shinsu-circle"></div>
+                </div>
               </div>
-              <div class="normal-shinsu-row container-horizontal">
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
-                <div class="shinsu-circle"></div>
+              <div class="shinsu-separator"></div>
+              <div class="recharged-shinsu container-vertical">
                 <div class="shinsu-circle"></div>
                 <div class="shinsu-circle"></div>
               </div>
             </div>
-            <div class="shinsu-separator"></div>
-            <div class="recharged-shinsu container-vertical">
-              <div class="shinsu-circle"></div>
-              <div class="shinsu-circle"></div>
+            <div class="username-frame">
+              <div class="username-container"><h2>you</h2></div>
             </div>
           </div>
           <div class="hand-container container-horizontal"></div>
@@ -99,6 +109,8 @@
       </div>
     </div>
 
+    <!-- socket.io client library -->
+    <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="/pages/game/script.js"></script>
   </body>
 </html>
