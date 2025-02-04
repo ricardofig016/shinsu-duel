@@ -103,10 +103,26 @@ const getRandomGameData = (data) => {
   return gameData;
 };
 
+const prepareBoard = (data) => {
+  // position drop zones
+  for (let line of ["frontline", "backline"]) {
+    const lineContainer = document.querySelector(`#you-container .${line}-container`);
+    const positionCodes = Object.keys(data.positions).filter((code) => data.positions[code].line === line);
+    for (let code of positionCodes) {
+      const dropZoneContainer = document.createElement("div");
+      dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
+      dropZoneContainer.innerHTML = `<div class="position-drop-zone-icon" style="background-image: url(${data.positions[code].iconPath})"></div>`;
+      dropZoneContainer.dataset.positionCode = code;
+      lineContainer.appendChild(dropZoneContainer);
+    }
+  }
+};
+
 const load = async (data) => {
   const loadCombatIndicators = async () => {
     for (let player of ["you", "opponent"]) {
       const indicatorsContainer = document.querySelector(`#${player}-container .combat-indicators-container`);
+      indicatorsContainer.innerHTML = "";
       for (let code of data.gameState[player].combatIndicatorCodes) {
         const newImg = document.createElement("img");
         newImg.src = `/assets/icons/positions/${code}.png`;
@@ -163,7 +179,6 @@ const load = async (data) => {
   };
 
   const loadFields = async () => {
-    // field cards
     for (let player of ["you", "opponent"]) {
       for (let line in data.gameState[player].field) {
         for (let card of data.gameState[player].field[line]) {
@@ -185,18 +200,6 @@ const load = async (data) => {
             positionData: data.positions,
           });
         }
-      }
-    }
-    // position drop zones
-    for (let line of ["frontline", "backline"]) {
-      const lineContainer = document.querySelector(`#you-container .${line}-container`);
-      const positionCodes = Object.keys(data.positions).filter((code) => data.positions[code].line === line);
-      for (let code of positionCodes) {
-        const dropZoneContainer = document.createElement("div");
-        dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
-        dropZoneContainer.innerHTML = `<div class="position-drop-zone-icon" style="background-image: url(${data.positions[code].iconPath})"></div>`;
-        dropZoneContainer.dataset.positionCode = code;
-        lineContainer.appendChild(dropZoneContainer);
       }
     }
   };
@@ -305,6 +308,7 @@ const load = async (data) => {
       });
     };
     setTimeout(alignCards, 0);
+    setTimeout(alignCards, 200); // very rarelly the cards dont align late enough
     window.addEventListener("resize", alignCards);
   };
 
@@ -365,6 +369,7 @@ const load = async (data) => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   let data = await prepareData();
+  prepareBoard(data);
 
   // debugging
   // addBorderToDivs();
@@ -391,7 +396,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("errorMessage: ", errorMessage);
   });
 
-  // for (let playeofin"you", ["opponent]) {
+  // for (let player of ["you", "opponent"]) {
   //   console.log(data.gameState[player].field);
   // }
 });

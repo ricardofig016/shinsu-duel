@@ -77,6 +77,8 @@ router.post("/:roomCode/join", isAuthenticated, async (req, res) => {
     return res.status(404).send("Invalid room code");
   }
   if (rooms[roomCode].players.length >= 2) {
+    if (rooms[roomCode].players.includes(username))
+      return res.status(200).send(`Player ${username} already in room: ${roomCode}`);
     logger.warn(`Attempt to join full room: ${roomCode}`);
     return res.status(403).send("Room is full");
   }
