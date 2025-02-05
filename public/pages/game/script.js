@@ -1,5 +1,7 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
 
+let draggedCardHandId = null;
+
 const prepareData = async () => {
   // init
   let data = {};
@@ -103,7 +105,35 @@ const getRandomGameData = (data) => {
   return gameData;
 };
 
-const prepareBoard = (data) => {
+const prepareBoard = async (data, socket) => {
+  for (let player of ["you", "opponent"]) {
+    // lighthouses
+    const lighthouseContainer = document.querySelector(`#${player}-container .lighthouse-container`);
+    await addTooltip(
+      lighthouseContainer,
+      lighthouseContainer.querySelector("img"),
+      "Lighthouses",
+      "If you run out of lighthouses, you lose the game"
+    );
+
+    // shinsu
+    const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
+    const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
+    await addTooltip(
+      shinsuContainer,
+      normalContainer,
+      "Shinsu",
+      "The resource that lets you play cards and use certain abilities"
+    );
+    const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
+    await addTooltip(
+      shinsuContainer,
+      rechargedContainer,
+      "Recharged Shinsu",
+      "The shinsu that wasn't used last turn"
+    );
+  }
+
   // position drop zones
   for (let line of ["frontline", "backline"]) {
     const lineContainer = document.querySelector(`#you-container .${line}-container`);
@@ -113,6 +143,14 @@ const prepareBoard = (data) => {
       dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
       dropZoneContainer.innerHTML = `<div class="position-drop-zone-icon" style="background-image: url(${data.positions[code].iconPath})"></div>`;
       dropZoneContainer.dataset.positionCode = code;
+      dropZoneContainer.addEventListener("mouseup", (event) => {
+        socket.emit("game-action", {
+          type: "deploy-unit",
+          handId: draggedCardHandId,
+          placedPositionCode: code,
+        });
+        draggedCardHandId = null;
+      });
       lineContainer.appendChild(dropZoneContainer);
     }
   }
@@ -144,7 +182,9 @@ const load = async (data) => {
     const positionOffset = 0.2;
     const maxDeckSize = 20;
     for (let player of ["you", "opponent"]) {
-      const deckContainer = document.querySelector(`#${player}-container .deck-container`);
+      const outerDiv = document.querySelector(`#${player}-container .deck-outer-container`);
+      const deckContainer = outerDiv.querySelector(`.deck-container`);
+      deckContainer.innerHTML = "";
       const cardAmount = Math.min(data.gameState[player].deck.size, maxDeckSize);
       for (let i = 0; i < cardAmount; i++) {
         const newDiv = document.createElement("div");
@@ -154,12 +194,7 @@ const load = async (data) => {
         newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
         newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
         if (i === cardAmount - 1)
-          await addTooltip(
-            document.body,
-            newDiv,
-            "Deck",
-            `${data.gameState[player].deck.size} cards remaining`
-          );
+          await addTooltip(outerDiv, newDiv, "Deck", `${data.gameState[player].deck.size} cards remaining`);
       }
     }
   };
@@ -169,21 +204,18 @@ const load = async (data) => {
       const lighthouseContainer = document.querySelector(`#${player}-container .lighthouse-container`);
       const lighthouseAmount = data.gameState[player].lighthouses.amount;
       lighthouseContainer.querySelector("h1").textContent = lighthouseAmount;
-      await addTooltip(
-        lighthouseContainer,
-        lighthouseContainer.querySelector("img"),
-        "Lighthouses",
-        "If you run out of lighthouses, you lose the game"
-      );
     }
   };
 
   const loadFields = async () => {
     for (let player of ["you", "opponent"]) {
       for (let line in data.gameState[player].field) {
+        // delete existing divs
+        const lineContainer = document.querySelector(`#${player}-container .${line}-container`);
+        const existingDivs = lineContainer.querySelectorAll(".unit-card-horizontal-component");
+        existingDivs.forEach((div) => div.remove());
         for (let card of data.gameState[player].field[line]) {
           // create div
-          const lineContainer = document.querySelector(`#${player}-container .${line}-container`);
           const newDiv = document.createElement("div");
           newDiv.classList.add("unit-card-horizontal-component");
           lineContainer.appendChild(newDiv);
@@ -209,7 +241,8 @@ const load = async (data) => {
       const handContainer = document.querySelector(`#${player}-container .hand-container`);
       handContainer.innerHTML = "";
       // load cards
-      for (let card of data.gameState[player].hand) {
+      for (let i = 0; i < data.gameState[player].hand.length; i++) {
+        let card = data.gameState[player].hand[i];
         // create div
         const newDiv = document.createElement("div");
         newDiv.classList.add("unit-card-vertical-component");
@@ -227,7 +260,7 @@ const load = async (data) => {
           affiliationData: data.affiliations,
           positionData: data.positions,
         });
-        // drag
+        // drag and drop
         if (player === "opponent") continue;
         newDiv.addEventListener("mousedown", (event) => {
           if (event.button !== 0) return; // left click
@@ -249,6 +282,8 @@ const load = async (data) => {
           dropZones.forEach((zone) => {
             if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
           });
+          // save card id
+          draggedCardHandId = i;
           // events
           const onMouseMove = (event) => {
             cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
@@ -330,21 +365,6 @@ const load = async (data) => {
         shinsuCircles[i].classList.add("available");
       for (let i = maxNormalShinsu + shinsu.recharged; i < maxNormalShinsu + maxRechargedShinsu; i++)
         shinsuCircles[i].classList.add("spent");
-      // tooltips
-      const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
-      await addTooltip(
-        shinsuContainer,
-        normalContainer,
-        "Shinsu",
-        "The resource that lets you play cards and use certain abilities"
-      );
-      const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
-      await addTooltip(
-        shinsuContainer,
-        rechargedContainer,
-        "Recharged Shinsu",
-        "The shinsu that wasn't used last turn"
-      );
     }
   };
 
@@ -355,6 +375,7 @@ const load = async (data) => {
       usernameFrame.querySelector("h2").textContent = username;
       // turn
       if (username === data.gameState.currentTurn) usernameFrame.classList.add("current-turn");
+      else usernameFrame.classList.remove("current-turn");
     }
   };
 
@@ -369,7 +390,6 @@ const load = async (data) => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   let data = await prepareData();
-  prepareBoard(data);
 
   // debugging
   // addBorderToDivs();
@@ -383,18 +403,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     },
   });
   socket.on("game-init", async (initialState) => {
-    console.log("initialState: ", initialState);
+    // console.log("initialState: ", initialState);
     data.gameState = initialState;
     await load(data);
   });
   socket.on("game-update", async (newState) => {
-    console.log("newState: ", newState);
     data.gameState = newState;
+    // console.log(data.gameState.you.field);
     await load(data);
   });
   socket.on("game-error", async (errorMessage) => {
     console.error("errorMessage: ", errorMessage);
   });
+
+  await prepareBoard(data, socket);
 
   // for (let player of ["you", "opponent"]) {
   //   console.log(data.gameState[player].field);

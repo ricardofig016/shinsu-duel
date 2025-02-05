@@ -1,3 +1,5 @@
+import positions from "../data/positions.json" assert { type: "json" };
+
 export default class GameState {
   constructor(roomCode, config) {
     this.roomCode = roomCode;
@@ -58,7 +60,11 @@ export default class GameState {
   }
 
   #mapUnits(units) {
-    return units.map((unit) => ({ id: unit.id, traitCodes: unit.traitCodes }));
+    return units.map((unit) => ({
+      id: unit.id,
+      traitCodes: unit.traitCodes,
+      placedPositionCode: unit.placedPositionCode,
+    }));
   }
 
   #filterYouState(username) {
@@ -101,13 +107,33 @@ export default class GameState {
     };
   }
 
-  validateAction(action, username) {
-    // Implement your validation logic here
+  validateAction(actionData) {
+    // TODO
     return true;
   }
 
-  processAction(action) {
-    // Implement your game logic here
-    this.actions.push(action);
+  processAction(actionData) {
+    const player = this.state.players[actionData.username];
+
+    const deployUnit = () => {
+      const [card] = player.hand.splice(actionData.handId, 1);
+      card.placedPositionCode = actionData.placedPositionCode;
+      const line = player.field[positions[card.placedPositionCode].line];
+      line.push(card);
+      // console.log("Deployed unit", card);
+    };
+
+    switch (actionData.type) {
+      case "deploy-unit":
+        deployUnit();
+        break;
+      case "end-turn":
+        endTurn();
+        break;
+      default:
+        console.log("Invalid action type");
+    }
+
+    this.actions.push(actionData);
   }
 }

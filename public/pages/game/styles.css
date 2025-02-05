@@ -47,7 +47,7 @@
   height: auto;
 }
 
-.deck-container,
+.deck-outer-container,
 .lighthouse-container,
 .hand-container {
   flex: 1;
@@ -55,9 +55,13 @@
   gap: 0;
 }
 
+.deck-outer-container {
+  flex: 0 0 55%;
+}
 .deck-container {
   position: relative;
-  flex: 0 0 55%;
+  width: 100%;
+  height: 100%;
 }
 
 .deck-card {
