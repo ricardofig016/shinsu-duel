@@ -1,4 +1,5 @@
 import positions from "../data/positions.json" assert { type: "json" };
+import cards from "../data/cards.json" assert { type: "json" };
 
 export default class GameState {
   VALID_ACTIONS = { "deploy-unit": ["handId", "placedPositionCode", "username"], "pass-turn": [] };
@@ -127,20 +128,42 @@ export default class GameState {
    * @returns true if action data is valid, throws an error otherwise.
    */
   #validateAction(data) {
+    // general checks
     if (!data || !data.type || !this.VALID_ACTIONS[data.type]) {
       throw new Error("Invalid action type: " + JSON.stringify(data));
     }
-
     if (!data.username || !this.state.players[data.username]) {
       throw new Error("Invalid username in action data: " + JSON.stringify(data));
     }
-
     if (!this.VALID_ACTIONS[data.type].every((field) => field in data)) {
       throw new Error("Missing fields in action data: " + JSON.stringify(data));
     }
-
     if (data.username !== this.currentTurn) {
       throw new Error("It's not your turn: " + data.username);
+    }
+
+    // specific checks
+    if (data.type === "deploy-unit") {
+      this.#validateDeployUnitAction(data);
+    }
+
+    return true;
+  }
+
+  #validateDeployUnitAction(data) {
+    if (data.handId < 0 || data.handId >= this.state.players[data.username].hand.length) {
+      throw new Error("Invalid handId: " + data.handId);
+    }
+    if (!positions[data.placedPositionCode]) {
+      throw new Error("Invalid placedPositionCode: " + data.placedPositionCode);
+    }
+    const card = this.state.players[data.username].hand[data.handId];
+    console.log("Card: " + JSON.stringify(card));
+    if (!card || !card.id) {
+      throw new Error("Card not found in hand: " + JSON.stringify(card));
+    }
+    if (!cards[card.id].positionCodes.includes(data.placedPositionCode)) {
+      throw new Error("Card cannot be placed in this position: " + data.placedPositionCode);
     }
 
     return true;
