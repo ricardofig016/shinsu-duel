@@ -414,6 +414,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   socket.on("game-error", async (errorMessage) => {
     console.error("errorMessage: ", errorMessage);
+    alert(`Error: ${errorMessage}`);
   });
 
   await prepareBoard(data, socket);

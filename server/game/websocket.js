@@ -19,7 +19,12 @@ export function initializeGameWebSocket(io) {
 
     const roomSockets = io.of("/game").adapter.rooms.get(roomCode) || new Set();
     if (!activeGames.has(roomCode)) {
-      // if (roomSockets.size < 2) return; // TODO: uncomment this line
+      if (roomSockets.size < 2) return; // comment this line to allow starting games with 1 player, for easier testing environment
+      if (roomSockets.size > 2) {
+        socket.emit("game-error", "Too many players in the room.");
+        socket.disconnect(true);
+        return;
+      }
       activeGames.set(roomCode, new GameState(roomCode, rooms[roomCode]));
     }
     const game = activeGames.get(roomCode);
@@ -31,12 +36,11 @@ export function initializeGameWebSocket(io) {
     socket.on("game-action", (actionData) => {
       try {
         actionData.username = username;
-        if (game.validateAction(actionData)) {
-          game.processAction(actionData);
-          broadcast(io, roomCode, "game-update", (playerSocket) =>
-            game.getClientState(playerSocket.request.session.username)
-          );
-        }
+        console.log("actionData", actionData);
+        game.processAction(actionData);
+        broadcast(io, roomCode, "game-update", (playerSocket) =>
+          game.getClientState(playerSocket.request.session.username)
+        );
       } catch (error) {
         socket.emit("game-error", error.message);
       }

@@ -1,10 +1,19 @@
 import positions from "../data/positions.json" assert { type: "json" };
 
 export default class GameState {
+  VALID_ACTIONS = { "deploy-unit": ["handId", "placedPositionCode", "username"], "pass-turn": [] };
+
   constructor(roomCode, config) {
+    if (!roomCode || !config || !config.players || config.players.length !== 2) {
+      throw new Error(
+        "Invalid game configuration: roomCode and players are required and must have exactly 2 players."
+      );
+    }
+
     this.roomCode = roomCode;
     this.players = config.players;
-    this.currentTurn = config.players[Math.floor(Math.random() * 2)];
+    this.roundTurn = config.players[Math.floor(Math.random() * 2)];
+    this.currentTurn = this.roundTurn;
     this.actions = [];
 
     // Initialize game state
@@ -51,14 +60,6 @@ export default class GameState {
     }
   }
 
-  getClientState(username) {
-    return {
-      you: this.#filterYouState(username),
-      opponent: this.#filterOpponentState(username),
-      currentTurn: this.currentTurn,
-    };
-  }
-
   #mapUnits(units) {
     return units.map((unit) => ({
       id: unit.id,
@@ -69,6 +70,11 @@ export default class GameState {
 
   #filterYouState(username) {
     const playerState = this.state.players[username];
+    if (!playerState) {
+      console.error(`Player state for ${username} not found.`);
+      console.error("Available players:", Object.keys(this.state.players));
+      return null;
+    }
     return {
       combatIndicatorCodes: playerState.combatIndicatorCodes,
       deck: { size: playerState.deck.size },
@@ -107,33 +113,85 @@ export default class GameState {
     };
   }
 
-  validateAction(actionData) {
-    // TODO
+  #flipCurrentTurn() {
+    this.currentTurn = this.players.find((p) => p !== this.currentTurn);
+  }
+
+  #flipRoundTurn() {
+    this.roundTurn = this.players.find((p) => p !== this.roundTurn);
+  }
+
+  getClientState(username) {
+    return {
+      you: this.#filterYouState(username),
+      opponent: this.#filterOpponentState(username),
+      currentTurn: this.currentTurn,
+    };
+  }
+
+  /**
+   * Validate the action data.
+   * @param {*} data
+   * @returns true if action data is valid, throws an error otherwise.
+   */
+  validateAction(data) {
+    if (!data || !data.type || !this.VALID_ACTIONS[data.type]) {
+      throw new Error("Invalid action type: " + JSON.stringify(data));
+    }
+
+    if (!data.username || !this.state.players[data.username]) {
+      throw new Error("Invalid username in action data: " + JSON.stringify(data));
+    }
+
+    if (!this.VALID_ACTIONS[data.type].every((field) => field in data)) {
+      throw new Error("Missing fields in action data: " + JSON.stringify(data));
+    }
+
+    if (data.username !== this.currentTurn) {
+      throw new Error("It's not your turn: " + data.username);
+    }
+
     return true;
   }
 
-  processAction(actionData) {
-    const player = this.state.players[actionData.username];
+  processAction(data) {
+    if (!this.validateAction(data)) return;
+
+    const player = this.state.players[data.username];
 
     const deployUnit = () => {
-      const [card] = player.hand.splice(actionData.handId, 1);
-      card.placedPositionCode = actionData.placedPositionCode;
+      const [card] = player.hand.splice(data.handId, 1);
+      card.placedPositionCode = data.placedPositionCode;
       const line = player.field[positions[card.placedPositionCode].line];
       line.push(card);
-      // console.log("Deployed unit", card);
+      endTurn();
     };
 
-    switch (actionData.type) {
+    const endTurn = () => {
+      this.#flipCurrentTurn();
+    };
+
+    const endRound = () => {
+      this.#flipRoundTurn();
+      this.currentTurn = this.roundTurn;
+    };
+
+    const passTurn = () => {
+      endTurn();
+      if (this.actions.length > 0 && this.actions[this.actions.length - 1].type === "pass-turn") endRound();
+    };
+
+    switch (data.type) {
       case "deploy-unit":
         deployUnit();
         break;
-      case "end-turn":
-        endTurn();
+      case "pass-turn":
+        passTurn();
         break;
       default:
-        console.log("Invalid action type");
+        console.log("Invalid action type: " + data.type);
     }
 
-    this.actions.push(actionData);
+    this.actions.push(data);
   }
 }
