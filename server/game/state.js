@@ -121,20 +121,12 @@ export default class GameState {
     this.roundTurn = this.players.find((p) => p !== this.roundTurn);
   }
 
-  getClientState(username) {
-    return {
-      you: this.#filterYouState(username),
-      opponent: this.#filterOpponentState(username),
-      currentTurn: this.currentTurn,
-    };
-  }
-
   /**
    * Validate the action data.
    * @param {*} data
    * @returns true if action data is valid, throws an error otherwise.
    */
-  validateAction(data) {
+  #validateAction(data) {
     if (!data || !data.type || !this.VALID_ACTIONS[data.type]) {
       throw new Error("Invalid action type: " + JSON.stringify(data));
     }
@@ -154,8 +146,16 @@ export default class GameState {
     return true;
   }
 
+  getClientState(username) {
+    return {
+      you: this.#filterYouState(username),
+      opponent: this.#filterOpponentState(username),
+      currentTurn: this.currentTurn,
+    };
+  }
+
   processAction(data) {
-    if (!this.validateAction(data)) return;
+    if (!this.#validateAction(data)) return;
 
     const player = this.state.players[data.username];
 
