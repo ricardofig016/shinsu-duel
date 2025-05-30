@@ -159,7 +159,7 @@ export default class GameState {
     }
     const card = this.state.players[data.username].hand[data.handId];
     console.log("Card: " + JSON.stringify(card));
-    if (!card || !card.id) {
+    if (!card || card.id === undefined || !cards[card.id]) {
       throw new Error("Card not found in hand: " + JSON.stringify(card));
     }
     if (!cards[card.id].positionCodes.includes(data.placedPositionCode)) {
