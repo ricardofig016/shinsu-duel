@@ -154,6 +154,14 @@ const prepareBoard = async (data, socket) => {
       lineContainer.appendChild(dropZoneContainer);
     }
   }
+
+  // pass button
+  const passButtonFrame = document.querySelector(`#you-container .pass-button-frame`);
+  passButtonFrame.addEventListener("click", () => {
+    socket.emit("game-action", {
+      type: "pass-turn",
+    });
+  });
 };
 
 const load = async (data) => {
@@ -343,7 +351,7 @@ const load = async (data) => {
       });
     };
     setTimeout(alignCards, 0);
-    setTimeout(alignCards, 200); // very rarelly the cards dont align late enough
+    setTimeout(alignCards, 300); // very rarelly the cards dont align late enough
     window.addEventListener("resize", alignCards);
   };
 
@@ -351,31 +359,38 @@ const load = async (data) => {
     const maxNormalShinsu = 10;
     const maxRechargedShinsu = 2;
     for (let player of ["you", "opponent"]) {
-      const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
       const shinsu = data.gameState[player].shinsu;
-      // normal shinsu
+      const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
       let shinsuCircles = Array.from(shinsuContainer.querySelectorAll(".shinsu-circle"));
+      // reset classes
+      shinsuCircles.forEach((c) => c.classList.remove("available", "spent", "unavailable"));
+      // normal shinsu
       for (let i = 0; i < shinsu.normalAvailable; i++) shinsuCircles[i].classList.add("available");
       for (let i = shinsu.normalAvailable; i < shinsu.normalAvailable + shinsu.normalSpent; i++)
         shinsuCircles[i].classList.add("spent");
       for (let i = shinsu.normalAvailable + shinsu.normalSpent; i < maxNormalShinsu; i++)
         shinsuCircles[i].classList.add("unavailable");
       // recharged shinsu
-      for (let i = maxNormalShinsu; i < maxNormalShinsu + shinsu.recharged; i++)
-        shinsuCircles[i].classList.add("available");
+      for (let i = maxNormalShinsu; i < maxNormalShinsu + shinsu.recharged; i++) {
+        try {
+          shinsuCircles[i].classList.add("available");
+        } catch (error) {
+          console.log("shinsu.recharged", shinsu.recharged);
+        }
+      }
       for (let i = maxNormalShinsu + shinsu.recharged; i < maxNormalShinsu + maxRechargedShinsu; i++)
         shinsuCircles[i].classList.add("spent");
     }
   };
 
-  const loadUsernames = async () => {
+  const loadPassButton = async () => {
     for (let player of ["you", "opponent"]) {
-      const usernameFrame = document.querySelector(`#${player}-container .username-frame`);
-      const username = data.gameState[player].username;
-      usernameFrame.querySelector("h2").textContent = username;
+      const passButtonFrame = document.querySelector(`#${player}-container .pass-button-frame`);
+      passButtonFrame.querySelector("h2").textContent = data.gameState[player].passButton.text;
       // turn
-      if (username === data.gameState.currentTurn) usernameFrame.classList.add("current-turn");
-      else usernameFrame.classList.remove("current-turn");
+      if (data.gameState[player].username === data.gameState.currentTurn)
+        passButtonFrame.classList.add("current-turn");
+      else passButtonFrame.classList.remove("current-turn");
     }
   };
 
@@ -385,7 +400,7 @@ const load = async (data) => {
   await loadFields();
   await loadHands();
   await loadShinsu();
-  await loadUsernames();
+  await loadPassButton();
 };
 
 document.addEventListener("DOMContentLoaded", async () => {

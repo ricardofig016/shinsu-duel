@@ -17,8 +17,11 @@ export function initializeGameWebSocket(io) {
 
     socket.join(roomCode);
 
-    const roomSockets = io.of("/game").adapter.rooms.get(roomCode) || new Set();
-    if (!activeGames.has(roomCode)) {
+    if (activeGames.has(roomCode)) {
+      const game = activeGames.get(roomCode);
+      socket.emit("game-update", game.getClientState(username));
+    } else {
+      const roomSockets = io.of("/game").adapter.rooms.get(roomCode) || new Set();
       if (roomSockets.size > 2) {
         socket.emit("game-error", "Too many players in the room.");
         socket.disconnect(true);
@@ -38,7 +41,7 @@ export function initializeGameWebSocket(io) {
       const game = activeGames.get(roomCode);
       if (!game) socket.emit("game-error", "Game has not started yet.");
       try {
-        actionData.username = username;
+        actionData.username = username; // always add username to action data
         game.processAction(actionData);
         broadcast(io, roomCode, "game-update", (playerSocket) =>
           game.getClientState(playerSocket.request.session.username)

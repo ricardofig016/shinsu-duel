@@ -162,7 +162,7 @@
   z-index: 2;
 }
 
-.shinsu-username-container {
+.shinsu-pass-button-container {
   flex: 1;
   width: 100%;
   justify-content: center;
@@ -197,7 +197,7 @@
   background-color: black;
 }
 
-.username-frame {
+.pass-button-frame {
   flex: 1;
   max-width: 35%;
   padding: 0.4rem;
@@ -205,16 +205,16 @@
   background-size: cover;
   background-position: center;
 }
-.username-frame.current-turn {
+.pass-button-frame.current-turn {
   background-image: url("/assets/images/card/frame.png");
 }
-.username-container {
+.pass-button-container {
   background-size: cover;
   background-position: center;
   background-image: url("/assets/images/card/background.png");
   border-radius: 1rem;
 }
-.username-container h2 {
+.pass-button-container h2 {
   margin: 0;
   padding: 1rem 0;
   color: white;
