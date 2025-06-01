@@ -2,8 +2,11 @@ import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
 
 export default class GameState {
-  // all of the valid user actions and their required fields
-  VALID_ACTIONS = { "deploy-unit": ["handId", "placedPositionCode", "username"], "pass-turn": ["username"] };
+  // all of the valid actions the user can take and their required fields
+  VALID_USER_ACTIONS = {
+    "deploy-unit": ["handId", "placedPositionCode", "username"],
+    "pass-turn": ["username"],
+  };
   // game settings
   INIT_HAND_SIZE = 4;
   INIT_DECK_SIZE = 30;
@@ -166,8 +169,7 @@ export default class GameState {
     this.round++;
     this.#resetShinsu(this.players);
     this.#draw(this.players, this.PER_ROUND_DRAW_AMOUNT);
-    this.#logAction({ type: "end-round", round: this.round }); // TODO: THERE IS A BUG AROUND HERE
-    console.log(`action: Round ${this.round} ended.`);
+    this.#logAction({ type: "end-round", round: this.round });
   }
 
   /**
@@ -195,13 +197,13 @@ export default class GameState {
    */
   #validateAction(data) {
     // general checks
-    if (!data || !data.type || !this.VALID_ACTIONS[data.type]) {
+    if (!data || !data.type || !this.VALID_USER_ACTIONS[data.type]) {
       throw new Error("Invalid action type: " + JSON.stringify(data));
     }
     if (!data.username || !this.state.players[data.username]) {
       throw new Error("Invalid username in action data: " + JSON.stringify(data));
     }
-    if (!this.VALID_ACTIONS[data.type].every((field) => field in data)) {
+    if (!this.VALID_USER_ACTIONS[data.type].every((field) => field in data)) {
       throw new Error("Missing fields in action data: " + JSON.stringify(data));
     }
     if (data.username !== this.currentTurn) {
