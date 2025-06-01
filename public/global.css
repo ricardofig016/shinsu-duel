@@ -47,6 +47,10 @@ h1 {
   font-weight: normal;
 }
 
+.allow-scroll {
+  overflow-y: auto;
+}
+
 .hidden {
   display: none !important;
 }
