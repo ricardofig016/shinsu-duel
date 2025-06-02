@@ -25,8 +25,7 @@ export default class GameState {
     this.roomCode = roomCode;
     this.players = config.players;
     this.round = 1;
-    this.roundTurn = config.players[Math.floor(Math.random() * 2)];
-    this.currentTurn = this.roundTurn;
+    this.currentTurn = config.players[Math.floor(Math.random() * 2)];
     this.actionLog = [];
 
     // initialize game state
@@ -167,9 +166,10 @@ export default class GameState {
     this.currentTurn = this.players.find((p) => p !== this.currentTurn);
   }
 
+  /**
+   * End the current round. This method does not flip the turn.
+   */
   #endRound() {
-    this.roundTurn = this.players.find((p) => p !== this.roundTurn);
-    this.currentTurn = this.roundTurn;
     this.round++;
     this.#resetShinsu(this.players);
     this.#draw(this.players, this.PER_ROUND_DRAW_AMOUNT);
