@@ -222,11 +222,15 @@ const load = async (data) => {
         const lineContainer = document.querySelector(`#${player}-container .${line}-container`);
         const existingDivs = lineContainer.querySelectorAll(".unit-card-horizontal-component");
         existingDivs.forEach((div) => div.remove());
-        for (let card of data.gameState[player].field[line]) {
+        // we reverse the order of the cards in the line beacuse we're going to prepend them to the container,
+        // this is because we need to keep the position drop zones at the end of the line
+        const lineCards = [...data.gameState[player].field[line]].reverse();
+        for (let card of lineCards) {
           // create div
           const newDiv = document.createElement("div");
           newDiv.classList.add("unit-card-horizontal-component");
-          lineContainer.appendChild(newDiv);
+          // add div to the beggining of the line container
+          lineContainer.prepend(newDiv);
           // load card component
           await loadComponent(newDiv, "unit-card-horizontal", {
             id: card.id,
