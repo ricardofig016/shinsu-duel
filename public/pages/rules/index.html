@@ -14,80 +14,36 @@
     <div class="allow-scroll" id="rules-container">
       <h1 id="shinsu-duel-a-tower-of-god-ccg">Shinsu Duel: A Tower of God CCG</h1>
 
-      <p>
-        Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's <em>Tower of God</em>. The game
-        offers both Player vs. Player (PvP) and Campaign (PvE) modes. Players strategize by building decks,
-        deploying units, and using abilities to destroy their opponent's lighthouses while protecting their
-        own.
-      </p>
-
       <h2 id="table-of-contents">Table of Contents</h2>
       <ol>
         <li><a href="#shinsu-duel-a-tower-of-god-ccg">Shinsu Duel: A Tower of God CCG</a></li>
         <li><a href="#table-of-contents">Table of Contents</a></li>
         <li><a href="#overview">Overview</a></li>
-        <li>
-          <a href="#card-types">Card Types</a>
-          <ol>
-            <li><a href="#unit-cards">Unit Cards</a></li>
-            <li><a href="#support-cards">Support Cards</a></li>
-          </ol>
-        </li>
-        <li><a href="#objective">Objective</a></li>
-        <li>
-          <a href="#resources">Resources</a>
-          <ol>
-            <li><a href="#shinsu">Shinsu</a></li>
-            <li><a href="#lighthouses">Lighthouses</a></li>
-          </ol>
-        </li>
-        <li><a href="#board-layout">Board Layout</a></li>
-        <li>
-          <a href="#gameplay">Gameplay</a>
-          <ol>
-            <li><a href="#turn-phases">Turn Phases</a></li>
-            <li><a href="#actions-and-free-actions">Actions and Free Actions</a></li>
-            <li><a href="#round-end-and-priority-token">Round End and Priority Token</a></li>
-          </ol>
-        </li>
-        <li>
-          <a href="#card-mechanics">Card Mechanics</a>
-          <ol>
-            <li><a href="#unit-cards-mechanics">Unit Cards Mechanics</a></li>
-            <li><a href="#support-cards-mechanics">Support Cards Mechanics</a></li>
-          </ol>
-        </li>
-        <li><a href="#deck-building-rules">Deck Building Rules</a></li>
-        <li>
-          <a href="#vocabulary">Vocabulary</a>
-          <ol>
-            <li><a href="#list-of-keywords">List of Keywords</a></li>
-            <li><a href="#traits">Traits</a></li>
-            <li><a href="#list-of-affiliations">List of Affiliations</a></li>
-          </ol>
-        </li>
-        <li>
-          <a href="#future-features">Future Features</a>
-          <ol>
-            <li><a href="#team-leader">Team Leader</a></li>
-            <li><a href="#evolution">Evolution</a></li>
-          </ol>
-        </li>
       </ol>
 
       <h2 id="overview">Overview</h2>
       <p>
-        Shinsu Duel is a tactical card game where players compete to destroy each other's
-        <strong>lighthouses</strong>. Players use <strong>unit cards</strong> to attack, defend, and control
-        the battlefield, while <strong>support cards</strong> provide additional strategic depth. The game is
-        inspired by the lore, characters, and objects from <em>Tower of God</em>.
+        Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's
+        <em><a href="https://www.webtoons.com/en/fantasy/tower-of-god/list?title_no=95">Tower of God</a></em
+        >. The game offers both Player vs. Player (PvP) and Campaign (PvE) modes. Players strategize by
+        building decks, deploying units, and using abilities to destroy their opponent's lighthouses while
+        protecting their own.
+      </p>
+
+      <h2 id="objective">Objective</h2>
+      <p>
+        The primary objective is to <strong>destroy the opponent's lighthouses</strong>. Each lighthouse
+        represents one point of the player's HP. A player loses when they have <strong>0 lighthouses</strong>.
       </p>
 
       <h2 id="card-types">Card Types</h2>
-
+      <p>
+        There are several types of cards in Shinsu Duel, each serving a unique purpose. None of the cards
+        represent how strong a character, weapon, or ability is in the original webtoon, to maintain game
+        balance and encourage diverse strategies.
+      </p>
       <h3 id="unit-cards">Unit Cards</h3>
-      <p>Unit cards represent characters from <em>Tower of God</em> (e.g., Zahard, Rak, Urek, Prince).</p>
-      <p><strong>Key Features</strong>:</p>
+      <p>Represent characters from <em>Tower of God</em> and are the main focus of the game.</p>
       <ol>
         <li>Can be deployed to the battlefield</li>
         <li>Have stats like HP and shinsu cost</li>
@@ -95,42 +51,53 @@
         <li>Have traits and affiliations</li>
         <li>Can only target backline enemies when the enemy frontline is empty</li>
         <li>Can only target the lighthouses when the enemy board is empty</li>
+        <li>
+          <strong>Shinheuh</strong>
+          <!-- Review this from notes on old notebook -->
+          <p>Are special units</p>
+          <ol>
+            <li>can only be summoned by animas</li>
+          </ol>
+        </li>
       </ol>
-
-      <h3 id="support-cards">Support Cards</h3>
-      <p>Represent objects, spells, effects, and other elements from the webtoon.</p>
-      <p><strong>Subtypes</strong>:</p>
+      <h3 id="consumables">Consumables</h3>
+      <p>Items that can be used once to provide a specific effect.</p>
       <ol>
-        <li><strong>Equipment</strong> (e.g., Green April, Androssi's Shield, Zahard's Ring)</li>
-        <li><strong>Spells</strong> (e.g., Ignition spells)</li>
-        <li><strong>Consumables</strong> (e.g., Lightning Pill)</li>
+        <li>May target specific units, all units, or no units</li>
+        <li>Playing a consumable ends the turn</li>
+        <li>e.g.: Lightning Pill, Shinsu Pill, Ignition spells</li>
       </ol>
-      <p>
-        Typically used to enhance or evolve units, manipulate the battlefield, or provide other strategic
-        advantages.
-      </p>
-
-      <h2 id="objective">Objective</h2>
-      <p>
-        The primary objective is to <strong>destroy the opponent's lighthouses</strong>. Each lighthouse
-        represents one point of the player's nexus HP. A player loses when they have
-        <strong>0 lighthouses</strong>.
-      </p>
+      <h3 id="equipment">Equipment</h3>
+      <p>Items that can be attached to allied units to enhance their stats or provide other benefits.</p>
+      <ol>
+        <li>Can be applied to a deployed allied unit</li>
+        <li>Provide buffs or special abilities</li>
+        <li>Can't be removed from the unit</li>
+        <li>Once the unit dies, the equipment returns to hand</li>
+        <li>Equipping an ally ends the turn</li>
+        <li>e.g.: Green April, Androssi's Shield, Zahard's Ring</li>
+      </ol>
+      <h3 id="landmarks">Landmarks</h3>
+      <p>Represent significant locations from <em>Tower of God</em>.</p>
+      <ol>
+        <!--Review this from notes on old notebook-->
+        <li>Each player can only have 1 landmark on the battlefield at a time</li>
+        <li>Provide passive or active effects on the whole battlefield while they are deployed</li>
+        <li>If the player plays another landmark, the previous one is destroyed and replaced</li>
+        <li>e.g.: Hidden Floor, Hell Train, The Workshop</li>
+      </ol>
 
       <h2 id="game-resources">Resources</h2>
 
       <h3 id="shinsu">Shinsu</h3>
       <ol>
-        <li>The resource required to play cards</li>
-        <li>
-          <strong>Recharge Rules</strong>:
-          <ol>
-            <li>Players start with 1 shinsu in round 1</li>
-            <li>Shinsu increases by 1 per round until round 10 (maximum of 10 shinsu per round)</li>
-            <li>Up to 2 unspent shinsu can be recharged and used next round</li>
-            <li><strong>Maximum Shinsu Cap</strong>: 12 (10 round shinsu + 2 recharged shinsu)</li>
-          </ol>
-        </li>
+        <li>The resource required to play all cards</li>
+        <li>Players start with 1 shinsu in round 1</li>
+        <li>Shinsu increases by 1 per round until round 10 (maximum of 10 shinsu per round)</li>
+        <li>After round 10, Shinsu remains at 10 per round</li>
+        <li>Up to 2 unspent shinsu can be recharged and used next round</li>
+        <li>The maximum shinsu a player can have in a round is 12 (10 normal shinsu + 2 recharged shinsu)</li>
+        <li>Abilities (mainly powerful ones) may also cost shinsu</li>
       </ol>
 
       <h3 id="lighthouses">Lighthouses</h3>
@@ -140,146 +107,105 @@
         <li>Losing all lighthouses ends the game</li>
       </ol>
 
-      <h2 id="board-layout">Board Layout</h2>
-      <p>The board is divided into:</p>
+      <h2 id="board">Board</h2>
+      <p>The board is divided into different areas for each player.</p>
       <ol>
+        <li>Hand</li>
+        <li>Deck</li>
+        <li>Lighthouses</li>
+        <li>Shinsu</li>
         <li>
-          <strong>Player Side</strong>:
+          Battlefield
           <ol>
-            <li>Hand (cards currently held)</li>
-            <li>Deck (remaining cards)</li>
-            <li>Lighthouse area (indicating nexus HP)</li>
-            <li>Shinsu counter (current shinsu)</li>
-          </ol>
-        </li>
-        <li>
-          <strong>Battlefield</strong>:
-          <ol>
-            <li>
-              Divided into <strong>Frontline</strong> and <strong>Backline</strong> for each player
-              <ol>
-                <li><strong>Frontline</strong>: Fisherman, Scout, Wave Controller</li>
-                <li><strong>Backline</strong>: Spear Bearer, Light Bearer</li>
-              </ol>
-            </li>
+            <li>Frontline: Fisherman, Scout, Wave Controller</li>
+            <li>Backline: Spear Bearer, Light Bearer</li>
           </ol>
         </li>
       </ol>
 
       <h2 id="gameplay">Gameplay</h2>
 
-      <h3 id="turn-phases">Turn Phases</h3>
+      <h3 id="round-phases">Round Phases</h3>
       <ol>
         <li>
-          <strong>Start of Round</strong>:
+          <strong>Start of Round</strong>
           <ol>
             <li>Shinsu recharges</li>
             <li>Each player draws one card</li>
           </ol>
         </li>
         <li>
-          <strong>Player Turns</strong>:
+          <strong>Player Turns</strong>
           <ol>
             <li>Players alternate actions</li>
-            <li>Actions include playing cards, using abilities, or repositioning units</li>
+            <li>Each action is a turn</li>
           </ol>
         </li>
         <li>
-          <strong>Round End</strong>:
+          <strong>Round End</strong>
           <ol>
             <li>Both players must pass consecutively to end the round</li>
           </ol>
         </li>
       </ol>
 
-      <h3 id="actions-and-free-actions">Actions and Free Actions</h3>
+      <h3 id="actions">Actions</h3>
+      <p>Players can perform one of the following actions during their turn:</p>
       <ol>
-        <li>
-          <strong>Actions</strong>:
-          <ol>
-            <li>Play a card</li>
-            <li>Use an ability</li>
-            <li>Change a unit's position</li>
-            <li>Pass the turn</li>
-          </ol>
-        </li>
-        <li>
-          <strong>Free Actions</strong> (do not end the turn):
-          <ol>
-            <li>Remove equipment from a unit</li>
-            <li>Play a "fast" support card</li>
-            <li>Use a "fast" ability</li>
-          </ol>
-        </li>
-      </ol>
-
-      <h3 id="round-end-and-priority-token">Round End and Priority Token</h3>
-      <ol>
-        <li>The player with the <strong>priority token</strong> starts the round</li>
-        <li>At the end of a round, the priority token passes to the other player</li>
+        <li>Play a card</li>
+        <li>Use an ability</li>
+        <li>Pass the turn</li>
       </ol>
 
       <h2 id="card-mechanics">Card Mechanics</h2>
 
-      <h3 id="unit-cards-mechanics">Unit Cards Mechanics</h3>
+      <h3>Unit Cards</h3>
       <ol>
         <li>
-          <strong>Stats</strong>:
+          Stats
           <ol>
-            <li>Shinsu Cost (top-left circle)</li>
+            <li>Shinsu Cost (blue circle)</li>
             <li>HP (heart icon)</li>
           </ol>
         </li>
-        <li>
-          <strong>Abilities</strong>:
-          <ol>
-            <li>Active abilities</li>
-            <li>Passive effects (always active)</li>
-          </ol>
-        </li>
+        <li>Abilities (below the art)</li>
+        <li>Passive (top-right)</li>
         <li>
           <strong>Positions</strong> indicate where units can be deployed on the field. Each position
-          generally has a role on the team:
+          generally has a role on the team.
           <ol>
             <li><strong>Fisherman</strong>: tank damage and deal damage</li>
             <li>
               <strong>Light Bearer</strong>: provide support in the form of utility, buffs and lighthouses
             </li>
             <li>
-              <strong>Scout</strong>: provide support in the form of debuffs, damaging protected enemy units
-              and interfere with enemy synergy
+              <strong>Scout</strong>: provide support in the form of enemy debuffs, damaging protected enemy
+              units and interfere with enemy synergy
             </li>
             <li><strong>Spear Bearer</strong>: deal massive amounts of damage</li>
             <li>
-              <strong>Wave Controller</strong>: deal area damage and provide shinsu related support and shinsu
-              related debuffs
+              <strong>Wave Controller</strong>: deal area damage and provide support in the form of shinsu
+              buffs and debuffs
             </li>
           </ol>
         </li>
         <li><strong>Traits and Affiliations</strong>: Additional modifiers and synergies</li>
       </ol>
 
-      <h3 id="support-cards-mechanics">Support Cards Mechanics</h3>
+      <h3>Consumables, Equipment and Landmarks</h3>
       <ol>
-        <li>Simpler structure compared to unit cards</li>
-        <li>
-          <strong>Key Features</strong>:
-          <ol>
-            <li>Background and rarity border</li>
-            <li>Shinsu cost</li>
-            <li>Effects vary based on subtype</li>
-          </ol>
-        </li>
+        <li>Shinsu cost</li>
+        <li>Effect description</li>
       </ol>
 
       <h2 id="deck-building-rules">Deck Building Rules</h2>
       <ol>
-        <li>Decks must contain <strong>exactly 20 cards</strong></li>
+        <li>Decks must contain <strong>exactly 30 cards</strong></li>
         <li>Players may include a maximum of <strong>3 copies of the same card</strong></li>
         <li>
           <strong>Starting Hand</strong>:
           <ol>
-            <li>Players draw 5 cards and may mulligan any number of them</li>
+            <li>Players draw 4 cards</li>
           </ol>
         </li>
       </ol>
@@ -289,8 +215,8 @@
       <h3 id="list-of-keywords">List of Keywords</h3>
       <ol>
         <li><strong>Cleanse</strong>: Remove every negative trait</li>
-        <li><strong>Destroy n</strong>: Remove n enemy lighthouses</li>
-        <li><strong>Fast</strong>: You can take another action after using this ability/spell</li>
+        <li><strong>Destroy n</strong>: Destroy n enemy lighthouses</li>
+        <li><strong>Fast</strong>: This ability/spell will not end your turn</li>
         <li><strong>Silence</strong>: Remove every positive trait</li>
         <li><strong>Spend n</strong>: Spend n shinsu to play this ability</li>
       </ol>
@@ -326,13 +252,13 @@
             <li>
               <strong>Negative</strong>:
               <ol>
-                <li><strong>Burned</strong>: I take 1 damage every round end</li>
-                <li><strong>Cursed</strong>: I take 1 damage when I use an ability</li>
+                <li><strong>Burned</strong>: Take 1 damage every turn end, until the end of the round</li>
+                <li><strong>Cursed</strong>: Take 1 damage when I use an ability</li>
                 <li><strong>Doomed</strong>: Die at the end of this round</li>
-                <li><strong>Exhausted</strong>: I deal -1 damage</li>
-                <li><strong>Ghost</strong>: Don't prevent the enemy from targeting what's behind me</li>
-                <li><strong>Heavy</strong>: Abilities that cost shinsu cost +1 shinsu</li>
-                <li><strong>Poisoned</strong>: Every turn end, take 1 damage</li>
+                <li><strong>Exhausted</strong>: Deal -1 damage</li>
+                <li><strong>Ghost</strong>: I don't prevent the enemy from targeting what's behind me</li>
+                <li><strong>Heavy</strong>: Abilities cost +1 shinsu</li>
+                <li><strong>Poisoned</strong>: Take 1 damage every round end</li>
                 <li><strong>Rooted</strong>: Can't switch positions</li>
                 <li><strong>Stunned</strong>: Can't use abilities</li>
                 <li><strong>Weak</strong>: Take +1 damage from all sources</li>
@@ -346,16 +272,16 @@
             <li>
               <strong>Positive</strong>:
               <ol>
-                <li>Defensive Buffs (<span class="positive-yellow">Yellow</span>)</li>
-                <li>Damage Buffs (<span class="positive-orange">Orange</span>)</li>
-                <li>Utility Buffs + HP Gain (<span class="positive-blue">Blue</span>)</li>
+                <li>Defensive Buffs (<span style="color: #ffff00">Yellow</span>)</li>
+                <li>Damage Buffs (<span style="color: #ffa500">Orange</span>)</li>
+                <li>Utility Buffs + HP Gain (<span style="color: #00ffff">Blue</span>)</li>
               </ol>
             </li>
             <li>
               <strong>Negative</strong>:
               <ol>
-                <li>Damage-Dealing Debuffs (<span class="negative-red">Red</span>)</li>
-                <li>Utility Debuffs (<span class="negative-purple">Purple</span>)</li>
+                <li>Damage-Dealing Debuffs (<span style="color: #ff0000">Red</span>)</li>
+                <li>Utility Debuffs (<span style="color: #aa00ff">Purple</span>)</li>
               </ol>
             </li>
           </ol>
@@ -364,8 +290,7 @@
 
       <h3 id="list-of-affiliations">List of Affiliations</h3>
       <ol>
-        <li>-</li>
-        <li>-</li>
+        <li>To be added</li>
       </ol>
 
       <h2 id="future-features">Future Features</h2>
@@ -383,8 +308,8 @@
       <ol>
         <li>Some units may evolve under specific conditions</li>
         <li>
-          Evolution improves a unit's stats and abilities (e.g., Khun Ran evolves when given the Lightning
-          Pill)
+          Evolution improves a unit's stats and abilities and changes its art (e.g., Khun Ran evolves when
+          given the Lightning Pill)
         </li>
       </ol>
     </div>
