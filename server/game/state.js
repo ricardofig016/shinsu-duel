@@ -60,11 +60,15 @@ export default class GameState {
    */
   #generateRandomDeck() {
     const maxCardId = Object.keys(cards).length - 1;
-    const deckCards = Array.from({ length: this.INIT_DECK_SIZE }, () => ({
-      id: Math.floor(Math.random() * (maxCardId + 1)),
-      traitCodes: [],
-      visible: false,
-    }));
+    const deckCards = Array.from({ length: this.INIT_DECK_SIZE }, () => {
+      const cardId = Math.floor(Math.random() * (maxCardId + 1));
+      const cardData = cards[cardId];
+      return {
+        id: cardId,
+        traitCodes: cardData.traitCodes,
+        visible: false,
+      };
+    });
     return { cards: deckCards, size: this.INIT_DECK_SIZE };
   }
 
