@@ -1,5 +1,5 @@
 import { readJsonFile } from "../utils/file-util.js";
-import GameState from "./state.js";
+import GameState from "./GameState.js";
 import { roomsFilePath } from "../routes/game.js";
 
 const activeGames = new Map();

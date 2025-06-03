@@ -1,6 +1,6 @@
 import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
-import EventBus from "./eventBus.js";
+import EventBus from "./EventBus.js";
 
 // mockup effect classes
 import TestConsoleLogOnTurnEnd from "./effects/triggered/TestConsoleLogOnTurnEnd.js";

@@ -7,6 +7,7 @@
 - [ ] add passives to cards (this is in the notebook)
 - [ ] update trait descriptions to follow the rules page
 - [ ] change GameState file name to the class name
+- [ ] add unit stat recalculation when sending game state data to users
 
 ## In Progress
 
