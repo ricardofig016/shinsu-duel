@@ -1,4 +1,6 @@
 export default class Logger {
+  DEBUGGER = true; // flag to print every log to console
+
   constructor(eventBus) {
     this.eventBus = eventBus;
     this.logs = [];
@@ -17,6 +19,7 @@ export default class Logger {
       type: eventName,
       payload: JSON.parse(JSON.stringify(payload)),
     });
+    this.DEBUGGER && console.log(this.getLastLog() + "\n");
   }
 
   logAction(action) {
@@ -25,6 +28,7 @@ export default class Logger {
       type: "UserAction",
       payload: JSON.parse(JSON.stringify(action)),
     });
+    this.DEBUGGER && console.log(this.getLastLog() + "\n");
   }
 
   getLogs() {

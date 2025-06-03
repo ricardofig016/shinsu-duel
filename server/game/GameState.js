@@ -372,7 +372,6 @@ export default class GameState {
   processAction(data) {
     this.#validateAction(data); // if the action is invalid, this method will throw an error
     this.logger.logAction(data);
-    console.log(this.logger.getLastLog());
     // reset the flag if the user did not pass their turn
     if (data.type !== "pass-turn") this.roundEndOnTurnEnd = false;
     switch (data.type) {
