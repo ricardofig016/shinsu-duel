@@ -1,11 +1,8 @@
 import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
 import EventBus from "./EventBus.js";
+import effectRegistry from "./effectRegistry.js";
 import Logger from "./Logger.js";
-
-// mockup effect classes
-import TestConsoleLogOnTurnEnd from "./effects/triggered/TestConsoleLogOnTurnEnd.js";
-import TestConsoleLogOnTurnEndUntilRoundEnd from "./effects/continuous/TestConsoleLogOnTurnEndUntilRoundEnd.js";
 
 export default class GameState {
   // all of the valid actions the user can take and their required fields
@@ -46,8 +43,8 @@ export default class GameState {
     this.#resetShinsu(this.usernames);
 
     // add mockup effects
-    // this.#addEffect(new TestConsoleLogOnTurnEnd(this));
-    // this.#addEffect(new TestConsoleLogOnTurnEndUntilRoundEnd(this));
+    this.#addEffect("test-console-log-on-turn-end");
+    this.#addEffect("test-console-log-on-turn-end-until-round-end");
 
     // publish initial game events
     this.eventBus.publish("OnGameStart", this.playerStates);
@@ -327,8 +324,11 @@ export default class GameState {
     player.shinsu.normalSpent += cost - deductedRechargedShinsu;
   }
 
-  #addEffect(effectInstance) {
-    this.activeEffects.push(effectInstance);
+  #addEffect(effectId) {
+    const EffectClass = effectRegistry[effectId];
+    if (!EffectClass) throw new Error(`No effect found for id ${effectId}`);
+    const instance = new EffectClass(this); // TODO: add more info here in the future (like source, owner, etc)
+    this.activeEffects.push(instance);
   }
 
   #deployUnit(username, handId, placedPositionCode) {
