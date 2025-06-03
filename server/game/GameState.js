@@ -1,6 +1,7 @@
 import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
 import EventBus from "./EventBus.js";
+import Logger from "./Logger.js";
 
 // mockup effect classes
 import TestConsoleLogOnTurnEnd from "./effects/triggered/TestConsoleLogOnTurnEnd.js";
@@ -28,12 +29,13 @@ export default class GameState {
     }
 
     this.eventBus = new EventBus();
+    this.logger = new Logger(this.eventBus);
     this.activeEffects = [];
     this.roomCode = roomCode;
     this.usernames = config.usernames;
     this.round = 1;
     this.currentTurn = this.usernames[Math.floor(Math.random() * 2)]; // randomly select the first player
-    this.actionLog = [];
+    this.roundEndOnTurnEnd = false; // whether the last user action was a pass and it was on the current round
 
     // initialize game state
     this.playerStates = {
@@ -44,8 +46,8 @@ export default class GameState {
     this.#resetShinsu(this.usernames);
 
     // add mockup effects
-    this.#addEffect(new TestConsoleLogOnTurnEnd(this));
-    this.#addEffect(new TestConsoleLogOnTurnEndUntilRoundEnd(this));
+    // this.#addEffect(new TestConsoleLogOnTurnEnd(this));
+    // this.#addEffect(new TestConsoleLogOnTurnEndUntilRoundEnd(this));
 
     // publish initial game events
     this.eventBus.publish("OnGameStart", this.playerStates);
@@ -123,11 +125,15 @@ export default class GameState {
     }
 
     let passButtonText = username;
-    if (username === this.currentTurn)
-      passButtonText =
-        this.actionLog.length > 0 && this.actionLog[this.actionLog.length - 1].type === "pass-turn"
-          ? "End Round" // if the previous opponent passed, passing will end the round. we inform the player about this
-          : "Pass Turn";
+    if (username === this.currentTurn) {
+      const previousUserAction = this.logger
+        .getLogs()
+        .reverse()
+        .find((log) => log.type === "UserAction");
+      // if the previous opponent passed in the current round, passing will end the round
+      // we inform the player of this
+      passButtonText = this.roundEndOnTurnEnd ? "End Round" : "Pass Turn";
+    }
 
     return {
       combatIndicatorCodes: player.combatIndicatorCodes,
@@ -182,11 +188,17 @@ export default class GameState {
     };
   }
 
-  #endTurn() {
+  #endTurn(isUserAction = false) {
     this.eventBus.publish("OnTurnEnd", {
       username: this.currentTurn,
       round: this.round,
     });
+    if (isUserAction) {
+      // end the round if both players passed their turn consecutively
+      if (this.roundEndOnTurnEnd) this.#endRound();
+      else this.roundEndOnTurnEnd = true; // set the flag to true for the next turn
+    }
+    // flip turn to the next player
     this.currentTurn = this.usernames.find((p) => p !== this.currentTurn);
     this.eventBus.publish("OnTurnStart", {
       username: this.currentTurn,
@@ -205,7 +217,7 @@ export default class GameState {
     this.round++;
     this.#resetShinsu(this.usernames);
     this.#draw(this.usernames, this.PER_ROUND_DRAW_AMOUNT);
-    this.#logAction({ type: "end-round", round: this.round });
+    this.roundEndOnTurnEnd = false; // reset the flag for the next round
     this.eventBus.publish("OnRoundStart", {
       username: this.currentTurn,
       round: this.round,
@@ -221,7 +233,7 @@ export default class GameState {
     usernames.forEach((username) => {
       const player = this.playerStates[username];
       if (player) {
-        const unspentShinsu = player.shinsu.recharged + player.shinsu.normalAvailable;
+        const unspentShinsu = player.shinsu.recharged + player.shinsu.normalAvailable || 0;
         player.shinsu = {
           normalSpent: 0,
           normalAvailable: Math.min(this.MAX_NORMAL_SHINSU, this.round),
@@ -315,12 +327,26 @@ export default class GameState {
     player.shinsu.normalSpent += cost - deductedRechargedShinsu;
   }
 
-  #logAction(action) {
-    this.actionLog.push(action);
-  }
-
   #addEffect(effectInstance) {
     this.activeEffects.push(effectInstance);
+  }
+
+  #deployUnit(username, handId, placedPositionCode) {
+    const player = this.playerStates[username];
+    const [card] = player.hand.splice(handId, 1); // remove card from hand
+    card.placedPositionCode = placedPositionCode; // set position
+    const line = player.field[positions[card.placedPositionCode].line];
+    line.push(card); // add card to the field
+    this.#spendShinsu(username, cards[card.id].cost); // update shinsu
+    this.eventBus.publish("OnDeployUnit", {
+      username,
+      card,
+    });
+    this.eventBus.publish("OnSummonUnit", {
+      username,
+      card,
+    });
+    this.#endTurn();
   }
 
   removeEffect(effectInstance) {
@@ -344,39 +370,17 @@ export default class GameState {
   }
 
   processAction(data) {
-    const deployUnit = () => {
-      const player = this.playerStates[data.username];
-      const [card] = player.hand.splice(data.handId, 1); // remove card from hand
-      card.placedPositionCode = data.placedPositionCode; // set position
-      const line = player.field[positions[card.placedPositionCode].line];
-      line.push(card); // add card to the field
-      this.#spendShinsu(data.username, cards[card.id].cost); // update shinsu
-      this.eventBus.publish("OnDeployUnit", {
-        username: data.username,
-        card,
-      });
-      this.eventBus.publish("OnSummonUnit", {
-        username: data.username,
-        card,
-      });
-      this.#endTurn(); // end turn
-    };
-
-    const passTurn = () => {
-      // console.log(`${data.username} passed their turn.`);
-      this.#endTurn();
-      const previousAction = this.actionLog[this.actionLog.length - 2];
-      if (this.actionLog.length >= 2 && previousAction.type === "pass-turn") this.#endRound(); // if both players passed their turn consecutively, end the round
-    };
-
-    if (!this.#validateAction(data)) return; // if the action is invalid, this method will throw an error
-    this.#logAction(data);
+    this.#validateAction(data); // if the action is invalid, this method will throw an error
+    this.logger.logAction(data);
+    console.log(this.logger.getLastLog());
+    // reset the flag if the user did not pass their turn
+    if (data.type !== "pass-turn") this.roundEndOnTurnEnd = false;
     switch (data.type) {
       case "deploy-unit":
-        deployUnit();
+        this.#deployUnit(data.username, data.handId, data.placedPositionCode);
         break;
       case "pass-turn":
-        passTurn();
+        this.#endTurn(true);
         break;
       default:
         throw new Error("Invalid action type: " + data.type);
