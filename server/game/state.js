@@ -2,6 +2,10 @@ import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
 import EventBus from "./eventBus.js";
 
+// mockup effect classes
+import TestConsoleLogOnTurnEnd from "./effects/triggered/TestConsoleLogOnTurnEnd.js";
+import TestConsoleLogOnTurnEndUntilRoundEnd from "./effects/continuous/TestConsoleLogOnTurnEndUntilRoundEnd.js";
+
 export default class GameState {
   // all of the valid actions the user can take and their required fields
   VALID_USER_ACTIONS = {
@@ -24,6 +28,7 @@ export default class GameState {
     }
 
     this.eventBus = new EventBus();
+    this.activeEffects = [];
     this.roomCode = roomCode;
     this.usernames = config.usernames;
     this.round = 1;
@@ -38,6 +43,10 @@ export default class GameState {
 
     // draw initial hand for each player
     this.#draw(this.usernames, this.INIT_HAND_SIZE);
+
+    // add mockup effects
+    this.#addEffect(new TestConsoleLogOnTurnEnd(this));
+    this.#addEffect(new TestConsoleLogOnTurnEndUntilRoundEnd(this));
   }
 
   #initializePlayerState(username) {
@@ -131,7 +140,7 @@ export default class GameState {
   }
 
   #getOpponentUsername(username) {
-    const opponent = Object.keys(this.playerStates).find((p) => p !== username);
+    const opponent = this.usernames.find((u) => u !== username);
     if (!opponent) {
       throw new Error(`Opponent for ${username} not found.`);
     }
@@ -290,6 +299,22 @@ export default class GameState {
     this.actionLog.push(action);
   }
 
+  #addEffect(effectInstance) {
+    this.activeEffects.push(effectInstance);
+  }
+
+  removeEffect(effectInstance) {
+    // remove from active effects
+    const idx = this.activeEffects.indexOf(effectInstance);
+    if (idx !== -1) {
+      this.activeEffects.splice(idx, 1);
+    }
+    // unsubscribe from all events
+    if (typeof effectInstance.unsubscribeAll === "function") {
+      effectInstance.unsubscribeAll();
+    }
+  }
+
   getClientState(username) {
     return {
       you: this.#filterYouState(username),
@@ -326,9 +351,6 @@ export default class GameState {
 
     if (!this.#validateAction(data)) return; // if the action is invalid, this method will throw an error
     this.#logAction(data);
-    if (data.type === "pass-turn") {
-      console.log("action: " + data.username + " passed their turn.");
-    }
     switch (data.type) {
       case "deploy-unit":
         deployUnit();
