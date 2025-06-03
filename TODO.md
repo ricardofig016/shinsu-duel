@@ -4,6 +4,8 @@
 
 - [ ] check if landmark information complies with information on the notebook
 - [ ] write rules regarding shinheuh and animas
+- [ ] add passives to cards (this is in the notebook)
+- [ ] update trait descriptions to follow the rules page
 
 ## In Progress
 

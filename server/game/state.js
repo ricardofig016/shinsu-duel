@@ -1,5 +1,6 @@
 import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
+import EventBus from "./eventBus.js";
 
 export default class GameState {
   // all of the valid actions the user can take and their required fields
@@ -22,6 +23,7 @@ export default class GameState {
       );
     }
 
+    this.eventBus = new EventBus();
     this.roomCode = roomCode;
     this.players = config.players;
     this.round = 1;
@@ -163,6 +165,10 @@ export default class GameState {
   }
 
   #endTurn() {
+    this.eventBus.publish("OnEndTurn", {
+      username: this.currentTurn,
+      round: this.round,
+    });
     this.currentTurn = this.players.find((p) => p !== this.currentTurn);
   }
 
@@ -170,6 +176,10 @@ export default class GameState {
    * End the current round. This method does not flip the turn.
    */
   #endRound() {
+    this.eventBus.publish("OnEndRound", {
+      username: this.currentTurn,
+      round: this.round,
+    });
     this.round++;
     this.#resetShinsu(this.players);
     this.#draw(this.players, this.PER_ROUND_DRAW_AMOUNT);
@@ -298,6 +308,14 @@ export default class GameState {
       const line = player.field[positions[card.placedPositionCode].line];
       line.push(card); // add card to the field
       this.#spendShinsu(data.username, cards[card.id].cost); // update shinsu
+      this.eventBus.publish("OnDeployUnit", {
+        username: data.username,
+        card,
+      });
+      this.eventBus.publish("OnSummonUnit", {
+        username: data.username,
+        card,
+      });
       this.#endTurn(); // end turn
     };
 
