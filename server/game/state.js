@@ -17,32 +17,30 @@ export default class GameState {
   MAX_RECHARGED_SHINSU = 2;
 
   constructor(roomCode, config) {
-    if (!roomCode || !config || !config.players || config.players.length !== 2) {
+    if (!roomCode || !config || !config.usernames || config.usernames.length !== 2) {
       throw new Error(
-        "Invalid game configuration: roomCode and players are required and must have exactly 2 players."
+        "Invalid game configuration: roomCode and usernames are required and must have exactly 2 usernames."
       );
     }
 
     this.eventBus = new EventBus();
     this.roomCode = roomCode;
-    this.players = config.players;
+    this.usernames = config.usernames;
     this.round = 1;
-    this.currentTurn = config.players[Math.floor(Math.random() * 2)];
+    this.currentTurn = this.usernames[Math.floor(Math.random() * 2)]; // randomly select the first player
     this.actionLog = [];
 
     // initialize game state
-    this.state = {
-      players: {
-        [config.players[0]]: this.#initializePlayer(config.players[0]),
-        [config.players[1]]: this.#initializePlayer(config.players[1]),
-      },
+    this.playerStates = {
+      [this.usernames[0]]: this.#initializePlayerState(this.usernames[0]),
+      [this.usernames[1]]: this.#initializePlayerState(this.usernames[1]),
     };
 
     // draw initial hand for each player
-    this.#draw(config.players, this.INIT_HAND_SIZE);
+    this.#draw(this.usernames, this.INIT_HAND_SIZE);
   }
 
-  #initializePlayer(username) {
+  #initializePlayerState(username) {
     // default values
     return {
       combatIndicatorCodes: ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"],
@@ -78,7 +76,7 @@ export default class GameState {
       usernames = [usernames]; // ensure usernames is an array
     }
     usernames.forEach((username) => {
-      const player = this.state.players[username];
+      const player = this.playerStates[username];
       if (!player || !player.deck) throw new Error(`Player ${username} does not have a valid deck.`);
       for (let i = 0; i < amount; i++) {
         if (player.deck.size === 0) return;
@@ -97,14 +95,14 @@ export default class GameState {
   }
 
   #filterYouState(username) {
-    const player = this.state.players[username];
+    const player = this.playerStates[username];
     if (!player) {
       console.error(`Player state for ${username} not found.`);
-      console.error("Available players:", Object.keys(this.state.players));
+      console.error("Available players:", this.usernames);
       return null;
     }
 
-    let passButtonText = player.username;
+    let passButtonText = username;
     if (username === this.currentTurn)
       passButtonText =
         this.actionLog.length > 0 && this.actionLog[this.actionLog.length - 1].type === "pass-turn"
@@ -133,7 +131,7 @@ export default class GameState {
   }
 
   #getOpponentUsername(username) {
-    const opponent = Object.keys(this.state.players).find((p) => p !== username);
+    const opponent = Object.keys(this.playerStates).find((p) => p !== username);
     if (!opponent) {
       throw new Error(`Opponent for ${username} not found.`);
     }
@@ -141,7 +139,7 @@ export default class GameState {
   }
 
   #filterOpponentState(username) {
-    const opponent = this.state.players[this.#getOpponentUsername(username)];
+    const opponent = this.playerStates[this.#getOpponentUsername(username)];
     const hand = opponent.hand.map((card) => {
       if (card.visible) return { id: card.id, traitCodes: card.traitCodes };
       else return {};
@@ -169,7 +167,7 @@ export default class GameState {
       username: this.currentTurn,
       round: this.round,
     });
-    this.currentTurn = this.players.find((p) => p !== this.currentTurn);
+    this.currentTurn = this.usernames.find((p) => p !== this.currentTurn);
   }
 
   /**
@@ -181,8 +179,8 @@ export default class GameState {
       round: this.round,
     });
     this.round++;
-    this.#resetShinsu(this.players);
-    this.#draw(this.players, this.PER_ROUND_DRAW_AMOUNT);
+    this.#resetShinsu(this.usernames);
+    this.#draw(this.usernames, this.PER_ROUND_DRAW_AMOUNT);
     this.#logAction({ type: "end-round", round: this.round });
   }
 
@@ -192,7 +190,7 @@ export default class GameState {
    */
   #resetShinsu(usernames) {
     usernames.forEach((username) => {
-      const player = this.state.players[username];
+      const player = this.playerStates[username];
       if (player) {
         const unspentShinsu = player.shinsu.recharged + player.shinsu.normalAvailable;
         player.shinsu = {
@@ -214,7 +212,7 @@ export default class GameState {
     if (!data || !data.type || !this.VALID_USER_ACTIONS[data.type]) {
       throw new Error("Invalid action type: " + JSON.stringify(data));
     }
-    if (!data.username || !this.state.players[data.username]) {
+    if (!data.username || !this.playerStates[data.username]) {
       throw new Error("Invalid username in action data: " + JSON.stringify(data));
     }
     if (!this.VALID_USER_ACTIONS[data.type].every((field) => field in data)) {
@@ -241,7 +239,7 @@ export default class GameState {
    * @returns true if action data is valid, throws an error otherwise.
    */
   #validateDeployUnitAction(data) {
-    const player = this.state.players[data.username];
+    const player = this.playerStates[data.username];
     if (data.handId < 0 || data.handId >= player.hand.length) {
       throw new Error("Invalid handId: " + data.handId);
     }
@@ -280,7 +278,7 @@ export default class GameState {
    * @param {number} cost - the cost to deduct (int)
    */
   #spendShinsu(username, cost) {
-    const player = this.state.players[username];
+    const player = this.playerStates[username];
     if (!Number.isInteger(cost) || cost < 0) return;
     const deductedRechargedShinsu = Math.min(player.shinsu.recharged, cost);
     player.shinsu.recharged -= deductedRechargedShinsu;
@@ -302,7 +300,7 @@ export default class GameState {
 
   processAction(data) {
     const deployUnit = () => {
-      const player = this.state.players[data.username];
+      const player = this.playerStates[data.username];
       const [card] = player.hand.splice(data.handId, 1); // remove card from hand
       card.placedPositionCode = data.placedPositionCode; // set position
       const line = player.field[positions[card.placedPositionCode].line];

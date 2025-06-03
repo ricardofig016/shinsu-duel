@@ -29,7 +29,11 @@ export function initializeGameWebSocket(io) {
       }
       // Initialize the game state only if there are 2 players in the room
       if (roomSockets.size == 2) {
-        const game = new GameState(roomCode, rooms[roomCode]);
+        const config = rooms[roomCode];
+        // Rename players to usernames for consistency
+        config.usernames = config.players;
+        delete config.players;
+        const game = new GameState(roomCode, config);
         activeGames.set(roomCode, game);
         broadcast(io, roomCode, "game-init", (playerSocket) =>
           game.getClientState(playerSocket.request.session.username)
