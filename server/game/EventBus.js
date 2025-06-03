@@ -1,6 +1,23 @@
 export default class EventBus {
+  VALID_EVENTS = [
+    "OnGameStart",
+    "OnGameEnd",
+    "OnTurnStart",
+    "OnTurnEnd",
+    "OnRoundStart",
+    "OnRoundEnd",
+    "OnDeployUnit",
+    "OnSummonUnit",
+  ];
+
   constructor() {
     this.listeners = new Map(); // {eventName: array of subscriber callbacks}
+  }
+
+  #validateEventName(eventName) {
+    if (!this.VALID_EVENTS.includes(eventName)) {
+      throw new Error(`Invalid event name: ${eventName}`);
+    }
   }
 
   /**
@@ -10,6 +27,7 @@ export default class EventBus {
    * @returns {Function} A function you can call to unsubscribe this handler.
    */
   subscribe(eventName, handler) {
+    this.#validateEventName(eventName);
     if (!this.listeners.has(eventName)) {
       this.listeners.set(eventName, []);
     }
@@ -28,6 +46,7 @@ export default class EventBus {
    * @param {Function} handler The exact handler function to remove.
    */
   unsubscribe(eventName, handler) {
+    this.#validateEventName(eventName);
     const handlers = this.listeners.get(eventName);
     if (!handlers) return;
 
@@ -47,6 +66,7 @@ export default class EventBus {
    * @param {any} payload Data to pass along to each handler.
    */
   publish(eventName, payload = {}) {
+    this.#validateEventName(eventName);
     const handlers = this.listeners.get(eventName);
     if (!handlers) return;
 

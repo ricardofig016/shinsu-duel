@@ -6,8 +6,8 @@ export default class TestConsoleLogOnTurnEndUntilRoundEnd {
    */
   constructor(gameState) {
     this.gameState = gameState;
-    this.onEndTurnUnsub = this.gameState.eventBus.subscribe("OnEndTurn", this.#onEndTurn.bind(this));
-    this.onEndRoundUnsub = this.gameState.eventBus.subscribe("OnEndRound", this.#onEndRound.bind(this));
+    this.onEndTurnUnsub = this.gameState.eventBus.subscribe("OnTurnEnd", this.#onEndTurn.bind(this));
+    this.onEndRoundUnsub = this.gameState.eventBus.subscribe("OnRoundEnd", this.#onEndRound.bind(this));
   }
 
   #onEndTurn(payload) {

@@ -40,13 +40,24 @@ export default class GameState {
       [this.usernames[0]]: this.#initializePlayerState(this.usernames[0]),
       [this.usernames[1]]: this.#initializePlayerState(this.usernames[1]),
     };
-
-    // draw initial hand for each player
     this.#draw(this.usernames, this.INIT_HAND_SIZE);
+    this.#resetShinsu(this.usernames);
 
     // add mockup effects
     this.#addEffect(new TestConsoleLogOnTurnEnd(this));
     this.#addEffect(new TestConsoleLogOnTurnEndUntilRoundEnd(this));
+
+    // publish initial game events
+    this.eventBus.publish("OnGameStart", this.playerStates);
+    this.eventBus.publish("OnRoundStart", {
+      username: this.currentTurn,
+      round: this.round,
+      playerStates: this.playerStates,
+    });
+    this.eventBus.publish("OnTurnStart", {
+      username: this.currentTurn,
+      round: this.round,
+    });
   }
 
   #initializePlayerState(username) {
@@ -57,7 +68,7 @@ export default class GameState {
       lighthouses: { amount: this.INIT_LIGHTHOUSE_AMOUNT },
       field: { frontline: [], backline: [] },
       hand: [],
-      shinsu: { normalSpent: 0, normalAvailable: this.round, recharged: 0 },
+      shinsu: {},
       username: username,
     };
   }
@@ -172,18 +183,22 @@ export default class GameState {
   }
 
   #endTurn() {
-    this.eventBus.publish("OnEndTurn", {
+    this.eventBus.publish("OnTurnEnd", {
       username: this.currentTurn,
       round: this.round,
     });
     this.currentTurn = this.usernames.find((p) => p !== this.currentTurn);
+    this.eventBus.publish("OnTurnStart", {
+      username: this.currentTurn,
+      round: this.round,
+    });
   }
 
   /**
    * End the current round. This method does not flip the turn.
    */
   #endRound() {
-    this.eventBus.publish("OnEndRound", {
+    this.eventBus.publish("OnRoundEnd", {
       username: this.currentTurn,
       round: this.round,
     });
@@ -191,6 +206,11 @@ export default class GameState {
     this.#resetShinsu(this.usernames);
     this.#draw(this.usernames, this.PER_ROUND_DRAW_AMOUNT);
     this.#logAction({ type: "end-round", round: this.round });
+    this.eventBus.publish("OnRoundStart", {
+      username: this.currentTurn,
+      round: this.round,
+      playerStates: this.playerStates,
+    });
   }
 
   /**
