@@ -27,19 +27,23 @@
       </p>
 
       <h2>Table of Contents</h2>
+      <hr />
       <ol>
         <li><a href="#objective">Objective</a></li>
         <li><a href="#resources">Resources</a></li>
         <li><a href="#board">Board</a></li>
         <li><a href="#gameplay">Gameplay</a></li>
-        <li><a href="#card-types">Card Types</a></li>
-        <li><a href="#card-mechanics">Card Mechanics</a></li>
-        <li><a href="#deck-building-rules">Deck Building Rules</a></li>
-        <li><a href="#vocabulary">Vocabulary</a></li>
+        <li><a href="#cards">Cards</a></li>
+        <li><a href="#deck">Deck</a></li>
+        <li><a href="#keywords">Keywords</a></li>
+        <li><a href="#positions">Positions</a></li>
+        <li><a href="#traits">Traits</a></li>
+        <li><a href="#affiliations">Affiliations</a></li>
         <li><a href="#future-features">Future Features</a></li>
       </ol>
 
       <h2 id="objective">Objective</h2>
+      <hr />
       <p>
         Destroy your opponent's lighthouses. Each lighthouse represents one point of HP. You lose when you
         have
@@ -47,6 +51,7 @@
       </p>
 
       <h2 id="resources">Resources</h2>
+      <hr />
       <h3>Shinsu</h3>
       <ol>
         <li>Required to play all cards</li>
@@ -61,18 +66,21 @@
       <h3>Lighthouses</h3>
       <ol>
         <li>Start with 20 lighthouses</li>
-        <li>Can gain additional lighthouses</li>
-        <li>Losing all lighthouses ends the game</li>
+        <li>Can gain additional lighthouses (Even above 20)</li>
+        <li>Losing all lighthouses loses you the game</li>
       </ol>
 
       <h2 id="board">Board</h2>
+      <hr />
+      Each player's side is divided into the following zones:
       <ol>
-        <li>Hand</li>
-        <li>Deck</li>
-        <li>Lighthouses</li>
-        <li>Shinsu</li>
+        <li>Deck (left)</li>
+        <li>Lighthouses (left)</li>
+        <li>Combat Indicators (left)</li>
+        <li>Hand (right)</li>
+        <li>Shinsu (right)</li>
         <li>
-          Battlefield
+          Battlefield (center)
           <ol>
             <li>Frontline: Fisherman, Scout, Wave Controller</li>
             <li>Backline: Spear Bearer, Light Bearer</li>
@@ -81,10 +89,11 @@
       </ol>
 
       <h2 id="gameplay">Gameplay</h2>
-      <h3>Round Phases</h3>
+      <hr />
+      <h3>Round</h3>
       <ol>
         <li>
-          <strong>Start of Round</strong>
+          <strong>Round Start</strong>
           <ol>
             <li>Shinsu recharges</li>
             <li>Each player draws one card</li>
@@ -100,35 +109,34 @@
         <li>
           <strong>Round End</strong>
           <ol>
-            <li>Both players must pass consecutively to end round</li>
+            <li>When both players pass consecutively, the round ends</li>
           </ol>
         </li>
       </ol>
 
       <h3>Actions</h3>
-      <p>During your turn, choose one:</p>
+      <p>During your turn, choose one of these:</p>
       <ol>
         <li>Play a card</li>
         <li>Use an ability</li>
         <li>Pass the turn</li>
       </ol>
 
-      <h2 id="card-types">Card Types</h2>
-      <h3>Unit Cards</h3>
-      <p>Represent characters from Tower of God:</p>
+      <h2 id="cards">Card</h2>
+      <hr />
+      <h3>Units</h3>
+      <p>Represent characters, creatures or locations from Tower of God:</p>
       <ol>
-        <li>Deployed to battlefield positions</li>
-        <li>Have HP and shinsu cost</li>
-        <li>Have traits and affiliations</li>
-        <li>Can only target backline enemies when frontline is empty</li>
-        <li>Can only target lighthouses when entire enemy board is empty</li>
-        <li>
-          <strong>Shinheuh</strong>
-          <ol>
-            <li>Special units</li>
-            <li>Can only be summoned by animas</li>
-          </ol>
-        </li>
+        <li>Deployed to the battlefield</li>
+        <li>Have HP and a shinsu cost to deploy</li>
+        <li>Have abilities that activate by using an action</li>
+        <li>Have one or more positions they can occupy on the board</li>
+        <li>May have traits that provide unique effects</li>
+        <li>May have affiliations that promote synergies with other units</li>
+        <li>May have an attribute that changes how the unit plays</li>
+        <li>May have a passive ability that is active while the unit is in play</li>
+        <li>Can only target backline enemies when the enemy frontline is empty</li>
+        <li>Can only target lighthouses when the enemy board is empty</li>
       </ol>
 
       <h3>Consumables</h3>
@@ -151,45 +159,21 @@
         <li>Examples: Green April, Zahard's Ring</li>
       </ol>
 
-      <h3>Landmarks</h3>
-      <p>Significant Tower locations:</p>
+      <h2 id="deck">Deck</h2>
+      <hr />
       <ol>
-        <li>Only 1 landmark per player on battlefield</li>
-        <li>Provide battlefield-wide effects</li>
-        <li>Playing new landmark destroys previous one</li>
-        <li>Examples: Hidden Floor, Hell Train</li>
-      </ol>
-
-      <h2 id="card-mechanics">Card Mechanics</h2>
-      <h3>Unit Stats</h3>
-      <ol>
-        <li>Shinsu Cost (blue circle)</li>
-        <li>HP (heart icon)</li>
-        <li>Abilities (below art)</li>
-        <li>Passive (top-right)</li>
-      </ol>
-
-      <h3>Unit Positions</h3>
-      <ol>
-        <li><strong>Fisherman</strong>: Tank damage and deal damage</li>
-        <li><strong>Light Bearer</strong>: Provide utility, buffs and lighthouses</li>
-        <li><strong>Scout</strong>: Debuff enemies and disrupt synergy</li>
-        <li><strong>Spear Bearer</strong>: Deal massive damage</li>
-        <li><strong>Wave Controller</strong>: Area damage and shinsu manipulation</li>
-      </ol>
-
-      <h3>Traits & Affiliations</h3>
-      <p>Provide modifiers and synergies (detailed in Vocabulary)</p>
-
-      <h2 id="deck-building-rules">Deck Building Rules</h2>
-      <ol>
-        <li>Exactly 30 cards per deck</li>
+        <li>A deck must have exactly 30 cards</li>
         <li>Maximum 3 copies of same card</li>
         <li>Starting hand: 4 cards</li>
+        <li>If at any point a player tries to draw and their deck is empty, they lose the game</li>
       </ol>
 
-      <h2 id="vocabulary">Vocabulary</h2>
-      <h3>Keywords</h3>
+      <h2 id="keywords">Keywords</h2>
+      <hr />
+      <p>
+        Keywords are special terms that provide additional context to cards and abilities. Their purpose is to
+        provide common language for effects and abilities, making each description less verbose.
+      </p>
       <ol>
         <li><strong>Cleanse</strong>: Remove all negative traits</li>
         <li><strong>Destroy n</strong>: Destroy n enemy lighthouses</li>
@@ -198,17 +182,59 @@
         <li><strong>Spend n</strong>: Pay n shinsu to use ability</li>
       </ol>
 
-      <h3>Traits</h3>
+      <h2 id="positions">Positions</h2>
+      <hr />
+      <p>
+        Each unit occupies one or more positions on the battlefield. The position determines its role and
+        playstyle.
+      </p>
+      <h3>Main Positions</h3>
+      <ol>
+        <li>
+          <strong>Fisherman</strong> (frontline): Durable units that tank damage and deal consistent damage to
+          enemies
+        </li>
+        <li>
+          <strong>Light Bearer</strong> (backline): Strategic support units specializing in utility, buffs,
+          and lighthouses
+        </li>
+        <li>
+          <strong>Scout</strong> (frontline): Disruptive units that excel at applying debuffs, breaking
+          synergy, and compromising the enemy backline
+        </li>
+        <li>
+          <strong>Spear Bearer</strong> (backline): Long-range units designed to deal massive amounts of
+          damage
+        </li>
+        <li>
+          <strong>Wave Controller</strong> (frontline): All rounder units that help their team by manipulating
+          shinsu and providing shinsu-related buffs and debuffs
+        </li>
+      </ol>
+      <h3>Special Positions</h3>
+      <ol>
+        <li>
+          <strong>Shinheuh</strong> (frontline): Special units summoned by Animas to attack on their behalf
+        </li>
+        <li>
+          <strong>Landmark</strong> (backline): Special units that apply continuous passive effects to the
+          entire battlefield
+        </li>
+      </ol>
 
-      <h4>Positive Traits</h4>
+      <h2 id="traits">Traits</h2>
+      <hr />
+      <p>
+        Traits are special effects that cards can have. They can be positive or negative and affect gameplay
+        in various ways.
+      </p>
+      <h3>Positive Traits</h3>
       <ol>
         <li><strong>Barrier</strong>: Negate all damage the next time I take damage</li>
         <li><strong>Bloodthirsty</strong>: When I kill a unit, restore 1 HP</li>
         <li><strong>Creator</strong>: When I am deployed, create 1 lighthouse</li>
         <li><strong>Dealer</strong>: Draw 1 card at the start of every round</li>
-        <li>
-          <strong>Immune</strong>: Remove every negative trait from me and I am immune to negative effects
-        </li>
+        <li><strong>Immune</strong>: I am immune to negative effects</li>
         <li>
           <strong>Last One Standing</strong>: If I am the only ally unit, I have +4 HP and deal +4 damage
         </li>
@@ -223,7 +249,7 @@
         <li><strong>Taunt</strong>: Enemies are forced to target me if possible</li>
       </ol>
 
-      <h4>Negative Traits</h4>
+      <h3>Negative Traits</h3>
       <ol>
         <li><strong>Burned</strong>: I take 1 damage every turn until the end of the round</li>
         <li><strong>Cursed</strong>: I take 1 damage when I use an ability</li>
@@ -237,7 +263,7 @@
         <li><strong>Weak</strong>: I take +1 damage from all sources</li>
       </ol>
 
-      <h4>Trait Colors</h4>
+      <h3>Trait Colors</h3>
       <ol>
         <li>
           <strong>Positive</strong>:
@@ -256,13 +282,19 @@
         </li>
       </ol>
 
-      <h3>Affiliations</h3>
+      <h2 id="affiliations">Affiliations</h2>
+      <hr />
+      <p>To be added</p>
+
+      <h2 id="attributes">Attributes</h2>
+      <hr />
       <p>To be added</p>
 
       <h2 id="future-features">Future Features</h2>
+      <hr />
       <h3>Team Leader</h3>
       <ol>
-        <li>Special effect when designated as leader</li>
+        <li>Special passive effect when designated as leader</li>
         <li>Only one leader per player</li>
       </ol>
 
@@ -270,7 +302,7 @@
       <ol>
         <li>Units evolve under specific conditions</li>
         <li>Improves stats/abilities and changes art</li>
-        <li>Example: Khun Ran evolves with Lightning Pill</li>
+        <li>Example: Khun Ran evolves when given the Lightning Pill consumable</li>
       </ol>
     </div>
 

@@ -9,7 +9,7 @@
   "exhausted": { "name": "Exhausted", "description": "I deal -1 damage" },
   "ghost": { "name": "Ghost", "description": "I don't prevent the enemy from targeting what's behind me" },
   "heavy": { "name": "Heavy", "description": "My abilities cost +1 shinsu" },
-  "immune": { "name": "Immune", "description": "Remove every negative trait from me and I am immune to negative effects" },
+  "immune": { "name": "Immune", "description": "I am immune to negative effects" },
   "lastonestanding": { "name": "Last One Standing", "description": "If I am the only ally unit, I have +4 HP and deal +4 damage" },
   "lethal": { "name": "Lethal", "description": "When I damage another unit, kill it" },
   "pierce": { "name": "Pierce", "description": "When I deal damage, destroy 1 enemy lighthouse" },
