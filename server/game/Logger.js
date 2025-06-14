@@ -13,35 +13,40 @@ export default class Logger {
     );
   }
 
+  #getTimestamp() {
+    const date = new Date();
+    const dateString = date.toUTCString().split(" ").slice(1, -1).join(" ");
+    return dateString + `:${date.getMilliseconds()}`;
+  }
+
   #logEvent(eventName, payload) {
     this.logs.push({
-      timestamp: new Date().toISOString(),
+      timestamp: this.#getTimestamp(),
       type: eventName,
       payload: JSON.parse(JSON.stringify(payload)),
     });
-    this.DEBUGGER && console.log(this.getLastLog() + "\n");
+    this.DEBUGGER && console.log(this.getLastLog());
   }
 
   logAction(action) {
     this.logs.push({
-      timestamp: new Date().toISOString(),
+      timestamp: this.#getTimestamp(),
       type: "UserAction",
       payload: JSON.parse(JSON.stringify(action)),
     });
-    this.DEBUGGER && console.log(this.getLastLog() + "\n");
+    this.DEBUGGER && console.log(this.getLastLog());
   }
 
   getLogs() {
     return this.logs.slice();
   }
 
-  getLastLog() {
-    if (this.logs.length > 0) {
-      const lastLog = this.logs[this.logs.length - 1];
-      return `[${lastLog.timestamp}] ${lastLog.type}: ${JSON.stringify(lastLog.payload)}`;
-    } else {
-      return "No logs available.";
-    }
+  getLastLog(verboseMode = false) {
+    if (this.logs.length <= 0) return "No logs available.";
+    const lastLog = this.logs[this.logs.length - 1];
+    return verboseMode
+      ? `[${lastLog.timestamp}] ${lastLog.type}: ${JSON.stringify(lastLog.payload)}`
+      : `[${lastLog.timestamp}] EventType: ${lastLog.type}`;
   }
 
   clear() {
