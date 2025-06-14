@@ -1,9 +1,26 @@
 {
-  "anima": { "name": "Anima", "description": "" },
-  "guide": { "name": "Guide", "description": "" },
-  "hwayeomsa": { "name": "", "description": "" },
-  "irregular": { "name": "", "description": "" },
-  "jeonsulsa": { "name": "", "description": "" },
-  "livingignitionweapon": { "name": "", "description": "" },
-  "shinheuh": { "name": "", "description": "" }
+  "anima": {
+    "name": "Anima",
+    "description": "When I'm deployed or round start: choose 1 of 3 random Shinheuh to create in your hand. Round start: gain a Shinheuh combat slot."
+  },
+  "guide": {
+    "name": "Guide",
+    "description": "You can always see you opponent's hand. The first time you draw a card in each round, look at the top 3 cards of your deck and choose one to add to your hand, then shuffle the rest. When I'm deployed or round start: draw a card."
+  },
+  "hwayeomsa": {
+    "name": "Hwayeomsa",
+    "description": "Spend 1: charge 1 Fire Charge and create Fire Core in your hand if you don't already have it."
+  },
+  "irregular": {
+    "name": "Irregular",
+    "description": "Slay: choose 1 of 2 random Outsider Powers that I don't already have and grant it to me."
+  },
+  "jeonsulsa": {
+    "name": "Jeonsulsa",
+    "description": "When I'm deployed, summon a 1 HP Conduit on the enemy backline if they don't already have one. When I use an ability, grant the conduit 1 HP."
+  },
+  "livingignitionweapon": {
+    "name": "Living Ignition Weapon",
+    "description": "You may equip me as many times as you want with unique equipments. When you equip me, grant a random trait to a random ally that is not me."
+  }
 }

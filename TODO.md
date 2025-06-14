@@ -7,6 +7,7 @@
 - [ ] add passives to cards (this is in the notebook)
 - [ ] add unit stat recalculation when sending game state data to users
 - [ ] add a new negative trait around silencing
+- [ ] refactor "combat indicator" everywhere to "combat slots"
 
 ## In Progress
 

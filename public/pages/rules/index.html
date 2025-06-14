@@ -39,6 +39,7 @@
         <li><a href="#positions">Positions</a></li>
         <li><a href="#traits">Traits</a></li>
         <li><a href="#affiliations">Affiliations</a></li>
+        <li><a href="#attributes">Attributes</a></li>
         <li><a href="#future-features">Future Features</a></li>
       </ol>
 
@@ -68,6 +69,24 @@
         <li>Start with 20 lighthouses</li>
         <li>Can gain additional lighthouses (Even above 20)</li>
         <li>Losing all lighthouses loses you the game</li>
+      </ol>
+
+      <h3>Combat Slots</h3>
+      <ol>
+        <li>Each player has 5 combat slots: one for each of the positions.</li>
+        <li>
+          A unit deployed in a position can only use an ability if the combat slot for that position is
+          available.
+        </li>
+        <li>
+          When a unit uses an ability, the combat slot for the position the unit was deployed in becomes
+          unavailable until the end of the round.
+        </li>
+        <li>This way, the same unit can't use an ability twice in the same round.</li>
+        <li>
+          And if a player has 2 units on the same position on the board, only 1 of them can take an action
+          during a round.
+        </li>
       </ol>
 
       <h2 id="board">Board</h2>
@@ -122,7 +141,7 @@
         <li>Pass the turn</li>
       </ol>
 
-      <h2 id="cards">Card</h2>
+      <h2 id="cards">Cards</h2>
       <hr />
       <h3>Units</h3>
       <p>Represent characters, creatures or locations from Tower of God:</p>
@@ -153,8 +172,7 @@
       <ol>
         <li>Apply to deployed allied units</li>
         <li>Provide buffs or special abilities</li>
-        <li>Cannot be removed</li>
-        <li>Returns to hand when unit dies</li>
+        <li>Returns to hand when unit dies or when the unit is equiped with another equipment</li>
         <li>Equipping ends your turn</li>
         <li>Examples: Green April, Zahard's Ring</li>
       </ol>
@@ -176,10 +194,11 @@
       </p>
       <ol>
         <li><strong>Cleanse</strong>: Remove all negative traits</li>
-        <li><strong>Destroy n</strong>: Destroy n enemy lighthouses</li>
-        <li><strong>Fast</strong>: Ability/spell doesn't end turn</li>
+        <li><strong>Destroy</strong>: Destroy enemy lighthouses</li>
+        <li><strong>Fast</strong>: Doesn't end turn</li>
         <li><strong>Silence</strong>: Remove all positive traits</li>
-        <li><strong>Spend n</strong>: Pay n shinsu to use ability</li>
+        <li><strong>Slay</strong>: Kill an enemy unit</li>
+        <li><strong>Spend</strong>: Spend shinsu</li>
       </ol>
 
       <h2 id="positions">Positions</h2>
@@ -288,7 +307,60 @@
 
       <h2 id="attributes">Attributes</h2>
       <hr />
-      <p>To be added</p>
+      <h3>Anima</h3>
+      <p>
+        When I'm deployed or round start: choose 1 of 3 random <strong>Shinheuh</strong> to create in your
+        hand. Round start: gain a Shinheuh combat slot.
+      </p>
+
+      <h3>Guide</h3>
+      <p>
+        You can always see you opponent's hand. The first time you draw a card in each round, look at the top
+        3 cards of your deck and choose one to add to your hand, then shuffle the rest. When I'm deployed or
+        round start: draw a card.
+      </p>
+
+      <h3>Hwayeomsa</h3>
+      <p>
+        Spend 1: charge 1 <strong>Fire Charge</strong> and create <strong>Fire Core</strong> in your hand if
+        you don't already have it. <br />
+        <strong>Fire Core</strong>: Consume your Fire Charges to create <strong>Incinerate</strong>.
+        <br />
+        <strong>Incinerate I</strong>: I am created by consuming 1 Fire Charge. Deal 1 to an enemy. <br />
+        <strong>Incinerate II</strong>: I am created by consuming 3 Fire Charges. Deal 2 to 2 enemies. <br />
+        <strong>Incinerate III</strong>: I am created by consuming 5 Fire Charges. Deal 2 to 3 enemies, and
+        give them Burn. <br />
+        <strong>Incinerate IV</strong>: I am created by consuming 7 Fire Charges. Deal 3 to all enemies, and
+        give them Burn this round and the next.
+      </p>
+
+      <h3>Irregular</h3>
+      <p>
+        Slay: choose 1 of 2 random <strong>Outsider Powers</strong> that I don't already have and grant it to
+        me.<br />
+        <strong>Power of Fortitude</strong>: Immune and Regenerate <br />
+        <strong>Power of Aegis</strong>: Resilient and Barrier <br />
+        <strong>Power of Ruin</strong>: Pierce and Ruthless <br />
+        <strong>Power of Vigor</strong>: Bloodthirsty and Strong <br />
+        <strong>Power of Defiance</strong>: Reflect and Taunt <br />
+      </p>
+
+      <h3>Jeonsulsa</h3>
+      <p>
+        When I'm deployed, summon a 1 HP <strong>Conduit</strong> on the enemy backline if they don't already
+        have one. When I use an ability, grant the conduit 1 HP. <br />
+        <strong>Conduit</strong>: Round start: For each HP that I have, activate 1 random
+        <strong>Jeonsul Baang</strong>. <br />
+        <strong>Lightning Baang</strong>: Deal 2 damage to a random enemy unit.<br />
+        <strong>Thunder Baang</strong>: Stun a random enemy unit this round.<br />
+        <strong>Static Baang</strong>: Give Weak to a random enemy unit this round.<br />
+      </p>
+
+      <h3>Living Ignition Weapon</h3>
+      <p>
+        You may equip me as many times as you want with unique equipments. When you equip me, grant a random
+        trait to a random ally that is not me.
+      </p>
 
       <h2 id="future-features">Future Features</h2>
       <hr />
@@ -304,6 +376,14 @@
         <li>Improves stats/abilities and changes art</li>
         <li>Example: Khun Ran evolves when given the Lightning Pill consumable</li>
       </ol>
+
+      <h3>Attributes</h3>
+      <p>
+        Add new attributes such as: <br />
+        <strong>Wonsulsa</strong> - Circle Technician (Mule Love, Gran de Lee, Yu Han Sung) <br />
+        <strong>Dansulsa</strong> - Breaker (Kurudan, Yu Han Sung) <br />
+        <strong>Defender</strong> (Aka Williams, Hendo Lok Bloodmadder) <br />
+      </p>
     </div>
 
     <script type="module" src="/pages/rules/script.js"></script>
