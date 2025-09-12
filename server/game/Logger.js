@@ -1,8 +1,9 @@
 export default class Logger {
-  constructor(eventBus, debug_mode = false) {
+  DEBUGGER = true; // flag to print every log to console
+
+  constructor(eventBus) {
     this.eventBus = eventBus;
     this.logs = [];
-    this.debug_mode = debug_mode;
     this.#subscribeToAllEvents();
   }
 
@@ -24,7 +25,7 @@ export default class Logger {
       type: eventName,
       payload: JSON.parse(JSON.stringify(payload)),
     });
-    this.this.debug_mode && console.log(this.getLastLog());
+    this.DEBUGGER && console.log(this.getLastLog());
   }
 
   logAction(action) {
@@ -33,7 +34,7 @@ export default class Logger {
       type: "UserAction",
       payload: JSON.parse(JSON.stringify(action)),
     });
-    this.this.debug_mode && console.log(this.getLastLog());
+    this.DEBUGGER && console.log(this.getLastLog());
   }
 
   getLogs() {
