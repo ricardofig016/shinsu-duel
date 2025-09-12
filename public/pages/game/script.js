@@ -50,7 +50,7 @@ const getRandomGameData = (data) => {
 
     // deck
     playerData.deck = {};
-    playerData.deck.size = Math.floor(Math.random() * 21);
+    playerData.deckSize = Math.floor(Math.random() * 21);
 
     // lighthouses
     playerData.lighthouses = {};
@@ -193,7 +193,7 @@ const load = async (data) => {
       const outerDiv = document.querySelector(`#${player}-container .deck-outer-container`);
       const deckContainer = outerDiv.querySelector(`.deck-container`);
       deckContainer.innerHTML = "";
-      const cardAmount = Math.min(data.gameState[player].deck.size, maxDeckSize);
+      const cardAmount = Math.min(data.gameState[player].deckSize, maxDeckSize);
       for (let i = 0; i < cardAmount; i++) {
         const newDiv = document.createElement("div");
         newDiv.classList.add("unit-card-vertical-component", "deck-card");
@@ -202,7 +202,7 @@ const load = async (data) => {
         newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
         newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
         if (i === cardAmount - 1)
-          await addTooltip(outerDiv, newDiv, "Deck", `${data.gameState[player].deck.size} cards remaining`);
+          await addTooltip(outerDiv, newDiv, "Deck", `${data.gameState[player].deckSize} cards remaining`);
       }
     }
   };
