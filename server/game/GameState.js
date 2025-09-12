@@ -78,7 +78,7 @@ export default class GameState {
    */
   #generateRandomDeck() {
     const maxCardId = Object.keys(cards).length - 1;
-    const deckCards = Array.from({ length: this.INIT_DECK_SIZE }, () => {
+    const deck = Array.from({ length: this.INIT_DECK_SIZE }, () => {
       const cardId = Math.floor(Math.random() * (maxCardId + 1));
       const cardData = cards[cardId];
       return {
@@ -87,7 +87,7 @@ export default class GameState {
         visible: false,
       };
     });
-    return { cards: deckCards, size: this.INIT_DECK_SIZE };
+    return deck;
   }
 
   #draw(usernames, amount) {
@@ -98,9 +98,8 @@ export default class GameState {
       const player = this.playerStates[username];
       if (!player || !player.deck) throw new Error(`Player ${username} does not have a valid deck.`);
       for (let i = 0; i < amount; i++) {
-        if (player.deck.size === 0) return;
-        player.hand.push(player.deck.cards.pop());
-        player.deck.size--;
+        if (player.deck.length === 0) return;
+        player.hand.push(player.deck.pop());
       }
     });
   }
@@ -134,7 +133,7 @@ export default class GameState {
 
     return {
       combatIndicatorCodes: player.combatIndicatorCodes,
-      deck: { size: player.deck.size },
+      deckSize: player.deck.length,
       lighthouses: player.lighthouses,
       field: {
         frontline: this.#mapUnits(player.field.frontline),
@@ -169,7 +168,7 @@ export default class GameState {
     });
     return {
       combatIndicatorCodes: opponent.combatIndicatorCodes,
-      deck: { size: opponent.deck.size },
+      deckSize: opponent.deck.length,
       lighthouses: opponent.lighthouses,
       field: {
         frontline: this.#mapUnits(opponent.field.frontline),
