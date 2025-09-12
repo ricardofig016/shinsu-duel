@@ -36,13 +36,13 @@
   max-width: 42%;
 }
 
-.combat-indicators-container {
+.combat-slots-container {
   height: auto;
   padding: 1% 0 0 0.5%;
   gap: 0.6rem;
 }
 
-.combat-indicators-container img {
+.combat-slots-container img {
   width: 100%;
   height: auto;
 }

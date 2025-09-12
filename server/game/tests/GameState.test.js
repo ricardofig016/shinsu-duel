@@ -90,7 +90,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
 
     // 'you' and 'opponent' should have expected keys
     [
-      "combatIndicatorCodes",
+      "combatSlotCodes",
       "deckSize",
       "lighthouses",
       "field",

@@ -69,7 +69,7 @@ export default class GameState {
 
   #initializePlayerState(username, deck) {
     return {
-      combatIndicatorCodes: ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"],
+      combatSlotCodes: ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"],
       deck: this.#buildDeckFromCardIds(deck ? deck : this.#generateRandomDeckOfCardIds()),
       lighthouses: { amount: this.INIT_LIGHTHOUSE_AMOUNT },
       field: { frontline: [], backline: [] },
@@ -155,7 +155,7 @@ export default class GameState {
     }
 
     return {
-      combatIndicatorCodes: player.combatIndicatorCodes,
+      combatSlotCodes: player.combatSlotCodes,
       deckSize: player.deck.length,
       lighthouses: player.lighthouses,
       field: {
@@ -190,7 +190,7 @@ export default class GameState {
       else return {};
     });
     return {
-      combatIndicatorCodes: opponent.combatIndicatorCodes,
+      combatSlotCodes: opponent.combatSlotCodes,
       deckSize: opponent.deck.length,
       lighthouses: opponent.lighthouses,
       field: {

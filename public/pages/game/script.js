@@ -37,16 +37,16 @@ const getRandomGameData = (data) => {
   for (let player of ["you", "opponent"]) {
     let playerData = {};
 
-    // combat indicators
+    // combat slots
     const positions = Object.keys(data.positions);
     const positionAmount = Math.floor(Math.random() * 7);
-    playerData.combatIndicatorCodes = [];
+    playerData.combatSlotCodes = [];
     for (let i = 0; i < positionAmount; i++) {
       const randomIndex = Math.floor(Math.random() * positions.length);
-      playerData.combatIndicatorCodes.push(positions[randomIndex]);
+      playerData.combatSlotCodes.push(positions[randomIndex]);
       positions.splice(randomIndex, 1);
     }
-    playerData.combatIndicatorCodes.sort();
+    playerData.combatSlotCodes.sort();
 
     // deck
     playerData.deck = {};
@@ -165,17 +165,17 @@ const prepareBoard = async (data, socket) => {
 };
 
 const load = async (data) => {
-  const loadCombatIndicators = async () => {
+  const loadCombatSlots = async () => {
     for (let player of ["you", "opponent"]) {
-      const indicatorsContainer = document.querySelector(`#${player}-container .combat-indicators-container`);
-      indicatorsContainer.innerHTML = "";
-      for (let code of data.gameState[player].combatIndicatorCodes) {
+      const slotsContainer = document.querySelector(`#${player}-container .combat-slots-container`);
+      slotsContainer.innerHTML = "";
+      for (let code of data.gameState[player].combatSlotCodes) {
         const newImg = document.createElement("img");
         newImg.src = `/assets/icons/positions/${code}.png`;
         newImg.alt = code;
-        indicatorsContainer.appendChild(newImg);
+        slotsContainer.appendChild(newImg);
         await addTooltip(
-          indicatorsContainer,
+          slotsContainer,
           newImg,
           data.positions[code].name,
           data.positions[code].description,
@@ -398,7 +398,7 @@ const load = async (data) => {
     }
   };
 
-  await loadCombatIndicators();
+  await loadCombatSlots();
   await loadDecks();
   await loadLightHouses();
   await loadFields();
