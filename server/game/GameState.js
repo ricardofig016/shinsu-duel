@@ -23,13 +23,15 @@ export default class GameState {
    * @param {string} roomCode unique room code for this game
    * @param {Array<string>} usernames array of exactly 2 usernames
    * @param {Object} decks (optional) dictionary mapping each username to an array of card ids to use as that player's deck. If null, a random deck will be generated.
+   * @param {string} firstPlayer (optional) username of the player to take the first turn. If null, a random player will be chosen.
    */
-  constructor(roomCode, usernames, decks = {}) {
-    if (!roomCode || !usernames || usernames.length !== 2) {
+  constructor(roomCode, usernames, decks = {}, firstPlayer = null) {
+    if (!roomCode || !usernames || usernames.length !== 2)
       throw new Error(
         "Invalid arguments: roomCode and usernames are required and must have exactly 2 usernames."
       );
-    }
+    if (firstPlayer && !usernames.includes(firstPlayer))
+      throw new Error("firstPlayer must be one of the usernames in the game");
 
     this.eventBus = new EventBus();
     this.logger = new Logger(this.eventBus);
@@ -37,7 +39,7 @@ export default class GameState {
     this.roomCode = roomCode;
     this.usernames = usernames;
     this.round = 1;
-    this.currentTurn = this.usernames[Math.floor(Math.random() * 2)]; // randomly select the first player
+    this.currentTurn = firstPlayer ? firstPlayer : this.usernames[Math.floor(Math.random() * 2)]; // randomly select the first player
     this.roundEndOnTurnEnd = false; // whether the last user action was a pass and it was on the current round
 
     // initialize game state
