@@ -1,28 +1,47 @@
 import GameState from "../GameState.js";
 
-describe("GameState core rules", () => {
+const PVP_CONFIG = {
+  opponent: "friend",
+  difficulty: null,
+  usernames: ["Alice", "Bob"],
+};
+
+function advanceToRound(game, round) {
+  const firstPlayer = game.currentTurn;
+  const secondPlayer = firstPlayer === "Alice" ? "Bob" : "Alice";
+  let safety = 0;
+  while (game.round < round) {
+    if (++safety > 1000) throw new Error("advanceToRound safety limit hit");
+    game.processAction({ type: "pass-turn", username: firstPlayer });
+    game.processAction({ type: "pass-turn", username: secondPlayer });
+  }
+}
+
+function expectShinsuState(playerState, normalSpent, normalAvailable, recharged) {
+  expect(playerState.shinsu.normalSpent).toBe(normalSpent);
+  expect(playerState.shinsu.normalAvailable).toBe(normalAvailable);
+  expect(playerState.shinsu.recharged).toBe(recharged);
+}
+
+describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   let game, firstPlayer, secondPlayer;
   const roomCode = "TEST";
-  const config = {
-    opponent: "friend",
-    difficulty: null,
-    usernames: ["Alice", "Bob"],
-  };
 
   beforeEach(() => {
-    game = new GameState(roomCode, config);
+    game = new GameState(roomCode, PVP_CONFIG);
     firstPlayer = game.currentTurn;
     secondPlayer = firstPlayer === "Alice" ? "Bob" : "Alice";
+    advanceToRound(game, round);
   });
 
-  test("initial state has round = 1", () => {
-    expect(game.round).toBe(1);
+  test(`game.round should be ${round}`, () => {
+    expect(game.round).toBe(round);
   });
 
   test("round increments after both players pass their turn", () => {
     game.processAction({ type: "pass-turn", username: firstPlayer }); // Alice -> Bob
     game.processAction({ type: "pass-turn", username: secondPlayer }); // Bob -> round should increment
-    expect(game.round).toBe(2);
+    expect(game.round).toBe(round + 1);
   });
 
   test("turn alternates between players", () => {
@@ -33,54 +52,29 @@ describe("GameState core rules", () => {
     expect(game.currentTurn).toBe(firstPlayer);
   });
 
-  test("players start with 1 available shinsu", () => {
+  test("amount of shinsu", () => {
     const aliceState = game.playerStates.Alice;
     const bobState = game.playerStates.Bob;
-    // Alice
-    expect(aliceState.shinsu.normalSpent).toBe(0);
-    expect(aliceState.shinsu.normalAvailable).toBe(1);
-    expect(aliceState.shinsu.recharged).toBe(0);
-    // Bob
-    expect(bobState.shinsu.normalSpent).toBe(0);
-    expect(bobState.shinsu.normalAvailable).toBe(1);
-    expect(bobState.shinsu.recharged).toBe(0);
+    const sumOfAllUnspentShinsu = ((game.round - 1) * (game.round - 1 + 1)) / 2;
+    const expectedRecharged = Math.min(sumOfAllUnspentShinsu, game.MAX_RECHARGED_SHINSU);
+    const expectedNormalAvailable = Math.min(game.round, game.MAX_NORMAL_SHINSU);
+    expectShinsuState(aliceState, 0, expectedNormalAvailable, expectedRecharged);
+    expectShinsuState(bobState, 0, expectedNormalAvailable, expectedRecharged);
   });
 
-  test("players gain 2 shinsu at start of round 2 and recharge 1 shinsu from the previous round", () => {
-    game.processAction({ type: "pass-turn", username: firstPlayer }); // Alice -> Bob
-    game.processAction({ type: "pass-turn", username: secondPlayer }); // Bob -> round 2
+  test("number of cards in hand", () => {
     const aliceState = game.playerStates.Alice;
     const bobState = game.playerStates.Bob;
-    // Alice
-    expect(aliceState.shinsu.normalSpent).toBe(0);
-    expect(aliceState.shinsu.normalAvailable).toBe(2);
-    expect(aliceState.shinsu.recharged).toBe(1);
-    // Bob
-    expect(bobState.shinsu.normalSpent).toBe(0);
-    expect(bobState.shinsu.normalAvailable).toBe(2);
-    expect(bobState.shinsu.recharged).toBe(1);
+    const expectedHandSize = game.INIT_HAND_SIZE + (game.round - 1);
+    expect(aliceState.hand.length).toBe(expectedHandSize);
+    expect(bobState.hand.length).toBe(expectedHandSize);
   });
 
-  test("players start with 4 cards in hand", () => {
+  test("number of cards in deck", () => {
     const aliceState = game.playerStates.Alice;
     const bobState = game.playerStates.Bob;
-    expect(aliceState.hand.length).toBe(4);
-    expect(bobState.hand.length).toBe(4);
-  });
-
-  test("players draw a card at the start of their turn", () => {
-    game.processAction({ type: "pass-turn", username: firstPlayer }); // Alice -> Bob
-    game.processAction({ type: "pass-turn", username: secondPlayer }); // Bob -> round 2
-    const aliceState = game.playerStates.Alice;
-    const bobState = game.playerStates.Bob;
-    expect(aliceState.hand.length).toBe(5);
-    expect(bobState.hand.length).toBe(5);
-  });
-
-  test("players start with 26 cards in deck (after drawing 4)", () => {
-    const aliceState = game.playerStates.Alice;
-    const bobState = game.playerStates.Bob;
-    expect(aliceState.deck.cards.length).toBe(26);
-    expect(bobState.deck.cards.length).toBe(26);
+    const expectedDeckSize = game.INIT_DECK_SIZE - (game.INIT_HAND_SIZE + (game.round - 1));
+    expect(aliceState.deck.length).toBe(expectedDeckSize);
+    expect(bobState.deck.length).toBe(expectedDeckSize);
   });
 });
