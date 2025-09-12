@@ -43,8 +43,8 @@ export default class GameState {
     this.#resetShinsu(this.usernames);
 
     // add mockup effects
-    this.#addEffect("test-console-log-on-turn-end");
-    this.#addEffect("test-console-log-on-turn-end-until-round-end");
+    // this.#addEffect("test-console-log-on-turn-end");
+    // this.#addEffect("test-console-log-on-turn-end-until-round-end");
 
     // publish initial game events
     this.eventBus.publish("OnGameStart", this.playerStates);
