@@ -18,10 +18,16 @@ export default class GameState {
   MAX_NORMAL_SHINSU = 10;
   MAX_RECHARGED_SHINSU = 2;
 
-  constructor(roomCode, config) {
-    if (!roomCode || !config || !config.usernames || config.usernames.length !== 2) {
+  /**
+   *
+   * @param {string} roomCode unique room code for this game
+   * @param {Array<string>} usernames array of exactly 2 usernames
+   * @param {Object} decks (optional) dictionary mapping each username to an array of card ids to use as that player's deck. If null, a random deck will be generated.
+   */
+  constructor(roomCode, usernames, decks = {}) {
+    if (!roomCode || !usernames || usernames.length !== 2) {
       throw new Error(
-        "Invalid game configuration: roomCode and usernames are required and must have exactly 2 usernames."
+        "Invalid arguments: roomCode and usernames are required and must have exactly 2 usernames."
       );
     }
 
@@ -29,15 +35,15 @@ export default class GameState {
     this.logger = new Logger(this.eventBus);
     this.activeEffects = [];
     this.roomCode = roomCode;
-    this.usernames = config.usernames;
+    this.usernames = usernames;
     this.round = 1;
     this.currentTurn = this.usernames[Math.floor(Math.random() * 2)]; // randomly select the first player
     this.roundEndOnTurnEnd = false; // whether the last user action was a pass and it was on the current round
 
     // initialize game state
     this.playerStates = {
-      [this.usernames[0]]: this.#initializePlayerState(this.usernames[0]),
-      [this.usernames[1]]: this.#initializePlayerState(this.usernames[1]),
+      [this.usernames[0]]: this.#initializePlayerState(this.usernames[0], decks[this.usernames[0]]),
+      [this.usernames[1]]: this.#initializePlayerState(this.usernames[1], decks[this.usernames[1]]),
     };
     this.#draw(this.usernames, this.INIT_HAND_SIZE);
     this.#resetShinsu(this.usernames);
@@ -59,11 +65,10 @@ export default class GameState {
     });
   }
 
-  #initializePlayerState(username) {
-    // default values
+  #initializePlayerState(username, deck) {
     return {
       combatIndicatorCodes: ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"],
-      deck: this.#generateRandomDeck(), // generate a random deck for now
+      deck: this.#buildDeckFromCardIds(deck ? deck : this.#generateRandomDeckOfCardIds()),
       lighthouses: { amount: this.INIT_LIGHTHOUSE_AMOUNT },
       field: { frontline: [], backline: [] },
       hand: [],
@@ -73,21 +78,37 @@ export default class GameState {
   }
 
   /**
-   * Generate a random deck.
-   * @returns {Object} { cards: Array of card objects, size: number of cards in the deck }
+   * Build a deck from an array of card ids.
+   * @param {Array<number>} cardIds array of card ids
+   * @returns {Array<Object>} Array of card objects
    */
-  #generateRandomDeck() {
-    const maxCardId = Object.keys(cards).length - 1;
-    const deck = Array.from({ length: this.INIT_DECK_SIZE }, () => {
-      const cardId = Math.floor(Math.random() * (maxCardId + 1));
+  #buildDeckFromCardIds(cardIds) {
+    if (!Array.isArray(cardIds) || cardIds.length !== this.INIT_DECK_SIZE) {
+      throw new Error(`deck must be an array of ${this.INIT_DECK_SIZE} card ids.`);
+    }
+    const deck = [];
+    cardIds.forEach((cardId) => {
       const cardData = cards[cardId];
-      return {
-        id: cardId,
-        traitCodes: cardData.traitCodes,
-        visible: false,
-      };
+      if (cardData === undefined) throw new Error(`Card with id ${cardId} does not exist`);
+      deck.push({ id: cardId, traitCodes: cardData.traitCodes, visible: false });
     });
     return deck;
+  }
+
+  /**
+   * Generate a random array of valid card ids.
+   * @returns {Array<number>} Array of card ids
+   */
+  #generateRandomDeckOfCardIds() {
+    const deck = Array.from({ length: this.INIT_DECK_SIZE }, () => {
+      return this.#getRandomCardId();
+    });
+    return deck;
+  }
+
+  #getRandomCardId() {
+    const maxCardId = Object.keys(cards).length - 1;
+    return Math.floor(Math.random() * (maxCardId + 1));
   }
 
   #draw(usernames, amount) {
