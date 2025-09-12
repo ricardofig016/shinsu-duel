@@ -73,6 +73,95 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
     expect(aliceState.deckSize).toBe(expectedDeckSize);
     expect(bobState.deckSize).toBe(expectedDeckSize);
   });
+
+  test("getOpponentUsername returns correct opponent", () => {
+    expect(game.getClientState(firstPlayer).opponent.username).toBe(secondPlayer);
+    expect(game.getClientState(secondPlayer).opponent.username).toBe(firstPlayer);
+  });
+
+  test("getClientState returns correct structure", () => {
+    const state = game.getClientState(firstPlayer);
+
+    // Top-level keys
+    expect(state).toHaveProperty("you");
+    expect(state).toHaveProperty("opponent");
+    expect(state).toHaveProperty("currentTurn");
+
+    // 'you' and 'opponent' should have expected keys
+    [
+      "combatIndicatorCodes",
+      "deckSize",
+      "lighthouses",
+      "field",
+      "hand",
+      "shinsu",
+      "username",
+      "passButton",
+    ].forEach((key) => {
+      expect(state.you).toHaveProperty(key);
+      expect(state.opponent).toHaveProperty(key);
+    });
+
+    // Username values
+    expect(state.you.username).toBe(firstPlayer);
+    expect(state.opponent.username).toBe(secondPlayer);
+
+    // Pass button structure
+    expect(state.you.passButton).toHaveProperty("isEnabled");
+    expect(state.you.passButton).toHaveProperty("text");
+    expect(typeof state.you.passButton.isEnabled).toBe("boolean");
+    expect(typeof state.you.passButton.text).toBe("string");
+
+    // Field structure
+    expect(state.you.field).toHaveProperty("frontline");
+    expect(state.you.field).toHaveProperty("backline");
+    expect(Array.isArray(state.you.field.frontline)).toBe(true);
+    expect(Array.isArray(state.you.field.backline)).toBe(true);
+
+    // Hand structure
+    expect(Array.isArray(state.you.hand)).toBe(true);
+    if (state.you.hand.length > 0) {
+      expect(state.you.hand[0]).toHaveProperty("id");
+      expect(state.you.hand[0]).toHaveProperty("traitCodes");
+    }
+
+    // Shinsu structure
+    expect(state.you.shinsu).toHaveProperty("normalSpent");
+    expect(state.you.shinsu).toHaveProperty("normalAvailable");
+    expect(state.you.shinsu).toHaveProperty("recharged");
+    expect(typeof state.you.shinsu.normalSpent).toBe("number");
+    expect(typeof state.you.shinsu.normalAvailable).toBe("number");
+    expect(typeof state.you.shinsu.recharged).toBe("number");
+  });
+
+  test("pass button is enabled only for current turn", () => {
+    const youState = game.getClientState(firstPlayer).you;
+    const opponentState = game.getClientState(firstPlayer).opponent;
+    expect(youState.passButton.isEnabled).toBe(true);
+    expect(opponentState.passButton.isEnabled).toBe(false);
+  });
+
+  test("invalid action type throws error", () => {
+    expect(() => game.processAction({ type: "invalid-action", username: firstPlayer })).toThrow(
+      /Invalid action type/
+    );
+  });
+
+  test("invalid username throws error", () => {
+    expect(() => game.processAction({ type: "pass-turn", username: "NotAPlayer" })).toThrow(
+      /Invalid username/
+    );
+  });
+
+  test("missing fields in action data throws error", () => {
+    expect(() => game.processAction({ type: "deploy-unit", username: firstPlayer })).toThrow(
+      /Missing fields/
+    );
+  });
+
+  test("not your turn throws error", () => {
+    expect(() => game.processAction({ type: "pass-turn", username: secondPlayer })).toThrow(/not your turn/);
+  });
 });
 
 function buildFilledDeck(cardId, count = 30) {
