@@ -2,11 +2,10 @@
   "0": {
     "name": "Jue Viole Grace",
     "rarity": "epic",
-    "abilities": ["Deal 2 damage to 3 enemies", "Spend 1 shinsu to deal 7 damage to an enemy"],
-    "passive": "When I take damage, refill 1 shinsu",
     "hp": 5,
     "cost": 3,
     "positionCodes": ["wavecontroller"],
+    "abilityCodes": ["Deal 2 damage to 3 enemies", "Spend 1 shinsu to deal 7 damage to an enemy"],
     "traitCodes": ["burned", "sharpshooter"],
     "affiliationCodes": ["fug"],
     "passiveCodes": ["draw-turn-end"]
@@ -15,35 +14,32 @@
     "name": "Zahard",
     "sobriquet": "King of the Tower",
     "rarity": "legendary",
-    "abilities": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
-    "passive": "Enemy fishermen deal -2 damage",
     "hp": 10,
     "cost": 5,
     "positionCodes": ["fisherman"],
+    "abilityCodes": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
     "traitCodes": ["burned"],
     "affiliationCodes": ["greatwarriors"],
-    "passiveCodes": []
+    "passiveCodes": ["Enemy fishermen deal -2 damage"]
   },
   "2": {
     "name": "Khun Aguero Agnes",
     "rarity": "rare",
-    "abilities": ["hello :)"],
-    "passive": "When I take damage, deal 1 damage to an enemy",
     "hp": 5,
     "cost": 2,
     "positionCodes": ["lightbearer"],
+    "abilityCodes": ["create-one-lighthouse"],
     "traitCodes": [],
     "affiliationCodes": ["khunfamily"],
-    "passiveCodes": []
+    "passiveCodes": ["When I take damage, deal 1 damage to an enemy"]
   },
   "3": {
     "name": "Rak Wraithraiser",
     "rarity": "common",
-    "abilities": ["nomnomnomnom", "i like chocolate bars :)", "all my friends are turtles :("],
-    "passive": "I am always angry",
     "hp": 5,
     "cost": 1,
     "positionCodes": ["spearbearer"],
+    "abilityCodes": ["nomnomnomnom", "i like chocolate bars :)", "all my friends are turtles :("],
     "traitCodes": [
       "barrier",
       "bloodthirsty",
@@ -72,16 +68,16 @@
       "weak"
     ],
     "affiliationCodes": [],
-    "passiveCodes": []
+
+    "passiveCodes": ["I am always angry"]
   },
   "4": {
     "name": "Ship Leesoo",
     "rarity": "rare",
-    "abilities": [],
-    "passive": "-",
     "hp": 5,
     "cost": 1,
     "positionCodes": ["scout"],
+    "abilityCodes": [],
     "traitCodes": [],
     "affiliationCodes": [],
     "passiveCodes": []
@@ -90,19 +86,22 @@
     "name": "Evankhell",
     "sobriquet": "The Infernal Evankhell",
     "rarity": "common",
-    "abilities": ["FIRE MUAHAHAHHAHAHAH", "THOU SHALL BURN", "FEEL THE WRATH OF THE ANCIENT FLAMES"],
-    "passive": "I am immune to fire",
     "hp": 15,
     "cost": 8,
     "positionCodes": ["wavecontroller", "fisherman"],
+    "abilityCodes": ["FIRE MUAHAHAHHAHAHAH", "THOU SHALL BURN", "FEEL THE WRATH OF THE ANCIENT FLAMES"],
     "traitCodes": ["ruthless", "lastonestanding"],
     "affiliationCodes": [],
-    "passiveCodes": []
+    "passiveCodes": ["I am immune to fire"]
   },
   "6": {
     "name": "Rachel",
     "rarity": "epic",
-    "abilities": [
+    "passive": "aaaaaaaa",
+    "hp": 1,
+    "cost": 1,
+    "positionCodes": ["lightbearer"],
+    "abilityCodes": [
       "Deal 1 damage to an enemy",
       "Deal 1 damage to an enemy",
       "Deal 1 damage to an enemy",
@@ -110,10 +109,6 @@
       "Deal 1 damage to an enemy",
       "Deal 2 damage to an enemy"
     ],
-    "passive": "aaaaaaaa",
-    "hp": 1,
-    "cost": 1,
-    "positionCodes": ["lightbearer"],
     "traitCodes": ["dealer", "creator"],
     "affiliationCodes": ["teamrachel"],
     "passiveCodes": []

@@ -52,7 +52,7 @@ const load = async (
   // artwork
   const artworkContainer = container.querySelector(".unit-card-horizontal-artwork");
   artworkContainer.style.backgroundImage = `url("${cardData.artworkPath}")`;
-  await addTooltip(container, artworkContainer, cardData.name, cardData.abilities);
+  await addTooltip(container, artworkContainer, cardData.name, cardData.abilityCodes);
   // position
   const positionContainer = container.querySelector(".unit-card-horizontal-position");
   positionContainer.innerHTML = "";

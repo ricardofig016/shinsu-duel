@@ -205,7 +205,7 @@ const load = async (
   // affiliations
   await loadAffiliations(container, cardData.affiliationCodes);
   // abilities
-  await loadAbilities(container, cardData.abilities);
+  await loadAbilities(container, cardData.abilityCodes);
   // shinsu
   const shinsuContainer = container.querySelector(".unit-card-vertical-shinsu");
   shinsuContainer.innerText = cardData.cost;
