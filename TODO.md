@@ -10,6 +10,8 @@
 
 ## In Progress
 
+- [ ] refactor GameState processAction method to an ActionHandler interface class
+
 ## Completed
 
 - [x] refactor 'abilities' to 'abilityCodes' from cards.json
