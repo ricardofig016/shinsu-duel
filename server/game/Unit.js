@@ -1,4 +1,4 @@
-import abilityRegistry from "./abilityRegistry.js";
+import abilityRegistry from "./registries/abilityRegistry.js";
 
 export default class Unit {
   constructor(gameState, cardId, cardData, owner, placedPositionCode, bus) {

@@ -1,7 +1,7 @@
 import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
 import EventBus from "./EventBus.js";
-import effectRegistry from "./effectRegistry.js";
+import effectRegistry from "./registries/effectRegistry.js";
 import Logger from "./Logger.js";
 import Unit from "./Unit.js";
 

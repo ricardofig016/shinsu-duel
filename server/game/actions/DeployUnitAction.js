@@ -1,4 +1,4 @@
-import ActionHandler from "./ActionHandler.js";
+import ActionHandler from "../ActionHandler.js";
 import Unit from "../Unit.js";
 
 export default class DeployUnitAction extends ActionHandler {
