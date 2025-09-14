@@ -8,6 +8,10 @@ export default class EventBus {
     "OnRoundEnd",
     "OnDeployUnit",
     "OnSummonUnit",
+    "UseAbilityIntent",
+    "UseAbilityResolved",
+    "UseAbilityApplied",
+    "OnLighthousesChanged", // TODO: this is just a test example, remove later
   ];
 
   constructor() {

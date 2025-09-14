@@ -21,6 +21,20 @@ function expectShinsuState(playerState, normalSpent, normalAvailable, recharged)
   expect(playerState.shinsu.recharged).toBe(recharged);
 }
 
+// Helper to create a game with specific cards in hand
+function setupGameWithCardsInHand(cardsInHand) {
+  // Create decks with specific cards at the end for drawing into hand
+  const deckCards = Array(26).fill(0);
+  const fullDeck = [...deckCards, ...cardsInHand];
+  const decks = {
+    Alice: fullDeck,
+    Bob: Array(30).fill(0),
+  };
+
+  const newGame = new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
+  return newGame;
+}
+
 describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   let game, firstPlayer, secondPlayer;
 
@@ -241,22 +255,6 @@ describe("deck behavior", () => {
 });
 
 describe("place cards on field", () => {
-  let game, firstPlayer;
-
-  // Helper to create a game with specific cards in hand
-  function setupGameWithCardsInHand(cardsInHand) {
-    // Create decks with specific cards at the end for drawing into hand
-    const deckCards = Array(26).fill(0);
-    const fullDeck = [...deckCards, ...cardsInHand];
-    const decks = {
-      Alice: fullDeck,
-      Bob: Array(30).fill(0),
-    };
-
-    const newGame = new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
-    return newGame;
-  }
-
   test("placing a scout unit puts it in the frontline", () => {
     // Ship is a scout (card id 4)
     const game = setupGameWithCardsInHand([4, 4, 4, 4]);
@@ -273,7 +271,7 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.frontline.length).toBe(1);
     expect(playerState.field.backline.length).toBe(0);
-    expect(playerState.field.frontline[0].id).toBe(4); // Ship's ID
+    expect(playerState.field.frontline[0].cardId).toBe(4); // Ship's ID
     expect(playerState.field.frontline[0].placedPositionCode).toBe("scout");
     expect(playerState.hand.length).toBe(3); // One card removed from hand
   });
@@ -294,7 +292,7 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.backline.length).toBe(1);
     expect(playerState.field.frontline.length).toBe(0);
-    expect(playerState.field.backline[0].id).toBe(6); // Rachel's id
+    expect(playerState.field.backline[0].cardId).toBe(6); // Rachel's id
     expect(playerState.field.backline[0].placedPositionCode).toBe("lightbearer");
     expect(playerState.hand.length).toBe(3); // One card removed from hand
   });
@@ -426,5 +424,37 @@ describe("place cards on field", () => {
 
     // Check turn switched
     expect(game.currentTurn).toBe(USERNAMES[1]);
+  });
+});
+
+describe("use simple abilities", () => {
+  test("khun create-one-lighthouse ability", () => {
+    const game = setupGameWithCardsInHand([2, 2, 2, 2]);
+    advanceToRound(game, 2);
+
+    // Deploy Khun
+    game.processAction({
+      type: "deploy-unit",
+      username: USERNAMES[0],
+      handId: 0,
+      placedPositionCode: "lightbearer",
+    });
+
+    // Bob passes turn
+    game.processAction({ type: "pass-turn", username: USERNAMES[1] });
+
+    // Check that we start with 20 lighthouses
+    expect(game.playerStates[USERNAMES[0]].lighthouses.amount).toBe(20);
+
+    // Use a simple ability
+    game.processAction({
+      type: "use-ability",
+      username: USERNAMES[0],
+      unitId: game.playerStates[USERNAMES[0]].field.backline[0].id,
+      abilityCode: "create-one-lighthouse",
+    });
+
+    // Check that the ability created a lighthouse
+    expect(game.playerStates[USERNAMES[0]].lighthouses.amount).toBe(21);
   });
 });

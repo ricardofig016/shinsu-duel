@@ -3,12 +3,16 @@ import cards from "../data/cards.json" assert { type: "json" };
 import EventBus from "./EventBus.js";
 import effectRegistry from "./effectRegistry.js";
 import Logger from "./Logger.js";
+import Unit from "./Unit.js";
 
 export default class GameState {
   // all of the valid actions the user can take and their required fields
   VALID_USER_ACTIONS = {
     "deploy-unit": ["handId", "placedPositionCode", "username"],
     "pass-turn": ["username"],
+    "use-ability": ["username", "unitId", "abilityCode"],
+    "add-lighthouses": ["username", "amount"],
+    noop: ["username"],
   };
   // game settings
   INIT_HAND_SIZE = 4;
@@ -128,8 +132,9 @@ export default class GameState {
   }
 
   #mapUnits(units) {
+    // TODO: change id to cardId and add unit id
     return units.map((unit) => ({
-      id: unit.id,
+      id: unit.cardId,
       traitCodes: unit.traitCodes,
       placedPositionCode: unit.placedPositionCode,
     }));
@@ -354,11 +359,11 @@ export default class GameState {
   }
 
   #deployUnit(username, handId, placedPositionCode) {
-    const player = this.playerStates[username];
-    const [card] = player.hand.splice(handId, 1); // remove card from hand
-    card.placedPositionCode = placedPositionCode; // set position
-    const line = player.field[positions[card.placedPositionCode].line];
-    line.push(card); // add card to the field
+    const playerState = this.playerStates[username];
+    const [card] = playerState.hand.splice(handId, 1); // remove card from hand { id, traitCodes, visible }
+    const line = playerState.field[positions[placedPositionCode].line];
+    const unit = new Unit(this, card.id, cards[card.id], username, placedPositionCode, this.eventBus);
+    line.push(unit); // add card to the field
     this.#spendShinsu(username, cards[card.id].cost); // update shinsu
     this.eventBus.publish("OnDeployUnit", {
       username,
@@ -369,6 +374,13 @@ export default class GameState {
       card,
     });
     this.#endTurn();
+  }
+
+  #useAbility(username, unitId, abilityCode) {
+    const playerState = this.playerStates[username];
+    const unit = [...playerState.field.frontline, ...playerState.field.backline].find((u) => u.id === unitId);
+    if (!unit) throw new Error(`Unit with id ${unitId} not found on the field.`);
+    unit.useAbility(abilityCode, null);
   }
 
   removeEffect(effectInstance) {
@@ -402,6 +414,14 @@ export default class GameState {
         break;
       case "pass-turn":
         this.#endTurn(true);
+        break;
+      case "use-ability":
+        this.#useAbility(data.username, data.unitId, data.abilityCode);
+        break;
+      case "add-lighthouses":
+        this.playerStates[data.username].lighthouses.amount += data.amount;
+        break;
+      case "noop":
         break;
       default:
         throw new Error("Invalid action type: " + data.type);
