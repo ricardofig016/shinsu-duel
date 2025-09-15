@@ -46,8 +46,7 @@ export default class DeployUnitAction extends ActionHandler {
       card.id,
       this.gameState.cards[card.id],
       username,
-      placedPositionCode,
-      this.gameState.eventBus
+      placedPositionCode
     );
     const line = player.field[this.gameState.positions[placedPositionCode].line];
     line.push(unit);

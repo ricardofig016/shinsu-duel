@@ -4,7 +4,6 @@ import EventBus from "./EventBus.js";
 import effectRegistry from "./registries/effectRegistry.js";
 import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
-import Unit from "./Unit.js";
 
 export default class GameState {
   // all of the valid actions the user can take and their required fields

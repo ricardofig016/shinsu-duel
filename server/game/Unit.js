@@ -1,7 +1,10 @@
 import abilityRegistry from "./registries/abilityRegistry.js";
 
+/**
+ * Represents a unit placed on the battlefield.
+ */
 export default class Unit {
-  constructor(gameState, cardId, cardData, owner, placedPositionCode, bus) {
+  constructor(gameState, cardId, cardData, owner, placedPositionCode) {
     this.id = Math.random().toString(36).substring(2, 9); // unique instance id
 
     this.cardId = cardId;
@@ -20,7 +23,7 @@ export default class Unit {
 
     this.gameState = gameState;
     this.owner = owner; // player username
-    this.bus = bus;
+    this.bus = gameState.eventBus;
 
     this.#initializeAbilities();
   }
