@@ -7,12 +7,12 @@
 - [ ] add passives to cards (this is in the notebook)
 - [ ] add unit stat recalculation when sending game state data to users
 - [ ] add a new negative trait around silencing
-- [ ] add unit test for too many fields in ActionHandler.validateSchema
 
 ## In Progress
 
 ## Completed
 
+- [x] add unit test for too many fields in ActionHandler.validateSchema
 - [x] refactor GameState processAction method to an ActionHandler interface class
 - [x] refactor 'abilities' to 'abilityCodes' from cards.json
 - [x] refactor "combat indicator" everywhere to "combat slots"

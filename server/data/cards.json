@@ -7,7 +7,7 @@
     "positionCodes": ["wavecontroller"],
     "abilityCodes": ["Deal 2 damage to 3 enemies", "Spend 1 shinsu to deal 7 damage to an enemy"],
     "traitCodes": ["burned", "sharpshooter"],
-    "affiliationCodes": ["fug"],
+    "affiliationCodes": ["fug", "team-fug", "team-sweet-and-sour"],
     "passiveCodes": ["draw-turn-end"]
   },
   "1": {
@@ -19,7 +19,7 @@
     "positionCodes": ["fisherman"],
     "abilityCodes": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
     "traitCodes": ["burned"],
-    "affiliationCodes": ["greatwarriors"],
+    "affiliationCodes": [],
     "passiveCodes": ["Enemy fishermen deal -2 damage"]
   },
   "2": {
@@ -30,7 +30,7 @@
     "positionCodes": ["lightbearer"],
     "abilityCodes": ["create-one-lighthouse"],
     "traitCodes": [],
-    "affiliationCodes": ["khunfamily"],
+    "affiliationCodes": ["khun-family", "khuns-team", "team-baam"],
     "passiveCodes": ["When I take damage, deal 1 damage to an enemy"]
   },
   "3": {
@@ -67,8 +67,7 @@
       "taunt",
       "weak"
     ],
-    "affiliationCodes": [],
-
+    "affiliationCodes": ["team-baam"],
     "passiveCodes": ["I am always angry"]
   },
   "4": {
@@ -79,7 +78,7 @@
     "positionCodes": ["scout"],
     "abilityCodes": [],
     "traitCodes": [],
-    "affiliationCodes": [],
+    "affiliationCodes": ["ships-team"],
     "passiveCodes": []
   },
   "5": {
@@ -91,7 +90,7 @@
     "positionCodes": ["wavecontroller", "fisherman"],
     "abilityCodes": ["FIRE MUAHAHAHHAHAHAH", "THOU SHALL BURN", "FEEL THE WRATH OF THE ANCIENT FLAMES"],
     "traitCodes": ["ruthless", "lastonestanding"],
-    "affiliationCodes": [],
+    "affiliationCodes": ["fug"],
     "passiveCodes": ["I am immune to fire"]
   },
   "6": {
@@ -110,7 +109,7 @@
       "Deal 2 damage to an enemy"
     ],
     "traitCodes": ["dealer", "creator"],
-    "affiliationCodes": ["teamrachel"],
+    "affiliationCodes": ["team-rachel", "khuns-team", "revolution"],
     "passiveCodes": []
   }
 }
