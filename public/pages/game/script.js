@@ -145,9 +145,8 @@ const prepareBoard = async (data, socket) => {
       dropZoneContainer.dataset.positionCode = code;
       dropZoneContainer.addEventListener("mouseup", (event) => {
         socket.emit("game-action", {
-          type: "deploy-unit",
-          handId: draggedCardHandId,
-          placedPositionCode: code,
+          type: "deploy-unit-action",
+          data: { handId: draggedCardHandId, placedPositionCode: code },
         });
         draggedCardHandId = null;
       });
@@ -159,7 +158,8 @@ const prepareBoard = async (data, socket) => {
   const passButtonFrame = document.querySelector(`#you-container .pass-button-frame`);
   passButtonFrame.addEventListener("click", () => {
     socket.emit("game-action", {
-      type: "pass-turn",
+      type: "pass-turn-action",
+      data: {},
     });
   });
 };

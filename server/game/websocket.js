@@ -37,12 +37,13 @@ export function initializeGameWebSocket(io) {
       }
     }
 
-    socket.on("game-action", (actionData) => {
+    socket.on("game-action", (action) => {
       const game = activeGames.get(roomCode);
       if (!game) socket.emit("game-error", "Game has not started yet.");
       try {
-        actionData.username = username; // always add username to action data
-        game.processAction(actionData);
+        action.data.username = username; // always add username to action data
+        action.data.source = "player"; // mark action as player-sourced
+        game.processAction(action);
         broadcast(io, roomCode, "game-update", (playerSocket) =>
           game.getClientState(playerSocket.request.session.username)
         );
