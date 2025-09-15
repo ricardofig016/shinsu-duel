@@ -21,7 +21,7 @@ export default class UseAbilityAction extends ActionHandler {
     if (this.gameState.currentTurn !== username) throw new Error("It's not your turn.");
 
     const unit = [...playerState.field.frontline, ...playerState.field.backline].find((u) => u.id === unitId);
-    if (!unit) throw new Error(`Unit ${unitId} not found in field.`);
+    if (!unit) throw new Error(`Unit ${unitId} not found in your field.`);
 
     return true;
   }
