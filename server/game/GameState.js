@@ -223,11 +223,13 @@ export default class GameState {
       username: this.currentTurn,
       round: this.round,
     });
+
     if (isPassAction) {
       // end the round if both players passed their turn consecutively
       if (this.roundEndOnTurnEnd) this.#endRound();
       else this.roundEndOnTurnEnd = true; // set the flag to true for the next turn
-    }
+    } else this.roundEndOnTurnEnd = false; // reset the flag if the action was not a pass
+
     // flip turn to the next player
     this.currentTurn = this.usernames.find((p) => p !== this.currentTurn);
     this.eventBus.publish("OnTurnStart", {

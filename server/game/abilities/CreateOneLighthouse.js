@@ -18,5 +18,6 @@ export default class CreateOneLighthouse extends Ability {
 
   apply(action) {
     this.gameState.processAction(action);
+    this.gameState.endTurn();
   }
 }
