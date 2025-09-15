@@ -10,10 +10,9 @@
 
 ## In Progress
 
-- [ ] refactor GameState processAction method to an ActionHandler interface class
-
 ## Completed
 
+- [x] refactor GameState processAction method to an ActionHandler interface class
 - [x] refactor 'abilities' to 'abilityCodes' from cards.json
 - [x] refactor "combat indicator" everywhere to "combat slots"
 - [x] change how turn switching works at round end to align with new rules: players should always alternate turns, even after round end

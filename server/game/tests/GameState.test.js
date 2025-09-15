@@ -10,8 +10,8 @@ function advanceToRound(game, round) {
   let safety = 0;
   while (game.round < round) {
     if (++safety > 1000) throw new Error("advanceToRound safety limit hit");
-    game.processAction({ type: "pass-turn", username: firstPlayer });
-    game.processAction({ type: "pass-turn", username: secondPlayer });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: firstPlayer } });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: secondPlayer } });
   }
 }
 
@@ -50,16 +50,18 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   });
 
   test("round increments after both players pass their turn", () => {
-    game.processAction({ type: "pass-turn", username: firstPlayer }); // Alice -> Bob
-    game.processAction({ type: "pass-turn", username: secondPlayer }); // Bob -> round should increment
+    // Alice -> Bob
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: firstPlayer } });
+    // Bob -> round should increment
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: secondPlayer } });
     expect(game.round).toBe(round + 1);
   });
 
   test("turn alternates between players", () => {
     expect(game.currentTurn).toBe(firstPlayer);
-    game.processAction({ type: "pass-turn", username: firstPlayer });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: firstPlayer } });
     expect(game.currentTurn).toBe(secondPlayer);
-    game.processAction({ type: "pass-turn", username: secondPlayer });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: secondPlayer } });
     expect(game.currentTurn).toBe(firstPlayer);
   });
 
@@ -157,25 +159,27 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   });
 
   test("invalid action type throws error", () => {
-    expect(() => game.processAction({ type: "invalid-action", username: firstPlayer })).toThrow(
-      /Invalid action type/
+    expect(() => game.processAction({ type: "invalid-action", data: { source: "player" } })).toThrow(
+      /invalid action type/
     );
   });
 
   test("invalid username throws error", () => {
-    expect(() => game.processAction({ type: "pass-turn", username: "NotAPlayer" })).toThrow(
-      /Invalid username/
-    );
+    expect(() =>
+      game.processAction({ type: "pass-turn-action", data: { source: "player", username: "NotAPlayer" } })
+    ).toThrow(/Player NotAPlayer not found/);
   });
 
   test("missing fields in action data throws error", () => {
-    expect(() => game.processAction({ type: "deploy-unit", username: firstPlayer })).toThrow(
-      /Missing fields/
-    );
+    expect(() =>
+      game.processAction({ type: "deploy-unit-action", data: { source: "player", username: firstPlayer } })
+    ).toThrow(/Missing required field/);
   });
 
   test("not your turn throws error", () => {
-    expect(() => game.processAction({ type: "pass-turn", username: secondPlayer })).toThrow(/not your turn/);
+    expect(() =>
+      game.processAction({ type: "pass-turn-action", data: { source: "player", username: secondPlayer } })
+    ).toThrow(/not your turn/);
   });
 });
 
@@ -246,8 +250,8 @@ describe("deck behavior", () => {
     // Determine current players for safe calls
     const first = game.currentTurn;
     const second = first === "Alice" ? "Bob" : "Alice";
-    game.processAction({ type: "pass-turn", username: first });
-    game.processAction({ type: "pass-turn", username: second });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: first } });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: second } });
 
     const handAfter = game.getClientState("Alice").you.hand;
     expect(handAfter).toEqual(handBefore); // no new cards since deck was empty
@@ -261,10 +265,8 @@ describe("place cards on field", () => {
 
     // Deploy Ship as a scout
     game.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "scout",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "scout" },
     });
 
     // Check that the card is on the field in the frontline
@@ -282,10 +284,8 @@ describe("place cards on field", () => {
 
     // Deploy Rachel as a lightbearer
     game.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "lightbearer",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "lightbearer" },
     });
 
     // Check that the card is on the field in the backline
@@ -309,10 +309,8 @@ describe("place cards on field", () => {
 
     // Deploy Evankell
     game.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "wavecontroller",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
     });
 
     // Check that shinsu was spent
@@ -337,10 +335,8 @@ describe("place cards on field", () => {
 
     // Try as fisherman first
     game.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "fisherman",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "fisherman" },
     });
 
     // Reset for second test with another game instance
@@ -351,10 +347,8 @@ describe("place cards on field", () => {
 
     // Try as wavecontroller
     game2.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "wavecontroller",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
     });
 
     // Both placements should succeed
@@ -372,10 +366,8 @@ describe("place cards on field", () => {
     // Should throw error when trying to place as fisherman
     expect(() =>
       game.processAction({
-        type: "deploy-unit",
-        username: USERNAMES[0],
-        handId: 0,
-        placedPositionCode: "fisherman",
+        type: "deploy-unit-action",
+        data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "fisherman" },
       })
     ).toThrow(/Card cannot be placed in position/);
   });
@@ -390,10 +382,8 @@ describe("place cards on field", () => {
     // Should throw error when trying to deploy expensive unit
     expect(() =>
       game.processAction({
-        type: "deploy-unit",
-        username: USERNAMES[0],
-        handId: 0,
-        placedPositionCode: "wavecontroller",
+        type: "deploy-unit-action",
+        data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
       })
     ).toThrow(/Not enough shinsu/);
   });
@@ -410,10 +400,8 @@ describe("place cards on field", () => {
 
     // Deploy Rak
     game.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "spearbearer",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "spearbearer" },
     });
 
     // Check events were published
@@ -427,34 +415,36 @@ describe("place cards on field", () => {
   });
 });
 
-describe("use simple abilities", () => {
-  test("khun create-one-lighthouse ability", () => {
+describe("use simple ability (khun's create-one-lighthouse)", () => {
+  test("ability alters lighthouse amount", () => {
     const game = setupGameWithCardsInHand([2, 2, 2, 2]);
     advanceToRound(game, 2);
 
     // Deploy Khun
     game.processAction({
-      type: "deploy-unit",
-      username: USERNAMES[0],
-      handId: 0,
-      placedPositionCode: "lightbearer",
+      type: "deploy-unit-action",
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "lightbearer" },
     });
 
     // Bob passes turn
-    game.processAction({ type: "pass-turn", username: USERNAMES[1] });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: USERNAMES[1] } });
 
     // Check that we start with 20 lighthouses
     expect(game.playerStates[USERNAMES[0]].lighthouses.amount).toBe(20);
 
     // Use a simple ability
     game.processAction({
-      type: "use-ability",
-      username: USERNAMES[0],
-      unitId: game.playerStates[USERNAMES[0]].field.backline[0].id,
-      abilityCode: "create-one-lighthouse",
+      type: "use-ability-action",
+      data: {
+        source: "player",
+        username: USERNAMES[0],
+        unitId: game.playerStates[USERNAMES[0]].field.backline[0].id,
+        abilityCode: "create-one-lighthouse",
+      },
     });
 
     // Check that the ability created a lighthouse
+    console.log(game.playerStates[USERNAMES[0]].lighthouses);
     expect(game.playerStates[USERNAMES[0]].lighthouses.amount).toBe(21);
   });
 });

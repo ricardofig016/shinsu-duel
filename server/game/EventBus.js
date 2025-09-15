@@ -11,6 +11,7 @@ export default class EventBus {
     "UseAbilityIntent",
     "UseAbilityResolved",
     "UseAbilityApplied",
+    "OnAddLighthouses",
     "OnLighthousesChanged", // TODO: this is just a test example, remove later
   ];
 

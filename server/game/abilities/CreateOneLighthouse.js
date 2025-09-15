@@ -10,10 +10,13 @@ export default class CreateOneLighthouse extends Ability {
   }
 
   execute(context) {
-    return { type: "add-lighthouses", username: context.unit.owner, amount: this.params.amount };
+    return {
+      type: "add-lighthouses-action",
+      data: { source: "system", username: context.unit.owner, amount: this.params.amount },
+    };
   }
 
   apply(action) {
-    if (action.type === "add-lighthouses") this.gameState.processAction(action);
+    this.gameState.processAction(action);
   }
 }

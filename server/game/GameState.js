@@ -1,7 +1,8 @@
-import positions from "../data/positions.json" assert { type: "json" };
 import cards from "../data/cards.json" assert { type: "json" };
+import positions from "../data/positions.json" assert { type: "json" };
 import EventBus from "./EventBus.js";
 import effectRegistry from "./registries/effectRegistry.js";
+import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
 import Unit from "./Unit.js";
 
@@ -38,7 +39,12 @@ export default class GameState {
       throw new Error("firstPlayer must be one of the usernames in the game");
 
     this.eventBus = new EventBus();
+    this.actionRegistry = createActionRegistry(this); // TODO: this may be broken due to working with old gameState version
     this.logger = new Logger(this.eventBus);
+
+    this.cards = cards;
+    this.positions = positions;
+
     this.activeEffects = [];
     this.roomCode = roomCode;
     this.usernames = usernames;
@@ -94,7 +100,7 @@ export default class GameState {
     }
     const deck = [];
     cardIds.forEach((cardId) => {
-      const cardData = cards[cardId];
+      const cardData = this.cards[cardId];
       if (cardData === undefined) throw new Error(`Card with id ${cardId} does not exist`);
       deck.push({ id: cardId, traitCodes: cardData.traitCodes, visible: false });
     });
@@ -113,7 +119,7 @@ export default class GameState {
   }
 
   #getRandomCardId() {
-    const maxCardId = Object.keys(cards).length - 1;
+    const maxCardId = Object.keys(this.cards).length - 1;
     return Math.floor(Math.random() * (maxCardId + 1));
   }
 
@@ -212,12 +218,12 @@ export default class GameState {
     };
   }
 
-  #endTurn(isUserAction = false) {
+  endTurn(isPassAction = false) {
     this.eventBus.publish("OnTurnEnd", {
       username: this.currentTurn,
       round: this.round,
     });
-    if (isUserAction) {
+    if (isPassAction) {
       // end the round if both players passed their turn consecutively
       if (this.roundEndOnTurnEnd) this.#endRound();
       else this.roundEndOnTurnEnd = true; // set the flag to true for the next turn
@@ -249,6 +255,12 @@ export default class GameState {
     });
   }
 
+  getTotalShinsu(username) {
+    const player = this.playerStates[username];
+    if (!player) throw new Error(`Player ${username} not found.`);
+    return player.shinsu.normalAvailable + player.shinsu.recharged;
+  }
+
   /**
    * Reset shinsu for the given usernames. This is called primarily at the end of a round.
    * @param {*} usernames - array of strings, with each username to reset
@@ -268,82 +280,13 @@ export default class GameState {
   }
 
   /**
-   * Validate the action data.
-   * @param {*} data
-   * @returns true if action data is valid, throws an error otherwise.
-   */
-  #validateAction(data) {
-    // general checks
-    if (!data || !data.type || !this.VALID_USER_ACTIONS[data.type]) {
-      throw new Error("Invalid action type: " + JSON.stringify(data));
-    }
-    if (!data.username || !this.playerStates[data.username]) {
-      throw new Error("Invalid username in action data: " + JSON.stringify(data));
-    }
-    if (!this.VALID_USER_ACTIONS[data.type].every((field) => field in data)) {
-      throw new Error("Missing fields in action data: " + JSON.stringify(data));
-    }
-    if (data.username !== this.currentTurn) {
-      throw new Error("It's not your turn: " + data.username);
-    }
-
-    // specific checks
-    if (data.type === "deploy-unit") {
-      this.#validateDeployUnitAction(data);
-    }
-    return true;
-  }
-
-  /**
-   * Validate the deploy-unit action data.
-   * to pass validation, all of the following must happen:
-   * - unit is in the player's hand
-   * - unit is placed in one of the valid positions
-   * - the player must have enough shinsu
-   * @param {*} data
-   * @returns true if action data is valid, throws an error otherwise.
-   */
-  #validateDeployUnitAction(data) {
-    const player = this.playerStates[data.username];
-    if (data.handId < 0 || data.handId >= player.hand.length) {
-      throw new Error("Invalid handId: " + data.handId);
-    }
-    if (!positions[data.placedPositionCode]) {
-      throw new Error(
-        `Invalid placedPositionCode ${data.placedPositionCode}. Must be one of ${JSON.stringify(
-          Object.keys(positions)
-        )}`
-      );
-    }
-    const card = player.hand[data.handId];
-    if (!card || card.id === undefined || !cards[card.id]) {
-      throw new Error(`Card with id ${data.handId} not found in hand.`);
-    }
-    if (!cards[card.id].positionCodes.includes(data.placedPositionCode)) {
-      throw new Error(
-        `Card cannot be placed in position ${data.placedPositionCode}. Must be one of ${JSON.stringify(
-          cards[card.id].positionCodes
-        )}`
-      );
-    }
-    const totalShinsu = player.shinsu.normalAvailable + player.shinsu.recharged;
-    if (cards[card.id].cost > totalShinsu) {
-      throw new Error(
-        `Not enough shinsu to deploy ${cards[card.id].name}. You need ${
-          cards[card.id].cost
-        } shinsu, but only have ${totalShinsu}.`
-      );
-    }
-    return true;
-  }
-
-  /**
    * First, deduct from recharged shinsu, then deduct the rest from normal shinsu
    * @param {string} username
    * @param {number} cost - the cost to deduct (int)
    */
-  #spendShinsu(username, cost) {
+  spendShinsu(username, cost) {
     const player = this.playerStates[username];
+    if (!player) throw new Error(`Player ${username} not found.`);
     if (!Number.isInteger(cost) || cost < 0) return;
     const deductedRechargedShinsu = Math.min(player.shinsu.recharged, cost);
     player.shinsu.recharged -= deductedRechargedShinsu;
@@ -356,31 +299,6 @@ export default class GameState {
     if (!EffectClass) throw new Error(`No effect found for id ${effectId}`);
     const instance = new EffectClass(this); // TODO: add more info here in the future (like source, owner, etc)
     this.activeEffects.push(instance);
-  }
-
-  #deployUnit(username, handId, placedPositionCode) {
-    const playerState = this.playerStates[username];
-    const [card] = playerState.hand.splice(handId, 1); // remove card from hand { id, traitCodes, visible }
-    const line = playerState.field[positions[placedPositionCode].line];
-    const unit = new Unit(this, card.id, cards[card.id], username, placedPositionCode, this.eventBus);
-    line.push(unit); // add card to the field
-    this.#spendShinsu(username, cards[card.id].cost); // update shinsu
-    this.eventBus.publish("OnDeployUnit", {
-      username,
-      card,
-    });
-    this.eventBus.publish("OnSummonUnit", {
-      username,
-      card,
-    });
-    this.#endTurn();
-  }
-
-  #useAbility(username, unitId, abilityCode) {
-    const playerState = this.playerStates[username];
-    const unit = [...playerState.field.frontline, ...playerState.field.backline].find((u) => u.id === unitId);
-    if (!unit) throw new Error(`Unit with id ${unitId} not found on the field.`);
-    unit.useAbility(abilityCode, null);
   }
 
   removeEffect(effectInstance) {
@@ -403,28 +321,16 @@ export default class GameState {
     };
   }
 
-  processAction(data) {
-    this.#validateAction(data); // if the action is invalid, this method will throw an error
-    this.logger.logAction(data);
-    // reset the flag if the user did not pass their turn
-    if (data.type !== "pass-turn") this.roundEndOnTurnEnd = false;
-    switch (data.type) {
-      case "deploy-unit":
-        this.#deployUnit(data.username, data.handId, data.placedPositionCode);
-        break;
-      case "pass-turn":
-        this.#endTurn(true);
-        break;
-      case "use-ability":
-        this.#useAbility(data.username, data.unitId, data.abilityCode);
-        break;
-      case "add-lighthouses":
-        this.playerStates[data.username].lighthouses.amount += data.amount;
-        break;
-      case "noop":
-        break;
-      default:
-        throw new Error("Invalid action type: " + data.type);
-    }
+  processAction(action) {
+    const { type, data } = action;
+    const handler = this.actionRegistry[type];
+    if (!handler)
+      throw new Error(
+        `${type} is an invalid action type\nAvailable types: ${Object.keys(this.actionRegistry).join(", ")}`
+      );
+
+    handler.validate(data);
+    handler.execute(data);
+    this.logger.logAction(action);
   }
 }
