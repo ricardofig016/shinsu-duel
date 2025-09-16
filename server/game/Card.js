@@ -5,6 +5,7 @@ export default class Card {
     this.id = Math.random().toString(36).substring(2, 9); // unique instance id
 
     this.cardId = cardId;
+    this.type = cardData.type;
     this.name = cardData.name;
     this.sobriquet = cardData.sobriquet || null;
     this.rarity = cardData.rarity;
@@ -39,6 +40,7 @@ export default class Card {
     return {
       id: this.id,
       cardId: this.cardId,
+      type: this.type,
       name: this.name,
       sobriquet: this.sobriquet,
       rarity: this.rarity,
