@@ -5,6 +5,9 @@ import abilityRegistry from "./registries/abilityRegistry.js";
  */
 export default class Unit {
   constructor(card, placedPositionCode) {
+    if (!card) throw new Error("Card instance is required to create a Unit");
+    if (card.type !== "unit") throw new Error(`Invalid card type: expected 'unit', got '${card.type}'`);
+
     this.id = card.id; // unique instance id
     this.card = card;
     this.currentHp = card.maxHp;
