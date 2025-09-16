@@ -1,23 +1,23 @@
 import Ability from "../Ability.js";
 
 export default class CreateOneLighthouse extends Ability {
-  constructor(gameState) {
-    super(gameState, "create-one-lighthouse", "Create One Lighthouse", { amount: 1 });
+  constructor() {
+    super("create-one-lighthouse", "Create One Lighthouse", { amount: 1 });
   }
 
-  validate(context) {
-    return context.unit.owner in this.gameState.playerStates;
+  validate(context, gameState) {
+    return context.unit.owner in gameState.playerStates;
   }
 
-  execute(context) {
+  execute(context, gameState) {
     return {
       type: "add-lighthouses-action",
       data: { source: "system", username: context.unit.owner, amount: this.params.amount },
     };
   }
 
-  apply(action) {
-    this.gameState.processAction(action);
-    this.gameState.endTurn();
+  apply(action, gameState) {
+    gameState.processAction(action);
+    gameState.endTurn();
   }
 }

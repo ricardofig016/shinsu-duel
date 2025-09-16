@@ -12,6 +12,27 @@ export default class Logger {
     );
   }
 
+  /**
+   * Remove circular references or unnecessary properties from payloads to ensure safe serialization.
+   */
+  #sanitizePayload(payload) {
+    const seen = new WeakSet();
+    const sanitize = (obj) => {
+      if (typeof obj !== "object" || obj === null) return obj; // Return primitive values as-is
+      if (seen.has(obj)) return undefined; // Remove circular reference
+
+      seen.add(obj);
+
+      // Create a shallow copy of the object and sanitize its properties
+      const sanitized = Array.isArray(obj) ? [] : {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) sanitized[key] = sanitize(obj[key]);
+      }
+      return sanitized;
+    };
+    return sanitize(payload);
+  }
+
   #getTimestamp() {
     const date = new Date();
     const dateString = date.toUTCString().split(" ").slice(1, -1).join(" ");
@@ -19,6 +40,7 @@ export default class Logger {
   }
 
   #logEvent(eventName, payload) {
+    // const sanitizedPayload = this.#sanitizePayload(payload); // USE THIS AS A LAST RESORT
     this.logs.push({
       timestamp: this.#getTimestamp(),
       type: eventName,

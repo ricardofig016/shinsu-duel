@@ -258,16 +258,16 @@ const load = async (data) => {
         // create div
         const newDiv = document.createElement("div");
         newDiv.classList.add("unit-card-vertical-component");
-        if (card.id === undefined) newDiv.classList.add("no-focus");
+        if (card.cardId === undefined) newDiv.classList.add("no-focus");
         handContainer.appendChild(newDiv);
         // load card component
         await loadComponent(newDiv, "unit-card-vertical", {
-          id: card.id,
+          id: card.cardId,
           traitCodes: card.traitCodes,
           placedPositionCode: null,
           currentHp: null,
           isSmall: true,
-          cardData: data.cards[card.id],
+          cardData: data.cards[card.cardId],
           traitData: data.traits,
           affiliationData: data.affiliations,
           positionData: data.positions,
@@ -290,7 +290,7 @@ const load = async (data) => {
           newDiv.classList.add("invisible");
           // show drop zones
           const dropZones = document.querySelectorAll(`.position-drop-zone`);
-          const positionCodes = data.cards[card.id].positionCodes;
+          const positionCodes = data.cards[card.cardId].positionCodes;
           dropZones.forEach((zone) => {
             if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
           });

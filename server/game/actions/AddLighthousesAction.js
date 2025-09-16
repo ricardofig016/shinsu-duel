@@ -11,10 +11,10 @@ export default class AddLighthousesAction extends ActionHandler {
   };
   static sourceAccess = { player: false, system: true };
 
-  validate(data) {
+  validate(data, gameState) {
     super.validate(data);
     const { username, amount } = data;
-    const playerState = this.gameState.playerStates[username];
+    const playerState = gameState.playerStates[username];
 
     if (!playerState) throw new Error(`Player ${username} not found.`);
     if (amount <= 0) throw new Error(`Invalid amount: ${amount}.`);
@@ -22,10 +22,10 @@ export default class AddLighthousesAction extends ActionHandler {
     return true;
   }
 
-  execute(data) {
+  execute(data, gameState) {
     const { username, amount } = data;
-    const playerState = this.gameState.playerStates[username];
+    const playerState = gameState.playerStates[username];
     playerState.lighthouses.amount += amount;
-    this.gameState.eventBus.publish("OnAddLighthouses", { username, amount });
+    gameState.eventBus.publish("OnAddLighthouses", { username, amount });
   }
 }

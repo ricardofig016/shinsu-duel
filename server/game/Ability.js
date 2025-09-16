@@ -5,19 +5,18 @@ export default class Ability {
    * @param {string} name - name of the ability
    * @param {object} params - additional parameters
    */
-  constructor(gameState, code, name, params = {}) {
-    this.gameState = gameState;
+  constructor(code, name, params = {}) {
     this.code = code;
     this.name = name;
     this.params = params;
   }
 
-  validate(context) {
+  validate(context, gameState) {
     // Default behavior: always valid
     return true;
   }
 
-  toIntent(context) {
+  toIntent(context, gameState) {
     return {
       type: "UseAbilityIntent",
       abilityId: this.code,
@@ -29,12 +28,12 @@ export default class Ability {
     };
   }
 
-  execute(context) {
+  execute(context, gameState) {
     // Default behavior: no-op
     return { action: "noop" };
   }
 
-  apply(effect) {
+  apply(effect, gameState) {
     // Default behavior: no-op
     return;
   }

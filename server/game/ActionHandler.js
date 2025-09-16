@@ -1,8 +1,4 @@
 export default class ActionHandler {
-  constructor(gameState) {
-    this.gameState = gameState;
-  }
-
   validateSchema(data) {
     if (!this.constructor.schema) throw new Error("No schema defined for this action.");
 
@@ -29,7 +25,7 @@ export default class ActionHandler {
     return true;
   }
 
-  validate(data) {
+  validate(data, gameState) {
     this.validateSchema(data);
     if (!this.constructor.sourceAccess[data.source]) {
       throw new Error(`Source ${data.source} is not allowed to perform this action.`);
@@ -37,7 +33,7 @@ export default class ActionHandler {
     return true;
   }
 
-  execute(data) {
+  execute(data, gameState) {
     throw new Error("execute() must be implemented in subclasses");
   }
 }

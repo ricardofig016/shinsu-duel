@@ -13,48 +13,42 @@ export default class DeployUnitAction extends ActionHandler {
   };
   static sourceAccess = { player: true, system: false };
 
-  validate(data) {
+  validate(data, gameState) {
     super.validate(data);
     const { username, handId, placedPositionCode } = data;
-    const playerState = this.gameState.playerStates[username];
+    const playerState = gameState.playerStates[username];
 
     if (!playerState) throw new Error(`Player ${username} not found.`);
-    if (this.gameState.currentTurn !== username) throw new Error("It's not your turn.");
+    if (gameState.currentTurn !== username) throw new Error("It's not your turn.");
 
     if (handId < 0 || handId >= playerState.hand.length) throw new Error("Invalid handId.");
-    if (!this.gameState.positions[placedPositionCode])
+    if (!gameState.positions[placedPositionCode])
       throw new Error(`Invalid placedPositionCode: ${placedPositionCode}`);
 
     const card = playerState.hand[handId];
     if (!card) throw new Error("Card not found in hand.");
-    if (!this.gameState.cards[card.id].positionCodes.includes(placedPositionCode))
+    if (!card.positionCodes.includes(placedPositionCode))
       throw new Error(`Card cannot be placed in position ${placedPositionCode}.`);
 
-    if (this.gameState.cards[card.id].cost > this.gameState.getTotalShinsu(username))
+    if (card.cost > gameState.getTotalShinsu(username))
       throw new Error("Not enough shinsu to deploy this unit.");
 
     return true;
   }
 
-  execute(data) {
+  execute(data, gameState) {
     const { username, handId, placedPositionCode } = data;
-    const player = this.gameState.playerStates[username];
+    const player = gameState.playerStates[username];
     const [card] = player.hand.splice(handId, 1);
 
-    const unit = new Unit(
-      this.gameState,
-      card.id,
-      this.gameState.cards[card.id],
-      username,
-      placedPositionCode
-    );
-    const line = player.field[this.gameState.positions[placedPositionCode].line];
+    const unit = new Unit(card, placedPositionCode);
+    const line = player.field[gameState.positions[placedPositionCode].line];
     line.push(unit);
 
-    this.gameState.spendShinsu(username, this.gameState.cards[card.id].cost);
+    gameState.spendShinsu(username, card.cost);
 
-    this.gameState.eventBus.publish("OnDeployUnit", { username, unit });
-    this.gameState.eventBus.publish("OnSummonUnit", { username, unit });
-    this.gameState.endTurn();
+    gameState.eventBus.publish("OnDeployUnit", { username, unit });
+    gameState.eventBus.publish("OnSummonUnit", { username, unit });
+    gameState.endTurn();
   }
 }

@@ -185,7 +185,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
 
 describe("deck behavior", () => {
   test("constructor accepts custom decks and draws initial hand from deck (pop semantics)", () => {
-    const aliceDeck = [...Array.from({ length: 26 }, () => 0), 1, 1, 1, 1]; // 26 zeros then 4 ones for Alice
+    const aliceDeck = [...Array.from({ length: 26 }, () => 0), 1, 2, 3, 4];
     const bobDeck = Array(30).fill(0); // all zeros for Bob
 
     const decks = { Alice: aliceDeck, Bob: bobDeck };
@@ -196,8 +196,8 @@ describe("deck behavior", () => {
     expect(aliceClient.hand.length).toBe(game.INIT_HAND_SIZE);
 
     // Because draw uses pop(), Alice's hand should contain the four 1's we placed at the end
-    const aliceHandIds = aliceClient.hand.map((c) => c.id);
-    expect(aliceHandIds).toEqual([1, 1, 1, 1]);
+    const aliceHandIds = aliceClient.hand.map((c) => c.cardId);
+    expect(aliceHandIds).toEqual([4, 3, 2, 1]);
 
     // Deck size decreased by INIT_HAND_SIZE
     expect(aliceClient.deckSize).toBe(game.INIT_DECK_SIZE - game.INIT_HAND_SIZE);
@@ -273,7 +273,7 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.frontline.length).toBe(1);
     expect(playerState.field.backline.length).toBe(0);
-    expect(playerState.field.frontline[0].cardId).toBe(4); // Ship's ID
+    expect(playerState.field.frontline[0].card.cardId).toBe(4); // Ship's ID
     expect(playerState.field.frontline[0].placedPositionCode).toBe("scout");
     expect(playerState.hand.length).toBe(3); // One card removed from hand
   });
@@ -292,7 +292,7 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.backline.length).toBe(1);
     expect(playerState.field.frontline.length).toBe(0);
-    expect(playerState.field.backline[0].cardId).toBe(6); // Rachel's id
+    expect(playerState.field.backline[0].card.cardId).toBe(6); // Rachel's id
     expect(playerState.field.backline[0].placedPositionCode).toBe("lightbearer");
     expect(playerState.hand.length).toBe(3); // One card removed from hand
   });

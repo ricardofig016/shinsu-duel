@@ -4,6 +4,7 @@ import EventBus from "./EventBus.js";
 import effectRegistry from "./registries/effectRegistry.js";
 import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
+import Card from "./Card.js";
 
 export default class GameState {
   // all of the valid actions the user can take and their required fields
@@ -26,7 +27,7 @@ export default class GameState {
    *
    * @param {string} roomCode unique room code for this game
    * @param {Array<string>} usernames array of exactly 2 usernames
-   * @param {Object} decks (optional) dictionary mapping each username to an array of card ids to use as that player's deck. If null, a random deck will be generated.
+   * @param {Object} decks (optional) dictionary mapping each username to an array of cardIds to use as that player's deck. If null, a random deck will be generated.
    * @param {string} firstPlayer (optional) username of the player to take the first turn. If null, a random player will be chosen.
    */
   constructor(roomCode, usernames, decks = {}, firstPlayer = null) {
@@ -38,11 +39,11 @@ export default class GameState {
       throw new Error("firstPlayer must be one of the usernames in the game");
 
     this.eventBus = new EventBus();
-    this.actionRegistry = createActionRegistry(this); // TODO: this may be broken due to working with old gameState version
+    this.actionRegistry = createActionRegistry();
     this.logger = new Logger(this.eventBus);
 
-    this.cards = cards;
-    this.positions = positions;
+    this.cards = cards; // TODO: change this to static cards
+    this.positions = positions; // TODO: change this to static positions
 
     this.activeEffects = [];
     this.roomCode = roomCode;
@@ -76,10 +77,11 @@ export default class GameState {
     });
   }
 
-  #initializePlayerState(username, deck) {
+  #initializePlayerState(username, deck = null) {
+    if (!deck) deck = this.#generateRandomDeckOfCardIds();
     return {
       combatSlotCodes: ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"],
-      deck: this.#buildDeckFromCardIds(deck ? deck : this.#generateRandomDeckOfCardIds()),
+      deck: this.#buildDeckFromCardIds(deck, username),
       lighthouses: { amount: this.INIT_LIGHTHOUSE_AMOUNT },
       field: { frontline: [], backline: [] },
       hand: [],
@@ -91,24 +93,24 @@ export default class GameState {
   /**
    * Build a deck from an array of card ids.
    * @param {Array<number>} cardIds array of card ids
-   * @returns {Array<Object>} Array of card objects
+   * @returns {Array<Card>} Array of Card objects
    */
-  #buildDeckFromCardIds(cardIds) {
-    if (!Array.isArray(cardIds) || cardIds.length !== this.INIT_DECK_SIZE) {
-      throw new Error(`deck must be an array of ${this.INIT_DECK_SIZE} card ids.`);
-    }
+  #buildDeckFromCardIds(cardIds, username) {
+    if (!Array.isArray(cardIds) || cardIds.length !== this.INIT_DECK_SIZE)
+      throw new Error(`deck must be an array of ${this.INIT_DECK_SIZE} cardIds.`);
+
     const deck = [];
     cardIds.forEach((cardId) => {
       const cardData = this.cards[cardId];
-      if (cardData === undefined) throw new Error(`Card with id ${cardId} does not exist`);
-      deck.push({ id: cardId, traitCodes: cardData.traitCodes, visible: false });
+      if (cardData === undefined) throw new Error(`Card with cardId ${cardId} does not exist`);
+      deck.push(new Card(cardId, cardData, username, this.eventBus));
     });
     return deck;
   }
 
   /**
-   * Generate a random array of valid card ids.
-   * @returns {Array<number>} Array of card ids
+   * Generate a random array of valid cardIds.
+   * @returns {Array<number>} Array of cardIds
    */
   #generateRandomDeckOfCardIds() {
     const deck = Array.from({ length: this.INIT_DECK_SIZE }, () => {
@@ -139,19 +141,16 @@ export default class GameState {
   #mapUnits(units) {
     // TODO: change id to cardId and add unit id
     return units.map((unit) => ({
-      id: unit.cardId,
-      traitCodes: unit.traitCodes,
+      id: unit.card.cardId,
+      traitCodes: unit.card.traitCodes,
       placedPositionCode: unit.placedPositionCode,
     }));
   }
 
   #filterYouState(username) {
-    const player = this.playerStates[username];
-    if (!player) {
-      console.error(`Player state for ${username} not found.`);
-      console.error("Available players:", this.usernames);
-      return null;
-    }
+    const playerState = this.playerStates[username];
+    if (!playerState)
+      throw new Error(`Player ${username} not found\nAvailable players: ${this.usernames.join(", ")}`);
 
     let passButtonText = username;
     if (username === this.currentTurn) {
@@ -165,19 +164,16 @@ export default class GameState {
     }
 
     return {
-      combatSlotCodes: player.combatSlotCodes,
-      deckSize: player.deck.length,
-      lighthouses: player.lighthouses,
+      combatSlotCodes: playerState.combatSlotCodes,
+      deckSize: playerState.deck.length,
+      lighthouses: playerState.lighthouses,
       field: {
-        frontline: this.#mapUnits(player.field.frontline),
-        backline: this.#mapUnits(player.field.backline),
+        frontline: this.#mapUnits(playerState.field.frontline),
+        backline: this.#mapUnits(playerState.field.backline),
       },
-      hand: player.hand.map((card) => ({
-        id: card.id,
-        traitCodes: card.traitCodes,
-      })),
-      shinsu: player.shinsu,
-      username: player.username,
+      hand: playerState.hand.map((card) => card.toSanitizedObject()), // send full card info for own hand
+      shinsu: playerState.shinsu,
+      username: playerState.username,
       passButton: {
         isEnabled: username === this.currentTurn, // pass button is enabled is it's the player's turn
         text: passButtonText, // text to display on the pass button
@@ -187,32 +183,31 @@ export default class GameState {
 
   #getOpponentUsername(username) {
     const opponent = this.usernames.find((u) => u !== username);
-    if (!opponent) {
-      throw new Error(`Opponent for ${username} not found.`);
-    }
+    if (!opponent) throw new Error(`Opponent for ${username} not found.`);
     return opponent;
   }
 
   #filterOpponentState(username) {
-    const opponent = this.playerStates[this.#getOpponentUsername(username)];
-    const hand = opponent.hand.map((card) => {
-      if (card.visible) return { id: card.id, traitCodes: card.traitCodes };
+    const opponentState = this.playerStates[this.#getOpponentUsername(username)];
+    const hand = opponentState.hand.map((card) => {
+      if (card.visible) return card.toSanitizedObject();
       else return {};
     });
+
     return {
-      combatSlotCodes: opponent.combatSlotCodes,
-      deckSize: opponent.deck.length,
-      lighthouses: opponent.lighthouses,
+      combatSlotCodes: opponentState.combatSlotCodes,
+      deckSize: opponentState.deck.length,
+      lighthouses: opponentState.lighthouses,
       field: {
-        frontline: this.#mapUnits(opponent.field.frontline),
-        backline: this.#mapUnits(opponent.field.backline),
+        frontline: this.#mapUnits(opponentState.field.frontline),
+        backline: this.#mapUnits(opponentState.field.backline),
       },
       hand: hand,
-      shinsu: opponent.shinsu,
-      username: opponent.username,
+      shinsu: opponentState.shinsu,
+      username: opponentState.username,
       passButton: {
         isEnabled: false, // opponent's pass button is always disabled
-        text: opponent.username, // always displays the opponent's username
+        text: opponentState.username, // always displays the opponent's username
       },
     };
   }
@@ -330,8 +325,8 @@ export default class GameState {
         `${type} is an invalid action type\nAvailable types: ${Object.keys(this.actionRegistry).join(", ")}`
       );
 
-    handler.validate(data);
-    handler.execute(data);
+    handler.validate(data, this);
+    handler.execute(data, this);
     this.logger.logAction(action);
   }
 }

@@ -7,17 +7,17 @@ export default class PassTurnAction extends ActionHandler {
   };
   static sourceAccess = { player: true, system: false };
 
-  validate(data) {
+  validate(data, gameState) {
     super.validate(data);
     const { username } = data;
-    const playerState = this.gameState.playerStates[username];
+    const playerState = gameState.playerStates[username];
 
     if (!playerState) throw new Error(`Player ${username} not found.`);
-    if (this.gameState.currentTurn !== username) throw new Error("It's not your turn.");
+    if (gameState.currentTurn !== username) throw new Error("It's not your turn.");
   }
 
-  execute(data) {
+  execute(data, gameState) {
     const { username } = data;
-    this.gameState.endTurn(true);
+    gameState.endTurn(true);
   }
 }

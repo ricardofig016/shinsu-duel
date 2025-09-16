@@ -1,5 +1,6 @@
 {
   "0": {
+    "type": "unit",
     "name": "Jue Viole Grace",
     "rarity": "epic",
     "hp": 5,
@@ -11,6 +12,7 @@
     "passiveCodes": ["draw-turn-end"]
   },
   "1": {
+    "type": "unit",
     "name": "Zahard",
     "sobriquet": "King of the Tower",
     "rarity": "legendary",
@@ -23,6 +25,7 @@
     "passiveCodes": ["Enemy fishermen deal -2 damage"]
   },
   "2": {
+    "type": "unit",
     "name": "Khun Aguero Agnes",
     "rarity": "rare",
     "hp": 5,
@@ -34,6 +37,7 @@
     "passiveCodes": ["When I take damage, deal 1 damage to an enemy"]
   },
   "3": {
+    "type": "unit",
     "name": "Rak Wraithraiser",
     "rarity": "common",
     "hp": 5,
@@ -71,6 +75,7 @@
     "passiveCodes": ["I am always angry"]
   },
   "4": {
+    "type": "unit",
     "name": "Ship Leesoo",
     "rarity": "rare",
     "hp": 5,
@@ -82,6 +87,7 @@
     "passiveCodes": []
   },
   "5": {
+    "type": "unit",
     "name": "Evankhell",
     "sobriquet": "The Infernal Evankhell",
     "rarity": "common",
@@ -94,6 +100,7 @@
     "passiveCodes": ["I am immune to fire"]
   },
   "6": {
+    "type": "unit",
     "name": "Rachel",
     "rarity": "epic",
     "passive": "aaaaaaaa",
