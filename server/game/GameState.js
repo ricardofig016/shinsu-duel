@@ -125,9 +125,8 @@ export default class GameState {
   }
 
   #draw(usernames, amount) {
-    if (!Array.isArray(usernames)) {
-      usernames = [usernames]; // ensure usernames is an array
-    }
+    // ensure usernames is an array
+    if (!Array.isArray(usernames)) usernames = [usernames];
     usernames.forEach((username) => {
       const player = this.playerStates[username];
       if (!player || !player.deck) throw new Error(`Player ${username} does not have a valid deck.`);
