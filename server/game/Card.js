@@ -13,25 +13,21 @@ export default class Card {
     this.cost = cardData.cost;
     this.visible = false; // whether the card is visible to the opponent
 
-    this.positionCodes = [...cardData.positionCodes];
-    this.abilityCodes = [...cardData.abilityCodes]; // array of ability ids
-    this.traitCodes = [...cardData.traitCodes];
     this.affiliationCodes = [...cardData.affiliationCodes];
+    this.positionCodes = [...cardData.positionCodes];
+    this.traitCodes = [...cardData.traitCodes];
+
+    this.abilities = this.#initializeAbilities(cardData.abilityCodes);
     this.passiveCodes = [...cardData.passiveCodes];
 
     this.owner = owner; // player username
     this.bus = bus;
-
-    this.#initializeAbilities();
   }
 
-  #initializeAbilities() {
-    this.abilities = this.abilityCodes.map((code) => {
+  #initializeAbilities(abilityCodes) {
+    return abilityCodes.map((code) => {
       const AbilityClass = abilityRegistry[code];
-
-      if (!AbilityClass) return; // TODO: remove this line after testing
       if (!AbilityClass) throw new Error(`Ability with code ${code} not found in registry`);
-
       return new AbilityClass();
     });
   }

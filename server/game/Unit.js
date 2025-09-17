@@ -23,12 +23,14 @@ export default class Unit {
 
   useAbility(abilityCode, targetInfo = null, gameState) {
     const ability = this.card.abilities.find((a) => a.code === abilityCode);
-    if (!ability)
+    if (!ability) {
+      const abilityCodes = this.card.abilities.map((a) => a.code);
       throw new Error(
         `Unit ${this.card.cardId} - ${
           this.card.name
-        } does not have ability ${abilityCode}\nAbilities: ${this.card.abilityCodes.join(", ")}`
+        } does not have ability ${abilityCode}\nAbilities: ${abilityCodes.join(", ")}`
       );
+    }
 
     const context = { unit: this, target: targetInfo };
 

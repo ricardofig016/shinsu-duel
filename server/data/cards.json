@@ -5,11 +5,11 @@
     "rarity": "epic",
     "hp": 5,
     "cost": 3,
-    "positionCodes": ["wavecontroller"],
-    "abilityCodes": ["Deal 2 damage to 3 enemies", "Spend 1 shinsu to deal 7 damage to an enemy"],
-    "traitCodes": ["burned", "sharpshooter"],
     "affiliationCodes": ["fug", "team-fug", "team-sweet-and-sour"],
-    "passiveCodes": ["draw-turn-end"]
+    "positionCodes": ["wavecontroller"],
+    "traitCodes": ["burned", "sharpshooter"],
+    "abilityCodes": [],
+    "passiveCodes": []
   },
   "1": {
     "type": "unit",
@@ -18,11 +18,11 @@
     "rarity": "legendary",
     "hp": 10,
     "cost": 5,
-    "positionCodes": ["fisherman"],
-    "abilityCodes": ["Deal 8 damage", "Deal 5 damage to a backline enemy"],
-    "traitCodes": ["burned"],
     "affiliationCodes": [],
-    "passiveCodes": ["Enemy fishermen deal -2 damage"]
+    "positionCodes": ["fisherman"],
+    "traitCodes": ["burned"],
+    "abilityCodes": [],
+    "passiveCodes": []
   },
   "2": {
     "type": "unit",
@@ -30,11 +30,11 @@
     "rarity": "rare",
     "hp": 5,
     "cost": 2,
-    "positionCodes": ["lightbearer"],
-    "abilityCodes": ["create-one-lighthouse"],
-    "traitCodes": [],
     "affiliationCodes": ["khun-family", "khuns-team", "team-baam"],
-    "passiveCodes": ["When I take damage, deal 1 damage to an enemy"]
+    "positionCodes": ["lightbearer"],
+    "traitCodes": [],
+    "abilityCodes": ["create-one-lighthouse"],
+    "passiveCodes": []
   },
   "3": {
     "type": "unit",
@@ -42,37 +42,11 @@
     "rarity": "common",
     "hp": 5,
     "cost": 1,
-    "positionCodes": ["spearbearer"],
-    "abilityCodes": ["nomnomnomnom", "i like chocolate bars :)", "all my friends are turtles :("],
-    "traitCodes": [
-      "barrier",
-      "bloodthirsty",
-      "burned",
-      "creator",
-      "cursed",
-      "dealer",
-      "doomed",
-      "exhausted",
-      "ghost",
-      "heavy",
-      "immune",
-      "lastonestanding",
-      "lethal",
-      "pierce",
-      "poisoned",
-      "reflect",
-      "regenerate",
-      "resilient",
-      "rooted",
-      "ruthless",
-      "sharpshooter",
-      "strong",
-      "stunned",
-      "taunt",
-      "weak"
-    ],
     "affiliationCodes": ["team-baam"],
-    "passiveCodes": ["I am always angry"]
+    "positionCodes": ["spearbearer"],
+    "traitCodes": ["barrier", "bloodthirsty", "burned", "creator", "cursed", "dealer"],
+    "abilityCodes": [],
+    "passiveCodes": []
   },
   "4": {
     "type": "unit",
@@ -80,10 +54,10 @@
     "rarity": "rare",
     "hp": 5,
     "cost": 1,
-    "positionCodes": ["scout"],
-    "abilityCodes": [],
-    "traitCodes": [],
     "affiliationCodes": ["ships-team"],
+    "positionCodes": ["scout"],
+    "traitCodes": [],
+    "abilityCodes": [],
     "passiveCodes": []
   },
   "5": {
@@ -93,30 +67,22 @@
     "rarity": "common",
     "hp": 15,
     "cost": 8,
-    "positionCodes": ["wavecontroller", "fisherman"],
-    "abilityCodes": ["FIRE MUAHAHAHHAHAHAH", "THOU SHALL BURN", "FEEL THE WRATH OF THE ANCIENT FLAMES"],
-    "traitCodes": ["ruthless", "lastonestanding"],
     "affiliationCodes": ["fug"],
-    "passiveCodes": ["I am immune to fire"]
+    "positionCodes": ["wavecontroller", "fisherman"],
+    "traitCodes": ["ruthless", "lastonestanding"],
+    "abilityCodes": [],
+    "passiveCodes": []
   },
   "6": {
     "type": "unit",
     "name": "Rachel",
     "rarity": "epic",
-    "passive": "aaaaaaaa",
     "hp": 1,
     "cost": 1,
-    "positionCodes": ["lightbearer"],
-    "abilityCodes": [
-      "Deal 1 damage to an enemy",
-      "Deal 1 damage to an enemy",
-      "Deal 1 damage to an enemy",
-      "Deal 2 damage to an enemy",
-      "Deal 1 damage to an enemy",
-      "Deal 2 damage to an enemy"
-    ],
-    "traitCodes": ["dealer", "creator"],
     "affiliationCodes": ["team-rachel", "khuns-team", "revolution"],
+    "positionCodes": ["lightbearer"],
+    "traitCodes": ["dealer", "creator"],
+    "abilityCodes": [],
     "passiveCodes": []
   }
 }
