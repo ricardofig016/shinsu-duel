@@ -2,12 +2,12 @@ export default class Ability {
   /**
    * Represents an ability that a unit can use
    * @param {string} code - unique identifier
-   * @param {string} name - name of the ability
+   * @param {string} text - text to display on the card
    * @param {object} params - additional parameters
    */
-  constructor(code, name, params = {}) {
+  constructor(code, text, params = {}) {
     this.code = code;
-    this.name = name;
+    this.text = text;
     this.params = params;
   }
 
@@ -20,7 +20,7 @@ export default class Ability {
     return {
       type: "UseAbilityIntent",
       abilityId: this.code,
-      abilityName: this.name,
+      abilityText: this.text,
       params: this.params,
       unitId: context.unit?.id,
       owner: context.unit?.owner,

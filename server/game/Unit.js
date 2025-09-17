@@ -36,7 +36,7 @@ export default class Unit {
 
     // Validate context
     if (!ability.validate(context, gameState)) {
-      throw new Error(`Ability "${ability.name}" cannot be used in the current context`);
+      throw new Error(`Ability "${ability.text}" cannot be used in the current context`);
     }
 
     // Create intent
