@@ -3,7 +3,7 @@ import { loadComponent, addTooltip } from "/utils/component-util.js";
 const load = async (
   container,
   {
-    id = null,
+    cardId = null,
     traitCodes = null,
     placedPositionCode = null,
     currentHp = null,
@@ -157,7 +157,7 @@ const load = async (
   };
 
   // display card back
-  if (id === null || !cardData || !traitData || !affiliationData || !positionData) {
+  if (cardId === null || !cardData || !traitData || !affiliationData || !positionData) {
     const cardFrame = container.querySelector(".unit-card-vertical-frame");
     cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
     cardFrame.classList.add("unit-card-vertical-small", "no-hover");
@@ -176,7 +176,7 @@ const load = async (
       cardComponent.classList.add("unit-card-vertical-component");
       container.appendChild(cardComponent);
       await loadComponent(cardComponent, "unit-card-vertical", {
-        id,
+        cardId,
         traitCodes,
         placedPositionCode,
         currentHp,

@@ -262,7 +262,7 @@ const load = async (data) => {
         handContainer.appendChild(newDiv);
         // load card component
         await loadComponent(newDiv, "unit-card-vertical", {
-          id: card.cardId,
+          cardId: card.cardId,
           traitCodes: card.traitCodes,
           placedPositionCode: null,
           currentHp: null,

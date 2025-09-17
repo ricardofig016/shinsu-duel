@@ -3,7 +3,7 @@ import { loadComponent, addTooltip } from "/utils/component-util.js";
 const load = async (
   container,
   {
-    id = null,
+    cardId = null,
     traitCodes = null,
     placedPositionCode = null,
     currentHp = null,
@@ -16,9 +16,16 @@ const load = async (
 ) => {
   // display card back
   const cardElement = container.querySelector(".unit-card-horizontal");
-  if (id === null || !placedPositionCode || !cardData || !traitData || !affiliationData || !positionData) {
+  if (
+    cardId === null ||
+    !placedPositionCode ||
+    !cardData ||
+    !traitData ||
+    !affiliationData ||
+    !positionData
+  ) {
     console.error("Invalid data", {
-      id,
+      cardId,
       placedPositionCode,
       cardData,
       traitData,
@@ -37,7 +44,7 @@ const load = async (
     cardComponent.classList.add("unit-card-vertical-component");
     cardElement.appendChild(cardComponent);
     await loadComponent(cardComponent, "unit-card-vertical", {
-      id,
+      cardId,
       traitCodes,
       placedPositionCode,
       currentHp,
