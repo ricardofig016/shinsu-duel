@@ -1,5 +1,8 @@
 import abilityRegistry from "./registries/abilityRegistry.js";
 import passiveAbilityRegisttry from "./registries/passiveAbilityRegisttry.js";
+import affiliations from "../data/affiliations.json" assert { type: "json" };
+import positions from "../data/positions.json" assert { type: "json" };
+import traits from "../data/traits.json" assert { type: "json" };
 
 export default class Card {
   constructor(cardId, cardData, owner, bus) {
@@ -14,30 +17,32 @@ export default class Card {
     this.cost = cardData.cost;
     this.visible = false; // whether the card is visible to the opponent
 
-    this.affiliationCodes = [...cardData.affiliationCodes];
-    this.positionCodes = [...cardData.positionCodes];
-    this.traitCodes = [...cardData.traitCodes];
+    this.affiliations = this.#mapCodesToDictionary(cardData.affiliationCodes, affiliations);
+    this.positions = this.#mapCodesToDictionary(cardData.positionCodes, positions);
+    this.traits = this.#mapCodesToDictionary(cardData.traitCodes, traits);
 
-    this.abilities = this.#initializeAbilities(cardData.abilityCodes);
-    this.passiveAbilities = this.#initializePassiveAbilities(cardData.passiveCodes);
+    this.abilities = this.#initializeAbilities(cardData.abilityCodes, abilityRegistry);
+    this.passiveAbilities = this.#initializeAbilities(cardData.passiveCodes, passiveAbilityRegisttry);
 
     this.owner = owner; // player username
     this.bus = bus;
   }
 
-  #initializeAbilities(abilityCodes) {
-    return abilityCodes.map((code) => {
-      const AbilityClass = abilityRegistry[code];
-      if (!AbilityClass) throw new Error(`Ability with code ${code} not found in registry`);
-      return new AbilityClass();
-    });
+  #mapCodesToDictionary(codes, source) {
+    return Object.fromEntries(codes.map((code) => [code, source[code]]));
   }
 
-  #initializePassiveAbilities(passiveCodes) {
-    return passiveCodes.map((code) => {
-      const PassiveClass = passiveAbilityRegisttry[code];
-      if (!PassiveClass) throw new Error(`Passive with code ${code} not found in registry`);
-      return new PassiveClass();
+  /**
+   * Can be used to initialize abilities or passive abilities
+   * @param {*} codes array of ability codes / passive ability codes
+   * @param {*} registry ability registry to use
+   * @returns
+   */
+  #initializeAbilities(codes, registry) {
+    return codes.map((code) => {
+      const AbilityClass = registry[code];
+      if (!AbilityClass) throw new Error(`Ability with code ${code} not found in registry`);
+      return new AbilityClass();
     });
   }
 
@@ -52,9 +57,9 @@ export default class Card {
       maxHp: this.maxHp,
       cost: this.cost,
       visible: this.visible,
-      affiliationCodes: this.affiliationCodes,
-      positionCodes: this.positionCodes,
-      traitCodes: this.traitCodes,
+      affiliations: this.affiliations,
+      positions: this.positions,
+      traits: this.traits,
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
       owner: this.owner,

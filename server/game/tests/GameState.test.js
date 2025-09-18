@@ -108,8 +108,27 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
     // Hand structure
     expect(Array.isArray(state.you.hand)).toBe(true);
     if (state.you.hand.length > 0) {
+      [
+        "id",
+        "cardId",
+        "type",
+        "name",
+        "sobriquet",
+        "rarity",
+        "maxHp",
+        "cost",
+        "visible",
+        "affiliations",
+        "positions",
+        "traits",
+        "abilities",
+        "passiveAbilities",
+        "owner",
+      ].forEach((key) => {
+        expect(state.you.hand[0]).toHaveProperty(key);
+      });
       expect(state.you.hand[0]).toHaveProperty("id");
-      expect(state.you.hand[0]).toHaveProperty("traitCodes");
+      expect(state.you.hand[0]).toHaveProperty("traits");
     }
 
     // Shinsu structure

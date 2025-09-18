@@ -27,7 +27,7 @@ export default class DeployUnitAction extends ActionHandler {
 
     const card = playerState.hand[handId];
     if (!card) throw new Error("Card not found in hand.");
-    if (!card.positionCodes.includes(placedPositionCode))
+    if (!(placedPositionCode in card.positions))
       throw new Error(`Card cannot be placed in position ${placedPositionCode}.`);
 
     if (card.cost > gameState.getTotalShinsu(username))
