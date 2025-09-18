@@ -4,6 +4,7 @@ import { advanceToRound, expectShinsuState } from "./utils.js";
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
 
+// TODO: add round 30+ (decks exhausted)
 describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   let game, firstPlayer, secondPlayer;
 
