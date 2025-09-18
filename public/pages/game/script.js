@@ -224,8 +224,8 @@ const load = async (data) => {
         existingDivs.forEach((div) => div.remove());
         // we reverse the order of the cards in the line beacuse we're going to prepend them to the container,
         // this is because we need to keep the position drop zones at the end of the line
-        const lineCards = [...data.gameState[player].field[line]].reverse();
-        for (let card of lineCards) {
+        const units = [...data.gameState[player].field[line]].reverse();
+        for (let unit of units) {
           // create div
           const newDiv = document.createElement("div");
           newDiv.classList.add("unit-card-horizontal-component");
@@ -233,12 +233,12 @@ const load = async (data) => {
           lineContainer.prepend(newDiv);
           // load card component
           await loadComponent(newDiv, "unit-card-horizontal", {
-            id: card.id,
-            traitCodes: card.traitCodes,
-            placedPositionCode: card.placedPositionCode,
+            cardId: unit.id,
+            traitCodes: unit.traitCodes,
+            placedPositionCode: unit.placedPositionCode,
             currentHp: null,
             isSmall: true,
-            cardData: data.cards[card.id],
+            cardData: data.cards[unit.id],
             traitData: data.traits,
             affiliationData: data.affiliations,
             positionData: data.positions,
@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   socket.on("game-update", async (newState) => {
     data.gameState = newState;
-    // console.log(data.gameState.you.field);
+    console.log(data);
     await load(data);
   });
   socket.on("game-error", async (errorMessage) => {

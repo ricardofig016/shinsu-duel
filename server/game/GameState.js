@@ -138,7 +138,7 @@ export default class GameState {
   }
 
   #mapUnits(units) {
-    // TODO: change id to cardId and add unit id
+    // return units.map((unit) => unit.toSanitizedObject()); // TODO: change this back when Card class is done
     return units.map((unit) => ({
       id: unit.card.cardId,
       traitCodes: unit.card.traitCodes,
@@ -208,6 +208,14 @@ export default class GameState {
         isEnabled: false, // opponent's pass button is always disabled
         text: opponentState.username, // always displays the opponent's username
       },
+    };
+  }
+
+  getClientState(username) {
+    return {
+      you: this.#filterYouState(username),
+      opponent: this.#filterOpponentState(username),
+      currentTurn: this.currentTurn,
     };
   }
 
@@ -306,14 +314,6 @@ export default class GameState {
     if (typeof effectInstance.unsubscribeAll === "function") {
       effectInstance.unsubscribeAll();
     }
-  }
-
-  getClientState(username) {
-    return {
-      you: this.#filterYouState(username),
-      opponent: this.#filterOpponentState(username),
-      currentTurn: this.currentTurn,
-    };
   }
 
   processAction(action) {
