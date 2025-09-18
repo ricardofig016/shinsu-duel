@@ -68,18 +68,13 @@
 
 .unit-card-vertical-passive-abilities {
   height: 100%;
-  width: 2.7em; /* fixed space to prevent overlap */
-  min-width: 2.7em; /* non-shrinking */
+  width: 2.7em;
+  min-width: 2.7em;
   flex: 0 0 2.7em; /* don't allow flex to shrink */
   background-image: url("/assets/icons/passive-ability/infinity.png");
   background-size: contain;
-  background-position: center right;
+  background-position: center;
   background-repeat: no-repeat;
-  align-self: flex-start; /* align to top */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 0.2em;
 }
 
 .unit-card-vertical-artwork-frame {
