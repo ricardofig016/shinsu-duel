@@ -5,9 +5,9 @@
 - [ ] check if landmark information complies with information on the notebook
 - [ ] write rules regarding shinheuh and animas
 - [ ] add passives to cards (this is in the notebook)
-- [ ] add unit stat recalculation when sending game state data to users
 - [ ] add a new negative trait around silencing
 - [ ] add 'message' field to every event payload
+- [ ] change board background to something from the webtoon
 
 ## In Progress
 

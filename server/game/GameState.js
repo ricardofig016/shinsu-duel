@@ -114,6 +114,7 @@ export default class GameState {
    */
   #generateRandomDeckOfCardIds() {
     const deck = Array.from({ length: this.INIT_DECK_SIZE }, () => {
+      // return 2; // for testing purposes, use only cardId 2 (khun)
       return this.#getRandomCardId();
     });
     return deck;

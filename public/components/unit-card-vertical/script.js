@@ -1,5 +1,6 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
 
+const DEFAULT_PASSIVE_ABILITIES_ICON = "/assets/icons/passive-ability/infinity.png";
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
 const DEFAULT_TRAIT_ICON = "/assets/icons/traits/placeholder.png";
 const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
@@ -17,10 +18,28 @@ const load = async (container, { unit, card, isSmall = false }) => {
     cardFrame.innerHTML = "";
   };
 
+  const loadPassiveAbility = async (container, passives) => {
+    const passiveContainer = container.querySelector(".unit-card-vertical-passive-abilities");
+
+    if (passives.length === 0) return passiveContainer.classList.add("hidden");
+
+    passiveContainer.classList.remove("hidden");
+    addTooltip(
+      container,
+      passiveContainer,
+      "Passive Abilities",
+      passives.map((p) => p.text) || [],
+      DEFAULT_PASSIVE_ABILITIES_ICON
+    );
+  };
+
   const loadName = async (container, name, sobriquet) => {
+    const titleContainer = container.querySelector(".unit-card-vertical-title");
     const nameContainer = container.querySelector(".unit-card-vertical-name");
+    // set text (truncation handled by CSS)
     nameContainer.innerText = name;
-    if (sobriquet) await addTooltip(container, nameContainer, name, sobriquet);
+    await addTooltip(container, nameContainer, name, sobriquet ? sobriquet : "");
+    return;
   };
 
   const loadTraits = async (container, traits) => {
@@ -171,6 +190,8 @@ const load = async (container, { unit, card, isSmall = false }) => {
     });
   }
 
+  // passive ability
+  await loadPassiveAbility(container, card.passiveAbilities);
   // name
   await loadName(container, card.name, card.sobriquet);
   // artwork (use fallback when missing)
@@ -198,6 +219,8 @@ const load = async (container, { unit, card, isSmall = false }) => {
     ? "The current hit points of this unit card"
     : "The maximum hit points of this unit card";
   await addTooltip(container, hpContainer, "HP", hpText);
+
+  console.log("\n\n\n\n\n\n\n\n");
 };
 
 export default load;
