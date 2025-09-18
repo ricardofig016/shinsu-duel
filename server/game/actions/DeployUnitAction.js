@@ -49,6 +49,7 @@ export default class DeployUnitAction extends ActionHandler {
 
     gameState.eventBus.publish("OnDeployUnit", { username, unit });
     gameState.eventBus.publish("OnSummonUnit", { username, unit });
+    unit.onSummon(gameState);
     gameState.endTurn();
   }
 }

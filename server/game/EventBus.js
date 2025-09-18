@@ -8,11 +8,17 @@ export default class EventBus {
     "OnRoundEnd",
     "OnDeployUnit",
     "OnSummonUnit",
-    "UseAbilityIntent",
-    "UseAbilityResolved",
-    "UseAbilityApplied",
+    "OnUseAbilityIntent",
+    "OnUseAbilityResolved",
     "OnAddLighthouses",
     "OnLighthousesChanged", // TODO: this is just a test example, remove later
+    "OnPassiveTriggered",
+    "OnPassiveActivated",
+    "OnDealDamageIntent",
+    "OnDealDamageApplied",
+    "OnUnitSummoned",
+    "OnUnitRemoved",
+    "OnUnitDeath",
   ];
 
   constructor() {
@@ -80,7 +86,7 @@ export default class EventBus {
       try {
         handler(payload);
       } catch (err) {
-        console.error(`Error in EventBus handler for "${eventName}":`, err);
+        throw new Error(`Error in EventBus handler for "${eventName}": ${err.message}`);
       }
     });
   }

@@ -1,4 +1,5 @@
 import abilityRegistry from "./registries/abilityRegistry.js";
+import passiveAbilityRegisttry from "./registries/passiveAbilityRegisttry.js";
 
 export default class Card {
   constructor(cardId, cardData, owner, bus) {
@@ -18,7 +19,7 @@ export default class Card {
     this.traitCodes = [...cardData.traitCodes];
 
     this.abilities = this.#initializeAbilities(cardData.abilityCodes);
-    this.passiveCodes = [...cardData.passiveCodes];
+    this.passiveAbilities = this.#initializePassiveAbilities(cardData.passiveCodes);
 
     this.owner = owner; // player username
     this.bus = bus;
@@ -29,6 +30,14 @@ export default class Card {
       const AbilityClass = abilityRegistry[code];
       if (!AbilityClass) throw new Error(`Ability with code ${code} not found in registry`);
       return new AbilityClass();
+    });
+  }
+
+  #initializePassiveAbilities(passiveCodes) {
+    return passiveCodes.map((code) => {
+      const PassiveClass = passiveAbilityRegisttry[code];
+      if (!PassiveClass) throw new Error(`Passive with code ${code} not found in registry`);
+      return new PassiveClass();
     });
   }
 
@@ -43,11 +52,11 @@ export default class Card {
       maxHp: this.maxHp,
       cost: this.cost,
       visible: this.visible,
-      positionCodes: this.positionCodes,
-      abilities: this.abilities,
-      traitCodes: this.traitCodes,
       affiliationCodes: this.affiliationCodes,
-      passiveCodes: this.passiveCodes,
+      positionCodes: this.positionCodes,
+      traitCodes: this.traitCodes,
+      abilities: this.abilities,
+      passiveAbilities: this.passiveAbilities,
       owner: this.owner,
     };
   }

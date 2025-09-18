@@ -34,7 +34,7 @@
     "positionCodes": ["lightbearer"],
     "traitCodes": [],
     "abilityCodes": ["create-one-lighthouse"],
-    "passiveCodes": []
+    "passiveCodes": ["round-end-take-one-damage"]
   },
   "3": {
     "type": "unit",

@@ -12,6 +12,7 @@ export function advanceToRound(game, round) {
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: firstPlayer } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: secondPlayer } });
   }
+  expect(game.round).toBe(round);
 }
 
 export function expectShinsuState(playerState, normalSpent, normalAvailable, recharged) {

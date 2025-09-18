@@ -17,8 +17,52 @@ export default class Unit {
     this.bus = card.bus;
   }
 
+  // Called when the unit is placed on the field
+  onSummon(gameState) {
+    // Activate all passive abilities
+    this.card.passiveAbilities.forEach((passive) => {
+      passive.activate(this, gameState);
+    });
+
+    this.bus.publish("OnUnitSummoned", { unitId: this.id });
+  }
+
+  // Called when the unit is removed from the field
+  onRemove(gameState) {
+    // Deactivate all passive abilities
+    this.card.passiveAbilities.forEach((passive) => {
+      passive.deactivate(this, gameState);
+    });
+
+    this.bus.publish("OnUnitRemoved", { unitId: this.id });
+  }
+
   isAlive() {
     return this.currentHp > 0;
+  }
+
+  takeDamage(amount) {
+    const damageAmount = Math.max(0, parseInt(amount) || 0);
+
+    // Publish event before damage is applied (allows for damage modification)
+    this.bus.publish("OnDealDamageIntent", {
+      source: this.toSanitizedObject(),
+      target: this.toSanitizedObject(),
+      damageAmount: damageAmount,
+      message: `${this.card.name} is about to take ${damageAmount} damage from itself`,
+    });
+
+    // Apply damage
+    this.currentHp = Math.max(0, this.currentHp - damageAmount);
+
+    // Publish event after damage is applied
+    this.bus.publish("OnDealDamageApplied", {
+      unit: this.toSanitizedObject(),
+      damageAmount: damageAmount,
+      message: `${this.card.name} took ${damageAmount} damage from itself and is now at ${this.currentHp} HP`,
+    });
+
+    return this.currentHp;
   }
 
   useAbility(abilityCode, targetInfo = null, gameState) {
@@ -41,15 +85,12 @@ export default class Unit {
 
     // Create intent
     const intent = ability.toIntent(context, gameState);
-    this.bus.publish("UseAbilityIntent", intent);
+    this.bus.publish("OnUseAbilityIntent", intent);
 
     // Resolve effects
     const action = ability.execute(context, gameState);
-    this.bus.publish("UseAbilityResolved", { ...intent, action });
-
-    // Apply effects
     ability.apply(action, gameState);
-    this.bus.publish("UseAbilityApplied", { ...intent, action, finalState: "applied" });
+    this.bus.publish("OnUseAbilityResolved", { ...intent, action });
   }
 
   toSanitizedObject() {
