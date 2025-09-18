@@ -19,17 +19,24 @@ export default class Card {
 
     this.affiliations = this.#mapCodesToDictionary(cardData.affiliationCodes, affiliations);
     this.positions = this.#mapCodesToDictionary(cardData.positionCodes, positions);
+    this.#addArtworkPathToDictionary(this.positions, "positions");
     this.traits = this.#mapCodesToDictionary(cardData.traitCodes, traits);
+    this.#addArtworkPathToDictionary(this.traits, "traits");
 
     this.abilities = this.#initializeAbilities(cardData.abilityCodes, abilityRegistry);
     this.passiveAbilities = this.#initializeAbilities(cardData.passiveCodes, passiveAbilityRegisttry);
 
     this.owner = owner; // player username
+    this.artworkPath = `/assets/images/artworks/${this.cardId}.png`;
     this.bus = bus;
   }
 
   #mapCodesToDictionary(codes, source) {
     return Object.fromEntries(codes.map((code) => [code, source[code]]));
+  }
+
+  #addArtworkPathToDictionary(dict, type) {
+    for (const key in dict) dict[key].iconPath = `/assets/icons/${type}/${key}.png`;
   }
 
   /**
@@ -63,6 +70,7 @@ export default class Card {
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
       owner: this.owner,
+      artworkPath: this.artworkPath,
     };
   }
 }

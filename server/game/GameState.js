@@ -137,15 +137,6 @@ export default class GameState {
     });
   }
 
-  #mapUnits(units) {
-    // return units.map((unit) => unit.toSanitizedObject()); // TODO: change this back when Card class is done
-    return units.map((unit) => ({
-      id: unit.card.cardId,
-      traitCodes: unit.card.traitCodes,
-      placedPositionCode: unit.placedPositionCode,
-    }));
-  }
-
   #filterYouState(username) {
     const playerState = this.playerStates[username];
     if (!playerState)
@@ -167,8 +158,8 @@ export default class GameState {
       deckSize: playerState.deck.length,
       lighthouses: playerState.lighthouses,
       field: {
-        frontline: this.#mapUnits(playerState.field.frontline),
-        backline: this.#mapUnits(playerState.field.backline),
+        frontline: playerState.field.frontline.map((unit) => unit.toSanitizedObject()),
+        backline: playerState.field.backline.map((unit) => unit.toSanitizedObject()),
       },
       hand: playerState.hand.map((card) => card.toSanitizedObject()), // send full card info for own hand
       shinsu: playerState.shinsu,
@@ -198,8 +189,8 @@ export default class GameState {
       deckSize: opponentState.deck.length,
       lighthouses: opponentState.lighthouses,
       field: {
-        frontline: this.#mapUnits(opponentState.field.frontline),
-        backline: this.#mapUnits(opponentState.field.backline),
+        frontline: opponentState.field.frontline.map((unit) => unit.toSanitizedObject()),
+        backline: opponentState.field.backline.map((unit) => unit.toSanitizedObject()),
       },
       hand: hand,
       shinsu: opponentState.shinsu,

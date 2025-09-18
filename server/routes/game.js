@@ -58,6 +58,12 @@ router.get("/:roomCode", isAuthenticated, async (req, res) => {
   const rooms = await readJsonFile(roomsFilePath);
   if (!roomCode || !rooms[roomCode]) {
     logger.warn(`Invalid access attempt to inexistant room: ${roomCode} by user: ${username}`);
+    // Add request context to help track where malformed requests originate from
+    logger.warn(
+      `Request details: originalUrl=${req.originalUrl}, referer=${req.headers.referer || "none"}, method=${
+        req.method
+      }, ip=${req.ip}, params=${JSON.stringify(req.params)}, query=${JSON.stringify(req.query)}`
+    );
     return res.status(404).send("Invalid room code");
   }
   if (!rooms[roomCode].players.includes(username)) {

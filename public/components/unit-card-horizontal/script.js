@@ -1,79 +1,61 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
 
-const load = async (
-  container,
-  {
-    cardId = null,
-    traitCodes = null,
-    placedPositionCode = null,
-    currentHp = null,
-    isSmall = false,
-    cardData,
-    traitData,
-    affiliationData,
-    positionData,
-  }
-) => {
-  // display card back
+const DEFAULT_BACK_IMAGE = "/assets/images/card/back.png";
+const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
+const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
+
+const load = async (container, { unit, isSmall = false }) => {
   const cardElement = container.querySelector(".unit-card-horizontal");
-  if (
-    cardId === null ||
-    !placedPositionCode ||
-    !cardData ||
-    !traitData ||
-    !affiliationData ||
-    !positionData
-  ) {
-    console.error("Invalid data", {
-      cardId,
-      placedPositionCode,
-      cardData,
-      traitData,
-      affiliationData,
-      positionData,
-    });
-    cardElement.style.backgroundImage = `url("/assets/images/card/back.png")`;
+
+  // Basic validation: allow currentHp === 0, but require placedPositionCode and affiliations/traits objects
+  if (!unit || typeof unit !== "object" || !unit.card || typeof unit.card !== "object") {
+    console.error("Invalid data for unit-card-horizontal", unit);
+    cardElement.style.backgroundImage = `url("${DEFAULT_BACK_IMAGE}")`;
     cardElement.innerHTML = "";
     return;
   }
 
-  // expand to vertical card
+  // expand to vertical card on right-click (safe, use local available data)
   cardElement.addEventListener("contextmenu", async (event) => {
     event.preventDefault();
     const cardComponent = document.createElement("div");
     cardComponent.classList.add("unit-card-vertical-component");
     cardElement.appendChild(cardComponent);
     await loadComponent(cardComponent, "unit-card-vertical", {
-      cardId,
-      traitCodes,
-      placedPositionCode,
-      currentHp,
+      unit,
       isSmall: false,
-      cardData,
-      traitData,
-      affiliationData,
-      positionData,
     });
   });
 
-  // artwork
+  // artwork (use fallback if missing)
   const artworkContainer = container.querySelector(".unit-card-horizontal-artwork");
-  artworkContainer.style.backgroundImage = `url("${cardData.artworkPath}")`;
-  await addTooltip(container, artworkContainer, cardData.name, cardData.abilityCodes);
-  // position
+  const artworkPath =
+    typeof unit.card.artworkPath === "string" && unit.card.artworkPath.trim() !== ""
+      ? unit.card.artworkPath
+      : DEFAULT_ARTWORK;
+  artworkContainer.style.backgroundImage = `url("${artworkPath}")`;
+  const abilityTexts = unit.card.abilities.map((ability) => ability.text);
+  await addTooltip(container, artworkContainer, unit.card.name, abilityTexts || []);
+
+  // position icon (use fallback if missing)
   const positionContainer = container.querySelector(".unit-card-horizontal-position");
   positionContainer.innerHTML = "";
-  positionContainer.style.backgroundImage = `url("${positionData[placedPositionCode].iconPath}")`;
+  const placedPosition = unit.card.positions[unit.placedPositionCode];
+  const positionIcon = placedPosition.iconPath || DEFAULT_POSITION_ICON;
+  positionContainer.style.backgroundImage = `url("${positionIcon}")`;
   await addTooltip(
     container,
     positionContainer,
-    positionData[placedPositionCode].name,
-    positionData[placedPositionCode].description,
-    positionData[placedPositionCode].iconPath
+    placedPosition.name,
+    placedPosition.description,
+    positionIcon
   );
-  // hp
+
+  // hp (use 0 if missing)
   const hpContainer = container.querySelector(".unit-card-horizontal-hp");
-  hpContainer.querySelector("h1").innerText = currentHp || cardData.hp;
+  const hpValue = unit.currentHp ? unit.currentHp : "0";
+  const hpHeader = hpContainer.querySelector("h1");
+  if (hpHeader) hpHeader.innerText = hpValue;
   await addTooltip(container, hpContainer, "HP", "The current hit points of this unit card");
 };
 

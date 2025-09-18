@@ -1,34 +1,35 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
 
-const load = async (
-  container,
-  {
-    cardId = null,
-    traitCodes = null,
-    placedPositionCode = null,
-    currentHp = null,
-    isSmall = false,
-    cardData,
-    traitData,
-    affiliationData,
-    positionData,
-  }
-) => {
+const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
+const DEFAULT_TRAIT_ICON = "/assets/icons/traits/placeholder.png";
+const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
+
+const safePath = (p, fallback) => {
+  if (typeof p === "string" && p.trim() !== "" && p !== "undefined" && p !== "null") return p;
+  return fallback;
+};
+
+const load = async (container, { unit, card, isSmall = false }) => {
+  const displayCardBack = (container) => {
+    const cardFrame = container.querySelector(".unit-card-vertical-frame");
+    cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
+    cardFrame.classList.add("unit-card-vertical-small", "no-hover");
+    cardFrame.innerHTML = "";
+  };
+
   const loadName = async (container, name, sobriquet) => {
     const nameContainer = container.querySelector(".unit-card-vertical-name");
     nameContainer.innerText = name;
     if (sobriquet) await addTooltip(container, nameContainer, name, sobriquet);
   };
 
-  const loadTraits = async (container, traitCodes) => {
-    // remove invalid trait codes
-    traitCodes = traitCodes.filter((code) => traitData[code]);
-
+  const loadTraits = async (container, traits) => {
     // load main traits
     const rowSize = 4;
     const traitsList = container.querySelector(".unit-card-vertical-traits");
     const traitsTooltipFrame = container.querySelector(".unit-card-vertical-traits-tooltip-frame");
     traitsList.innerHTML = "";
+    const traitCodes = Object.keys(traits);
     for (let i = 0; i < traitCodes.length; i++) {
       const code = traitCodes[i];
       const img = document.createElement("img");
@@ -41,14 +42,9 @@ const load = async (
         traitsList.appendChild(img);
         break;
       }
-      img.src = traitData[code].iconPath;
-      await addTooltip(
-        container,
-        img,
-        traitData[code].name,
-        traitData[code].description,
-        traitData[code].iconPath
-      );
+      const traitIcon = safePath(traits[code].iconPath, DEFAULT_TRAIT_ICON);
+      img.src = traitIcon;
+      await addTooltip(container, img, traits[code].name, traits[code].description, traitIcon);
       traitsList.appendChild(img);
     }
     if (traitCodes.length === 0) traitsList.innerText = "Traits";
@@ -61,14 +57,9 @@ const load = async (
     for (let i = 3; i < traitCodes.length; i++) {
       const code = traitCodes[i];
       const img = document.createElement("img");
-      img.src = traitData[code].iconPath;
-      await addTooltip(
-        container,
-        img,
-        traitData[code].name,
-        traitData[code].description,
-        traitData[code].iconPath
-      );
+      const traitIcon = safePath(traits[code].iconPath, DEFAULT_TRAIT_ICON);
+      img.src = traitIcon;
+      await addTooltip(container, img, traits[code].name, traits[code].description, traitIcon);
       tooltipRow.appendChild(img);
       // end of row
       if (i % 4 === 2 || i === traitCodes.length - 1) {
@@ -79,15 +70,13 @@ const load = async (
     }
   };
 
-  const loadAffiliations = async (container, affiliationCodes) => {
-    // remove invalid affiliation codes
-    affiliationCodes = affiliationCodes.filter((code) => affiliationData[code]);
-    if (affiliationCodes.length === 0) return;
-
+  const loadAffiliations = async (container, affiliations) => {
+    const affiliationCodes = Object.keys(affiliations);
     // first affiliation
     const affiliationsContainer = container.querySelector(".unit-card-vertical-affiliations");
-    affiliationsContainer.innerHTML = affiliationData[affiliationCodes[0]].name;
-    if (affiliationCodes.length === 1) return;
+    const text = affiliationCodes.length === 0 ? "Affiliations" : affiliations[affiliationCodes[0]].name;
+    affiliationsContainer.innerHTML = text;
+    if (affiliationCodes.length <= 1) return;
 
     // hover to show tooltip
     const affiliationsTooltipFrame = container.querySelector(
@@ -104,7 +93,7 @@ const load = async (
     for (let i = 1; i < affiliationCodes.length; i++) {
       const code = affiliationCodes[i];
       const p = document.createElement("p");
-      p.innerText = affiliationData[code].name;
+      p.innerText = affiliations[code].name;
       affiliationsTooltip.appendChild(p);
     }
   };
@@ -121,9 +110,9 @@ const load = async (
     // create list items
     for (let ability of abilities) {
       const li = document.createElement("li");
-      li.innerText = ability;
+      li.innerText = ability.text;
       abilitiesList.appendChild(li);
-      li.addEventListener("click", () => console.log(ability));
+      li.addEventListener("click", () => console.log(ability.text));
       listItems.push(li);
     }
 
@@ -139,31 +128,25 @@ const load = async (
     abilitiesList.style.maxHeight = `${maxSize.height}px`;
   };
 
-  const loadPositions = async (container, positionCodes) => {
+  const loadPositions = async (container, positions) => {
     const positionsList = container.querySelector(".unit-card-vertical-positions");
     positionsList.innerHTML = "";
-    for (let code of positionCodes) {
+    for (let code of Object.keys(positions)) {
       const li = document.createElement("li");
-      li.style.backgroundImage = `url("${positionData[code].iconPath}")`;
-      await addTooltip(
-        container,
-        li,
-        positionData[code].name,
-        positionData[code].description,
-        positionData[code].iconPath
-      );
+      const posIcon = safePath(positions[code].iconPath, DEFAULT_POSITION_ICON);
+      li.style.backgroundImage = `url("${posIcon}")`;
+      await addTooltip(container, li, positions[code].name, positions[code].description, posIcon);
       positionsList.appendChild(li);
     }
   };
 
-  // display card back
-  if (cardId === null || !cardData || !traitData || !affiliationData || !positionData) {
-    const cardFrame = container.querySelector(".unit-card-vertical-frame");
-    cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
-    cardFrame.classList.add("unit-card-vertical-small", "no-hover");
-    cardFrame.innerHTML = "";
-    return;
-  }
+  // Need either unit or card, but not both
+  if ((unit && card) || (!unit && !card)) return displayCardBack(container);
+
+  if (unit) card = unit.card;
+
+  // hidden card
+  if (card.cardId == null) return displayCardBack(container);
 
   // size
   const cardFrame = container.querySelector(".unit-card-vertical-frame");
@@ -176,15 +159,9 @@ const load = async (
       cardComponent.classList.add("unit-card-vertical-component");
       container.appendChild(cardComponent);
       await loadComponent(cardComponent, "unit-card-vertical", {
-        cardId,
-        traitCodes,
-        placedPositionCode,
-        currentHp,
+        unit: unit,
+        card: unit ? null : card,
         isSmall: false,
-        cardData,
-        traitData,
-        affiliationData,
-        positionData,
       });
     });
   } else {
@@ -195,29 +172,32 @@ const load = async (
   }
 
   // name
-  await loadName(container, cardData.name, cardData.sobriquet);
-  // artwork
-  container.querySelector(
-    ".unit-card-vertical-artwork"
-  ).style.backgroundImage = `url("${cardData.artworkPath}")`;
+  await loadName(container, card.name, card.sobriquet);
+  // artwork (use fallback when missing)
+  const artworkPath = safePath(card.artworkPath, DEFAULT_ARTWORK);
+  container.querySelector(".unit-card-vertical-artwork").style.backgroundImage = `url("${artworkPath}")`;
   // traits
-  await loadTraits(container, traitCodes || cardData.traitCodes);
+  await loadTraits(container, card.traits);
   // affiliations
-  await loadAffiliations(container, cardData.affiliationCodes);
+  await loadAffiliations(container, card.affiliations);
   // abilities
-  await loadAbilities(container, cardData.abilityCodes);
+  await loadAbilities(container, card.abilities);
   // shinsu
   const shinsuContainer = container.querySelector(".unit-card-vertical-shinsu");
-  shinsuContainer.innerText = cardData.cost;
+  shinsuContainer.innerText = card.cost;
   await addTooltip(container, shinsuContainer, "Shinsu", "The cost of playing this card");
   // positions
-  let positionCodes = cardData.positionCodes;
-  if (placedPositionCode && positionCodes.includes(placedPositionCode)) positionCodes = [placedPositionCode];
-  await loadPositions(container, positionCodes);
+  let positionsToLoad = card.positions;
+  if (unit && unit.placedPositionCode && unit.placedPositionCode in unit.card.positions)
+    positionsToLoad = { [unit.placedPositionCode]: unit.card.positions[unit.placedPositionCode] };
+  await loadPositions(container, positionsToLoad);
   // hp
   const hpContainer = container.querySelector(".unit-card-vertical-hp");
-  hpContainer.innerText = currentHp || cardData.hp;
-  await addTooltip(container, hpContainer, "HP", "The current hit points of this unit card");
+  hpContainer.innerText = unit ? unit.currentHp : card.maxHp;
+  const hpText = unit
+    ? "The current hit points of this unit card"
+    : "The maximum hit points of this unit card";
+  await addTooltip(container, hpContainer, "HP", hpText);
 };
 
 export default load;

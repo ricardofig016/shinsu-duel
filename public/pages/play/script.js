@@ -1,5 +1,9 @@
 import { loadComponent } from "/utils/component-util.js";
 
+const isValidRoomCode = (code) => {
+  return typeof code === "string" && code.trim() !== "" && code !== "undefined" && code !== "null";
+};
+
 const setupModeSelection = () => {
   const friendButton = document.getElementById("friend-btn");
   const botButton = document.getElementById("bot-btn");
@@ -64,13 +68,16 @@ const createRoom = async (opponent, difficulty = null) => {
 
 const joinRoom = async (roomCode) => {
   try {
-    if (roomCode) {
+    if (isValidRoomCode(roomCode)) {
       const response = await fetch(`/game/${roomCode}/join`, { method: "POST" });
       if (response.status !== 200) {
         alert(await response.text());
       } else {
+        // navigate only after successful join
         window.location.href = `/game/${roomCode}`;
       }
+    } else {
+      alert("Invalid room code. Please enter a valid room code.");
     }
   } catch (error) {
     console.error(error);

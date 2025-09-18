@@ -1,6 +1,19 @@
 const load = async (container, { hoverContainer, title, textList, iconPath = null }) => {
-  if (!iconPath) container.querySelector(".tooltip-icon").remove();
-  else container.querySelector(".tooltip-icon").src = iconPath;
+  const iconEl = container.querySelector(".tooltip-icon");
+  const sanitizePath = (p) => {
+    if (typeof p !== "string") return null;
+    const s = p.trim();
+    if (!s || s === "undefined" || s === "null") return null;
+    // ensure absolute-ish path so browser won't resolve it under current page path
+    if (!s.startsWith("/") && !s.startsWith("http://") && !s.startsWith("https://")) return `/${s}`;
+    return s;
+  };
+  const safeIcon = sanitizePath(iconPath);
+  if (!safeIcon) {
+    if (iconEl) iconEl.remove();
+  } else {
+    if (iconEl) iconEl.src = safeIcon;
+  }
   container.querySelector(".tooltip-title").innerText = title;
   const tooltipTextContainer = container.querySelector(".tooltip-text");
   if (typeof textList === "string") tooltipTextContainer.innerHTML = `<p>${textList}</p>`;

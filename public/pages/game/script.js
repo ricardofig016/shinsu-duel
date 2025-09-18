@@ -141,7 +141,19 @@ const prepareBoard = async (data, socket) => {
     for (let code of positionCodes) {
       const dropZoneContainer = document.createElement("div");
       dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
-      dropZoneContainer.innerHTML = `<div class="position-drop-zone-icon" style="background-image: url(${data.positions[code].iconPath})"></div>`;
+      // only set background-image when iconPath is present and valid to avoid requesting invalid URLs
+      const iconPath = data.positions[code] && data.positions[code].iconPath;
+      const iconDiv = document.createElement("div");
+      iconDiv.classList.add("position-drop-zone-icon");
+      if (
+        typeof iconPath === "string" &&
+        iconPath.trim() !== "" &&
+        iconPath !== "undefined" &&
+        iconPath !== "null"
+      ) {
+        iconDiv.style.backgroundImage = `url(${iconPath})`;
+      }
+      dropZoneContainer.appendChild(iconDiv);
       dropZoneContainer.dataset.positionCode = code;
       dropZoneContainer.addEventListener("mouseup", (event) => {
         socket.emit("game-action", {
@@ -233,15 +245,8 @@ const load = async (data) => {
           lineContainer.prepend(newDiv);
           // load card component
           await loadComponent(newDiv, "unit-card-horizontal", {
-            cardId: unit.id,
-            traitCodes: unit.traitCodes,
-            placedPositionCode: unit.placedPositionCode,
-            currentHp: null,
+            unit,
             isSmall: true,
-            cardData: data.cards[unit.id],
-            traitData: data.traits,
-            affiliationData: data.affiliations,
-            positionData: data.positions,
           });
         }
       }
@@ -258,19 +263,12 @@ const load = async (data) => {
         // create div
         const newDiv = document.createElement("div");
         newDiv.classList.add("unit-card-vertical-component");
-        if (card.cardId === undefined) newDiv.classList.add("no-focus");
+        if (!card.cardId) newDiv.classList.add("no-focus");
         handContainer.appendChild(newDiv);
         // load card component
         await loadComponent(newDiv, "unit-card-vertical", {
-          cardId: card.cardId,
-          traitCodes: card.traitCodes,
-          placedPositionCode: null,
-          currentHp: null,
+          card: card,
           isSmall: true,
-          cardData: data.cards[card.cardId],
-          traitData: data.traits,
-          affiliationData: data.affiliations,
-          positionData: data.positions,
         });
         // drag and drop
         if (player === "opponent") continue;
@@ -290,7 +288,7 @@ const load = async (data) => {
           newDiv.classList.add("invisible");
           // show drop zones
           const dropZones = document.querySelectorAll(`.position-drop-zone`);
-          const positionCodes = data.cards[card.cardId].positionCodes;
+          const positionCodes = Object.keys(card.positions);
           dropZones.forEach((zone) => {
             if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
           });
@@ -416,10 +414,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   // console.log(data.gameState);
 
   // socket
+  const roomCode = window.location.pathname.split("/").pop();
+  const isValidRoomCode = (code) =>
+    typeof code === "string" && code.trim() !== "" && code !== "undefined" && code !== "null";
+  if (!isValidRoomCode(roomCode)) {
+    alert("Invalid or missing room code. Redirecting to Play page.");
+    window.location.href = "/play";
+    return;
+  }
+
   const socket = io("/game", {
-    query: {
-      roomCode: window.location.pathname.split("/").pop(),
-    },
+    query: { roomCode },
   });
   socket.on("game-init", async (initialState) => {
     // console.log("initialState: ", initialState);

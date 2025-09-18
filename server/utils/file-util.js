@@ -1,6 +1,8 @@
 import fs from "fs-extra";
 import path from "path";
 
+const placeholderImagePath = "/assets/images/placeholder.png";
+
 export const readJsonFile = async (filePath) => {
   try {
     const data = await fs.readFile(filePath, "utf8");
@@ -24,8 +26,13 @@ export const writeJsonFile = async (filePath, data) => {
 };
 
 export const getIconPath = (fileName, folderName) => {
-  const directoryPath = path.resolve(`public/assets/icons/${folderName}/`);
-  const files = fs.readdirSync(directoryPath);
-  const file = files.find((file) => file === `${fileName}.png`);
-  return file ? `/assets/icons/${folderName}/${file}` : placeholderImagePath;
+  try {
+    const directoryPath = path.resolve(`public/assets/icons/${folderName}/`);
+    const files = fs.readdirSync(directoryPath);
+    const file = files.find((file) => file === `${fileName}.png`);
+    return file ? `/assets/icons/${folderName}/${file}` : placeholderImagePath;
+  } catch (error) {
+    // if directory doesn't exist or can't be read, return placeholder
+    return placeholderImagePath;
+  }
 };
