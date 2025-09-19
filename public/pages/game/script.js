@@ -92,7 +92,7 @@ const prepareBoard = async (positionData, socket) => {
   });
 };
 
-const load = async (gameState, data) => {
+const load = async (gameState, data, socket) => {
   const loadCombatSlots = async () => {
     for (let player of ["you", "opponent"]) {
       const slotsContainer = document.querySelector(`#${player}-container .combat-slots-container`);
@@ -162,7 +162,7 @@ const load = async (gameState, data) => {
           // load card component
           await loadComponent(newDiv, "unit-card-horizontal", {
             unit,
-            isSmall: true,
+            socket: socket,
           });
         }
       }
@@ -185,6 +185,7 @@ const load = async (gameState, data) => {
         await loadComponent(newDiv, "unit-card-vertical", {
           card: card,
           isSmall: true,
+          socket: null,
         });
         // drag and drop
         if (player === "opponent") continue;
@@ -341,12 +342,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   socket.on("game-init", async (initialState) => {
     gameState = initialState;
-    await load(gameState, data);
+    await load(gameState, data, socket);
   });
   socket.on("game-update", async (newState) => {
     gameState = newState;
     console.dir(gameState);
-    await load(gameState, data);
+    await load(gameState, data, socket);
   });
   socket.on("game-error", async (errorMessage) => {
     console.error("errorMessage: ", errorMessage);

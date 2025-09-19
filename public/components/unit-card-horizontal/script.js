@@ -4,10 +4,10 @@ const DEFAULT_BACK_IMAGE = "/assets/images/card/back.png";
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
 const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
 
-const load = async (container, { unit, isSmall = false }) => {
+const load = async (container, { unit, socket = null }) => {
   const cardElement = container.querySelector(".unit-card-horizontal");
 
-  // Basic validation: allow currentHp === 0, but require placedPositionCode and affiliations/traits objects
+  // basic validation
   if (!unit || typeof unit !== "object" || !unit.card || typeof unit.card !== "object") {
     console.error("Invalid data for unit-card-horizontal", unit);
     cardElement.style.backgroundImage = `url("${DEFAULT_BACK_IMAGE}")`;
@@ -15,7 +15,7 @@ const load = async (container, { unit, isSmall = false }) => {
     return;
   }
 
-  // expand to vertical card on right-click (safe, use local available data)
+  // expand to vertical card on right-click
   cardElement.addEventListener("contextmenu", async (event) => {
     event.preventDefault();
     const cardComponent = document.createElement("div");
@@ -24,6 +24,7 @@ const load = async (container, { unit, isSmall = false }) => {
     await loadComponent(cardComponent, "unit-card-vertical", {
       unit,
       isSmall: false,
+      socket: socket,
     });
   });
 

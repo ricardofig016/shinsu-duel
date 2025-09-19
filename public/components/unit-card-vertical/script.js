@@ -10,14 +10,25 @@ const safePath = (p, fallback) => {
   return fallback;
 };
 
-const load = async (container, { unit, card, isSmall = false }) => {
-  const displayCardBack = (container) => {
-    const cardFrame = container.querySelector(".unit-card-vertical-frame");
-    cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
-    cardFrame.classList.add("unit-card-vertical-small", "no-hover");
-    cardFrame.innerHTML = "";
-  };
+const displayCardBack = (container) => {
+  const cardFrame = container.querySelector(".unit-card-vertical-frame");
+  cardFrame.style.backgroundImage = `url("/assets/images/card/back.png")`;
+  cardFrame.classList.add("unit-card-vertical-small", "no-hover");
+  cardFrame.innerHTML = "";
+};
 
+const useAbility = (socket, unitId, abilityCode) => {
+  if (!socket || !unitId || !abilityCode) return;
+  socket.emit("game-action", {
+    type: "use-ability-action",
+    data: {
+      unitId: unitId,
+      abilityCode: abilityCode,
+    },
+  });
+};
+
+const load = async (container, { unit, card, isSmall = false, socket = null }) => {
   const loadPassiveAbility = async (container, passives) => {
     const passiveContainer = container.querySelector(".unit-card-vertical-passive-abilities");
 
@@ -131,7 +142,9 @@ const load = async (container, { unit, card, isSmall = false }) => {
       const li = document.createElement("li");
       li.innerText = ability.text;
       abilitiesList.appendChild(li);
-      li.addEventListener("click", () => console.log(ability.text));
+      li.addEventListener("click", () => {
+        useAbility(socket, unit.id, ability.code);
+      });
       listItems.push(li);
     }
 
@@ -179,14 +192,15 @@ const load = async (container, { unit, card, isSmall = false }) => {
       container.appendChild(cardComponent);
       await loadComponent(cardComponent, "unit-card-vertical", {
         unit: unit,
-        card: unit ? null : card,
+        card: unit ? null : card, // only pass card if this isn't a unit
         isSmall: false,
+        socket: unit ? null : socket, // only pass socket if this isn't a unit
       });
     });
   } else {
     document.addEventListener("mousedown", (event) => {
-      // if (event.target !== cardFrame && !cardFrame.contains(event.target))
-      container.remove();
+      // close the big card if clicked outside
+      if (event.target !== cardFrame && !cardFrame.contains(event.target)) container.remove();
     });
   }
 
@@ -219,8 +233,6 @@ const load = async (container, { unit, card, isSmall = false }) => {
     ? "The current hit points of this unit card"
     : "The maximum hit points of this unit card";
   await addTooltip(container, hpContainer, "HP", hpText);
-
-  console.log("\n\n\n\n\n\n\n\n");
 };
 
 export default load;
