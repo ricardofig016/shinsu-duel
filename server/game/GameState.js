@@ -79,8 +79,14 @@ export default class GameState {
 
   #initializePlayerState(username, deck = null) {
     if (!deck) deck = this.#generateRandomDeckOfCardIds();
+
+    // codes for all non special positions
+    const combatSlotCodes = Object.keys(this.positions)
+      .filter((code) => !this.positions[code].special)
+      .map((code) => code);
+
     return {
-      combatSlotCodes: ["fisherman", "lightbearer", "scout", "spearbearer", "wavecontroller"],
+      combatSlotCodes: combatSlotCodes,
       deck: this.#buildDeckFromCardIds(deck, username),
       lighthouses: { amount: this.INIT_LIGHTHOUSE_AMOUNT },
       field: { frontline: [], backline: [] },
