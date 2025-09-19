@@ -7,21 +7,17 @@ import Logger from "./Logger.js";
 import Card from "./Card.js";
 
 export default class GameState {
-  // all of the valid actions the user can take and their required fields
-  VALID_USER_ACTIONS = {
-    "deploy-unit": ["handId", "placedPositionCode", "username"],
-    "pass-turn": ["username"],
-    "use-ability": ["username", "unitId", "abilityCode"],
-    "add-lighthouses": ["username", "amount"],
-    noop: ["username"],
-  };
   // game settings
-  INIT_HAND_SIZE = 4;
-  INIT_DECK_SIZE = 30;
-  INIT_LIGHTHOUSE_AMOUNT = 20;
-  PER_ROUND_DRAW_AMOUNT = 1;
-  MAX_NORMAL_SHINSU = 10;
-  MAX_RECHARGED_SHINSU = 2;
+  static INIT_HAND_SIZE = 4;
+  static INIT_DECK_SIZE = 30;
+  static INIT_LIGHTHOUSE_AMOUNT = 20;
+  static PER_ROUND_DRAW_AMOUNT = 1;
+  static MAX_NORMAL_SHINSU = 10;
+  static MAX_RECHARGED_SHINSU = 2;
+
+  // data
+  static cards = cards;
+  static positions = positions;
 
   /**
    *
@@ -42,9 +38,6 @@ export default class GameState {
     this.actionRegistry = createActionRegistry();
     this.logger = new Logger(this.eventBus);
 
-    this.cards = cards; // TODO: change this to static cards
-    this.positions = positions; // TODO: change this to static positions
-
     this.activeEffects = [];
     this.roomCode = roomCode;
     this.usernames = usernames;
@@ -57,7 +50,7 @@ export default class GameState {
       [this.usernames[0]]: this.#initializePlayerState(this.usernames[0], decks[this.usernames[0]]),
       [this.usernames[1]]: this.#initializePlayerState(this.usernames[1], decks[this.usernames[1]]),
     };
-    this.#draw(this.usernames, this.INIT_HAND_SIZE);
+    this.#draw(this.usernames, GameState.INIT_HAND_SIZE);
     this.#resetShinsu(this.usernames);
 
     // add mockup effects
@@ -81,14 +74,14 @@ export default class GameState {
     if (!deck) deck = this.#generateRandomDeckOfCardIds();
 
     // codes for all non special positions
-    const combatSlotCodes = Object.keys(this.positions)
-      .filter((code) => !this.positions[code].special)
+    const combatSlotCodes = Object.keys(GameState.positions)
+      .filter((code) => !GameState.positions[code].special)
       .map((code) => code);
 
     return {
       combatSlotCodes: combatSlotCodes,
       deck: this.#buildDeckFromCardIds(deck, username),
-      lighthouses: { amount: this.INIT_LIGHTHOUSE_AMOUNT },
+      lighthouses: { amount: GameState.INIT_LIGHTHOUSE_AMOUNT },
       field: { frontline: [], backline: [] },
       hand: [],
       shinsu: {},
@@ -102,12 +95,12 @@ export default class GameState {
    * @returns {Array<Card>} Array of Card objects
    */
   #buildDeckFromCardIds(cardIds, username) {
-    if (!Array.isArray(cardIds) || cardIds.length !== this.INIT_DECK_SIZE)
-      throw new Error(`deck must be an array of ${this.INIT_DECK_SIZE} cardIds.`);
+    if (!Array.isArray(cardIds) || cardIds.length !== GameState.INIT_DECK_SIZE)
+      throw new Error(`deck must be an array of ${GameState.INIT_DECK_SIZE} cardIds.`);
 
     const deck = [];
     cardIds.forEach((cardId) => {
-      const cardData = this.cards[cardId];
+      const cardData = GameState.cards[cardId];
       if (cardData === undefined) throw new Error(`Card with cardId ${cardId} does not exist`);
       deck.push(new Card(cardId, cardData, username, this.eventBus));
     });
@@ -119,7 +112,7 @@ export default class GameState {
    * @returns {Array<number>} Array of cardIds
    */
   #generateRandomDeckOfCardIds() {
-    const deck = Array.from({ length: this.INIT_DECK_SIZE }, () => {
+    const deck = Array.from({ length: GameState.INIT_DECK_SIZE }, () => {
       // return 2; // for testing purposes, use only cardId 2 (khun)
       return this.#getRandomCardId();
     });
@@ -127,7 +120,7 @@ export default class GameState {
   }
 
   #getRandomCardId() {
-    const maxCardId = Object.keys(this.cards).length - 1;
+    const maxCardId = Object.keys(GameState.cards).length - 1;
     return Math.floor(Math.random() * (maxCardId + 1));
   }
 
@@ -247,7 +240,7 @@ export default class GameState {
     });
     this.round++;
     this.#resetShinsu(this.usernames);
-    this.#draw(this.usernames, this.PER_ROUND_DRAW_AMOUNT);
+    this.#draw(this.usernames, GameState.PER_ROUND_DRAW_AMOUNT);
     this.roundEndOnTurnEnd = false; // reset the flag for the next round
     this.eventBus.publish("OnRoundStart", {
       username: this.currentTurn,
@@ -273,8 +266,8 @@ export default class GameState {
         const unspentShinsu = player.shinsu.recharged + player.shinsu.normalAvailable || 0;
         player.shinsu = {
           normalSpent: 0,
-          normalAvailable: Math.min(this.MAX_NORMAL_SHINSU, this.round),
-          recharged: Math.min(this.MAX_RECHARGED_SHINSU, unspentShinsu),
+          normalAvailable: Math.min(GameState.MAX_NORMAL_SHINSU, this.round),
+          recharged: Math.min(GameState.MAX_RECHARGED_SHINSU, unspentShinsu),
         };
       }
     });

@@ -39,8 +39,8 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
     const aliceState = game.getClientState("Alice").you;
     const bobState = game.getClientState("Bob").you;
     const sumOfAllUnspentShinsu = ((game.round - 1) * (game.round - 1 + 1)) / 2;
-    const expectedRecharged = Math.min(sumOfAllUnspentShinsu, game.MAX_RECHARGED_SHINSU);
-    const expectedNormalAvailable = Math.min(game.round, game.MAX_NORMAL_SHINSU);
+    const expectedRecharged = Math.min(sumOfAllUnspentShinsu, GameState.MAX_RECHARGED_SHINSU);
+    const expectedNormalAvailable = Math.min(game.round, GameState.MAX_NORMAL_SHINSU);
     expectShinsuState(aliceState, 0, expectedNormalAvailable, expectedRecharged);
     expectShinsuState(bobState, 0, expectedNormalAvailable, expectedRecharged);
   });
@@ -48,7 +48,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   test("number of cards in hand", () => {
     const aliceState = game.getClientState("Alice").you;
     const bobState = game.getClientState("Bob").you;
-    const expectedHandSize = game.INIT_HAND_SIZE + (game.round - 1);
+    const expectedHandSize = GameState.INIT_HAND_SIZE + (game.round - 1);
     expect(aliceState.hand.length).toBe(expectedHandSize);
     expect(bobState.hand.length).toBe(expectedHandSize);
   });
@@ -56,7 +56,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   test("number of cards in deck", () => {
     const aliceState = game.getClientState("Alice").you;
     const bobState = game.getClientState("Bob").you;
-    const expectedDeckSize = game.INIT_DECK_SIZE - (game.INIT_HAND_SIZE + (game.round - 1));
+    const expectedDeckSize = GameState.INIT_DECK_SIZE - (GameState.INIT_HAND_SIZE + (game.round - 1));
     expect(aliceState.deckSize).toBe(expectedDeckSize);
     expect(bobState.deckSize).toBe(expectedDeckSize);
   });
@@ -180,21 +180,21 @@ describe("deck behavior", () => {
     const decks = { Alice: aliceDeck, Bob: bobDeck };
     const game = new GameState(ROOM_CODE, USERNAMES, decks);
 
-    // After constructor, initial hand size is INIT_HAND_SIZE
+    // After constructor, initial hand size GameState INIT_HAND_SIZE
     const aliceClient = game.getClientState("Alice").you;
-    expect(aliceClient.hand.length).toBe(game.INIT_HAND_SIZE);
+    expect(aliceClient.hand.length).toBe(GameState.INIT_HAND_SIZE);
 
     // Because draw uses pop(), Alice's hand should contain the four 1's we placed at the end
     const aliceHandIds = aliceClient.hand.map((c) => c.cardId);
     expect(aliceHandIds).toEqual([4, 3, 2, 1]);
 
-    // Deck size decreased by INIT_HAND_SIZE
-    expect(aliceClient.deckSize).toBe(game.INIT_DECK_SIZE - game.INIT_HAND_SIZE);
+    // Deck size decreased GameState INIT_HAND_SIZE
+    expect(aliceClient.deckSize).toBe(GameState.INIT_DECK_SIZE - GameState.INIT_HAND_SIZE);
 
     // Bob also should have a reduced deck and 4 cards in hand
     const bobClient = game.getClientState("Bob").you;
-    expect(bobClient.hand.length).toBe(game.INIT_HAND_SIZE);
-    expect(bobClient.deckSize).toBe(game.INIT_DECK_SIZE - game.INIT_HAND_SIZE);
+    expect(bobClient.hand.length).toBe(GameState.INIT_HAND_SIZE);
+    expect(bobClient.deckSize).toBe(GameState.INIT_DECK_SIZE - GameState.INIT_HAND_SIZE);
   });
 
   test("getClientState.deckSize matches internal deck length", () => {

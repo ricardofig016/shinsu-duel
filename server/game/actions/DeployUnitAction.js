@@ -22,7 +22,7 @@ export default class DeployUnitAction extends ActionHandler {
     if (gameState.currentTurn !== username) throw new Error("It's not your turn.");
 
     if (handId < 0 || handId >= playerState.hand.length) throw new Error("Invalid handId.");
-    if (!gameState.positions[placedPositionCode])
+    if (!gameState.constructor.positions[placedPositionCode])
       throw new Error(`Invalid placedPositionCode: ${placedPositionCode}`);
 
     const card = playerState.hand[handId];
@@ -42,7 +42,7 @@ export default class DeployUnitAction extends ActionHandler {
     const [card] = player.hand.splice(handId, 1);
 
     const unit = new Unit(card, placedPositionCode);
-    const line = player.field[gameState.positions[placedPositionCode].line];
+    const line = player.field[gameState.constructor.positions[placedPositionCode].line];
     line.push(unit);
 
     gameState.spendShinsu(username, card.cost);
