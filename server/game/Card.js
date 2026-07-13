@@ -1,8 +1,8 @@
 import abilityRegistry from "./registries/abilityRegistry.js";
 import passiveAbilityRegisttry from "./registries/passiveAbilityRegisttry.js";
-import affiliations from "../data/affiliations.json" assert { type: "json" };
-import positions from "../data/positions.json" assert { type: "json" };
-import traits from "../data/traits.json" assert { type: "json" };
+import affiliations from "../data/affiliations.json" with { type: "json" };
+import positions from "../data/positions.json" with { type: "json" };
+import traits from "../data/traits.json" with { type: "json" };
 
 export default class Card {
   constructor(cardId, cardData, owner, bus) {

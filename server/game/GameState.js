@@ -1,5 +1,5 @@
-import cards from "../data/cards.json" assert { type: "json" };
-import positions from "../data/positions.json" assert { type: "json" };
+import cards from "../data/cards.json" with { type: "json" };
+import positions from "../data/positions.json" with { type: "json" };
 import EventBus from "./EventBus.js";
 import effectRegistry from "./registries/effectRegistry.js";
 import createActionRegistry from "./registries/actionRegistry.js";
