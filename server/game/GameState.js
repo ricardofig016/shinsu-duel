@@ -8,7 +8,7 @@ import Card from "./Card.js";
 
 export default class GameState {
   // game settings
-  static INIT_HAND_SIZE = 4;
+  static INIT_HAND_SIZE = 5;
   static INIT_DECK_SIZE = 30;
   static INIT_LIGHTHOUSE_AMOUNT = 20;
   static PER_ROUND_DRAW_AMOUNT = 1;

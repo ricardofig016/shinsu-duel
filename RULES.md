@@ -2,20 +2,49 @@
 
 Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of God](https://www.webtoons.com/en/fantasy/tower-of-god/list?title_no=95)_. Players build decks, deploy units, and use abilities to destroy their opponent's lighthouses while protecting their own.
 
-## Table of Contents
-
-1. [Objective](#objective)
-2. [Resources](#resources)
-3. [Board](#board)
-4. [Gameplay](#gameplay)
-5. [Cards](#cards)
-6. [Deck](#deck)
-7. [Keywords](#keywords)
-8. [Positions](#positions)
-9. [Traits](#traits)
-10. [Affiliations](#affiliations)
-11. [Attributes](#attributes)
-12. [Future Features](#future-features)
+- [Shinsu Duel: A Tower of God CCG](#shinsu-duel-a-tower-of-god-ccg)
+  - [Objective](#objective)
+  - [Resources](#resources)
+    - [Shinsu](#shinsu)
+    - [Lighthouses](#lighthouses)
+    - [Combat Slots](#combat-slots)
+  - [Board](#board)
+    - [Physical Layout](#physical-layout)
+    - [Lines](#lines)
+  - [Gameplay](#gameplay)
+  - [Setup](#setup)
+    - [Round](#round)
+    - [Actions](#actions)
+  - [Cards](#cards)
+    - [Units](#units)
+    - [Consumables](#consumables)
+    - [Equipment](#equipment)
+  - [Deck](#deck)
+  - [Keywords](#keywords)
+  - [Positions](#positions)
+    - [Main Positions](#main-positions)
+    - [Special Positions](#special-positions)
+      - [Shinheuh](#shinheuh)
+      - [Landmark](#landmark)
+  - [Traits](#traits)
+    - [Positive Traits](#positive-traits)
+    - [Negative Traits](#negative-traits)
+    - [Trait Colors](#trait-colors)
+  - [Attributes](#attributes)
+    - [Anima](#anima)
+    - [Guide](#guide)
+      - [Silver Dwarf](#silver-dwarf)
+      - [Red Witch](#red-witch)
+    - [Hwayeomsa](#hwayeomsa)
+    - [Irregular](#irregular)
+    - [Jeonsulsa](#jeonsulsa)
+    - [Living Ignition Weapon](#living-ignition-weapon)
+  - [Affiliations](#affiliations)
+  - [Rank](#rank)
+  - [Future Features](#future-features)
+    - [Team Leader](#team-leader)
+    - [Evolution](#evolution)
+    - [Attributes](#attributes-1)
 
 ## Objective
 
@@ -25,13 +54,13 @@ Destroy your opponent's lighthouses. Each lighthouse represents one point of HP.
 
 ### Shinsu
 
-1. Required to play all cards
-2. Start with 1 shinsu in round 1
-3. Increases by 1 per round (max 10 at round 10)
-4. After round 10: Stays at 10 per round
-5. Up to 2 unspent shinsu carry over to next round
-6. Max per round: 12 shinsu (10 + 2 carried over)
-7. Abilities may cost shinsu
+1. Required to play all cards.
+2. Abilities may cost shinsu.
+3. Every round, players' shinsu resets and they gain shinsu equal to the round number, to a maximum of 10 shinsu per round.
+4. Up to 2 unspent shinsu carry over to next round to a different pool, called **Recharged Shinsu**, and the rest is lost.
+5. The maximum shinsu a person can have is equal to the round number, not counting Recharged Shinsu.
+6. This means that the max shinsu on round 4 is 6, on round 9 is 11, and on round 10+ is 12.
+7. When a player gains shinsu it is added exclusively to the main pool. Recharged Shinsu is only filled by unspent shinsu at the end of a round.
 
 ### Lighthouses
 
@@ -42,12 +71,13 @@ Destroy your opponent's lighthouses. Each lighthouse represents one point of HP.
 ### Combat Slots
 
 1. Each player has 5 combat slots: one for each of the positions.
-2. A unit deployed in a position can only use an ability if the combat slot for that position is available.
+2. A unit deployed in a position can only use an ability if the combat slot for that position is available. Notice that this doesn't stop the player from playing another unit in that position.
 3. When a unit uses an ability, the combat slot for the position the unit was deployed in becomes unavailable until the end of the round.
-4. This way, the same unit can't use an ability twice in the same round.
-5. And if a player has 2 units on the same position on the board, only 1 of them can take an action during a round.
+4. This means the same unit can't use an ability twice in the same round, and other units in the same position can't use their abilities either.
 
 ## Board
+
+### Physical Layout
 
 Each player's side is divided into the following zones:
 
@@ -56,19 +86,32 @@ Each player's side is divided into the following zones:
 3. Combat Slots (left)
 4. Hand (right)
 5. Shinsu (right)
-6. Battlefield (center)
+6. Discard Pile (right)
+7. Battlefield (center)
    1. Frontline: Fisherman, Scout, Wave Controller
-   2. Backline: Spear Bearer, Light Bearer
+   2. Backline: Spear Bearer, Light Bearer, Landmark
+
+### Lines
+
+...
 
 ## Gameplay
+
+## Setup
+
+1. Each player draws 5 cards
+2. Players start with 1 shinsu each
 
 ### Round
 
 1. **Round Start**:
-   1. Shinsu recharges
-   2. Each player draws one card
+   1. Players flip all their combat slots back up
+   2. Shinsu recharges (amount equal to the number of the round)
+   3. Each player draws one card
 2. **Player Turns**: Players alternate actions (each action is a turn)
-3. **Round End**: The round ends when both players pass consecutively
+3. **Round End**:
+   1. The round ends when both players pass consecutively
+   2. Players reset their shinsu, saving up to 2 unspent shinsu
 
 ### Actions
 
@@ -86,14 +129,16 @@ Represent characters, creatures or locations from Tower of God:
 
 1. Deployed to the battlefield
 2. Have HP and a shinsu cost to deploy
-3. Have abilities that activate by using an action
-4. Have one or more positions they can occupy on the board
-5. May have traits that provide unique effects
-6. May have affiliations that promote synergies with other units
+3. Have one or more positions they can occupy on the board
+4. Have abilities that activate by using an action
+5. May have a passive ability that is active while the unit is in play
+6. May have traits that provide unique effects
 7. May have an attribute that changes how the unit plays
-8. May have a passive ability that is active while the unit is in play
-9. Can only target backline enemies when the enemy frontline is empty
-10. Can only target lighthouses when the enemy board is empty
+8. May have affiliations that promote synergies with other units
+9. Have a rank that may be targeted by other cards
+10. Can't be played or summoned if a unit with the same name is already on your board
+11. Can only target backline enemies when the enemy frontline is empty
+12. Can only target lighthouses when the enemy board is empty
 
 ### Consumables
 
@@ -118,7 +163,7 @@ Attach to units for enhancements:
 
 1. A deck must have exactly 30 cards
 2. Maximum 3 copies of same card
-3. Starting hand: 4 cards
+3. Starting hand: 5 cards
 4. If at any point a player tries to draw and their deck is empty, they lose the game
 
 ## Keywords
@@ -126,17 +171,18 @@ Attach to units for enhancements:
 Keywords are special terms that provide additional context to cards and abilities. Their purpose is to provide common language for effects and abilities, making each description less verbose.
 
 1. **Cleanse**: Remove all negative traits
-2. **Create <x>**: Regain <x> lighthouses
-3. **Destroy <x>**: Destroy <x> enemy lighthouses
-4. **Quick**: Doesn't end your turn
-5. **Silence**: Remove all positive traits
-6. **Slay**: Kill a unit
-7. **Spend <x>**: Spend <x> shinsu
-8. **<position>**: available only when played as <position>
+2. **Charge <x>**: Regain <x> shinsu. Cannot charge over round number.
+3. **Create <x>**: Regain <x> lighthouses
+4. **Destroy <x>**: Destroy <x> enemy lighthouses
+5. **Quick**: Doesn't end your turn
+6. **Silence**: Remove all positive traits
+7. **Slay**: Kill a unit
+8. **Spend <x>**: Spend <x> shinsu
+9. **<position>**: available only when played as <position>
 
 ## Positions
 
-Each unit occupies one position on the battlefield. The position determines its role and playstyle. When you play a unit with more than 1 position you must choose a single position for it to take. 
+Each unit occupies one position on the battlefield. The position determines its role and playstyle. When you play a unit with more than 1 position you must choose a single position for it to take.
 
 ### Main Positions
 
@@ -148,8 +194,22 @@ Each unit occupies one position on the battlefield. The position determines its 
 
 ### Special Positions
 
-1. **Shinheuh** (frontline): Special units summoned by Animas to attack on their behalf
-2. **Landmark** (backline): Special units that apply continuous passive effects to the entire battlefield
+These positions don't have a combat slot by default.
+
+#### Shinheuh
+
+1. Special units summoned by Animas to attack on their behalf.
+2. Can be frontline or backline, specified in the unit card.
+3. You cannot build your deck using Shinheuh cards, they must be created during play.
+4. To use their abilities, you need a Shinheuh combat slot, which is exclusivly created by [Anima](#anima).
+5. A unit doesn't need to be a Anima to have Shinheuh related abilities.
+
+#### Landmark
+
+1. Special units that apply continuous passive effects to the entire battlefield.
+2. They don't have a combat slot or abilities, but they do have HP and a passive.
+3. Backline.
+4. Each player can only have 1 landmark at a time on their board, playing another one causes the existing one to be destroyed.
 
 ## Traits
 
@@ -196,49 +256,183 @@ Traits are special effects that cards can have. They can be positive or negative
    1. Damage Debuffs (Red)
    2. Utility Debuffs (Purple)
 
-## Affiliations
-
-To be added
-
 ## Attributes
+
+Some specific units have an attribute, which changes the core of how a unit functions and plays within the game. They represent unique and powerful abilities that some people have in Tower of God. Each attribute has a unique core mechanic that defines how the unit plays.
 
 ### Anima
 
-When I'm deployed or round start: choose 1 of 3 random **Shinheuh** to create in your hand. Round start: gain a Shinheuh combat slot.
+Anima summon and control special creatures called [Shinheuh](#shinheuh) to fight for them. Yu Han Sung is an Anima.
+
+**Core in-game mechanic:**
+
+```
+Round start: gain a single-use Shinheuh combat slot if you don't already have one.
+```
+
+**Example Synergies:**
+
+- `**Passive**: Round start: choose 1 of 3 random Shinheuh to create in your hand`
+- `**Passive**: When you summon a Shinheuh, Charge 1.`
+- `**Passive**: When I am deployed, summon Bull` (Yuga)
+- `**Ability**: Spend 1: Summon a random 2-3 cost Shinheuh`
 
 ### Guide
 
-You can always see you opponent's hand. The first time you draw a card in each round, look at the top 3 cards of your deck and choose one to add to your hand, then shuffle the rest. When I'm deployed or round start: draw a card.
+Guides are support units that help their team by providing information. They can tell what's the best move and predict the future.
+
+There's 2 types of guides, each of them guide their team differently and have a different core mechanic.
+
+#### Silver Dwarf
+
+Specializes in navigating the immediate physical crossroads and obstacles right in front of them. Evan Edrok is a Silver Dwarf.
+
+**Core in-game mechanic:**
+
+```
+You can always see your opponent's hand and the top card of both players' decks.
+```
+
+#### Red Witch
+
+Specializes in reading long-term destiny and the overarching threads of fate. Hwa Ryun is a Red Witch.
+
+**Core in-game mechanic:**
+
+```
+When you draw a card, choose the card directly from your deck, then shuffle the rest.
+```
+
+**Example Synergies:**
+
+- `**Passive**: Round start: draw a card`
+- `**Ability**: Spend 3: switch a card in your hand with a card in your opponent's hand`
+- `**Ability**: Spend 3: draw 3 cards, Charge 1 for each Consumable drawn`
+- `**Ability**: Spend 1: discard a Ranker from your opponent's hand`
 
 ### Hwayeomsa
 
-Spend 1: charge 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have it.
-**Fire Core**: Consume your Fire Charges to create **Incinerate**.
+Hwayeomsa are flame users who are able to convert shinsu into fire. They deal team-wide massive fire damage. Yeon Yihwa is a Hwayeomsa.
+
+**Core in-game mechanic:**
+
+```
+Spend 1: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have it.
+**Fire Core**: Quick: Consume your Fire Charges to create **Incinerate <level>** in hand:
 **Incinerate I**: I am created by consuming 1 Fire Charge. Deal 1 to an enemy.
 **Incinerate II**: I am created by consuming 3 Fire Charges. Deal 2 to 2 enemies.
-**Incinerate III**: I am created by consuming 5 Fire Charges. Deal 2 to 3 enemies, and give them Burn.
+**Incinerate III**: I am created by consuming 5 Fire Charges. Deal 2 to 3 enemies and give them Burn.
 **Incinerate IV**: I am created by consuming 7 Fire Charges. Deal 3 to all enemies, and give them Burn this round and the next.
+```
+
+**Example Synergies:**
+
+- ``
 
 ### Irregular
 
-Slay: choose 1 of 2 random **Outsider Powers** that I don't already have and grant it to me.
+Irregulars are extremely powerful individuals who were not selected by Headon. Instead, they entered the First Floor from outside the Tower. They ramp up when killing enemies by stacking multiple different traits on themselves. Twenty-Fifth Baam is an Irregular.
+
+**Core in-game mechanic:**
+
+```
+Slay: Grant me a random **Outsider Power** that I don't already have.
 **Power of Fortitude**: Immune and Regenerate
 **Power of Aegis**: Resilient and Barrier
 **Power of Ruin**: Pierce and Ruthless
 **Power of Vigor**: Bloodthirsty and Strong
 **Power of Defiance**: Reflect and Taunt
+```
+
+**Example Synergies:**
+
+- ``
 
 ### Jeonsulsa
 
-When I'm deployed, summon a 1 HP **Conduit** on the enemy backline if they don't already have one. When I use an ability, grant the conduit 1 HP.
-**Conduit**: Round start: For each HP that I have, activate 1 random **Jeonsul Baang**.
-**Lightning Baang**: Deal 2 damage to a random enemy unit.
-**Thunder Baang**: Stun a random enemy unit this round.
-**Static Baang**: Give Weak to a random enemy unit this round.
+Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units. Khun Eduan is a Jeonsulsa.
+
+**Core in-game mechanic:**
+
+```
+When I'm deployed, summon a 2 HP **Conduit** on the enemy backline. When I leave play, destroy it.
+**Conduit**: Ghost. Round start or Activation: For every 2 HP that I have, play 1 random **Jeonsul Baang** on yourself.
+**Lightning Baang**: Deal 2 damage to a random ally unit.
+**Thunder Baang**: Root a random ally unit this round that is not already Rooted.
+**Static Baang**: Give +1 Weak to a random ally unit this round.
+```
+
+**Example Synergies:**
+
+- `**Passive**: When I use an ability, grant the enemy **Conduit** 1 HP or summon a new one.`
+- `**Ability**: Spend 3: Activate the enemy **Conduit** twice.`
+- `**Passive**: The first time an ally Jeonsulsa dies this game, activate the enemy **Conduit** 4 times.`
 
 ### Living Ignition Weapon
 
+**Core in-game mechanic:**
+
+```
 You may equip me as many times as you want with unique equipments. When you equip me, grant a random trait to a random ally that is not me.
+```
+
+**Example Synergies:**
+
+- ``
+
+## Affiliations
+
+Affiliations represent a unit's allegiance: the groups, teams, organizations, and families they belong to. A unit can have multiple affiliations.
+
+Affiliations have no direct effect on gameplay, but they can be targeted by abilities and can promote synergies with other units that share the same affiliation.
+
+| Name                                                                          | Type         | Example Unit          |
+| ----------------------------------------------------------------------------- | ------------ | --------------------- |
+| [Team AKA](https://towerofgod.fandom.com/wiki/Team_Aka)                       | Team         | Aka Williams          |
+| [Team Baam](https://towerofgod.fandom.com/wiki/Team_Baam)                     | Team         | Twenty-Fifth Baam     |
+| [Team Bero](https://towerofgod.fandom.com/wiki/Team_Bero)                     | Team         | Phonsekal Irure       |
+| [Team FUG](https://towerofgod.fandom.com/wiki/Team_FUG)                       | Team         | Jue Viole Grace       |
+| [Team Khel Hellam](https://towerofgod.fandom.com/wiki/Team_Khel_Hellam)       | Team         | Khel Hellam           |
+| [Team Novick](https://towerofgod.fandom.com/wiki/Team_Novick)                 | Team         | Edin Dan              |
+| [Team Rachel](https://towerofgod.fandom.com/wiki/Team_Rachel)                 | Team         | Rachel                |
+| [Team Sachi](https://towerofgod.fandom.com/wiki/Team_Sachi)                   | Team         | Sachi Faker           |
+| [Team Sweet and Sour](https://towerofgod.fandom.com/wiki/Team_Tangsooyook)    | Team         | Ja Wangnan            |
+| [Khun's Team](https://towerofgod.fandom.com/wiki/Khun's_Team)                 | Team         | Khun Aguero Agnes     |
+| [Team Ship](https://towerofgod.fandom.com/wiki/Ship's_Team)                   | Team         | Ship Leesoo           |
+| [FUG](https://towerofgod.fandom.com/wiki/FUG)                                 | Organization | Karaka                |
+| [Hidden Grove](https://towerofgod.fandom.com/wiki/Hidden_Grove)               | Organization | Cha                   |
+| [Revolution](https://towerofgod.fandom.com/wiki/Revolution)                   | Organization | Lo Po Bia Goruro      |
+| [Wolhaiksong](https://towerofgod.fandom.com/wiki/Wolhaiksong)                 | Organization | Urek Mazino           |
+| [Zahard's Army](https://towerofgod.fandom.com/wiki/Zahard's_Army)             | Organization | Khun Maschenny Zahard |
+| [Zahard's Princesses](https://towerofgod.fandom.com/wiki/Zahard's_Princesses) | Organization | Ha Yuri Zahard        |
+| [Great Warriors](https://towerofgod.fandom.com/wiki/Great_Warriors)           | Organization | V                     |
+| [Arie Family](https://towerofgod.fandom.com/wiki/Arie_Family)                 | Great Family | White                 |
+| [Khun Family](https://towerofgod.fandom.com/wiki/Khun_Family)                 | Great Family | Khun Aguero Agnes     |
+| [Ha Family](https://towerofgod.fandom.com/wiki/Ha_Family)                     | Great Family | Ha Jinsung            |
+| [Tu Perie Family](https://towerofgod.fandom.com/wiki/Tu_Perie_Family)         | Great Family | Tu Perie Tperie       |
+| [Eurasia Family](https://towerofgod.fandom.com/wiki/Eurasia_Family)           | Great Family | Phonsekal Laure       |
+| [Po Bidau Family](https://towerofgod.fandom.com/wiki/Po_Bidau_Family)         | Great Family | Po Bidau Gustang      |
+| [Yeon Family](https://towerofgod.fandom.com/wiki/Yeon_Family)                 | Great Family | Yeon Yihwa            |
+| [Ari Family](https://towerofgod.fandom.com/wiki/Ari_Family)                   | Great Family | Ari Bright Sharon     |
+| [Lo Po Bia Family](https://towerofgod.fandom.com/wiki/Lo_Po_Bia_Family)       | Great Family | Lo Po Bia Elaine      |
+| [Hendo Lok Family](https://towerofgod.fandom.com/wiki/Hendo_Lok_Family)       | Great Family | Hendo Lok Bloodmadder |
+| [Blitz Family](https://towerofgod.fandom.com/wiki/Blitz_Family)               | Family       | Quaetro Blitz         |
+| [Grand Family](https://towerofgod.fandom.com/wiki/Grand_Family)               | Family       | Grand De Lee          |
+| [Edrok Family](https://towerofgod.fandom.com/wiki/Edrok_Family)               | Family       | Evan Edrok            |
+| [Mule Family](https://towerofgod.fandom.com/wiki/Mule_Family)                 | Family       | Mule Love             |
+| [Nissam Family](https://towerofgod.fandom.com/wiki/Nissam_Family)             | Family       | Khul Nissam Kay       |
+| [Canines](https://towerofgod.fandom.com/wiki/Canines)                         | Species      | Baylord Yama          |
+| [Data Humans](https://towerofgod.fandom.com/wiki/Data_Humans)                 | Species      | Khun Eduan (Data)     |
+
+## Rank
+
+How the person is ranked in the tower. A unit's rank has no direct effect on gameplay, but it can be targeted by abilities and can promote synergies with other units that share the same affiliation.
+
+One of:
+
+- **Regular**: someone chosen by Headon to climb the tower
+- **Ranker**: someone who has reached the 134th floor of the tower (also encompasses advanced rankers)
+- **High Ranker**: someone at the top 1% of Rankers
 
 ## Future Features
 

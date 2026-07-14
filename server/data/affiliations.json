@@ -7,9 +7,9 @@
   "team-novick": { "name": "Team Novick" },
   "team-rachel": { "name": "Team Rachel" },
   "team-sachi": { "name": "Team Sachi" },
+  "team-ship": { "name": "Team Ship" },
   "team-sweet-and-sour": { "name": "Team Sweet and Sour" },
   "khuns-team": { "name": "Khun's Team" },
-  "ships-team": { "name": "Ship's Team" },
   "fug": { "name": "FUG" },
   "hidden-grove": { "name": "Hidden Grove" },
   "revolution": { "name": "Revolution" },
@@ -29,9 +29,9 @@
   "hendo-lok-family": { "name": "Hendo Lok Family" },
   "blitz-family": { "name": "Blitz Family" },
   "grand-family": { "name": "Grand Family" },
-  "edrock-family": { "name": "Edrok Family" },
+  "edrok-family": { "name": "Edrok Family" },
   "mule-family": { "name": "Mule Family" },
   "nissam-family": { "name": "Nissam Family" },
-  "canine-people": { "name": "Canine People" },
-  "data-people": { "name": "Data People" }
+  "canines": { "name": "Canines" },
+  "data-humans": { "name": "Data Humans" }
 }
