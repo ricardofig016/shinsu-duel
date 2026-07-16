@@ -26,10 +26,9 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Special Positions](#special-positions)
       - [Shinheuh](#shinheuh)
       - [Landmark](#landmark)
-  - [Traits](#traits)
-    - [Positive Traits](#positive-traits)
-    - [Negative Traits](#negative-traits)
-    - [Trait Colors](#trait-colors)
+  - [Traits and Conditions](#traits-and-conditions)
+    - [Traits](#traits)
+    - [Conditions](#conditions)
   - [Attributes](#attributes)
     - [Anima](#anima)
     - [Guide](#guide)
@@ -93,7 +92,10 @@ Each player's side is divided into the following zones:
 
 ### Lines
 
-...
+1. Each player has 2 lines: a frontline and a backline.
+2. The maximum number of units in each line is 5.
+3. If you deploy a unit to a line that already has 5 units, choose a unit to be Destroyed.
+4. Units can only target units in the enemy backline if the enemy frontline is empty. And can only target lighthouses if the enemy board is empty.
 
 ## Gameplay
 
@@ -119,7 +121,8 @@ During your turn, choose one of these actions:
 
 1. Play a card
 2. Use an ability
-3. Pass the turn
+3. Switch a unit's position
+4. Pass the turn
 
 ## Cards
 
@@ -139,6 +142,10 @@ Represent characters, creatures or locations from Tower of God:
 10. Can't be played or summoned if a unit with the same name is already on your board
 11. Can only target backline enemies when the enemy frontline is empty
 12. Can only target lighthouses when the enemy board is empty
+13. When you play a unit, you must choose a position for it to occupy from the positions available on the card.
+14. You can change the unit's position later by using your turn for it.
+15. You may have more than one unit in each position at a time.
+16. When a unit dies, it is sent to the discard pile.
 
 ### Consumables
 
@@ -211,11 +218,19 @@ These positions don't have a combat slot by default.
 3. Backline.
 4. Each player can only have 1 landmark at a time on their board, playing another one causes the existing one to be destroyed.
 
-## Traits
+## Traits and Conditions
 
-Traits are special effects that cards can have. They can be positive or negative and affect gameplay in various ways.
+Traits and Conditions are special effects that units can have. Both can stack.
 
-### Positive Traits
+### Traits
+
+Traits are positive permanent effects native to cards. They are color coded as such:
+
+1. Defensive Buffs (Yellow)
+2. Damage Buffs (Orange)
+3. Utility Buffs/HP Gain (Blue)
+
+**List of Traits:**
 
 1. **Barrier**: Negate all damage the next time I take damage
 2. **Bloodthirsty**: When I kill a unit, restore 1 HP
@@ -231,11 +246,18 @@ Traits are special effects that cards can have. They can be positive or negative
 12. **Ruthless**: I deal +1 damage for each lighthouse destroyed
 13. **Sharpshooter**: I can target any enemy unit
 14. **Strong**: I deal +1 damage
-15. **Taunt**: Enemies are forced to target me if possible
+15. **Taunt**: Enemies are forced to target me if they can
 
-### Negative Traits
+### Conditions
 
-1. **Burned**: I take 1 damage every turn until the end of the round
+Conditions are negative temporary effects that last until the end of the round. They are color coded as such:
+
+1. Damage Debuffs (Red)
+2. Utility Debuffs (Purple)
+
+**List of Conditions:**
+
+1. **Burned**: I take 1 damage at the end of every turn
 2. **Cursed**: I take 1 damage when I use an ability
 3. **Doomed**: I will die at the end of this round
 4. **Exhausted**: I deal -1 damage
@@ -246,19 +268,9 @@ Traits are special effects that cards can have. They can be positive or negative
 9. **Stunned**: I can't use abilities
 10. **Weak**: I take +1 damage from all sources
 
-### Trait Colors
-
-1. **Positive**:
-   1. Defensive Buffs (Yellow)
-   2. Damage Buffs (Orange)
-   3. Utility Buffs/HP Gain (Blue)
-2. **Negative**:
-   1. Damage Debuffs (Red)
-   2. Utility Debuffs (Purple)
-
 ## Attributes
 
-Some specific units have an attribute, which changes the core of how a unit functions and plays within the game. They represent unique and powerful abilities that some people have in Tower of God. Each attribute has a unique core mechanic that defines how the unit plays.
+Some specific units have an attribute, which changes the core of how they function and play within the game. They represent unique and powerful abilities that some people have in Tower of God. Each attribute has a unique core mechanic that defines how the unit plays.
 
 ### Anima
 
@@ -290,7 +302,7 @@ Specializes in navigating the immediate physical crossroads and obstacles right 
 **Core in-game mechanic:**
 
 ```
-You can always see your opponent's hand and the top card of both players' decks.
+When you draw a card, choose the card directly from your deck, then shuffle the rest.
 ```
 
 #### Red Witch
@@ -300,7 +312,7 @@ Specializes in reading long-term destiny and the overarching threads of fate. Hw
 **Core in-game mechanic:**
 
 ```
-When you draw a card, choose the card directly from your deck, then shuffle the rest.
+You can always see your opponent's hand and the top card of both players' decks.
 ```
 
 **Example Synergies:**
@@ -426,13 +438,14 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 
 ## Rank
 
-How the person is ranked in the tower. A unit's rank has no direct effect on gameplay, but it can be targeted by abilities and can promote synergies with other units that share the same affiliation.
+How the person is ranked in the tower. In game, it represents how expensive the unit is:
 
-One of:
+- **Regular** (cost **0-5**): someone chosen by Headon to climb the tower
+- **Ranker** (cost **3-7**): someone who has reached the 134th floor of the tower (also encompasses advanced rankers)
+- **High Ranker** (cost **5-10**): someone at the top 1% of Rankers
 
-- **Regular**: someone chosen by Headon to climb the tower
-- **Ranker**: someone who has reached the 134th floor of the tower (also encompasses advanced rankers)
-- **High Ranker**: someone at the top 1% of Rankers
+A unit's rank has no direct effect on gameplay, but it can be targeted by abilities and can promote synergies with other units that share the same affiliation.
+
 
 ## Future Features
 
