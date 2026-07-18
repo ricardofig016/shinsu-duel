@@ -1,0 +1,17 @@
+type: unit
+name: Monkeyman
+cost: 1
+hp: 2
+rank: regular
+positions:
+  - fisherman
+  - scout
+passives:
+abilities:
+  - "scout: quick: see a random card in the opponents hand"
+  - "fisherman: deal 1 to an enemy"
+evolve:
+traits:
+attributes:
+affiliations:
+  - team chang

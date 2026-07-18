@@ -1,0 +1,19 @@
+type: unit
+name: Yeon Yihwa
+cost: 5
+hp: 5
+rank: regular
+positions:
+  - fisherman
+passives:
+  - units with burn 3+ can't target me
+abilities:
+  - "give 2 burned enemies exhausted"
+evolve:
+traits:
+attributes:
+  - hwayeomsa
+affiliations:
+  - team baam
+  - team sweet and sour
+  - yeon family

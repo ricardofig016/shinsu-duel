@@ -40,9 +40,9 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Living Ignition Weapon](#living-ignition-weapon)
   - [Affiliations](#affiliations)
   - [Rank](#rank)
+  - [Evolution](#evolution)
   - [Future Features](#future-features)
     - [Team Leader](#team-leader)
-    - [Evolution](#evolution)
     - [Attributes](#attributes-1)
 
 ## Objective
@@ -139,13 +139,14 @@ Represent characters, creatures or locations from Tower of God:
 7. May have an attribute that changes how the unit plays
 8. May have affiliations that promote synergies with other units
 9. Have a rank that may be targeted by other cards
-10. Can't be played or summoned if a unit with the same name is already on your board
-11. Can only target backline enemies when the enemy frontline is empty
-12. Can only target lighthouses when the enemy board is empty
-13. When you play a unit, you must choose a position for it to occupy from the positions available on the card.
-14. You can change the unit's position later by using your turn for it.
-15. You may have more than one unit in each position at a time.
-16. When a unit dies, it is sent to the discard pile.
+10. May evolve when a specified trigger is met
+11. Can't be played or summoned if a unit with the same name is already on your board
+12. Can only target backline enemies when the enemy frontline is empty
+13. Can only target lighthouses when the enemy board is empty
+14. When you play a unit, you must choose a position for it to occupy from the positions available on the card.
+15. You can change the unit's position later by using your turn for it.
+16. You may have more than one unit in each position at a time.
+17. When a unit dies, it is sent to the discard pile.
 
 ### Consumables
 
@@ -158,13 +159,15 @@ Single-use items:
 
 ### Equipment
 
-Attach to units for enhancements:
+Equipments can be attached to ally deployed units for enhancements.
 
-1. Apply to deployed allied units
-2. Provide buffs or special abilities
-3. Returns to hand when unit dies or when the unit is equiped with another equipment
-4. Equipping ends your turn
-5. Examples: Green April, Zahard's Ring
+Equiping a unit costs the turn.
+
+Units can only hold 1 equipment at a time, unless they are [Irregular](#irregular).
+
+It returns to hand when it's unit dies or when the unit is equiped when another equipment.
+
+**Examples**: Green April, Zahard's Ring, Woon's Hammer
 
 ## Deck
 
@@ -201,7 +204,7 @@ Each unit occupies one position on the battlefield. The position determines its 
 
 ### Special Positions
 
-These positions don't have a combat slot by default.
+These positions don't have a combat slot nor a rank.
 
 #### Shinheuh
 
@@ -232,21 +235,21 @@ Traits are positive permanent effects native to cards. They are color coded as s
 
 **List of Traits:**
 
-1. **Barrier**: Negate all damage the next time I take damage
+1. **Barrier**: Negate all damage the first time I take damage each round
 2. **Bloodthirsty**: When I kill a unit, restore 1 HP
 3. **Creator**: When I am deployed, create 1
 4. **Dealer**: Draw 1 card at the start of every round
-5. **Immune**: I am immune to negative effects
-6. **Last One Standing**: If I am the only ally unit, I have +4 HP and deal +4 damage
-7. **Lethal**: When I damage another unit, kill it
-8. **Pierce**: When I deal damage, destroy 1 enemy lighthouse
-9. **Reflect**: When I take damage, deal 1 damage to my attacker
-10. **Regenerate**: Restore me to full HP at the end of the round
-11. **Resilient**: I take -1 damage from all sources
-12. **Ruthless**: I deal +1 damage for each lighthouse destroyed
-13. **Sharpshooter**: I can target any enemy unit
-14. **Strong**: I deal +1 damage
-15. **Taunt**: Enemies are forced to target me if they can
+6. **Immune**: I am immune to negative effects
+7. **Last One Standing**: If I am the only ally unit, I have +4 HP and deal +4 damage
+8. **Lethal**: When I damage another unit, kill it
+9. **Pierce**: When I deal damage, destroy 1 enemy lighthouse
+10. **Reflect**: When I take damage, deal 1 damage to my attacker
+11. **Regenerate**: Restore me to full HP at the end of the round
+12. **Resilient**: I take -1 damage from all sources
+13. **Ruthless**: I deal +1 damage for each lighthouse destroyed
+14. **Sharpshooter**: I can target any enemy unit
+15. **Strong**: I deal +1 damage
+16. **Taunt**: Enemies are forced to target me if they can
 
 ### Conditions
 
@@ -261,12 +264,13 @@ Conditions are negative temporary effects that last until the end of the round. 
 2. **Cursed**: I take 1 damage when I use an ability
 3. **Doomed**: I will die at the end of this round
 4. **Exhausted**: I deal -1 damage
-5. **Ghost**: I don't prevent the enemy from targeting what's behind me
-6. **Heavy**: My abilities cost +1 shinsu
-7. **Poisoned**: I take 1 damage every round
-8. **Rooted**: I can't switch positions or be substituted
-9. **Stunned**: I can't use abilities
-10. **Weak**: I take +1 damage from all sources
+5. **Frozen**: When i use an ability, spend all combat slots (*missing icon*)
+6. **Ghost**: I don't prevent the enemy from targeting what's behind me
+7. **Heavy**: My abilities cost +1 shinsu
+8. **Poisoned**: I take 1 damage when i use an ability
+9. **Rooted**: I can't switch positions or be substituted
+10. **Stunned**: I can't use abilities
+11. **Weak**: I take +1 damage from all sources
 
 ## Attributes
 
@@ -398,43 +402,46 @@ Affiliations represent a unit's allegiance: the groups, teams, organizations, an
 
 Affiliations have no direct effect on gameplay, but they can be targeted by abilities and can promote synergies with other units that share the same affiliation.
 
-| Name                                                                          | Type         | Example Unit          |
-| ----------------------------------------------------------------------------- | ------------ | --------------------- |
-| [Team AKA](https://towerofgod.fandom.com/wiki/Team_Aka)                       | Team         | Aka Williams          |
-| [Team Baam](https://towerofgod.fandom.com/wiki/Team_Baam)                     | Team         | Twenty-Fifth Baam     |
-| [Team Bero](https://towerofgod.fandom.com/wiki/Team_Bero)                     | Team         | Phonsekal Irure       |
-| [Team FUG](https://towerofgod.fandom.com/wiki/Team_FUG)                       | Team         | Jue Viole Grace       |
-| [Team Khel Hellam](https://towerofgod.fandom.com/wiki/Team_Khel_Hellam)       | Team         | Khel Hellam           |
-| [Team Novick](https://towerofgod.fandom.com/wiki/Team_Novick)                 | Team         | Edin Dan              |
-| [Team Rachel](https://towerofgod.fandom.com/wiki/Team_Rachel)                 | Team         | Rachel                |
-| [Team Sachi](https://towerofgod.fandom.com/wiki/Team_Sachi)                   | Team         | Sachi Faker           |
-| [Team Sweet and Sour](https://towerofgod.fandom.com/wiki/Team_Tangsooyook)    | Team         | Ja Wangnan            |
-| [Khun's Team](https://towerofgod.fandom.com/wiki/Khun's_Team)                 | Team         | Khun Aguero Agnes     |
-| [Team Ship](https://towerofgod.fandom.com/wiki/Ship's_Team)                   | Team         | Ship Leesoo           |
-| [FUG](https://towerofgod.fandom.com/wiki/FUG)                                 | Organization | Karaka                |
-| [Hidden Grove](https://towerofgod.fandom.com/wiki/Hidden_Grove)               | Organization | Cha                   |
-| [Revolution](https://towerofgod.fandom.com/wiki/Revolution)                   | Organization | Lo Po Bia Goruro      |
-| [Wolhaiksong](https://towerofgod.fandom.com/wiki/Wolhaiksong)                 | Organization | Urek Mazino           |
-| [Zahard's Army](https://towerofgod.fandom.com/wiki/Zahard's_Army)             | Organization | Khun Maschenny Zahard |
-| [Zahard's Princesses](https://towerofgod.fandom.com/wiki/Zahard's_Princesses) | Organization | Ha Yuri Zahard        |
-| [Great Warriors](https://towerofgod.fandom.com/wiki/Great_Warriors)           | Organization | V                     |
-| [Arie Family](https://towerofgod.fandom.com/wiki/Arie_Family)                 | Great Family | White                 |
-| [Khun Family](https://towerofgod.fandom.com/wiki/Khun_Family)                 | Great Family | Khun Aguero Agnes     |
-| [Ha Family](https://towerofgod.fandom.com/wiki/Ha_Family)                     | Great Family | Ha Jinsung            |
-| [Tu Perie Family](https://towerofgod.fandom.com/wiki/Tu_Perie_Family)         | Great Family | Tu Perie Tperie       |
-| [Eurasia Family](https://towerofgod.fandom.com/wiki/Eurasia_Family)           | Great Family | Phonsekal Laure       |
-| [Po Bidau Family](https://towerofgod.fandom.com/wiki/Po_Bidau_Family)         | Great Family | Po Bidau Gustang      |
-| [Yeon Family](https://towerofgod.fandom.com/wiki/Yeon_Family)                 | Great Family | Yeon Yihwa            |
-| [Ari Family](https://towerofgod.fandom.com/wiki/Ari_Family)                   | Great Family | Ari Bright Sharon     |
-| [Lo Po Bia Family](https://towerofgod.fandom.com/wiki/Lo_Po_Bia_Family)       | Great Family | Lo Po Bia Elaine      |
-| [Hendo Lok Family](https://towerofgod.fandom.com/wiki/Hendo_Lok_Family)       | Great Family | Hendo Lok Bloodmadder |
-| [Blitz Family](https://towerofgod.fandom.com/wiki/Blitz_Family)               | Family       | Quaetro Blitz         |
-| [Grand Family](https://towerofgod.fandom.com/wiki/Grand_Family)               | Family       | Grand De Lee          |
-| [Edrok Family](https://towerofgod.fandom.com/wiki/Edrok_Family)               | Family       | Evan Edrok            |
-| [Mule Family](https://towerofgod.fandom.com/wiki/Mule_Family)                 | Family       | Mule Love             |
-| [Nissam Family](https://towerofgod.fandom.com/wiki/Nissam_Family)             | Family       | Khul Nissam Kay       |
-| [Canines](https://towerofgod.fandom.com/wiki/Canines)                         | Species      | Baylord Yama          |
-| [Data Humans](https://towerofgod.fandom.com/wiki/Data_Humans)                 | Species      | Khun Eduan (Data)     |
+| Name                                                                                                   | Type         | Example Unit          |
+| ------------------------------------------------------------------------------------------------------ | ------------ | --------------------- |
+| [Team AKA](https://towerofgod.fandom.com/wiki/Team_Aka)                                                | Team         | Aka Williams          |
+| [Team Baam](https://towerofgod.fandom.com/wiki/Team_Baam)                                              | Team         | Twenty-Fifth Baam     |
+| [Team Bero](https://towerofgod.fandom.com/wiki/Team_Bero)                                              | Team         | Phonsekal Irure       |
+| [Team Chang](https://towerofgod.fandom.com/wiki/Team_Chang)                                            | Team         | Quaetro Blitz         |
+| [Team FUG](https://towerofgod.fandom.com/wiki/Team_FUG)                                                | Team         | Jue Viole Grace       |
+| [Team Khel Hellam](https://towerofgod.fandom.com/wiki/Team_Khel_Hellam)                                | Team         | Khel Hellam           |
+| [Team Novick](https://towerofgod.fandom.com/wiki/Team_Novick)                                          | Team         | Edin Dan              |
+| [Team Rachel](https://towerofgod.fandom.com/wiki/Team_Rachel)                                          | Team         | Rachel                |
+| [Team Sachi](https://towerofgod.fandom.com/wiki/Team_Sachi)                                            | Team         | Sachi Faker           |
+| [Team Sweet and Sour](https://towerofgod.fandom.com/wiki/Team_Tangsooyook)                             | Team         | Ja Wangnan            |
+| [Khun's Team](https://towerofgod.fandom.com/wiki/Khun's_Team)                                          | Team         | Khun Aguero Agnes     |
+| [Team Ship](https://towerofgod.fandom.com/wiki/Ship's_Team)                                            | Team         | Ship Leesoo           |
+| [FUG](https://towerofgod.fandom.com/wiki/FUG)                                                          | Organization | Ha Jinsung            |
+| [Hidden Grove](https://towerofgod.fandom.com/wiki/Hidden_Grove)                                        | Organization | Cha                   |
+| [Revolution](https://towerofgod.fandom.com/wiki/Revolution)                                            | Organization | Lo Po Bia Goruro      |
+| [Wolhaiksong](https://towerofgod.fandom.com/wiki/Wolhaiksong)                                          | Organization | Baek Ryun             |
+| [Zahard's Army](https://towerofgod.fandom.com/wiki/Zahard's_Army)                                      | Organization | Khun Maschenny Zahard |
+| [Zahard's Princesses](https://towerofgod.fandom.com/wiki/Zahard's_Princesses)                          | Organization | Ha Yuri Zahard        |
+| [Great Warriors](https://towerofgod.fandom.com/wiki/Great_Warriors)                                    | Organization | V                     |
+| [Shining Ones](https://towerofgod.fandom.com/wiki/Shining_Ones)                                        | Organization | Urek Mazino           |
+| [Arie Family](https://towerofgod.fandom.com/wiki/Arie_Family)                                          | Great Family | White                 |
+| [Khun Family](https://towerofgod.fandom.com/wiki/Khun_Family)                                          | Great Family | Khun Aguero Agnes     |
+| [Ha Family](https://towerofgod.fandom.com/wiki/Ha_Family)                                              | Great Family | Ha Jinsung            |
+| [Tu Perie Family](https://towerofgod.fandom.com/wiki/Tu_Perie_Family)                                  | Great Family | Tu Perie Tperie       |
+| [Eurasia Family](https://towerofgod.fandom.com/wiki/Eurasia_Family)                                    | Great Family | Phonsekal Laure       |
+| [Po Bidau Family](https://towerofgod.fandom.com/wiki/Po_Bidau_Family)                                  | Great Family | Po Bidau Gustang      |
+| [Yeon Family](https://towerofgod.fandom.com/wiki/Yeon_Family)                                          | Great Family | Yeon Yihwa            |
+| [Ari Family](https://towerofgod.fandom.com/wiki/Ari_Family)                                            | Great Family | Ari Bright Sharon     |
+| [Lo Po Bia Family](https://towerofgod.fandom.com/wiki/Lo_Po_Bia_Family)                                | Great Family | Lo Po Bia Elaine      |
+| [Hendo Lok Family](https://towerofgod.fandom.com/wiki/Hendo_Lok_Family)                                | Great Family | Hendo Lok Bloodmadder |
+| [Blitz Family](https://towerofgod.fandom.com/wiki/Blitz_Family)                                        | Family       | Quaetro Blitz         |
+| [Grand Family](https://towerofgod.fandom.com/wiki/Grand_Family)                                        | Family       | Grand De Lee          |
+| [Edrok Family](https://towerofgod.fandom.com/wiki/Edrok_Family)                                        | Family       | Evan Edrok            |
+| [Mule Family](https://towerofgod.fandom.com/wiki/Mule_Family)                                          | Family       | Mule Love             |
+| [Nissam Family](https://towerofgod.fandom.com/wiki/Nissam_Family)                                      | Family       | Khul Nissam Kay       |
+| [Canines](https://towerofgod.fandom.com/wiki/Canines)                                                  | Species      | Baylord Yama          |
+| [Data Humans](https://towerofgod.fandom.com/wiki/Data_Humans)                                          | Species      | Khun Eduan (Data)     |
+| [Prince of the Redlight District](https://towerofgod.fandom.com/wiki/Prince_of_the_Red-light_District) | Other        | Karaka                |
 
 ## Rank
 
@@ -446,6 +453,17 @@ How the person is ranked in the tower. In game, it represents how expensive the 
 
 A unit's rank has no direct effect on gameplay, but it can be targeted by abilities and can promote synergies with other units that share the same affiliation.
 
+## Evolution
+
+Some units can evolve when a trigger is met. The trigger is specified in the unit's card.
+
+The evolved card may have different stats, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution.
+
+Examples:
+
+- `Khun Aguero Agnis` evolves into `Khun Aguero Agnis (evolved)` when equipped with `Ice Spear`.
+- `Karaka` evolves into `Karaka (evolved)` when equipped with `Steel Tree`, `Karaka's Armor Suit`, or `Purple Dementor`.
+- `Khun Ran` evolves into `Khun Ran (evolved)` when given `Redan`
 
 ## Future Features
 
@@ -453,12 +471,6 @@ A unit's rank has no direct effect on gameplay, but it can be targeted by abilit
 
 1. Special passive effect when designated as leader
 2. Only one leader per player
-
-### Evolution
-
-1. Units evolve under specific conditions
-2. Improves stats/abilities and changes art
-3. Example: Khun Ran evolves when given the Lightning Pill consumable
 
 ### Attributes
 

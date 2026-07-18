@@ -1,0 +1,19 @@
+type: unit
+name: Chang Blarode
+cost: 4
+hp: 6
+rank: regular
+positions:
+  - fisherman
+passives:
+  - ally team chang members have resilient
+abilities:
+  - deal 2 to an enemy
+evolve:
+traits:
+  - bloodthirsty
+  - taunt
+attributes:
+affiliations:
+  - team chang
+  - canines

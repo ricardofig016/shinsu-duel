@@ -1,0 +1,18 @@
+type: unit
+name: Quaetro Blitz
+cost: 2
+hp: 4
+rank: regular
+positions:
+  - wave controller
+passives:
+abilities:
+  - "spend 1: burn an enemy"
+  - "spend 3: deal 2 to all burned enemies"
+evolve:
+traits:
+  - sharpshooter
+attributes:
+affiliations:
+  - team chang
+  - team sweet and sour

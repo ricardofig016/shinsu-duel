@@ -1,0 +1,20 @@
+type: unit
+name: Urek Mazino
+cost: 8
+hp: 11
+rank: high ranker
+positions:
+  - fisherman
+passives:
+  - "while i am alone on the ally frontline, i have resilient and deal +3 damage"
+abilities:
+  - "deal 4 damage to a unit"
+  - "spend 1: deal 6 damage to a unit"
+evolve:
+traits:
+  - barrier
+  - last one standing
+attributes:
+  - irregular
+affiliations:
+  - wolhaiksong

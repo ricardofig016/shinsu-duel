@@ -1,0 +1,18 @@
+type: unit
+name: Yeon Woon
+cost: 5
+hp: 4
+rank: ranker
+positions:
+  - light bearer
+passives:
+  - ally yeon family members have resilient
+abilities:
+  - "spend 2: give barrier to 2 allies"
+  - "heal an ally 2 HP"
+evolve:
+traits:
+attributes:
+affiliations:
+  - wolhaiksong
+  - yeon family
