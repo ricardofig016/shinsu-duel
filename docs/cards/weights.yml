@@ -1,0 +1,5 @@
+type: consumable
+name: Weights
+cost: 1
+abilities:
+  - give Heavy to an enemy

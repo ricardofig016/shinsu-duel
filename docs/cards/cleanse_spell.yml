@@ -1,0 +1,5 @@
+type: consumable
+name: Cleanse Spell
+cost: 1
+abilities:
+  - Clense an ally
