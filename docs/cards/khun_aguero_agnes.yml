@@ -1,0 +1,20 @@
+type: unit
+name: Khun Aguero Agnes
+cost: 0
+hp: 2
+rank: regular
+positions:
+  - light bearer
+passives:
+abilities:
+  - create 1
+evolve:
+  - equip with Ice Spear
+traits:
+  - creator
+attributes:
+affiliations:
+  - team baam
+  - team sweet and sour
+  - khun's team
+  - khun family

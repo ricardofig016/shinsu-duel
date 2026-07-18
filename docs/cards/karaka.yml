@@ -1,0 +1,19 @@
+type: unit
+name: Karaka
+cost: 7
+hp: 7
+rank: high ranker
+positions:
+  - fisherman
+  - scout
+  - wave controller
+passives:
+abilities:
+  - "spend 1: deal 6 to a rooted enemy"
+evolve:
+  - equip with Karaka's Armor Suit (fisherman), Steel Tree (wave controller) or Purple Dementor (scout)
+traits:
+  - reflect
+attributes:
+affiliations:
+  - fug
