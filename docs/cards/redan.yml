@@ -1,0 +1,5 @@
+type: consumable
+name: Redan
+cost: 1
+abilities:
+  - give an ally Cursed

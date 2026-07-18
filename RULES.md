@@ -457,7 +457,7 @@ A unit's rank has no direct effect on gameplay, but it can be targeted by abilit
 
 Some units can evolve when a trigger is met. The trigger is specified in the unit's card.
 
-The evolved card may have different stats, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution.
+The evolved card may have different HP, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution.
 
 Examples:
 

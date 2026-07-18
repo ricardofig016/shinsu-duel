@@ -29,6 +29,7 @@ const requiredUnitKeys = [
   "attributes",
   "affiliations",
 ];
+const requiredSimpleCardKeys = ["type", "name", "cost", "abilities"];
 
 const rulesDomain = {
   positions: [
@@ -105,6 +106,8 @@ const rulesDomain = {
 
 const validators = {
   unit: validateUnit,
+  consumable: validateSimpleCard,
+  equipment: validateSimpleCard,
 };
 
 const allowedPositions = new Set(rulesDomain.positions);
@@ -166,6 +169,14 @@ function requireStringList(card, key, errors) {
   return values;
 }
 
+function validateExactKeys(card, requiredKeys, errors) {
+  const actualKeys = Object.keys(card);
+
+  if (actualKeys.length !== requiredKeys.length || actualKeys.some((key, index) => key !== requiredKeys[index])) {
+    addError(errors, "keys", `must appear exactly in this order: ${requiredKeys.join(", ")}`);
+  }
+}
+
 function validateKnownValues(values, key, allowed, errors) {
   const seen = new Set();
   let latestAllowedIndex = -1;
@@ -224,11 +235,7 @@ function validateRankAndCost(card, errors, { requiresNullRank }) {
 
 function validateUnit(card) {
   const errors = [];
-  const actualKeys = Object.keys(card);
-
-  if (actualKeys.length !== requiredUnitKeys.length || actualKeys.some((key, index) => key !== requiredUnitKeys[index])) {
-    addError(errors, "keys", `must appear exactly in this order: ${requiredUnitKeys.join(", ")}`);
-  }
+  validateExactKeys(card, requiredUnitKeys, errors);
 
   requireString(card, "name", errors);
   requireInteger(card, "hp", errors, { min: 1 });
@@ -266,6 +273,17 @@ function validateUnit(card) {
       addError(errors, "positions", `${positionCode} is not a unit position named in RULES.md`);
     }
   }
+
+  return errors;
+}
+
+function validateSimpleCard(card) {
+  const errors = [];
+  validateExactKeys(card, requiredSimpleCardKeys, errors);
+
+  requireString(card, "name", errors);
+  requireInteger(card, "cost", errors, { min: 0 });
+  requireStringListValue(card, "abilities", errors);
 
   return errors;
 }
