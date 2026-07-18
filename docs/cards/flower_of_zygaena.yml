@@ -1,0 +1,5 @@
+type: consumable
+name: Flower of Zygaena
+cost: 4
+abilities:
+  - give wolhaiksong ally units strong 2

@@ -1,0 +1,5 @@
+type: consumable
+name: Healing Potion
+cost: 2
+abilities:
+  - heal 1 ally 5 hp

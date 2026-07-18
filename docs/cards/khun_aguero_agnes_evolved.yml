@@ -1,0 +1,21 @@
+type: unit
+name: Khun Aguero Agnes
+cost: 0
+hp: 3
+rank: regular
+positions:
+  - light bearer
+  - spear bearer
+passives:
+abilities:
+  - create 1
+  - deal 2 to enemy
+evolve:
+traits:
+  - creator
+attributes:
+affiliations:
+  - team baam
+  - team sweet and sour
+  - khun's team
+  - khun family

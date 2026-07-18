@@ -1,0 +1,6 @@
+type: equipment
+name: Steel Tree
+cost: 3
+abilities:
+  - can only be used on wave controllers
+  - i have immune and pierce

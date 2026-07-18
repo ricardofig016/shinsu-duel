@@ -1,0 +1,17 @@
+type: unit
+name: Rak Wraithraiser
+cost: 2
+hp: 4
+rank: regular
+positions:
+  - spear bearer
+passives:
+abilities:
+  - deal 4 to an enemy
+evolve:
+traits:
+  - bloodthirsty
+  - taunt
+attributes:
+affiliations:
+  - team baam

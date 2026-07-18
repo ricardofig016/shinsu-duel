@@ -1,0 +1,6 @@
+type: equipment
+name: Ice Spear
+cost: 3
+abilities:
+  - all of my attacks give frozen
+  - i have pierce

@@ -1,0 +1,21 @@
+type: unit
+name: Khun Ran
+cost: 3
+hp: 2
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+passives:
+abilities:
+  - deal 3 to a frontline enemy
+  - deal 2 to a backline enemy
+evolve:
+  - consume a Redan
+traits:
+attributes:
+affiliations:
+  - team fug
+  - team novick
+  - khun's team
+  - khun family

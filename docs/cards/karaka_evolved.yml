@@ -1,0 +1,19 @@
+type: unit
+name: Karaka
+cost: 7
+hp: 9
+rank: high ranker
+positions:
+  - fisherman
+  - scout
+  - wave controller
+passives:
+abilities:
+  - "spend 1: deal 6 to a rooted enemy"
+  - "spend 2: root and deal 3 to all rooted enemies"
+evolve:
+traits:
+  - reflect
+attributes:
+affiliations:
+  - fug
