@@ -179,20 +179,12 @@ function validateExactKeys(card, requiredKeys, errors) {
 
 function validateKnownValues(values, key, allowed, errors) {
   const seen = new Set();
-  let latestAllowedIndex = -1;
 
   values.forEach((value, index) => {
     if (!allowed.has(value)) {
       addError(errors, `${key}[${index}]`, `must exactly match one of: ${[...allowed].join(", ")}`);
       return;
     }
-
-    const allowedIndex = [...allowed].indexOf(value);
-    if (allowedIndex < latestAllowedIndex) {
-      addError(errors, `${key}[${index}]`, `must appear in RULES.md order`);
-    }
-
-    latestAllowedIndex = allowedIndex;
 
     if (seen.has(value)) {
       addError(errors, `${key}[${index}]`, `duplicates "${value}"`);
@@ -202,6 +194,31 @@ function validateKnownValues(values, key, allowed, errors) {
   });
 
   return seen;
+}
+
+function validateTraits(values, errors) {
+  const seen = new Set();
+
+  values.forEach((value, index) => {
+    const match = /^(.+?)(?:\s+(\d+))?$/.exec(String(value));
+    const traitName = match[1];
+    const traitNumber = match[2];
+
+    if (!allowedTraits.has(traitName)) {
+      addError(errors, `traits[${index}]`, `must exactly match one of: ${[...allowedTraits].join(", ")}`);
+      return;
+    }
+
+    if (traitNumber !== undefined && parseInt(traitNumber, 10) < 1) {
+      addError(errors, `traits[${index}]`, `numeric value must be a positive integer`);
+    }
+
+    if (seen.has(traitName)) {
+      addError(errors, `traits[${index}]`, `duplicates "${traitName}"`);
+    }
+
+    seen.add(traitName);
+  });
 }
 
 function validateRankAndCost(card, errors, { requiresNullRank }) {
@@ -242,7 +259,7 @@ function validateUnit(card) {
   requireInteger(card, "cost", errors, { min: 0 });
 
   const positionCodes = validateKnownValues(requireStringList(card, "positions", errors), "positions", allowedPositions, errors);
-  validateKnownValues(requireStringListValue(card, "traits", errors), "traits", allowedTraits, errors);
+  validateTraits(requireStringListValue(card, "traits", errors), errors);
   validateKnownValues(requireStringListValue(card, "attributes", errors), "attributes", allowedAttributes, errors);
   validateKnownValues(requireStringListValue(card, "affiliations", errors), "affiliations", allowedAffiliations, errors);
   const abilityValues = requireStringListValue(card, "abilities", errors);
