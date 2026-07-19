@@ -1,6 +1,7 @@
 type: equipment
 name: Enryu's Thorn
 cost: 0
+requirements:
 abilities:
   - unreachable
   - my damage dealing abilities deal +2 damage

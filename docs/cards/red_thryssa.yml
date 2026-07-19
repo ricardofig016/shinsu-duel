@@ -1,5 +1,6 @@
 type: equipment
 name: Red Thryssa
 cost: 3
+requirements:
 abilities:
   - "ability: deal 5 to an enemy"

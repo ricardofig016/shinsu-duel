@@ -1,7 +1,8 @@
 type: equipment
 name: Purple Dementor
 cost: 3
+requirements:
+  - deployed as Scout
 abilities:
-  - i can only be equiped to Scouts
   - i have Resilient 2
   - "ability: give Poison 4 to an enemy"

@@ -1,7 +1,8 @@
 type: equipment
 name: Karaka's Armor Suit
 cost: 4
+requirements:
+  - deployed as Fishermen
 abilities:
-  - if you started the game with Ha Jinsung, i cost 2 less
-  - i can only be equiped to fishermen
-  - i have barrier
+  - if you started the game with Ha Jinsung in your deck, i cost 2 less
+  - i have Barrier

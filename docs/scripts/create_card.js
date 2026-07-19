@@ -31,6 +31,7 @@ abilities:
   equipment: `type: equipment
 name: 
 cost: 
+requirements:
 abilities:
 `,
 };

@@ -1,6 +1,7 @@
 type: equipment
 name: Third Thorn Fragment
 cost: 1
+requirements:
 abilities:
   - unreachable
   - quick

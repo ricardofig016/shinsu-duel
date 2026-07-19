@@ -29,7 +29,8 @@ const requiredUnitKeys = [
   "attributes",
   "affiliations",
 ];
-const requiredSimpleCardKeys = ["type", "name", "cost", "abilities"];
+const requiredConsumableKeys = ["type", "name", "cost", "abilities"];
+const requiredEquipmentKeys = ["type", "name", "cost", "requirements", "abilities"];
 
 const rulesDomain = {
   positions: [
@@ -107,8 +108,8 @@ const rulesDomain = {
 
 const validators = {
   unit: validateUnit,
-  consumable: validateSimpleCard,
-  equipment: validateSimpleCard,
+  consumable: validateConsumable,
+  equipment: validateEquipment,
 };
 
 const allowedPositions = new Set(rulesDomain.positions);
@@ -295,12 +296,24 @@ function validateUnit(card) {
   return errors;
 }
 
-function validateSimpleCard(card) {
+function validateConsumable(card) {
   const errors = [];
-  validateExactKeys(card, requiredSimpleCardKeys, errors);
+  validateExactKeys(card, requiredConsumableKeys, errors);
 
   requireString(card, "name", errors);
   requireInteger(card, "cost", errors, { min: 0 });
+  requireStringListValue(card, "abilities", errors);
+
+  return errors;
+}
+
+function validateEquipment(card) {
+  const errors = [];
+  validateExactKeys(card, requiredEquipmentKeys, errors);
+
+  requireString(card, "name", errors);
+  requireInteger(card, "cost", errors, { min: 0 });
+  requireStringListValue(card, "requirements", errors);
   requireStringListValue(card, "abilities", errors);
 
   return errors;

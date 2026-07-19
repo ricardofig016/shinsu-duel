@@ -1,6 +1,7 @@
 type: equipment
 name: Second Thorn Fragment
 cost: 1
+requirements:
 abilities:
   - unreachable
   - quick
