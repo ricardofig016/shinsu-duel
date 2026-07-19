@@ -9,6 +9,7 @@
     "start": "node server/app.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose=false",
     "validate:cards": "node docs/scripts/validate_cards.js",
+    "create:card": "node docs/scripts/create_card.js",
     "lookup": "node docs/scripts/lookup_cards.js"
   },
   "author": "Ricardo Castro Figueiredo",
