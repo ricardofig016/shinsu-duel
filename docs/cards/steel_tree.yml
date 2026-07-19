@@ -3,5 +3,5 @@ name: Steel Tree
 cost: 3
 requirements:
   - deployed as Wave Controller
-abilities:
+effects:
   - i have Immune and Pierce

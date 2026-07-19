@@ -26,13 +26,13 @@ affiliations:
   consumable: `type: consumable
 name: 
 cost: 
-abilities:
+effects:
 `,
   equipment: `type: equipment
 name: 
 cost: 
 requirements:
-abilities:
+effects:
 `,
 };
 

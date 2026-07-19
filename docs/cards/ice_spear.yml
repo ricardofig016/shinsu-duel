@@ -3,6 +3,6 @@ name: Ice Spear
 cost: 3
 requirements:
   - khun family member
-abilities:
+effects:
   - all my attacks Freeze
   - i have Pierce

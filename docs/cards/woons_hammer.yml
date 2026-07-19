@@ -3,5 +3,5 @@ name: Woon's Hammer
 cost: 2
 requirements:
   - Yeon Woon is in your board
-abilities:
+effects:
   - i have Strong 3

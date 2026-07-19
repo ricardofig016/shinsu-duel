@@ -1,6 +1,6 @@
 type: consumable
 name: Baang
 cost: 1
-abilities:
+effects:
   - deal 2 to an enemy
   - you can put 3 of me in your deck during deckbuilding
