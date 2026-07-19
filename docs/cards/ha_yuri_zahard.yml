@@ -1,0 +1,22 @@
+type: unit
+name: Ha Yuri Zahard
+cost: 6
+hp: 8
+rank: high ranker
+positions:
+  - fisherman
+passives:
+  - if i have an ally Guide, i have Taunt
+abilities:
+  - deal 6 to an enemy
+  - give me Ruthless
+evolve:
+traits:
+  - resilient 3
+attributes:
+affiliations:
+  - zahard's army
+  - zahard's princesses
+  - ari family
+  - ha family
+  - wolhaiksong

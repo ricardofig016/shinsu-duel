@@ -240,17 +240,17 @@ Traits are positive permanent effects native to cards. They are color coded as s
 2. **Bloodthirsty**: When I kill a unit, restore 1 HP
 3. **Creator**: When I am deployed, create 1
 4. **Dealer**: Draw 1 card at the start of every round
-6. **Immune**: I am immune to negative effects
-7. **Last One Standing**: If I am the only ally unit, I have +4 HP and deal +4 damage
-8. **Lethal**: When I damage another unit, kill it
-9. **Pierce**: When I deal damage, destroy 1 enemy lighthouse
-10. **Reflect**: When I take damage, deal 1 damage to my attacker
-11. **Regenerate**: Restore me to full HP at the end of the round
-12. **Resilient**: I take -1 damage from all sources
-13. **Ruthless**: I deal +1 damage for each lighthouse destroyed
-14. **Sharpshooter**: I can target any enemy unit
-15. **Strong**: I deal +1 damage
-16. **Taunt**: Enemies are forced to target me if they can
+5. **Immune**: I am immune to negative effects
+6. **Last One Standing**: If I am the only ally unit, I have +4 HP and deal +4 damage
+7. **Lethal**: When I damage another unit, kill it
+8. **Pierce**: When I kill a unit, Destroy 1
+9. **Reflect**: When I take damage, deal 1 damage to my attacker
+10. **Regenerate**: Restore me to full HP at the end of the round
+11. **Resilient**: I take -1 damage from all sources
+12. **Ruthless**: I deal +1 damage if the enemy has less than 10 lighthouses
+13. **Sharpshooter**: I can target any enemy unit
+14. **Strong**: I deal +1 damage
+15. **Taunt**: Enemies are forced to target me if they can
 
 ### Conditions
 
@@ -265,7 +265,7 @@ Conditions are negative temporary effects that last until the end of the round. 
 2. **Cursed**: I take 1 damage when I use an ability
 3. **Doomed**: I will die at the end of this round
 4. **Exhausted**: I deal -1 damage
-5. **Frozen**: When i use an ability, spend all combat slots (*missing icon*)
+5. **Frozen**: When i use an ability, spend all combat slots (_missing icon_)
 6. **Ghost**: I don't prevent the enemy from targeting what's behind me
 7. **Heavy**: My abilities cost +1 shinsu
 8. **Poisoned**: I take 1 damage when i use an ability
@@ -419,6 +419,7 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 | [Team Ship](https://towerofgod.fandom.com/wiki/Ship's_Team)                                            | Team         | Ship Leesoo           |
 | [FUG](https://towerofgod.fandom.com/wiki/FUG)                                                          | Organization | Ha Jinsung            |
 | [Hidden Grove](https://towerofgod.fandom.com/wiki/Hidden_Grove)                                        | Organization | Cha                   |
+| [Karaka's Servants](https://towerofgod.fandom.com/wiki/Karaka's_Servants)                              | Organization | Pedro                 |
 | [Revolution](https://towerofgod.fandom.com/wiki/Revolution)                                            | Organization | Lo Po Bia Goruro      |
 | [Wolhaiksong](https://towerofgod.fandom.com/wiki/Wolhaiksong)                                          | Organization | Baek Ryun             |
 | [Zahard's Army](https://towerofgod.fandom.com/wiki/Zahard's_Army)                                      | Organization | Khun Maschenny Zahard |

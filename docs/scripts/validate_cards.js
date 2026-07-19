@@ -77,6 +77,7 @@ const rulesDomain = {
     "team ship",
     "fug",
     "hidden grove",
+    "karaka's servants",
     "revolution",
     "wolhaiksong",
     "zahard's army",

@@ -9,7 +9,7 @@ passives:
 abilities:
   - create 1
 evolve:
-  - equip with Ice Spear
+  - i am equiped with Ice Spear
 traits:
   - creator
 attributes:

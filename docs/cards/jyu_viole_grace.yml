@@ -8,7 +8,7 @@ positions:
 passives:
 abilities:
   - deal 1 for every trait i have to an enemy
-  - "spend 1: use an enemy ability"
+  - "spend 2: use an enemy ability"
 evolve:
 traits:
 attributes:

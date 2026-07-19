@@ -8,6 +8,7 @@ positions:
   - scout
   - wave controller
 passives:
+  - karaka's servants' abilities have Quick
 abilities:
   - "spend 1: deal 6 to a rooted enemy"
   - "spend 2: root and deal 3 to all rooted enemies"

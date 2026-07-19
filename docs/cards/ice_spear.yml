@@ -2,5 +2,6 @@ type: equipment
 name: Ice Spear
 cost: 3
 abilities:
-  - all of my attacks give frozen
-  - i have pierce
+  - i can only be equiped to khun family members
+  - all my attacks Freeze
+  - i have Pierce

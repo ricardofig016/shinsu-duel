@@ -1,0 +1,17 @@
+type: unit
+name: Pedro
+cost: 3
+hp: 2
+rank: ranker
+positions:
+  - scout
+passives:
+  - if i have Purple Dementor equiped, i give +2 Poison to high rankers
+abilities:
+  - give a backline enemy Poison
+evolve:
+traits:
+attributes:
+affiliations:
+  - fug
+  - karaka's servants

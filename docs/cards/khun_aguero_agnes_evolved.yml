@@ -7,9 +7,10 @@ positions:
   - light bearer
   - spear bearer
 passives:
+  - i ignore Taunt
 abilities:
-  - create 1
-  - deal 2 to enemy
+  - "light bearer: create 1"
+  - "spear bearer: deal 2 to an enemy"
 evolve:
 traits:
   - creator
