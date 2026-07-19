@@ -1,18 +1,16 @@
 type: unit
-name: Quaetro Blitz
+name: Hon Akraptor
 cost: 2
 hp: 4
 rank: regular
 positions:
-  - wave controller
+  - fisherman
 passives:
-  - Baang burns
+  - if Yeo Miseng is on the board, I have Strong
 abilities:
-  - "spend 3: deal 2 to all burned enemies"
+  - deal 4 to an enemy unit
 evolve:
 traits:
-  - sharpshooter
 attributes:
 affiliations:
-  - team chang
   - team sweet and sour

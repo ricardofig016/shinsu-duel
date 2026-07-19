@@ -1,0 +1,17 @@
+type: unit
+name: Yeo Goseng
+cost: 1
+hp: 1
+rank: regular
+positions:
+  - light bearer
+passives:
+  - team sweet and sour members cost one less
+abilities:
+  - heal a team sweet and sour member 1 HP
+evolve:
+traits:
+  - creator
+attributes:
+affiliations:
+  - team sweet and sour

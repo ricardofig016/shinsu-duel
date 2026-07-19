@@ -1,0 +1,20 @@
+type: unit
+name: Twenty-Fifth Baam (evolved)
+cost: 5
+hp: 6
+rank: regular
+positions:
+  - wave controller
+passives:
+abilities:
+  - "quick: spend 2: the next time you play Baang this turn, play it 3 more times"
+evolve:
+traits:
+  - immune
+attributes:
+  - living ignition weapon
+affiliations:
+  - team baam
+  - team fug
+  - team sweet and sour
+  - fug

@@ -1,0 +1,6 @@
+type: consumable
+name: Baang
+cost: 1
+abilities:
+  - deal 2 to an enemy
+  - you can have 3 of me in your deck

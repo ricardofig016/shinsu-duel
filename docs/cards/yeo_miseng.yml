@@ -1,0 +1,16 @@
+type: unit
+name: Yeo Miseng
+cost: 2
+hp: 1
+rank: regular
+positions:
+  - scout
+passives:
+  - "round end: i lose all traits"
+abilities:
+  - "spend 3: give me taunt and barrier"
+evolve:
+traits:
+attributes:
+affiliations:
+  - team sweet and sour

@@ -1,0 +1,22 @@
+type: unit
+name: Twenty-Fifth Baam
+cost: 5
+hp: 6
+rank: regular
+positions:
+  - wave controller
+passives:
+abilities:
+  - create a random Thorn Fragment in hand
+evolve:
+  - i have Enryu's Thorn, Blue Thryssa, and Red Thryssa equiped
+traits:
+attributes:
+  - living ignition weapon
+affiliations:
+  - team baam
+  - team fug
+  - team sweet and sour
+  - fug
+
+# TODO: create Blue and Red Thryssa

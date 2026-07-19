@@ -35,8 +35,8 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
       - [Silver Dwarf](#silver-dwarf)
       - [Red Witch](#red-witch)
     - [Hwayeomsa](#hwayeomsa)
-    - [Irregular](#irregular)
     - [Jeonsulsa](#jeonsulsa)
+    - [Irregular](#irregular)
     - [Living Ignition Weapon](#living-ignition-weapon)
   - [Affiliations](#affiliations)
   - [Rank](#rank)
@@ -181,14 +181,15 @@ It returns to hand when it's unit dies or when the unit is equiped when another 
 Keywords are special terms that provide additional context to cards and abilities. Their purpose is to provide common language for effects and abilities, making each description less verbose.
 
 1. **Cleanse**: Remove all negative traits
-2. **Charge <x>**: Regain <x> shinsu. Cannot charge over round number.
+2. **Charge <x>**: Regain <x> shinsu
 3. **Create <x>**: Regain <x> lighthouses
 4. **Destroy <x>**: Destroy <x> enemy lighthouses
 5. **Quick**: Doesn't end your turn
 6. **Silence**: Remove all positive traits
 7. **Slay**: Kill a unit
 8. **Spend <x>**: Spend <x> shinsu
-9. **<position>**: available only when played as <position>
+9. **Unreachable**: You can't put me in your deck during deckbuilding
+10. **<position>**: available only when played as <position>
 
 ## Positions
 
@@ -345,25 +346,6 @@ Spend 1: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you d
 
 - ``
 
-### Irregular
-
-Irregulars are extremely powerful individuals who were not selected by Headon. Instead, they entered the First Floor from outside the Tower. They ramp up when killing enemies by stacking multiple different traits on themselves. Twenty-Fifth Baam is an Irregular.
-
-**Core in-game mechanic:**
-
-```
-Slay: Grant me a random **Outsider Power** that I don't already have.
-**Power of Fortitude**: Immune and Regenerate
-**Power of Aegis**: Resilient and Barrier
-**Power of Ruin**: Pierce and Ruthless
-**Power of Vigor**: Bloodthirsty and Strong
-**Power of Defiance**: Reflect and Taunt
-```
-
-**Example Synergies:**
-
-- ``
-
 ### Jeonsulsa
 
 Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units. Khun Eduan is a Jeonsulsa.
@@ -384,17 +366,36 @@ When I'm deployed, summon a 2 HP **Conduit** on the enemy backline. When I leave
 - `**Ability**: Spend 3: Activate the enemy **Conduit** twice.`
 - `**Passive**: The first time an ally Jeonsulsa dies this game, activate the enemy **Conduit** 4 times.`
 
+### Irregular
+
+Irregulars are extremely powerful individuals who were not selected by Headon. Instead, they entered the First Floor from outside the Tower. They ramp up when killing enemies by stacking multiple different traits on themselves. Twenty-Fifth Baam is an Irregular.
+
+**Core in-game mechanic:**
+
+```
+Slay: Grant me a random **Outsider Power** that I don't already have.
+**Power of Fortitude**: Immune and Regenerate
+**Power of Aegis**: Resilient and Barrier
+**Power of Ruin**: Pierce and Ruthless
+**Power of Vigor**: Bloodthirsty and Strong
+**Power of Defiance**: Reflect and Taunt
+```
+
+**Example Synergies:**
+
+- `**Ability**: deal 1 for every trait i have to an enemy`
+
 ### Living Ignition Weapon
 
 **Core in-game mechanic:**
 
 ```
-You may equip me as many times as you want with unique equipments. When you equip me, grant a random trait to a random ally that is not me.
+You may equip me as many times as you want with unique equipments.
 ```
 
 **Example Synergies:**
 
-- ``
+- `**Passive**: When you equip me, grant a random trait to a random ally that is not me.`
 
 ## Affiliations
 

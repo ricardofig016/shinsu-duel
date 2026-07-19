@@ -1,0 +1,20 @@
+type: unit
+name: Jue Viole Grace
+cost: 4
+hp: 4
+rank: regular
+positions:
+  - wave controller
+passives:
+abilities:
+  - deal 1 for every trait i have to an enemy
+  - "spend 1: use an enemy ability"
+evolve:
+traits:
+attributes:
+  - irregular
+affiliations:
+  - team baam
+  - team fug
+  - team sweet and sour
+  - fug
