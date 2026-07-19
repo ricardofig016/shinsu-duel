@@ -3,5 +3,6 @@ name: First Thorn Fragment
 cost: 1
 abilities:
   - unreachable
-  - if i also have Second Thorn Fragment equiped, discard us both and create Enryu's Thorn in hand
+  - quick
+  - if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand
   - my damage dealing abilities deal +1 damage

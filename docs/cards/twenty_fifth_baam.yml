@@ -7,9 +7,9 @@ positions:
   - wave controller
 passives:
 abilities:
-  - create a random Thorn Fragment in hand
+  - create a Thorn Fragment of your choice in hand
 evolve:
-  - i have Enryu's Thorn, Blue Thryssa, and Red Thryssa equiped
+  - i am equiped with Enryu's Thorn
 traits:
 attributes:
   - living ignition weapon
@@ -18,5 +18,3 @@ affiliations:
   - team fug
   - team sweet and sour
   - fug
-
-# TODO: create Blue and Red Thryssa

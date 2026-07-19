@@ -313,7 +313,25 @@ async function findCardFiles() {
     .sort((left, right) => left.localeCompare(right));
 }
 
-function validateCard(card) {
+function expectedFilename(name) {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[\s\-]+/g, "_")
+      .replace(/[^a-z0-9_]/g, "") + ".yml"
+  );
+}
+
+function validateFilename(card, filename, errors) {
+  if (typeof card.name !== "string" || card.name.trim() === "") return;
+
+  const expected = expectedFilename(card.name);
+  if (filename !== expected) {
+    addError(errors, "filename", `"${filename}" does not match name field "${card.name}"`);
+  }
+}
+
+function validateCard(card, filename) {
   const errors = [];
 
   if (typeof card.type !== "string" || card.type.trim() === "") {
@@ -333,7 +351,9 @@ function validateCard(card) {
     return errors;
   }
 
-  return validator({ ...card, type });
+  const typeErrors = validator({ ...card, type });
+  validateFilename(card, filename, typeErrors);
+  return typeErrors;
 }
 
 const colors = {
@@ -350,7 +370,8 @@ async function main() {
   for (const cardFile of cardFiles) {
     const relativePath = path.relative(process.cwd(), cardFile);
     const { card, errors: loadErrors } = await loadCard(cardFile);
-    const errors = card ? validateCard(card) : loadErrors;
+    const filename = path.basename(cardFile);
+    const errors = card ? validateCard(card, filename) : loadErrors;
 
     if (errors.length > 0) {
       failures.push({ relativePath, errors });

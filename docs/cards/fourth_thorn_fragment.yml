@@ -1,8 +1,8 @@
 type: equipment
-name: Second Thorn Fragment
+name: Fourth Thorn Fragment
 cost: 1
 abilities:
   - unreachable
   - quick
   - if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand
-  - my healing abilities heal +1 hp
+  - i have Bloodthirsty

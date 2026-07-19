@@ -1,5 +1,5 @@
 type: unit
-name: Khun Ran
+name: Khun Ran (evolved)
 cost: 3
 hp: 5
 rank: regular
@@ -7,8 +7,7 @@ positions:
   - fisherman
   - spear bearer
 passives:
-  - i turn back to Khun Ran at the end of the round
-  - create a Redan in then hand
+  - "round end: create a Redan in hand and i turn back to Khun Ran"
 abilities:
   - deal 3 to a frontline enemy and 2 to a backline enemy
 evolve:

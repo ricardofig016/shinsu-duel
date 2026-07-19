@@ -7,7 +7,7 @@ positions:
   - wave controller
 passives:
 abilities:
-  - "quick: spend 2: the next time you play Baang this turn, play it 3 more times"
+  - "quick: spend 2: the next time you play Baang this turn, play it 4 more times"
 evolve:
 traits:
   - immune

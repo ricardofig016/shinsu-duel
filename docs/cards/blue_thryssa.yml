@@ -1,0 +1,5 @@
+type: equipment
+name: Blue Thryssa
+cost: 2
+abilities:
+  - "ability: heal me 2 hp and Cleanse me"
