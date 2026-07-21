@@ -26,31 +26,38 @@ function showHelp() {
 ${colors.Cyan}lookup${colors.Reset} — Search cards by field values
 
 ${colors.Yellow}USAGE${colors.Reset}
-  npm run lookup <term>                 Search predefined fields
+  npm run lookup <term>                 Search across all fields
   npm run lookup <field>=<value>        Search a specific field
-  npm run lookup --help                 Show this help
+  npm run lookup /dist <term>           Show HP/cost distribution for results
+  npm run lookup /help                  Show this help
+
+${colors.Yellow}OPTIONS${colors.Reset}
+  /dist           Print a simple HP and cost distribution chart for the results.
+  /help           Show this message.
 
 ${colors.Yellow}GLOBAL SEARCH (no "=")${colors.Reset}
   Case-insensitive substring search across ALL fields of every card.
-  Think of it as a glorified Ctrl+F over the entire card collection.
+  Basically a Ctrl+F over the entire card collection.
 
 ${colors.Yellow}FIELD=VALUE SEARCH${colors.Reset}
   name=         Fuzzy — case-insensitive substring, ignoring spaces & special chars
-  abilities=    Substring search within each ability text (case-insensitive)
-  effects=      Substring search within each effect text   (case-insensitive)
-  passives=     Substring search within each passive text  (case-insensitive)
+  abilities=      Substring search within each ability text (case-insensitive)
+  effects=        Substring search within each effect text  (case-insensitive)
+  passives=       Substring search within each passive text (case-insensitive)
+  requirements=   Substring search within each requirement text (case-insensitive)
   cost= / hp=   Exact match (compared as strings)
   Other fields  Exact case-insensitive match (scalar) or element match (array)
 
 ${colors.Yellow}EXAMPLES${colors.Reset}
-  npm run lookup tank
+  npm run lookup unit
   npm run lookup shinheuh
   npm run lookup name=Thorn
   npm run lookup name=Thorn Fragment
   npm run lookup cost=2
   npm run lookup hp=6
   npm run lookup abilities=spend 2:
-  npm run lookup effects=deal 6
+  npm run lookup effects=heal
+  npm run lookup /dist wave controller
 `);
 }
 
@@ -83,27 +90,34 @@ function asList(value) {
 // ---------------------------------------------------------------------------
 
 /**
- * Join all positional args with a space, then split on the first '='.
+ * Join all positional args with a space, strip --dist, then split on the first '='.
  *
  * Returns { help: true } for --help / -h,
  *         { field: null, value: "…" } for legacy mode (no '='),
  *         { field: "…", value: "…" } for field=value mode.
+ *         { dist: true } when --dist flag is present.
  */
 function parseArgs(rawArgs) {
-  const joined = rawArgs.join(" ").trim();
+  let joined = rawArgs.join(" ").trim();
+  const dist = /(?:^|\s)[-/]{1,2}dist(?:\s|$)/i.test(joined);
+  joined = joined.replace(/[-/]{1,2}dist\s*/gi, "").trim();
 
-  if (joined === "--help" || joined === "-h") {
-    return { help: true };
+  if (joined === "--help" || joined === "-h" || joined === "/help") {
+    return { help: true, dist };
+  }
+
+  if (joined === "") {
+    return { field: null, value: "", dist };
   }
 
   const eqIndex = joined.indexOf("=");
   if (eqIndex === -1) {
-    return { field: null, value: joined.toLowerCase() };
+    return { field: null, value: joined.toLowerCase(), dist };
   }
 
   const field = joined.slice(0, eqIndex).trim().toLowerCase();
   const value = joined.slice(eqIndex + 1).trim();
-  return { field, value };
+  return { field, value, dist };
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +135,7 @@ function fieldValueMatches(fieldName, cardValue, lookupValue) {
     return fuzzyNameMatch(String(cardValue), lookupValue);
   }
 
-  if (fieldName === "abilities" || fieldName === "effects" || fieldName === "passives") {
+  if (fieldName === "abilities" || fieldName === "effects" || fieldName === "passives" || fieldName === "requirements") {
     if (typeof cardValue === "string") {
       return substringMatch(cardValue, lookupValue);
     }
@@ -200,6 +214,54 @@ async function loadCard(filePath) {
 }
 
 // ---------------------------------------------------------------------------
+// Distribution display
+// ---------------------------------------------------------------------------
+
+/** Print a simple horizontal bar-chart of HP and cost distribution. */
+function showDistribution(matches) {
+  const hpMap = new Map();
+  const costMap = new Map();
+
+  for (const m of matches) {
+    const hp = m.hp;
+    const cost = m.cost;
+    if (hp !== undefined && hp !== null) {
+      hpMap.set(hp, (hpMap.get(hp) || 0) + 1);
+    }
+    if (cost !== undefined && cost !== null) {
+      costMap.set(cost, (costMap.get(cost) || 0) + 1);
+    }
+  }
+
+  const maxCount = Math.max(
+    ...Array.from(hpMap.values(), (v) => v),
+    ...Array.from(costMap.values(), (v) => v),
+    1,
+  );
+  const barWidth = 30;
+
+  const draw = (label, map) => {
+    if (map.size === 0) {
+      console.log(`  ${colors.Dim}(none)${colors.Reset}`);
+      return;
+    }
+    const sorted = [...map.entries()].sort((a, b) => a[0] - b[0]);
+    for (const [val, count] of sorted) {
+      const filled = Math.round((count / maxCount) * barWidth);
+      const bar = "█".repeat(filled) + "░".repeat(barWidth - filled);
+      console.log(
+        `  ${String(val).padStart(2)} ${bar} ${colors.Yellow}${count}${colors.Reset}`,
+      );
+    }
+  };
+
+  console.log(`\n${colors.Cyan}── HP distribution ──${colors.Reset}`);
+  draw("HP", hpMap);
+  console.log(`\n${colors.Cyan}── Cost distribution ──${colors.Reset}`);
+  draw("Cost", costMap);
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -211,7 +273,7 @@ async function main() {
     return;
   }
 
-  const { field, value } = parsed;
+  const { field, value, dist } = parsed;
 
   if (field === null && value === "") {
     console.error(`${colors.Red}Usage: npm run lookup <field=value|term>${colors.Reset}`);
@@ -236,6 +298,8 @@ async function main() {
 
     matches.push({
       name: typeof card.name === "string" ? card.name : path.basename(cardFile),
+      hp: card.hp,
+      cost: card.cost,
       relativePath: path.relative(process.cwd(), cardFile),
       matches: cardMatches,
     });
@@ -253,6 +317,10 @@ async function main() {
 
   const modeLabel = field === null ? `"${value}"` : `${field}="${value}"`;
   console.log(`${colors.Green}${matches.length} card(s) found for ${modeLabel}.${colors.Reset}`);
+
+  if (dist && matches.length > 0) {
+    showDistribution(matches);
+  }
 }
 
 main().catch((error) => {
