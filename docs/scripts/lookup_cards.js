@@ -28,12 +28,20 @@ ${colors.Cyan}lookup${colors.Reset} — Search cards by field values
 ${colors.Yellow}USAGE${colors.Reset}
   npm run lookup <term>                 Search across all fields
   npm run lookup <field>=<value>        Search a specific field
+  npm run lookup <query>,<query>        Intersection (AND) of multiple queries
   npm run lookup /dist <term>           Show HP/cost distribution for results
   npm run lookup /help                  Show this help
 
 ${colors.Yellow}OPTIONS${colors.Reset}
   /dist           Print a simple HP and cost distribution chart for the results.
   /help           Show this message.
+
+${colors.Yellow}MULTI-FILTER (comma delimiter)${colors.Reset}
+  Separate queries with "," for intersection (AND) logic.
+  A card must match ALL queries to appear in the results.
+  npm run lookup positions=fisherman,cost=3
+  npm run lookup positions=fisherman,cost=3,passives=round end:
+  npm run lookup positions=fisherman,cost=3,frontline
 
 ${colors.Yellow}GLOBAL SEARCH (no "=")${colors.Reset}
   Case-insensitive substring search across ALL fields of every card.
@@ -58,6 +66,8 @@ ${colors.Yellow}EXAMPLES${colors.Reset}
   npm run lookup abilities=spend 2:
   npm run lookup effects=heal
   npm run lookup /dist wave controller
+  npm run lookup positions=fisherman,cost=3
+  npm run lookup positions=fisherman,cost=3,frontline
 `);
 }
 
@@ -90,12 +100,12 @@ function asList(value) {
 // ---------------------------------------------------------------------------
 
 /**
- * Join all positional args with a space, strip --dist, then split on the first '='.
+ * Join all positional args with a space, strip --dist, split on ',' into
+ * individual queries, then parse each query (global or field=value).
  *
  * Returns { help: true } for --help / -h,
- *         { field: null, value: "…" } for legacy mode (no '='),
- *         { field: "…", value: "…" } for field=value mode.
- *         { dist: true } when --dist flag is present.
+ *         { queries: [{ field, value }, ...], dist } otherwise.
+ *         dist is true when the --dist flag is present.
  */
 function parseArgs(rawArgs) {
   let joined = rawArgs.join(" ").trim();
@@ -107,17 +117,31 @@ function parseArgs(rawArgs) {
   }
 
   if (joined === "") {
-    return { field: null, value: "", dist };
+    return { queries: [{ field: null, value: "" }], dist };
   }
 
-  const eqIndex = joined.indexOf("=");
-  if (eqIndex === -1) {
-    return { field: null, value: joined.toLowerCase(), dist };
+  // Split on ',' to support multiple filters (intersection / AND logic)
+  const segments = joined
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s !== "");
+
+  if (segments.length === 0) {
+    return { queries: [{ field: null, value: "" }], dist };
   }
 
-  const field = joined.slice(0, eqIndex).trim().toLowerCase();
-  const value = joined.slice(eqIndex + 1).trim();
-  return { field, value, dist };
+  const queries = segments.map((segment) => {
+    const eqIndex = segment.indexOf("=");
+    if (eqIndex === -1) {
+      // Global / legacy mode (no '=')
+      return { field: null, value: segment.toLowerCase() };
+    }
+    const field = segment.slice(0, eqIndex).trim().toLowerCase();
+    const value = segment.slice(eqIndex + 1).trim();
+    return { field, value };
+  });
+
+  return { queries, dist };
 }
 
 // ---------------------------------------------------------------------------
@@ -273,10 +297,10 @@ async function main() {
     return;
   }
 
-  const { field, value, dist } = parsed;
+  const { queries, dist } = parsed;
 
-  if (field === null && value === "") {
-    console.error(`${colors.Red}Usage: npm run lookup <field=value|term>${colors.Reset}`);
+  if (queries.length === 1 && queries[0].field === null && queries[0].value === "") {
+    console.error(`${colors.Red}Usage: npm run lookup <field=value|term>[,<filter2>...]${colors.Reset}`);
     console.error(`${colors.Dim}       npm run lookup --help${colors.Reset}`);
     process.exitCode = 1;
     return;
@@ -289,33 +313,47 @@ async function main() {
     const card = await loadCard(cardFile);
     if (card === null || typeof card !== "object" || Array.isArray(card)) continue;
 
-    const cardMatches =
-      field === null
-        ? legacyGetMatches(card, value)
-        : fieldValueGetMatches(card, field, value);
+    // Intersection: card must match EVERY query
+    const allQueryMatches = [];
+    let matchesAll = true;
 
-    if (cardMatches.length === 0) continue;
+    for (const query of queries) {
+      const cardMatches =
+        query.field === null
+          ? legacyGetMatches(card, query.value)
+          : fieldValueGetMatches(card, query.field, query.value);
+
+      if (cardMatches.length === 0) {
+        matchesAll = false;
+        break;
+      }
+      allQueryMatches.push(...cardMatches);
+    }
+
+    if (!matchesAll) continue;
 
     matches.push({
       name: typeof card.name === "string" ? card.name : path.basename(cardFile),
       hp: card.hp,
       cost: card.cost,
       relativePath: path.relative(process.cwd(), cardFile),
-      matches: cardMatches,
+      matches: allQueryMatches,
     });
   }
 
   for (const match of matches) {
     const matchedFields = match.matches
       .map(({ field: f, values: vs }) => `${f}=${vs.join(", ")}`)
-      .join("; ");
+      .join(", ");
 
     console.log(
       `${colors.Cyan}- ${match.name}${colors.Reset} ${colors.Yellow}(${matchedFields})${colors.Reset} ${colors.Dim}(${match.relativePath})${colors.Reset}`,
     );
   }
 
-  const modeLabel = field === null ? `"${value}"` : `${field}="${value}"`;
+  const modeLabel = queries
+    .map((q) => (q.field === null ? `"${q.value}"` : `${q.field}="${q.value}"`))
+    .join(", ");
   console.log(`${colors.Green}${matches.length} card(s) found for ${modeLabel}.${colors.Reset}`);
 
   if (dist && matches.length > 0) {
