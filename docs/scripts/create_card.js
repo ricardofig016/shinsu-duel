@@ -51,9 +51,16 @@ function toDisplayName(snakeName) {
     .join(" ");
 }
 
+function normalizeName(rawName) {
+  return rawName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
 async function main() {
   const type = process.argv[2];
-  const nameArg = process.argv[3];
+  const nameArg = process.argv.slice(3).join(" ");
 
   if (!type || !nameArg) {
     console.error(`${colors.red}Usage: npm run create:card <type> <name>${colors.reset}`);
@@ -69,7 +76,8 @@ async function main() {
     return;
   }
 
-  const filename = `${nameArg}.yml`;
+  const normalizedName = normalizeName(nameArg);
+  const filename = `${normalizedName}.yml`;
   const filePath = path.join(cardsDirectory, filename);
 
   try {
