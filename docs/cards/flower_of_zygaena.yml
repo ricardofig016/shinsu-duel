@@ -1,5 +1,6 @@
 type: consumable
 name: Flower of Zygaena
 cost: 4
+requirements:
 effects:
   - give ally wolhaiksong and team sweet and sour members strong 2

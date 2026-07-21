@@ -26,6 +26,7 @@ affiliations:
   consumable: `type: consumable
 name: 
 cost: 
+requirements:
 effects:
 `,
   equipment: `type: equipment

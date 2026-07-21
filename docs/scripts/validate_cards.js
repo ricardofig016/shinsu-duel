@@ -29,7 +29,7 @@ const requiredUnitKeys = [
   "attributes",
   "affiliations",
 ];
-const requiredConsumableKeys = ["type", "name", "cost", "effects"];
+const requiredConsumableKeys = ["type", "name", "cost", "requirements", "effects"];
 const requiredEquipmentKeys = ["type", "name", "cost", "requirements", "effects"];
 
 const rulesDomain = {
@@ -302,6 +302,8 @@ function validateConsumable(card) {
 
   requireString(card, "name", errors);
   requireInteger(card, "cost", errors, { min: 0 });
+  requireStringListValue(card, "requirements", errors);
+  requireStringListValue(card, "requirements", errors);
   requireStringListValue(card, "effects", errors);
 
   return errors;
