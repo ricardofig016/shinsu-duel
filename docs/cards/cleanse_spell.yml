@@ -1,4 +1,4 @@
-type: consumable
+type: skill
 name: Cleanse Spell
 cost: 1
 requirements:

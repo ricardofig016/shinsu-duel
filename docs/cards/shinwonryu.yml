@@ -1,8 +1,8 @@
-type: consumable
+type: skill
 name: Shinwonryu
-cost: 3
+cost: 4
 requirements:
   - have an ally Irregular
 effects:
   - Unreachable
-  - deal 5 damage to a unit. this ignores all traits the target has.
+  - give Curse 2 and deal 6 to an enemy. this ignores all traits the target has.

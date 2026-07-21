@@ -1,4 +1,4 @@
-type: consumable
+type: skill
 name: Weights
 cost: 1
 requirements:

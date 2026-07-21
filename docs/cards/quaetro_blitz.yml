@@ -6,7 +6,7 @@ rank: regular
 positions:
   - wave controller
 passives:
-  - Baang burns
+  - Baang gives Burn
 abilities:
   - "spend 3: deal 2 to all burned enemies"
 evolve:

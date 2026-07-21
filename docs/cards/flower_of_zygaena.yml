@@ -1,4 +1,4 @@
-type: consumable
+type: skill
 name: Flower of Zygaena
 cost: 4
 requirements:

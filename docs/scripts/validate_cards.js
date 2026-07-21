@@ -14,7 +14,7 @@ const rankCostRanges = {
   "high ranker": [5, 10],
 };
 
-const allowedTypes = new Set(["unit", "consumable", "equipment"]);
+const allowedTypes = new Set(["unit", "skill", "equipment"]);
 const requiredUnitKeys = [
   "type",
   "name",
@@ -29,7 +29,7 @@ const requiredUnitKeys = [
   "attributes",
   "affiliations",
 ];
-const requiredConsumableKeys = ["type", "name", "cost", "requirements", "effects"];
+const requiredSkillKeys = ["type", "name", "cost", "requirements", "effects"];
 const requiredEquipmentKeys = ["type", "name", "cost", "requirements", "effects"];
 
 const rulesDomain = {
@@ -108,7 +108,7 @@ const rulesDomain = {
 
 const validators = {
   unit: validateUnit,
-  consumable: validateConsumable,
+  skill: validateSkill,
   equipment: validateEquipment,
 };
 
@@ -296,9 +296,9 @@ function validateUnit(card) {
   return errors;
 }
 
-function validateConsumable(card) {
+function validateSkill(card) {
   const errors = [];
-  validateExactKeys(card, requiredConsumableKeys, errors);
+  validateExactKeys(card, requiredSkillKeys, errors);
 
   requireString(card, "name", errors);
   requireInteger(card, "cost", errors, { min: 0 });
@@ -368,13 +368,13 @@ function validateCard(card, filename) {
   const errors = [];
 
   if (typeof card.type !== "string" || card.type.trim() === "") {
-    addError(errors, "type", "must be one of unit, consumable, equipment");
+    addError(errors, "type", "must be one of unit, skill, equipment");
     return errors;
   }
 
   const type = card.type;
   if (!allowedTypes.has(type)) {
-    addError(errors, "type", "must be one of unit, consumable, equipment");
+    addError(errors, "type", "must be one of unit, skill, equipment");
     return errors;
   }
 

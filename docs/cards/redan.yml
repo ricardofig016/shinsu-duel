@@ -1,4 +1,4 @@
-type: consumable
+type: skill
 name: Redan
 cost: 1
 requirements:

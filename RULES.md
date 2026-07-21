@@ -17,7 +17,7 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Actions](#actions)
   - [Cards](#cards)
     - [Units](#units)
-    - [Consumables](#consumables)
+    - [Skills](#skills)
     - [Equipment](#equipment)
   - [Deck](#deck)
   - [Keywords](#keywords)
@@ -148,13 +148,13 @@ Represent characters, creatures or locations from Tower of God:
 16. You may have more than one unit in each position at a time.
 17. When a unit dies, it is sent to the discard pile.
 
-### Consumables
+### Skills
 
 Single-use items:
 
 1. Provide immediate effect
 2. May target units or have global effect
-3. Playing a consumable ends your turn
+3. Playing a skill ends your turn
 4. Examples: Lightning Pill, Ignition spells
 
 ### Equipment
@@ -180,12 +180,12 @@ It returns to hand when it's unit dies or when the unit is equiped when another 
 
 Keywords are special terms that provide additional context to cards and abilities. Their purpose is to provide common language for effects and abilities, making each description less verbose.
 
-1. **Cleanse**: Remove all negative traits
+1. **Cleanse**: Remove all conditions
 2. **Charge <x>**: Regain <x> shinsu
 3. **Create <x>**: Regain <x> lighthouses
 4. **Destroy <x>**: Destroy <x> enemy lighthouses
 5. **Quick**: Doesn't end your turn
-6. **Silence**: Remove all positive traits
+6. **Silence**: Remove all traits
 7. **Slay**: Kill a unit
 8. **Spend <x>**: Spend <x> shinsu
 9. **Unreachable**: You can't put me in your deck during deckbuilding
@@ -283,7 +283,7 @@ Anima summon and control special creatures called [Shinheuh](#shinheuh) to fight
 
 **Core in-game mechanic:**
 
-```
+```md
 Round start: gain a single-use Shinheuh combat slot if you don't already have one.
 ```
 
@@ -306,7 +306,7 @@ Specializes in navigating the immediate physical crossroads and obstacles right 
 
 **Core in-game mechanic:**
 
-```
+```md
 When you draw a card, choose the card directly from your deck, then shuffle the rest.
 ```
 
@@ -316,7 +316,7 @@ Specializes in reading long-term destiny and the overarching threads of fate. Hw
 
 **Core in-game mechanic:**
 
-```
+```md
 You can always see your opponent's hand and the top card of both players' decks.
 ```
 
@@ -324,7 +324,7 @@ You can always see your opponent's hand and the top card of both players' decks.
 
 - `**Passive**: Round start: draw a card`
 - `**Ability**: Spend 3: switch a card in your hand with a card in your opponent's hand`
-- `**Ability**: Spend 3: draw 3 cards, Charge 1 for each Consumable drawn`
+- `**Ability**: Spend 3: draw 3 cards, Charge 1 for each Skill drawn`
 - `**Ability**: Spend 1: discard a Ranker from your opponent's hand`
 
 ### Hwayeomsa
@@ -333,18 +333,20 @@ Hwayeomsa are flame users who are able to convert shinsu into fire. They deal te
 
 **Core in-game mechanic:**
 
-```
+```md
 Spend 1: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have it.
 **Fire Core**: Quick: Consume your Fire Charges to create **Incinerate <level>** in hand:
 **Incinerate I**: I am created by consuming 1 Fire Charge. Deal 1 to an enemy.
 **Incinerate II**: I am created by consuming 3 Fire Charges. Deal 2 to 2 enemies.
 **Incinerate III**: I am created by consuming 5 Fire Charges. Deal 2 to 3 enemies and give them Burn.
-**Incinerate IV**: I am created by consuming 7 Fire Charges. Deal 3 to all enemies, and give them Burn this round and the next.
+**Incinerate IV**: I am created by consuming 7 Fire Charges. Deal 3 to all enemies, and give them Burn 2.
 ```
 
 **Example Synergies:**
 
-- ``
+- `**Passive**: Baang gives Burn`
+- `**Passive**: when an ally gives Burn <x> to an enemy, they give Burn <x+1> instead`
+- `**Ability**: spend 3: deal 2 to all burned enemies`
 
 ### Jeonsulsa
 
@@ -352,7 +354,7 @@ Jeonsulsa are lightning users who have the ability to give electrical properties
 
 **Core in-game mechanic:**
 
-```
+```md
 When I'm deployed, summon a 2 HP **Conduit** on the enemy backline. When I leave play, destroy it.
 **Conduit**: Ghost. Round start or Activation: For every 2 HP that I have, play 1 random **Jeonsul Baang** on yourself.
 **Lightning Baang**: Deal 2 damage to a random ally unit.
@@ -362,9 +364,9 @@ When I'm deployed, summon a 2 HP **Conduit** on the enemy backline. When I leave
 
 **Example Synergies:**
 
-- `**Passive**: When I use an ability, grant the enemy **Conduit** 1 HP or summon a new one.`
-- `**Ability**: Spend 3: Activate the enemy **Conduit** twice.`
-- `**Passive**: The first time an ally Jeonsulsa dies this game, activate the enemy **Conduit** 4 times.`
+- `**Passive**: when I use an ability, grant the enemy **Conduit** 1 HP or summon a new one.`
+- `**Ability**: spend 3: Activate the enemy **Conduit** twice.`
+- `**Passive**: the first time an ally Jeonsulsa dies this game, activate the enemy **Conduit** 4 times.`
 
 ### Irregular
 
@@ -372,7 +374,7 @@ Irregulars are extremely powerful individuals who were not selected by Headon. I
 
 **Core in-game mechanic:**
 
-```
+```md
 Slay: Grant me a random **Outsider Power** that I don't already have.
 **Power of Fortitude**: Immune and Regenerate
 **Power of Aegis**: Resilient and Barrier
@@ -384,18 +386,22 @@ Slay: Grant me a random **Outsider Power** that I don't already have.
 **Example Synergies:**
 
 - `**Ability**: deal 1 for every trait i have to an enemy`
+- `**Ability**: spend 3: give me Lethal`
+- `**Passive**: Silence doesnt affect me`
 
 ### Living Ignition Weapon
 
 **Core in-game mechanic:**
 
-```
+```md
 You may equip me as many times as you want with unique equipments.
 ```
 
 **Example Synergies:**
 
-- `**Passive**: When you equip me, grant a random trait to a random ally that is not me.`
+- `**Passive**: equipments cost 1 less`
+- `**Passive**: when you equip me, grant a random trait to a random ally that is not me`
+- `**Ability**: spend 3: steal an enemy equipment and play it on me`
 
 ## Affiliations
 

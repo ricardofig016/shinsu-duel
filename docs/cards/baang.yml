@@ -1,4 +1,4 @@
-type: consumable
+type: skill
 name: Baang
 cost: 1
 requirements:

@@ -7,7 +7,7 @@ const currentFile = fileURLToPath(import.meta.url);
 const scriptsDirectory = path.dirname(currentFile);
 const cardsDirectory = path.join(scriptsDirectory, "../cards");
 
-const allowedTypes = new Set(["unit", "consumable", "equipment"]);
+const allowedTypes = new Set(["unit", "skill", "equipment"]);
 
 const templates = {
   unit: `type: unit
@@ -23,7 +23,7 @@ traits:
 attributes:
 affiliations:
 `,
-  consumable: `type: consumable
+  skill: `type: skill
 name: 
 cost: 
 requirements:
