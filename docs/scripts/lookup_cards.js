@@ -241,25 +241,41 @@ async function loadCard(filePath) {
 // Distribution display
 // ---------------------------------------------------------------------------
 
-/** Print a simple horizontal bar-chart of HP and cost distribution. */
+/** Print a simple horizontal bar-chart of HP, cost, rank and positions distribution. */
 function showDistribution(matches) {
   const hpMap = new Map();
   const costMap = new Map();
+  const rankMap = new Map();
+  const posMap = new Map();
 
   for (const m of matches) {
     const hp = m.hp;
     const cost = m.cost;
+    const rank = m.rank;
+    const positions = m.positions;
     if (hp !== undefined && hp !== null) {
       hpMap.set(hp, (hpMap.get(hp) || 0) + 1);
     }
     if (cost !== undefined && cost !== null) {
       costMap.set(cost, (costMap.get(cost) || 0) + 1);
     }
+    if (rank !== undefined && rank !== null) {
+      rankMap.set(rank, (rankMap.get(rank) || 0) + 1);
+    }
+    if (Array.isArray(positions)) {
+      for (const pos of positions) {
+        if (typeof pos === "string") {
+          posMap.set(pos, (posMap.get(pos) || 0) + 1);
+        }
+      }
+    }
   }
 
   const maxCount = Math.max(
     ...Array.from(hpMap.values(), (v) => v),
     ...Array.from(costMap.values(), (v) => v),
+    ...Array.from(rankMap.values(), (v) => v),
+    ...Array.from(posMap.values(), (v) => v),
     1,
   );
   const barWidth = 30;
@@ -269,12 +285,19 @@ function showDistribution(matches) {
       console.log(`  ${colors.Dim}(none)${colors.Reset}`);
       return;
     }
-    const sorted = [...map.entries()].sort((a, b) => a[0] - b[0]);
+    const sorted = [...map.entries()].sort((a, b) => {
+      const aNum = typeof a[0] === "number";
+      const bNum = typeof b[0] === "number";
+      if (aNum && bNum) return a[0] - b[0];
+      if (aNum !== bNum) return aNum ? -1 : 1;
+      return String(a[0]).localeCompare(String(b[0]));
+    });
+    const maxLabelLen = Math.max(...sorted.map(([v]) => String(v).length));
     for (const [val, count] of sorted) {
       const filled = Math.round((count / maxCount) * barWidth);
       const bar = "█".repeat(filled) + "░".repeat(barWidth - filled);
       console.log(
-        `  ${String(val).padStart(2)} ${bar} ${colors.Yellow}${count}${colors.Reset}`,
+        `  ${String(val).padStart(maxLabelLen)} ${bar} ${colors.Yellow}${count}${colors.Reset}`,
       );
     }
   };
@@ -283,6 +306,10 @@ function showDistribution(matches) {
   draw("HP", hpMap);
   console.log(`\n${colors.Cyan}── Cost distribution ──${colors.Reset}`);
   draw("Cost", costMap);
+  console.log(`\n${colors.Cyan}── Rank distribution ──${colors.Reset}`);
+  draw("Rank", rankMap);
+  console.log(`\n${colors.Cyan}── Positions distribution ──${colors.Reset}`);
+  draw("Positions", posMap);
 }
 
 // ---------------------------------------------------------------------------
@@ -299,13 +326,6 @@ async function main() {
 
   const { queries, dist } = parsed;
 
-  if (queries.length === 1 && queries[0].field === null && queries[0].value === "") {
-    console.error(`${colors.Red}Usage: npm run lookup <field=value|term>[,<filter2>...]${colors.Reset}`);
-    console.error(`${colors.Dim}       npm run lookup --help${colors.Reset}`);
-    process.exitCode = 1;
-    return;
-  }
-
   const cardFiles = await findCardFiles();
   const matches = [];
 
@@ -318,6 +338,9 @@ async function main() {
     let matchesAll = true;
 
     for (const query of queries) {
+      // Empty query matches everything
+      if (query.value === "") continue;
+
       const cardMatches =
         query.field === null
           ? legacyGetMatches(card, query.value)
@@ -336,6 +359,8 @@ async function main() {
       name: typeof card.name === "string" ? card.name : path.basename(cardFile),
       hp: card.hp,
       cost: card.cost,
+      rank: card.rank,
+      positions: card.positions,
       relativePath: path.relative(process.cwd(), cardFile),
       matches: allQueryMatches,
     });
