@@ -1,0 +1,8 @@
+type: consumable
+name: Shinwonryu
+cost: 3
+requirements:
+  - have an ally Irregular
+effects:
+  - Unreachable
+  - deal 5 damage to a unit. this ignores all traits the target has.

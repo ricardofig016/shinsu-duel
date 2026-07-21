@@ -1,0 +1,20 @@
+type: unit
+name: Rachel
+cost: 1
+hp: 1
+rank: regular
+positions:
+  - light bearer
+passives:
+abilities:
+  - kill an ally to Create 3
+  - "spend 3: summon Akryung from your deck or hand"
+evolve:
+traits:
+attributes:
+  - irregular
+affiliations:
+  - fug
+  - revolution
+  - team rachel
+  - khun's team

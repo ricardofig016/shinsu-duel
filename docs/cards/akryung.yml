@@ -1,0 +1,18 @@
+type: unit
+name: Akryung
+cost: 4
+hp: 7
+rank: regular
+positions:
+  - wave controller
+  - spear bearer
+passives:
+  - "round start: give me the traits that ally Rachel has"
+abilities:
+  - create Shinwonryu in hand
+  - heal myself 3 hp
+evolve:
+traits:
+  - resilient
+attributes:
+affiliations:
