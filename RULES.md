@@ -44,6 +44,9 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
   - [Future Features](#future-features)
     - [Team Leader](#team-leader)
     - [Attributes](#attributes-1)
+  - [Random Tables](#random-tables)
+    - [Random Trait](#random-trait)
+    - [Random Condition](#random-condition)
 
 ## Objective
 
@@ -289,10 +292,10 @@ Round start: gain a single-use Shinheuh combat slot if you don't already have on
 
 **Example Synergies:**
 
-- `**Passive**: Round start: choose 1 of 3 random Shinheuh to create in your hand`
-- `**Passive**: When you summon a Shinheuh, Charge 1.`
-- `**Passive**: When I am deployed, summon Bull` (Yuga)
-- `**Ability**: Spend 1: Summon a random 2-3 cost Shinheuh`
+- `**Passive**: round start: choose 1 of 3 random Shinheuh to create in your hand`
+- `**Passive**: when you summon a Shinheuh, Charge 1`
+- `**Passive**: when I am deployed, summon Bull` (Yuga)
+- `**Ability**: spend 1: Summon a random 2-3 cost Shinheuh`
 
 ### Guide
 
@@ -400,7 +403,7 @@ You may equip me as many times as you want with unique equipments.
 **Example Synergies:**
 
 - `**Passive**: equipments cost 1 less`
-- `**Passive**: when you equip me, grant a random trait to a random ally that is not me`
+- `**Passive**: when you equip me, give a random condition to a random enemy`
 - `**Ability**: spend 3: steal an enemy equipment and play it on me`
 
 ## Affiliations
@@ -486,3 +489,46 @@ Add new attributes such as:
 **Wonsulsa** - Circle Technician (Mule Love, Gran de Lee, Yu Han Sung)
 **Dansulsa** - Breaker (Kurudan, Yu Han Sung)
 **Defender** (Aka Williams, Hendo Lok Bloodmadder)
+
+## Random Tables
+
+When a rule or card calls for a random event, consult consult these random tables.
+If the tables can't satisfy your specific need, decide with your opponent how to resolve your random event.
+
+### Random Trait
+
+Roll a d20:
+
+- 1   Barrier
+- 2   Bloodthirsty
+- 3   Creator
+- 4   Dealer
+- 5   Immune
+- 6   Last One Standing
+- 7   Lethal
+- 8   Pierce
+- 9   Reflect
+- 10  Regenerate
+- 11  Resilient
+- 12  Ruthless
+- 13  Sharpshooter
+- 14  Strong
+- 15  Taunt
+- 16+ reroll
+
+### Random Condition
+
+Roll a d12:
+
+- 1   Burned
+- 2   Cursed
+- 3   Doomed
+- 4   Exhausted
+- 5   Frozen
+- 6   Ghost
+- 7   Heavy
+- 8   Poisoned
+- 9   Rooted
+- 10  Stunned
+- 11  Weak
+- 12  reroll
