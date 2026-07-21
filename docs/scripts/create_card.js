@@ -34,6 +34,7 @@ name:
 cost: 
 requirements:
 effects:
+ignition:
 `,
 };
 

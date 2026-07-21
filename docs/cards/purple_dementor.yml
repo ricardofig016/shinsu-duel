@@ -6,3 +6,4 @@ requirements:
 effects:
   - i have Resilient 2
   - "ability: give Poison 4 to an enemy"
+ignition:

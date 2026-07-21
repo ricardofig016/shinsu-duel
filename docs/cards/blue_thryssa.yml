@@ -4,3 +4,4 @@ cost: 2
 requirements:
 effects:
   - "ability: heal me 2 hp and Cleanse me"
+ignition:

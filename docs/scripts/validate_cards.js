@@ -30,7 +30,7 @@ const requiredUnitKeys = [
   "affiliations",
 ];
 const requiredSkillKeys = ["type", "name", "cost", "requirements", "effects"];
-const requiredEquipmentKeys = ["type", "name", "cost", "requirements", "effects"];
+const requiredEquipmentKeys = ["type", "name", "cost", "requirements", "effects", "ignition"];
 
 const rulesDomain = {
   positions: [
@@ -317,6 +317,7 @@ function validateEquipment(card) {
   requireInteger(card, "cost", errors, { min: 0 });
   requireStringListValue(card, "requirements", errors);
   requireStringListValue(card, "effects", errors);
+  requireStringListValue(card, "ignition", errors);
 
   return errors;
 }
