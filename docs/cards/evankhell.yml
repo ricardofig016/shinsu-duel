@@ -1,0 +1,18 @@
+type: unit
+name: Evankhell
+cost: 9
+hp: 
+rank: high ranker
+positions:
+  - fisherman
+  - wave controller
+passives:
+  - "round end: all enemies with Burned 3+ die"
+abilities:
+  - give the entire enemy team Burned
+evolve:
+traits:
+attributes:
+  - hwayeomsa
+affiliations:
+  - fug

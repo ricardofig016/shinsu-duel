@@ -348,9 +348,9 @@ Spend 1: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you d
 
 **Example Synergies:**
 
-- `**Passive**: Baang gives Burn`
-- `**Passive**: when an ally gives Burn <x> to an enemy, they give Burn <x+1> instead`
-- `**Ability**: spend 3: deal 2 to all burned enemies`
+- `**Passive**: Baang gives Burned`
+- `**Passive**: when an ally gives Burned <x> to an enemy, they give Burned <x+1> instead`
+- `**Ability**: spend 3: deal 2 to all Burned enemies`
 
 ### Jeonsulsa
 
