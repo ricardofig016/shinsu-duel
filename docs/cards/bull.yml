@@ -1,0 +1,14 @@
+type: unit
+name: Bull
+cost: 3
+hp: 3
+rank:
+positions:
+  - frontline shinheuh
+passives:
+abilities:
+  - "quick: deal 3 to an enemy"
+evolve:
+traits:
+attributes:
+affiliations:

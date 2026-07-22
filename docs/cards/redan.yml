@@ -2,5 +2,6 @@ type: skill
 name: Redan
 cost: 1
 requirements:
+  - target is an ally
 effects:
-  - give an ally Cursed
+  - give Poisoned

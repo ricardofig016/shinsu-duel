@@ -5,4 +5,4 @@ requirements:
   - have an ally Irregular
 effects:
   - Unreachable
-  - give Curse 2 and deal 6 to an enemy. this ignores all traits the target has.
+  - give an enemy Doomed

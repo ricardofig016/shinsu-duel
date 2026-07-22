@@ -1,0 +1,21 @@
+type: unit
+name: Lo Po Bia Ren
+cost: 6
+hp: 5
+rank: ranker
+positions:
+  - wave controller
+  - scout
+passives:
+  - "wave controller: frontline Shinheuh give Poison"
+  - "scout: backlike Shinheuh give Ghost"
+abilities:
+  - summon a random 2 cost Shinheuh
+  - steal the enemy's cheapest Shinheuh
+evolve:
+traits:
+attributes:
+  - anima
+affiliations:
+  - lo po bia family
+  - zahard's army

@@ -1,0 +1,19 @@
+type: unit
+name: Yuga
+cost: 4
+hp: 3
+rank: ranker
+positions:
+  - wave controller
+  - scout
+passives:
+  - when I am deployed, summon Bull from your deck or hand
+abilities:
+  - give ally Bull Strength 2
+evolve:
+traits:
+attributes:
+  - anima
+affiliations:
+  - lo po bia family
+  - zahard's army

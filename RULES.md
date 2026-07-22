@@ -266,7 +266,7 @@ Conditions are negative temporary effects that last until the end of the round. 
 **List of Conditions:**
 
 1. **Burned**: I take 1 damage at the end of every turn
-2. **Cursed**: I take 1 damage when I use an ability
+2. **Cursed**: Round end: i take 1 damage for each condition i have besides Curse
 3. **Doomed**: I will die at the end of this round
 4. **Exhausted**: I deal -1 damage
 5. **Frozen**: When i use an ability, spend all combat slots (_missing icon_)
@@ -295,7 +295,7 @@ Round start: gain a single-use Shinheuh combat slot if you don't already have on
 
 - `**Passive**: round start: choose 1 of 3 random Shinheuh to create in your hand`
 - `**Passive**: when you summon a Shinheuh, Charge 1`
-- `**Passive**: when I am deployed, summon Bull` (Yuga)
+- `**Passive**: when I am deployed, summon Bull`
 - `**Ability**: spend 1: Summon a random 2-3 cost Shinheuh`
 
 ### Guide
