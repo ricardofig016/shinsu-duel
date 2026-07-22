@@ -153,22 +153,23 @@ Represent characters, creatures or locations from Tower of God:
 
 ### Skills
 
-Single-use items:
+Single-use items/spells/techniques that provide an immediate effect. Playing a skill ends your turn.
 
-1. Provide immediate effect
-2. May target units or have global effect
-3. Playing a skill ends your turn
-4. Examples: Lightning Pill, Ignition spells
+May have requirements that must all be met when it is played.
+
+**Examples**: Redan, Flower of Zygaena, Shinwonryu
 
 ### Equipment
 
-Equipments can be attached to ally deployed units for enhancements.
-
-Equiping a unit costs the turn.
+Equipments can be attached to ally deployed units for enhancements. Equiping a unit ends your turn.
 
 Units can only hold 1 equipment at a time, unless they are [Irregular](#irregular).
 
-It returns to hand when it's unit dies or when the unit is equiped when another equipment.
+May have requirements that must all be met when it is played.
+
+**Ignition**: Some equipments can ignite when a trigger is met. The trigger is specified in the equipments's card. Ignited equipments have different effects. Example: `Narumada` ignites into `Narumada (ignited)` when its bearer kills a unit.
+
+Equipments return to hand when their bearer dies or is equiped when another equipment. The card returns to its default non-ignited version.
 
 **Examples**: Green April, Zahard's Ring, Woon's Hammer
 
@@ -468,7 +469,7 @@ A unit's rank has no direct effect on gameplay, but it can be targeted by abilit
 
 Some units can evolve when a trigger is met. The trigger is specified in the unit's card.
 
-The evolved card may have different HP, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution.
+The evolved unit may have different HP, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution.
 
 Examples:
 
