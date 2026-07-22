@@ -1,0 +1,8 @@
+type: equipment
+name: Narumada
+cost: 2
+requirements:
+effects:
+  - my damage dealing abilities deal +3 damage
+ignition:
+  - my bearer kills a unit

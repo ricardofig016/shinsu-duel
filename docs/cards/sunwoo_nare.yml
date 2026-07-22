@@ -1,0 +1,17 @@
+type: unit
+name: Sunwoo Nare
+cost: 2
+hp: 1
+rank: regular
+positions:
+  - scout
+passives:
+  - when you summon a Shinheuh, Charge 1
+abilities:
+  - if i have an ally Shinheuh, give Exhaust 2 to an enemy
+evolve:
+traits:
+  - sharpshooter
+attributes:
+  - anima
+affiliations:

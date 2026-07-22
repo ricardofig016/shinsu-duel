@@ -1,0 +1,7 @@
+type: equipment
+name: Narumada (ignited)
+cost: 2
+requirements:
+effects:
+  - my damage dealing abilities deal +3 damage and give Exhaust # synergy with Hong Chunhwa
+ignition:

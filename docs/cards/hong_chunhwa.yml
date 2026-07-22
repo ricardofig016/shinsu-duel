@@ -1,0 +1,15 @@
+type: unit
+name: Hong Chunhwa
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+passives:
+abilities:
+  - deal 2 to an enemy
+  - deal 3 to an enemy with Exhaust # synergy with Sunwoo Nare and Narumada (ignited)
+evolve:
+traits:
+attributes:
+affiliations:
