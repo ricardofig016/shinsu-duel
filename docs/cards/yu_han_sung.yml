@@ -1,0 +1,19 @@
+type: unit
+name: Yu Han Sung
+cost: 6
+hp: 4
+rank: ranker
+positions:
+  - wave controller
+passives:
+  - Baang gives Weak 2 and Cursed
+abilities:
+  - decrease the cost of Submerged Fish in your hand by 1
+  - "quick: create Baang in your hand"
+evolve:
+traits:
+  - dealer
+  - barrier
+attributes:
+affiliations:
+  - fug

@@ -1,0 +1,6 @@
+type: skill
+name: Submerged Fish
+cost: 4
+requirements:
+effects:
+  - kill an enemy regular or ranker

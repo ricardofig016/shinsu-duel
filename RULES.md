@@ -242,8 +242,8 @@ Traits are positive permanent effects native to cards. They are color coded as s
 
 1. **Barrier**: Negate all damage the first time I take damage each round
 2. **Bloodthirsty**: When I kill a unit, restore 1 HP
-3. **Creator**: When I am deployed, create 1
-4. **Dealer**: Draw 1 card at the start of every round
+3. **Creator**: When I am deployed, Create 1
+4. **Dealer**: Round start: draw 1 card
 5. **Immune**: I am immune to negative effects
 6. **Last One Standing**: If I am the only ally unit, I have +4 HP and deal +4 damage
 7. **Lethal**: When I damage another unit, kill it
@@ -266,7 +266,7 @@ Conditions are negative temporary effects that last until the end of the round. 
 **List of Conditions:**
 
 1. **Burned**: I take 1 damage at the end of every turn
-2. **Cursed**: Round end: i take 1 damage for each condition i have besides Curse
+2. **Cursed**: Round end: i take 1 damage for each unique condition i have
 3. **Doomed**: I will die at the end of this round
 4. **Exhausted**: I deal -1 damage
 5. **Frozen**: When i use an ability, spend all combat slots (_missing icon_)
@@ -311,7 +311,7 @@ Specializes in navigating the immediate physical crossroads and obstacles right 
 **Core in-game mechanic:**
 
 ```md
-When you draw a card, choose the card directly from your deck, then shuffle the rest.
+The first time you draw a card per turn, choose the card directly from your deck.
 ```
 
 #### Red Witch
