@@ -241,13 +241,27 @@ async function loadCard(filePath) {
 // Distribution display
 // ---------------------------------------------------------------------------
 
-/** Print a simple horizontal bar-chart of type, HP, cost, rank and positions distribution. */
+/** Print a simple horizontal bar-chart of type, HP, cost, rank, positions, traits, attributes and affiliations distribution. */
 function showDistribution(matches) {
   const typeMap = new Map();
   const hpMap = new Map();
   const costMap = new Map();
   const rankMap = new Map();
   const posMap = new Map();
+  const traitsMap = new Map();
+  const attrsMap = new Map();
+  const affilsMap = new Map();
+
+  function countArray(map, values, normalize) {
+    if (Array.isArray(values)) {
+      for (const v of values) {
+        if (typeof v === "string") {
+          const key = normalize ? normalize(v) : v;
+          map.set(key, (map.get(key) || 0) + 1);
+        }
+      }
+    }
+  }
 
   for (const m of matches) {
     const type = m.type;
@@ -267,13 +281,10 @@ function showDistribution(matches) {
     if (rank !== undefined && rank !== null) {
       rankMap.set(rank, (rankMap.get(rank) || 0) + 1);
     }
-    if (Array.isArray(positions)) {
-      for (const pos of positions) {
-        if (typeof pos === "string") {
-          posMap.set(pos, (posMap.get(pos) || 0) + 1);
-        }
-      }
-    }
+    countArray(posMap, positions);
+    countArray(traitsMap, m.traits, (v) => v.replace(/\s+\d+$/, ""));
+    countArray(attrsMap, m.attributes);
+    countArray(affilsMap, m.affiliations);
   }
 
   const barWidth = 30;
@@ -311,6 +322,12 @@ function showDistribution(matches) {
   draw("Rank", rankMap);
   console.log(`\n${colors.Cyan}── Positions distribution ──${colors.Reset}`);
   draw("Positions", posMap);
+  console.log(`\n${colors.Cyan}── Traits distribution ──${colors.Reset}`);
+  draw("Traits", traitsMap);
+  console.log(`\n${colors.Cyan}── Attributes distribution ──${colors.Reset}`);
+  draw("Attributes", attrsMap);
+  console.log(`\n${colors.Cyan}── Affiliations distribution ──${colors.Reset}`);
+  draw("Affiliations", affilsMap);
 }
 
 // ---------------------------------------------------------------------------
@@ -363,6 +380,9 @@ async function main() {
       cost: card.cost,
       rank: card.rank,
       positions: card.positions,
+      traits: card.traits,
+      attributes: card.attributes,
+      affiliations: card.affiliations,
       relativePath: path.relative(process.cwd(), cardFile),
       matches: allQueryMatches,
     });
