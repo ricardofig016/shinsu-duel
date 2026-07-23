@@ -1,0 +1,7 @@
+type: skill
+name: Fiery Elephant
+cost: 2
+requirements:
+effects:
+  - give Burned to an enemy
+  - Compress a Hwayeomsa in your hand 1

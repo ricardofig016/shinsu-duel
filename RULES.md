@@ -155,7 +155,9 @@ Represent characters, creatures or locations from Tower of God:
 
 Single-use items/spells/techniques that provide an immediate effect. Playing a skill ends your turn.
 
-May have requirements that must all be met when it is played.
+Skills may have requirements that must all be met when and how it is played.
+
+Unlike unit/uquipment abilities, skills can target any unit unless otherwise specified.
 
 **Examples**: Redan, Flower of Zygaena, Shinwonryu
 
@@ -165,7 +167,7 @@ Equipments can be attached to ally deployed units for enhancements. Equiping a u
 
 Units can only hold 1 equipment at a time, unless they are [Irregular](#irregular).
 
-May have requirements that must all be met when it is played.
+Equipments may have requirements that must all be met when and how it is played.
 
 **Ignition**: Some equipments can ignite when a trigger is met. The trigger is specified in the equipments's card. Ignited equipments have different effects. Example: `Narumada` ignites into `Narumada (ignited)` when its bearer kills a unit.
 
@@ -176,24 +178,26 @@ Equipments return to hand when their bearer dies or is equiped when another equi
 ## Deck
 
 1. A deck must have exactly 30 cards
-2. Maximum 3 copies of same card
-3. Starting hand: 5 cards
+2. Repeated cards are not allowed
+3. Starting hand: 5 cards, no mulligan
 4. If at any point a player tries to draw and their deck is empty, they lose the game
 
 ## Keywords
 
 Keywords are special terms that provide additional context to cards and abilities. Their purpose is to provide common language for effects and abilities, making each description less verbose.
 
-1. **Cleanse**: Remove all conditions
-2. **Charge <x>**: Regain <x> shinsu
-3. **Create <x>**: Regain <x> lighthouses
-4. **Destroy <x>**: Destroy <x> enemy lighthouses
-5. **Quick**: Doesn't end your turn
-6. **Silence**: Remove all traits
-7. **Slay**: Kill a unit
-8. **Spend <x>**: Spend <x> shinsu
-9. **Unreachable**: You can't put me in your deck during deckbuilding
-10. **<position>**: available only when played as <position>
+1. **Charge <x>**: Regain <x> shinsu
+2. **Cleanse**: Remove all conditions
+3. **Compress <x>**: Reduce shinsu cost by <x>
+4. **Create <x>**: Regain <x> lighthouses
+5. **Destroy <x>**: Destroy <x> enemy lighthouses
+6. **Quick**: Doesn't end your turn
+7. **Reclaim <x>**: Put <x> cards from your discard pile into your hand
+8. **Silence**: Remove all traits
+9. **Slay <x>**: Kill <x> units
+10. **Spend <x>**: Spend <x> shinsu
+11. **Unreachable**: You can't put me in your deck during deckbuilding
+12. **<position>**: available only when played as <position>
 
 ## Positions
 
@@ -244,11 +248,11 @@ Traits are positive permanent effects native to cards. They are color coded as s
 2. **Bloodthirsty**: When I kill a unit, restore 1 HP
 3. **Creator**: When I am deployed, Create 1
 4. **Dealer**: Round start: draw 1 card
-5. **Immune**: I am immune to negative effects
+5. **Immune**: I am immune to conditions
 6. **Last One Standing**: If I am the only ally unit, I have +4 HP and deal +4 damage
 7. **Lethal**: When I damage another unit, kill it
 8. **Pierce**: When I kill a unit, Destroy 1
-9. **Reflect**: When I take damage, deal 1 damage to my attacker
+9.  **Reflect**: When I take damage, deal 1 damage to my attacker
 10. **Regenerate**: Restore me to full HP at the end of the round
 11. **Resilient**: I take -1 damage from all sources
 12. **Ruthless**: I deal +1 damage if the enemy has less than 10 lighthouses

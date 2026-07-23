@@ -1,7 +1,7 @@
 type: unit
 name: Evankhell
 cost: 9
-hp: 
+hp: 7
 rank: high ranker
 positions:
   - fisherman

@@ -8,7 +8,7 @@ positions:
 passives:
   - Baang gives Weak 2 and Cursed
 abilities:
-  - decrease the cost of Submerged Fish in your hand by 1
+  - Compress Submerged Fish in your hand 1
   - "quick: create Baang in your hand"
 evolve:
 traits:
