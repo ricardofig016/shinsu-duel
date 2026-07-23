@@ -29,7 +29,7 @@ ${colors.Yellow}USAGE${colors.Reset}
   npm run lookup <term>                 Search across all fields
   npm run lookup <field>=<value>        Search a specific field
   npm run lookup <query>,<query>        Intersection (AND) of multiple queries
-  npm run lookup /dist <term>           Show HP/cost distribution for results
+  npm run lookup /dist <term>           Show type/HP/cost distribution for results
   npm run lookup /help                  Show this help
 
 ${colors.Yellow}OPTIONS${colors.Reset}
@@ -241,18 +241,23 @@ async function loadCard(filePath) {
 // Distribution display
 // ---------------------------------------------------------------------------
 
-/** Print a simple horizontal bar-chart of HP, cost, rank and positions distribution. */
+/** Print a simple horizontal bar-chart of type, HP, cost, rank and positions distribution. */
 function showDistribution(matches) {
+  const typeMap = new Map();
   const hpMap = new Map();
   const costMap = new Map();
   const rankMap = new Map();
   const posMap = new Map();
 
   for (const m of matches) {
+    const type = m.type;
     const hp = m.hp;
     const cost = m.cost;
     const rank = m.rank;
     const positions = m.positions;
+    if (type !== undefined && type !== null) {
+      typeMap.set(type, (typeMap.get(type) || 0) + 1);
+    }
     if (hp !== undefined && hp !== null) {
       hpMap.set(hp, (hpMap.get(hp) || 0) + 1);
     }
@@ -271,13 +276,6 @@ function showDistribution(matches) {
     }
   }
 
-  const maxCount = Math.max(
-    ...Array.from(hpMap.values(), (v) => v),
-    ...Array.from(costMap.values(), (v) => v),
-    ...Array.from(rankMap.values(), (v) => v),
-    ...Array.from(posMap.values(), (v) => v),
-    1,
-  );
   const barWidth = 30;
 
   const draw = (label, map) => {
@@ -293,8 +291,9 @@ function showDistribution(matches) {
       return String(a[0]).localeCompare(String(b[0]));
     });
     const maxLabelLen = Math.max(...sorted.map(([v]) => String(v).length));
+    const mapMax = Math.max(...sorted.map(([, count]) => count), 1);
     for (const [val, count] of sorted) {
-      const filled = Math.round((count / maxCount) * barWidth);
+      const filled = Math.round((count / mapMax) * barWidth);
       const bar = "█".repeat(filled) + "░".repeat(barWidth - filled);
       console.log(
         `  ${String(val).padStart(maxLabelLen)} ${bar} ${colors.Yellow}${count}${colors.Reset}`,
@@ -302,6 +301,8 @@ function showDistribution(matches) {
     }
   };
 
+  console.log(`\n${colors.Cyan}── Type distribution ──${colors.Reset}`);
+  draw("Type", typeMap);
   console.log(`\n${colors.Cyan}── HP distribution ──${colors.Reset}`);
   draw("HP", hpMap);
   console.log(`\n${colors.Cyan}── Cost distribution ──${colors.Reset}`);
@@ -357,6 +358,7 @@ async function main() {
 
     matches.push({
       name: typeof card.name === "string" ? card.name : path.basename(cardFile),
+      type: card.type,
       hp: card.hp,
       cost: card.cost,
       rank: card.rank,
