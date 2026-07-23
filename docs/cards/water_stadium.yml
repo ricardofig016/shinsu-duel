@@ -1,0 +1,14 @@
+type: unit
+name: Water Stadium
+cost: 2
+hp: 7
+rank: 
+positions:
+  - landmark
+passives:
+  - conditions do not stack past 2 # counter Yeon Yihwa
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:

@@ -137,7 +137,7 @@ Represent characters, creatures or locations from Tower of God:
 2. Have HP and a shinsu cost to deploy
 3. Have one or more positions they can occupy on the board
 4. Have abilities that activate by using an action
-5. May have a passive ability that is active while the unit is in play
+5. May have passive abilities that are active while the unit is in play
 6. May have traits that provide unique effects
 7. May have an attribute that changes how the unit plays
 8. May have affiliations that promote synergies with other units
@@ -213,7 +213,7 @@ Each unit occupies one position on the battlefield. The position determines its 
 
 ### Special Positions
 
-These positions don't have a combat slot nor a rank.
+These positions don't have a combat slot nor a rank. If a unit has 1 of these positions, they can't have any other position.
 
 #### Shinheuh
 

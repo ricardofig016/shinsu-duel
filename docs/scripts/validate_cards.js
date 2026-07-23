@@ -268,22 +268,50 @@ function validateUnit(card) {
   requireStringListValue(card, "evolve", errors);
   requireStringListValue(card, "passives", errors);
   const attributeValues = requireStringListValue(card, "attributes", errors);
-  const specialPositionCodes = [...positionCodes].filter((positionCode) => specialPositions.has(positionCode));
-  const hasSpecialPosition = specialPositionCodes.length > 0;
-  validateRankAndCost(card, errors, { requiresNullRank: hasSpecialPosition });
 
-  if (hasSpecialPosition && positionCodes.size > 1) {
-    addError(errors, "positions", "shinheuh and landmark units cannot have any other position");
+  const hasShinheuh = positionCodes.has("frontline shinheuh") || positionCodes.has("backline shinheuh");
+  const hasLandmark = positionCodes.has("landmark");
+
+  if (hasShinheuh) {
+    if (positionCodes.size > 1) {
+      addError(errors, "positions", "shinheuh units cannot have any other position");
+    }
+
+    if (card.rank !== null) {
+      addError(errors, "rank", "shinheuh units must have null rank");
+    }
   }
 
-  if (positionCodes.has("landmark")) {
+  if (hasLandmark) {
+    if (positionCodes.size > 1) {
+      addError(errors, "positions", "landmark units cannot have any other position");
+    }
+
+    if (card.rank !== null) {
+      addError(errors, "rank", "landmark units must have null rank");
+    }
+
     if (card.abilities !== null) {
       addError(errors, "abilities", "landmark units must have null abilities");
+    }
+
+    if (card.evolve !== null) {
+      addError(errors, "evolve", "landmark units must have null evolve");
+    }
+
+    if (card.traits !== null) {
+      addError(errors, "traits", "landmark units must have null traits");
     }
 
     if (card.attributes !== null) {
       addError(errors, "attributes", "landmark units must have null attributes");
     }
+
+    requireStringList(card, "passives", errors);
+  }
+
+  if (!hasShinheuh && !hasLandmark) {
+    validateRankAndCost(card, errors, { requiresNullRank: false });
   }
 
   for (const positionCode of positionCodes) {

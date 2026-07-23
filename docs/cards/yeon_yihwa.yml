@@ -1,14 +1,14 @@
 type: unit
 name: Yeon Yihwa
 cost: 5
-hp: 5
+hp: 6
 rank: regular
 positions:
   - fisherman
 passives:
   - units with burn 3+ can't target me
 abilities:
-  - "give 2 burned enemies exhausted"
+  - "give 2 Burned enemies Exhausted"
 evolve:
 traits:
 attributes:
