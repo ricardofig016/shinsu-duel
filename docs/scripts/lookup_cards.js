@@ -55,6 +55,7 @@ ${colors.Yellow}FIELD=VALUE SEARCH${colors.Reset}
   requirements=   Substring search within each requirement text (case-insensitive)
   cost= / hp=   Exact match (compared as strings)
   Other fields  Exact case-insensitive match (scalar) or element match (array)
+  *=            Wildcard — matches any card that has a non-empty value for that field
 
 ${colors.Yellow}EXAMPLES${colors.Reset}
   npm run lookup unit
@@ -68,6 +69,7 @@ ${colors.Yellow}EXAMPLES${colors.Reset}
   npm run lookup /dist wave controller
   npm run lookup positions=fisherman,cost=3
   npm run lookup positions=fisherman,cost=3,frontline
+  npm run lookup ignition=*
 `);
 }
 
@@ -204,6 +206,18 @@ function legacyGetMatches(card, lookupTerm) {
 function fieldValueGetMatches(card, field, lookupValue) {
   const raw = card[field];
   if (raw === null || raw === undefined) return [];
+
+  // Wildcard: match any non-null, non-undefined, non-empty value
+  if (lookupValue === "*") {
+    if (Array.isArray(raw)) {
+      const values = asList(raw);
+      if (values.length > 0) {
+        return [{ field, values }];
+      }
+      return [];
+    }
+    return [{ field, values: [String(raw)] }];
+  }
 
   if (Array.isArray(raw)) {
     const values = asList(raw).filter((v) => fieldValueMatches(field, v, lookupValue));
