@@ -53,7 +53,7 @@ ${colors.Yellow}FIELD=VALUE SEARCH${colors.Reset}
   effects=        Substring search within each effect text  (case-insensitive)
   passives=       Substring search within each passive text (case-insensitive)
   requirements=   Substring search within each requirement text (case-insensitive)
-  cost= / hp=   Exact match (compared as strings)
+  cost= / hp=   Exact match or range (e.g. cost=2-5, hp=4-6)
   Other fields  Exact case-insensitive match (scalar) or element match (array)
   *=            Wildcard — matches any card that has a non-empty value for that field
 
@@ -63,7 +63,9 @@ ${colors.Yellow}EXAMPLES${colors.Reset}
   npm run lookup name=Thorn
   npm run lookup name=Thorn Fragment
   npm run lookup cost=2
+  npm run lookup cost=2-5
   npm run lookup hp=6
+  npm run lookup hp=4-6
   npm run lookup abilities=spend 2:
   npm run lookup effects=heal
   npm run lookup /dist wave controller
@@ -89,6 +91,20 @@ function substringMatch(text, lookupValue) {
 
 function exactMatch(a, b) {
   return String(a).toLowerCase() === String(b).toLowerCase();
+}
+
+/**
+ * Parse a range string like "2-5" and test whether `cardValue` falls inside
+ * the inclusive bounds.  Returns false when `lookupValue` isn't a range.
+ */
+function rangeMatch(cardValue, lookupValue) {
+  const m = /^(\d+)-(\d+)$/.exec(lookupValue);
+  if (!m) return false;
+  const min = Number(m[1]);
+  const max = Number(m[2]);
+  const num = Number(cardValue);
+  if (Number.isNaN(num)) return false;
+  return num >= min && num <= max;
 }
 
 function asList(value) {
@@ -189,6 +205,10 @@ function fieldValueMatches(fieldName, cardValue, lookupValue) {
       return substringMatch(cardValue, lookupValue);
     }
     return false;
+  }
+
+  if (fieldName === "cost" || fieldName === "hp") {
+    return rangeMatch(cardValue, lookupValue) || exactMatch(cardValue, lookupValue);
   }
 
   return exactMatch(cardValue, lookupValue);
