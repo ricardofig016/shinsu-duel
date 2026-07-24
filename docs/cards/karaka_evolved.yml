@@ -9,9 +9,10 @@ positions:
   - wave controller
 passives:
   - karaka's servants' abilities have Quick
+  - "Round end: deal 3 to all Rooted enemies"
 abilities:
-  - "spend 1: deal 6 to a rooted enemy"
-  - "spend 2: root and deal 3 to all rooted enemies"
+  - deal 7 to an enemy
+  - "spend 1: give Rooted to 2 enemies and deal 3 to all rooted enemies"
 evolve:
 traits:
   - reflect
