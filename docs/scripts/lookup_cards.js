@@ -53,7 +53,7 @@ ${colors.Yellow}FIELD=VALUE SEARCH${colors.Reset}
   effects=        Substring search within each effect text  (case-insensitive)
   passives=       Substring search within each passive text (case-insensitive)
   requirements=   Substring search within each requirement text (case-insensitive)
-  cost= / hp=   Exact match (compared as strings)
+  cost= / hp=   Exact match or range (e.g. cost=2-5, hp=4-6)
   Other fields  Exact case-insensitive match (scalar) or element match (array)
   *=            Wildcard — matches any card that has a non-empty value for that field
 
@@ -63,7 +63,9 @@ ${colors.Yellow}EXAMPLES${colors.Reset}
   npm run lookup name=Thorn
   npm run lookup name=Thorn Fragment
   npm run lookup cost=2
+  npm run lookup cost=2-5
   npm run lookup hp=6
+  npm run lookup hp=4-6
   npm run lookup abilities=spend 2:
   npm run lookup effects=heal
   npm run lookup /dist wave controller
@@ -91,6 +93,20 @@ function exactMatch(a, b) {
   return String(a).toLowerCase() === String(b).toLowerCase();
 }
 
+/**
+ * Parse a range string like "2-5" and test whether `cardValue` falls inside
+ * the inclusive bounds.  Returns false when `lookupValue` isn't a range.
+ */
+function rangeMatch(cardValue, lookupValue) {
+  const m = /^(\d+)-(\d+)$/.exec(lookupValue);
+  if (!m) return false;
+  const min = Number(m[1]);
+  const max = Number(m[2]);
+  const num = Number(cardValue);
+  if (Number.isNaN(num)) return false;
+  return num >= min && num <= max;
+}
+
 function asList(value) {
   if (value === null || value === undefined) return [];
   if (!Array.isArray(value)) return [];
@@ -102,46 +118,69 @@ function asList(value) {
 // ---------------------------------------------------------------------------
 
 /**
- * Join all positional args with a space, strip --dist, split on ',' into
- * individual queries, then parse each query (global or field=value).
+ * Parse CLI arguments into query objects.
+ *
+ * PowerShell treats ',' as an array operator and strips it between arguments,
+ * so "type=unit, cost=2" arrives as ["type=unit", "cost=2"].  We split each
+ * argument on ',' individually to handle both styles, then classify segments:
+ * those containing '=' are always separate field=value queries; consecutive
+ * segments without '=' are joined into a single global search term.
  *
  * Returns { help: true } for --help / -h,
  *         { queries: [{ field, value }, ...], dist } otherwise.
  *         dist is true when the --dist flag is present.
  */
 function parseArgs(rawArgs) {
-  let joined = rawArgs.join(" ").trim();
-  const dist = /(?:^|\s)[-/]{1,2}dist(?:\s|$)/i.test(joined);
-  joined = joined.replace(/[-/]{1,2}dist\s*/gi, "").trim();
+  // Split each arg on ',' individually — handles both "a,b" (single arg) and
+  // "a", "b" (PowerShell splitting) styles.
+  const allSegments = rawArgs
+    .flatMap((arg) => arg.split(","))
+    .map((s) => s.trim())
+    .filter((s) => s !== "");
+
+  // Detect and remove /dist flag
+  const dist = allSegments.some((s) => /^[-/]{1,2}dist$/i.test(s));
+  const filtered = allSegments.filter((s) => !/^[-/]{1,2}dist$/i.test(s));
+
+  const joined = filtered.join(" ");
 
   if (joined === "--help" || joined === "-h" || joined === "/help") {
     return { help: true, dist };
   }
 
-  if (joined === "") {
+  if (filtered.length === 0) {
     return { queries: [{ field: null, value: "" }], dist };
   }
 
-  // Split on ',' to support multiple filters (intersection / AND logic)
-  const segments = joined
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => s !== "");
+  // Classify: segments with '=' are field=value queries (always separate);
+  // segments without '=' are global search fragments — consecutive ones are
+  // joined into a single global query.
+  const queries = [];
+  let globalParts = [];
 
-  if (segments.length === 0) {
-    return { queries: [{ field: null, value: "" }], dist };
-  }
-
-  const queries = segments.map((segment) => {
-    const eqIndex = segment.indexOf("=");
-    if (eqIndex === -1) {
-      // Global / legacy mode (no '=')
-      return { field: null, value: segment.toLowerCase() };
+  for (const seg of filtered) {
+    const eqIndex = seg.indexOf("=");
+    if (eqIndex >= 0) {
+      // Flush any accumulated global parts first
+      if (globalParts.length > 0) {
+        queries.push({ field: null, value: globalParts.join(" ").toLowerCase() });
+        globalParts = [];
+      }
+      const field = seg.slice(0, eqIndex).trim().toLowerCase();
+      const value = seg.slice(eqIndex + 1).trim();
+      queries.push({ field, value });
+    } else {
+      globalParts.push(seg);
     }
-    const field = segment.slice(0, eqIndex).trim().toLowerCase();
-    const value = segment.slice(eqIndex + 1).trim();
-    return { field, value };
-  });
+  }
+
+  if (globalParts.length > 0) {
+    queries.push({ field: null, value: globalParts.join(" ").toLowerCase() });
+  }
+
+  if (queries.length === 0) {
+    queries.push({ field: null, value: "" });
+  }
 
   return { queries, dist };
 }
@@ -166,6 +205,10 @@ function fieldValueMatches(fieldName, cardValue, lookupValue) {
       return substringMatch(cardValue, lookupValue);
     }
     return false;
+  }
+
+  if (fieldName === "cost" || fieldName === "hp") {
+    return rangeMatch(cardValue, lookupValue) || exactMatch(cardValue, lookupValue);
   }
 
   return exactMatch(cardValue, lookupValue);
