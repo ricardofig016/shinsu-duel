@@ -1,0 +1,14 @@
+type: unit
+name: Floor of Death
+cost: 5
+hp: 6
+rank: 
+positions:
+  - landmark
+passives:
+  - passives do not work
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:

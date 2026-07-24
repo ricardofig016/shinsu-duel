@@ -1,0 +1,14 @@
+type: unit
+name: Wooden Horse
+cost: 2
+hp: 11
+rank: 
+positions:
+  - landmark
+passives:
+  - when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:
