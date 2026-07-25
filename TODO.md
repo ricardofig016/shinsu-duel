@@ -2,10 +2,6 @@
 
 ## Tasks
 
-- [ ] check if landmark information complies with information on the notebook
-- [ ] write rules regarding shinheuh and animas
-- [ ] add passives to cards (this is in the notebook)
-- [ ] add a new negative trait around silencing
 - [ ] add 'message' field to every event payload
 - [ ] change board background to something from the webtoon
 
@@ -13,6 +9,9 @@
 
 ## Completed
 
+- [x] write rules regarding shinheuh and animas
+- [x] add passives to cards (this is in the notebook)
+- [x] add a new negative trait around silencing
 - [x] add unit test for too many fields in ActionHandler.validateSchema
 - [x] refactor GameState processAction method to an ActionHandler interface class
 - [x] refactor 'abilities' to 'abilityCodes' from cards.json

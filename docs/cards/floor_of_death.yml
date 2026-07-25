@@ -6,7 +6,7 @@ rank:
 positions:
   - landmark
 passives:
-  - passives do not work
+  - passives have no effect
 abilities:
 evolve:
 traits:
