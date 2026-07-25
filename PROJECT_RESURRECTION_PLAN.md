@@ -469,36 +469,36 @@ class GameState {
 
 ### GameState Method Inventory (complete)
 
-| Method                        | Exists | Needs Change                                                                                                      |
-| ----------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
-| `constructor`                 | ✅     | **Rewrite**: add combatSlots (keyed by `combatSlotGroup`), load conditions.json, fix shinsu init (1 shinsu at start per RULES) |
+| Method                        | Exists | Needs Change                                                                                                                        |
+| ----------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `constructor`                 | ✅     | **Rewrite**: add combatSlots (keyed by `combatSlotGroup`), load conditions.json, fix shinsu init (1 shinsu at start per RULES)      |
 | `#initializePlayerState`      | ✅     | **Update**: add conditions/traits maps to player, combat slots state (use `combatSlotGroup` from positions data), landmark tracking |
-| `#draw`                       | ✅     | **Minor fix**: deck exhaustion = loss                                                                             |
-| `#filterYouState`             | ✅     | **Update**: add conditions, traits, attributes, combat slots (by group), shinheuh position indicators to client state |
-| `#filterOpponentState`        | ✅     | **Update**: add limited visibility (traits/conditions visible, hand hidden)                                       |
-| `getClientState`              | ✅     | **Minor**: may need extra fields                                                                                  |
-| `endTurn`                     | ✅     | **Verify**: rule about both-pass consecutive                                                                      |
-| `#endRound`                   | ✅     | **Update**: reset combat slots by group, trigger round-end effects (Regenerate, Burned, Cursed, Doomed), condition cleanup |
-| `getTotalShinsu`              | ✅     | **Keep**, verify correctness                                                                                      |
-| `#resetShinsu`                | ✅     | **Verify**: RULES says start with 1 shinsu per player at game start                                               |
-| `spendShinsu`                 | ✅     | **Keep**                                                                                                          |
-| `#addEffect`                  | ✅     | **Update**: use new EventBus API                                                                                  |
-| `removeEffect`                | ✅     | **Keep**                                                                                                          |
-| `processAction`               | ✅     | **Keep** structure, expand action types                                                                           |
-| **NEW** `#setupGame`          | ❌     | Add round 1 start: 1 shinsu, draw 5, publish OnGameStart                                                          |
-| **NEW** `#onTurnStart`        | ❌     | Publish event, check game over                                                                                    |
-| **NEW** `#onTurnEnd`          | ❌     | Handle turn-end triggers (Burned damage)                                                                          |
-| **NEW** `#deployUnit`         | ❌     | Line cap enforcement, position selection (incl. `frontline-shinheuh`/`backline-shinheuh`), targeting setup        |
-| **NEW** `#playSkill`          | ❌     | Skill execution pipeline                                                                                          |
-| **NEW** `#equipEquipment`     | ❌     | Equipment attachment, ignition check                                                                              |
-| **NEW** `#evolveUnit`         | ❌     | Evolution mechanics — use `card.evolveInto` to find target card, preserve HP/conditions                           |
-| **NEW** `#switchPosition`     | ❌     | Position switching (shinheuh units can switch between `frontline-shinheuh` and `backline-shinheuh`)               |
-| **NEW** `#destroyUnit`        | ❌     | Remove from field, trigger passives deactivation                                                                  |
-| **NEW** `#dealDamage`         | ❌     | Full damage pipeline: intent → pre-modify → apply → post-check → death                                            |
-| **NEW** `#applyCondition`     | ❌     | Condition application with stacking; pull condition definitions from `this.conditions` (loaded from conditions.json) |
-| **NEW** `#healUnit`           | ❌     | Healing mechanic                                                                                                  |
-| **NEW** `#checkWinCondition`  | ❌     | Lighthouse check, deck exhaustion check                                                                           |
-| **NEW** `#getTargetableUnits` | ❌     | Targeting logic per line visibility rules; account for shinheuh positions on both lines                           |
+| `#draw`                       | ✅     | **Minor fix**: deck exhaustion = loss                                                                                               |
+| `#filterYouState`             | ✅     | **Update**: add conditions, traits, attributes, combat slots (by group), shinheuh position indicators to client state               |
+| `#filterOpponentState`        | ✅     | **Update**: add limited visibility (traits/conditions visible, hand hidden)                                                         |
+| `getClientState`              | ✅     | **Minor**: may need extra fields                                                                                                    |
+| `endTurn`                     | ✅     | **Verify**: rule about both-pass consecutive                                                                                        |
+| `#endRound`                   | ✅     | **Update**: reset combat slots by group, trigger round-end effects (Regenerate, Burned, Cursed, Doomed), condition cleanup          |
+| `getTotalShinsu`              | ✅     | **Keep**, verify correctness                                                                                                        |
+| `#resetShinsu`                | ✅     | **Verify**: RULES says start with 1 shinsu per player at game start                                                                 |
+| `spendShinsu`                 | ✅     | **Keep**                                                                                                                            |
+| `#addEffect`                  | ✅     | **Update**: use new EventBus API                                                                                                    |
+| `removeEffect`                | ✅     | **Keep**                                                                                                                            |
+| `processAction`               | ✅     | **Keep** structure, expand action types                                                                                             |
+| **NEW** `#setupGame`          | ❌     | Add round 1 start: 1 shinsu, draw 5, publish OnGameStart                                                                            |
+| **NEW** `#onTurnStart`        | ❌     | Publish event, check game over                                                                                                      |
+| **NEW** `#onTurnEnd`          | ❌     | Handle turn-end triggers (Burned damage)                                                                                            |
+| **NEW** `#deployUnit`         | ❌     | Line cap enforcement, position selection (incl. `frontline-shinheuh`/`backline-shinheuh`), targeting setup                          |
+| **NEW** `#playSkill`          | ❌     | Skill execution pipeline                                                                                                            |
+| **NEW** `#equipEquipment`     | ❌     | Equipment attachment, ignition check                                                                                                |
+| **NEW** `#evolveUnit`         | ❌     | Evolution mechanics — use `card.evolveInto` to find target card, preserve HP/conditions                                             |
+| **NEW** `#switchPosition`     | ❌     | Position switching (shinheuh units can switch between `frontline-shinheuh` and `backline-shinheuh`)                                 |
+| **NEW** `#destroyUnit`        | ❌     | Remove from field, trigger passives deactivation                                                                                    |
+| **NEW** `#dealDamage`         | ❌     | Full damage pipeline: intent → pre-modify → apply → post-check → death                                                              |
+| **NEW** `#applyCondition`     | ❌     | Condition application with stacking; pull condition definitions from `this.conditions` (loaded from conditions.json)                |
+| **NEW** `#healUnit`           | ❌     | Healing mechanic                                                                                                                    |
+| **NEW** `#checkWinCondition`  | ❌     | Lighthouse check, deck exhaustion check                                                                                             |
+| **NEW** `#getTargetableUnits` | ❌     | Targeting logic per line visibility rules; account for shinheuh positions on both lines                                             |
 
 **Completing Phase 2:** After each sub-phase (2A through 2E), mark it done in the tracker above and update the **Progress Tracker** at the top of this file. After all sub-phases are complete, mark Phase 2 as ✅ DONE.
 
@@ -870,16 +870,16 @@ After completing each file below, mark it done in the Phase 6 Tracker above and 
 
 ### Changes Summary
 
-| File                                      | Action                                                                                                                        |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `server/game/websocket.js`                | **MINOR UPDATE**: adapt to new GameState constructor signature, handle skill/equipment actions                                |
-| `public/pages/game/script.js`             | **UPDATE**: handle new card types in UI (skill cards, equipment cards display), display conditions/traits/attributes properly |
-| `public/pages/game/styles.css`            | **UPDATE**: may need styles for new elements                                                                                  |
-| `public/pages/game/index.html`            | **UPDATE**: may need new UI elements for conditions display, combat slot indicators                                           |
-| `public/utils/card-util.js`               | **UPDATE**: process new card data structure                                                                                   |
+| File                                      | Action                                                                                                                            |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `server/game/websocket.js`                | **MINOR UPDATE**: adapt to new GameState constructor signature, handle skill/equipment actions                                    |
+| `public/pages/game/script.js`             | **UPDATE**: handle new card types in UI (skill cards, equipment cards display), display conditions/traits/attributes properly     |
+| `public/pages/game/styles.css`            | **UPDATE**: may need styles for new elements                                                                                      |
+| `public/pages/game/index.html`            | **UPDATE**: may need new UI elements for conditions display, combat slot indicators                                               |
+| `public/utils/card-util.js`               | **UPDATE**: process new card data structure                                                                                       |
 | `public/components/unit-card-vertical/`   | **UPDATE**: display extra info (conditions overlay as separate from traits, equipment indicator, position-specific shinheuh icon) |
-| `public/components/unit-card-horizontal/` | **UPDATE**: display extra info (same)                                                                                                |
-| `public/components/tooltip/`              | **KEEP** — fine as-is                                                                                                         |
+| `public/components/unit-card-horizontal/` | **UPDATE**: display extra info (same)                                                                                             |
+| `public/components/tooltip/`              | **KEEP** — fine as-is                                                                                                             |
 
 ---
 
