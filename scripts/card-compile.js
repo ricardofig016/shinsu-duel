@@ -19,10 +19,10 @@ function toCode(str) {
 // Position display name → internal code
 const positionCodeMap = {
   "fisherman": "fisherman",
-  "light bearer": "lightbearer",
+  "light bearer": "light-bearer",
   "scout": "scout",
-  "spear bearer": "spearbearer",
-  "wave controller": "wavecontroller",
+  "spear bearer": "spear-bearer",
+  "wave controller": "wave-controller",
   "frontline shinheuh": "frontline-shinheuh",
   "backline shinheuh": "backline-shinheuh",
   "landmark": "landmark",

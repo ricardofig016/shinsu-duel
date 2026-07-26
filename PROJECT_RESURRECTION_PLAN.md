@@ -42,18 +42,18 @@
 
 ### What Changes
 
-| File                                  | Action                        | Notes                                                                                                                                          |
-| ------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/cards/*.yml`                    | **MOVED** → `data/cards/*.yml` | Source of truth stays YAML; 60 files moved                                                                                                     |
-| `docs/scripts/*.js`                   | **REPLACED** by `scripts/card-*.js` | Original scripts left in place; new scripts created in project root `scripts/`                                                          |
-| `server/data/cards.json`              | **REGENERATED**               | Compiled from YAML by `card-compile.js`. Sparse schema: fields only present on matching card types (unit arrays vs skill/equipment effects). Computed evolve/ignite links, deckConstraints, separated conditions |
-| `server/data/affiliations.json`       | **UPDATED**                   | Added `team-chang`, `karakas-servants`, `prince-of-the-redlight-district`. Fixed typo: `walhaiksong` → `wolhaiksong`                          |
-| `server/data/traits.json`             | **REWRITTEN**                 | Removed all 11 conditions (moved to conditions.json). Added `vengeful`. Verified all 16 traits match RULES.md                                 |
-| **NEW** `server/data/conditions.json` | **CREATED**                   | All 11 conditions from RULES.md as standalone entries with name, description, color, numeric flag, iconPath (pointing to `conditions/` folder) |
-| `server/data/attributes.json`         | **REWRITTEN**                 | Split `guide` into `silver-dwarf` and `red-witch`. Fixed `livingignitionweapon` → `living-ignition-weapon`. All 7 attributes present           |
-| `server/data/positions.json`          | **REWRITTEN**                 | Old `shinheuh` replaced with `frontline-shinheuh` + `backline-shinheuh` sharing `combatSlotGroup: "shinheuh"`. Added `wavecontroller`. All positions have `combatSlotGroup` |
-| `data/cards/schema.json`              | **CREATED**                   | JSON Schema (draft-07) for YAML validation: unit/skill/equipment schemas, allowed enums for positions/traits/attributes/affiliations           |
-| `scripts/card-compile.js`             | **CREATED**                   | Compiles YAML → `server/data/cards.json`. Stable alphabetical cardIds, bidirectional evolve/ignite links, keyword expansion (Unreachable → deckConstraints), **unified DSL shape** for all effect-like fields (abilities, passives, effects, triggers). No backward-compat string codes |
+| File                                  | Action                              | Notes                                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/cards/*.yml`                    | **MOVED** → `data/cards/*.yml`      | Source of truth stays YAML; 60 files moved                                                                                                                                                                                                                                              |
+| `docs/scripts/*.js`                   | **REPLACED** by `scripts/card-*.js` | Original scripts left in place; new scripts created in project root `scripts/`                                                                                                                                                                                                          |
+| `server/data/cards.json`              | **REGENERATED**                     | Compiled from YAML by `card-compile.js`. Sparse schema: fields only present on matching card types (unit arrays vs skill/equipment effects). Computed evolve/ignite links, deckConstraints, separated conditions                                                                        |
+| `server/data/affiliations.json`       | **UPDATED**                         | Added `team-chang`, `karakas-servants`, `prince-of-the-redlight-district`. Fixed typo: `walhaiksong` → `wolhaiksong`                                                                                                                                                                    |
+| `server/data/traits.json`             | **REWRITTEN**                       | Removed all 11 conditions (moved to conditions.json). Added `vengeful`. Verified all 16 traits match RULES.md                                                                                                                                                                           |
+| **NEW** `server/data/conditions.json` | **CREATED**                         | All 11 conditions from RULES.md as standalone entries with name, description, color, numeric flag, iconPath (pointing to `conditions/` folder)                                                                                                                                          |
+| `server/data/attributes.json`         | **REWRITTEN**                       | Split `guide` into `silver-dwarf` and `red-witch`. Fixed `livingignitionweapon` → `living-ignition-weapon`. All 7 attributes present                                                                                                                                                    |
+| `server/data/positions.json`          | **REWRITTEN**                       | Old `shinheuh` replaced with `frontline-shinheuh` + `backline-shinheuh` sharing `combatSlotGroup: "shinheuh"`. Added `wave-controller`. All position codes use kebab-case. All positions have `combatSlotGroup`                                                                         |
+| `data/cards/schema.json`              | **CREATED**                         | JSON Schema (draft-07) for YAML validation: unit/skill/equipment schemas, allowed enums for positions/traits/attributes/affiliations                                                                                                                                                    |
+| `scripts/card-compile.js`             | **CREATED**                         | Compiles YAML → `server/data/cards.json`. Stable alphabetical cardIds, bidirectional evolve/ignite links, keyword expansion (Unreachable → deckConstraints), **unified DSL shape** for all effect-like fields (abilities, passives, effects, triggers). No backward-compat string codes |
 
 ### Design Note: Shinheuh Position Model
 
@@ -80,7 +80,7 @@ Shinheuh is unique among positions — it has no fixed line. A shinheuh unit can
 
 **Why two codes sharing a slot:**
 
-- Each code maps to a fixed line (consistent with how all other positions work — fisherman always frontline, lightbearer always backline)
+- Each code maps to a fixed line (consistent with how all other positions work — fisherman always frontline, light-bearer always backline)
 - `combatSlotGroup` ties them together: when an ability is used by a unit deployed in either shinheuh position, it consumes the single shared `shinheuh` combat slot
 - The YAML validator already accepts `frontline shinheuh` and `backline shinheuh` as separate values — the compiler maps them to these codes
 - The combat slot logic is generic: look up the unit's position code, get `combatSlotGroup`, check availability for that group. Non-slot-sharing positions have `combatSlotGroup` equal to their own code (unique slot)
@@ -129,6 +129,7 @@ Shinheuh is unique among positions — it has no fixed line. A shinheuh unit can
 
 > **Design note — sparse schema, not a flat union:**
 > The compiled JSON uses a **sparse schema** — fields only appear on the card types that use them:
+>
 > - **Units** have: `cardId, type, name, cost, hp, rank, positionCodes, traitCodes, attributeCodes, affiliationCodes, abilityCodes, passiveCodes, deckConstraints` (+ optional `sobriquet, evolveInto, evolvedFrom`)
 > - **Skills** have: `cardId, type, name, cost, effects, deckConstraints` (+ optional `requirements`)
 > - **Equipment** have: `cardId, type, name, cost, effects, deckConstraints` (+ optional `requirements, igniteInto, ignitedFrom`)
@@ -245,9 +246,11 @@ Most effects in the current 60-card set fall into Tier 1 (compilable) because th
 
 > **Unified DSL shape — abilities, passives, and effects use the same object from Phase 0:**
 > All effect-like fields (`abilityCodes`, `passiveCodes`, `effects`, `evolveInto.trigger`, `igniteInto.trigger`) share a single shape:
+>
 > ```json
 > { "type": "custom", "raw": "<original YAML text>", "handler": null }
 > ```
+>
 > - `type: "custom"` means "hand-written handler needed" — Phase 4 expands the pattern matcher to produce typed objects like `{ type: "deal_damage", target: "enemy", amount: 7 }`
 > - `raw` preserves the original YAML text for debugging and for custom handlers to parse
 > - `handler` is `null` until a class is registered; `"UnreachableKeyword"` for the one keyword the compiler already expands
@@ -277,6 +280,7 @@ After completing each step below, mark it done in the Phase 0 Tracker above and 
 **Verification for Phase 0** ✅
 
 All checks pass:
+
 - `npm run compile:cards` succeeds with 0 errors — 60 cards (35 units, 11 skills, 14 equipment)
 - `npm run validate:cards` succeeds: `✓ Validated 60 card file(s) successfully.`
 - `server/data/cards.json` contains all 60+ cards with correct new schema
@@ -978,12 +982,12 @@ Phase 0 (Data Pipeline) ──┐
 
 ## Files to Rename
 
-| Old Name                                            | New Name                                           | Reason                          |
-| --------------------------------------------------- | -------------------------------------------------- | ------------------------------- |
-| `server/game/registries/passiveAbilityRegisttry.js` | `server/game/registries/passiveAbilityRegistry.js` | Fix typo (deferred to Phase 4)  |
-| ~~`docs/scripts/create_card.js`~~                   | ~~`scripts/card-create.js`~~                       | ✅ Done — new script created    |
-| ~~`docs/scripts/validate_cards.js`~~                | ~~`scripts/card-validate.js`~~                     | ✅ Done — new script created    |
-| ~~`docs/scripts/lookup_cards.js`~~                  | ~~`scripts/card-lookup.js`~~                       | ✅ Done — copied, path updated  |
+| Old Name                                            | New Name                                           | Reason                         |
+| --------------------------------------------------- | -------------------------------------------------- | ------------------------------ |
+| `server/game/registries/passiveAbilityRegisttry.js` | `server/game/registries/passiveAbilityRegistry.js` | Fix typo (deferred to Phase 4) |
+| ~~`docs/scripts/create_card.js`~~                   | ~~`scripts/card-create.js`~~                       | ✅ Done — new script created   |
+| ~~`docs/scripts/validate_cards.js`~~                | ~~`scripts/card-validate.js`~~                     | ✅ Done — new script created   |
+| ~~`docs/scripts/lookup_cards.js`~~                  | ~~`scripts/card-lookup.js`~~                       | ✅ Done — copied, path updated |
 
 ## Risks & Mitigations
 

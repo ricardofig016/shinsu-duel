@@ -7,13 +7,13 @@
     "special": false,
     "combatSlotGroup": "fisherman"
   },
-  "spearbearer": {
+  "spear-bearer": {
     "name": "Spear Bearer",
     "description": "Long-range units designed to deal massive amounts of damage",
     "verboseDescription": "Spear Bearers attack from long distance and snipe the opponent using Spears as their primary weapon. They do not tend to be very powerful in a melee, but are very valuable due to their pinpoint attacking from a distance.",
     "line": "backline",
     "special": false,
-    "combatSlotGroup": "spearbearer"
+    "combatSlotGroup": "spear-bearer"
   },
   "scout": {
     "name": "Scout",
@@ -23,21 +23,21 @@
     "special": false,
     "combatSlotGroup": "scout"
   },
-  "lightbearer": {
+  "light-bearer": {
     "name": "Light Bearer",
     "description": "Strategic support units specializing in utility, buffs, and lighthouses",
     "verboseDescription": "Lightbearers use Lighthouses to gain information on the battle or the surroundings. They gather information and formulate plans with the help of such information as they command their Lighthouse.",
     "line": "backline",
     "special": false,
-    "combatSlotGroup": "lightbearer"
+    "combatSlotGroup": "light-bearer"
   },
-  "wavecontroller": {
+  "wave-controller": {
     "name": "Wave Controller",
     "description": "Versatile units that manipulate shinsu for area control, damage amplification, and support",
     "verboseDescription": "Wave Controllers help their allies in battle by attacking the enemy or aiding the team by manipulating Shinsu. This position is rare compared to the others and requires an expert and specialized manipulation of Shinsu.",
     "line": "backline",
     "special": false,
-    "combatSlotGroup": "wavecontroller"
+    "combatSlotGroup": "wave-controller"
   },
   "frontline-shinheuh": {
     "name": "Frontline Shinheuh",

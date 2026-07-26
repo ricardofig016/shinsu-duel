@@ -23,14 +23,14 @@ describe("place cards on field", () => {
     expect(playerState.hand.length).toBe(4); // 5 initial - 1 deployed = 4
   });
 
-  test("placing a lightbearer unit puts it in the backline", () => {
-    // Rachel is a lightbearer
+  test("placing a light-bearer unit puts it in the backline", () => {
+    // Rachel is a light-bearer
     const game = setupGameWithCardsInHand(["Rachel", "Rachel", "Rachel", "Rachel"]);
 
-    // Deploy Rachel as a lightbearer
+    // Deploy Rachel as a light-bearer
     game.processAction({
       type: "deploy-unit-action",
-      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "lightbearer" },
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "light-bearer" },
     });
 
     // Check that the card is on the field in the backline
@@ -38,7 +38,7 @@ describe("place cards on field", () => {
     expect(playerState.field.backline.length).toBe(1);
     expect(playerState.field.frontline.length).toBe(0);
     expect(playerState.field.backline[0].card.name).toBe("Rachel");
-    expect(playerState.field.backline[0].placedPositionCode).toBe("lightbearer");
+    expect(playerState.field.backline[0].placedPositionCode).toBe("light-bearer");
     expect(playerState.hand.length).toBe(4); // 5 initial - 1 deployed = 4
   });
 
@@ -55,7 +55,7 @@ describe("place cards on field", () => {
     // Deploy Evankhell
     game.processAction({
       type: "deploy-unit-action",
-      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wave-controller" },
     });
 
     // Check that shinsu was spent
@@ -72,7 +72,7 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit with multiple position options works for all valid positions", () => {
-    // Evankhell can be placed as wavecontroller or fisherman
+    // Evankhell can be placed as wave-controller or fisherman
     const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
 
     // Fast-forward to round 10
@@ -90,19 +90,19 @@ describe("place cards on field", () => {
     // Fast-forward to round 10
     advanceToRound(game2, 10);
 
-    // Try as wavecontroller
+    // Try as wave-controller
     game2.processAction({
       type: "deploy-unit-action",
-      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wave-controller" },
     });
 
     // Both placements should succeed
     expect(game.playerStates[USERNAMES[0]].field.frontline[0].placedPositionCode).toBe("fisherman");
-    expect(game2.playerStates[USERNAMES[0]].field.backline[0].placedPositionCode).toBe("wavecontroller");
+    expect(game2.playerStates[USERNAMES[0]].field.backline[0].placedPositionCode).toBe("wave-controller");
   });
 
   test("deploying a unit to invalid position throws error", () => {
-    // Khun Aguero Agnes is only a lightbearer, not a fisherman
+    // Khun Aguero Agnes is only a light-bearer, not a fisherman
     const game = setupGameWithCardsInHand(["Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes"]);
 
     // Fast-forward to round 2
@@ -128,13 +128,13 @@ describe("place cards on field", () => {
     expect(() =>
       game.processAction({
         type: "deploy-unit-action",
-        data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
+        data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wave-controller" },
       })
     ).toThrow(/Not enough shinsu/);
   });
 
   test("deploying a unit publishes events and switches turns", () => {
-    // Rak Wraithraiser is a spearbearer, costs 2 shinsu
+    // Rak Wraithraiser is a spear-bearer, costs 2 shinsu
     const game = setupGameWithCardsInHand(["Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser"]);
 
     // Need at least round 2 for 2 shinsu
@@ -147,7 +147,7 @@ describe("place cards on field", () => {
     // Deploy Rak
     game.processAction({
       type: "deploy-unit-action",
-      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "spearbearer" },
+      data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "spear-bearer" },
     });
 
     // Check events were published
