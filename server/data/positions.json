@@ -9,7 +9,7 @@
   },
   "spear-bearer": {
     "name": "Spear Bearer",
-    "description": "Long-range units designed to deal massive amounts of damage",
+    "description": "Long-range units able to deal massive amounts of damage",
     "verboseDescription": "Spear Bearers attack from long distance and snipe the opponent using Spears as their primary weapon. They do not tend to be very powerful in a melee, but are very valuable due to their pinpoint attacking from a distance.",
     "line": "backline",
     "special": false,
@@ -41,16 +41,16 @@
   },
   "frontline-shinheuh": {
     "name": "Frontline Shinheuh",
-    "description": "A shinheuh summoned to the frontline to attack enemies directly",
-    "verboseDescription": "Shinheuh are creatures controlled by Animas. Frontline Shinheuh fight on the front lines alongside other units.",
+    "description": "Special units summoned by Anima to fight on their behalf",
+    "verboseDescription": "Shinheuh are creatures native to the tower. Some people called Anima are able to subjugate and control these beasts to do their bidding. Shinheuh species are incredibly varied, and so their play style is determind by the creature itself and not their position.",
     "line": "frontline",
     "special": true,
     "combatSlotGroup": "shinheuh"
   },
   "backline-shinheuh": {
     "name": "Backline Shinheuh",
-    "description": "A shinheuh summoned to the backline to provide support",
-    "verboseDescription": "Shinheuh are creatures controlled by Animas. Backline Shinheuh support from the rear, providing utility and ranged attacks.",
+    "description": "Special units summoned by Anima to fight on their behalf",
+    "verboseDescription": "Shinheuh are creatures native to the tower. Some people called Anima are able to subjugate and control these beasts to do their bidding. Shinheuh species are incredibly varied, and so their play style is determind by the creature itself and not their position.",
     "line": "backline",
     "special": true,
     "combatSlotGroup": "shinheuh"
@@ -58,7 +58,7 @@
   "landmark": {
     "name": "Landmark",
     "description": "Special units that apply continuous effects to the entire battlefield",
-    "verboseDescription": "Landmarks represent locations or structures that affect the entire battlefield. Only one landmark can be deployed per player.",
+    "verboseDescription": "Landmarks represent notable locations or structures in the tower. Unlike other units they don't attack or take actions, but they apply powerful continuous effects that drastically affect gameplay.",
     "line": "backline",
     "special": true,
     "combatSlotGroup": "landmark"
