@@ -74,7 +74,7 @@ Destroy your opponent's lighthouses. Each lighthouse represents one point of HP.
 
 1. Each player has 5 combat slots: one for each of the positions.
 2. A unit deployed in a position can only use an ability if the combat slot for that position is available. Notice that this doesn't stop the player from playing another unit in that position.
-3. When a unit uses an ability, the combat slot for the position the unit was deployed in becomes unavailable until the end of the round.
+3. When a unit uses an ability, the combat slot for the position the unit was deployed in is spent and becomes unavailable until the end of the round.
 4. This means the same unit can't use an ability twice in the same round, and other units in the same position can't use their abilities either.
 
 ## Board
@@ -191,13 +191,14 @@ Keywords are special terms that provide additional context to cards and abilitie
 3. **Compress `x`**: Reduce shinsu cost by `x`
 4. **Create `x`**: Regain `x` lighthouses
 5. **Destroy `x`**: Destroy `x` enemy lighthouses
-6. **Quick**: Doesn't end your turn
-7. **Reclaim `x`**: Put `x` cards from your discard pile into your hand
-8. **Silence**: Remove all traits
-9. **Slay `x`**: Kill `x` units
-10. **Spend `x`**: Spend `x` shinsu
-11. **Unreachable**: You can't put me in your deck during deckbuilding
-12. **<position>**: available only when played as <position>
+6. **Free**: Doesn't expend a combat slot
+7. **Quick**: Doesn't end your turn
+8. **Reclaim `x`**: Put `x` cards from your discard pile into your hand
+9. **Silence**: Remove all traits
+10. **Slay `x`**: Kill `x` units
+11. **Spend `x`**: Spend `x` shinsu
+12. **Unreachable**: You can't put me in your deck during deckbuilding
+13. **<position>**: available only when played as <position>
 
 ## Positions
 
@@ -316,7 +317,7 @@ Specializes in navigating the immediate physical crossroads and obstacles right 
 **Core in-game mechanic:**
 
 ```md
-The first time you draw a card per turn, choose the card directly from your deck.
+The first time you draw a card each round, choose the card directly from your deck.
 ```
 
 #### Red Witch
@@ -343,7 +344,7 @@ Hwayeomsa are flame users who are able to convert shinsu into fire. They deal te
 **Core in-game mechanic:**
 
 ```md
-Spend 1: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have it.
+Spend 1, Free: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have it.
 **Fire Core**: Quick: Consume your Fire Charges to create **Incinerate <level>** in hand:
 **Incinerate I**: I am created by consuming 1 Fire Charge. Deal 1 to an enemy.
 **Incinerate II**: I am created by consuming 3 Fire Charges. Deal 2 to 2 enemies.
@@ -364,11 +365,11 @@ Jeonsulsa are lightning users who have the ability to give electrical properties
 **Core in-game mechanic:**
 
 ```md
-When I'm deployed, summon a 2 HP **Conduit** on the enemy backline. When I leave play, destroy it.
-**Conduit**: Ghost. Round start or Activation: For every 2 HP that I have, play 1 random **Jeonsul Baang** on yourself.
-**Lightning Baang**: Deal 2 damage to a random ally unit.
-**Thunder Baang**: Root a random ally unit this round that is not already Rooted.
-**Static Baang**: Give +1 Weak to a random ally unit this round.
+When I'm deployed, heal 2 HP from or summon **Conduit** on the enemy backline.
+**Conduit**: Ghost. Round start or Activation: If there is no Jeonsulsa on the enemy team, i die. For every 2 HP that I have, play 1 random **Jeonsul Baang** on yourself. No position. 2 HP.
+**Lightning Baang**: Deal 2 to a random ally.
+**Thunder Baang**: Give Rooted to random ally that is not already Rooted.
+**Static Baang**: Give Weak to a random ally.
 ```
 
 **Example Synergies:**
