@@ -247,7 +247,7 @@ Traits are positive permanent effects native to cards. They are color coded as s
 1. **Barrier**: Negate all damage the first time I take damage each round
 2. **Bloodthirsty `x`**: When I kill a unit, restore `x` HP
 3. **Creator `x`**: When I am deployed, Create `x`
-4. **Dealer `x`**: When I am deployed, draw `x` card
+4. **Dealer `x`**: When I am deployed, draw `x` cards
 5. **Immune**: I am immune to conditions
 6. **Last One Standing `x`**: If I am the only ally unit, I have +`x` HP
 7. **Lethal**: When I damage another unit, kill it

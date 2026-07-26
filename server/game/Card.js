@@ -53,7 +53,7 @@ export default class Card {
     );
   }
 
-  // Extract numeric values from trait objects (e.g. "lastonestanding" has value 4)
+  // Extract numeric values from trait objects (e.g. "last-one-standing" has value 4)
   #extractTraitValues(traitCodes) {
     const values = {};
     for (const t of traitCodes) {

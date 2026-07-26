@@ -48,7 +48,7 @@ function parseTrait(raw) {
   const name = match[1].toLowerCase();
   const value = match[2] ? parseInt(match[2], 10) : null;
   return {
-    code: name.replace(/\s+/g, ""), // matches traits.json keys (e.g. "lastonestanding")
+    code: name.replace(/\s+/g, "-"), // matches traits.json keys (e.g. "last-one-standing")
     value: value,
   };
 }

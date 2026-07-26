@@ -111,7 +111,7 @@ Shinheuh is unique among positions — it has no fixed line. A shinheuh unit can
 - `name`, `sobriquet` (optional)
 - `cost`, `hp` (unit only), `rank` (unit only)
 - `positionCodes`: array of position codes (use kebab-case codes internally)
-- `traitCodes`: array of `{ code, value? }` objects — code matches `traits.json` key; `value` only present for numeric traits (e.g. `{ code: "lastonestanding", value: 4 }`). Display name lives in `traits.json`, not duplicated per card.
+- `traitCodes`: array of `{ code, value? }` objects — code matches `traits.json` key; `value` only present for numeric traits (e.g. `{ code: "last-one-standing", value: 4 }`). Display name lives in `traits.json`, not duplicated per card.
 - `attributeCodes`: array — `"hwayeomsa"`, `"irregular"`, `"anima"`, `"silver-dwarf"`, `"red-witch"`, `"jeonsulsa"`, `"living-ignition-weapon"`
 - `affiliationCodes`: array
 - `abilityCodes`: array of unified DSL objects `{ type, raw, handler, quick?, positionCode? }` — same shape as effects

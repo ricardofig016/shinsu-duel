@@ -1,7 +1,7 @@
 # ICONS TODO
 
 Missing icon files for `public/assets/icons/`. Each entry lists the expected file path and what it represents.  
-Icons are **56×56 PNG** files with transparent backgrounds.
+Icons are **512×512 PNG** files with transparent backgrounds.
 
 ---
 
@@ -16,15 +16,15 @@ Traits are color coded per RULES.md:
 | Status | File                         | Name              | Color  |
 | ------ | ---------------------------- | ----------------- | ------ |
 | ✅     | `traits/barrier.png`         | Barrier           | Yellow |
-| ✅     | `traits/bloodthirsty.png`    | Bloodthirsty      | Orange |
+| ✅     | `traits/bloodthirsty.png`    | Bloodthirsty      | Blue |
 | ✅     | `traits/creator.png`         | Creator           | Blue   |
 | ✅     | `traits/dealer.png`          | Dealer            | Blue   |
 | ✅     | `traits/immune.png`          | Immune            | Yellow |
-| ✅     | `traits/lastonestanding.png` | Last One Standing | Yellow |
+| ✅     | `traits/last-one-standing.png` | Last One Standing | Yellow |
 | ✅     | `traits/lethal.png`          | Lethal            | Orange |
 | ✅     | `traits/pierce.png`          | Pierce            | Orange |
-| ✅     | `traits/reflect.png`         | Reflect           | Orange |
-| ✅     | `traits/regenerate.png`      | Regenerate        | Yellow |
+| ✅     | `traits/reflect.png`         | Reflect           | Yellow |
+| ✅     | `traits/regenerate.png`      | Regenerate        | Blue |
 | ✅     | `traits/resilient.png`       | Resilient         | Yellow |
 | ✅     | `traits/ruthless.png`        | Ruthless          | Orange |
 | ✅     | `traits/sharpshooter.png`    | Sharpshooter      | Blue   |

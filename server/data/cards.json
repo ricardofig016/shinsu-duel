@@ -1716,7 +1716,7 @@
         "code": "barrier"
       },
       {
-        "code": "lastonestanding",
+        "code": "last-one-standing",
         "value": 4
       }
     ],
