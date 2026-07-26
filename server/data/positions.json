@@ -4,48 +4,63 @@
     "description": "Durable units that tank damage and deal consistent damage to enemies",
     "verboseDescription": "Fishermen are suited for close to medium-range combats and are the main offence of the team. They generally possess the most destructive power in man-to-man fights and tend to use Reel or Needles as their primary weapon.",
     "line": "frontline",
-    "special": false
-  },
-  "landmark": {
-    "name": "Landmark",
-    "description": "Special units that apply continuous effects to the entire battlefield",
-    "verboseDescription": "no verbose description yet",
-    "line": "backline",
-    "special": true
-  },
-  "lightbearer": {
-    "name": "Light Bearer",
-    "description": "Strategic support units specializing in utility, buffs, and lighthouses",
-    "verboseDescription": "Lightbearers use Lighthouses to gain information on the battle or the surroundings. They gather information and formulate plans with the help of such information as they command their Lighthouse.",
-    "line": "backline",
-    "special": false
-  },
-  "scout": {
-    "name": "Scout",
-    "description": "Disruptive units that excel at applying debuffs, breaking synergy, and compromising the enemy backline",
-    "verboseDescription": "Scouts move ahead of the group, observe the environment and situation, and aid the Fishermen as secondary offence. They are usually lightly armed for the intention to be agile and swift in movement and thinking.",
-    "line": "frontline",
-    "special": false
-  },
-  "shinheuh": {
-    "name": "Shinheuh",
-    "description": "Special units summoned by Animas to attack on their behalf",
-    "verboseDescription": "no verbose description yet",
-    "line": "frontline",
-    "special": true
+    "special": false,
+    "combatSlotGroup": "fisherman"
   },
   "spearbearer": {
     "name": "Spear Bearer",
     "description": "Long-range units designed to deal massive amounts of damage",
     "verboseDescription": "Spear Bearers attack from long distance and snipe the opponent using Spears as their primary weapon. They do not tend to be very powerful in a melee, but are very valuable due to their pinpoint attacking from a distance.",
     "line": "backline",
-    "special": false
+    "special": false,
+    "combatSlotGroup": "spearbearer"
+  },
+  "scout": {
+    "name": "Scout",
+    "description": "Disruptive units that excel at applying debuffs, breaking synergy, and compromising the enemy backline",
+    "verboseDescription": "Scouts move ahead of the group, observe the environment and situation, and aid the Fishermen as secondary offence. They are usually lightly armed for the intention to be agile and swift in movement and thinking.",
+    "line": "frontline",
+    "special": false,
+    "combatSlotGroup": "scout"
+  },
+  "lightbearer": {
+    "name": "Light Bearer",
+    "description": "Strategic support units specializing in utility, buffs, and lighthouses",
+    "verboseDescription": "Lightbearers use Lighthouses to gain information on the battle or the surroundings. They gather information and formulate plans with the help of such information as they command their Lighthouse.",
+    "line": "backline",
+    "special": false,
+    "combatSlotGroup": "lightbearer"
   },
   "wavecontroller": {
     "name": "Wave Controller",
-    "description": "All rounder units that help their team by manipulating shinsu and providing shinsu-related buffs and debuffs",
+    "description": "Versatile units that manipulate shinsu for area control, damage amplification, and support",
     "verboseDescription": "Wave Controllers help their allies in battle by attacking the enemy or aiding the team by manipulating Shinsu. This position is rare compared to the others and requires an expert and specialized manipulation of Shinsu.",
+    "line": "backline",
+    "special": false,
+    "combatSlotGroup": "wavecontroller"
+  },
+  "frontline-shinheuh": {
+    "name": "Frontline Shinheuh",
+    "description": "A shinheuh summoned to the frontline to attack enemies directly",
+    "verboseDescription": "Shinheuh are creatures controlled by Animas. Frontline Shinheuh fight on the front lines alongside other units.",
     "line": "frontline",
-    "special": false
+    "special": true,
+    "combatSlotGroup": "shinheuh"
+  },
+  "backline-shinheuh": {
+    "name": "Backline Shinheuh",
+    "description": "A shinheuh summoned to the backline to provide support",
+    "verboseDescription": "Shinheuh are creatures controlled by Animas. Backline Shinheuh support from the rear, providing utility and ranged attacks.",
+    "line": "backline",
+    "special": true,
+    "combatSlotGroup": "shinheuh"
+  },
+  "landmark": {
+    "name": "Landmark",
+    "description": "Special units that apply continuous effects to the entire battlefield",
+    "verboseDescription": "Landmarks represent locations or structures that affect the entire battlefield. Only one landmark can be deployed per player.",
+    "line": "backline",
+    "special": true,
+    "combatSlotGroup": "landmark"
   }
 }

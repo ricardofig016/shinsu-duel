@@ -1,7 +1,6 @@
-import abilityRegistry from "./registries/abilityRegistry.js";
-
 /**
  * Represents a unit placed on the battlefield.
+ * Phase 0: plain data container. Ability execution comes in Phase 3/4.
  */
 export default class Unit {
   constructor(card, placedPositionCode) {
@@ -17,23 +16,13 @@ export default class Unit {
     this.bus = card.bus;
   }
 
-  // Called when the unit is placed on the field
+  // Stub — Phase 3/4 will implement ability/passive activation
   onSummon(gameState) {
-    // Activate all passive abilities
-    this.card.passiveAbilities.forEach((passive) => {
-      passive.activate(this, gameState);
-    });
-
     this.bus.publish("OnUnitSummoned", { unitId: this.id });
   }
 
-  // Called when the unit is removed from the field
+  // Stub — Phase 3/4 will implement ability/passive deactivation
   onRemove(gameState) {
-    // Deactivate all passive abilities
-    this.card.passiveAbilities.forEach((passive) => {
-      passive.deactivate(this, gameState);
-    });
-
     this.bus.publish("OnUnitRemoved", { unitId: this.id });
   }
 
@@ -65,32 +54,11 @@ export default class Unit {
     return this.currentHp;
   }
 
+  // Stub — Phase 3/4 will implement ability dispatching from DSL objects
   useAbility(abilityCode, targetInfo = null, gameState) {
-    const ability = this.card.abilities.find((a) => a.code === abilityCode);
-    if (!ability) {
-      const abilityCodes = this.card.abilities.map((a) => a.code);
-      throw new Error(
-        `Unit ${this.card.cardId} - ${
-          this.card.name
-        } does not have ability ${abilityCode}\nAbilities: ${abilityCodes.join(", ")}`
-      );
-    }
-
-    const context = { unit: this, target: targetInfo };
-
-    // Validate context
-    if (!ability.validate(context, gameState)) {
-      throw new Error(`Ability "${ability.text}" cannot be used in the current context`);
-    }
-
-    // Create intent
-    const intent = ability.toIntent(context, gameState);
-    this.bus.publish("OnUseAbilityIntent", intent);
-
-    // Resolve effects
-    const action = ability.execute(context, gameState);
-    ability.apply(action, gameState);
-    this.bus.publish("OnUseAbilityResolved", { ...intent, action });
+    // Placeholder: ability execution pipeline rebuilt in Phase 3/4
+    this.bus.publish("OnUseAbilityIntent", { unitId: this.id, abilityCode, targetInfo });
+    this.bus.publish("OnUseAbilityResolved", { unitId: this.id, abilityCode, targetInfo });
   }
 
   toSanitizedObject() {

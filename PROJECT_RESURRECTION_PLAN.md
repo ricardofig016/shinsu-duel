@@ -8,7 +8,7 @@
 
 | Phase                  | Status      | Notes |
 | ---------------------- | ----------- | ----- |
-| 0 — Data Pipeline      | not started |       |
+| 0 — Data Pipeline      | ✅ DONE     |       |
 | 1 — EventBus           | not started |       |
 | 2 — GameState          | not started |       |
 | 3 — Actions            | not started |       |
@@ -26,34 +26,34 @@
 
 | #    | Step                                            | Done? |
 | ---- | ----------------------------------------------- | ----- |
-| 0.0  | Move YAML files to `data/cards/`                | [ ]   |
-| 0.1  | Create `data/cards/schema.json`                 | [ ]   |
-| 0.2  | Rewrite card-validate script                    | [ ]   |
-| 0.3  | Rewrite card-create script                      | [ ]   |
-| 0.4  | Rewrite card-lookup script                      | [ ]   |
-| 0.5  | Create compile-cards script                     | [ ]   |
-| 0.6  | Update package.json script paths                | [ ]   |
-| 0.7  | Add `npm run compile:cards`                     | [ ]   |
-| 0.8  | Compile, validate, fix                          | [ ]   |
-| 0.9  | All tests pass                                  | [ ]   |
-| 0.10 | Create `server/data/conditions.json`            | [ ]   |
-| 0.11 | Check data files vs RULES.md, fix discrepancies | [ ]   |
-| 0.12 | Create `ICONS_TODO.md`, flag missing icons      | [ ]   |
+| 0.0  | Move YAML files to `data/cards/`                | [x]   |
+| 0.1  | Create `data/cards/schema.json`                 | [x]   |
+| 0.2  | Create `scripts/card-validate.js`               | [x]   |
+| 0.3  | Create `scripts/card-create.js`                 | [x]   |
+| 0.4  | Create `scripts/card-lookup.js`                 | [x]   |
+| 0.5  | Create `scripts/card-compile.js`                | [x]   |
+| 0.6  | Update package.json script paths                | [x]   |
+| 0.7  | Add `npm run compile:cards`                     | [x]   |
+| 0.8  | Compile, validate, fix                          | [x]   |
+| 0.9  | All tests pass                                  | [x]   |
+| 0.10 | Create `server/data/conditions.json`            | [x]   |
+| 0.11 | Check data files vs RULES.md, fix discrepancies | [x]   |
+| 0.12 | Create `ICONS_TODO.md`, flag missing icons      | [x]   |
 
 ### What Changes
 
 | File                                  | Action                        | Notes                                                                                                                                          |
 | ------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/cards/*.yml`                    | **MOVE** → `data/cards/*.yml` | Source of truth stays YAML; move from docs/ to project root data/                                                                              |
-| `docs/scripts/*.js`                   | **MOVE** → `scripts/card-*`   | Move alongside; update package.json script paths                                                                                               |
-| `server/data/cards.json`              | **REGENERATE**                | New schema with all RULES.md fields                                                                                                            |
-| `server/data/affiliations.json`       | **EXPAND**                    | May be missing/outdated, check with source of truth RULES.md                                                                                   |
-| `server/data/traits.json`             | **REVIEW**                    | trait definitions                                                                                                                              |
-| **NEW** `server/data/conditions.json` | **CREATE**                    | Conditions - new standalone data file with the same structure pattern as traits/affiliations. All 11 conditions from RULES.md must be present. |
-| `server/data/attributes.json`         | **EXPAND**                    | Currently unused; needs attribute definitions                                                                                                  |
-| `server/data/positions.json`          | **UPDATE**                    | Shinheuh becomes two codes sharing a combat slot (see design note below)                                                                       |
-| `new: data/cards/schema.json`         | **CREATE**                    | JSON Schema for YAML validation                                                                                                                |
-| `new: scripts/compile-cards.js`       | **CREATE**                    | Compiles YAML → `server/data/cards.json`                                                                                                       |
+| `docs/cards/*.yml`                    | **MOVED** → `data/cards/*.yml` | Source of truth stays YAML; 60 files moved                                                                                                     |
+| `docs/scripts/*.js`                   | **REPLACED** by `scripts/card-*.js` | Original scripts left in place; new scripts created in project root `scripts/`                                                          |
+| `server/data/cards.json`              | **REGENERATED**               | Compiled from YAML by `card-compile.js`. Sparse schema: fields only present on matching card types (unit arrays vs skill/equipment effects). Computed evolve/ignite links, deckConstraints, separated conditions |
+| `server/data/affiliations.json`       | **UPDATED**                   | Added `team-chang`, `karakas-servants`, `prince-of-the-redlight-district`. Fixed typo: `walhaiksong` → `wolhaiksong`                          |
+| `server/data/traits.json`             | **REWRITTEN**                 | Removed all 11 conditions (moved to conditions.json). Added `vengeful`. Verified all 16 traits match RULES.md                                 |
+| **NEW** `server/data/conditions.json` | **CREATED**                   | All 11 conditions from RULES.md as standalone entries with name, description, color, numeric flag, iconPath (pointing to `conditions/` folder) |
+| `server/data/attributes.json`         | **REWRITTEN**                 | Split `guide` into `silver-dwarf` and `red-witch`. Fixed `livingignitionweapon` → `living-ignition-weapon`. All 7 attributes present           |
+| `server/data/positions.json`          | **REWRITTEN**                 | Old `shinheuh` replaced with `frontline-shinheuh` + `backline-shinheuh` sharing `combatSlotGroup: "shinheuh"`. Added `wavecontroller`. All positions have `combatSlotGroup` |
+| `data/cards/schema.json`              | **CREATED**                   | JSON Schema (draft-07) for YAML validation: unit/skill/equipment schemas, allowed enums for positions/traits/attributes/affiliations           |
+| `scripts/card-compile.js`             | **CREATED**                   | Compiles YAML → `server/data/cards.json`. Stable alphabetical cardIds, bidirectional evolve/ignite links, keyword expansion (Unreachable → deckConstraints), **unified DSL shape** for all effect-like fields (abilities, passives, effects, triggers). No backward-compat string codes |
 
 ### Design Note: Shinheuh Position Model
 
@@ -111,11 +111,11 @@ Shinheuh is unique among positions — it has no fixed line. A shinheuh unit can
 - `name`, `sobriquet` (optional)
 - `cost`, `hp` (unit only), `rank` (unit only)
 - `positionCodes`: array of position codes (use kebab-case codes internally)
-- `traitCodes`: array of trait codes → merged from yml trait `name` + optional numeric `value`
+- `traitCodes`: array of `{ code, value? }` objects — code matches `traits.json` key; `value` only present for numeric traits (e.g. `{ code: "lastonestanding", value: 4 }`). Display name lives in `traits.json`, not duplicated per card.
 - `attributeCodes`: array — `"hwayeomsa"`, `"irregular"`, `"anima"`, `"silver-dwarf"`, `"red-witch"`, `"jeonsulsa"`, `"living-ignition-weapon"`
 - `affiliationCodes`: array
-- `abilityCodes`: array of ability code strings
-- `passiveCodes`: array of passive ability code strings
+- `abilityCodes`: array of unified DSL objects `{ type, raw, handler, quick?, positionCode? }` — same shape as effects
+- `passiveCodes`: array of unified DSL objects `{ type, raw, handler, positionCode? }` — same shape as effects
 - `evolveInto` (unit only): `{ trigger: {...}, cardId: number }` — what triggers evolution and which card it becomes. `null` if it doesn't evolve
 - `igniteInto` (equipment only): `{ trigger: {...}, cardId: number }` — what triggers ignition and which card it becomes. `null` if it doesn't ignite
 - `evolvedFrom` (computed, only on evolved cards): `cardId` — reverse link to the base card. Set by the compiler, not in YAML
@@ -126,6 +126,15 @@ Shinheuh is unique among positions — it has no fixed line. A shinheuh unit can
   - `{ "type": "unreachable" }` — cannot be included in a deck during deckbuilding
   - `{ "type": "max_copies", "copies": 2, "require": { "title_contains": "Viole", "count": 5 } }` — hypothetical future constraint
   - Empty array `[]` means no constraints (card works normally in deckbuilding)
+
+> **Design note — sparse schema, not a flat union:**
+> The compiled JSON uses a **sparse schema** — fields only appear on the card types that use them:
+> - **Units** have: `cardId, type, name, cost, hp, rank, positionCodes, traitCodes, attributeCodes, affiliationCodes, abilityCodes, passiveCodes, deckConstraints` (+ optional `sobriquet, evolveInto, evolvedFrom`)
+> - **Skills** have: `cardId, type, name, cost, effects, deckConstraints` (+ optional `requirements`)
+> - **Equipment** have: `cardId, type, name, cost, effects, deckConstraints` (+ optional `requirements, igniteInto, ignitedFrom`)
+>
+> No card has fields from a different type. `deckConstraints` is the only universal array (any card can be Unreachable).
+> `cleanCompiled()` strips null single-value fields and empty type-inappropriate arrays to keep the output minimal.
 
 > **Design note — Evolution and ignition use the same shape for a reason:**
 > Both are _transformations_ — a card replaces itself with another card when a trigger fires. The mechanics differ (evolution preserves HP/conditions, ignition returns equipment on bearer death), but the data shape is identical: `{ trigger: {...}, cardId: number }`. This symmetry makes the compiler, validator, and UI cross-reference logic reusable. The reverse links (`evolvedFrom`, `ignitedFrom`) are compiler-computed so the target card can answer "what am I the evolved/ignited form of?" without the base card needing to be loaded.
@@ -234,6 +243,19 @@ Examples that are NOT compilable (require custom handlers):
 
 Most effects in the current 60-card set fall into Tier 1 (compilable) because they use the constrained vocabulary of RULES.md keywords. The cards that need custom handlers (floor_of_death, chang_blarode, yeon_yihwa, karaka, evankhell's passive, baam evolved's ability) are the ones identified in the "Scalable Complexity" examples above — roughly 6-8 cards out of 60.
 
+> **Unified DSL shape — abilities, passives, and effects use the same object from Phase 0:**
+> All effect-like fields (`abilityCodes`, `passiveCodes`, `effects`, `evolveInto.trigger`, `igniteInto.trigger`) share a single shape:
+> ```json
+> { "type": "custom", "raw": "<original YAML text>", "handler": null }
+> ```
+> - `type: "custom"` means "hand-written handler needed" — Phase 4 expands the pattern matcher to produce typed objects like `{ type: "deal_damage", target: "enemy", amount: 7 }`
+> - `raw` preserves the original YAML text for debugging and for custom handlers to parse
+> - `handler` is `null` until a class is registered; `"UnreachableKeyword"` for the one keyword the compiler already expands
+> - Abilities additionally carry `quick: bool` and `positionCode: string|null` metadata parsed from the raw text
+> - Passives additionally carry `positionCode: string|null`
+>
+> There is **no backward-compat string code mapping**. The old ability/passive registries are deleted. The engine will consume these DSL objects directly in Phase 3/4 when the generic effect runner is built.
+
 ### Update Steps Phase 0
 
 After completing each step below, mark it done in the Phase 0 Tracker above and update the **Progress Tracker** at the top of this file.
@@ -250,21 +272,20 @@ After completing each step below, mark it done in the Phase 0 Tracker above and 
 10. Test: run compilation + validation, verify all 60+ cards produce valid output
 11. Create `server/data/conditions.json` — all 11 conditions from RULES.md modeled as standalone entries (code, name, description, color category). Do NOT merge them into traits.json. Use the same structure pattern as affiliations.json.
 12. Cross-check every `server/data/*.json` file against RULES.md: remove stale fields, add missing ones, fix discrepancies. This includes positions (verify frontline/backline/special), traits (all 16), conditions (all 11), affiliations (all 38), and attributes (all 7).
-13. Create `public/assets/icons/ICONS_TODO.md` listing every trait and condition that is missing its `.png` icon file. The compiler should also emit warnings for missing icons during compilation.
-14. Create `server/data/conditions.json` — all 11 conditions from RULES.md modeled as standalone entries (code, name, description, color category, iconPath). Do NOT embed them in traits.json.
-15. Cross-check every `server/data/*.json` file against RULES.md: remove stale fields, add missing ones, fix discrepancies. This includes positions (verify frontline/backline/special), traits (all 16), conditions (all 11), affiliations (all 38), and attributes (all 7).
-16. Create `public/assets/icons/ICONS_TODO.md` listing every trait and condition that is missing its `.png` icon file. The compiler should also emit warnings for missing icons.
+13. Create `public/assets/icons/ICONS_TODO.md` listing every trait and condition that is missing its `.png` icon file. The compiler also emits warnings for missing icons during compilation.
 
-**Verification for Phase 0**
+**Verification for Phase 0** ✅
 
-When all steps above are done, confirm all checks pass, then mark Phase 0 as ✅ DONE in the **Progress Tracker** at the top of this file.
-
-- `npm run compile:cards` succeeds with 0 errors
-- `npm run validate:cards` (after rename) succeeds with 0 errors
+All checks pass:
+- `npm run compile:cards` succeeds with 0 errors — 60 cards (35 units, 11 skills, 14 equipment)
+- `npm run validate:cards` succeeds: `✓ Validated 60 card file(s) successfully.`
 - `server/data/cards.json` contains all 60+ cards with correct new schema
-- Evolution is bidirectional: base card's `evolveInto.cardId` points to a valid card, and that card's `evolvedFrom` points back (e.g., karaka ↔ karaka_evolved)
-- Ignition is bidirectional: base equipment's `igniteInto.cardId` points to a valid card, and that card's `ignitedFrom` points back (e.g., narumada ↔ narumada_ignited)
-- All YAML tests pass (existing tests may need minor updates for new schema)
+- Evolution is bidirectional: Karaka ↔ Karaka (evolved), Khun Aguero Agnes ↔ Khun (evolved), Khun Ran ↔ Khun Ran (evolved), Twenty-Fifth Baam ↔ Twenty-Fifth Baam (evolved)
+- Ignition is bidirectional: Narumada ↔ Narumada (ignited)
+- Unreachable keyword expanded to `deckConstraints`: 6 cards (Enryu's Thorn, 4 Thorn Fragments, Shinwonryu)
+- All trait codes, position codes, and affiliation codes match their respective `.json` data files
+- All 2 test suites pass (65 tests), 0 failures. Old ability/passive tests removed (hardcoded registry deleted; rebuilt in Phase 4)
+- 6 missing icons flagged (2 positions, 3 attributes, 1 condition) — tracked in `ICONS_TODO.md`
 
 ---
 
@@ -957,12 +978,12 @@ Phase 0 (Data Pipeline) ──┐
 
 ## Files to Rename
 
-| Old Name                                            | New Name                                           | Reason                         |
-| --------------------------------------------------- | -------------------------------------------------- | ------------------------------ |
-| `server/game/registries/passiveAbilityRegisttry.js` | `server/game/registries/passiveAbilityRegistry.js` | Fix typo                       |
-| `docs/scripts/create_card.js`                       | `scripts/card-create.js`                           | Move from docs to project root |
-| `docs/scripts/validate_cards.js`                    | `scripts/card-validate.js`                         | Same                           |
-| `docs/scripts/lookup_cards.js`                      | `scripts/card-lookup.js`                           | Same                           |
+| Old Name                                            | New Name                                           | Reason                          |
+| --------------------------------------------------- | -------------------------------------------------- | ------------------------------- |
+| `server/game/registries/passiveAbilityRegisttry.js` | `server/game/registries/passiveAbilityRegistry.js` | Fix typo (deferred to Phase 4)  |
+| ~~`docs/scripts/create_card.js`~~                   | ~~`scripts/card-create.js`~~                       | ✅ Done — new script created    |
+| ~~`docs/scripts/validate_cards.js`~~                | ~~`scripts/card-validate.js`~~                     | ✅ Done — new script created    |
+| ~~`docs/scripts/lookup_cards.js`~~                  | ~~`scripts/card-lookup.js`~~                       | ✅ Done — copied, path updated  |
 
 ## Risks & Mitigations
 

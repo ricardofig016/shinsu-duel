@@ -1,0 +1,90 @@
+{
+  "burned": {
+    "name": "Burned",
+    "description": "Turn end: I take x damage",
+    "color": "red",
+    "colorName": "Damage Debuff",
+    "numeric": true,
+    "iconPath": "conditions/burned.png"
+  },
+  "cursed": {
+    "name": "Cursed",
+    "description": "Round end: I take x damage for each unique condition I have",
+    "color": "red",
+    "colorName": "Damage Debuff",
+    "numeric": true,
+    "iconPath": "conditions/cursed.png"
+  },
+  "doomed": {
+    "name": "Doomed",
+    "description": "I will die at the end of this round",
+    "color": "red",
+    "colorName": "Damage Debuff",
+    "numeric": false,
+    "iconPath": "conditions/doomed.png"
+  },
+  "exhausted": {
+    "name": "Exhausted",
+    "description": "I deal -x damage",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": true,
+    "iconPath": "conditions/exhausted.png"
+  },
+  "frozen": {
+    "name": "Frozen",
+    "description": "When I use an ability, spend all combat slots",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": false,
+    "iconPath": "conditions/frozen.png"
+  },
+  "ghost": {
+    "name": "Ghost",
+    "description": "I don't prevent the enemy from targeting what's behind me",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": false,
+    "iconPath": "conditions/ghost.png"
+  },
+  "heavy": {
+    "name": "Heavy",
+    "description": "My abilities cost +x shinsu",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": true,
+    "iconPath": "conditions/heavy.png"
+  },
+  "poisoned": {
+    "name": "Poisoned",
+    "description": "I take x damage when I use an ability",
+    "color": "red",
+    "colorName": "Damage Debuff",
+    "numeric": true,
+    "iconPath": "conditions/poisoned.png"
+  },
+  "rooted": {
+    "name": "Rooted",
+    "description": "I can't switch positions or be substituted",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": false,
+    "iconPath": "conditions/rooted.png"
+  },
+  "stunned": {
+    "name": "Stunned",
+    "description": "I can't use abilities",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": false,
+    "iconPath": "conditions/stunned.png"
+  },
+  "weak": {
+    "name": "Weak",
+    "description": "I take +x damage from all sources",
+    "color": "red",
+    "colorName": "Damage Debuff",
+    "numeric": true,
+    "iconPath": "conditions/weak.png"
+  }
+}

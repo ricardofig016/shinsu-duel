@@ -1,114 +1,1907 @@
 {
   "0": {
+    "cardId": 0,
     "type": "unit",
-    "name": "Jue Viole Grace",
+    "name": "Akryung",
+    "cost": 4,
+    "hp": 7,
     "rank": "regular",
-    "hp": 5,
-    "cost": 3,
-    "affiliationCodes": ["fug", "team-fug", "team-sweet-and-sour"],
-    "positionCodes": ["wavecontroller"],
-    "traitCodes": ["burned", "sharpshooter"],
-    "abilityCodes": [],
-    "passiveCodes": []
+    "positionCodes": [
+      "wavecontroller",
+      "spearbearer"
+    ],
+    "traitCodes": [
+      {
+        "code": "resilient"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "fug",
+      "team-rachel",
+      "revolution"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "create Shinwonryu in hand",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "heal myself 3 hp",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "round start: give me the traits that ally Rachel has",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
   },
   "1": {
-    "type": "unit",
-    "name": "Zahard",
-    "sobriquet": "King of the Tower",
-    "rank": "high-ranker",
-    "hp": 10,
-    "cost": 5,
-    "affiliationCodes": [],
-    "positionCodes": ["fisherman"],
-    "traitCodes": ["burned"],
-    "abilityCodes": [],
-    "passiveCodes": []
+    "cardId": 1,
+    "type": "skill",
+    "name": "Baang",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "deal 2 to an enemy",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "you can put 3 of me in your deck during deckbuilding",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
   },
   "2": {
-    "type": "unit",
-    "name": "Khun Aguero Agnes",
-    "rank": "regular",
-    "hp": 5,
+    "cardId": 2,
+    "type": "equipment",
+    "name": "Blue Thryssa",
     "cost": 2,
-    "affiliationCodes": ["khun-family", "khuns-team", "team-baam"],
-    "positionCodes": ["lightbearer"],
-    "traitCodes": [],
-    "abilityCodes": ["create-one-lighthouse"],
-    "passiveCodes": ["round-end-take-one-damage"]
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "ability: heal me 2 hp and Cleanse me",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
   },
   "3": {
+    "cardId": 3,
     "type": "unit",
-    "name": "Rak Wraithraiser",
-    "rank": "regular",
-    "hp": 5,
-    "cost": 1,
-    "affiliationCodes": ["team-baam"],
-    "positionCodes": ["spearbearer"],
-    "traitCodes": [
-      "barrier",
-      "bloodthirsty",
-      "burned",
-      "creator",
-      "cursed",
-      "dealer",
-      "doomed",
-      "exhausted",
-      "ghost",
-      "heavy",
-      "immune",
-      "lastonestanding",
-      "lethal",
-      "pierce",
-      "poisoned",
-      "reflect",
-      "regenerate",
-      "resilient",
-      "rooted",
-      "ruthless",
-      "sharpshooter",
-      "strong",
-      "stunned",
-      "taunt",
-      "weak"
+    "name": "Bull",
+    "cost": 3,
+    "hp": 3,
+    "positionCodes": [
+      "frontline-shinheuh"
     ],
-    "abilityCodes": [],
-    "passiveCodes": []
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 3 to an enemy",
+        "handler": null,
+        "quick": true,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "deckConstraints": []
   },
   "4": {
+    "cardId": 4,
     "type": "unit",
-    "name": "Ship Leesoo",
+    "name": "Chang Blarode",
+    "cost": 4,
+    "hp": 6,
     "rank": "regular",
-    "hp": 5,
-    "cost": 1,
-    "affiliationCodes": ["ships-team"],
-    "positionCodes": ["scout"],
-    "traitCodes": [],
-    "abilityCodes": [],
-    "passiveCodes": []
+    "positionCodes": [
+      "fisherman"
+    ],
+    "traitCodes": [
+      {
+        "code": "bloodthirsty"
+      },
+      {
+        "code": "taunt"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-chang",
+      "canines"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 2 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "ally team chang members have resilient",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
   },
   "5": {
-    "type": "unit",
-    "name": "Evankhell",
-    "sobriquet": "The Infernal Evankhell",
-    "rank": "high-ranker",
-    "hp": 15,
-    "cost": 8,
-    "affiliationCodes": ["fug"],
-    "positionCodes": ["wavecontroller", "fisherman"],
-    "traitCodes": ["ruthless", "lastonestanding"],
-    "abilityCodes": [],
-    "passiveCodes": []
+    "cardId": 5,
+    "type": "skill",
+    "name": "Cleanse Spell",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "Clense an ally",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
   },
   "6": {
+    "cardId": 6,
+    "type": "equipment",
+    "name": "Enryu's Thorn",
+    "cost": 0,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "unreachable",
+        "handler": "UnreachableKeyword"
+      },
+      {
+        "type": "custom",
+        "raw": "my damage dealing abilities deal +2 damage",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "my healing abilities heal +2 hp",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "i have +2 hp",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "i have Bloodthirsty",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [
+      {
+        "type": "unreachable"
+      }
+    ]
+  },
+  "7": {
+    "cardId": 7,
+    "type": "unit",
+    "name": "Evankhell",
+    "cost": 9,
+    "hp": 7,
+    "rank": "high ranker",
+    "positionCodes": [
+      "fisherman",
+      "wavecontroller"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "hwayeomsa"
+    ],
+    "affiliationCodes": [
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "give the entire enemy team Burned",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "round end: all enemies with Burned 3+ die",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "8": {
+    "cardId": 8,
+    "type": "skill",
+    "name": "Fiery Elephant",
+    "cost": 2,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "give Burned to an enemy",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "Compress a Hwayeomsa in your hand 1",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "9": {
+    "cardId": 9,
+    "type": "equipment",
+    "name": "First Thorn Fragment",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "unreachable",
+        "handler": "UnreachableKeyword"
+      },
+      {
+        "type": "custom",
+        "raw": "quick",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "my damage dealing abilities deal +1 damage",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [
+      {
+        "type": "unreachable"
+      }
+    ]
+  },
+  "10": {
+    "cardId": 10,
+    "type": "unit",
+    "name": "Floor of Death",
+    "cost": 5,
+    "hp": 6,
+    "positionCodes": [
+      "landmark"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [],
+    "abilityCodes": [],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "passives have no effect",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "11": {
+    "cardId": 11,
+    "type": "skill",
+    "name": "Flower of Zygaena",
+    "cost": 4,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "give ally wolhaiksong and team sweet and sour members strong 2",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "12": {
+    "cardId": 12,
+    "type": "equipment",
+    "name": "Fourth Thorn Fragment",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "unreachable",
+        "handler": "UnreachableKeyword"
+      },
+      {
+        "type": "custom",
+        "raw": "quick",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "i have Bloodthirsty",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [
+      {
+        "type": "unreachable"
+      }
+    ]
+  },
+  "13": {
+    "cardId": 13,
+    "type": "unit",
+    "name": "Ha Yuri Zahard",
+    "cost": 6,
+    "hp": 8,
+    "rank": "high ranker",
+    "positionCodes": [
+      "fisherman"
+    ],
+    "traitCodes": [
+      {
+        "code": "resilient",
+        "value": 3
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "zahards-army",
+      "zahards-princesses",
+      "ari-family",
+      "ha-family",
+      "wolhaiksong"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 6 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "give me Ruthless",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "if i have an ally Guide, i have Taunt",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "14": {
+    "cardId": 14,
+    "type": "skill",
+    "name": "Healing Flames",
+    "cost": 5,
+    "requirements": [
+      "you have an ally yeon family member or Hwayeomsa"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "Cleanse all allies and heal them 4",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "15": {
+    "cardId": 15,
+    "type": "skill",
+    "name": "Healing Potion",
+    "cost": 2,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "heal an ally 5 hp",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "16": {
+    "cardId": 16,
+    "type": "unit",
+    "name": "Hell Express",
+    "cost": 1,
+    "hp": 6,
+    "positionCodes": [
+      "landmark"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [],
+    "abilityCodes": [],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "all Rankers and High Rankers have Ghost",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "17": {
+    "cardId": 17,
+    "type": "unit",
+    "name": "Hon Akraptor",
+    "cost": 2,
+    "hp": 4,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-sweet-and-sour"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 4 to an enemy unit",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "if Yeo Miseng is on the board, I have Strong",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "18": {
+    "cardId": 18,
+    "type": "unit",
+    "name": "Hong Chunhwa",
+    "cost": 1,
+    "hp": 3,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 2 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "deal 3 to an enemy with Exhaust",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "deckConstraints": []
+  },
+  "19": {
+    "cardId": 19,
+    "type": "equipment",
+    "name": "Ice Spear",
+    "cost": 3,
+    "requirements": [
+      "khun family member"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "all my attacks Freeze",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "i have Pierce",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "20": {
+    "cardId": 20,
+    "type": "unit",
+    "name": "Ja Wangnan",
+    "cost": 3,
+    "hp": 5,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman",
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-rachel",
+      "team-sweet-and-sour",
+      "prince-of-the-redlight-district"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "spend 1: deal 1 to 2 enemies and burn one of them",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "heal a prince of the redlight district 2 HP",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "i deal +1 damage to burned units",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "21": {
+    "cardId": 21,
+    "type": "unit",
+    "name": "Jyu Viole Grace",
+    "cost": 4,
+    "hp": 4,
+    "rank": "regular",
+    "positionCodes": [
+      "wavecontroller"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "irregular"
+    ],
+    "affiliationCodes": [
+      "team-baam",
+      "team-fug",
+      "team-sweet-and-sour",
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 1 for every trait i have to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "spend 2: use an enemy ability",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "deckConstraints": []
+  },
+  "22": {
+    "cardId": 22,
+    "type": "unit",
+    "name": "Karaka",
+    "cost": 7,
+    "hp": 7,
+    "rank": "high ranker",
+    "positionCodes": [
+      "fisherman",
+      "scout",
+      "wavecontroller"
+    ],
+    "traitCodes": [
+      {
+        "code": "reflect"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 7 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all rooted enemies",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "karaka's servants' abilities have Quick",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "evolveInto": {
+      "trigger": {
+        "type": "custom",
+        "raw": "equip with Karaka's Armor Suit (fisherman), Steel Tree (wave controller) or Purple Dementor (scout)",
+        "handler": null
+      },
+      "cardId": 23
+    },
+    "deckConstraints": []
+  },
+  "23": {
+    "cardId": 23,
+    "type": "unit",
+    "name": "Karaka (evolved)",
+    "cost": 7,
+    "hp": 9,
+    "rank": "high ranker",
+    "positionCodes": [
+      "fisherman",
+      "scout",
+      "wavecontroller"
+    ],
+    "traitCodes": [
+      {
+        "code": "reflect"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 7 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all rooted enemies",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "karaka's servants' abilities have Quick",
+        "handler": null,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "Round end: deal 3 to all Rooted enemies",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "evolvedFrom": 22,
+    "deckConstraints": []
+  },
+  "24": {
+    "cardId": 24,
+    "type": "equipment",
+    "name": "Karaka's Armor Suit",
+    "cost": 4,
+    "requirements": [
+      "deployed as Fishermen"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "if you started the game with Ha Jinsung in your deck, i cost 2 less",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "i have Barrier",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "25": {
+    "cardId": 25,
+    "type": "unit",
+    "name": "Khun Aguero Agnes",
+    "cost": 0,
+    "hp": 2,
+    "rank": "regular",
+    "positionCodes": [
+      "lightbearer"
+    ],
+    "traitCodes": [
+      {
+        "code": "creator"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-baam",
+      "team-sweet-and-sour",
+      "khuns-team",
+      "khun-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "create 1",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "evolveInto": {
+      "trigger": {
+        "type": "custom",
+        "raw": "i am equiped with Ice Spear",
+        "handler": null
+      },
+      "cardId": 26
+    },
+    "deckConstraints": []
+  },
+  "26": {
+    "cardId": 26,
+    "type": "unit",
+    "name": "Khun Aguero Agnes (evolved)",
+    "cost": 0,
+    "hp": 3,
+    "rank": "regular",
+    "positionCodes": [
+      "lightbearer",
+      "spearbearer"
+    ],
+    "traitCodes": [
+      {
+        "code": "creator"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-baam",
+      "team-sweet-and-sour",
+      "khuns-team",
+      "khun-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "create 1",
+        "handler": null,
+        "quick": false,
+        "positionCode": "lightbearer"
+      },
+      {
+        "type": "custom",
+        "raw": "deal 2 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": "spearbearer"
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "i ignore Taunt",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "evolvedFrom": 25,
+    "deckConstraints": []
+  },
+  "27": {
+    "cardId": 27,
+    "type": "unit",
+    "name": "Khun Ran",
+    "cost": 3,
+    "hp": 2,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman",
+      "spearbearer"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-fug",
+      "team-novick",
+      "khuns-team",
+      "khun-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 3 to a frontline enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "deal 2 to a backline enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "evolveInto": {
+      "trigger": {
+        "type": "custom",
+        "raw": "consume a Redan",
+        "handler": null
+      },
+      "cardId": 28
+    },
+    "deckConstraints": []
+  },
+  "28": {
+    "cardId": 28,
+    "type": "unit",
+    "name": "Khun Ran (evolved)",
+    "cost": 3,
+    "hp": 5,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman",
+      "spearbearer"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-fug",
+      "team-novick",
+      "khuns-team",
+      "khun-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 3 to a frontline enemy and 2 to a backline enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "round end: create a Redan in hand and i turn back to Khun Ran",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "evolvedFrom": 27,
+    "deckConstraints": []
+  },
+  "29": {
+    "cardId": 29,
+    "type": "unit",
+    "name": "Lo Po Bia Ren",
+    "cost": 6,
+    "hp": 5,
+    "rank": "ranker",
+    "positionCodes": [
+      "wavecontroller",
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "anima"
+    ],
+    "affiliationCodes": [
+      "lo-po-bia-family",
+      "zahards-army"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "summon a random 2 cost Shinheuh",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "steal the enemy's cheapest Shinheuh",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "frontline Shinheuh give Poison",
+        "handler": null,
+        "positionCode": "wavecontroller"
+      },
+      {
+        "type": "custom",
+        "raw": "backlike Shinheuh give Ghost",
+        "handler": null,
+        "positionCode": "scout"
+      }
+    ],
+    "deckConstraints": []
+  },
+  "30": {
+    "cardId": 30,
+    "type": "unit",
+    "name": "Monkeyman",
+    "cost": 1,
+    "hp": 2,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman",
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-chang"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "see a random card in the opponents hand",
+        "handler": null,
+        "quick": true,
+        "positionCode": "scout"
+      },
+      {
+        "type": "custom",
+        "raw": "deal 1 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": "fisherman"
+      }
+    ],
+    "passiveCodes": [],
+    "deckConstraints": []
+  },
+  "31": {
+    "cardId": 31,
+    "type": "equipment",
+    "name": "Narumada",
+    "cost": 2,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "my damage dealing abilities deal +3 damage",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [],
+    "igniteInto": {
+      "trigger": {
+        "type": "custom",
+        "raw": "my bearer kills a unit",
+        "handler": null
+      },
+      "cardId": 32
+    }
+  },
+  "32": {
+    "cardId": 32,
+    "type": "equipment",
+    "name": "Narumada (ignited)",
+    "cost": 2,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "my damage dealing abilities deal +3 damage and give Exhaust",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [],
+    "ignitedFrom": 31
+  },
+  "33": {
+    "cardId": 33,
+    "type": "unit",
+    "name": "Pedro",
+    "cost": 3,
+    "hp": 2,
+    "rank": "ranker",
+    "positionCodes": [
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "fug",
+      "karakas-servants"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "give a backline enemy Poison",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "if i have Purple Dementor equiped, i give +2 Poison to high rankers",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "34": {
+    "cardId": 34,
+    "type": "equipment",
+    "name": "Purple Dementor",
+    "cost": 3,
+    "requirements": [
+      "deployed as Scout"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "i have Resilient 2",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "ability: give Poison 4 to an enemy",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "35": {
+    "cardId": 35,
+    "type": "unit",
+    "name": "Quaetro Blitz",
+    "cost": 2,
+    "hp": 4,
+    "rank": "regular",
+    "positionCodes": [
+      "wavecontroller"
+    ],
+    "traitCodes": [
+      {
+        "code": "sharpshooter"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-chang",
+      "team-sweet-and-sour"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "spend 3: deal 2 to all burned enemies",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "Baang gives Burn",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "36": {
+    "cardId": 36,
     "type": "unit",
     "name": "Rachel",
-    "rank": "regular",
-    "hp": 1,
     "cost": 1,
-    "affiliationCodes": ["team-rachel", "khuns-team", "revolution"],
-    "positionCodes": ["lightbearer"],
-    "traitCodes": ["dealer", "creator"],
+    "hp": 1,
+    "rank": "regular",
+    "positionCodes": [
+      "lightbearer"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "irregular"
+    ],
+    "affiliationCodes": [
+      "fug",
+      "revolution",
+      "team-rachel",
+      "khuns-team"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "kill an ally to Create 3",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "spend 3: summon Akryung from your deck or hand",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "deckConstraints": []
+  },
+  "37": {
+    "cardId": 37,
+    "type": "unit",
+    "name": "Rak Wraithraiser",
+    "cost": 2,
+    "hp": 4,
+    "rank": "regular",
+    "positionCodes": [
+      "spearbearer"
+    ],
+    "traitCodes": [
+      {
+        "code": "bloodthirsty"
+      },
+      {
+        "code": "taunt"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-baam"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 4 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "deckConstraints": []
+  },
+  "38": {
+    "cardId": 38,
+    "type": "equipment",
+    "name": "Red Thryssa",
+    "cost": 3,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "ability: deal 5 to an enemy",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "39": {
+    "cardId": 39,
+    "type": "skill",
+    "name": "Redan",
+    "cost": 1,
+    "requirements": [
+      "target is an ally"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "give Poisoned",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "40": {
+    "cardId": 40,
+    "type": "equipment",
+    "name": "Second Thorn Fragment",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "unreachable",
+        "handler": "UnreachableKeyword"
+      },
+      {
+        "type": "custom",
+        "raw": "quick",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "my healing abilities heal +1 hp",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [
+      {
+        "type": "unreachable"
+      }
+    ]
+  },
+  "41": {
+    "cardId": 41,
+    "type": "skill",
+    "name": "Shinwonryu",
+    "cost": 4,
+    "requirements": [
+      "have an ally Irregular"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "Unreachable",
+        "handler": "UnreachableKeyword"
+      },
+      {
+        "type": "custom",
+        "raw": "give an enemy Doomed",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [
+      {
+        "type": "unreachable"
+      }
+    ]
+  },
+  "42": {
+    "cardId": 42,
+    "type": "equipment",
+    "name": "Steel Tree",
+    "cost": 3,
+    "requirements": [
+      "deployed as Wave Controller"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "i have Immune and Pierce",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "43": {
+    "cardId": 43,
+    "type": "skill",
+    "name": "Submerged Fish",
+    "cost": 4,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "kill an enemy regular or ranker",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "44": {
+    "cardId": 44,
+    "type": "unit",
+    "name": "Sunwoo Nare",
+    "cost": 2,
+    "hp": 1,
+    "rank": "regular",
+    "positionCodes": [
+      "scout"
+    ],
+    "traitCodes": [
+      {
+        "code": "sharpshooter"
+      }
+    ],
+    "attributeCodes": [
+      "anima"
+    ],
+    "affiliationCodes": [],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "if i have an ally Shinheuh, give Exhaust 2 to an enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "when you summon a Shinheuh, Charge 1",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "45": {
+    "cardId": 45,
+    "type": "skill",
+    "name": "The Workshop",
+    "cost": 3,
+    "requirements": [
+      "I'm the first card you play this round"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "Destroy 1",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "heal an ally 1",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "Compress the most expensive card in your hand 1",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "Reclaim 1",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "Silence an enemy",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "46": {
+    "cardId": 46,
+    "type": "equipment",
+    "name": "Third Thorn Fragment",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "unreachable",
+        "handler": "UnreachableKeyword"
+      },
+      {
+        "type": "custom",
+        "raw": "quick",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "handler": null
+      },
+      {
+        "type": "custom",
+        "raw": "i have +1 hp",
+        "handler": null
+      }
+    ],
+    "deckConstraints": [
+      {
+        "type": "unreachable"
+      }
+    ]
+  },
+  "47": {
+    "cardId": 47,
+    "type": "unit",
+    "name": "Twenty-Fifth Baam",
+    "cost": 5,
+    "hp": 6,
+    "rank": "regular",
+    "positionCodes": [
+      "wavecontroller"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "living-ignition-weapon"
+    ],
+    "affiliationCodes": [
+      "team-baam",
+      "team-fug",
+      "team-sweet-and-sour",
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "create a Thorn Fragment of your choice in hand",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "evolveInto": {
+      "trigger": {
+        "type": "custom",
+        "raw": "i am equiped with Enryu's Thorn",
+        "handler": null
+      },
+      "cardId": 48
+    },
+    "deckConstraints": []
+  },
+  "48": {
+    "cardId": 48,
+    "type": "unit",
+    "name": "Twenty-Fifth Baam (evolved)",
+    "cost": 5,
+    "hp": 6,
+    "rank": "regular",
+    "positionCodes": [
+      "wavecontroller"
+    ],
+    "traitCodes": [
+      {
+        "code": "immune"
+      }
+    ],
+    "attributeCodes": [
+      "living-ignition-weapon"
+    ],
+    "affiliationCodes": [
+      "team-baam",
+      "team-fug",
+      "team-sweet-and-sour",
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "spend 2: the next time you play Baang this turn, play it 4 more times",
+        "handler": null,
+        "quick": true,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [],
+    "evolvedFrom": 47,
+    "deckConstraints": []
+  },
+  "49": {
+    "cardId": 49,
+    "type": "unit",
+    "name": "Urek Mazino",
+    "cost": 8,
+    "hp": 11,
+    "rank": "high ranker",
+    "positionCodes": [
+      "fisherman"
+    ],
+    "traitCodes": [
+      {
+        "code": "barrier"
+      },
+      {
+        "code": "lastonestanding",
+        "value": 4
+      }
+    ],
+    "attributeCodes": [
+      "irregular"
+    ],
+    "affiliationCodes": [
+      "wolhaiksong"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "deal 4 damage to a unit",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "spend 1: deal 6 damage to a unit",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "while i am alone on the ally frontline, i have resilient and deal +3 damage",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "50": {
+    "cardId": 50,
+    "type": "unit",
+    "name": "Water Stadium",
+    "cost": 2,
+    "hp": 7,
+    "positionCodes": [
+      "landmark"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [],
     "abilityCodes": [],
-    "passiveCodes": []
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "conditions do not stack past 2",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "51": {
+    "cardId": 51,
+    "type": "skill",
+    "name": "Weights",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "give Heavy to an enemy",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "52": {
+    "cardId": 52,
+    "type": "unit",
+    "name": "Wooden Horse",
+    "cost": 2,
+    "hp": 11,
+    "positionCodes": [
+      "landmark"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [],
+    "abilityCodes": [],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "53": {
+    "cardId": 53,
+    "type": "equipment",
+    "name": "Woon's Hammer",
+    "cost": 2,
+    "requirements": [
+      "Yeon Woon is in your board"
+    ],
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "i have Strong 3",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "54": {
+    "cardId": 54,
+    "type": "unit",
+    "name": "Yeo Goseng",
+    "cost": 1,
+    "hp": 1,
+    "rank": "regular",
+    "positionCodes": [
+      "lightbearer"
+    ],
+    "traitCodes": [
+      {
+        "code": "creator"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-sweet-and-sour"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "heal a team sweet and sour member 1 HP",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "team sweet and sour members cost one less",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "55": {
+    "cardId": 55,
+    "type": "unit",
+    "name": "Yeo Miseng",
+    "cost": 2,
+    "hp": 1,
+    "rank": "regular",
+    "positionCodes": [
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "team-sweet-and-sour"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "spend 3: give me taunt and barrier",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "round end: i lose all traits",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "56": {
+    "cardId": 56,
+    "type": "unit",
+    "name": "Yeon Woon",
+    "cost": 5,
+    "hp": 4,
+    "rank": "ranker",
+    "positionCodes": [
+      "lightbearer"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "wolhaiksong",
+      "yeon-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "spend 2: give barrier to 2 allies",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "heal an ally 2 HP",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "ally yeon family members have resilient",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "57": {
+    "cardId": 57,
+    "type": "unit",
+    "name": "Yeon Yihwa",
+    "cost": 5,
+    "hp": 6,
+    "rank": "regular",
+    "positionCodes": [
+      "fisherman"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "hwayeomsa"
+    ],
+    "affiliationCodes": [
+      "team-baam",
+      "team-sweet-and-sour",
+      "yeon-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "give 2 Burned enemies Exhausted",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "units with burn 3+ can't target me",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "58": {
+    "cardId": 58,
+    "type": "unit",
+    "name": "Yu Han Sung",
+    "cost": 6,
+    "hp": 4,
+    "rank": "ranker",
+    "positionCodes": [
+      "wavecontroller"
+    ],
+    "traitCodes": [
+      {
+        "code": "dealer"
+      },
+      {
+        "code": "barrier"
+      }
+    ],
+    "attributeCodes": [],
+    "affiliationCodes": [
+      "fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "Compress Submerged Fish in your hand 1",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "create Baang in your hand",
+        "handler": null,
+        "quick": true,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "Baang gives Weak 2 and Cursed",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "59": {
+    "cardId": 59,
+    "type": "unit",
+    "name": "Yuga",
+    "cost": 4,
+    "hp": 3,
+    "rank": "ranker",
+    "positionCodes": [
+      "wavecontroller",
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "anima"
+    ],
+    "affiliationCodes": [
+      "lo-po-bia-family",
+      "zahards-army"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "give ally Bull Strength 2",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "when I am deployed, summon Bull from your deck or hand",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
   }
 }

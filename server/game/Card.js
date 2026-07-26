@@ -1,5 +1,3 @@
-import abilityRegistry from "./registries/abilityRegistry.js";
-import passiveAbilityRegisttry from "./registries/passiveAbilityRegisttry.js";
 import affiliations from "../data/affiliations.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traits from "../data/traits.json" with { type: "json" };
@@ -13,18 +11,19 @@ export default class Card {
     this.name = cardData.name;
     this.sobriquet = cardData.sobriquet || null;
     this.rarity = cardData.rarity;
-    this.maxHp = cardData.hp;
+    this.maxHp = cardData.hp ?? null;
     this.cost = cardData.cost;
     this.visible = false; // whether the card is visible to the opponent
 
-    this.affiliations = this.#mapCodesToDictionary(cardData.affiliationCodes, affiliations);
-    this.positions = this.#mapCodesToDictionary(cardData.positionCodes, positions);
+    this.affiliations = this.#mapCodesToDictionary(cardData.affiliationCodes || [], affiliations);
+    this.positions = this.#mapCodesToDictionary(cardData.positionCodes || [], positions);
     this.#addArtworkPathToDictionary(this.positions, "positions");
-    this.traits = this.#mapCodesToDictionary(cardData.traitCodes, traits);
+    this.traits = this.#mapTraitCodesToDictionary(cardData.traitCodes || [], traits);
     this.#addArtworkPathToDictionary(this.traits, "traits");
+    this.traitValues = this.#extractTraitValues(cardData.traitCodes || []); // numeric trait values
 
-    this.abilities = this.#initializeAbilities(cardData.abilityCodes, abilityRegistry);
-    this.passiveAbilities = this.#initializeAbilities(cardData.passiveCodes, passiveAbilityRegisttry);
+    this.abilities = cardData.abilityCodes || [];   // unified DSL objects
+    this.passiveAbilities = cardData.passiveCodes || []; // unified DSL objects
 
     this.owner = owner; // player username
     this.artworkPath = `/assets/images/artworks/${this.cardId}.png`;
@@ -32,25 +31,45 @@ export default class Card {
   }
 
   #mapCodesToDictionary(codes, source) {
-    return Object.fromEntries(codes.map((code) => [code, source[code]]));
+    return Object.fromEntries(
+      codes
+        .filter((code) => source[code] !== undefined)
+        .map((code) => [code, source[code]])
+    );
+  }
+
+  // Trait codes are { code, value? }; extract code for traits.json lookup
+  #mapTraitCodesToDictionary(traitCodes, source) {
+    return Object.fromEntries(
+      traitCodes
+        .filter((t) => {
+          const code = typeof t === "string" ? t : t.code;
+          return source[code] !== undefined;
+        })
+        .map((t) => {
+          const code = typeof t === "string" ? t : t.code;
+          return [code, source[code]];
+        })
+    );
+  }
+
+  // Extract numeric values from trait objects (e.g. "lastonestanding" has value 4)
+  #extractTraitValues(traitCodes) {
+    const values = {};
+    for (const t of traitCodes) {
+      if (typeof t === "object" && t.value !== undefined && t.value !== null) {
+        values[t.code] = t.value;
+      }
+    }
+    return values;
   }
 
   #addArtworkPathToDictionary(dict, type) {
-    for (const key in dict) dict[key].iconPath = `/assets/icons/${type}/${key}.png`;
-  }
-
-  /**
-   * Can be used to initialize abilities or passive abilities
-   * @param {*} codes array of ability codes / passive ability codes
-   * @param {*} registry ability registry to use
-   * @returns
-   */
-  #initializeAbilities(codes, registry) {
-    return codes.map((code) => {
-      const AbilityClass = registry[code];
-      if (!AbilityClass) throw new Error(`Ability with code ${code} not found in registry`);
-      return new AbilityClass();
-    });
+    for (const key in dict) {
+      if (dict[key] && typeof dict[key] === "object") {
+        dict[key].iconPath = `/assets/icons/${type}/${key}.png`;
+      }
+    }
   }
 
   toSanitizedObject() {

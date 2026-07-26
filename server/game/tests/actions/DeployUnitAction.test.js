@@ -5,10 +5,10 @@ const USERNAMES = ["Alice", "Bob"];
 
 describe("place cards on field", () => {
   test("placing a scout unit puts it in the frontline", () => {
-    // Ship is a scout (card id 4)
-    const game = setupGameWithCardsInHand([4, 4, 4, 4]);
+    // Monkeyman is a scout
+    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
 
-    // Deploy Ship as a scout
+    // Deploy Monkeyman as a scout
     game.processAction({
       type: "deploy-unit-action",
       data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "scout" },
@@ -18,14 +18,14 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.frontline.length).toBe(1);
     expect(playerState.field.backline.length).toBe(0);
-    expect(playerState.field.frontline[0].card.cardId).toBe(4); // Ship's ID
+    expect(playerState.field.frontline[0].card.name).toBe("Monkeyman");
     expect(playerState.field.frontline[0].placedPositionCode).toBe("scout");
-    expect(playerState.hand.length).toBe(3); // One card removed from hand
+    expect(playerState.hand.length).toBe(4); // 5 initial - 1 deployed = 4
   });
 
   test("placing a lightbearer unit puts it in the backline", () => {
-    // Rachel is a lightbearer (card id 6)
-    const game = setupGameWithCardsInHand([6, 6, 6, 6]);
+    // Rachel is a lightbearer
+    const game = setupGameWithCardsInHand(["Rachel", "Rachel", "Rachel", "Rachel"]);
 
     // Deploy Rachel as a lightbearer
     game.processAction({
@@ -37,22 +37,22 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.backline.length).toBe(1);
     expect(playerState.field.frontline.length).toBe(0);
-    expect(playerState.field.backline[0].card.cardId).toBe(6); // Rachel's id
+    expect(playerState.field.backline[0].card.name).toBe("Rachel");
     expect(playerState.field.backline[0].placedPositionCode).toBe("lightbearer");
-    expect(playerState.hand.length).toBe(3); // One card removed from hand
+    expect(playerState.hand.length).toBe(4); // 5 initial - 1 deployed = 4
   });
 
   test("deploying a unit costs shinsu", () => {
-    // Evankell costs 8 shinsu (card id 5)
-    const game = setupGameWithCardsInHand([5, 5, 5, 5]);
+    // Evankhell costs 9 shinsu (from YAML)
+    const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
 
-    // Fast-forward to round 6
-    advanceToRound(game, 6);
+    // Fast-forward to round 10 (enough shinsu for 9-cost card)
+    advanceToRound(game, 10);
 
     // Get initial shinsu state
     const initialShinsu = { ...game.playerStates[USERNAMES[0]].shinsu };
 
-    // Deploy Evankell
+    // Deploy Evankhell
     game.processAction({
       type: "deploy-unit-action",
       data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "wavecontroller" },
@@ -60,7 +60,7 @@ describe("place cards on field", () => {
 
     // Check that shinsu was spent
     const finalShinsu = game.playerStates[USERNAMES[0]].shinsu;
-    const cardCost = 8; // Evankell's cost
+    const cardCost = 9; // Evankhell's cost from YAML
 
     // The cost is first deducted from recharged shinsu, then from normal available
     const expectedRechargedSpent = Math.min(initialShinsu.recharged, cardCost);
@@ -72,8 +72,8 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit with multiple position options works for all valid positions", () => {
-    // Evankhell (id 5) can be placed as wavecontroller or fisherman
-    const game = setupGameWithCardsInHand([5, 5, 5, 5]);
+    // Evankhell can be placed as wavecontroller or fisherman
+    const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
 
     // Fast-forward to round 10
     advanceToRound(game, 10);
@@ -85,7 +85,7 @@ describe("place cards on field", () => {
     });
 
     // Reset for second test with another game instance
-    const game2 = setupGameWithCardsInHand([5, 5, 5, 5]);
+    const game2 = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
 
     // Fast-forward to round 10
     advanceToRound(game2, 10);
@@ -98,12 +98,12 @@ describe("place cards on field", () => {
 
     // Both placements should succeed
     expect(game.playerStates[USERNAMES[0]].field.frontline[0].placedPositionCode).toBe("fisherman");
-    expect(game2.playerStates[USERNAMES[0]].field.frontline[0].placedPositionCode).toBe("wavecontroller");
+    expect(game2.playerStates[USERNAMES[0]].field.backline[0].placedPositionCode).toBe("wavecontroller");
   });
 
   test("deploying a unit to invalid position throws error", () => {
-    // Khun (id 2) is only a lightbearer, not a fisherman
-    const game = setupGameWithCardsInHand([2, 2, 2, 2]);
+    // Khun Aguero Agnes is only a lightbearer, not a fisherman
+    const game = setupGameWithCardsInHand(["Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes"]);
 
     // Fast-forward to round 2
     advanceToRound(game, 2);
@@ -118,8 +118,8 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit without enough shinsu throws error", () => {
-    // Viole costs 3 shinsu (id 0), too much for round 1
-    const game = setupGameWithCardsInHand([0, 0, 0, 0]);
+    // Evankhell costs 9 shinsu, too much for round 1
+    const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
 
     // Make sure it's round 1 with only 1 shinsu
     expect(game.round).toBe(1);
@@ -134,10 +134,11 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit publishes events and switches turns", () => {
-    // Add spy to monitor event publishing
-    const game = setupGameWithCardsInHand([3, 3, 3, 3]);
+    // Rak Wraithraiser is a spearbearer, costs 2 shinsu
+    const game = setupGameWithCardsInHand(["Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser"]);
 
-    // Create spies on the event bus
+    // Need at least round 2 for 2 shinsu
+    advanceToRound(game, 2);
     const publishSpy = jest.spyOn(game.eventBus, "publish");
 
     // Initial turn state

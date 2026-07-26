@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://shinsu-duel/card.schema.json",
+  "title": "Shinsu Duel Card Schema",
+  "description": "JSON Schema for Shinsu Duel card YAML definitions",
+  "definitions": {
+    "rank": {
+      "type": "string",
+      "enum": ["regular", "ranker", "high ranker"]
+    },
+    "mainPosition": {
+      "type": "string",
+      "enum": ["fisherman", "light bearer", "scout", "spear bearer", "wave controller"]
+    },
+    "specialPosition": {
+      "type": "string",
+      "enum": ["frontline shinheuh", "backline shinheuh", "landmark"]
+    },
+    "anyPosition": {
+      "anyOf": [
+        { "$ref": "#/definitions/mainPosition" },
+        { "$ref": "#/definitions/specialPosition" }
+      ]
+    },
+    "traitName": {
+      "type": "string",
+      "enum": [
+        "barrier", "bloodthirsty", "creator", "dealer", "immune",
+        "last one standing", "lethal", "pierce", "reflect", "regenerate",
+        "resilient", "ruthless", "sharpshooter", "strong", "taunt", "vengeful"
+      ]
+    },
+    "attributeName": {
+      "type": "string",
+      "enum": [
+        "anima", "silver dwarf", "red witch", "hwayeomsa",
+        "jeonsulsa", "irregular", "living ignition weapon"
+      ]
+    },
+    "affiliationName": {
+      "type": "string",
+      "enum": [
+        "team aka", "team baam", "team bero", "team chang",
+        "team fug", "team khel hellam", "team novick", "team rachel",
+        "team sachi", "team ship", "team sweet and sour",
+        "khun's team", "fug", "hidden grove", "karaka's servants",
+        "revolution", "wolhaiksong", "zahard's army", "zahard's princesses",
+        "great warriors", "arie family", "khun family", "ha family",
+        "tu perie family", "eurasia family", "po bidau family", "yeon family",
+        "ari family", "lo po bia family", "hendo lok family", "blitz family",
+        "grand family", "edrok family", "mule family", "nissam family",
+        "canines", "data humans", "prince of the redlight district"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$id": "#unit",
+      "title": "Unit Card",
+      "type": "object",
+      "properties": {
+        "type": { "const": "unit" },
+        "name": { "type": "string", "minLength": 1 },
+        "sobriquet": { "type": "string" },
+        "cost": { "type": "integer", "minimum": 0 },
+        "hp": { "type": "integer", "minimum": 1 },
+        "rank": {
+          "anyOf": [
+            { "$ref": "#/definitions/rank" },
+            { "type": "null" }
+          ]
+        },
+        "positions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/anyPosition" }
+        },
+        "passives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "abilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "evolve": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "traits": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/attributeName" }
+        },
+        "affiliations": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/affiliationName" }
+        }
+      },
+      "required": ["type", "name", "cost", "hp", "rank", "positions", "passives", "abilities", "evolve", "traits", "attributes", "affiliations"]
+    },
+    {
+      "$id": "#skill",
+      "title": "Skill Card",
+      "type": "object",
+      "properties": {
+        "type": { "const": "skill" },
+        "name": { "type": "string", "minLength": 1 },
+        "cost": { "type": "integer", "minimum": 0 },
+        "requirements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "effects": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["type", "name", "cost", "requirements", "effects"]
+    },
+    {
+      "$id": "#equipment",
+      "title": "Equipment Card",
+      "type": "object",
+      "properties": {
+        "type": { "const": "equipment" },
+        "name": { "type": "string", "minLength": 1 },
+        "cost": { "type": "integer", "minimum": 0 },
+        "requirements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "effects": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ignition": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["type", "name", "cost", "requirements", "effects", "ignition"]
+    }
+  ]
+}

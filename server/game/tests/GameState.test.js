@@ -1,5 +1,5 @@
 import GameState from "../GameState.js";
-import { advanceToRound, expectShinsuState } from "./utils.js";
+import { advanceToRound, expectShinsuState, getCardIdByName } from "./utils.js";
 
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
@@ -174,8 +174,12 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
 
 describe("deck behavior", () => {
   test("constructor accepts custom decks and draws initial hand from deck (pop semantics)", () => {
-    const aliceDeck = [...Array.from({ length: 26 }, () => 0), 1, 2, 3, 4];
-    const bobDeck = Array(30).fill(0); // all zeros for Bob
+    const cardNames = ["Rak Wraithraiser", "Rachel", "Khun Aguero Agnes", "Evankhell"];
+    const aliceDeck = [
+      ...Array.from({ length: 26 }, () => 0),
+      ...cardNames.map((n) => getCardIdByName(n)),
+    ];
+    const bobDeck = Array(30).fill(0);
 
     const decks = { Alice: aliceDeck, Bob: bobDeck };
     const game = new GameState(ROOM_CODE, USERNAMES, decks);
@@ -184,9 +188,10 @@ describe("deck behavior", () => {
     const aliceClient = game.getClientState("Alice").you;
     expect(aliceClient.hand.length).toBe(GameState.INIT_HAND_SIZE);
 
-    // Because draw uses pop(), Alice's hand should contain the four 1's we placed at the end
-    const aliceHandIds = aliceClient.hand.map((c) => c.cardId);
-    expect(aliceHandIds).toEqual([4, 3, 2, 1]);
+    // Because draw uses pop(), Alice's hand should contain the named cards in reverse order
+    // followed by filler cards (26 zeros in deck, 1 poppable zero)
+    const aliceHandNames = aliceClient.hand.map((c) => c.name);
+    expect(aliceHandNames.slice(0, 4)).toEqual([...cardNames].reverse());
 
     // Deck size decreased GameState INIT_HAND_SIZE
     expect(aliceClient.deckSize).toBe(GameState.INIT_DECK_SIZE - GameState.INIT_HAND_SIZE);
