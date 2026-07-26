@@ -4,8 +4,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const currentFile = fileURLToPath(import.meta.url);
-const scriptsDirectory = path.dirname(currentFile);
-const cardsDirectory = path.join(scriptsDirectory, "../cards");
+const projectRoot = path.resolve(path.dirname(currentFile), "..");
+const cardsDirectory = path.join(projectRoot, "data", "cards");
 
 const allowedTypes = new Set(["unit", "skill", "equipment"]);
 
@@ -45,13 +45,6 @@ const colors = {
   cyan: "\x1b[36m",
 };
 
-function toDisplayName(snakeName) {
-  return snakeName
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 function normalizeName(rawName) {
   return rawName
     .toLowerCase()
@@ -66,7 +59,7 @@ async function main() {
   if (!type || !nameArg) {
     console.error(`${colors.red}Usage: npm run create:card <type> <name>${colors.reset}`);
     console.error(`${colors.red}Types: ${[...allowedTypes].join(", ")}${colors.reset}`);
-    console.error(`${colors.red}Example: npm run create:card unit khun_ran${colors.reset}`);
+    console.error(`${colors.red}Example: npm run create:card unit Khun Ran${colors.reset}`);
     process.exitCode = 1;
     return;
   }
@@ -83,20 +76,38 @@ async function main() {
 
   try {
     await fs.access(filePath);
-    console.error(`${colors.red}File already exists: docs/cards/${filename}${colors.reset}`);
+    console.error(`${colors.red}Card file already exists: ${filename}${colors.reset}`);
     process.exitCode = 1;
     return;
   } catch {
-    // file does not exist, proceed
+    // File does not exist — proceed
   }
 
-  const displayName = toDisplayName(nameArg);
-  const content = templates[type].replace(/^(name: )$/m, `$1${displayName}`);
-  await fs.writeFile(filePath, content, "utf8");
-  console.log(`${colors.green}Created ${colors.cyan}docs/cards/${filename}${colors.reset}`);
+  const displayName = nameArg
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  let template = templates[type];
+
+  // For unit cards, pre-fill the name
+  if (type === "unit") {
+    template = template.replace("name: ", `name: ${displayName}`);
+  } else {
+    template = template.replace("name: ", `name: ${displayName}`);
+  }
+
+  try {
+    await fs.mkdir(cardsDirectory, { recursive: true });
+    await fs.writeFile(filePath, template, "utf-8");
+    console.log(`${colors.green}✓ Created ${colors.cyan}${filename}${colors.green} (${type})${colors.reset}`);
+  } catch (err) {
+    console.error(`${colors.red}Failed to create file: ${err.message}${colors.reset}`);
+    process.exitCode = 1;
+  }
 }
 
 main().catch((error) => {
-  console.error(`${colors.red}${error}${colors.reset}`);
+  console.error(`${colors.red}${error.message}${colors.reset}`);
   process.exitCode = 1;
 });

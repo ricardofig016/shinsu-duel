@@ -6,7 +6,7 @@ import yaml from "js-yaml";
 
 const currentFile = fileURLToPath(import.meta.url);
 const scriptsDirectory = path.dirname(currentFile);
-const cardsDirectory = path.join(scriptsDirectory, "..", "cards");
+const cardsDirectory = path.join(scriptsDirectory, "..", "data", "cards");
 
 const colors = {
   Reset: "\x1b[0m",
@@ -48,156 +48,140 @@ ${colors.Yellow}GLOBAL SEARCH (no "=")${colors.Reset}
   Basically a Ctrl+F over the entire card collection.
 
 ${colors.Yellow}FIELD=VALUE SEARCH${colors.Reset}
-  name=         Fuzzy — case-insensitive substring, ignoring spaces & special chars
-  abilities=      Substring search within each ability text (case-insensitive)
-  effects=        Substring search within each effect text  (case-insensitive)
-  passives=       Substring search within each passive text (case-insensitive)
-  requirements=   Substring search within each requirement text (case-insensitive)
-  cost= / hp=   Exact match or range (e.g. cost=2-5, hp=4-6)
-  Other fields  Exact case-insensitive match (scalar) or element match (array)
-  *=            Wildcard — matches any card that has a non-empty value for that field
+  name=         Fuzzy — case-insensitive substring, ignoring spaces & special characters
+  type=         Exact — unit, skill, equipment
+  cost=         Range — number or "min-max" inclusive
+  hp=           Range — number or "min-max" inclusive
+  rank=         Fuzzy — case-insensitive substring
+  positions=    Fuzzy — single position substring
+  traits=       Fuzzy — trait name (ignores trailing number)
+  attributes=   Fuzzy — attribute substring
+  affiliations= Fuzzy — affiliation substring
+  passives=     Substring — case-insensitive text search
+  abilities=    Substring — case-insensitive text search
+  effects=      Substring — case-insensitive text search
+  requirements= Substring — case-insensitive text search
+  evolve=       Substring — case-insensitive text search
+  ignition=     Substring — case-insensitive text search
 
-${colors.Yellow}EXAMPLES${colors.Reset}
-  npm run lookup unit
-  npm run lookup shinheuh
-  npm run lookup name=Thorn
-  npm run lookup name=Thorn Fragment
-  npm run lookup cost=2
-  npm run lookup cost=2-5
-  npm run lookup hp=6
-  npm run lookup hp=4-6
-  npm run lookup abilities=spend 2:
-  npm run lookup effects=heal
-  npm run lookup /dist wave controller
-  npm run lookup positions=fisherman,cost=3
-  npm run lookup positions=fisherman,cost=3,frontline
-  npm run lookup ignition=*
-`);
+${colors.Yellow}WILDCARD${colors.Reset}
+  field=*       Matches any card that has a non-null, non-empty value for that field.
+`)
 }
 
-/** Lowercase, strip everything except a-z0-9. */
-function fuzzyNormalize(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+// ---------------------------------------------------------------------------
+// File loading
+// ---------------------------------------------------------------------------
+
+async function findCardFiles() {
+  const entries = await fs.readdir(cardsDirectory);
+  return entries
+    .filter((e) => e.endsWith(".yml") || e.endsWith(".yaml"))
+    .map((e) => path.join(cardsDirectory, e));
 }
 
-/** Fuzzy name match: both sides are fuzzy-normalised, then substring check. */
-function fuzzyNameMatch(cardName, lookupValue) {
-  return fuzzyNormalize(cardName).includes(fuzzyNormalize(lookupValue));
-}
-
-function substringMatch(text, lookupValue) {
-  return text.toLowerCase().includes(lookupValue.toLowerCase());
-}
-
-function exactMatch(a, b) {
-  return String(a).toLowerCase() === String(b).toLowerCase();
-}
-
-/**
- * Parse a range string like "2-5" and test whether `cardValue` falls inside
- * the inclusive bounds.  Returns false when `lookupValue` isn't a range.
- */
-function rangeMatch(cardValue, lookupValue) {
-  const m = /^(\d+)-(\d+)$/.exec(lookupValue);
-  if (!m) return false;
-  const min = Number(m[1]);
-  const max = Number(m[2]);
-  const num = Number(cardValue);
-  if (Number.isNaN(num)) return false;
-  return num >= min && num <= max;
-}
-
-function asList(value) {
-  if (value === null || value === undefined) return [];
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry) => typeof entry === "string");
+async function loadCard(filePath) {
+  try {
+    const raw = await fs.readFile(filePath, "utf8");
+    return yaml.load(raw);
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing
 // ---------------------------------------------------------------------------
 
-/**
- * Parse CLI arguments into query objects.
- *
- * PowerShell treats ',' as an array operator and strips it between arguments,
- * so "type=unit, cost=2" arrives as ["type=unit", "cost=2"].  We split each
- * argument on ',' individually to handle both styles, then classify segments:
- * those containing '=' are always separate field=value queries; consecutive
- * segments without '=' are joined into a single global search term.
- *
- * Returns { help: true } for --help / -h,
- *         { queries: [{ field, value }, ...], dist } otherwise.
- *         dist is true when the --dist flag is present.
- */
 function parseArgs(rawArgs) {
-  // Split each arg on ',' individually — handles both "a,b" (single arg) and
-  // "a", "b" (PowerShell splitting) styles.
-  const allSegments = rawArgs
-    .flatMap((arg) => arg.split(","))
-    .map((s) => s.trim())
-    .filter((s) => s !== "");
-
-  // Detect and remove /dist flag
-  const dist = allSegments.some((s) => /^[-/]{1,2}dist$/i.test(s));
-  const filtered = allSegments.filter((s) => !/^[-/]{1,2}dist$/i.test(s));
-
-  const joined = filtered.join(" ");
-
-  if (joined === "--help" || joined === "-h" || joined === "/help") {
-    return { help: true, dist };
-  }
-
-  if (filtered.length === 0) {
-    return { queries: [{ field: null, value: "" }], dist };
-  }
-
-  // Classify: segments with '=' are field=value queries (always separate);
-  // segments without '=' are global search fragments — consecutive ones are
-  // joined into a single global query.
   const queries = [];
-  let globalParts = [];
+  let dist = false;
+  let help = false;
 
-  for (const seg of filtered) {
-    const eqIndex = seg.indexOf("=");
-    if (eqIndex >= 0) {
-      // Flush any accumulated global parts first
-      if (globalParts.length > 0) {
-        queries.push({ field: null, value: globalParts.join(" ").toLowerCase() });
-        globalParts = [];
+  for (const a of rawArgs) {
+    if (a === "/dist") {
+      dist = true;
+      continue;
+    }
+    if (a === "/help") {
+      help = true;
+      continue;
+    }
+    queries.push(a);
+  }
+
+  const parsedQueries = [];
+  for (const q of queries) {
+    // Split on comma, but only if it's a delimiter between queries
+    const parts = q.split(",");
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed.length > 0) {
+        parsedQueries.push(part.trim());
       }
-      const field = seg.slice(0, eqIndex).trim().toLowerCase();
-      const value = seg.slice(eqIndex + 1).trim();
-      queries.push({ field, value });
-    } else {
-      globalParts.push(seg);
     }
   }
 
-  if (globalParts.length > 0) {
-    queries.push({ field: null, value: globalParts.join(" ").toLowerCase() });
-  }
-
-  if (queries.length === 0) {
-    queries.push({ field: null, value: "" });
-  }
-
-  return { queries, dist };
+  return {
+    queries: parsedQueries.map((q) => {
+      const eq = q.indexOf("=");
+      if (eq === -1) return { field: null, value: q.toLowerCase() };
+      return { field: q.slice(0, eq).toLowerCase(), value: q.slice(eq + 1) };
+    }),
+    dist,
+    help,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// Matching logic
+// Matching primitives
 // ---------------------------------------------------------------------------
 
-/**
- * Match a single card-field value against a user-supplied lookup value.
- * Chooses the strategy based on the field name.
- */
-function fieldValueMatches(fieldName, cardValue, lookupValue) {
-  if (cardValue === null || cardValue === undefined) return false;
+function substringMatch(actual, expected) {
+  return String(actual).toLowerCase().includes(String(expected).toLowerCase());
+}
+
+function exactMatch(actual, expected) {
+  return String(actual).toLowerCase() === String(expected).toLowerCase();
+}
+
+function fuzzyNameMatch(actual, expected) {
+  const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return normalize(actual).includes(normalize(expected));
+}
+
+function rangeMatch(actual, expected) {
+  const rangeMatch = String(expected).match(/^(\d+)\s*-\s*(\d+)$/);
+  if (rangeMatch) {
+    const min = parseInt(rangeMatch[1], 10);
+    const max = parseInt(rangeMatch[2], 10);
+    return Number(actual) >= min && Number(actual) <= max;
+  }
+  return false;
+}
+
+function asList(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (raw === null || raw === undefined) return [];
+  return [raw];
+}
+
+// ---------------------------------------------------------------------------
+// Per-field matching
+// ---------------------------------------------------------------------------
+
+function fieldMatches(card, fieldName, lookupValue) {
+  const cardValue = card[fieldName];
+
+  if (fieldName === "type") {
+    return exactMatch(cardValue, lookupValue);
+  }
 
   if (fieldName === "name") {
-    return fuzzyNameMatch(String(cardValue), lookupValue);
+    if (typeof cardValue === "string") {
+      return fuzzyNameMatch(cardValue, lookupValue);
+    }
+    return false;
   }
 
   if (fieldName === "abilities" || fieldName === "effects" || fieldName === "passives" || fieldName === "requirements") {
@@ -263,40 +247,20 @@ function fieldValueGetMatches(card, field, lookupValue) {
   }
 
   if (Array.isArray(raw)) {
-    const values = asList(raw).filter((v) => fieldValueMatches(field, v, lookupValue));
+    const values = asList(raw).filter((v) => fieldMatches(card, field, lookupValue) || substringMatch(v, lookupValue));
     if (values.length > 0) {
       return [{ field, values }];
     }
     return [];
   }
 
-  if (fieldValueMatches(field, raw, lookupValue)) {
+  // String/number/boolean — direct match
+  if (fieldMatches(card, field, lookupValue)) {
     return [{ field, values: [String(raw)] }];
   }
 
   return [];
 }
-
-// ---------------------------------------------------------------------------
-// File I/O
-// ---------------------------------------------------------------------------
-
-async function findCardFiles() {
-  const entries = await fs.readdir(cardsDirectory, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && /\.ya?ml$/i.test(entry.name))
-    .map((entry) => path.join(cardsDirectory, entry.name))
-    .sort((left, right) => left.localeCompare(right));
-}
-
-async function loadCard(filePath) {
-  const source = await fs.readFile(filePath, "utf8");
-  return yaml.load(source);
-}
-
-// ---------------------------------------------------------------------------
-// Distribution display
-// ---------------------------------------------------------------------------
 
 /** Print a simple horizontal bar-chart of type, HP, cost, rank, positions, traits, attributes and affiliations distribution. */
 function showDistribution(matches) {
