@@ -154,7 +154,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "Clense an ally",
+        "raw": "Cleanse an ally",
         "handler": null
       }
     ],
