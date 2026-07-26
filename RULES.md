@@ -240,7 +240,7 @@ Traits are positive permanent effects native to cards. They are color coded as s
 
 1. Defensive Buffs (Yellow)
 2. Damage Buffs (Orange)
-3. Utility Buffs/HP Gain (Blue)
+3. Utility Buffs (Blue)
 
 **List of Traits:**
 

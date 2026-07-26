@@ -11,30 +11,35 @@ Traits are color coded per RULES.md:
 
 - **Defensive Buffs (Yellow)**
 - **Damage Buffs (Orange)**
-- **Utility Buffs/HP Gain (Blue)**
+- **Utility Buffs (Blue)**
 
-| Status | File                         | Name              | Color  |
-| ------ | ---------------------------- | ----------------- | ------ |
-| ✅     | `traits/barrier.png`         | Barrier           | Yellow |
-| ✅     | `traits/bloodthirsty.png`    | Bloodthirsty      | Blue |
-| ✅     | `traits/creator.png`         | Creator           | Blue   |
-| ✅     | `traits/dealer.png`          | Dealer            | Blue   |
-| ✅     | `traits/immune.png`          | Immune            | Yellow |
+| Status | File                           | Name              | Color  |
+| ------ | ------------------------------ | ----------------- | ------ |
+| ✅     | `traits/barrier.png`           | Barrier           | Yellow |
+| ✅     | `traits/bloodthirsty.png`      | Bloodthirsty      | Blue   |
+| ✅     | `traits/creator.png`           | Creator           | Blue   |
+| ✅     | `traits/dealer.png`            | Dealer            | Blue   |
+| ✅     | `traits/immune.png`            | Immune            | Yellow |
 | ✅     | `traits/last-one-standing.png` | Last One Standing | Yellow |
-| ✅     | `traits/lethal.png`          | Lethal            | Orange |
-| ✅     | `traits/pierce.png`          | Pierce            | Orange |
-| ✅     | `traits/reflect.png`         | Reflect           | Yellow |
-| ✅     | `traits/regenerate.png`      | Regenerate        | Blue |
-| ✅     | `traits/resilient.png`       | Resilient         | Yellow |
-| ✅     | `traits/ruthless.png`        | Ruthless          | Orange |
-| ✅     | `traits/sharpshooter.png`    | Sharpshooter      | Blue   |
-| ✅     | `traits/strong.png`          | Strong            | Orange |
-| ✅     | `traits/taunt.png`           | Taunt             | Yellow |
-| ✅     | `traits/vengeful.png`        | Vengeful          | Orange |
+| ✅     | `traits/lethal.png`            | Lethal            | Orange |
+| ✅     | `traits/pierce.png`            | Pierce            | Orange |
+| ✅     | `traits/reflect.png`           | Reflect           | Yellow |
+| ✅     | `traits/regenerate.png`        | Regenerate        | Blue   |
+| ✅     | `traits/resilient.png`         | Resilient         | Yellow |
+| ✅     | `traits/ruthless.png`          | Ruthless          | Orange |
+| ✅     | `traits/sharpshooter.png`      | Sharpshooter      | Blue   |
+| ✅     | `traits/strong.png`            | Strong            | Orange |
+| ✅     | `traits/taunt.png`             | Taunt             | Yellow |
+| ✅     | `traits/vengeful.png`          | Vengeful          | Orange |
 
 ---
 
 ## Conditions (11 total — `conditions/`)
+
+Conditions are color coded per RULES.md:
+
+- **Damage Debuffs (Red)**
+- **Utility Debuffs (Purple)**
 
 | Status | File                       | Name      | Color  |
 | ------ | -------------------------- | --------- | ------ |

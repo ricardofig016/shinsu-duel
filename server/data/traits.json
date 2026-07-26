@@ -1,18 +1,130 @@
 {
-  "barrier": { "name": "Barrier", "description": "Negate all damage the first time I take damage each round", "numeric": false },
-  "bloodthirsty": { "name": "Bloodthirsty", "description": "When I kill a unit, restore x HP", "numeric": true },
-  "creator": { "name": "Creator", "description": "When I am deployed, Create x", "numeric": true },
-  "dealer": { "name": "Dealer", "description": "When I am deployed, draw x cards", "numeric": true },
-  "immune": { "name": "Immune", "description": "I am immune to conditions", "numeric": false },
-  "last-one-standing": { "name": "Last One Standing", "description": "If I am the only ally unit, I have +x HP", "numeric": true },
-  "lethal": { "name": "Lethal", "description": "When I damage another unit, kill it", "numeric": false },
-  "pierce": { "name": "Pierce", "description": "When I kill a unit, Destroy x", "numeric": true },
-  "reflect": { "name": "Reflect", "description": "When I take damage, deal x damage to my attacker", "numeric": true },
-  "regenerate": { "name": "Regenerate", "description": "Round end: heal me x HP", "numeric": true },
-  "resilient": { "name": "Resilient", "description": "I take -x damage from all sources", "numeric": true },
-  "ruthless": { "name": "Ruthless", "description": "I deal +x damage if the enemy has less than 10 lighthouses", "numeric": true },
-  "sharpshooter": { "name": "Sharpshooter", "description": "I can target any enemy unit", "numeric": false },
-  "strong": { "name": "Strong", "description": "I deal +x damage", "numeric": true },
-  "taunt": { "name": "Taunt", "description": "Enemies are forced to target me if they can", "numeric": false },
-  "vengeful": { "name": "Vengeful", "description": "I deal +x damage if I am missing HP", "numeric": true }
+  "barrier": {
+    "name": "Barrier",
+    "description": "Negate all damage the first time I take damage each round",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": false,
+    "iconPath": "traits/barrier.png"
+  },
+  "bloodthirsty": {
+    "name": "Bloodthirsty",
+    "description": "When I kill a unit, restore x HP",
+    "color": "blue",
+    "colorName": "Utility Buff",
+    "numeric": true,
+    "iconPath": "traits/bloodthirsty.png"
+  },
+  "creator": {
+    "name": "Creator",
+    "description": "When I am deployed, Create x",
+    "color": "blue",
+    "colorName": "Utility Buff",
+    "numeric": true,
+    "iconPath": "traits/creator.png"
+  },
+  "dealer": {
+    "name": "Dealer",
+    "description": "When I am deployed, draw x cards",
+    "color": "blue",
+    "colorName": "Utility Buff",
+    "numeric": true,
+    "iconPath": "traits/dealer.png"
+  },
+  "immune": {
+    "name": "Immune",
+    "description": "I am immune to conditions",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": false,
+    "iconPath": "traits/immune.png"
+  },
+  "last-one-standing": {
+    "name": "Last One Standing",
+    "description": "If I am the only ally unit, I have +x HP",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": true,
+    "iconPath": "traits/last-one-standing.png"
+  },
+  "lethal": {
+    "name": "Lethal",
+    "description": "When I damage another unit, kill it",
+    "color": "orange",
+    "colorName": "Damage Buff",
+    "numeric": false,
+    "iconPath": "traits/lethal.png"
+  },
+  "pierce": {
+    "name": "Pierce",
+    "description": "When I kill a unit, Destroy x",
+    "color": "orange",
+    "colorName": "Damage Buff",
+    "numeric": true,
+    "iconPath": "traits/pierce.png"
+  },
+  "reflect": {
+    "name": "Reflect",
+    "description": "When I take damage, deal x damage to my attacker",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": true,
+    "iconPath": "traits/reflect.png"
+  },
+  "regenerate": {
+    "name": "Regenerate",
+    "description": "Round end: heal me x HP",
+    "color": "blue",
+    "colorName": "Utility Buff",
+    "numeric": true,
+    "iconPath": "traits/regenerate.png"
+  },
+  "resilient": {
+    "name": "Resilient",
+    "description": "I take -x damage from all sources",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": true,
+    "iconPath": "traits/resilient.png"
+  },
+  "ruthless": {
+    "name": "Ruthless",
+    "description": "I deal +x damage if the enemy has less than 10 lighthouses",
+    "color": "orange",
+    "colorName": "Damage Buff",
+    "numeric": true,
+    "iconPath": "traits/ruthless.png"
+  },
+  "sharpshooter": {
+    "name": "Sharpshooter",
+    "description": "I can target any enemy unit",
+    "color": "blue",
+    "colorName": "Utility Buff",
+    "numeric": false,
+    "iconPath": "traits/sharpshooter.png"
+  },
+  "strong": {
+    "name": "Strong",
+    "description": "I deal +x damage",
+    "color": "orange",
+    "colorName": "Damage Buff",
+    "numeric": true,
+    "iconPath": "traits/strong.png"
+  },
+  "taunt": {
+    "name": "Taunt",
+    "description": "Enemies are forced to target me if they can",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": false,
+    "iconPath": "traits/taunt.png"
+  },
+  "vengeful": {
+    "name": "Vengeful",
+    "description": "I deal +x damage if I am missing HP",
+    "color": "orange",
+    "colorName": "Damage Buff",
+    "numeric": true,
+    "iconPath": "traits/vengeful.png"
+  }
 }
