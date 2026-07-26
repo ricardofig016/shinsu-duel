@@ -252,7 +252,7 @@ Traits are positive permanent effects native to cards. They are color coded as s
 6. **Last One Standing `x`**: If I am the only ally unit, I have +`x` HP
 7. **Lethal**: When I damage another unit, kill it
 8. **Pierce `x`**: When I kill a unit, Destroy `x`
-9.  **Reflect `x`**: When I take damage, deal `x` damage to my attacker
+9. **Reflect `x`**: When I take damage, deal `x` damage to my attacker
 10. **Regenerate `x`**: Round end: heal me `x` HP
 11. **Resilient `x`**: I take -`x` damage from all sources
 12. **Ruthless `x`**: I deal +`x` damage if the enemy has less than 10 lighthouses
@@ -435,6 +435,7 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 | [FUG](https://towerofgod.fandom.com/wiki/FUG)                                                          | Organization | Ha Jinsung            |
 | [Hidden Grove](https://towerofgod.fandom.com/wiki/Hidden_Grove)                                        | Organization | Cha                   |
 | [Karaka's Servants](https://towerofgod.fandom.com/wiki/Karaka's_Servants)                              | Organization | Pedro                 |
+| [Prince of the Redlight District](https://towerofgod.fandom.com/wiki/Prince_of_the_Red-light_District) | Organization | Karaka                |
 | [Revolution](https://towerofgod.fandom.com/wiki/Revolution)                                            | Organization | Lo Po Bia Goruro      |
 | [Wolhaiksong](https://towerofgod.fandom.com/wiki/Wolhaiksong)                                          | Organization | Baek Ryun             |
 | [Zahard's Army](https://towerofgod.fandom.com/wiki/Zahard's_Army)                                      | Organization | Khun Maschenny Zahard |
@@ -458,7 +459,6 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 | [Nissam Family](https://towerofgod.fandom.com/wiki/Nissam_Family)                                      | Family       | Khul Nissam Kay       |
 | [Canines](https://towerofgod.fandom.com/wiki/Canines)                                                  | Species      | Baylord Yama          |
 | [Data Humans](https://towerofgod.fandom.com/wiki/Data_Humans)                                          | Species      | Khun Eduan (Data)     |
-| [Prince of the Redlight District](https://towerofgod.fandom.com/wiki/Prince_of_the_Red-light_District) | Other        | Karaka                |
 
 ## Rank
 
@@ -505,36 +505,36 @@ If the tables can't satisfy your specific need, decide with your opponent how to
 
 Roll a d20:
 
-- 1   Barrier
-- 2   Bloodthirsty
-- 3   Creator
-- 4   Dealer
-- 5   Immune
-- 6   Last One Standing
-- 7   Lethal
-- 8   Pierce
-- 9   Reflect
-- 10  Regenerate
-- 11  Resilient
-- 12  Ruthless
-- 13  Sharpshooter
-- 14  Strong
-- 15  Taunt
+- 1 Barrier
+- 2 Bloodthirsty
+- 3 Creator
+- 4 Dealer
+- 5 Immune
+- 6 Last One Standing
+- 7 Lethal
+- 8 Pierce
+- 9 Reflect
+- 10 Regenerate
+- 11 Resilient
+- 12 Ruthless
+- 13 Sharpshooter
+- 14 Strong
+- 15 Taunt
 - 16+ reroll
 
 ### Random Condition
 
 Roll a d12:
 
-- 1   Burned
-- 2   Cursed
-- 3   Doomed
-- 4   Exhausted
-- 5   Frozen
-- 6   Ghost
-- 7   Heavy
-- 8   Poisoned
-- 9   Rooted
-- 10  Stunned
-- 11  Weak
-- 12  reroll
+- 1 Burned
+- 2 Cursed
+- 3 Doomed
+- 4 Exhausted
+- 5 Frozen
+- 6 Ghost
+- 7 Heavy
+- 8 Poisoned
+- 9 Rooted
+- 10 Stunned
+- 11 Weak
+- 12 reroll
