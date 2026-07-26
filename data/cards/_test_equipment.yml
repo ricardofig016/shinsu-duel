@@ -1,0 +1,7 @@
+type: equipment
+name: _Test Equipment
+cost: 1
+requirements:
+effects:
+  - test
+ignition:

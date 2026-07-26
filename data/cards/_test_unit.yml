@@ -1,0 +1,20 @@
+type: unit
+name: _Test Unit
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+  - scout
+  - light bearer
+  - wave controller
+  # - frontline shinheuh
+  # - backline shinheuh
+  # - landmark
+passives:
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:

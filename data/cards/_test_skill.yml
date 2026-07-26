@@ -1,0 +1,6 @@
+type: skill
+name: _Test Skill
+cost: 1
+requirements:
+effects:
+  - test
