@@ -7,42 +7,48 @@ Icons are **56×56 PNG** files with transparent backgrounds.
 
 ## Traits (16 total — `traits/`)
 
-| Status | File                          | Name             |
-| ------ | ----------------------------- | ---------------- |
-| ✅     | `traits/barrier.png`          | Barrier          |
-| ✅     | `traits/bloodthirsty.png`     | Bloodthirsty     |
-| ✅     | `traits/creator.png`          | Creator          |
-| ✅     | `traits/dealer.png`           | Dealer           |
-| ✅     | `traits/immune.png`           | Immune           |
-| ✅     | `traits/lastonestanding.png`  | Last One Standing|
-| ✅     | `traits/lethal.png`           | Lethal           |
-| ✅     | `traits/pierce.png`           | Pierce           |
-| ✅     | `traits/reflect.png`          | Reflect          |
-| ✅     | `traits/regenerate.png`       | Regenerate       |
-| ✅     | `traits/resilient.png`        | Resilient        |
-| ✅     | `traits/ruthless.png`         | Ruthless         |
-| ✅     | `traits/sharpshooter.png`     | Sharpshooter     |
-| ✅     | `traits/strong.png`           | Strong           |
-| ✅     | `traits/taunt.png`            | Taunt            |
-| ❌     | `traits/vengeful.png`         | Vengeful         |
+Traits are color coded per RULES.md:
+
+- **Defensive Buffs (Yellow)**
+- **Damage Buffs (Orange)**
+- **Utility Buffs/HP Gain (Blue)**
+
+| Status | File                         | Name              | Color  |
+| ------ | ---------------------------- | ----------------- | ------ |
+| ✅     | `traits/barrier.png`         | Barrier           | Yellow |
+| ✅     | `traits/bloodthirsty.png`    | Bloodthirsty      | Orange |
+| ✅     | `traits/creator.png`         | Creator           | Blue   |
+| ✅     | `traits/dealer.png`          | Dealer            | Blue   |
+| ✅     | `traits/immune.png`          | Immune            | Yellow |
+| ✅     | `traits/lastonestanding.png` | Last One Standing | Yellow |
+| ✅     | `traits/lethal.png`          | Lethal            | Orange |
+| ✅     | `traits/pierce.png`          | Pierce            | Orange |
+| ✅     | `traits/reflect.png`         | Reflect           | Orange |
+| ✅     | `traits/regenerate.png`      | Regenerate        | Yellow |
+| ✅     | `traits/resilient.png`       | Resilient         | Yellow |
+| ✅     | `traits/ruthless.png`        | Ruthless          | Orange |
+| ✅     | `traits/sharpshooter.png`    | Sharpshooter      | Blue   |
+| ✅     | `traits/strong.png`          | Strong            | Orange |
+| ✅     | `traits/taunt.png`           | Taunt             | Yellow |
+| ✅     | `traits/vengeful.png`        | Vengeful          | Orange |
 
 ---
 
 ## Conditions (11 total — `conditions/`)
 
-| Status | File                        | Name      | Color  |
-| ------ | --------------------------- | --------- | ------ |
-| ✅     | `conditions/burned.png`     | Burned    | Red    |
-| ✅     | `conditions/cursed.png`     | Cursed    | Red    |
-| ✅     | `conditions/doomed.png`     | Doomed    | Red    |
-| ✅     | `conditions/exhausted.png`  | Exhausted | Purple |
-| ❌     | `conditions/frozen.png`     | Frozen    | Purple |
-| ✅     | `conditions/ghost.png`      | Ghost     | Purple |
-| ✅     | `conditions/heavy.png`      | Heavy     | Purple |
-| ✅     | `conditions/poisoned.png`   | Poisoned  | Red    |
-| ✅     | `conditions/rooted.png`     | Rooted    | Purple |
-| ✅     | `conditions/stunned.png`    | Stunned   | Purple |
-| ✅     | `conditions/weak.png`       | Weak      | Red    |
+| Status | File                       | Name      | Color  |
+| ------ | -------------------------- | --------- | ------ |
+| ✅     | `conditions/burned.png`    | Burned    | Red    |
+| ✅     | `conditions/cursed.png`    | Cursed    | Red    |
+| ✅     | `conditions/doomed.png`    | Doomed    | Red    |
+| ✅     | `conditions/exhausted.png` | Exhausted | Purple |
+| ✅     | `conditions/frozen.png`    | Frozen    | Purple |
+| ✅     | `conditions/ghost.png`     | Ghost     | Purple |
+| ✅     | `conditions/heavy.png`     | Heavy     | Purple |
+| ✅     | `conditions/poisoned.png`  | Poisoned  | Red    |
+| ✅     | `conditions/rooted.png`    | Rooted    | Purple |
+| ✅     | `conditions/stunned.png`   | Stunned   | Purple |
+| ✅     | `conditions/weak.png`      | Weak      | Red    |
 
 ---
 
@@ -55,8 +61,8 @@ Icons are **56×56 PNG** files with transparent backgrounds.
 | ✅     | `positions/scout.png`              | Scout              | Frontline |
 | ✅     | `positions/light-bearer.png`       | Light Bearer       | Backline  |
 | ✅     | `positions/wave-controller.png`    | Wave Controller    | Backline  |
-| ❌     | `positions/frontline-shinheuh.png` | Frontline Shinheuh | Frontline |
-| ❌     | `positions/backline-shinheuh.png`  | Backline Shinheuh  | Backline  |
+| ✅     | `positions/frontline-shinheuh.png` | Frontline Shinheuh | Frontline |
+| ✅     | `positions/backline-shinheuh.png`  | Backline Shinheuh  | Backline  |
 | ✅     | `positions/landmark.png`           | Landmark           | Backline  |
 
 > **Note:** The old `positions/shinheuh.png` is now deprecated — replace with two separate icons for frontline and backline variants.
@@ -65,30 +71,18 @@ Icons are **56×56 PNG** files with transparent backgrounds.
 
 ## Attributes (7 total — `attributes/`)
 
-| Status | File                                   | Name                    |
-| ------ | -------------------------------------- | ----------------------- |
-| ❌     | `attributes/anima.png`                 | Anima                   |
-| ❌     | `attributes/silver-dwarf.png`          | Silver Dwarf            |
-| ❌     | `attributes/red-witch.png`             | Red Witch               |
-| ❌     | `attributes/hwayeomsa.png`             | Hwayeomsa               |
-| ❌     | `attributes/jeonsulsa.png`             | Jeonsulsa               |
-| ❌     | `attributes/irregular.png`             | Irregular               |
-| ❌     | `attributes/living-ignition-weapon.png`| Living Ignition Weapon  |
+| Status | File                                    | Name                   |
+| ------ | --------------------------------------- | ---------------------- |
+| ✅     | `attributes/anima.png`                  | Anima                  |
+| ✅     | `attributes/silver-dwarf.png`           | Guide - Silver Dwarf   |
+| ✅     | `attributes/red-witch.png`              | Guide - Red Witch      |
+| ✅     | `attributes/hwayeomsa.png`              | Hwayeomsa              |
+| ✅     | `attributes/jeonsulsa.png`              | Jeonsulsa              |
+| ✅     | `attributes/irregular.png`              | Irregular              |
+| ✅     | `attributes/living-ignition-weapon.png` | Living Ignition Weapon |
 
 > **Note:** The old `attributes/guide.png` is deprecated — split into `silver-dwarf.png` and `red-witch.png`.
 
 ---
 
-## Summary
-
-| Category    | Total | Have | Missing |
-| ----------- | ----- | ---- | ------- |
-| Traits      | 16    | 15   | 1       |
-| Conditions  | 11    | 10   | 1       |
-| Positions   | 8     | 6    | 2       |
-| Attributes  | 7     | 0    | 7       |
-| **Total**   | **42**| **31**| **11**  |
-
----
-
-*Generated during Phase 0 of PROJECT_RESURRECTION_PLAN.md. Update this file as new icons are added.*
+_Generated during Phase 0 of PROJECT_RESURRECTION_PLAN.md. Update this file as new icons are added._
