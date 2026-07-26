@@ -1,0 +1,21 @@
+type: unit
+name: Evan Edrok
+cost: 6
+hp: 5
+rank: high ranker
+positions:
+  - scout
+  - light bearer
+passives:
+  - whenever you draw an equipment, draw again
+  - when i'm equiped with Frog Fisher, Reclaim 1 equipment
+abilities:
+  - draw an equipment of your choice
+  - force an enemy to switch positions
+evolve:
+traits:
+  - creator 3
+attributes:
+  - silver dwarf
+affiliations:
+  - edrok family

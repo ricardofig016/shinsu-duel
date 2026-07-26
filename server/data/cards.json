@@ -250,6 +250,61 @@
   "10": {
     "cardId": 10,
     "type": "unit",
+    "name": "Evan Edrok",
+    "cost": 6,
+    "hp": 5,
+    "rank": "high ranker",
+    "positionCodes": [
+      "scout",
+      "light-bearer"
+    ],
+    "traitCodes": [
+      {
+        "code": "creator",
+        "value": 3
+      }
+    ],
+    "attributeCodes": [
+      "silver-dwarf"
+    ],
+    "affiliationCodes": [
+      "edrok-family"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "draw an equipment of your choice",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "force an enemy to switch positions",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "whenever you draw an equipment, draw again",
+        "handler": null,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "when i'm equiped with Frog Fisher, Reclaim 1 equipment",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "11": {
+    "cardId": 11,
+    "type": "unit",
     "name": "Evankhell",
     "cost": 9,
     "hp": 7,
@@ -284,8 +339,8 @@
     ],
     "deckConstraints": []
   },
-  "11": {
-    "cardId": 11,
+  "12": {
+    "cardId": 12,
     "type": "skill",
     "name": "Fiery Elephant",
     "cost": 2,
@@ -303,8 +358,8 @@
     ],
     "deckConstraints": []
   },
-  "12": {
-    "cardId": 12,
+  "13": {
+    "cardId": 13,
     "type": "equipment",
     "name": "First Thorn Fragment",
     "cost": 1,
@@ -336,8 +391,8 @@
       }
     ]
   },
-  "13": {
-    "cardId": 13,
+  "14": {
+    "cardId": 14,
     "type": "unit",
     "name": "Floor of Death",
     "cost": 5,
@@ -359,8 +414,8 @@
     ],
     "deckConstraints": []
   },
-  "14": {
-    "cardId": 14,
+  "15": {
+    "cardId": 15,
     "type": "skill",
     "name": "Flower of Zygaena",
     "cost": 4,
@@ -373,8 +428,8 @@
     ],
     "deckConstraints": []
   },
-  "15": {
-    "cardId": 15,
+  "16": {
+    "cardId": 16,
     "type": "equipment",
     "name": "Fourth Thorn Fragment",
     "cost": 1,
@@ -406,8 +461,22 @@
       }
     ]
   },
-  "16": {
-    "cardId": 16,
+  "17": {
+    "cardId": 17,
+    "type": "equipment",
+    "name": "Frog Fisher",
+    "cost": 1,
+    "effects": [
+      {
+        "type": "custom",
+        "raw": "i have Barrier",
+        "handler": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "18": {
+    "cardId": 18,
     "type": "unit",
     "name": "Ha Yuri Zahard",
     "cost": 6,
@@ -456,8 +525,8 @@
     ],
     "deckConstraints": []
   },
-  "17": {
-    "cardId": 17,
+  "19": {
+    "cardId": 19,
     "type": "skill",
     "name": "Healing Flames",
     "cost": 5,
@@ -473,8 +542,8 @@
     ],
     "deckConstraints": []
   },
-  "18": {
-    "cardId": 18,
+  "20": {
+    "cardId": 20,
     "type": "skill",
     "name": "Healing Potion",
     "cost": 2,
@@ -487,8 +556,8 @@
     ],
     "deckConstraints": []
   },
-  "19": {
-    "cardId": 19,
+  "21": {
+    "cardId": 21,
     "type": "unit",
     "name": "Hell Express",
     "cost": 1,
@@ -510,8 +579,8 @@
     ],
     "deckConstraints": []
   },
-  "20": {
-    "cardId": 20,
+  "22": {
+    "cardId": 22,
     "type": "unit",
     "name": "Hon Akraptor",
     "cost": 2,
@@ -544,8 +613,8 @@
     ],
     "deckConstraints": []
   },
-  "21": {
-    "cardId": 21,
+  "23": {
+    "cardId": 23,
     "type": "unit",
     "name": "Hong Chunhwa",
     "cost": 1,
@@ -576,8 +645,53 @@
     "passiveCodes": [],
     "deckConstraints": []
   },
-  "22": {
-    "cardId": 22,
+  "24": {
+    "cardId": 24,
+    "type": "unit",
+    "name": "Hwa Ryun",
+    "cost": 3,
+    "hp": 2,
+    "rank": "regular",
+    "positionCodes": [
+      "scout"
+    ],
+    "traitCodes": [],
+    "attributeCodes": [
+      "red-witch"
+    ],
+    "affiliationCodes": [
+      "fug",
+      "team-baam",
+      "team-fug"
+    ],
+    "abilityCodes": [
+      {
+        "type": "custom",
+        "raw": "your opponent discards a regular of your choice",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      },
+      {
+        "type": "custom",
+        "raw": "give Heavy to a backline enemy",
+        "handler": null,
+        "quick": false,
+        "positionCode": null
+      }
+    ],
+    "passiveCodes": [
+      {
+        "type": "custom",
+        "raw": "while i have an ally team baam or team fug member, opponents skills cost 1 more",
+        "handler": null,
+        "positionCode": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "25": {
+    "cardId": 25,
     "type": "equipment",
     "name": "Ice Spear",
     "cost": 3,
@@ -598,8 +712,8 @@
     ],
     "deckConstraints": []
   },
-  "23": {
-    "cardId": 23,
+  "26": {
+    "cardId": 26,
     "type": "unit",
     "name": "Ja Wangnan",
     "cost": 3,
@@ -642,8 +756,8 @@
     ],
     "deckConstraints": []
   },
-  "24": {
-    "cardId": 24,
+  "27": {
+    "cardId": 27,
     "type": "unit",
     "name": "Jyu Viole Grace",
     "cost": 4,
@@ -681,8 +795,8 @@
     "passiveCodes": [],
     "deckConstraints": []
   },
-  "25": {
-    "cardId": 25,
+  "28": {
+    "cardId": 28,
     "type": "unit",
     "name": "Karaka",
     "cost": 7,
@@ -732,12 +846,12 @@
         "raw": "equip with Karaka's Armor Suit (fisherman), Steel Tree (wave controller) or Purple Dementor (scout)",
         "handler": null
       },
-      "cardId": 26
+      "cardId": 29
     },
     "deckConstraints": []
   },
-  "26": {
-    "cardId": 26,
+  "29": {
+    "cardId": 29,
     "type": "unit",
     "name": "Karaka (evolved)",
     "cost": 7,
@@ -787,11 +901,11 @@
         "positionCode": null
       }
     ],
-    "evolvedFrom": 25,
+    "evolvedFrom": 28,
     "deckConstraints": []
   },
-  "27": {
-    "cardId": 27,
+  "30": {
+    "cardId": 30,
     "type": "equipment",
     "name": "Karaka's Armor Suit",
     "cost": 4,
@@ -812,8 +926,8 @@
     ],
     "deckConstraints": []
   },
-  "28": {
-    "cardId": 28,
+  "31": {
+    "cardId": 31,
     "type": "unit",
     "name": "Khun Aguero Agnes",
     "cost": 0,
@@ -850,12 +964,12 @@
         "raw": "i am equiped with Ice Spear",
         "handler": null
       },
-      "cardId": 29
+      "cardId": 32
     },
     "deckConstraints": []
   },
-  "29": {
-    "cardId": 29,
+  "32": {
+    "cardId": 32,
     "type": "unit",
     "name": "Khun Aguero Agnes (evolved)",
     "cost": 0,
@@ -901,11 +1015,11 @@
         "positionCode": null
       }
     ],
-    "evolvedFrom": 28,
+    "evolvedFrom": 31,
     "deckConstraints": []
   },
-  "30": {
-    "cardId": 30,
+  "33": {
+    "cardId": 33,
     "type": "unit",
     "name": "Khun Ran",
     "cost": 3,
@@ -946,12 +1060,12 @@
         "raw": "consume a Redan",
         "handler": null
       },
-      "cardId": 31
+      "cardId": 34
     },
     "deckConstraints": []
   },
-  "31": {
-    "cardId": 31,
+  "34": {
+    "cardId": 34,
     "type": "unit",
     "name": "Khun Ran (evolved)",
     "cost": 3,
@@ -986,11 +1100,11 @@
         "positionCode": null
       }
     ],
-    "evolvedFrom": 30,
+    "evolvedFrom": 33,
     "deckConstraints": []
   },
-  "32": {
-    "cardId": 32,
+  "35": {
+    "cardId": 35,
     "type": "unit",
     "name": "Lo Po Bia Ren",
     "cost": 6,
@@ -1040,8 +1154,8 @@
     ],
     "deckConstraints": []
   },
-  "33": {
-    "cardId": 33,
+  "36": {
+    "cardId": 36,
     "type": "unit",
     "name": "Monkeyman",
     "cost": 1,
@@ -1075,8 +1189,8 @@
     "passiveCodes": [],
     "deckConstraints": []
   },
-  "34": {
-    "cardId": 34,
+  "37": {
+    "cardId": 37,
     "type": "equipment",
     "name": "Narumada",
     "cost": 2,
@@ -1094,11 +1208,11 @@
         "raw": "my bearer kills a unit",
         "handler": null
       },
-      "cardId": 35
+      "cardId": 38
     }
   },
-  "35": {
-    "cardId": 35,
+  "38": {
+    "cardId": 38,
     "type": "equipment",
     "name": "Narumada (ignited)",
     "cost": 2,
@@ -1110,10 +1224,10 @@
       }
     ],
     "deckConstraints": [],
-    "ignitedFrom": 34
+    "ignitedFrom": 37
   },
-  "36": {
-    "cardId": 36,
+  "39": {
+    "cardId": 39,
     "type": "unit",
     "name": "Pedro",
     "cost": 3,
@@ -1147,8 +1261,8 @@
     ],
     "deckConstraints": []
   },
-  "37": {
-    "cardId": 37,
+  "40": {
+    "cardId": 40,
     "type": "equipment",
     "name": "Purple Dementor",
     "cost": 3,
@@ -1169,8 +1283,8 @@
     ],
     "deckConstraints": []
   },
-  "38": {
-    "cardId": 38,
+  "41": {
+    "cardId": 41,
     "type": "unit",
     "name": "Quaetro Blitz",
     "cost": 2,
@@ -1208,8 +1322,8 @@
     ],
     "deckConstraints": []
   },
-  "39": {
-    "cardId": 39,
+  "42": {
+    "cardId": 42,
     "type": "unit",
     "name": "Rachel",
     "cost": 1,
@@ -1247,8 +1361,8 @@
     "passiveCodes": [],
     "deckConstraints": []
   },
-  "40": {
-    "cardId": 40,
+  "43": {
+    "cardId": 43,
     "type": "unit",
     "name": "Rak Wraithraiser",
     "cost": 2,
@@ -1281,8 +1395,8 @@
     "passiveCodes": [],
     "deckConstraints": []
   },
-  "41": {
-    "cardId": 41,
+  "44": {
+    "cardId": 44,
     "type": "equipment",
     "name": "Red Thryssa",
     "cost": 3,
@@ -1295,8 +1409,8 @@
     ],
     "deckConstraints": []
   },
-  "42": {
-    "cardId": 42,
+  "45": {
+    "cardId": 45,
     "type": "skill",
     "name": "Redan",
     "cost": 1,
@@ -1312,8 +1426,8 @@
     ],
     "deckConstraints": []
   },
-  "43": {
-    "cardId": 43,
+  "46": {
+    "cardId": 46,
     "type": "equipment",
     "name": "Second Thorn Fragment",
     "cost": 1,
@@ -1345,8 +1459,8 @@
       }
     ]
   },
-  "44": {
-    "cardId": 44,
+  "47": {
+    "cardId": 47,
     "type": "skill",
     "name": "Shinwonryu",
     "cost": 4,
@@ -1371,8 +1485,8 @@
       }
     ]
   },
-  "45": {
-    "cardId": 45,
+  "48": {
+    "cardId": 48,
     "type": "equipment",
     "name": "Steel Tree",
     "cost": 3,
@@ -1388,8 +1502,8 @@
     ],
     "deckConstraints": []
   },
-  "46": {
-    "cardId": 46,
+  "49": {
+    "cardId": 49,
     "type": "skill",
     "name": "Submerged Fish",
     "cost": 4,
@@ -1402,8 +1516,8 @@
     ],
     "deckConstraints": []
   },
-  "47": {
-    "cardId": 47,
+  "50": {
+    "cardId": 50,
     "type": "unit",
     "name": "Sunwoo Nare",
     "cost": 2,
@@ -1440,8 +1554,8 @@
     ],
     "deckConstraints": []
   },
-  "48": {
-    "cardId": 48,
+  "51": {
+    "cardId": 51,
     "type": "skill",
     "name": "The Workshop",
     "cost": 3,
@@ -1477,8 +1591,8 @@
     ],
     "deckConstraints": []
   },
-  "49": {
-    "cardId": 49,
+  "52": {
+    "cardId": 52,
     "type": "equipment",
     "name": "Third Thorn Fragment",
     "cost": 1,
@@ -1510,8 +1624,8 @@
       }
     ]
   },
-  "50": {
-    "cardId": 50,
+  "53": {
+    "cardId": 53,
     "type": "unit",
     "name": "Twenty-Fifth Baam",
     "cost": 5,
@@ -1546,12 +1660,12 @@
         "raw": "i am equiped with Enryu's Thorn",
         "handler": null
       },
-      "cardId": 51
+      "cardId": 54
     },
     "deckConstraints": []
   },
-  "51": {
-    "cardId": 51,
+  "54": {
+    "cardId": 54,
     "type": "unit",
     "name": "Twenty-Fifth Baam (evolved)",
     "cost": 5,
@@ -1584,11 +1698,11 @@
       }
     ],
     "passiveCodes": [],
-    "evolvedFrom": 50,
+    "evolvedFrom": 53,
     "deckConstraints": []
   },
-  "52": {
-    "cardId": 52,
+  "55": {
+    "cardId": 55,
     "type": "unit",
     "name": "Urek Mazino",
     "cost": 8,
@@ -1638,8 +1752,8 @@
     ],
     "deckConstraints": []
   },
-  "53": {
-    "cardId": 53,
+  "56": {
+    "cardId": 56,
     "type": "unit",
     "name": "Water Stadium",
     "cost": 2,
@@ -1661,8 +1775,8 @@
     ],
     "deckConstraints": []
   },
-  "54": {
-    "cardId": 54,
+  "57": {
+    "cardId": 57,
     "type": "skill",
     "name": "Weights",
     "cost": 1,
@@ -1675,8 +1789,8 @@
     ],
     "deckConstraints": []
   },
-  "55": {
-    "cardId": 55,
+  "58": {
+    "cardId": 58,
     "type": "unit",
     "name": "Wooden Horse",
     "cost": 2,
@@ -1698,8 +1812,8 @@
     ],
     "deckConstraints": []
   },
-  "56": {
-    "cardId": 56,
+  "59": {
+    "cardId": 59,
     "type": "equipment",
     "name": "Woon's Hammer",
     "cost": 2,
@@ -1715,8 +1829,8 @@
     ],
     "deckConstraints": []
   },
-  "57": {
-    "cardId": 57,
+  "60": {
+    "cardId": 60,
     "type": "unit",
     "name": "Yeo Goseng",
     "cost": 1,
@@ -1753,8 +1867,8 @@
     ],
     "deckConstraints": []
   },
-  "58": {
-    "cardId": 58,
+  "61": {
+    "cardId": 61,
     "type": "unit",
     "name": "Yeo Miseng",
     "cost": 2,
@@ -1787,8 +1901,8 @@
     ],
     "deckConstraints": []
   },
-  "59": {
-    "cardId": 59,
+  "62": {
+    "cardId": 62,
     "type": "unit",
     "name": "Yeon Woon",
     "cost": 5,
@@ -1829,8 +1943,8 @@
     ],
     "deckConstraints": []
   },
-  "60": {
-    "cardId": 60,
+  "63": {
+    "cardId": 63,
     "type": "unit",
     "name": "Yeon Yihwa",
     "cost": 5,
@@ -1867,8 +1981,8 @@
     ],
     "deckConstraints": []
   },
-  "61": {
-    "cardId": 61,
+  "64": {
+    "cardId": 64,
     "type": "unit",
     "name": "Yu Han Sung",
     "cost": 6,
@@ -1915,8 +2029,8 @@
     ],
     "deckConstraints": []
   },
-  "62": {
-    "cardId": 62,
+  "65": {
+    "cardId": 65,
     "type": "unit",
     "name": "Yuga",
     "cost": 4,
