@@ -3,7 +3,7 @@ name: Enryu's Thorn
 cost: 0
 requirements:
 effects:
-  - unreachable
+  - Unreachable
   - the bearer's damage-dealing abilities deal +2 damage
   - the bearer's healing abilities heal +2 HP
   - the bearer has +2 HP

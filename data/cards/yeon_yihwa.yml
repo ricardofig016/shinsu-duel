@@ -6,7 +6,7 @@ rank: regular
 positions:
   - fisherman
 passives:
-  - units with burn 3+ can't target me
+  - units with Burned 3+ can't target me
 abilities:
   - "give 2 Burned enemies Exhausted"
 evolve:

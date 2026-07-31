@@ -9,7 +9,7 @@ positions:
 passives:
   - when I am deployed, summon Bull from your deck or hand
 abilities:
-  - give ally Bull Strength 2
+  - give ally Bull Strong 2
 evolve:
 traits:
 attributes:
