@@ -3,10 +3,21 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
+import Ajv from "ajv";
 
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const cardsDirectory = path.join(projectRoot, "data", "cards");
+const schemaPath = path.join(projectRoot, "schemas", "card.schema.json");
+
+/**
+ * Source-card validator.
+ *
+ * This script validates YAML authoring files in data/cards/ only. It does not
+ * validate server/data/cards.json. The compiler invokes this script first and
+ * must stop if source validation fails. JSON output validation belongs to the
+ * compiler because it owns the compiled representation.
+ */
 
 // ── Domain data (mirrors RULES.md) ──────────────────────────────────────────
 
@@ -87,6 +98,22 @@ function ensureArray(value) {
   return value;
 }
 
+function normalizeCardForSchema(card) {
+  const normalized = { ...card };
+  const arrayFields = [
+    "positions", "passives", "abilities", "evolve", "traits", "attributes",
+    "affiliations", "requirements", "effects", "ignition",
+  ];
+
+  for (const field of arrayFields) {
+    if (normalized[field] === null || normalized[field] === undefined) {
+      normalized[field] = [];
+    }
+  }
+
+  return normalized;
+}
+
 // ── Find and load cards ─────────────────────────────────────────────────────
 
 async function findCardFiles() {
@@ -104,6 +131,12 @@ async function loadCard(filePath) {
   } catch (err) {
     return { card: null, errors: [`YAML parse error: ${err.message}`] };
   }
+}
+
+async function loadSchemaValidator() {
+  const schema = JSON.parse(await fs.readFile(schemaPath, "utf-8"));
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  return ajv.compile(schema);
 }
 
 // ── Build card name → filename index for cross-referencing ──────────────────
@@ -164,6 +197,14 @@ function validateTraits(values, errors) {
 
 function validatePositions(positions, errors) {
   const seen = new Set();
+  const specialPositions = positions.filter((position) =>
+    ["frontline shinheuh", "backline shinheuh", "landmark"].includes(position.toLowerCase())
+  );
+
+  if (specialPositions.length > 0 && positions.length > 1) {
+    addError(errors, "positions", "special positions cannot be combined with another position");
+  }
+
   positions.forEach((pos, index) => {
     const posLower = pos.toLowerCase();
     if (!allowedPositions.has(posLower)) {
@@ -260,30 +301,39 @@ function validateIgnition(ignitionList, errors) {
 
 // ── Cross-reference validator (runs after all cards loaded) ─────────────────
 
-function validateCrossReferences(allCards, errorsByFile) {
+function validateCrossReferences(allCards, failuresByFile) {
   // Build map: normalized name → card info
   const nameToFile = new Map();
   for (const { filename, card } of allCards) {
     if (card && card.name) {
-      nameToFile.set(normalizeName(card.name), { filename, card });
+      nameToFile.set(card.name, { filename, card });
     }
   }
 
-  for (const { filename, card } of allCards) {
+  for (const { filename, relativePath, card } of allCards) {
     if (!card) continue;
-    const fileErrors = errorsByFile.get(filename) || [];
+    const fileErrors = failuresByFile.get(relativePath) || [];
 
     // Check evolve references for units
     if (card.type === "unit" && Array.isArray(card.evolve) && card.evolve.length > 0) {
-      // Evolve triggers reference another card by implication  
-      // The evolved form is typically: "{name} (evolved)"
-      // But we don't have a deterministic way to know which card it evolves into
-      // from YAML alone — this is the compiler's job.
-      // However, we can check that evolve trigger text looks reasonable.
+      const targetName = `${card.name} (evolved)`;
+      const target = nameToFile.get(targetName);
+      if (!target || target.card.type !== "unit") {
+        fileErrors.push(`evolve: target card "${targetName}" does not exist`);
+      }
     }
 
-    // Check that each card's affiliations/attributes/positions are within allowed sets
-    // (already validated above)
+    if (card.type === "equipment" && Array.isArray(card.ignition) && card.ignition.length > 0) {
+      const targetName = `${card.name} (ignited)`;
+      const target = nameToFile.get(targetName);
+      if (!target || target.card.type !== "equipment") {
+        fileErrors.push(`ignition: target card "${targetName}" does not exist`);
+      }
+    }
+
+    if (fileErrors.length > 0 && !failuresByFile.has(relativePath)) {
+      failuresByFile.set(relativePath, fileErrors);
+    }
   }
 }
 
@@ -441,6 +491,7 @@ function validateCard(card, filename) {
 // ── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
+  const validateSchema = await loadSchemaValidator();
   const cardFiles = await findCardFiles();
   const allCards = [];
   const failures = [];
@@ -456,6 +507,11 @@ async function main() {
     }
 
     const errors = validateCard(card, filename);
+    if (!validateSchema(normalizeCardForSchema(card))) {
+      for (const error of validateSchema.errors || []) {
+        errors.push(`schema ${error.instancePath || "card"}: ${error.message}`);
+      }
+    }
     allCards.push({ filename, card, relativePath });
 
     if (errors.length > 0) {
@@ -469,6 +525,12 @@ async function main() {
     errorsByFile.set(failure.relativePath, failure.errors);
   }
   validateCrossReferences(allCards, errorsByFile);
+
+  for (const [relativePath, errors] of errorsByFile) {
+    if (errors.length > 0 && !failures.some((failure) => failure.relativePath === relativePath)) {
+      failures.push({ relativePath, errors });
+    }
+  }
 
   if (failures.length > 0) {
     console.error(`\n${colors.red}Card validation FAILED for ${failures.length} file(s):${colors.reset}\n`);
