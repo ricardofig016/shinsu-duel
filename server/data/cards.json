@@ -61,7 +61,8 @@
     ],
     "traitCodes": [
       {
-        "code": "resilient"
+        "code": "resilient",
+        "value": 1
       }
     ],
     "attributeCodes": [],
@@ -73,14 +74,14 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "create Shinwonryu in hand",
+        "raw": "create Shinwonryu in your hand",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
         "type": "custom",
-        "raw": "heal myself 3 hp",
+        "raw": "heal me 3 HP",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -89,7 +90,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "round start: give me the traits that ally Rachel has",
+        "raw": "round start: give me all traits currently held by an allied Rachel",
         "handler": null,
         "positionCode": null
       }
@@ -123,7 +124,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "ability: heal me 2 hp and Cleanse me",
+        "raw": "heal the bearer 2 HP and Cleanse the bearer",
         "handler": null
       }
     ],
@@ -144,7 +145,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "deal 3 to an enemy",
+        "raw": "quick: deal 3 to an enemy",
         "handler": null,
         "quick": true,
         "positionCode": null
@@ -165,7 +166,8 @@
     ],
     "traitCodes": [
       {
-        "code": "bloodthirsty"
+        "code": "bloodthirsty",
+        "value": 1
       },
       {
         "code": "taunt"
@@ -188,7 +190,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "ally team chang members have resilient",
+        "raw": "allied Team Chang members have Resilient 1",
         "handler": null,
         "positionCode": null
       }
@@ -217,27 +219,27 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "unreachable",
+        "raw": "Unreachable",
         "handler": "UnreachableKeyword"
       },
       {
         "type": "custom",
-        "raw": "my damage dealing abilities deal +2 damage",
+        "raw": "the bearer's damage-dealing abilities deal +2 damage",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "my healing abilities heal +2 hp",
+        "raw": "the bearer's healing abilities heal +2 HP",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "i have +2 hp",
+        "raw": "the bearer has +2 HP",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "i have Bloodthirsty",
+        "raw": "the bearer has Bloodthirsty 1",
         "handler": null
       }
     ],
@@ -295,7 +297,7 @@
       },
       {
         "type": "custom",
-        "raw": "when i'm equiped with Frog Fisher, Reclaim 1 equipment",
+        "raw": "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card",
         "handler": null,
         "positionCode": null
       }
@@ -323,7 +325,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "give the entire enemy team Burned",
+        "raw": "give Burned 1 to all enemies",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -332,7 +334,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "round end: all enemies with Burned 3+ die",
+        "raw": "round end: Slay all enemies with Burned 3+",
         "handler": null,
         "positionCode": null
       }
@@ -347,12 +349,12 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "give Burned to an enemy",
+        "raw": "give Burned 1 to an enemy",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "Compress a Hwayeomsa in your hand 1",
+        "raw": "Compress 1 Hwayeomsa in your hand",
         "handler": null
       }
     ],
@@ -366,22 +368,22 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "unreachable",
+        "raw": "Unreachable",
         "handler": "UnreachableKeyword"
       },
       {
         "type": "custom",
-        "raw": "quick",
+        "raw": "Quick",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "my damage dealing abilities deal +1 damage",
+        "raw": "the bearer's damage-dealing abilities deal +1 damage",
         "handler": null
       }
     ],
@@ -436,22 +438,22 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "unreachable",
+        "raw": "Unreachable",
         "handler": "UnreachableKeyword"
       },
       {
         "type": "custom",
-        "raw": "quick",
+        "raw": "Quick",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "i have Bloodthirsty",
+        "raw": "the bearer has Bloodthirsty 1",
         "handler": null
       }
     ],
@@ -469,7 +471,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "i have Barrier",
+        "raw": "the bearer has Barrier",
         "handler": null
       }
     ],
@@ -509,7 +511,7 @@
       },
       {
         "type": "custom",
-        "raw": "give me Ruthless",
+        "raw": "give me Ruthless 1",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -518,7 +520,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "if i have an ally Guide, i have Taunt",
+        "raw": "if i have an allied Guide, i have Taunt",
         "handler": null,
         "positionCode": null
       }
@@ -536,7 +538,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "Cleanse all allies and heal them 4",
+        "raw": "Cleanse all allies and heal each of them 4 HP",
         "handler": null
       }
     ],
@@ -572,7 +574,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "all Rankers and High Rankers have Ghost",
+        "raw": "all Ranker and High Ranker units have Ghost",
         "handler": null,
         "positionCode": null
       }
@@ -597,7 +599,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "deal 4 to an enemy unit",
+        "raw": "deal 4 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -606,7 +608,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "if Yeo Miseng is on the board, I have Strong",
+        "raw": "if I have an allied Yeo Miseng, I have Strong 1",
         "handler": null,
         "positionCode": null
       }
@@ -636,7 +638,7 @@
       },
       {
         "type": "custom",
-        "raw": "deal 3 to an enemy with Exhaust",
+        "raw": "deal 3 to an enemy with Exhausted",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -674,7 +676,7 @@
       },
       {
         "type": "custom",
-        "raw": "give Heavy to a backline enemy",
+        "raw": "give Heavy 1 to a backline enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -701,12 +703,12 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "all my attacks Freeze",
+        "raw": "the bearer's attacks give Frozen to their targets",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "i have Pierce",
+        "raw": "the bearer has Pierce 1",
         "handler": null
       }
     ],
@@ -733,14 +735,14 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "spend 1: deal 1 to 2 enemies and burn one of them",
+        "raw": "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
         "type": "custom",
-        "raw": "heal a prince of the redlight district 2 HP",
+        "raw": "heal a Prince of the Redlight District member 2 HP",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -749,7 +751,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "i deal +1 damage to burned units",
+        "raw": "i deal +1 damage to Burned units",
         "handler": null,
         "positionCode": null
       }
@@ -779,7 +781,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "deal 1 for every trait i have to an enemy",
+        "raw": "deal 1 for each trait i have to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -826,7 +828,7 @@
       },
       {
         "type": "custom",
-        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all rooted enemies",
+        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -843,7 +845,7 @@
     "evolveInto": {
       "trigger": {
         "type": "custom",
-        "raw": "equip with Karaka's Armor Suit (fisherman), Steel Tree (wave controller) or Purple Dementor (scout)",
+        "raw": "Fisherman: equip with Karaka's Armor Suit; Wave Controller: equip with Steel Tree; Scout: equip with Purple Dementor",
         "handler": null
       },
       "cardId": 29
@@ -881,7 +883,7 @@
       },
       {
         "type": "custom",
-        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all rooted enemies",
+        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -896,7 +898,7 @@
       },
       {
         "type": "custom",
-        "raw": "Round end: deal 3 to all Rooted enemies",
+        "raw": "round end: deal 3 to all Rooted enemies",
         "handler": null,
         "positionCode": null
       }
@@ -910,7 +912,7 @@
     "name": "Karaka's Armor Suit",
     "cost": 4,
     "requirements": [
-      "deployed as Fishermen"
+      "deployed as Fisherman"
     ],
     "effects": [
       {
@@ -920,7 +922,7 @@
       },
       {
         "type": "custom",
-        "raw": "i have Barrier",
+        "raw": "the bearer has Barrier",
         "handler": null
       }
     ],
@@ -938,7 +940,8 @@
     ],
     "traitCodes": [
       {
-        "code": "creator"
+        "code": "creator",
+        "value": 1
       }
     ],
     "attributeCodes": [],
@@ -950,7 +953,8 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "create_lighthouse",
+        "amount": 1,
         "raw": "create 1",
         "handler": null,
         "quick": false,
@@ -961,7 +965,7 @@
     "evolveInto": {
       "trigger": {
         "type": "custom",
-        "raw": "i am equiped with Ice Spear",
+        "raw": "i am equipped with Ice Spear",
         "handler": null
       },
       "cardId": 32
@@ -981,7 +985,8 @@
     ],
     "traitCodes": [
       {
-        "code": "creator"
+        "code": "creator",
+        "value": 1
       }
     ],
     "attributeCodes": [],
@@ -993,15 +998,16 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
-        "raw": "create 1",
+        "type": "create_lighthouse",
+        "amount": 1,
+        "raw": "light bearer: create 1",
         "handler": null,
         "quick": false,
         "positionCode": "light-bearer"
       },
       {
         "type": "custom",
-        "raw": "deal 2 to an enemy",
+        "raw": "spear bearer: deal 2 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": "spear-bearer"
@@ -1057,7 +1063,7 @@
     "evolveInto": {
       "trigger": {
         "type": "custom",
-        "raw": "consume a Redan",
+        "raw": "i consume Redan",
         "handler": null
       },
       "cardId": 34
@@ -1095,7 +1101,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "round end: create a Redan in hand and i turn back to Khun Ran",
+        "raw": "round end: create Redan in your hand and revert me to Khun Ran",
         "handler": null,
         "positionCode": null
       }
@@ -1141,13 +1147,13 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "frontline Shinheuh give Poison",
+        "raw": "wave controller: frontline Shinheuh give Poisoned 1",
         "handler": null,
         "positionCode": "wave-controller"
       },
       {
         "type": "custom",
-        "raw": "backlike Shinheuh give Ghost",
+        "raw": "scout: backline Shinheuh give Ghost",
         "handler": null,
         "positionCode": "scout"
       }
@@ -1173,14 +1179,14 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "see a random card in the opponents hand",
+        "raw": "scout: quick: see a random card in the opponent's hand",
         "handler": null,
         "quick": true,
         "positionCode": "scout"
       },
       {
         "type": "custom",
-        "raw": "deal 1 to an enemy",
+        "raw": "fisherman: deal 1 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": "fisherman"
@@ -1197,7 +1203,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "my damage dealing abilities deal +3 damage",
+        "raw": "the bearer's damage-dealing abilities deal +3 damage",
         "handler": null
       }
     ],
@@ -1205,7 +1211,7 @@
     "igniteInto": {
       "trigger": {
         "type": "custom",
-        "raw": "my bearer kills a unit",
+        "raw": "the bearer Slays a unit",
         "handler": null
       },
       "cardId": 38
@@ -1219,7 +1225,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "my damage dealing abilities deal +3 damage and give Exhaust",
+        "raw": "the bearer's damage-dealing abilities deal +3 damage and give Exhausted 1",
         "handler": null
       }
     ],
@@ -1245,7 +1251,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "give a backline enemy Poison",
+        "raw": "give Poisoned 1 to a backline enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -1254,7 +1260,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "if i have Purple Dementor equiped, i give +2 Poison to high rankers",
+        "raw": "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units",
         "handler": null,
         "positionCode": null
       }
@@ -1272,12 +1278,18 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "i have Resilient 2",
+        "raw": "the bearer has Resilient 2",
         "handler": null
       },
       {
-        "type": "custom",
-        "raw": "ability: give Poison 4 to an enemy",
+        "type": "grant_ability",
+        "target": "bearer",
+        "ability": {
+          "type": "custom",
+          "raw": "give Poisoned 4 to an enemy",
+          "handler": null
+        },
+        "raw": "ability: give Poisoned 4 to an enemy",
         "handler": null
       }
     ],
@@ -1306,7 +1318,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "spend 3: deal 2 to all burned enemies",
+        "raw": "spend 3: deal 2 to all Burned enemies",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -1315,7 +1327,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "Baang gives Burn",
+        "raw": "Baang gives Burned 1",
         "handler": null,
         "positionCode": null
       }
@@ -1402,7 +1414,13 @@
     "cost": 3,
     "effects": [
       {
-        "type": "custom",
+        "type": "grant_ability",
+        "target": "bearer",
+        "ability": {
+          "type": "custom",
+          "raw": "deal 5 to an enemy",
+          "handler": null
+        },
         "raw": "ability: deal 5 to an enemy",
         "handler": null
       }
@@ -1434,22 +1452,22 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "unreachable",
+        "raw": "Unreachable",
         "handler": "UnreachableKeyword"
       },
       {
         "type": "custom",
-        "raw": "quick",
+        "raw": "Quick",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "my healing abilities heal +1 hp",
+        "raw": "the bearer's healing abilities heal +1 HP",
         "handler": null
       }
     ],
@@ -1496,7 +1514,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "i have Immune and Pierce",
+        "raw": "the bearer has Immune and Pierce 1",
         "handler": null
       }
     ],
@@ -1510,7 +1528,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "kill an enemy regular or ranker",
+        "raw": "Slay an enemy Regular or Ranker",
         "handler": null
       }
     ],
@@ -1538,7 +1556,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "if i have an ally Shinheuh, give Exhaust 2 to an enemy",
+        "raw": "if i have an allied Shinheuh, give Exhausted 2 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -1570,12 +1588,12 @@
       },
       {
         "type": "custom",
-        "raw": "heal an ally 1",
+        "raw": "heal an ally 1 HP",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "Compress the most expensive card in your hand 1",
+        "raw": "Compress 1 from the most expensive card in your hand",
         "handler": null
       },
       {
@@ -1599,22 +1617,22 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "unreachable",
+        "raw": "Unreachable",
         "handler": "UnreachableKeyword"
       },
       {
         "type": "custom",
-        "raw": "quick",
+        "raw": "Quick",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand",
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
         "handler": null
       },
       {
         "type": "custom",
-        "raw": "i have +1 hp",
+        "raw": "the bearer has +1 HP",
         "handler": null
       }
     ],
@@ -1657,7 +1675,7 @@
     "evolveInto": {
       "trigger": {
         "type": "custom",
-        "raw": "i am equiped with Enryu's Thorn",
+        "raw": "i am equipped with Enryu's Thorn",
         "handler": null
       },
       "cardId": 54
@@ -1691,7 +1709,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "spend 2: the next time you play Baang this turn, play it 4 more times",
+        "raw": "quick: spend 2: the next time you play Baang this turn, play it 4 more times",
         "handler": null,
         "quick": true,
         "positionCode": null
@@ -1975,7 +1993,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "units with burn 3+ can't target me",
+        "raw": "units with Burned 3+ can't target me",
         "handler": null,
         "positionCode": null
       }
@@ -2014,7 +2032,7 @@
       },
       {
         "type": "custom",
-        "raw": "create Baang in your hand",
+        "raw": "quick: create Baang in your hand",
         "handler": null,
         "quick": true,
         "positionCode": null
@@ -2052,7 +2070,7 @@
     "abilityCodes": [
       {
         "type": "custom",
-        "raw": "give ally Bull Strength 2",
+        "raw": "give ally Bull Strong 2",
         "handler": null,
         "quick": false,
         "positionCode": null
