@@ -6,9 +6,9 @@ rank: regular
 positions:
   - fisherman
 passives:
-  - if Yeo Miseng is on the board, I have Strong
+  - if I have an allied Yeo Miseng, I have Strong 1
 abilities:
-  - deal 4 to an enemy unit
+  - deal 4 to an enemy
 evolve:
 traits:
 attributes:

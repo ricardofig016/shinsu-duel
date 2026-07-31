@@ -7,8 +7,8 @@ positions:
   - wave controller
   - scout
 passives:
-  - "wave controller: frontline Shinheuh give Poison"
-  - "scout: backlike Shinheuh give Ghost"
+  - "wave controller: frontline Shinheuh give Poisoned 1"
+  - "scout: backline Shinheuh give Ghost"
 abilities:
   - summon a random 2 cost Shinheuh
   - steal the enemy's cheapest Shinheuh

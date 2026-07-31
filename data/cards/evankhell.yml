@@ -7,9 +7,9 @@ positions:
   - fisherman
   - wave controller
 passives:
-  - "round end: all enemies with Burned 3+ die"
+  - "round end: Slay all enemies with Burned 3+"
 abilities:
-  - give the entire enemy team Burned
+  - give Burned 1 to all enemies
 evolve:
 traits:
 attributes:

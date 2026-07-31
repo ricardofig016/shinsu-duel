@@ -13,7 +13,7 @@ abilities:
   - "spear bearer: deal 2 to an enemy"
 evolve:
 traits:
-  - creator
+  - creator 1
 attributes:
 affiliations:
   - team baam

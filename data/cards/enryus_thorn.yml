@@ -4,8 +4,8 @@ cost: 0
 requirements:
 effects:
   - unreachable
-  - my damage dealing abilities deal +2 damage
-  - my healing abilities heal +2 hp
-  - i have +2 hp
-  - i have Bloodthirsty
+  - the bearer's damage-dealing abilities deal +2 damage
+  - the bearer's healing abilities heal +2 HP
+  - the bearer has +2 HP
+  - the bearer has Bloodthirsty 1
 ignition:

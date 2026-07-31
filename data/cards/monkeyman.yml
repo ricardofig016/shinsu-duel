@@ -8,7 +8,7 @@ positions:
   - scout
 passives:
 abilities:
-  - "scout: quick: see a random card in the opponents hand"
+  - "scout: quick: see a random card in the opponent's hand"
   - "fisherman: deal 1 to an enemy"
 evolve:
 traits:

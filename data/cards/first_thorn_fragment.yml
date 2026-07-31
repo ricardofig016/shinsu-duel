@@ -3,8 +3,8 @@ name: First Thorn Fragment
 cost: 1
 requirements:
 effects:
-  - unreachable
-  - quick
-  - if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand
-  - my damage dealing abilities deal +1 damage
+  - Unreachable
+  - Quick
+  - when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand
+  - the bearer's damage-dealing abilities deal +1 damage
 ignition:

@@ -7,10 +7,10 @@ positions:
   - fisherman
   - scout
 passives:
-  - i deal +1 damage to burned units
+  - i deal +1 damage to Burned units
 abilities:
-  - "spend 1: deal 1 to 2 enemies and burn one of them"
-  - "heal a prince of the redlight district 2 HP"
+  - "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
+  - "heal a Prince of the Redlight District member 2 HP"
 evolve:
 traits:
 attributes:

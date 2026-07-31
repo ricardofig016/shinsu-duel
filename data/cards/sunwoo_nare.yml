@@ -8,7 +8,7 @@ positions:
 passives:
   - when you summon a Shinheuh, Charge 1
 abilities:
-  - if i have an ally Shinheuh, give Exhaust 2 to an enemy
+  - if i have an allied Shinheuh, give Exhausted 2 to an enemy
 evolve:
 traits:
   - sharpshooter

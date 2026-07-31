@@ -5,7 +5,7 @@ requirements:
   - I'm the first card you play this round
 effects:
   - Destroy 1
-  - heal an ally 1
-  - Compress the most expensive card in your hand 1
+  - heal an ally 1 HP
+  - Compress 1 from the most expensive card in your hand
   - Reclaim 1
   - Silence an enemy

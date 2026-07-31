@@ -4,5 +4,5 @@ cost: 3
 requirements:
   - deployed as Wave Controller
 effects:
-  - i have Immune and Pierce
+  - the bearer has Immune and Pierce 1
 ignition:

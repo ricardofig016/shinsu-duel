@@ -3,5 +3,5 @@ name: Fiery Elephant
 cost: 2
 requirements:
 effects:
-  - give Burned to an enemy
-  - Compress a Hwayeomsa in your hand 1
+  - give Burned 1 to an enemy
+  - Compress 1 Hwayeomsa in your hand

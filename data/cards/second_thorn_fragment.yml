@@ -3,8 +3,8 @@ name: Second Thorn Fragment
 cost: 1
 requirements:
 effects:
-  - unreachable
-  - quick
-  - if when you equip me i have 4 unique Thorn Fragments equiped, discard all of us and create Enryu's Thorn in hand
-  - my healing abilities heal +1 hp
+  - Unreachable
+  - Quick
+  - when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand
+  - the bearer's healing abilities heal +1 HP
 ignition:

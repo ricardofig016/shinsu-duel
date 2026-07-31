@@ -6,9 +6,9 @@ rank: regular
 positions:
   - wave controller
 passives:
-  - Baang gives Burn
+  - Baang gives Burned 1
 abilities:
-  - "spend 3: deal 2 to all burned enemies"
+  - "spend 3: deal 2 to all Burned enemies"
 evolve:
 traits:
   - sharpshooter

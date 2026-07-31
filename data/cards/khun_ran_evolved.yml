@@ -7,7 +7,7 @@ positions:
   - fisherman
   - spear bearer
 passives:
-  - "round end: create a Redan in hand and i turn back to Khun Ran"
+  - "round end: create Redan in your hand and revert me to Khun Ran"
 abilities:
   - deal 3 to a frontline enemy and 2 to a backline enemy
 evolve:

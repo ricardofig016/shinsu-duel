@@ -4,6 +4,6 @@ cost: 3
 requirements:
   - deployed as Scout
 effects:
-  - i have Resilient 2
-  - "ability: give Poison 4 to an enemy"
+  - the bearer has Resilient 2
+  - "ability: give Poisoned 4 to an enemy"
 ignition:

@@ -9,9 +9,9 @@ passives:
 abilities:
   - create 1
 evolve:
-  - i am equiped with Ice Spear
+  - i am equipped with Ice Spear
 traits:
-  - creator
+  - creator 1
 attributes:
 affiliations:
   - team baam

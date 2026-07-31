@@ -4,6 +4,6 @@ cost: 3
 requirements:
   - khun family member
 effects:
-  - all my attacks Freeze
-  - i have Pierce
+  - the bearer's attacks give Frozen to their targets
+  - the bearer has Pierce 1
 ignition:

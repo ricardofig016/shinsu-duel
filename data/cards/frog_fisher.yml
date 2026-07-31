@@ -3,5 +3,5 @@ name: Frog Fisher
 cost: 1
 requirements:
 effects:
-  - i have Barrier
+  - the bearer has Barrier
 ignition:

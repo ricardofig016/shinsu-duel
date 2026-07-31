@@ -3,5 +3,5 @@ name: Blue Thryssa
 cost: 2
 requirements:
 effects:
-  - "ability: heal me 2 hp and Cleanse me"
+  - "heal the bearer 2 HP and Cleanse the bearer"
 ignition:

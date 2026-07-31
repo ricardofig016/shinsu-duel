@@ -3,6 +3,6 @@ name: Narumada
 cost: 2
 requirements:
 effects:
-  - my damage dealing abilities deal +3 damage
+  - the bearer's damage-dealing abilities deal +3 damage
 ignition:
-  - my bearer kills a unit
+  - the bearer Slays a unit

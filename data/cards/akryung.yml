@@ -7,13 +7,13 @@ positions:
   - wave controller
   - spear bearer
 passives:
-  - "round start: give me the traits that ally Rachel has"
+  - "round start: give me all traits currently held by an allied Rachel"
 abilities:
-  - create Shinwonryu in hand
-  - heal myself 3 hp
+  - create Shinwonryu in your hand
+  - heal me 3 HP
 evolve:
 traits:
-  - resilient
+  - resilient 1
 attributes:
 affiliations:
   - fug

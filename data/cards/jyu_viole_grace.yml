@@ -7,7 +7,7 @@ positions:
   - wave controller
 passives:
 abilities:
-  - deal 1 for every trait i have to an enemy
+  - deal 1 for each trait i have to an enemy
   - "spend 2: use an enemy ability"
 evolve:
 traits:

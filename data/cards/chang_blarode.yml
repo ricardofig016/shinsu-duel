@@ -6,12 +6,12 @@ rank: regular
 positions:
   - fisherman
 passives:
-  - ally team chang members have resilient
+  - allied Team Chang members have Resilient 1
 abilities:
   - deal 2 to an enemy
 evolve:
 traits:
-  - bloodthirsty
+  - bloodthirsty 1
   - taunt
 attributes:
 affiliations:

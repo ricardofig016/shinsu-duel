@@ -11,9 +11,11 @@ passives:
   - karaka's servants' abilities have Quick
 abilities:
   - deal 7 to an enemy
-  - "spend 1: give Rooted to 2 enemies and deal 3 to all rooted enemies"
+  - "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
 evolve:
-  - equip with Karaka's Armor Suit (fisherman), Steel Tree (wave controller) or Purple Dementor (scout)
+  - "Fisherman: equip with Karaka's Armor Suit"
+  - "Wave Controller: equip with Steel Tree"
+  - "Scout: equip with Purple Dementor"
 traits:
   - reflect
 attributes:

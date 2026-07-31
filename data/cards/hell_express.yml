@@ -6,7 +6,7 @@ rank:
 positions:
   - landmark
 passives:
-  - all Rankers and High Rankers have Ghost
+  - all Ranker and High Ranker units have Ghost
 abilities:
 evolve:
 traits:
