@@ -4,15 +4,15 @@ This document is the implementation contract for rebuilding the game engine with
 
 ## Current status
 
-| Phase | Status | Scope |
-| --- | --- | --- |
-| 0 — Foundation and data pipeline | Complete | Source validation, compilation, runtime card contract, rules/data alignment |
-| 1 — EventBus | In progress | Mutation-capable event pipeline, tests, and validator tests |
-| 2 — GameState | Not started | Rules-complete authoritative game state |
-| 3 — Actions | Not started | Complete player action model |
-| 4 — Effects and passives | Not started | Generic DSL execution and custom handlers |
-| 5 — Integration testing | Not started | Cross-system and regression coverage |
-| 6 — WebSocket and client | Not started | Client protocol and UI integration |
+| Phase                            | Status      | Scope                                                                       |
+| -------------------------------- | ----------- | --------------------------------------------------------------------------- |
+| 0 — Foundation and data pipeline | Complete    | Source validation, compilation, runtime card contract, rules/data alignment |
+| 1 — EventBus                     | In progress | Mutation-capable event pipeline, tests, and validator tests                 |
+| 2 — GameState                    | Not started | Rules-complete authoritative game state                                     |
+| 3 — Actions                      | Not started | Complete player action model                                                |
+| 4 — Effects and passives         | Not started | Generic DSL execution and custom handlers                                   |
+| 5 — Integration testing          | Not started | Cross-system and regression coverage                                        |
+| 6 — WebSocket and client         | Not started | Client protocol and UI integration                                          |
 
 ## Cross-phase contracts
 
@@ -25,8 +25,8 @@ These rules apply to every phase:
 5. Source text is preserved in compiled `raw` fields. Parsed metadata and structured fields are additional data, not replacements for source text.
 6. Evolution and ignition are optional. An empty or omitted trigger means no transformation; a non-empty trigger requires an exact target card of the appropriate type.
 7. `scripts/card-validate.js` validates source YAML only. `scripts/card-compile.js` invokes it before compilation and validates the generated JSON separately.
-8.  Keep `server/data/cards.json` present and regenerated because the server consumes it at runtime.
-9.  Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. The plan is to rewrite the game engine, not to patch it up. 
+8. Keep `server/data/cards.json` present and regenerated because the server consumes it at runtime.
+9. Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. The plan is to rewrite the game engine, not to patch it up.
 
 ## Phase 0 — Foundation and data pipeline
 
