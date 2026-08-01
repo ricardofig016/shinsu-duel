@@ -15,15 +15,15 @@ export default class Card {
     this.cost = cardData.cost;
     this.visible = false; // whether the card is visible to the opponent
 
-    this.affiliations = this.#mapCodesToDictionary(cardData.affiliationCodes || [], affiliations);
-    this.positions = this.#mapCodesToDictionary(cardData.positionCodes || [], positions);
+    this.affiliations = this.#mapCodesToDictionary(cardData.affiliations || [], affiliations);
+    this.positions = this.#mapCodesToDictionary(cardData.positions || [], positions);
     this.#addArtworkPathToDictionary(this.positions, "positions");
-    this.traits = this.#mapTraitCodesToDictionary(cardData.traitCodes || [], traits);
+    this.traits = this.#mapTraitCodesToDictionary(cardData.traits || [], traits);
     this.#addArtworkPathToDictionary(this.traits, "traits");
-    this.traitValues = this.#extractTraitValues(cardData.traitCodes || []); // numeric trait values
+    this.traitValues = this.#extractTraitValues(cardData.traits || []); // numeric trait values
 
-    this.abilities = cardData.abilityCodes || [];   // unified DSL objects
-    this.passiveAbilities = cardData.passiveCodes || []; // unified DSL objects
+    this.abilities = cardData.abilities || [];   // unified DSL objects
+    this.passiveAbilities = cardData.passives || []; // unified DSL objects
 
     this.owner = owner; // player username
     this.artworkPath = `/assets/images/artworks/${this.cardId}.png`;

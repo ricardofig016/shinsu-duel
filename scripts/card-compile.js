@@ -239,16 +239,16 @@ function parseEffectWithMetadata(raw) {
   const sourceText = String(raw);
   const text = sourceText.trim();
   const positionMatch = /^(.+?):\s*(.+)$/.exec(text);
-  const positionCode = positionMatch
+  const position = positionMatch
     ? positionCodeMap[positionMatch[1].trim().toLowerCase()] || null
     : null;
-  const effectText = positionCode ? positionMatch[2].trim() : text;
+  const effectText = position ? positionMatch[2].trim() : text;
   const quick = /^quick:?\s*/i.test(effectText);
   const normalizedEffect = quick ? effectText.replace(/^quick:?\s*/i, "").trim() : effectText;
   const parsed = parseEffectText(normalizedEffect);
 
   if (!parsed) return null;
-  return { ...parsed, raw: sourceText, ...(quick ? { quick: true } : {}), ...(positionCode ? { positionCode } : {}) };
+  return { ...parsed, raw: sourceText, ...(quick ? { quick: true } : {}), ...(position ? { position } : {}) };
 }
 
 // ── Effect compilation (keyword expansion) ──────────────────────────────────
@@ -299,7 +299,7 @@ function compileAbility(raw) {
   const str = sourceText.trim();
   if (!str) return null;
 
-  let positionCode = null;
+  let position = null;
   let effectText = str;
 
   // Check for position-scoped ability: "position: effect"
@@ -308,7 +308,7 @@ function compileAbility(raw) {
     const posName = positionMatch[1].trim().toLowerCase();
     const knownPosition = positionCodeMap[posName];
     if (knownPosition) {
-      positionCode = knownPosition;
+      position = knownPosition;
       effectText = positionMatch[2].trim();
     }
   }
@@ -322,10 +322,10 @@ function compileAbility(raw) {
 
   const parsed = parseEffectText(effectText);
   if (parsed) {
-    return { ...parsed, raw: sourceText, quick: isQuick, positionCode };
+    return { ...parsed, raw: sourceText, quick: isQuick, position };
   }
 
-  return dslObject(sourceText, null, { quick: isQuick, positionCode });
+  return dslObject(sourceText, null, { quick: isQuick, position });
 }
 
 function compilePassive(raw) {
@@ -333,7 +333,7 @@ function compilePassive(raw) {
   const str = sourceText.trim();
   if (!str) return null;
 
-  let positionCode = null;
+  let position = null;
   let effectText = str;
 
   // Check for position-scoped passive
@@ -342,12 +342,12 @@ function compilePassive(raw) {
     const posName = positionMatch[1].trim().toLowerCase();
     const knownPosition = positionCodeMap[posName];
     if (knownPosition) {
-      positionCode = knownPosition;
+      position = knownPosition;
       effectText = positionMatch[2].trim();
     }
   }
 
-  return dslObject(sourceText, null, { positionCode });
+  return dslObject(sourceText, null, { position });
 }
 
 // ── Cross-reference resolution ──────────────────────────────────────────────
@@ -434,7 +434,7 @@ function compileCard(rawCard, allCards) {
     compiled.rank = rawCard.rank || null;
 
     // Positions
-    compiled.positionCodes = (rawCard.positions || []).map(
+    compiled.positions = (rawCard.positions || []).map(
       (p) => positionCodeMap[p.toLowerCase()] || toCode(p)
     );
 
@@ -442,26 +442,26 @@ function compileCard(rawCard, allCards) {
     const parsedTraits = (rawCard.traits || [])
       .map(parseTrait)
       .filter(Boolean);
-    compiled.traitCodes = parsedTraits.map((t) => {
+    compiled.traits = parsedTraits.map((t) => {
       if (t.value !== null) return { code: t.code, value: t.value };
       return { code: t.code };
     });
 
     // Attributes
-    compiled.attributeCodes = (rawCard.attributes || []).map(
+    compiled.attributes = (rawCard.attributes || []).map(
       (a) => attributeCodeMap[a.toLowerCase()] || toCode(a)
     );
 
     // Affiliations
-    compiled.affiliationCodes = (rawCard.affiliations || []).map(toCode);
+    compiled.affiliations = (rawCard.affiliations || []).map(toCode);
 
     // Abilities — unified DSL objects (same shape as effects)
-    compiled.abilityCodes = (rawCard.abilities || [])
+    compiled.abilities = (rawCard.abilities || [])
       .map(compileAbility)
       .filter(Boolean);
 
     // Passives — unified DSL objects (same shape as effects)
-    compiled.passiveCodes = (rawCard.passives || [])
+    compiled.passives = (rawCard.passives || [])
       .map(compilePassive)
       .filter(Boolean);
 
@@ -490,12 +490,12 @@ function compileCard(rawCard, allCards) {
     // Not applicable to skills
     compiled.hp = null;
     compiled.rank = null;
-    compiled.positionCodes = [];
-    compiled.traitCodes = [];
-    compiled.attributeCodes = [];
-    compiled.affiliationCodes = [];
-    compiled.abilityCodes = [];
-    compiled.passiveCodes = [];
+    compiled.positions = [];
+    compiled.traits = [];
+    compiled.attributes = [];
+    compiled.affiliations = [];
+    compiled.abilities = [];
+    compiled.passives = [];
     compiled.evolveInto = null;
     compiled.evolvedFrom = null;
     compiled.igniteInto = null;
@@ -517,12 +517,12 @@ function compileCard(rawCard, allCards) {
     // Not applicable to equipment
     compiled.hp = null;
     compiled.rank = null;
-    compiled.positionCodes = [];
-    compiled.traitCodes = [];
-    compiled.attributeCodes = [];
-    compiled.affiliationCodes = [];
-    compiled.abilityCodes = [];
-    compiled.passiveCodes = [];
+    compiled.positions = [];
+    compiled.traits = [];
+    compiled.attributes = [];
+    compiled.affiliations = [];
+    compiled.abilities = [];
+    compiled.passives = [];
     compiled.evolveInto = null;
     compiled.evolvedFrom = null;
   }
@@ -547,12 +547,12 @@ function cleanCompiled(card) {
   // Delete type-inappropriate empty arrays (sparse schema per plan)
   // Unit-only arrays — remove from non-unit cards
   if (card.type !== "unit") {
-    if (!card.positionCodes || card.positionCodes.length === 0) delete card.positionCodes;
-    if (!card.traitCodes || card.traitCodes.length === 0) delete card.traitCodes;
-    if (!card.attributeCodes || card.attributeCodes.length === 0) delete card.attributeCodes;
-    if (!card.affiliationCodes || card.affiliationCodes.length === 0) delete card.affiliationCodes;
-    if (!card.abilityCodes || card.abilityCodes.length === 0) delete card.abilityCodes;
-    if (!card.passiveCodes || card.passiveCodes.length === 0) delete card.passiveCodes;
+    if (!card.positions || card.positions.length === 0) delete card.positions;
+    if (!card.traits || card.traits.length === 0) delete card.traits;
+    if (!card.attributes || card.attributes.length === 0) delete card.attributes;
+    if (!card.affiliations || card.affiliations.length === 0) delete card.affiliations;
+    if (!card.abilities || card.abilities.length === 0) delete card.abilities;
+    if (!card.passives || card.passives.length === 0) delete card.passives;
   }
   // Skill/equipment-only arrays
   if (card.requirements && card.requirements.length === 0) delete card.requirements;
@@ -569,21 +569,21 @@ async function checkIcons(cards) {
 
   // Collect all trait codes (now objects with .code)
   for (const card of cards) {
-    for (const trait of card.traitCodes || []) {
+    for (const trait of card.traits || []) {
       neededIcons.add(`traits/${trait.code}.png`);
     }
   }
 
   // Collect all position codes
   for (const card of cards) {
-    for (const posCode of card.positionCodes || []) {
+    for (const posCode of card.positions || []) {
       neededIcons.add(`positions/${posCode}.png`);
     }
   }
 
   // Collect all attribute codes
   for (const card of cards) {
-    for (const attrCode of card.attributeCodes || []) {
+    for (const attrCode of card.attributes || []) {
       neededIcons.add(`attributes/${attrCode}.png`);
     }
   }
