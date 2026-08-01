@@ -119,7 +119,6 @@ Phase 0 is complete when all three commands pass, generated data is current, and
 - Stable ordering by phase, priority, then registration order.
 - Payload mutation in `pre`/`execute`; cancellation through an event context or result.
 - Handler errors that identify the event and do not hide the original error.
-- Backward-compatible `subscribe`, `unsubscribe`, and `publish` adapters until callers are migrated.
 
 `Logger` should subscribe in `post` or `resolved`, use safe structured payload copies, and not depend on a removed event list.
 
