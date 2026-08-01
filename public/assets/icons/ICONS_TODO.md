@@ -1,6 +1,7 @@
-# ICONS TODO
+# Icon Inventory
 
-Missing icon files for `public/assets/icons/`. Each entry lists the expected file path and what it represents.  
+This file records the expected icon inventory for `public/assets/icons/`. It is not a missing-work list: `✅` means the file currently exists. Missing files should be added here with status `❌` and also reported by `npm run compile:cards`.
+
 Icons are **512×512 PNG** files with transparent backgrounds.
 
 ---
@@ -65,7 +66,7 @@ Conditions are color coded per RULES.md:
 | ✅     | `positions/spear-bearer.png`       | Spear Bearer       | Backline  |
 | ✅     | `positions/scout.png`              | Scout              | Frontline |
 | ✅     | `positions/light-bearer.png`       | Light Bearer       | Backline  |
-| ✅     | `positions/wave-controller.png`    | Wave Controller    | Backline  |
+| ✅     | `positions/wave-controller.png`    | Wave Controller    | Frontline |
 | ✅     | `positions/frontline-shinheuh.png` | Frontline Shinheuh | Frontline |
 | ✅     | `positions/backline-shinheuh.png`  | Backline Shinheuh  | Backline  |
 | ✅     | `positions/landmark.png`           | Landmark           | Backline  |
@@ -90,4 +91,4 @@ Conditions are color coded per RULES.md:
 
 ---
 
-_Generated during Phase 0 of PROJECT_RESURRECTION_PLAN.md. Update this file as new icons are added._
+_Maintained alongside the card data and updated when new positions, traits, conditions, or attributes are added._
