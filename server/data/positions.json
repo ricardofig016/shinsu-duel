@@ -35,7 +35,7 @@
     "name": "Wave Controller",
     "description": "Versatile units that manipulate shinsu for area control, damage amplification, and support",
     "verboseDescription": "Wave Controllers help their allies in battle by attacking the enemy or aiding the team by manipulating Shinsu. This position is rare compared to the others and requires an expert and specialized manipulation of Shinsu.",
-    "line": "backline",
+    "line": "frontline",
     "special": false,
     "combatSlotGroup": "wave-controller"
   },
