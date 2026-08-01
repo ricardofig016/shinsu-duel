@@ -64,10 +64,10 @@ The validator also checks:
 
 The compiler assigns stable alphabetical `cardId` values and emits a sparse representation:
 
-- Units contain unit fields, `abilityCodes`, `passiveCodes`, and `deckConstraints`.
+- Units contain unit fields, `abilities`, `passives`, and `deckConstraints`.
 - Skills and equipment contain `requirements`, `effects`, and `deckConstraints`.
 - Equipment may contain `igniteInto`/`ignitedFrom`; units may contain `evolveInto`/`evolvedFrom`.
-- `abilityCodes`, `passiveCodes`, effects, and transformation triggers use DSL objects.
+- `abilities`, `passives`, effects, and transformation triggers use DSL objects.
 - Recognized common patterns become structured objects such as `deal_damage`, `give_condition`, `heal`, `create_lighthouse`, `compress_shinsu`, and `spend_shinsu`.
 - Unsupported mechanics remain `{ type: "custom", raw, handler }` for a later custom handler.
 - Every DSL object preserves the source text in `raw`.
