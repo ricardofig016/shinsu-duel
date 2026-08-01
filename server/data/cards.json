@@ -80,7 +80,9 @@
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "heal",
+        "amount": 3,
+        "target": "self",
         "raw": "heal me 3 HP",
         "handler": null,
         "quick": false,
@@ -104,7 +106,9 @@
     "cost": 1,
     "effects": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 2,
+        "target": "enemy",
         "raw": "deal 2 to an enemy",
         "handler": null
       },
@@ -144,7 +148,9 @@
     "affiliationCodes": [],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 3,
+        "target": "enemy",
         "raw": "quick: deal 3 to an enemy",
         "handler": null,
         "quick": true,
@@ -180,7 +186,9 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 2,
+        "target": "enemy",
         "raw": "deal 2 to an enemy",
         "handler": null,
         "quick": false,
@@ -204,7 +212,8 @@
     "cost": 1,
     "effects": [
       {
-        "type": "custom",
+        "type": "cleanse",
+        "target": "ally",
         "raw": "Cleanse an ally",
         "handler": null
       }
@@ -238,7 +247,10 @@
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "grant_trait",
+        "target": "bearer",
+        "trait": "bloodthirsty",
+        "amount": 1,
         "raw": "the bearer has Bloodthirsty 1",
         "handler": null
       }
@@ -324,7 +336,10 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "give_condition",
+        "condition": "burned",
+        "amount": 1,
+        "target": "all_enemies",
         "raw": "give Burned 1 to all enemies",
         "handler": null,
         "quick": false,
@@ -348,7 +363,10 @@
     "cost": 2,
     "effects": [
       {
-        "type": "custom",
+        "type": "give_condition",
+        "condition": "burned",
+        "amount": 1,
+        "target": "enemy",
         "raw": "give Burned 1 to an enemy",
         "handler": null
       },
@@ -374,7 +392,8 @@
       {
         "type": "custom",
         "raw": "Quick",
-        "handler": null
+        "handler": null,
+        "quick": true
       },
       {
         "type": "custom",
@@ -444,7 +463,8 @@
       {
         "type": "custom",
         "raw": "Quick",
-        "handler": null
+        "handler": null,
+        "quick": true
       },
       {
         "type": "custom",
@@ -452,7 +472,10 @@
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "grant_trait",
+        "target": "bearer",
+        "trait": "bloodthirsty",
+        "amount": 1,
         "raw": "the bearer has Bloodthirsty 1",
         "handler": null
       }
@@ -470,7 +493,9 @@
     "cost": 1,
     "effects": [
       {
-        "type": "custom",
+        "type": "grant_trait",
+        "target": "bearer",
+        "trait": "barrier",
         "raw": "the bearer has Barrier",
         "handler": null
       }
@@ -503,7 +528,9 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 6,
+        "target": "enemy",
         "raw": "deal 6 to an enemy",
         "handler": null,
         "quick": false,
@@ -551,7 +578,9 @@
     "cost": 2,
     "effects": [
       {
-        "type": "custom",
+        "type": "heal",
+        "amount": 5,
+        "target": "ally",
         "raw": "heal an ally 5 hp",
         "handler": null
       }
@@ -598,7 +627,9 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 4,
+        "target": "enemy",
         "raw": "deal 4 to an enemy",
         "handler": null,
         "quick": false,
@@ -630,14 +661,19 @@
     "affiliationCodes": [],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 2,
+        "target": "enemy",
         "raw": "deal 2 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 3,
+        "target": "enemy",
+        "condition": "exhausted",
         "raw": "deal 3 to an enemy with Exhausted",
         "handler": null,
         "quick": false,
@@ -675,7 +711,10 @@
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "give_condition",
+        "condition": "heavy",
+        "amount": 1,
+        "target": "enemy_backline",
         "raw": "give Heavy 1 to a backline enemy",
         "handler": null,
         "quick": false,
@@ -707,7 +746,10 @@
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "grant_trait",
+        "target": "bearer",
+        "trait": "pierce",
+        "amount": 1,
         "raw": "the bearer has Pierce 1",
         "handler": null
       }
@@ -734,7 +776,13 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 1,
+        "effect": {
+          "type": "custom",
+          "raw": "deal 1 to 2 enemies and give Burned 1 to one of them",
+          "handler": null
+        },
         "raw": "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them",
         "handler": null,
         "quick": false,
@@ -787,7 +835,13 @@
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 2,
+        "effect": {
+          "type": "custom",
+          "raw": "use an enemy ability",
+          "handler": null
+        },
         "raw": "spend 2: use an enemy ability",
         "handler": null,
         "quick": false,
@@ -820,14 +874,22 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 7,
+        "target": "enemy",
         "raw": "deal 7 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 1,
+        "effect": {
+          "type": "custom",
+          "raw": "give Rooted to 2 enemies and deal 3 to all Rooted enemies",
+          "handler": null
+        },
         "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies",
         "handler": null,
         "quick": false,
@@ -875,14 +937,22 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 7,
+        "target": "enemy",
         "raw": "deal 7 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 1,
+        "effect": {
+          "type": "custom",
+          "raw": "give Rooted to 2 enemies and deal 3 to all Rooted enemies",
+          "handler": null
+        },
         "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies",
         "handler": null,
         "quick": false,
@@ -921,7 +991,9 @@
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "grant_trait",
+        "target": "bearer",
+        "trait": "barrier",
         "raw": "the bearer has Barrier",
         "handler": null
       }
@@ -1006,7 +1078,9 @@
         "positionCode": "light-bearer"
       },
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 2,
+        "target": "enemy",
         "raw": "spear bearer: deal 2 to an enemy",
         "handler": null,
         "quick": false,
@@ -1045,14 +1119,18 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 3,
+        "target": "enemy_frontline",
         "raw": "deal 3 to a frontline enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 2,
+        "target": "enemy_backline",
         "raw": "deal 2 to a backline enemy",
         "handler": null,
         "quick": false,
@@ -1185,7 +1263,9 @@
         "positionCode": "scout"
       },
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 1,
+        "target": "enemy",
         "raw": "fisherman: deal 1 to an enemy",
         "handler": null,
         "quick": false,
@@ -1250,7 +1330,10 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "give_condition",
+        "condition": "poisoned",
+        "amount": 1,
+        "target": "enemy_backline",
         "raw": "give Poisoned 1 to a backline enemy",
         "handler": null,
         "quick": false,
@@ -1277,7 +1360,10 @@
     ],
     "effects": [
       {
-        "type": "custom",
+        "type": "grant_trait",
+        "target": "bearer",
+        "trait": "resilient",
+        "amount": 2,
         "raw": "the bearer has Resilient 2",
         "handler": null
       },
@@ -1285,7 +1371,10 @@
         "type": "grant_ability",
         "target": "bearer",
         "ability": {
-          "type": "custom",
+          "type": "give_condition",
+          "condition": "poisoned",
+          "amount": 4,
+          "target": "enemy",
           "raw": "give Poisoned 4 to an enemy",
           "handler": null
         },
@@ -1317,7 +1406,16 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 3,
+        "effect": {
+          "type": "deal_damage",
+          "amount": 2,
+          "target": "all_enemies",
+          "condition": "burned",
+          "raw": "deal 2 to all Burned enemies",
+          "handler": null
+        },
         "raw": "spend 3: deal 2 to all Burned enemies",
         "handler": null,
         "quick": false,
@@ -1363,7 +1461,13 @@
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 3,
+        "effect": {
+          "type": "custom",
+          "raw": "summon Akryung from your deck or hand",
+          "handler": null
+        },
         "raw": "spend 3: summon Akryung from your deck or hand",
         "handler": null,
         "quick": false,
@@ -1397,7 +1501,9 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 4,
+        "target": "enemy",
         "raw": "deal 4 to an enemy",
         "handler": null,
         "quick": false,
@@ -1417,7 +1523,9 @@
         "type": "grant_ability",
         "target": "bearer",
         "ability": {
-          "type": "custom",
+          "type": "deal_damage",
+          "amount": 5,
+          "target": "enemy",
           "raw": "deal 5 to an enemy",
           "handler": null
         },
@@ -1458,7 +1566,8 @@
       {
         "type": "custom",
         "raw": "Quick",
-        "handler": null
+        "handler": null,
+        "quick": true
       },
       {
         "type": "custom",
@@ -1582,12 +1691,15 @@
     ],
     "effects": [
       {
-        "type": "custom",
+        "type": "destroy_lighthouse",
+        "amount": 1,
         "raw": "Destroy 1",
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "heal",
+        "amount": 1,
+        "target": "ally",
         "raw": "heal an ally 1 HP",
         "handler": null
       },
@@ -1597,7 +1709,8 @@
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "reclaim_cards",
+        "amount": 1,
         "raw": "Reclaim 1",
         "handler": null
       },
@@ -1623,7 +1736,8 @@
       {
         "type": "custom",
         "raw": "Quick",
-        "handler": null
+        "handler": null,
+        "quick": true
       },
       {
         "type": "custom",
@@ -1708,7 +1822,13 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 2,
+        "effect": {
+          "type": "custom",
+          "raw": "the next time you play Baang this turn, play it 4 more times",
+          "handler": null
+        },
         "raw": "quick: spend 2: the next time you play Baang this turn, play it 4 more times",
         "handler": null,
         "quick": true,
@@ -1754,7 +1874,13 @@
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 1,
+        "effect": {
+          "type": "custom",
+          "raw": "deal 6 damage to a unit",
+          "handler": null
+        },
         "raw": "spend 1: deal 6 damage to a unit",
         "handler": null,
         "quick": false,
@@ -1801,7 +1927,9 @@
     "cost": 1,
     "effects": [
       {
-        "type": "custom",
+        "type": "give_condition",
+        "condition": "heavy",
+        "target": "enemy",
         "raw": "give Heavy to an enemy",
         "handler": null
       }
@@ -1903,7 +2031,13 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 3,
+        "effect": {
+          "type": "custom",
+          "raw": "give me taunt and barrier",
+          "handler": null
+        },
         "raw": "spend 3: give me taunt and barrier",
         "handler": null,
         "quick": false,
@@ -1938,14 +2072,22 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
+        "type": "spend_shinsu",
+        "amount": 2,
+        "effect": {
+          "type": "custom",
+          "raw": "give barrier to 2 allies",
+          "handler": null
+        },
         "raw": "spend 2: give barrier to 2 allies",
         "handler": null,
         "quick": false,
         "positionCode": null
       },
       {
-        "type": "custom",
+        "type": "heal",
+        "amount": 2,
+        "target": "ally",
         "raw": "heal an ally 2 HP",
         "handler": null,
         "quick": false,
