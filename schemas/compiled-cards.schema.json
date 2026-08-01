@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://shinsu-duel/compiled-cards.schema.json",
+  "$id": "https://shinsu-duel/card-compiled.schema.json",
   "title": "Shinsu Duel Compiled Cards",
   "description": "Schema for server/data/cards.json generated from validated YAML source cards.",
   "definitions": {
