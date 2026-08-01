@@ -98,7 +98,7 @@ describe("place cards on field", () => {
 
     // Both placements should succeed
     expect(game.playerStates[USERNAMES[0]].field.frontline[0].placedPositionCode).toBe("fisherman");
-    expect(game2.playerStates[USERNAMES[0]].field.backline[0].placedPositionCode).toBe("wave-controller");
+    expect(game2.playerStates[USERNAMES[0]].field.frontline[0].placedPositionCode).toBe("wave-controller");
   });
 
   test("deploying a unit to invalid position throws error", () => {

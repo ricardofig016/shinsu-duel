@@ -7,9 +7,9 @@ export default class Logger {
   }
 
   #subscribeToAllEvents() {
-    this.eventBus.VALID_EVENTS.forEach((e) =>
-      this.eventBus.subscribe(e, (payload) => this.#logEvent(e, payload))
-    );
+    this.eventBus.on("*", (payload, context) => this.#logEvent(context.eventName, payload), {
+      phase: "resolved",
+    });
   }
 
   /**
@@ -40,11 +40,18 @@ export default class Logger {
   }
 
   #logEvent(eventName, payload) {
-    // const sanitizedPayload = this.#sanitizePayload(payload); // USE THIS AS A LAST RESORT
+    let serializedPayload;
+    try {
+      serializedPayload = structuredClone(payload);
+    } catch {
+      const sanitizedPayload = this.#sanitizePayload(payload);
+      serializedPayload = JSON.parse(JSON.stringify(sanitizedPayload));
+    }
+
     this.logs.push({
       timestamp: this.#getTimestamp(),
       type: eventName,
-      payload: JSON.parse(JSON.stringify(payload)),
+      payload: serializedPayload,
     });
     this.debug_mode && console.log(this.getLastLog());
   }

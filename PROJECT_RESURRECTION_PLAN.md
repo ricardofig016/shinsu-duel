@@ -20,14 +20,13 @@ These rules apply to every phase:
 
 1. `RULES.md` is the authority for gameplay vocabulary and mechanics.
 2. YAML files in `data/cards/` are the card source of truth. Do not edit `server/data/cards.json` by hand.
-3. There is no fixed card count. Every `.yml`/`.yaml` card in `data/cards/` is part of the source set, including `_test_*.yml` production fixtures.
-4. The Wave Controller is a frontline position. Frontline and backline Shinheuh are special positions sharing the `shinheuh` combat-slot group.
-5. Card text uses canonical vocabulary. Do not add aliases to the compiler to accommodate non-canonical source text; correct the source card instead.
-6. Source text is preserved in compiled `raw` fields. Parsed metadata and structured fields are additional data, not replacements for source text.
-7. Evolution and ignition are optional. An empty or omitted trigger means no transformation; a non-empty trigger requires an exact target card of the appropriate type.
-8. `scripts/card-validate.js` validates source YAML only. `scripts/card-compile.js` invokes it before compilation and validates the generated JSON separately.
-9. Phase 1 owns EventBus redesign and EventBus tests. Do not add EventBus behavior to Phase 0.
-10. Keep `server/data/cards.json` present and regenerated because the server consumes it at runtime.
+3. Frontline and backline Shinheuh are special positions sharing the `shinheuh` combat-slot group.
+4. Card text uses canonical vocabulary. Do not add aliases to the compiler to accommodate non-canonical source text; correct the source card instead.
+5. Source text is preserved in compiled `raw` fields. Parsed metadata and structured fields are additional data, not replacements for source text.
+6. Evolution and ignition are optional. An empty or omitted trigger means no transformation; a non-empty trigger requires an exact target card of the appropriate type.
+7. `scripts/card-validate.js` validates source YAML only. `scripts/card-compile.js` invokes it before compilation and validates the generated JSON separately.
+8.  Keep `server/data/cards.json` present and regenerated because the server consumes it at runtime.
+9.  Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. The plan is to rewrite the game engine, not to patch it up. 
 
 ## Phase 0 — Foundation and data pipeline
 
