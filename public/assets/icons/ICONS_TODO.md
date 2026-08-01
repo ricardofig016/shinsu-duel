@@ -71,7 +71,7 @@ Conditions are color coded per RULES.md:
 | ✅     | `positions/backline-shinheuh.png`  | Backline Shinheuh  | Backline  |
 | ✅     | `positions/landmark.png`           | Landmark           | Backline  |
 
-> **Note:** The old `positions/shinheuh.png` is now deprecated — replace with two separate icons for frontline and backline variants.
+> **Note:** `positions/shinheuh.png` is the generic Shinheuh combat-slot icon. Frontline and backline Shinheuh each have their own position icons above.
 
 ---
 

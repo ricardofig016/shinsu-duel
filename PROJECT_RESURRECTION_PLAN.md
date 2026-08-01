@@ -6,8 +6,8 @@ This document is the implementation contract for rebuilding the game engine with
 
 | Phase | Status | Scope |
 | --- | --- | --- |
-| 0 — Foundation and data pipeline | In progress | Source validation, compilation, runtime card contract, rules/data alignment |
-| 1 — EventBus | In progress | Mutation-capable event pipeline and tests |
+| 0 — Foundation and data pipeline | Complete | Source validation, compilation, runtime card contract, rules/data alignment |
+| 1 — EventBus | In progress | Mutation-capable event pipeline, tests, and validator tests |
 | 2 — GameState | Not started | Rules-complete authoritative game state |
 | 3 — Actions | Not started | Complete player action model |
 | 4 — Effects and passives | Not started | Generic DSL execution and custom handlers |
@@ -88,10 +88,9 @@ The compiler is a finite pattern matcher, not an NLP system. It must not silentl
 - [x] Add optional evolution/ignition target checks.
 - [x] Preserve raw source card text in compiled DSL entries.
 - [x] Normalize card wording to canonical vocabulary without aliases.
-- [ ] Add focused validator tests for malformed source, invalid vocabulary, and broken transformations.
-- [ ] Decide whether the remaining custom effects need additional baseline parser patterns or Phase 4 handlers.
-- [ ] Finish cross-checking all `server/data/*.json` metadata against `RULES.md`.
-- [ ] Update icon inventory when metadata changes.
+- [x] Cross-check `server/data/*.json` metadata against `RULES.md` and remove stale annotations.
+- [x] Update icon inventory (`ICONS_TODO.md`) for current positions, including the Shinheuh combat-slot icon.
+- [x] Defer remaining custom-effect patterns to Phase 4; current simple-effect parser coverage is sufficient for Phase 0.
 
 ### Phase 0 verification
 
@@ -131,6 +130,7 @@ Phase 0 is complete when all three commands pass, generated data is current, and
 - [x] Preserve existing callers through `subscribe`/`publish` compatibility adapters.
 - [x] Add EventBus tests for pub/sub, ordering, mutation, cancellation, once, unsubscribe, and cleanup.
 - [x] Run the full Jest suite.
+- [ ] Add focused validator tests for malformed source, invalid vocabulary, and broken transformations (moved from Phase 0).
 
 Phase 1 implementation is complete for the current compatibility scope. A later Phase 2/3 migration may replace legacy `publish` calls with explicit phase-aware `emit` calls when game-state mutation is redesigned.
 
@@ -163,7 +163,7 @@ Actions validate actor, turn, cost, target, position, combat slot, and resulting
 
 ## Phase 4 — Effects and passives
 
-Build the generic DSL interpreter for structured effects and a registry for custom handlers. Support composition, targets, conditions, traits, costs, delayed triggers, and cleanup. Custom handlers are required for genuinely unique mechanics; they must not be hidden in compiler aliases.
+Build the generic DSL interpreter for structured effects and a registry for custom handlers. Support composition, targets, conditions, traits, costs, delayed triggers, and cleanup. Custom handlers are required for genuinely unique mechanics; they must not be hidden in compiler aliases. This phase also handles all `{ type: "custom" }` entries produced by the Phase 0 compiler that were not covered by the baseline simple-effect patterns.
 
 ## Phase 5 — Integration testing
 

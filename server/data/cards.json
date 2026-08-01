@@ -1546,7 +1546,7 @@
     "effects": [
       {
         "type": "custom",
-        "raw": "give Poisoned",
+        "raw": "give Poisoned 1",
         "handler": null
       }
     ],
@@ -1867,8 +1867,10 @@
     ],
     "abilityCodes": [
       {
-        "type": "custom",
-        "raw": "deal 4 damage to a unit",
+        "type": "deal_damage",
+        "amount": 4,
+        "target": "enemy",
+        "raw": "deal 4 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -1877,11 +1879,13 @@
         "type": "spend_shinsu",
         "amount": 1,
         "effect": {
-          "type": "custom",
-          "raw": "deal 6 damage to a unit",
+          "type": "deal_damage",
+          "amount": 6,
+          "target": "enemy",
+          "raw": "deal 6 to an enemy",
           "handler": null
         },
-        "raw": "spend 1: deal 6 damage to a unit",
+        "raw": "spend 1: deal 6 to an enemy",
         "handler": null,
         "quick": false,
         "positionCode": null
@@ -1890,7 +1894,7 @@
     "passiveCodes": [
       {
         "type": "custom",
-        "raw": "while i am alone on the ally frontline, i have resilient and deal +3 damage",
+        "raw": "while i am alone on the ally frontline, i have Resilient 1 and Strong 3",
         "handler": null,
         "positionCode": null
       }
@@ -1929,8 +1933,9 @@
       {
         "type": "give_condition",
         "condition": "heavy",
+        "amount": 1,
         "target": "enemy",
-        "raw": "give Heavy to an enemy",
+        "raw": "give Heavy 1 to an enemy",
         "handler": null
       }
     ],

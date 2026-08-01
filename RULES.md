@@ -275,7 +275,7 @@ Conditions are negative temporary effects that last until the end of the round. 
 2. **Cursed `x`**: Round end: i take `x` damage for each unique condition i have
 3. **Doomed**: I will die at the end of this round
 4. **Exhausted `x`**: I deal -`x` damage
-5. **Frozen**: When i use an ability, spend all combat slots (_missing icon_)
+5. **Frozen**: When i use an ability, spend all combat slots
 6. **Ghost**: I don't prevent the enemy from targeting what's behind me
 7. **Heavy `x`**: My abilities cost +`x` shinsu
 8. **Poisoned `x`**: I take `x` damage when i use an ability

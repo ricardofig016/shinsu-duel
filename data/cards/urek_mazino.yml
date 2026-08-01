@@ -6,10 +6,10 @@ rank: high ranker
 positions:
   - fisherman
 passives:
-  - "while i am alone on the ally frontline, i have resilient and deal +3 damage"
+  - "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
 abilities:
-  - "deal 4 damage to a unit"
-  - "spend 1: deal 6 damage to a unit"
+  - "deal 4 to an enemy"
+  - "spend 1: deal 6 to an enemy"
 evolve:
 traits:
   - barrier
