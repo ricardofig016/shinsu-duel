@@ -26,6 +26,6 @@ export default class AddLighthousesAction extends ActionHandler {
     const { username, amount } = data;
     const playerState = gameState.playerStates[username];
     playerState.lighthouses.amount += amount;
-    gameState.eventBus.publish("OnAddLighthouses", { username, amount });
+    gameState.eventBus.emit("OnAddLighthouses", { username, amount });
   }
 }

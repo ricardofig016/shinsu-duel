@@ -47,8 +47,8 @@ export default class DeployUnitAction extends ActionHandler {
 
     gameState.spendShinsu(username, card.cost);
 
-    gameState.eventBus.publish("OnDeployUnit", { username, unit });
-    gameState.eventBus.publish("OnSummonUnit", { username, unit });
+    gameState.eventBus.emit("OnDeployUnit", { username, unit });
+    gameState.eventBus.emit("OnSummonUnit", { username, unit });
     unit.onSummon(gameState);
     gameState.endTurn();
   }
