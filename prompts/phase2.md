@@ -82,3 +82,17 @@ These are all Phase 2 items — none block Phase 1 completion:
 ### Verdict
 
 **Phase 1 is fully complete and integrated.** All acceptance criteria from PROJECT_RESURRECTION_PLAN.md are met — and exceeded (the plan didn't call for ModifierStack, HandlerRegistry, 8 baseline handlers, or 5 architecture docs). The codebase is clean: zero legacy shims, zero stale references, zero compat wrappers. Ready for Phase 2 planning.
+
+## FAQ
+
+Q: Should Phase 2 implement full trigger parsing (raw text to event subscriptions, auto-trigger) or just build transformer infrastructure and defer raw trigger parsing to Phase 4?
+A: Full trigger system - Parse raw trigger text, register listeners, auto-trigger evolution/ignition.
+
+Q: How many of the 7 attribute mechanics should Phase 2 implement? (Anima, Silver Dwarf, Red Witch, Hwayeomsa, Jeonsulsa, Irregular, Living Ignition Weapon)
+A: 2 complex ones so we can validate your architecture is generaly sturdy - lets go with anima and hwayeomsa. the rest is phase 4.
+
+Q: Which missing handlers should Phase 2 implement? compress_shinsu (~3 uses), charge_shinsu (~2 uses), reclaim_cards (1 use), grant_ability (2 uses).
+A: All four handlers - Implement compress_shinsu, charge_shinsu, reclaim_cards, and grant_ability.
+
+Q: The empty directories (abilities/, passive_abilities/, effects/continuous/, effects/triggered/) are legacy. Should Phase 2 replace them with a new structure or fill them?
+A: Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. The plan is to rewrite the engine, not to patch it up. your decision should be completely transparent and ignore the existing folders. if they match your design, fine, if they dont, thats perfectly fine. do not let subpar legacy implementation sway you from the path of excelent design.
