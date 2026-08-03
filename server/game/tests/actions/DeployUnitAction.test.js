@@ -133,13 +133,13 @@ describe("place cards on field", () => {
     ).toThrow(/Not enough shinsu/);
   });
 
-  test("deploying a unit publishes events and switches turns", () => {
+  test("deploying a unit emits events and switches turns", () => {
     // Rak Wraithraiser is a spear-bearer, costs 2 shinsu
     const game = setupGameWithCardsInHand(["Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser"]);
 
     // Need at least round 2 for 2 shinsu
     advanceToRound(game, 2);
-    const publishSpy = jest.spyOn(game.eventBus, "publish");
+    const emitSpy = jest.spyOn(game.eventBus, "emit");
 
     // Initial turn state
     expect(game.currentTurn).toBe(USERNAMES[0]);
@@ -150,11 +150,11 @@ describe("place cards on field", () => {
       data: { source: "player", username: USERNAMES[0], handId: 0, placedPositionCode: "spear-bearer" },
     });
 
-    // Check events were published
-    expect(publishSpy).toHaveBeenCalledWith("OnDeployUnit", expect.any(Object));
-    expect(publishSpy).toHaveBeenCalledWith("OnSummonUnit", expect.any(Object));
-    expect(publishSpy).toHaveBeenCalledWith("OnTurnEnd", expect.any(Object));
-    expect(publishSpy).toHaveBeenCalledWith("OnTurnStart", expect.any(Object));
+    // Check events were emitted
+    expect(emitSpy).toHaveBeenCalledWith("OnDeployUnit", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("OnSummonUnit", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("OnTurnEnd", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("OnTurnStart", expect.any(Object));
 
     // Check turn switched
     expect(game.currentTurn).toBe(USERNAMES[1]);
