@@ -1,6 +1,8 @@
 /**
  * Represents a unit placed on the battlefield.
- * Phase 0: plain data container. Ability execution comes in Phase 3/4.
+ *
+ * Ability and passive resolution is owned by the event/handler pipeline;
+ * Unit only emits lifecycle intents and stores instance state.
  */
 export default class Unit {
   constructor(card, placedPositionCode) {
@@ -18,12 +20,11 @@ export default class Unit {
 
   // Stub — Phase 3/4 will implement ability/passive activation
   onSummon(gameState) {
-    this.bus.publish("OnUnitSummoned", { unitId: this.id });
+    this.bus.emit("OnUnitSummoned", { unitId: this.id });
   }
 
-  // Stub — Phase 3/4 will implement ability/passive deactivation
   onRemove(gameState) {
-    this.bus.publish("OnUnitRemoved", { unitId: this.id });
+    this.bus.emit("OnUnitRemoved", { unitId: this.id });
   }
 
   isAlive() {
@@ -33,8 +34,8 @@ export default class Unit {
   takeDamage(amount) {
     const damageAmount = Math.max(0, parseInt(amount) || 0);
 
-    // Publish event before damage is applied (allows for damage modification)
-    this.bus.publish("OnDealDamageIntent", {
+    // Emit event before damage is applied (allows for damage modification)
+    this.bus.emit("OnDealDamageIntent", {
       source: this.toSanitizedObject(),
       target: this.toSanitizedObject(),
       damageAmount: damageAmount,
@@ -44,8 +45,8 @@ export default class Unit {
     // Apply damage
     this.currentHp = Math.max(0, this.currentHp - damageAmount);
 
-    // Publish event after damage is applied
-    this.bus.publish("OnDealDamageApplied", {
+    // Emit event after damage is applied
+    this.bus.emit("OnDealDamageApplied", {
       unit: this.toSanitizedObject(),
       damageAmount: damageAmount,
       message: `${this.card.name} took ${damageAmount} damage from itself and is now at ${this.currentHp} HP`,
@@ -54,11 +55,18 @@ export default class Unit {
     return this.currentHp;
   }
 
-  // Stub — Phase 3/4 will implement ability dispatching from DSL objects
   useAbility(abilityCode, targetInfo = null, gameState) {
-    // Placeholder: ability execution pipeline rebuilt in Phase 3/4
-    this.bus.publish("OnUseAbilityIntent", { unitId: this.id, abilityCode, targetInfo });
-    this.bus.publish("OnUseAbilityResolved", { unitId: this.id, abilityCode, targetInfo });
+    this.bus.emit("unit:ability:intent", {
+      unitId: this.id,
+      abilityCode,
+      targetInfo,
+      gameState,
+    });
+    this.bus.emit("unit:ability:resolved", {
+      unitId: this.id,
+      abilityCode,
+      targetInfo,
+    });
   }
 
   toSanitizedObject() {

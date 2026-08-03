@@ -1,195 +1,381 @@
+/**
+ * Deterministic depth-first event bus for Shinsu Duel.
+ *
+ * ## Phases
+ *
+ *  pre      — Modify payload, cancel the event. Runs before state mutation.
+ *  execute  — The main effect / state mutation happens here.
+ *  post     — Reactions to the resolved effect (e.g. "when damaged", "when killed").
+ *  resolved — Logging, cleanup. Cannot trigger new events.
+ *
+ * ## DFS execution model
+ *
+ * When a handler calls `context.emitChild(eventName, payload)`, that child
+ * event goes through its ENTIRE lifecycle (all 4 phases + any grandchildren)
+ * BEFORE the next handler at the parent level runs.
+ *
+ * This preserves causality: you see one chain resolve completely before
+ * another begins.
+ *
+ * ## Ordering within a phase
+ *
+ *  1. priority (ascending — lower runs first)
+ *  2. sourceAge (ascending — older sources run first)
+ *  3. registrationOrder (ascending — first registered runs first)
+ *
+ * ## Cancellation
+ *
+ * A `pre` or `execute` handler may call `context.cancel(reason)`. The current
+ * phase stops immediately. Child events that already ran are NOT rolled back.
+ *
+ * ## Error isolation
+ *
+ * One handler throwing does not prevent other handlers from running.
+ * Errors are collected and wrapped with event/phase/handler identity.
+ */
+
 const PHASE_ORDER = ["pre", "execute", "post", "resolved"];
 const PHASES = new Set(PHASE_ORDER);
 
-function normalizePhase(phase) {
-  const normalized = String(phase ?? "execute").toLowerCase();
-  if (!PHASES.has(normalized)) {
-    throw new Error(`Invalid event phase: ${phase}`);
-  }
-  return normalized;
-}
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-function validateEventName(eventName) {
-  if (typeof eventName !== "string" || eventName.trim().length === 0) {
+function validateEventName(name) {
+  if (typeof name !== "string" || name.trim().length === 0) {
     throw new Error("Event name must be a non-empty string");
   }
 }
 
-function validateHandler(handler) {
-  if (typeof handler !== "function") {
+function validateHandler(fn) {
+  if (typeof fn !== "function") {
     throw new Error("Event handler must be a function");
   }
 }
 
-/**
- * Deterministic publish/subscribe bus for game events.
- *
- * `emit` dispatches one phase at a time. Handlers may mutate the payload in
- * place. PRE and EXECUTE handlers can cancel the event through the context
- * passed as their second argument.
- */
-export default class EventBus {
-  static PHASES = Object.freeze([...PHASE_ORDER]);
+function normalizePhase(raw) {
+  const p = String(raw ?? "execute").toLowerCase();
+  if (!PHASES.has(p)) throw new Error(`Invalid event phase: ${raw}`);
+  return p;
+}
 
-  constructor() {
-    this.listeners = new Map();
-    this.registrationOrder = 0;
+/**
+ * Build the sort key for handler ordering:
+ *   [priority, sourceAge, registrationOrder]
+ */
+function sortKey(e) {
+  return (e.priority * 1e12) + (e.sourceAge * 1e6) + e.order;
+}
+
+// ---------------------------------------------------------------------------
+// EventContext
+// ---------------------------------------------------------------------------
+
+class EventContext {
+  constructor(eventBus, eventName, phase, depth) {
+    this._bus = eventBus;
+    this.eventName = eventName;
+    this.phase = phase;
+    this.depth = depth;
+    this._cancelled = false;
+    this._cancelReason = null;
+    this._children = [];       // records child event results for logging
   }
 
   /**
-   * Register a handler.
-   * @param {string} eventName Event name, or `*` for every event.
-   * @param {Function} handler Event callback `(payload, context)`.
-   * @param {{phase?: string, priority?: number}} options Registration options.
+   * Cancel the current event. No further phases execute.
+   * Child events that already ran are NOT rolled back.
+   */
+  cancel(reason = "cancelled") {
+    this._cancelled = true;
+    this._cancelReason = reason;
+  }
+
+  get cancelled() {
+    return this._cancelled;
+  }
+
+  /**
+   * Emit a child event **now** (DFS). The child resolves completely
+   * before this call returns.
+   */
+  emitChild(eventName, payload) {
+    const result = this._bus._emitInternal(eventName, payload, this.depth + 1);
+    this._children.push({ eventName, result });
+    return result;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// EventBus
+// ---------------------------------------------------------------------------
+
+export default class EventBus {
+  static PHASES = Object.freeze([...PHASE_ORDER]);
+
+  /**
+   * @param {import('./GameClock.js').default} [clock] Shared clock for
+   *   deterministic source-age assignment. Creates its own if omitted.
+   * @param {number} [maxDepth=50] Maximum DFS nesting before throwing.
+   */
+  constructor(clock, maxDepth = 50) {
+    /** @type {Map<string, Array<object>>} */
+    this._listeners = new Map();
+    this._registrationOrder = 0;
+    this._clock = clock ?? { now: () => 0 };
+    this._maxDepth = maxDepth;
+  }
+
+  // -----------------------------------------------------------------------
+  // Registration
+  // -----------------------------------------------------------------------
+
+  /**
+   * Register a persistent handler.
+   *
+   * @param {string} eventName  Event name or `"*"` for all events.
+   * @param {Function} handler  `(payload, context) => void`.
+   * @param {object} [options]
+   * @param {string} [options.phase="execute"]
+   * @param {number} [options.priority=0]
+   * @param {number} [options.sourceAge]  Source age for tiebreaking. Uses clock if omitted.
    * @returns {Function} Unsubscribe function.
    */
   on(eventName, handler, options = {}) {
     validateEventName(eventName);
     validateHandler(handler);
 
+    const entry = this._createEntry(eventName, handler, options);
+
+    const list = this._listeners.get(eventName) || [];
+    list.push(entry);
+    this._listeners.set(eventName, list);
+
+    return () => this._removeEntry(eventName, entry);
+  }
+
+  /**
+   * Register a one-shot handler. Removed after its first invocation.
+   */
+  once(eventName, handler, options = {}) {
+    const entry = this._createEntry(eventName, handler, options);
+    entry.once = true;
+
+    const list = this._listeners.get(eventName) || [];
+    list.push(entry);
+    this._listeners.set(eventName, list);
+
+    return () => this._removeEntry(eventName, entry);
+  }
+
+  /**
+   * Remove a specific handler.
+   */
+  off(eventName, handler) {
+    validateEventName(eventName);
+    if (typeof handler !== "function") return;
+
+    const list = this._listeners.get(eventName);
+    if (!list) return;
+
+    const filtered = list.filter((e) => e.handler !== handler);
+    if (filtered.length === 0) this._listeners.delete(eventName);
+    else this._listeners.set(eventName, filtered);
+  }
+
+  /**
+   * Remove all listeners for a given event, or all listeners entirely.
+   */
+  removeAllListeners(eventName) {
+    if (eventName === undefined) {
+      this._listeners.clear();
+    } else {
+      validateEventName(eventName);
+      this._listeners.delete(eventName);
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // Emission
+  // -----------------------------------------------------------------------
+
+  /**
+   * Public entry point. Runs all 4 phases in order.
+   *
+   * @param {string} eventName
+   * @param {*} payload            Will be mutated in-place by handlers.
+   * @param {object} [options]
+   * @param {string} [options.phase]  Only run a single phase (for partial emits).
+   * @returns {{ cancelled: boolean, reason: string|null, finalPayload: *, children: Array }}
+   */
+  emit(eventName, payload = {}, options = {}) {
+    if (options.phase) {
+      // Single-phase mode
+      return this._emitSinglePhase(eventName, payload, options.phase);
+    }
+    return this._emitInternal(eventName, payload, 0);
+  }
+
+  // -----------------------------------------------------------------------
+  // Internal
+  // -----------------------------------------------------------------------
+
+  /** @private */
+  _emitInternal(eventName, payload, depth) {
+    if (depth > this._maxDepth) {
+      throw new Error(
+        `EventBus max recursion depth (${this._maxDepth}) exceeded at "${eventName}". ` +
+        `Check for infinite event loops.`
+      );
+    }
+
+    validateEventName(eventName);
+
+    const rootCtx = new EventContext(this, eventName, "pre", depth);
+    const errors = [];
+
+    for (const phase of PHASE_ORDER) {
+      if (rootCtx._cancelled) break;
+      rootCtx.phase = phase;
+
+      const handlers = this._collectHandlers(eventName, phase);
+
+      for (const entry of handlers) {
+        // Skip once-handlers that were already removed during emission
+        if (entry._removed) continue;
+
+        try {
+          entry.handler(payload, rootCtx);
+        } catch (err) {
+          errors.push(this._wrapError(err, eventName, phase, entry));
+        }
+
+        // Clean up once handlers
+        if (entry.once && !entry._removed) {
+          entry._removed = true;
+          this._removeEntry(eventName, entry);
+        }
+      }
+    }
+
+    // Throw collected errors after all handlers have run
+    if (errors.length > 0) {
+      const msg = errors.map((e) => e.message).join("\n");
+      throw new Error(`${errors.length} handler error(s) during "${eventName}":\n${msg}`);
+    }
+
+    return {
+      cancelled: rootCtx._cancelled,
+      reason: rootCtx._cancelReason,
+      finalPayload: payload,
+      children: rootCtx._children,
+    };
+  }
+
+  /** @private */
+  _emitSinglePhase(eventName, payload, phase) {
+    const ctx = new EventContext(this, eventName, normalizePhase(phase), 0);
+    const handlers = this._collectHandlers(eventName, normalizePhase(phase));
+    const errors = [];
+
+    for (const entry of handlers) {
+      if (ctx._cancelled) break;
+      if (entry._removed) continue;
+
+      try {
+        entry.handler(payload, ctx);
+      } catch (err) {
+        errors.push(this._wrapError(err, eventName, phase, entry));
+      }
+
+      if (entry.once && !entry._removed) {
+        entry._removed = true;
+        this._removeEntry(eventName, entry);
+      }
+    }
+
+    if (errors.length > 0) {
+      const msg = errors.map((e) => e.message).join("\n");
+      throw new Error(`${errors.length} handler error(s) during "${eventName}":\n${msg}`);
+    }
+
+    return {
+      cancelled: ctx._cancelled,
+      reason: ctx._cancelReason,
+      modifiedPayload: payload,
+      children: ctx._children,
+    };
+  }
+
+  /** @private */
+  _collectHandlers(eventName, phase) {
+    const result = [];
+
+    // Direct handlers
+    const direct = this._listeners.get(eventName);
+    if (direct) {
+      for (const e of direct) {
+        if (e.phase === phase) result.push(e);
+      }
+    }
+
+    // Wildcard handlers
+    if (eventName !== "*") {
+      const wild = this._listeners.get("*");
+      if (wild) {
+        for (const e of wild) {
+          if (e.phase === phase) result.push(e);
+        }
+      }
+    }
+
+    // Stable sort by [priority, sourceAge, registrationOrder]
+    result.sort((a, b) => sortKey(a) - sortKey(b));
+    return result;
+  }
+
+  /** @private */
+  _createEntry(eventName, handler, options) {
     const phase = normalizePhase(options.phase);
     const priority = options.priority ?? 0;
     if (typeof priority !== "number" || !Number.isFinite(priority)) {
       throw new Error("Event handler priority must be a finite number");
     }
 
-    const entry = {
+    return {
       eventName,
       handler,
       phase,
       priority,
-      order: this.registrationOrder++,
+      sourceAge: options.sourceAge ?? this._clock.now(),
+      order: this._registrationOrder++,
       once: false,
-    };
-    const handlers = this.listeners.get(eventName) || [];
-    handlers.push(entry);
-    this.listeners.set(eventName, handlers);
-
-    return () => this.#removeEntry(entry);
-  }
-
-  /**
-   * Register a handler that is removed before it can run a second time.
-   */
-  once(eventName, handler, options = {}) {
-    const unsubscribe = this.on(eventName, handler, options);
-    const handlers = this.listeners.get(eventName);
-    const entry = handlers?.findLast((candidate) => candidate.handler === handler && !candidate.once);
-    if (entry) entry.once = true;
-    return unsubscribe;
-  }
-
-  /**
-   * Remove all registrations for the handler on an event.
-   */
-  off(eventName, handler) {
-    validateEventName(eventName);
-    validateHandler(handler);
-
-    const handlers = this.listeners.get(eventName);
-    if (!handlers) return;
-
-    const remaining = handlers.filter((entry) => entry.handler !== handler);
-    if (remaining.length === 0) this.listeners.delete(eventName);
-    else this.listeners.set(eventName, remaining);
-  }
-
-  /**
-   * Remove all handlers for one event. With no event name, remove everything.
-   */
-  removeAllListeners(eventName = undefined) {
-    if (eventName === undefined) {
-      this.listeners.clear();
-      return;
-    }
-
-    validateEventName(eventName);
-    this.listeners.delete(eventName);
-  }
-
-  /**
-   * Emit one phase of an event.
-   *
-   * @returns {{eventName: string, phase: string, modifiedPayload: any, cancelled: boolean, results: any[]}}
-   */
-  emit(eventName, payload = {}, options = {}) {
-    validateEventName(eventName);
-    const phase = normalizePhase(options.phase);
-    const handlers = [
-      ...(this.listeners.get(eventName) || []),
-      ...(this.listeners.get("*") || []),
-    ]
-      .filter((entry) => entry.phase === phase)
-      .sort((left, right) => left.priority - right.priority || left.order - right.order);
-
-    const context = {
-      eventName,
-      phase,
-      cancelled: false,
-      reason: undefined,
-      cancel: (reason = undefined) => {
-        context.cancelled = true;
-        context.reason = reason;
-      },
-    };
-    const results = [];
-
-    for (const entry of handlers) {
-      if (entry.once) this.#removeEntry(entry);
-      try {
-        const result = entry.handler(payload, context);
-        results.push(result);
-        if (result === false && (phase === "pre" || phase === "execute")) {
-          context.cancel();
-        }
-      } catch (error) {
-        const wrappedError = new Error(`Error in EventBus handler for "${eventName}" (${phase}): ${error.message}`);
-        wrappedError.cause = error;
-        throw wrappedError;
-      }
-    }
-
-    return {
-      eventName,
-      phase,
-      modifiedPayload: payload,
-      cancelled: context.cancelled,
-      reason: context.reason,
-      results,
+      _removed: false,
     };
   }
 
-  /**
-   * Legacy adapter. Existing callers publish execute events; POST handlers
-   * also run so logging and post-apply reactions continue to work.
-   */
-  publish(eventName, payload = {}) {
-    const executeResult = this.emit(eventName, payload, { phase: "execute" });
-    const postResult = this.emit(eventName, payload, { phase: "post" });
-    const resolvedResult = this.emit(eventName, payload, { phase: "resolved" });
-    return {
-      ...resolvedResult,
-      cancelled: executeResult.cancelled || postResult.cancelled || resolvedResult.cancelled,
-      reason: executeResult.reason ?? postResult.reason ?? resolvedResult.reason,
-      results: [...executeResult.results, ...postResult.results, ...resolvedResult.results],
-    };
+  /** @private */
+  _removeEntry(eventName, entry) {
+    const list = this._listeners.get(eventName);
+    if (!list) return;
+
+    const idx = list.indexOf(entry);
+    if (idx === -1) return;
+
+    list.splice(idx, 1);
+    if (list.length === 0) this._listeners.delete(eventName);
   }
 
-  // Legacy method names retained while game callers migrate to on/off/emit.
-  subscribe(eventName, handler, options = {}) {
-    return this.on(eventName, handler, options);
-  }
-
-  unsubscribe(eventName, handler) {
-    return this.off(eventName, handler);
-  }
-
-  #removeEntry(entry) {
-    const handlers = this.listeners.get(entry.eventName);
-    if (!handlers) return;
-
-    const remaining = handlers.filter((candidate) => candidate !== entry);
-    if (remaining.length === 0) this.listeners.delete(entry.eventName);
-    else this.listeners.set(entry.eventName, remaining);
+  /** @private */
+  _wrapError(err, eventName, phase, entry) {
+    const label = entry.handler?.name || "(anonymous)";
+    const wrapped = new Error(
+      `[${eventName}:${phase}] handler "${label}" threw: ${err.message}`
+    );
+    wrapped.cause = err;
+    wrapped.eventName = eventName;
+    wrapped.phase = phase;
+    wrapped.handlerName = label;
+    return wrapped;
   }
 }

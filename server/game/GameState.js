@@ -1,7 +1,8 @@
 import cards from "../data/cards.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
+import GameClock from "./GameClock.js";
 import EventBus from "./EventBus.js";
-import effectRegistry from "./registries/effectRegistry.js";
+import ModifierStack from "./ModifierStack.js";
 import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
 import Card from "./Card.js";
@@ -34,11 +35,15 @@ export default class GameState {
     if (firstPlayer && !usernames.includes(firstPlayer))
       throw new Error("firstPlayer must be one of the usernames in the game");
 
-    this.eventBus = new EventBus();
+    this._clock = new GameClock();
+    this.eventBus = new EventBus(this._clock);
+    this.modifierStack = new ModifierStack(this.eventBus, this._clock);
     this.actionRegistry = createActionRegistry();
-    this.logger = new Logger(this.eventBus);
+    this.logger = new Logger(this.eventBus, {
+      snapshotFn: () => this._createSnapshot(),
+    });
 
-    this.activeEffects = [];
+    this._barrierUsedThisRound = new Set();
     this.roomCode = roomCode;
     this.usernames = usernames;
     this.round = 1;
@@ -53,18 +58,14 @@ export default class GameState {
     this.#draw(this.usernames, GameState.INIT_HAND_SIZE);
     this.#resetShinsu(this.usernames);
 
-    // add mockup effects
-    // this.#addEffect("test-console-log-on-turn-end");
-    // this.#addEffect("test-console-log-on-turn-end-until-round-end");
-
-    // publish initial game events
-    this.eventBus.publish("OnGameStart", this.playerStates);
-    this.eventBus.publish("OnRoundStart", {
+    // Emit initial game events
+    this.eventBus.emit("OnGameStart", this.playerStates);
+    this.eventBus.emit("OnRoundStart", {
       username: this.currentTurn,
       round: this.round,
       playerStates: this.playerStates,
     });
-    this.eventBus.publish("OnTurnStart", {
+    this.eventBus.emit("OnTurnStart", {
       username: this.currentTurn,
       round: this.round,
     });
@@ -211,7 +212,7 @@ export default class GameState {
   }
 
   endTurn(isPassAction = false) {
-    this.eventBus.publish("OnTurnEnd", {
+    this.eventBus.emit("OnTurnEnd", {
       username: this.currentTurn,
       round: this.round,
     });
@@ -224,7 +225,7 @@ export default class GameState {
 
     // flip turn to the next player
     this.currentTurn = this.usernames.find((p) => p !== this.currentTurn);
-    this.eventBus.publish("OnTurnStart", {
+    this.eventBus.emit("OnTurnStart", {
       username: this.currentTurn,
       round: this.round,
     });
@@ -234,7 +235,7 @@ export default class GameState {
    * End the current round. This method does not flip the turn.
    */
   #endRound() {
-    this.eventBus.publish("OnRoundEnd", {
+    this.eventBus.emit("OnRoundEnd", {
       username: this.currentTurn,
       round: this.round,
     });
@@ -242,7 +243,7 @@ export default class GameState {
     this.#resetShinsu(this.usernames);
     this.#draw(this.usernames, GameState.PER_ROUND_DRAW_AMOUNT);
     this.roundEndOnTurnEnd = false; // reset the flag for the next round
-    this.eventBus.publish("OnRoundStart", {
+    this.eventBus.emit("OnRoundStart", {
       username: this.currentTurn,
       round: this.round,
       playerStates: this.playerStates,
@@ -288,25 +289,6 @@ export default class GameState {
     player.shinsu.normalSpent += cost - deductedRechargedShinsu;
   }
 
-  #addEffect(effectId) {
-    const EffectClass = effectRegistry[effectId];
-    if (!EffectClass) throw new Error(`No effect found for id ${effectId}`);
-    const instance = new EffectClass(this); // TODO: add more info here in the future (like source, owner, etc)
-    this.activeEffects.push(instance);
-  }
-
-  removeEffect(effectInstance) {
-    // remove from active effects
-    const idx = this.activeEffects.indexOf(effectInstance);
-    if (idx !== -1) {
-      this.activeEffects.splice(idx, 1);
-    }
-    // unsubscribe from all events
-    if (typeof effectInstance.unsubscribeAll === "function") {
-      effectInstance.unsubscribeAll();
-    }
-  }
-
   processAction(action) {
     const { type, data } = action;
     const handler = this.actionRegistry[type];
@@ -317,6 +299,44 @@ export default class GameState {
 
     handler.validate(data, this);
     handler.execute(data, this);
-    this.logger.logAction(action);
+  }
+
+  /**
+   * Find a unit by its instance ID across both players' fields.
+   * Used by handlers that need to modify unit state.
+   */
+  _findUnit(unitId) {
+    for (const username of this.usernames) {
+      const field = this.playerStates[username]?.field;
+      if (!field) continue;
+      for (const unit of [...(field.frontline || []), ...(field.backline || [])]) {
+        if (unit.id === unitId) return unit;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Create a lightweight state snapshot for the Logger.
+   */
+  _createSnapshot() {
+    const snap = { round: this.round, currentTurn: this.currentTurn };
+    for (const username of this.usernames) {
+      const p = this.playerStates[username];
+      if (!p) continue;
+      snap[username] = {
+        lighthouses: p.lighthouses?.amount,
+        shinsu: { ...p.shinsu },
+        handSize: p.hand?.length ?? 0,
+        deckSize: p.deck?.length ?? 0,
+        frontline: p.field?.frontline?.map((u) => ({
+          id: u.id, name: u.card?.name, hp: u.currentHp, position: u.placedPositionCode,
+        })) ?? [],
+        backline: p.field?.backline?.map((u) => ({
+          id: u.id, name: u.card?.name, hp: u.currentHp, position: u.placedPositionCode,
+        })) ?? [],
+      };
+    }
+    return snap;
   }
 }
