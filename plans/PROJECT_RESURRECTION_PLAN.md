@@ -156,7 +156,6 @@ Implement and test the complete action registry:
 - Equip equipment.
 - Switch a unit's position.
 - Pass.
-- Add/destroy lighthouses where rules permit.
 
 Actions validate actor, turn, cost, target, position, combat slot, and resulting state before mutation.
 
