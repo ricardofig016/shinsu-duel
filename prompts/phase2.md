@@ -96,3 +96,15 @@ A: All four handlers - Implement compress_shinsu, charge_shinsu, reclaim_cards, 
 
 Q: The empty directories (abilities/, passive_abilities/, effects/continuous/, effects/triggered/) are legacy. Should Phase 2 replace them with a new structure or fill them?
 A: Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. The plan is to rewrite the engine, not to patch it up. your decision should be completely transparent and ignore the existing folders. if they match your design, fine, if they dont, thats perfectly fine. do not let subpar legacy implementation sway you from the path of excelent design.
+
+Q: For full evolution/ignition support, may Phase 2 add a canonical compiler-time parser that converts source trigger text into typed ASTs (runtime never parses raw)?
+A: Yes — typed AST at compile time - Recommended; unsupported canonical triggers fail compilation until modeled.
+
+Q: How should Phase 2 represent effects requiring choices (targets, overflow destruction, reclaimed card, Incinerate targets)?
+A: Pending-decision state - Engine pauses with validated candidates; player resolves a typed decision. Recommended for arbitrary future interactions.
+
+Q: When an evolution/ignition trigger is met, what default behavior should the engine enforce?
+A: Mandatory immediate transform - Recommended default: after triggering event resolves, preserve damage, conditions, attachments, grants, identity, and slot state; atomically replace definition/subscriptions.
+
+Q: Fire Core and Incinerate I–IV are defined in RULES.md but absent from `data/cards/`. What source model should Phase 2 plan?
+A: add the missing cards (fire core and the 4 incenerates) as yml files. necessary info for card text is in readme. they are all unreachable. there are no system cards, all cards come from the yml files.
