@@ -1,0 +1,8 @@
+type: skill
+name: Incinerate II
+cost: 0
+requirements:
+effects:
+  - create me by spending 3 Fire Charges
+  - deal 2 to 2 enemies
+  - unreachable

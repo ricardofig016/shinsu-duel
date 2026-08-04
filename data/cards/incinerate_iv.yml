@@ -1,0 +1,8 @@
+type: skill
+name: Incinerate IV
+cost: 0
+requirements:
+effects:
+  - create me by spending 7 Fire Charges
+  - deal 3 to all enemies and give them Burn 2
+  - unreachable

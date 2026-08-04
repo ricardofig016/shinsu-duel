@@ -1,0 +1,8 @@
+type: skill
+name: Incinerate I
+cost: 0
+requirements:
+effects:
+  - create me by spending 1 Fire Charge
+  - deal 1 to an enemy
+  - unreachable

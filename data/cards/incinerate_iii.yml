@@ -1,0 +1,8 @@
+type: skill
+name: Incinerate III
+cost: 0
+requirements:
+effects:
+  - create me by spending 5 Fire Charges
+  - deal 2 to 3 enemies and give them Burn
+  - unreachable

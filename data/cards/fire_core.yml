@@ -1,0 +1,7 @@
+type: skill
+name: Fire Core
+cost: 0
+requirements:
+effects:
+  - "Quick: Spend Fire Charges to create the highest affordable Incinerate in your hand"
+  - unreachable
