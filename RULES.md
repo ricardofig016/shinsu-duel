@@ -1,8 +1,8 @@
-# Shinsu Duel: A Tower of God CCG
+# Shinsu Duel: A Tower of God CCG - Rules
 
 Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of God](https://www.webtoons.com/en/fantasy/tower-of-god/list?title_no=95)_. Players build decks, deploy units, and use abilities to destroy their opponent's lighthouses while protecting their own.
 
-- [Shinsu Duel: A Tower of God CCG](#shinsu-duel-a-tower-of-god-ccg)
+- [Shinsu Duel: A Tower of God CCG - Rules](#shinsu-duel-a-tower-of-god-ccg---rules)
   - [Objective](#objective)
   - [Resources](#resources)
     - [Shinsu](#shinsu)
@@ -170,6 +170,8 @@ Units can only hold 1 equipment at a time, unless they are [Irregular](#irregula
 Equipments may have requirements that must all be met when and how it is played.
 
 **Ignition**: Some equipments can ignite when a trigger is met. The trigger is specified in the equipments's card. Ignited equipments have different effects. Example: `Narumada` ignites into `Narumada (ignited)` when its bearer kills a unit.
+
+Equipments with more than 1 trigger ignite when any of the triggers are met.
 
 Equipments return to hand when their bearer dies or is equiped when another equipment. The card returns to its default non-ignited version.
 
@@ -345,11 +347,11 @@ Hwayeomsa are flame users who are able to convert shinsu into fire. They deal te
 
 ```md
 Spend 1, Free: Charge 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have one.
-**Fire Core**: Quick: Consume your Fire Charges to create **Incinerate <level>** in hand:
-**Incinerate I**: I am created by consuming 1 Fire Charge. Deal 1 to an enemy.
-**Incinerate II**: I am created by consuming 3 Fire Charges. Deal 2 to 2 enemies.
-**Incinerate III**: I am created by consuming 5 Fire Charges. Deal 2 to 3 enemies and give them Burn.
-**Incinerate IV**: I am created by consuming 7 Fire Charges. Deal 3 to all enemies, and give them Burn 2.
+**Fire Core**: Quick: Spend Fire Charges to create the highest affordable Incinerate in your hand.
+**Incinerate I**: Create me by spending 1 Fire Charge. Deal 1 to an enemy.
+**Incinerate II**: Create me by spending 3 Fire Charges. Deal 2 to 2 enemies.
+**Incinerate III**: Create me by spending 5 Fire Charges. Deal 2 to 3 enemies and give them Burn.
+**Incinerate IV**: Create me by spending 7 Fire Charges. Deal 3 to all enemies, and give them Burn 2.
 ```
 
 **Example Synergies:**
