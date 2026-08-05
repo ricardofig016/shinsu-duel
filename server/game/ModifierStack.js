@@ -21,6 +21,8 @@
  *     value:     1 | -1 | "barrier",
  *     operation: "add" | "set" | "override",
  *     enabled:   boolean (Silence flips to false)
+ *     priority:  number (higher is better)
+ *     expiresAt: date (when the modifier expires)
  *   }
  */
 
@@ -73,6 +75,8 @@ export default class ModifierStack {
    * @param {string} spec.key
    * @param {*}      spec.value
    * @param {string} [spec.operation="add"]
+   * @param {number} [spec.priority=0]
+   * @param {date}   [spec.expiresAt=null]
    * @returns {object} The created modifier.
    */
   apply(spec) {
@@ -87,6 +91,8 @@ export default class ModifierStack {
       operation: spec.operation || "add",
       enabled: true,
       createdAt: this._clock.now(),
+      priority: spec.priority ?? 0,
+      expiresAt: spec.expiresAt ?? null,
     };
 
     this._byId.set(mod.id, mod);
@@ -194,27 +200,32 @@ export default class ModifierStack {
   // Query
   // -----------------------------------------------------------------------
 
-  /**
-   * Get the effective (net) value for a target's modifier type/key.
-   * Only `enabled` modifiers with `operation === "add"` are summed.
-   */
+  // ── Priority-based getEffective (Phase 2) ──────────────────────────────
+  // Multiple "set" modifiers: highest priority wins. On tie, most recent.
   getEffective(targetId, type, key) {
     const mods = this._byTarget.get(targetId);
     if (!mods) return 0;
 
     let total = 0;
+    let bestSet = null;
+
     for (const mod of mods) {
       if (!mod.enabled || mod.type !== type || mod.key !== key) continue;
 
       if (mod.operation === "set" || mod.operation === "override") {
-        return mod.value;
+        if (!bestSet || mod.priority > bestSet.priority ||
+            (mod.priority === bestSet.priority && mod.createdAt > bestSet.createdAt)) {
+          bestSet = mod;
+        }
+        continue;
       }
 
       if (mod.operation === "add") {
         total += (typeof mod.value === "number" ? mod.value : 0);
       }
     }
-    return total;
+
+    return bestSet ? bestSet.value : total;
   }
 
   /**

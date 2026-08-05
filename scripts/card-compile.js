@@ -350,6 +350,88 @@ function compilePassive(raw) {
   return dslObject(sourceText, null, { position });
 }
 
+// ── Trigger parsing (Phase 2) ───────────────────────────────────────────────
+// Converts raw trigger text into typed ASTs so the runtime never parses raw.
+// Unsupported triggers fail compilation until the pattern is modeled here.
+
+function parseTrigger(raw) {
+  const text = String(raw).trim();
+  if (!text) return null;
+
+  // "i am equipped with X"
+  const equipMatch = /^i am equipped with (.+)$/i.exec(text);
+  if (equipMatch) {
+    return { type: "equip", cardName: equipMatch[1].trim() };
+  }
+
+  // "the bearer Slays a unit"
+  const slayMatch = /^the bearer slays (?:a |an )?(.+)$/i.exec(text);
+  if (slayMatch) {
+    return { type: "slay", target: slayMatch[1].trim().toLowerCase() };
+  }
+
+  // "when i am deployed"
+  if (/^when i am deployed$/i.test(text)) {
+    return { type: "deploy" };
+  }
+
+  // "when i kill a <rank>"
+  const killRankMatch = /^when i kill (?:a |an )(.+)$/i.exec(text);
+  if (killRankMatch) {
+    return { type: "kill", rank: killRankMatch[1].trim().toLowerCase() };
+  }
+
+  // "when i kill a unit"
+  if (/^when i kill (?:a |an )?unit$/i.test(text)) {
+    return { type: "kill", target: "unit" };
+  }
+
+  // "when an ally dies"
+  if (/^when (?:another )?ally dies$/i.test(text)) {
+    return { type: "ally_dies" };
+  }
+
+  // "when i am damaged by X"
+  const damagedByMatch = /^when i am damaged by (.+)$/i.exec(text);
+  if (damagedByMatch) {
+    return { type: "damaged_by", source: damagedByMatch[1].trim().toLowerCase() };
+  }
+
+  // "when I am given X"
+  const givenMatch = /^when i am given (.+)$/i.exec(text);
+  if (givenMatch) {
+    return { type: "given", item: givenMatch[1].trim() };
+  }
+
+  // "round start" 
+  if (/^round start$/i.test(text)) return { type: "round_start" };
+  
+  // "round end"
+  if (/^round end$/i.test(text)) return { type: "round_end" };
+
+  // "when i deal damage"
+  if (/^when i deal damage$/i.test(text)) return { type: "deal_damage" };
+
+  // "when I use an ability"
+  if (/^when i use an ability$/i.test(text)) return { type: "ability_used" };
+
+  // "Fisherman: equip with X" / "equip with X" (position-scoped or bare)
+  const posEquipMatch = /^(?:([a-z ]+):\s*)?equip with (.+)$/i.exec(text);
+  if (posEquipMatch) {
+    const result = { type: "equip", cardName: posEquipMatch[2].trim() };
+    if (posEquipMatch[1]) {
+      const posName = posEquipMatch[1].trim().toLowerCase();
+      if (positionCodeMap[posName]) {
+        result.position = positionCodeMap[posName];
+      }
+    }
+    return result;
+  }
+
+  // Unknown trigger — fail compilation so it gets modeled
+  return null;
+}
+
 // ── Cross-reference resolution ──────────────────────────────────────────────
 
 function resolveEvolveInto(card, allCards) {
@@ -364,13 +446,22 @@ function resolveEvolveInto(card, allCards) {
 
   if (!evolvedCard) return null;
 
-  // Build trigger description from evolve list
-  const triggerRaw = evolveTriggers
+  // Build typed trigger ASTs from evolve list
+  const triggers = evolveTriggers
     .filter((t) => typeof t === "string" && t.trim().length > 0)
-    .join("; ");
+    .map((t) => {
+      const parsed = parseTrigger(t);
+      if (!parsed) {
+        throw new Error(
+          `Unsupported evolution trigger "${t}" on card "${card.name}". ` +
+          `Add its pattern to parseTrigger() in card-compile.js.`
+        );
+      }
+      return { ...parsed, raw: t };
+    });
 
   return {
-    trigger: { type: "custom", raw: triggerRaw, handler: null },
+    triggers,
     cardId: evolvedCard.cardId,
   };
 }
@@ -396,12 +487,22 @@ function resolveIgniteInto(card, allCards) {
 
   if (!ignitedCard) return null;
 
-  const triggerRaw = ignitionTriggers
+  // Build typed trigger ASTs from ignition list
+  const triggers = ignitionTriggers
     .filter((t) => typeof t === "string" && t.trim().length > 0)
-    .join("; ");
+    .map((t) => {
+      const parsed = parseTrigger(t);
+      if (!parsed) {
+        throw new Error(
+          `Unsupported ignition trigger "${t}" on card "${card.name}". ` +
+          `Add its pattern to parseTrigger() in card-compile.js.`
+        );
+      }
+      return { ...parsed, raw: t };
+    });
 
   return {
-    trigger: { type: "custom", raw: triggerRaw, handler: null },
+    triggers,
     cardId: ignitedCard.cardId,
   };
 }

@@ -39,11 +39,38 @@ export function initializeGameWebSocket(io) {
 
     socket.on("game-action", (action) => {
       const game = activeGames.get(roomCode);
-      if (!game) socket.emit("game-error", "Game has not started yet.");
+      if (!game) { socket.emit("game-error", "Game has not started yet."); return; }
+
+      // Check for game over — reject actions
+      if (game.gameOver) {
+        socket.emit("game-over", game.gameOver);
+        return;
+      }
+
       try {
-        action.data.username = username; // always add username to action data
+        action.data.username = username;
         action.data.source = "player"; // mark action as player-sourced
         game.processAction(action);
+
+        // Check if game ended from this action
+        if (game.gameOver) {
+          broadcast(io, roomCode, "game-over", () => game.gameOver);
+        }
+
+        broadcast(io, roomCode, "game-update", (playerSocket) =>
+          game.getClientState(playerSocket.request.session.username)
+        );
+      } catch (error) {
+        socket.emit("game-error", error.message);
+      }
+    });
+
+    // Phase 2: pending-decision protocol
+    socket.on("game-decision", (decision) => {
+      const game = activeGames.get(roomCode);
+      if (!game) return;
+      try {
+        game.resolveDecision(decision);
         broadcast(io, roomCode, "game-update", (playerSocket) =>
           game.getClientState(playerSocket.request.session.username)
         );

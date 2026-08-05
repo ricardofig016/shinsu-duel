@@ -54,3 +54,12 @@ export function setupGameWithCardsInHand(cardsInHand) {
   const newGame = new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
   return newGame;
 }
+
+// Helper to create a basic test game
+export function createTestGame() {
+  const decks = {
+    Alice: Array(30).fill(0),
+    Bob: Array(30).fill(0),
+  };
+  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
+}

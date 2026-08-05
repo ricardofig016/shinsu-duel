@@ -1,10 +1,11 @@
+import * as IdFactory from "./IdFactory.js";
 import affiliations from "../data/affiliations.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traits from "../data/traits.json" with { type: "json" };
 
 export default class Card {
   constructor(cardId, cardData, owner, bus) {
-    this.id = Math.random().toString(36).substring(2, 9); // unique instance id
+    this.id = IdFactory.cardInstance(cardId); // deterministic instance id
 
     this.cardId = cardId;
     this.type = cardData.type;

@@ -1,7 +1,6 @@
 # EventBus Architecture — Shinsu Duel
 
-This document describes the architecture, design decisions, and usage patterns
-for the Shinsu Duel event system (Phase 1).
+This document describes the architecture, design decisions, and usage patterns for the Shinsu Duel event system.
 
 ---
 
@@ -250,7 +249,7 @@ Each handler extends `BaseHandler` and implements:
 Handlers use `context.emitChild()` for cascading effects and the
 `ModifierStack` for state changes — never mutate state directly.
 
-### Baseline handlers (Phase 1)
+### Baseline handlers
 
 | Handler                   | What it does                                                  |
 | ------------------------- | ------------------------------------------------------------- |

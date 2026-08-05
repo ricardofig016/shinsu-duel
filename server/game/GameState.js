@@ -1,3 +1,12 @@
+import ShinsuService from "./services/ShinsuService.js";
+import ZoneService from "./services/ZoneService.js";
+import LifecycleEngine from "./services/LifecycleEngine.js";
+import TriggerManager from "./services/TriggerManager.js";
+import AttributeRegistry from "./attributes/AttributeRegistry.js";
+import AnimaEngine from "./attributes/AnimaEngine.js";
+import HwayeomsaEngine from "./attributes/HwayeomsaEngine.js";
+import * as IdFactory from "./IdFactory.js";
+import EVT from "./EventCatalog.js";
 import cards from "../data/cards.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import GameClock from "./GameClock.js";
@@ -43,12 +52,24 @@ export default class GameState {
       snapshotFn: () => this._createSnapshot(),
     });
 
+    // Trigger Manager
+    this._triggerManager = new TriggerManager(this.eventBus);
+
+    // Attribute Registry
+    this._attributeRegistry = new AttributeRegistry();
+    this._attributeRegistry.register("anima", new AnimaEngine(this.eventBus));
+    this._attributeRegistry.register("hwayeomsa", new HwayeomsaEngine(this.eventBus, GameState.cards));
+
+    // Barrier tracking (reset on round start)
     this._barrierUsedThisRound = new Set();
+
+    // Deterministic first player (use index 0 as default instead of Math.random)
     this.roomCode = roomCode;
     this.usernames = usernames;
     this.round = 1;
-    this.currentTurn = firstPlayer ? firstPlayer : this.usernames[Math.floor(Math.random() * 2)]; // randomly select the first player
-    this.roundEndOnTurnEnd = false; // whether the last user action was a pass and it was on the current round
+    this.currentTurn = firstPlayer || this.usernames[0];
+    this.roundEndOnTurnEnd = false;
+    this.gameOver = null; // { winner, reason }
 
     // initialize game state
     this.playerStates = {
@@ -58,14 +79,37 @@ export default class GameState {
     this.#draw(this.usernames, GameState.INIT_HAND_SIZE);
     this.#resetShinsu(this.usernames);
 
-    // Emit initial game events
-    this.eventBus.emit("OnGameStart", this.playerStates);
-    this.eventBus.emit("OnRoundStart", {
+    // Wire Barrier reset and condition cleanup lifecycle events
+    this.eventBus.on(EVT.ROUND_START, () => {
+      this._barrierUsedThisRound.clear();
+    }, { phase: "execute" });
+
+    this.eventBus.on(EVT.ROUND_END, () => {
+      // Conditions last "until end of round" per RULES.md
+      for (const username of this.usernames) {
+        const field = this.playerStates[username]?.field;
+        if (!field) continue;
+        const allUnits = [...(field.frontline || []), ...(field.backline || [])];
+        for (const unit of allUnits) {
+          this.modifierStack.removeWhere(
+            (m) => m.targetId === unit.id && m.type === "condition"
+          );
+        }
+        // Reset Anima Shinheuh slot
+        AnimaEngine.resetSlot(username, this);
+        // Reset combat slots
+        this.#resetCombatSlots(username);
+      }
+    }, { phase: "execute" });
+
+    // Emit initial game events using canonical names
+    this.eventBus.emit(EVT.GAME_STARTED, this.playerStates);
+    this.eventBus.emit(EVT.ROUND_START, {
       username: this.currentTurn,
       round: this.round,
       playerStates: this.playerStates,
     });
-    this.eventBus.emit("OnTurnStart", {
+    this.eventBus.emit(EVT.TURN_START, {
       username: this.currentTurn,
       round: this.round,
     });
@@ -81,13 +125,34 @@ export default class GameState {
 
     return {
       combatSlotCodes: combatSlotCodes,
+      combatSlots: this.#initCombatSlots(combatSlotCodes),
       deck: this.#buildDeckFromCardIds(deck, username),
-      lighthouses: { amount: GameState.INIT_LIGHTHOUSE_AMOUNT },
+      discard: [],
+      lighthouses: { amount: GameState.INIT_LIGHTHOUSE_AMOUNT, max: 40 },
       field: { frontline: [], backline: [] },
       hand: [],
       shinsu: {},
+      shinheuhSlot: { available: false, used: false },
+      compressAmount: 0,
+      fireCharges: 0,
       username: username,
     };
+  }
+
+  #initCombatSlots(codes) {
+    const slots = {};
+    for (const code of codes) {
+      slots[code] = { available: true };
+    }
+    return slots;
+  }
+
+  #resetCombatSlots(username) {
+    const player = this.playerStates[username];
+    if (!player?.combatSlots) return;
+    for (const code of Object.keys(player.combatSlots)) {
+      player.combatSlots[code].available = true;
+    }
   }
 
   /**
@@ -156,18 +221,33 @@ export default class GameState {
 
     return {
       combatSlotCodes: playerState.combatSlotCodes,
+      combatSlots: playerState.combatSlots,
       deckSize: playerState.deck.length,
+      discardSize: playerState.discard?.length ?? 0,
       lighthouses: playerState.lighthouses,
+      shinheuhSlot: playerState.shinheuhSlot ? { ...playerState.shinheuhSlot } : null,
+      compressAmount: playerState.compressAmount ?? 0,
+      fireCharges: playerState.fireCharges ?? 0,
       field: {
-        frontline: playerState.field.frontline.map((unit) => unit.toSanitizedObject()),
-        backline: playerState.field.backline.map((unit) => unit.toSanitizedObject()),
+        frontline: playerState.field.frontline.map((unit) => ({
+          ...unit.toSanitizedObject(),
+          equipment: unit.equipment?.name || null,
+          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+        })),
+        backline: playerState.field.backline.map((unit) => ({
+          ...unit.toSanitizedObject(),
+          equipment: unit.equipment?.name || null,
+          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+        })),
       },
-      hand: playerState.hand.map((card) => card.toSanitizedObject()), // send full card info for own hand
+      hand: playerState.hand.map((card) => card.toSanitizedObject()),
       shinsu: playerState.shinsu,
       username: playerState.username,
       passButton: {
-        isEnabled: username === this.currentTurn, // pass button is enabled is it's the player's turn
-        text: passButtonText, // text to display on the pass button
+        isEnabled: username === this.currentTurn,
+        text: passButtonText,
       },
     };
   }
@@ -190,8 +270,18 @@ export default class GameState {
       deckSize: opponentState.deck.length,
       lighthouses: opponentState.lighthouses,
       field: {
-        frontline: opponentState.field.frontline.map((unit) => unit.toSanitizedObject()),
-        backline: opponentState.field.backline.map((unit) => unit.toSanitizedObject()),
+        frontline: opponentState.field.frontline.map((unit) => ({
+          ...unit.toSanitizedObject(),
+          equipment: unit.equipment?.name || null,
+          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+        })),
+        backline: opponentState.field.backline.map((unit) => ({
+          ...unit.toSanitizedObject(),
+          equipment: unit.equipment?.name || null,
+          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+        })),
       },
       hand: hand,
       shinsu: opponentState.shinsu,
@@ -212,20 +302,23 @@ export default class GameState {
   }
 
   endTurn(isPassAction = false) {
-    this.eventBus.emit("OnTurnEnd", {
+    // Clear compress amount at turn end
+    const player = this.playerStates[this.currentTurn];
+    if (player) player.compressAmount = 0;
+
+    this.eventBus.emit(EVT.TURN_END, {
       username: this.currentTurn,
       round: this.round,
     });
 
     if (isPassAction) {
-      // end the round if both players passed their turn consecutively
       if (this.roundEndOnTurnEnd) this.#endRound();
       else this.roundEndOnTurnEnd = true; // set the flag to true for the next turn
     } else this.roundEndOnTurnEnd = false; // reset the flag if the action was not a pass
 
     // flip turn to the next player
     this.currentTurn = this.usernames.find((p) => p !== this.currentTurn);
-    this.eventBus.emit("OnTurnStart", {
+    this.eventBus.emit(EVT.TURN_START, {
       username: this.currentTurn,
       round: this.round,
     });
@@ -235,15 +328,17 @@ export default class GameState {
    * End the current round. This method does not flip the turn.
    */
   #endRound() {
-    this.eventBus.emit("OnRoundEnd", {
+    this.eventBus.emit(EVT.ROUND_END, {
       username: this.currentTurn,
       round: this.round,
     });
     this.round++;
-    this.#resetShinsu(this.usernames);
-    this.#draw(this.usernames, GameState.PER_ROUND_DRAW_AMOUNT);
+    ShinsuService.reset(this.playerStates[this.usernames[0]], this.round);
+    ShinsuService.reset(this.playerStates[this.usernames[1]], this.round);
+    ZoneService.draw(this.playerStates[this.usernames[0]], GameState.PER_ROUND_DRAW_AMOUNT, this);
+    ZoneService.draw(this.playerStates[this.usernames[1]], GameState.PER_ROUND_DRAW_AMOUNT, this);
     this.roundEndOnTurnEnd = false; // reset the flag for the next round
-    this.eventBus.emit("OnRoundStart", {
+    this.eventBus.emit(EVT.ROUND_START, {
       username: this.currentTurn,
       round: this.round,
       playerStates: this.playerStates,
@@ -253,7 +348,7 @@ export default class GameState {
   getTotalShinsu(username) {
     const player = this.playerStates[username];
     if (!player) throw new Error(`Player ${username} not found.`);
-    return player.shinsu.normalAvailable + player.shinsu.recharged;
+    return ShinsuService.getTotal(player);
   }
 
   /**
@@ -283,10 +378,7 @@ export default class GameState {
     const player = this.playerStates[username];
     if (!player) throw new Error(`Player ${username} not found.`);
     if (!Number.isInteger(cost) || cost < 0) return;
-    const deductedRechargedShinsu = Math.min(player.shinsu.recharged, cost);
-    player.shinsu.recharged -= deductedRechargedShinsu;
-    player.shinsu.normalAvailable -= cost - deductedRechargedShinsu;
-    player.shinsu.normalSpent += cost - deductedRechargedShinsu;
+    ShinsuService.spend(player, cost);
   }
 
   processAction(action) {
@@ -320,7 +412,7 @@ export default class GameState {
    * Create a lightweight state snapshot for the Logger.
    */
   _createSnapshot() {
-    const snap = { round: this.round, currentTurn: this.currentTurn };
+    const snap = { round: this.round, currentTurn: this.currentTurn, gameOver: this.gameOver };
     for (const username of this.usernames) {
       const p = this.playerStates[username];
       if (!p) continue;
@@ -329,14 +421,59 @@ export default class GameState {
         shinsu: { ...p.shinsu },
         handSize: p.hand?.length ?? 0,
         deckSize: p.deck?.length ?? 0,
+        discardSize: p.discard?.length ?? 0,
+        combatSlots: { ...p.combatSlots },
+        shinheuhSlot: p.shinheuhSlot ? { ...p.shinheuhSlot } : null,
+        compressAmount: p.compressAmount ?? 0,
+        fireCharges: p.fireCharges ?? 0,
         frontline: p.field?.frontline?.map((u) => ({
-          id: u.id, name: u.card?.name, hp: u.currentHp, position: u.placedPositionCode,
+          id: u.id,
+          name: u.card?.name,
+          hp: u.currentHp,
+          maxHp: u.card?.maxHp,
+          position: u.placedPositionCode,
+          equipment: u.equipment?.name || null,
+          conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
+          traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
         })) ?? [],
         backline: p.field?.backline?.map((u) => ({
-          id: u.id, name: u.card?.name, hp: u.currentHp, position: u.placedPositionCode,
+          id: u.id,
+          name: u.card?.name,
+          hp: u.currentHp,
+          maxHp: u.card?.maxHp,
+          position: u.placedPositionCode,
+          equipment: u.equipment?.name || null,
+          conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
+          traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
         })) ?? [],
       };
     }
     return snap;
+  }
+
+  // Check and set lighthouses (with game-over detection)
+  modifyLighthouses(username, amount) {
+    const player = this.playerStates[username];
+    if (!player) throw new Error(`Player ${username} not found.`);
+    player.lighthouses.amount = Math.max(0, Math.min(40, player.lighthouses.amount + amount));
+    if (player.lighthouses.amount <= 0) {
+      this.gameOver = { winner: this.#getOpponentUsername(username), reason: "lighthouses depleted" };
+      this.eventBus.emit(EVT.GAME_LIGHTHOUSES_DEPLETED, { loser: username, winner: this.gameOver.winner });
+      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
+    }
+    return player.lighthouses.amount;
+  }
+
+  // Pending-decision protocol
+  /**
+   * @param {{ decisionId: string, type: string, choices: any[] }} decision
+   */
+  resolveDecision(decision) {
+    // Placeholder — Phase 3+ will implement full decision resolution
+    // For now, just validate the decision exists
+    if (!decision || !decision.decisionId) {
+      throw new Error("Invalid decision payload");
+    }
+    // Future: look up pending decision by ID, validate choices, resume event chain
   }
 }

@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import TargetResolver from "../TargetResolver.js";
 
 /**
  * Resolves damage through Barrier → Resilient → apply → kill check → Slay.
@@ -15,14 +16,32 @@ export default class DealDamageHandler extends BaseHandler {
     if (typeof payload.amount !== "number" || payload.amount < 0) {
       throw new Error("DealDamageHandler: payload.amount must be a non-negative number");
     }
-    if (!payload.targetId) {
-      throw new Error("DealDamageHandler: payload.targetId is required");
+    // targetId is optional now — can also use target descriptor + sourceUnit
+    if (!payload.targetId && !payload.target) {
+      throw new Error("DealDamageHandler: payload.targetId or payload.target is required");
     }
   }
 
   execute(payload, context, gameState) {
-    const { targetId, amount } = payload;
+    const { amount } = payload;
     const modStack = gameState.modifierStack;
+
+    // Resolve target — use TargetResolver if target descriptor provided
+    let targetId = payload.targetId;
+    if (!targetId && payload.target) {
+      const sourceUnit = payload.sourceUnit || gameState._findUnit(payload.sourceId);
+      const targets = TargetResolver.resolveTargets(gameState, {
+        target: payload.target,
+        sourceUnit,
+        condition: payload.condition,
+        conditionValue: payload.conditionValue,
+        count: payload.count || 1,
+      });
+      if (targets.length === 0) return { damageDealt: 0, killed: false };
+      targetId = targets[0].id;
+    }
+
+    if (!targetId) return { damageDealt: 0, killed: false };
     let damage = amount;
 
     // Barrier: negate first damage each round

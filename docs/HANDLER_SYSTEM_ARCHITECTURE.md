@@ -81,8 +81,8 @@ singletons — they hold no per-invocation state. If a handler needs
 per-effect state, pass it in the payload.
 
 **⚠️ The registry key is the DSL `type` field** from the compiled
-`cards.json`. This is the bridge between Phase 0 (compiler) and Phase 2+
-(runtime).
+`cards.json`. This is the bridge between the compiler and the runtime
+engine.
 
 ---
 
@@ -107,13 +107,11 @@ At runtime, the resolution engine:
 3. Calls `handler.validate(payload)`
 4. Calls `handler.execute(payload, context, gameState)`
 
-For `type: "custom"` effects (~130 in the card set), there is **no handler
-registered**. These are raw-text effects deferred to Phase 4. The resolution
-engine must skip them gracefully (log a warning, don't crash).
+For `type: "custom"` effects (~130 in the card set), there is **no handler registered**. These are raw-text effects that the resolution engine must skip gracefully (log a warning, don't crash).
 
 ---
 
-## Baseline Handlers (Phase 1)
+## Baseline Handlers
 
 | Handler | DSL `type` | Key behavior |
 |---|---|---|
@@ -126,6 +124,33 @@ engine must skip them gracefully (log a warning, don't crash).
 | `DestroyLighthouseHandler` | `destroy_lighthouse` | Modifies `playerState.lighthouses.amount` (floor 0); emits `game:lighthouses:depleted` on 0 |
 | `SpendShinsuHandler` | `spend_shinsu` | Deducts recharged first, then normal |
 | `DrawCardHandler` | `draw_card` | Pops from deck; emits `game:deck:empty` on exhaustion |
+
+---
+
+## Additional Handlers
+
+| Handler | DSL `type` | Key behavior |
+|---|---|---|
+| `ChargeShinsuHandler` | `charge_shinsu` | Adds shinsu to normal pool, capped at round max; emits `shinsu:charged` |
+| `CompressShinsuHandler` | `compress_shinsu` | Reduces next card cost this turn via `compressAmount`; cleared at turn end |
+| `ReclaimCardsHandler` | `reclaim_cards` | Moves `amount` cards from discard to hand; emits `card:reclaimed` |
+| `GrantAbilityHandler` | `grant_ability` | Registers inner ability DSL via ModifierStack; cleaned up on source removal |
+
+All 12 structured DSL types have handler implementations. `custom` type effects (~130) remain unresolved until custom handlers are written.
+
+## EffectResolver
+
+The `EffectResolver` is the recursive resolution engine that maps DSL objects
+to handlers:
+
+```js
+resolveEffect(effect, context, gameState, extra)
+```
+
+1. Reads `effect.type`, looks up handler via `HandlerRegistry`
+2. Handles nested effects: `spend_shinsu.effect` resolved recursively after deduction
+3. `grant_ability.ability` is stored by the GrantAbilityHandler, not resolved immediately
+4. `type: "custom"` is skipped with a warning
 
 ---
 
@@ -155,11 +180,11 @@ Resolution flow:
 3. The inner effect may itself be nested (e.g., `spend_shinsu` wrapping
    `deal_damage`)
 
-**⚠️ This requires a recursive resolution function** in Phase 2:
+**⚠️ This requires a recursive resolution function**:
 ```js
 function resolveEffect(effect, context, gameState) {
   if (effect.type === "custom") {
-    // Skip — deferred to Phase 4
+    // Skip — custom types are handled elsewhere
     return;
   }
   const handler = registry.get(effect.type);
@@ -221,53 +246,15 @@ Handlers can use it for logging/error messages but should NOT parse it
 for logic. Use the structured fields only.
 
 **⚠️ The `handler` field is always `null` in compiled data.** It was a
-Phase 0 design artifact for custom handler names. It may be repurposed
-in Phase 4 for named custom handler lookup.
+design artifact for custom handler names. It may be repurposed for named
+custom handler lookup later.
 
 ---
 
-## Missing Handlers (Phase 2+)
-
-These DSL types appear in `cards.json` but have no handler:
-
-| DSL type | Occurrences | Example card |
-|---|---|---|
-| `reclaim_cards` | 1 | The Workshop |
-| `grant_ability` | 2 | Red Thryssa, Purple Dementor |
-| `compress_shinsu` | ~3 | Yu Han Sung, Fiery Elephant |
-| `charge_shinsu` | ~2 | Various |
-| `custom` | ~130 | Almost every card |
-
-Phase 2 should implement `reclaim_cards` and `grant_ability` (they appear in production cards). The remaining types
-and all `custom` effects are Phase 4's responsibility.
-
----
-
-## Integration with Phase 2+
-
-### What Phase 2 must do
-
-1. **Wire the HandlerRegistry into GameState** — instantiate it, register
-   all 9 baseline handlers, and provide a `resolveEffect(effect, ctx)` method.
-
-2. **Implement recursive DSL resolution** for nested types (`spend_shinsu`,
-   `grant_ability`).
-
-3. **Implement missing handlers** for `reclaim_cards`
-   and `grant_ability`.
-
-4. **Wire ability execution** — `UseAbilityAction` currently does nothing.
-   It should look up the unit's ability DSL, resolve it through the
-   registry, and spend the combat slot.
-
-5. **Wire passive registration** — when a unit is deployed, its passives
-   should subscribe to the appropriate events (round start, round end,
-   on damage, etc.) using the EventBus and trigger handler execution.
-
-### Anti-patterns
+## Anti-patterns
 
 - **Don't parse `raw` text for logic** — use structured fields.
 - **Don't skip validation** — always call `handler.validate()` before `execute()`.
 - **Don't hold state in handler instances** — they're singletons.
-- **Don't swallow custom effects silently** — log a warning so Phase 4
-  knows which effects need handlers.
+- **Don't swallow custom effects silently** — log a warning so they get
+  handlers eventually.

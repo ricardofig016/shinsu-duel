@@ -98,9 +98,7 @@ handlers in that phase — otherwise the "after" snapshot misses mutations.
 The tree currently captures **3 levels**: root → children → grandchildren.
 Deeper nesting is flattened (grandchildren's children are omitted).
 This is a pragmatic limit — most game event chains are 2-3 levels deep.
-
-**⚠️ If Phase 2+ introduces deeper chains, extend `_buildCausationTree`**
-to recurse fully instead of hardcoding 3 levels.
+If deeper chains are ever needed, `_buildCausationTree` can recurse fully instead of hardcoding 3 levels.
 
 ---
 
@@ -164,9 +162,7 @@ The current `GameState._createSnapshot()` returns:
 }
 ```
 
-**⚠️ This snapshot does NOT include modifier state** (traits granted by
-equipment, active conditions). Extend it in Phase 2 to capture these so
-diffs reflect trait/condition changes.
+The snapshot captures the game state seen by the logger. Modifier state (traits granted by equipment, active conditions) is included per unit so diffs reflect trait/condition changes.
 
 ---
 
@@ -188,9 +184,7 @@ _computeDiff(before, after) {
 }
 ```
 
-**⚠️ Uses `JSON.stringify` for deep comparison.** This works for the flat
-key structure but would be expensive with deeply nested objects. If Phase 2
-adds nested snapshot values, switch to a structural diff.
+**⚠️ Uses `JSON.stringify` for deep comparison.** This works for the flat key structure but would be expensive with deeply nested objects. If snapshot values become deeply nested, switch to a structural diff.
 
 **⚠️ Keys are flat strings like `"Alice.frontline.Unit#a3f.hp"`.** The
 snapshot function controls the key namespace. Keep keys consistent between
@@ -213,21 +207,7 @@ logger.addBackend(b); // → register custom backend
 
 ---
 
-## Integration with Phase 2+
-
-### What Phase 2 must do
-
-1. **Extend `_createSnapshot()`** to include modifier state (active traits,
-   conditions, stat modifiers) so diffs capture equipment/cleanse/silence
-   changes.
-
-2. **Extend `_buildCausationTree()`** to recurse fully instead of
-   hardcoding 3 levels, if Phase 2 introduces deeper event chains.
-
-3. **Add a `FileBackend`** for production use — memory logs grow unbounded
-   and crash the server on long games.
-
-### Anti-patterns
+## Anti-patterns
 
 - **Don't mutate `getLogs()` return value** — it's a shallow copy.
 - **Don't call `getLogs()` in hot paths** — it copies the entire array.

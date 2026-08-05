@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import TargetResolver from "../TargetResolver.js";
 
 /**
  * Applies a condition to a target unit via the ModifierStack.
@@ -11,13 +12,30 @@ import BaseHandler from "./BaseHandler.js";
  */
 export default class GiveConditionHandler extends BaseHandler {
   validate(payload) {
-    if (!payload.targetId) throw new Error("GiveConditionHandler: payload.targetId is required");
+    // targetId is optional — can also use target descriptor + sourceUnit
+    if (!payload.targetId && !payload.target) {
+      throw new Error("GiveConditionHandler: payload.targetId or payload.target is required");
+    }
     if (!payload.condition) throw new Error("GiveConditionHandler: payload.condition is required");
     if (!payload.sourceId) throw new Error("GiveConditionHandler: payload.sourceId is required");
   }
 
   execute(payload, context, gameState) {
-    const { sourceId, targetId, condition, amount = 1, sourceType = "unit" } = payload;
+    const { sourceId, condition, amount = 1, sourceType = "unit" } = payload;
+
+    // Resolve target — use TargetResolver if target descriptor provided
+    let targetId = payload.targetId;
+    if (!targetId && payload.target) {
+      const sourceUnit = payload.sourceUnit || gameState._findUnit(payload.sourceId);
+      const targets = TargetResolver.resolveTargets(gameState, {
+        target: payload.target,
+        sourceUnit,
+        count: payload.count || 1,
+      });
+      if (targets.length === 0) return { blocked: true, reason: "no targets" };
+      targetId = targets[0].id;
+    }
+    if (!targetId) return { blocked: true, reason: "no target" };
 
     // Check if target is Immune
     if (gameState.modifierStack.has(targetId, "trait", "immune")) {

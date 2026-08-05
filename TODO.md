@@ -2,8 +2,14 @@
 
 ## Tasks
 
-- [ ] add 'message' field to every event payload
-- [ ] change board background to something from the webtoon
+- [ ] targetting engine: sharpshooter bypasses taunt when it should not
+- [ ] targetting engine: enemy lighthouses should be targetable when no non-ghost enemies are on the board
+- [ ] targetting engine: make sure taunt enforces first target on mass-target effects
+- [ ] frontend: change board background to something from the webtoon
+- [ ] ZoneService: should not skip draw on Unreachable cards, this is the job of the deck validator. unreachable cards may be created in deck during the game
+- [ ] ZoneService: what is compressAmount and why is it stored in `playerState`?
+- [ ] LifecycleEngine: deployUnit on full line (5 units) destroys oldest instead of player choice (should choose between the 5 or cancel)
+- [ ] GameState: Event Catalog legacy events (PascalCase `OnGameStart`) should be removed, only canonical events should be used (EVT `game:started`)
 
 ## In Progress
 

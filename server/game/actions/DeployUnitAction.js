@@ -1,5 +1,6 @@
 import ActionHandler from "../ActionHandler.js";
 import Unit from "../Unit.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Deploy a unit from a player's hand to a specified position on the board.
@@ -47,8 +48,8 @@ export default class DeployUnitAction extends ActionHandler {
 
     gameState.spendShinsu(username, card.cost);
 
-    gameState.eventBus.emit("OnDeployUnit", { username, unit });
-    gameState.eventBus.emit("OnSummonUnit", { username, unit });
+    gameState.eventBus.emit(EVT.UNIT_DEPLOYED, { username, unit });
+    gameState.eventBus.emit(EVT.UNIT_SUMMONED, { username, unit });
     unit.onSummon(gameState);
     gameState.endTurn();
   }

@@ -1,7 +1,7 @@
 # Compiled Card DSL — Shinsu Duel
 
-This document describes the contract between the Phase 0 card compiler
-(`scripts/card-compile.js`) and the Phase 2+ runtime engine. It specifies
+This document describes the contract between the card compiler
+(`scripts/card-compile.js`) and the runtime engine. It specifies
 what the runtime can expect from `server/data/cards.json` and how to
 interpret each DSL type.
 
@@ -13,11 +13,12 @@ The card compiler reads YAML source files from `data/cards/`, validates
 them, and produces a single `server/data/cards.json` file. This file is
 the **sole runtime data source** — the game engine never reads YAML directly.
 
-| Source | Compiled | Validated by |
-|---|---|---|
+| Source             | Compiled                 | Validated by                                                                    |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------- |
 | `data/cards/*.yml` | `server/data/cards.json` | `scripts/card-validate.js` (YAML) + `schemas/compiled-cards.schema.json` (JSON) |
 
 Commands:
+
 ```powershell
 npm run validate:cards   # validate YAML only
 npm run compile:cards    # validate YAML → compile → validate JSON → write
@@ -32,10 +33,16 @@ source and recompile. The compiled file is a build artifact.
 
 ```json
 {
-  "0": { /* card object */ },
-  "1": { /* card object */ },
+  "0": {
+    /* card object */
+  },
+  "1": {
+    /* card object */
+  },
   "...": {},
-  "65": { /* card object */ }
+  "65": {
+    /* card object */
+  }
 }
 ```
 
@@ -64,10 +71,16 @@ up by name or use the compiled `cardId` field.
   "traits": [],
   "attributes": ["irregular"],
   "affiliations": ["team-baam", "fug"],
-  "abilities": [ /* DSL objects */ ],
-  "passives": [ /* DSL objects */ ],
-  "evolveInto": { /* optional transformation */ },
-  "evolvedFrom": 26,       /* optional — cardId of base form */
+  "abilities": [
+    /* DSL objects */
+  ],
+  "passives": [
+    /* DSL objects */
+  ],
+  "evolveInto": {
+    /* optional transformation */
+  },
+  "evolvedFrom": 26 /* optional — cardId of base form */,
   "deckConstraints": []
 }
 ```
@@ -80,8 +93,10 @@ up by name or use the compiled `cardId` field.
   "type": "skill",
   "name": "Fiery Elephant",
   "cost": 2,
-  "effects": [ /* DSL objects — at least 1 */ ],
-  "requirements": ["target is an ally"],  /* optional */
+  "effects": [
+    /* DSL objects — at least 1 */
+  ],
+  "requirements": ["target is an ally"] /* optional */,
   "deckConstraints": []
 }
 ```
@@ -94,10 +109,14 @@ up by name or use the compiled `cardId` field.
   "type": "equipment",
   "name": "Karaka's Armor Suit",
   "cost": 4,
-  "effects": [ /* DSL objects — at least 1 */ ],
-  "requirements": ["deployed as Fisherman"],  /* optional */
-  "igniteInto": { /* optional transformation */ },
-  "ignitedFrom": 29,       /* optional — cardId of base form */
+  "effects": [
+    /* DSL objects — at least 1 */
+  ],
+  "requirements": ["deployed as Fisherman"] /* optional */,
+  "igniteInto": {
+    /* optional transformation */
+  },
+  "ignitedFrom": 29 /* optional — cardId of base form */,
   "deckConstraints": []
 }
 ```
@@ -116,28 +135,28 @@ Every ability, passive, and effect is a **DSL object** with this base shape:
 }
 ```
 
-| Field | Required | Description |
-|---|---|---|
-| `type` | Yes | One of the DSL types below. `"custom"` means unresolved. |
-| `raw` | Yes | Original card text. Authoritative. Never parsed at runtime. |
-| `handler` | Always `null` | Phase 0 artifact. May be repurposed in Phase 4. |
+| Field     | Required      | Description                                                 |
+| --------- | ------------- | ----------------------------------------------------------- |
+| `type`    | Yes           | One of the DSL types below. `"custom"` means unresolved.    |
+| `raw`     | Yes           | Original card text. Authoritative. Never parsed at runtime. |
+| `handler` | Always `null` | Design artifact. May be repurposed later.                   |
 
 Additional fields depend on `type` (see below).
 
 ### Common additional fields
 
-| Field | Types that use it | Description |
-|---|---|---|
-| `amount` | `deal_damage`, `heal`, `spend_shinsu`, `give_condition`, `grant_trait`, `create_lighthouse`, `destroy_lighthouse`, `reclaim_cards`, `compress_shinsu`, `charge_shinsu` | Numeric value |
-| `target` | `deal_damage`, `heal`, `cleanse`, `give_condition`, `grant_trait`, `grant_ability` | `"enemy"`, `"ally"`, `"self"`, `"bearer"`, `"all_enemies"`, `"all_allies"` |
-| `condition` | `give_condition` | `"burned"`, `"poisoned"`, `"rooted"`, etc. |
-| `trait` | `grant_trait` | `"barrier"`, `"strong"`, `"lethal"`, etc. |
-| `quick` | abilities, effects | `true` if the ability/effect has Quick keyword |
-| `position` | abilities, passives | Position code if position-scoped, else `null` |
-| `effect` | `spend_shinsu` | Nested DSL object — the effect that costs shinsu |
-| `ability` | `grant_ability` | Nested DSL object — the granted ability |
-| `count` | `deal_damage`, `give_condition` | Number of targets (e.g., "2 enemies") |
-| `conditionValue` | `deal_damage` | Conditional targeting (e.g., "deal 3 to all Rooted enemies") |
+| Field            | Types that use it                                                                                                                                                      | Description                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `amount`         | `deal_damage`, `heal`, `spend_shinsu`, `give_condition`, `grant_trait`, `create_lighthouse`, `destroy_lighthouse`, `reclaim_cards`, `compress_shinsu`, `charge_shinsu` | Numeric value                                                              |
+| `target`         | `deal_damage`, `heal`, `cleanse`, `give_condition`, `grant_trait`, `grant_ability`                                                                                     | `"enemy"`, `"ally"`, `"self"`, `"bearer"`, `"all_enemies"`, `"all_allies"` |
+| `condition`      | `give_condition`                                                                                                                                                       | `"burned"`, `"poisoned"`, `"rooted"`, etc.                                 |
+| `trait`          | `grant_trait`                                                                                                                                                          | `"barrier"`, `"strong"`, `"lethal"`, etc.                                  |
+| `quick`          | abilities, effects                                                                                                                                                     | `true` if the ability/effect has Quick keyword                             |
+| `position`       | abilities, passives                                                                                                                                                    | Position code if position-scoped, else `null`                              |
+| `effect`         | `spend_shinsu`                                                                                                                                                         | Nested DSL object — the effect that costs shinsu                           |
+| `ability`        | `grant_ability`                                                                                                                                                        | Nested DSL object — the granted ability                                    |
+| `count`          | `deal_damage`, `give_condition`                                                                                                                                        | Number of targets (e.g., "2 enemies")                                      |
+| `conditionValue` | `deal_damage`                                                                                                                                                          | Conditional targeting (e.g., "deal 3 to all Rooted enemies")               |
 
 ---
 
@@ -145,31 +164,28 @@ Additional fields depend on `type` (see below).
 
 ### Structured types (have handlers)
 
-| `type` | Handler | Example `raw` |
-|---|---|---|
-| `deal_damage` | `DealDamageHandler` | `"deal 7 to an enemy"` |
-| `heal` | `HealHandler` | `"heal me 3 HP"` |
-| `cleanse` | `CleanseHandler` | `"Cleanse an ally"` |
-| `give_condition` | `GiveConditionHandler` | `"give Burned 1 to all enemies"` |
-| `grant_trait` | `GrantTraitHandler` | `"the bearer has Bloodthirsty 1"` |
-| `spend_shinsu` | `SpendShinsuHandler` | `"spend 1: give Rooted to 2 enemies"` |
-| `create_lighthouse` | `CreateLighthouseHandler` | `"create 1"` |
-| `destroy_lighthouse` | `DestroyLighthouseHandler` | `"destroy 1"` |
+| `type`               | Handler                    | Example `raw`                            |
+| -------------------- | -------------------------- | ---------------------------------------- |
+| `deal_damage`        | `DealDamageHandler`        | `"deal 7 to an enemy"`                   |
+| `heal`               | `HealHandler`              | `"heal me 3 HP"`                         |
+| `cleanse`            | `CleanseHandler`           | `"Cleanse an ally"`                      |
+| `give_condition`     | `GiveConditionHandler`     | `"give Burned 1 to all enemies"`         |
+| `grant_trait`        | `GrantTraitHandler`        | `"the bearer has Bloodthirsty 1"`        |
+| `spend_shinsu`       | `SpendShinsuHandler`       | `"spend 1: give Rooted to 2 enemies"`    |
+| `create_lighthouse`  | `CreateLighthouseHandler`  | `"create 1"`                             |
+| `destroy_lighthouse` | `DestroyLighthouseHandler` | `"destroy 1"`                            |
+| `charge_shinsu`      | `ChargeShinsuHandler`      | `"Charge 2"`                             |
+| `compress_shinsu`    | `CompressShinsuHandler`    | `"Compress 1"`                           |
+| `reclaim_cards`      | `ReclaimCardsHandler`      | `"reclaim 1"`                            |
+| `grant_ability`      | `GrantAbilityHandler`      | `"ability: give Poisoned 4 to an enemy"` |
 
-### Structured types (need handlers in Phase 2)
-
-| `type` | Occurrences | Example `raw` |
-|---|---|---|
-| `reclaim_cards` | 1 | `"reclaim 1"` (The Workshop) |
-| `grant_ability` | 2 | `"ability: give Poisoned 4 to an enemy"` (Purple Dementor) |
-| `compress_shinsu` | ~3 | `"Compress 1"` (Yu Han Sung) |
-| `charge_shinsu` | ~2 | `"Charge 2"` |
+All 12 DSL types now have runtime handlers. `custom` type effects remain unresolved.
 
 ### Unresolved type
 
-| `type` | Occurrences | Description |
-|---|---|---|
-| `custom` | ~130 | Raw text, `handler: null`. Phase 4 responsibility. |
+| `type`   | Occurrences | Description                                           |
+| -------- | ----------- | ----------------------------------------------------- |
+| `custom` | ~130        | Raw text, `handler: null`. Requires a custom handler. |
 
 ---
 
@@ -234,34 +250,50 @@ Resolution: find all enemies, filter by `condition`, deal damage to each.
 
 ```json
 "evolveInto": {
-  "trigger": {
-    "type": "custom",
-    "raw": "i am equipped with Ice Spear",
-    "handler": null
-  },
+  "triggers": [
+    { "type": "equip", "cardName": "Ice Spear", "raw": "i am equipped with Ice Spear" }
+  ],
   "cardId": 32
-},
-"evolvedFrom": 31
+}
 ```
 
 ### Ignition
 
 ```json
 "igniteInto": {
-  "trigger": {
-    "type": "custom",
-    "raw": "the bearer Slays a unit",
-    "handler": null
-  },
+  "triggers": [
+    { "type": "slay", "target": "unit", "raw": "the bearer Slays a unit" }
+  ],
   "cardId": 38
-},
-"ignitedFrom": 37
+}
 ```
 
-**⚠️ Triggers are `type: "custom"` with raw text.** Phase 4 will need to
-parse these or register named trigger handlers. Phase 2 should wire the
-event subscriptions (e.g., `unit:slay` → check ignition trigger) but can
-defer the actual trigger parsing.
+### Position-scoped equip trigger
+
+```json
+"evolveInto": {
+  "triggers": [
+    { "type": "equip", "cardName": "Karaka's Armor Suit", "position": "fisherman", "raw": "Fisherman: equip with Karaka's Armor Suit" }
+  ],
+  "cardId": 34
+}
+```
+
+Supported trigger types: `equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`. Unsupported triggers fail compilation until modeled in `parseTrigger()`.
+
+---
+
+## Fire Core / Incinerate Cards
+
+Hwayeomsa attribute cards, all `unreachable`:
+
+| Card           | Cost | Effect                                                 |
+| -------------- | ---- | ------------------------------------------------------ |
+| Fire Core      | 0    | Quick — consume Fire Charges to create Incinerate      |
+| Incinerate I   | 0    | 1 charge → deal 1 to an enemy                          |
+| Incinerate II  | 0    | 3 charges → deal 2 to 2 enemies                        |
+| Incinerate III | 0    | 5 charges → deal 2 to 3 enemies and give them Burn     |
+| Incinerate IV  | 0    | 7 charges → deal 3 to all enemies and give them Burn 2 |
 
 ---
 
@@ -276,32 +308,9 @@ defer the actual trigger parsing.
 - `"unreachable"` — card cannot be drawn normally. Must be created by
   an effect (Thorn Fragments, Enryu's Thorn, Shinwonryu).
 
-Phase 2 must enforce this in draw logic.
-
 ---
 
-## Integration with Phase 2+
-
-### What Phase 2 must do
-
-1. **Load `cards.json` at startup** — already done by `GameState.cards`.
-
-2. **Map DSL `type` to HandlerRegistry key** — the registry key IS the
-   `type` field. No translation needed.
-
-3. **Handle nested DSL** — `spend_shinsu.effect` and `grant_ability.ability`
-   need recursive resolution.
-
-4. **Skip `type: "custom"` gracefully** — log a warning, don't crash.
-
-5. **Enforce `deckConstraints`** — `unreachable` cards can't be in
-   starting decks or drawn normally.
-
-6. **Parse `requirements`** on skills/equipment — currently stored as
-   raw strings like `"deployed as Fisherman"` or `"target is an ally"`.
-   Phase 2 needs to resolve these at play time.
-
-### Anti-patterns
+## Anti-patterns
 
 - **Don't parse `raw`** — it's for display/debugging only.
 - **Don't hardcode card IDs** — they shift when cards change.

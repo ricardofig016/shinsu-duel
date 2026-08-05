@@ -151,10 +151,10 @@ describe("place cards on field", () => {
     });
 
     // Check events were emitted
-    expect(emitSpy).toHaveBeenCalledWith("OnDeployUnit", expect.any(Object));
-    expect(emitSpy).toHaveBeenCalledWith("OnSummonUnit", expect.any(Object));
-    expect(emitSpy).toHaveBeenCalledWith("OnTurnEnd", expect.any(Object));
-    expect(emitSpy).toHaveBeenCalledWith("OnTurnStart", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("unit:deployed", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("unit:summoned", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("turn:ended", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith("turn:started", expect.any(Object));
 
     // Check turn switched
     expect(game.currentTurn).toBe(USERNAMES[1]);

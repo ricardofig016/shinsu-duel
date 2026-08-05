@@ -4,17 +4,128 @@
   "title": "Shinsu Duel Compiled Cards",
   "description": "Schema for server/data/cards.json generated from validated YAML source cards.",
   "definitions": {
-    "dsl": { "type": "object", "required": ["type", "raw", "handler"], "properties": { "type": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 }, "handler": { "type": ["string", "null"] }, "quick": { "type": "boolean" }, "position": { "type": ["string", "null"] }, "amount": { "type": "integer", "minimum": 0 }, "target": { "type": "string", "minLength": 1 }, "ability": { "$ref": "#/definitions/dsl" } }, "additionalProperties": true },
-    "trait": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string", "minLength": 1 }, "value": { "type": "integer", "minimum": 1 } }, "additionalProperties": false },
-    "transformation": { "type": "object", "required": ["trigger", "cardId"], "properties": { "trigger": { "$ref": "#/definitions/dsl" }, "cardId": { "type": "integer", "minimum": 0 } }, "additionalProperties": false },
-    "deckConstraint": { "type": "object", "required": ["type"], "properties": { "type": { "type": "string", "minLength": 1 } }, "additionalProperties": true }
+    "dsl": {
+      "type": "object",
+      "required": ["type", "raw", "handler"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "raw": { "type": "string", "minLength": 1 },
+        "handler": { "type": ["string", "null"] },
+        "quick": { "type": "boolean" },
+        "position": { "type": ["string", "null"] },
+        "amount": { "type": "integer", "minimum": 0 },
+        "target": { "type": "string", "minLength": 1 },
+        "trait": { "type": "string" },
+        "condition": { "type": "string" },
+        "count": { "type": "integer", "minimum": 1 },
+        "conditionValue": { "type": "integer" },
+        "ability": { "$ref": "#/definitions/dsl" },
+        "effect": { "$ref": "#/definitions/dsl" }
+      },
+      "additionalProperties": true
+    },
+    "trait": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "value": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "trigger": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "raw": { "type": "string", "minLength": 1 },
+        "cardName": { "type": "string" },
+        "target": { "type": "string" },
+        "rank": { "type": "string" },
+        "source": { "type": "string" },
+        "item": { "type": "string" },
+        "position": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "transformation": {
+      "type": "object",
+      "required": ["triggers", "cardId"],
+      "properties": {
+        "triggers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/trigger" }
+        },
+        "cardId": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "deckConstraint": {
+      "type": "object",
+      "required": ["type"],
+      "properties": { "type": { "type": "string", "minLength": 1 } },
+      "additionalProperties": true
+    }
   },
   "type": "object",
   "additionalProperties": {
     "oneOf": [
-      { "type": "object", "additionalProperties": false, "required": ["cardId", "type", "name", "cost", "hp", "positions", "traits", "attributes", "affiliations", "abilities", "passives", "deckConstraints"], "properties": { "cardId": { "type": "integer", "minimum": 0 }, "type": { "const": "unit" }, "name": { "type": "string", "minLength": 1 }, "sobriquet": { "type": "string", "minLength": 1 }, "cost": { "type": "integer", "minimum": 0 }, "hp": { "type": "integer", "minimum": 1 }, "rank": { "type": "string", "enum": ["regular", "ranker", "high ranker"] }, "positions": { "type": "array", "minItems": 1, "items": { "type": "string" } }, "traits": { "type": "array", "items": { "$ref": "#/definitions/trait" } }, "attributes": { "type": "array", "items": { "type": "string" } }, "affiliations": { "type": "array", "items": { "type": "string" } }, "abilities": { "type": "array", "items": { "$ref": "#/definitions/dsl" } }, "passives": { "type": "array", "items": { "$ref": "#/definitions/dsl" } }, "evolveInto": { "$ref": "#/definitions/transformation" }, "evolvedFrom": { "type": "integer", "minimum": 0 }, "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } } } },
-      { "type": "object", "additionalProperties": false, "required": ["cardId", "type", "name", "cost", "effects", "deckConstraints"], "properties": { "cardId": { "type": "integer", "minimum": 0 }, "type": { "const": "skill" }, "name": { "type": "string", "minLength": 1 }, "sobriquet": { "type": "string", "minLength": 1 }, "cost": { "type": "integer", "minimum": 0 }, "requirements": { "type": "array", "items": { "type": "string" } }, "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/dsl" } }, "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } } } },
-      { "type": "object", "additionalProperties": false, "required": ["cardId", "type", "name", "cost", "effects", "deckConstraints"], "properties": { "cardId": { "type": "integer", "minimum": 0 }, "type": { "const": "equipment" }, "name": { "type": "string", "minLength": 1 }, "sobriquet": { "type": "string", "minLength": 1 }, "cost": { "type": "integer", "minimum": 0 }, "requirements": { "type": "array", "items": { "type": "string" } }, "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/dsl" } }, "igniteInto": { "$ref": "#/definitions/transformation" }, "ignitedFrom": { "type": "integer", "minimum": 0 }, "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } } } }
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cardId", "type", "name", "cost", "hp", "positions", "traits", "attributes", "affiliations", "abilities", "passives", "deckConstraints"],
+        "properties": {
+          "cardId": { "type": "integer", "minimum": 0 },
+          "type": { "const": "unit" },
+          "name": { "type": "string", "minLength": 1 },
+          "sobriquet": { "type": "string", "minLength": 1 },
+          "cost": { "type": "integer", "minimum": 0 },
+          "hp": { "type": "integer", "minimum": 1 },
+          "rank": { "type": "string", "enum": ["regular", "ranker", "high ranker"] },
+          "positions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "traits": { "type": "array", "items": { "$ref": "#/definitions/trait" } },
+          "attributes": { "type": "array", "items": { "type": "string" } },
+          "affiliations": { "type": "array", "items": { "type": "string" } },
+          "abilities": { "type": "array", "items": { "$ref": "#/definitions/dsl" } },
+          "passives": { "type": "array", "items": { "$ref": "#/definitions/dsl" } },
+          "evolveInto": { "$ref": "#/definitions/transformation" },
+          "evolvedFrom": { "type": "integer", "minimum": 0 },
+          "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cardId", "type", "name", "cost", "effects", "deckConstraints"],
+        "properties": {
+          "cardId": { "type": "integer", "minimum": 0 },
+          "type": { "const": "skill" },
+          "name": { "type": "string", "minLength": 1 },
+          "sobriquet": { "type": "string", "minLength": 1 },
+          "cost": { "type": "integer", "minimum": 0 },
+          "requirements": { "type": "array", "items": { "type": "string" } },
+          "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/dsl" } },
+          "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cardId", "type", "name", "cost", "effects", "deckConstraints"],
+        "properties": {
+          "cardId": { "type": "integer", "minimum": 0 },
+          "type": { "const": "equipment" },
+          "name": { "type": "string", "minLength": 1 },
+          "sobriquet": { "type": "string", "minLength": 1 },
+          "cost": { "type": "integer", "minimum": 0 },
+          "requirements": { "type": "array", "items": { "type": "string" } },
+          "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/dsl" } },
+          "igniteInto": { "$ref": "#/definitions/transformation" },
+          "ignitedFrom": { "type": "integer", "minimum": 0 },
+          "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
+        }
+      }
     ]
   }
 }

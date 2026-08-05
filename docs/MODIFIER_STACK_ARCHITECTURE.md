@@ -62,8 +62,8 @@ silence) correct without manual bookkeeping.
 
 ## Source ID Conventions
 
-Source IDs **must be unique strings**. The Phase 1 codebase uses these
-conventions (formalize these in Phase 2):
+Source IDs **must be unique strings**. The codebase uses these
+conventions:
 
 | Source | Pattern | Example |
 |---|---|---|
@@ -192,29 +192,42 @@ External systems (Logger, UI) subscribe to them for auditing.
 
 ---
 
-## Integration with Phase 2+
+## Priority & Precedence
 
-### What Phase 2 must do
+Multiple `set`/`override` modifiers on the same key now resolve by priority:
+higher `priority` wins; tied priorities use most-recent-first (`createdAt`).
 
-1. **Standardize source ID generation.** Create an `IdFactory` or at minimum
-   a documented naming convention so different systems don't collide.
+### Expiration
 
-2. **Wire round-end condition cleanup.** Conditions last "until end of round"
-   per RULES.md. At `game:round:end`, call:
-   ```js
-   stack.removeWhere(m => m.type === "condition");
-   ```
+Modifiers can have `expiresAt: number` (GameClock tick). Call
+`stack.removeExpired(now)` to clean up timed modifiers.
 
-3. **Wire Silence/Cleanse keywords** to `disableByTarget`/`removeWhere`.
+### Snapshot
 
-4. **Extend `GameState._createSnapshot()`** to include modifier state
-   so the Logger captures trait/condition changes in diffs.
+`stack.snapshot()` returns a deep copy of all modifiers indexed by targetId,
+for Logger diffs and serialization.
 
-5. **Handle `stat` type modifiers.** Currently only `trait` and `condition`
-   are actively used. Equipment effects like "the bearer has +2 HP" need
-   `stat` modifiers and `getEffective` queries for max HP.
+### ID Generation
 
-### Anti-patterns
+`IdFactory.js` provides canonical source IDs: `Unit#<cardId>`, `Equip#<cardId>`,
+`Ability#<unitId>#<idx>`, `Passive#<unitId>#<idx>`, `Skill#<cardId>`,
+`Landmark#<unitId>`, `System`. All callers use `IdFactory` — no ad-hoc IDs.
+
+### Auto-Cleanup Integration
+
+- `unit:destroyed` — `removeByTarget`
+- `game:round:end` — `removeWhere(m => m.type === "condition")`, wired in the GameState constructor
+- Barrier tracking resets on `game:round:start`
+
+### Snapshot Extension
+
+`GameState._createSnapshot()` now includes active conditions, traits, equipment,
+combat slots, shinheuh slots, and fire charges per unit — so Logger diffs
+reflect all modifier-based state changes.
+
+---
+
+## Anti-patterns
 
 - **Don't mutate unit properties directly** — always go through ModifierStack.
 - **Don't forget to emit `unit:destroyed`** — or modifiers leak.
