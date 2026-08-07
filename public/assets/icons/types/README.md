@@ -1,0 +1,1 @@
+all icons in this folder are from https://www.flaticon.com/packs/a-to-z-capital-letters
