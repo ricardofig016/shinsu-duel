@@ -1,0 +1,17 @@
+type: unit
+name: Stone Doll
+cost: 0
+hp: 20
+rank: 
+positions:
+  - frontline shinheuh
+passives:
+  - Unreachable
+  - Spear bearers deal +4 damage to me
+abilities:
+  - "Free: Spend 1: deal 1 to an enemy"
+evolve:
+traits:
+  - taunt
+attributes:
+affiliations:

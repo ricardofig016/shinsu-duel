@@ -1,0 +1,15 @@
+type: unit
+name: The Hand Of Arlen
+cost: 2
+hp: 6
+rank: 
+positions:
+  - landmark
+passives:
+  - when an ability with Free is played, the unit destroys 5 of their own lighthouses
+  - when i die, summon Stone Doll on both players' fields
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:
