@@ -13,5 +13,67 @@ passives:
 abilities:
 evolve:
 traits:
+  - barrier
+  - bloodthirsty
+  - creator
+  - dealer 10
+  - immune
+  - last one standing 10
+  - lethal
+  - pierce 10
+  - reflect 10
+  - regenerate 10
+  - resilient 10
+  - ruthless 10
+  - sharpshooter
+  - strong 10
+  - taunt
+  - vengeful 10
 attributes:
+  - anima
+  - silver dwarf
+  - red witch
+  - hwayeomsa
+  - jeonsulsa
+  - irregular
+  - living ignition weapon
 affiliations:
+  - team aka
+  - team baam
+  - team bero
+  - team chang
+  - team fug
+  - team khel hellam
+  - team novick
+  - team rachel
+  - team sachi
+  - team ship
+  - team sweet and sour
+  - khun's team
+  - fug
+  - hidden grove
+  - karaka's servants
+  - revolution
+  - wolhaiksong
+  - zahard's army
+  - zahard's princesses
+  - great warriors
+  - shining ones
+  - arie family
+  - khun family
+  - ha family
+  - tu perie family
+  - eurasia family
+  - po bidau family
+  - yeon family
+  - ari family
+  - lo po bia family
+  - hendo lok family
+  - blitz family
+  - grand family
+  - edrok family
+  - mule family
+  - nissam family
+  - canines
+  - data humans
+  - prince of the redlight district
