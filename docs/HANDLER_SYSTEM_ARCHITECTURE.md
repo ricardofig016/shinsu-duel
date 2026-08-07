@@ -13,12 +13,12 @@ classes** that extend `BaseHandler`. Handlers receive a structured payload,
 validate it, and execute state changes through the `ModifierStack` and
 `EventBus`.
 
-| Concept | Implementation |
-|---|---|
-| Handler contract | `BaseHandler` with `validate()` + `execute()` |
-| Registration | `HandlerRegistry` maps DSL `type` → handler instance |
-| Nested DSL | `spend_shinsu` wraps an inner `effect`; `grant_ability` wraps an `ability` |
-| Cascading effects | `context.emitChild()` triggers downstream events |
+| Concept           | Implementation                                                             |
+| ----------------- | -------------------------------------------------------------------------- |
+| Handler contract  | `BaseHandler` with `validate()` + `execute()`                              |
+| Registration      | `HandlerRegistry` maps DSL `type` → handler instance                       |
+| Nested DSL        | `spend_shinsu` wraps an inner `effect`; `grant_ability` wraps an `ability` |
+| Cascading effects | `context.emitChild()` triggers downstream events                           |
 
 ---
 
@@ -53,6 +53,7 @@ throw before any state mutation occurs. A handler that mutates state during
 validation, then throws, leaves the game in a corrupt state.
 
 **⚠️ `context` is the EventContext from EventBus.** It provides:
+
 - `context.emitChild(eventName, payload)` — DFS child event
 - `context.cancel(reason)` — cancel the current event
 - `context.eventName`, `context.phase`, `context.depth` — read-only metadata
@@ -71,8 +72,8 @@ registry.register("heal", HealHandler);
 registry.register("grant_trait", GrantTraitHandler);
 // ...
 
-registry.has("deal_damage");            // → true
-registry.get("deal_damage");            // → DealDamageHandler instance
+registry.has("deal_damage"); // → true
+registry.get("deal_damage"); // → DealDamageHandler instance
 registry.get("deal_damage").execute(payload, ctx, gameState);
 ```
 
@@ -113,28 +114,28 @@ For `type: "custom"` effects (~130 in the card set), there is **no handler regis
 
 ## Baseline Handlers
 
-| Handler | DSL `type` | Key behavior |
-|---|---|---|
-| `DealDamageHandler` | `deal_damage` | Barrier → Resilient → Weak → apply → kill check → emitChildren |
-| `HealHandler` | `heal` | Applies healing, capped at max HP |
-| `GrantTraitHandler` | `grant_trait` | `stack.apply({ type:"trait", key, value })` |
-| `GiveConditionHandler` | `give_condition` | Respects Immune; `stack.apply({ type:"condition", ... })` |
-| `CleanseHandler` | `cleanse` | `stack.removeWhere(m => m.type === "condition")` |
-| `CreateLighthouseHandler` | `create_lighthouse` | Modifies `playerState.lighthouses.amount` (cap 40) |
+| Handler                    | DSL `type`           | Key behavior                                                                                |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
+| `DealDamageHandler`        | `deal_damage`        | Barrier → Resilient → Weak → apply → kill check → emitChildren                              |
+| `HealHandler`              | `heal`               | Applies healing, capped at max HP                                                           |
+| `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                                 |
+| `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                                   |
+| `CleanseHandler`           | `cleanse`            | `stack.removeWhere(m => m.type === "condition")`                                            |
+| `CreateLighthouseHandler`  | `create_lighthouse`  | Modifies `playerState.lighthouses.amount` (cap 40)                                          |
 | `DestroyLighthouseHandler` | `destroy_lighthouse` | Modifies `playerState.lighthouses.amount` (floor 0); emits `game:lighthouses:depleted` on 0 |
-| `SpendShinsuHandler` | `spend_shinsu` | Deducts recharged first, then normal |
-| `DrawCardHandler` | `draw_card` | Pops from deck; emits `game:deck:empty` on exhaustion |
+| `SpendShinsuHandler`       | `spend_shinsu`       | Deducts recharged first, then normal                                                        |
+| `DrawCardHandler`          | `draw_card`          | Pops from deck; emits `game:deck:empty` on exhaustion                                       |
 
 ---
 
 ## Additional Handlers
 
-| Handler | DSL `type` | Key behavior |
-|---|---|---|
-| `ChargeShinsuHandler` | `charge_shinsu` | Adds shinsu to normal pool, capped at round max; emits `shinsu:charged` |
-| `CompressShinsuHandler` | `compress_shinsu` | Reduces next card cost this turn via `compressAmount`; cleared at turn end |
-| `ReclaimCardsHandler` | `reclaim_cards` | Moves `amount` cards from discard to hand; emits `card:reclaimed` |
-| `GrantAbilityHandler` | `grant_ability` | Registers inner ability DSL via ModifierStack; cleaned up on source removal |
+| Handler                 | DSL `type`        | Key behavior                                                                |
+| ----------------------- | ----------------- | --------------------------------------------------------------------------- |
+| `ChargeShinsuHandler`   | `charge_shinsu`   | Adds shinsu to normal pool, capped at round max; emits `shinsu:charged`     |
+| `CompressShinsuHandler` | `compress_shinsu` | Reduces the selected card instance's cost via `costReduction`               |
+| `ReclaimCardsHandler`   | `reclaim_cards`   | Moves `amount` cards from discard to hand; emits `card:reclaimed`           |
+| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability DSL via ModifierStack; cleaned up on source removal |
 
 All 12 structured DSL types have handler implementations. `custom` type effects (~130) remain unresolved until custom handlers are written.
 
@@ -144,7 +145,7 @@ The `EffectResolver` is the recursive resolution engine that maps DSL objects
 to handlers:
 
 ```js
-resolveEffect(effect, context, gameState, extra)
+resolveEffect(effect, context, gameState, extra);
 ```
 
 1. Reads `effect.type`, looks up handler via `HandlerRegistry`
@@ -174,6 +175,7 @@ that themselves need handler resolution.
 ```
 
 Resolution flow:
+
 1. `SpendShinsuHandler` validates and deducts shinsu
 2. If successful, it resolves the inner `effect` by looking up its `type`
    in the registry
@@ -181,6 +183,7 @@ Resolution flow:
    `deal_damage`)
 
 **⚠️ This requires a recursive resolution function**:
+
 ```js
 function resolveEffect(effect, context, gameState) {
   if (effect.type === "custom") {

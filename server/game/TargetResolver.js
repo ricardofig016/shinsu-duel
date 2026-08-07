@@ -34,8 +34,10 @@ function isAlly(unit, sourceOwner) {
 // RULES.md §Lines rule 4: can only target backline if enemy frontline is empty.
 // Ghost units don't block backline access. Sharpshooter bypasses entirely.
 
-function getValidEnemyTargets(gameState, sourceUnit) {
-  const opponent = gameState.usernames.find((u) => u !== sourceUnit.owner);
+function getValidEnemyTargets(gameState, sourceUnit, sourceOwner = null) {
+  const owner = sourceUnit?.owner || sourceOwner;
+  if (!owner) throw new Error("TargetResolver: enemy targeting requires sourceUnit or sourceOwner");
+  const opponent = gameState.usernames.find((u) => u !== owner);
   const enemyField = gameState.playerStates[opponent]?.field;
   if (!enemyField) return [];
 
@@ -67,22 +69,50 @@ function getValidEnemyTargets(gameState, sourceUnit) {
   return [...frontline, ...backline].filter((u) => u.isAlive());
 }
 
+export function canTargetEnemyLighthouses(gameState, sourceUnit) {
+  const opponent = gameState.usernames.find((u) => u !== sourceUnit?.owner);
+  const field = gameState.playerStates[opponent]?.field;
+  if (!field) return false;
+  const isGhost = (unit) => gameState.modifierStack.has(unit.id, "condition", "ghost");
+  return [...(field.frontline || []), ...(field.backline || [])]
+    .every((unit) => !unit.isAlive() || isGhost(unit));
+}
+
 // ─── Taunt enforcement ──────────────────────────────────────────────────────
-// If any enemy has Taunt and is alive, you MUST target them.
-// Sharpshooter bypasses this.
+// Taunt constrains effects from enemy units only. A targetable skill has no
+// source unit and therefore does not trigger Taunt.
+
+function getTargetableTaunters(targets, gameState, sourceUnit) {
+  if (!sourceUnit) return [];
+  return targets.filter((unit) =>
+    unit.owner !== sourceUnit.owner && gameState.modifierStack.has(unit.id, "trait", "taunt")
+  );
+}
 
 function applyTauntFilter(targets, gameState, sourceUnit) {
-  const hasSharpshooter = sourceUnit
-    ? gameState.modifierStack.has(sourceUnit.id, "trait", "sharpshooter")
-    : false;
-  if (hasSharpshooter) return targets;
+  const taunters = getTargetableTaunters(targets, gameState, sourceUnit);
+  return taunters.length > 0 ? taunters : targets;
+}
 
-  const taunters = targets.filter((u) =>
-    gameState.modifierStack.has(u.id, "trait", "taunt")
+/**
+ * Validates a player-selected multi-target set against Taunt.
+ * Every targetable enemy Taunt unit must be selected before any other enemy
+ * may be selected. Skill effects do not have a source unit and bypass Taunt.
+ */
+export function validateTauntSelection(candidates, selectedIds, gameState, sourceUnit) {
+  if (!sourceUnit) return true;
+  const selected = new Set(selectedIds);
+  const taunters = getTargetableTaunters(candidates, gameState, sourceUnit);
+  const missingTaunter = taunters.some((unit) => !selected.has(unit.id));
+  if (!missingTaunter) return true;
+
+  const selectedOtherEnemy = candidates.some((unit) =>
+    selected.has(unit.id) && unit.owner !== sourceUnit.owner && !taunters.includes(unit)
   );
-
-  if (taunters.length > 0) return taunters;
-  return targets;
+  if (selectedOtherEnemy) {
+    throw new Error("All targetable Taunt units must be selected before other enemy units.");
+  }
+  return true;
 }
 
 // ─── Filter helpers ─────────────────────────────────────────────────────────
@@ -153,36 +183,46 @@ export function resolveTargets(gameState, options) {
       break;
 
     case "ally": {
-      if (!sourceUnit) throw new Error("TargetResolver: 'ally' requires sourceUnit");
-      const allyField = gameState.playerStates[sourceUnit.owner]?.field;
+      const sourceOwner = sourceUnit?.owner || options.sourceOwner;
+      if (!sourceOwner) throw new Error("TargetResolver: 'ally' requires sourceUnit or sourceOwner");
+      const allyField = gameState.playerStates[sourceOwner]?.field;
       if (!allyField) return [];
       candidates = [...(allyField.frontline || []), ...(allyField.backline || [])]
-        .filter((u) => u.isAlive() && u.id !== sourceUnit.id);
+        .filter((u) => u.isAlive() && (!sourceUnit || u.id !== sourceUnit.id));
       break;
     }
 
     case "enemy":
-      candidates = getValidEnemyTargets(gameState, sourceUnit);
+      candidates = getValidEnemyTargets(gameState, sourceUnit, options.sourceOwner);
       candidates = applyTauntFilter(candidates, gameState, sourceUnit);
       break;
 
+    case "enemies":
+      // Multi-target choices retain all candidates; validation requires every
+      // targetable Taunt unit before other enemies can be selected.
+      candidates = getValidEnemyTargets(gameState, sourceUnit, options.sourceOwner);
+      break;
+
     case "enemy_frontline": {
-      const opponent = gameState.usernames.find((u) => u !== sourceUnit?.owner);
+      const owner = sourceUnit?.owner || options.sourceOwner;
+      const opponent = gameState.usernames.find((u) => u !== owner);
       candidates = gameState.playerStates[opponent]?.field?.frontline
         ?.filter((u) => u.isAlive()) ?? [];
       break;
     }
 
     case "enemy_backline": {
-      const opponent = gameState.usernames.find((u) => u !== sourceUnit?.owner);
+      const owner = sourceUnit?.owner || options.sourceOwner;
+      const opponent = gameState.usernames.find((u) => u !== owner);
       candidates = gameState.playerStates[opponent]?.field?.backline
         ?.filter((u) => u.isAlive()) ?? [];
       break;
     }
 
     case "all_allies": {
-      if (!sourceUnit) throw new Error("TargetResolver: 'all_allies' requires sourceUnit");
-      const allyField = gameState.playerStates[sourceUnit.owner]?.field;
+      const sourceOwner = sourceUnit?.owner || options.sourceOwner;
+      if (!sourceOwner) throw new Error("TargetResolver: 'all_allies' requires sourceUnit or sourceOwner");
+      const allyField = gameState.playerStates[sourceOwner]?.field;
       candidates = allyField
         ? [...(allyField.frontline || []), ...(allyField.backline || [])].filter((u) => u.isAlive())
         : [];
@@ -190,8 +230,16 @@ export function resolveTargets(gameState, options) {
     }
 
     case "all_enemies":
-      candidates = getValidEnemyTargets(gameState, sourceUnit);
+      candidates = getValidEnemyTargets(gameState, sourceUnit, options.sourceOwner);
       // Taunt doesn't filter "all enemies" — it forces single-target, not mass
+      break;
+
+    case "enemy_lighthouses":
+      if (!canTargetEnemyLighthouses(gameState, sourceUnit)) return [];
+      candidates = [{
+        id: `lighthouse:${gameState.usernames.find((u) => u !== sourceUnit?.owner)}`,
+        type: "lighthouse",
+      }];
       break;
 
     case "bearer":
@@ -234,4 +282,4 @@ export function resolveTargets(gameState, options) {
   return candidates;
 }
 
-export default { resolveTargets };
+export default { resolveTargets, canTargetEnemyLighthouses, validateTauntSelection };

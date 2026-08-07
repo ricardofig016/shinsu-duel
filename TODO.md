@@ -2,19 +2,20 @@
 
 ## Tasks
 
-- [ ] targetting engine: sharpshooter bypasses taunt when it should not
-- [ ] targetting engine: enemy lighthouses should be targetable when no non-ghost enemies are on the board
-- [ ] targetting engine: make sure taunt enforces first target on mass-target effects
 - [ ] frontend: change board background to something from the webtoon
-- [ ] ZoneService: should not skip draw on Unreachable cards, this is the job of the deck validator. unreachable cards may be created in deck during the game
-- [ ] ZoneService: what is compressAmount and why is it stored in `playerState`?
-- [ ] LifecycleEngine: deployUnit on full line (5 units) destroys oldest instead of player choice (should choose between the 5 or cancel)
-- [ ] GameState: Event Catalog legacy events (PascalCase `OnGameStart`) should be removed, only canonical events should be used (EVT `game:started`)
+- [ ] data: rename all ` (evolved)`/` (ignited)` to ` - Evolved`/` - Ignited`
 
 ## In Progress
 
 ## Completed
 
+- [x] targetting engine: make sure taunt enforces first target on mass-target effects
+- [x] targetting engine: sharpshooter bypasses taunt when it should not
+- [x] targetting engine: enemy lighthouses should be targetable when no non-ghost enemies are on the board
+- [x] ZoneService: should not skip draw on Unreachable cards, this is the job of the deck validator. unreachable cards may be created in deck during the game
+- [x] ZoneService: what is compressAmount and why is it stored in `playerState`?
+- [x] LifecycleEngine: deployUnit on full line (5 units) destroys oldest instead of player choice (should choose between the 5 or cancel)
+- [x] GameState: Event Catalog legacy events (PascalCase `OnGameStart`) should be removed, only canonical events should be used (EVT `game:started`)
 - [x] write rules regarding shinheuh and animas
 - [x] add passives to cards (this is in the notebook)
 - [x] add a new negative trait around silencing

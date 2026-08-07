@@ -27,6 +27,7 @@ export default class HealHandler extends BaseHandler {
       const targets = TargetResolver.resolveTargets(gameState, {
         target: payload.target,
         sourceUnit,
+        sourceOwner: payload.sourceOwner || payload.owner,
         count: payload.count || 1,
       });
       if (targets.length === 0) return { healed: 0 };

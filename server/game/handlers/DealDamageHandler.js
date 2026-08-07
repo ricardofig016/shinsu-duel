@@ -1,5 +1,6 @@
 import BaseHandler from "./BaseHandler.js";
 import TargetResolver from "../TargetResolver.js";
+import LifecycleEngine from "../services/LifecycleEngine.js";
 
 /**
  * Resolves damage through Barrier → Resilient → apply → kill check → Slay.
@@ -33,6 +34,7 @@ export default class DealDamageHandler extends BaseHandler {
       const targets = TargetResolver.resolveTargets(gameState, {
         target: payload.target,
         sourceUnit,
+        sourceOwner: payload.sourceOwner || payload.owner,
         condition: payload.condition,
         conditionValue: payload.conditionValue,
         count: payload.count || 1,
@@ -107,11 +109,14 @@ export default class DealDamageHandler extends BaseHandler {
         killerOwner: payload.sourceOwner,
       });
 
-      // Destroy the unit
-      context.emitChild("unit:destroyed", {
-        unitId: targetId,
-        owner: payload.targetOwner,
-      });
+      // Every production lethal path uses the lifecycle engine so zones,
+      // attachments, modifiers, attributes, and trigger subscriptions remain coherent.
+      // The fallback keeps this handler independently testable with a minimal state stub.
+      if (gameState.playerStates && gameState.eventBus) {
+        LifecycleEngine.destroyUnit(gameState, unit);
+      } else {
+        context.emitChild("unit:destroyed", { unitId: targetId, owner: payload.targetOwner });
+      }
     }
 
     return { damageDealt: actualDamage, killed: !unit.isAlive() };

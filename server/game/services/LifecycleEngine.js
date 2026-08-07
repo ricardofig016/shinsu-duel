@@ -12,6 +12,7 @@ import Unit from "../Unit.js";
 import ZoneService from "./ZoneService.js";
 import ShinsuService from "./ShinsuService.js";
 import Card from "../Card.js";
+import { resolveEffects } from "../EffectResolver.js";
 
 export default class LifecycleEngine {
   /**
@@ -26,7 +27,7 @@ export default class LifecycleEngine {
    * @param {string} positionCode
    * @returns {{ unit: Unit, overflowDestroyed: boolean }}
    */
-  static deployUnit(gameState, username, handIndex, positionCode) {
+  static deployUnit(gameState, username, handIndex, positionCode, options = {}) {
     const player = gameState.playerStates[username];
     if (!player) throw new Error(`Player "${username}" not found`);
 
@@ -36,8 +37,9 @@ export default class LifecycleEngine {
     // Validate it's player's turn
     if (gameState.currentTurn !== username) throw new Error("It's not your turn.");
 
-    // Get card from hand
-    const card = ZoneService.removeFromHand(player, handIndex);
+    // Read first: service callers must never lose a card because a later
+    // lifecycle validation fails.
+    const card = player.hand?.[handIndex];
     if (!card || card.type !== "unit") throw new Error("Card is not a unit or not in hand.");
 
     // Validate position
@@ -45,12 +47,8 @@ export default class LifecycleEngine {
       throw new Error(`Card "${card.name}" cannot be placed in position "${positionCode}".`);
     }
 
-    // Calculate effective cost (compress reduction)
-    let cost = card.cost;
-    if (player.compressAmount > 0) {
-      cost = Math.max(0, cost - player.compressAmount);
-      player.compressAmount = 0;
-    }
+    // Compression is a reduction on this card instance. It remains attached to this card until it is played.
+    const cost = Math.max(0, card.cost - (card.costReduction || 0));
 
     // Check shinsu
     if (!ShinsuService.canAfford(player, cost)) {
@@ -74,7 +72,8 @@ export default class LifecycleEngine {
       }
     }
 
-    // Deduct shinsu
+    // Mutate only after every synchronous validation above has succeeded.
+    ZoneService.removeFromHand(player, handIndex);
     ShinsuService.spend(player, cost);
 
     // Create unit
@@ -82,12 +81,24 @@ export default class LifecycleEngine {
     const line = player.field[positionDef.line];
     line.push(unit);
 
-    // Check line overflow (max 5 units)
+    // Check line overflow (max 5 units). The owner chooses one of the six
+    // units, including the new deployment, to destroy before play continues.
     let overflowDestroyed = false;
     if (line.length > 5) {
-      // Destroy the oldest unit (first in array)
-      const overflowUnit = line.shift();
-      LifecycleEngine.destroyUnit(gameState, overflowUnit);
+      const candidates = line.map((candidate) => ({
+        id: candidate.id,
+        name: candidate.card.name,
+        hp: candidate.currentHp,
+      }));
+      gameState.createPendingDecision({
+        owner: username,
+        type: "line_overflow",
+        candidates,
+        resolve: ([unitId]) => {
+          const overflowUnit = gameState._findUnit(unitId);
+          if (overflowUnit) LifecycleEngine.destroyUnit(gameState, overflowUnit);
+        },
+      });
       overflowDestroyed = true;
     }
 
@@ -106,16 +117,17 @@ export default class LifecycleEngine {
     });
 
     // Apply native traits via ModifierStack
-    const sourceId = IdFactory.unitSource(card.cardId);
-    const nativeTraits = card.traits || [];
-    for (const traitCode of Object.keys(card.traitValues || {})) {
+    const sourceId = IdFactory.unitSource(unit.id);
+    // `Card.traits` is a dictionary keyed by canonical trait code. Apply both
+    // valueless traits (Barrier, Taunt, Immune, ...) and numeric traits.
+    for (const traitCode of Object.keys(card.traits || {})) {
       gameState.modifierStack.apply({
         sourceId,
         sourceType: "unit",
         targetId: unit.id,
         type: "trait",
         key: traitCode,
-        value: card.traitValues[traitCode],
+        value: card.traitValues?.[traitCode] ?? 1,
       });
     }
 
@@ -176,6 +188,9 @@ export default class LifecycleEngine {
       ZoneService.discard(player, unit.card);
     }
 
+    gameState._triggerManager?.unregisterAll(unit.id);
+    gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
+
     // Emit destroyed event (ModifierStack auto-cleans via listener)
     gameState.eventBus.emit("unit:destroyed", {
       unitId: unit.id,
@@ -199,35 +214,35 @@ export default class LifecycleEngine {
     const lostHp = unit.card.maxHp - unit.currentHp;
     const oldCard = unit.card;
 
-    // Swap card definition
-    unit.card = targetCard;
-    unit.currentHp = Math.max(1, targetCard.hp - lostHp);
+    // Swap card definition while preserving damage. A transformation may enter
+    // with 0 HP only when the caller already allowed a lethal state.
+    unit.card = new Card(targetCardId, targetCard, unit.owner, gameState.eventBus);
+    unit.currentHp = Math.max(0, unit.card.maxHp - lostHp);
 
     // Re-apply native traits with new source
-    const oldSourceId = IdFactory.unitSource(oldCard.cardId);
-    gameState.modifierStack.removeBySource(oldSourceId);
+    const sourceId = IdFactory.unitSource(unit.id);
+    gameState.modifierStack.removeBySource(sourceId);
 
-    const newSourceId = IdFactory.unitSource(targetCardId);
-    const nativeTraits = targetCard.traits || [];
-    for (const traitCode of Object.keys(unit.card.traitValues || {})) {
+    for (const traitCode of Object.keys(unit.card.traits || {})) {
       gameState.modifierStack.apply({
-        sourceId: newSourceId,
+        sourceId,
         sourceType: "unit",
         targetId: unit.id,
         type: "trait",
         key: traitCode,
-        value: unit.card.traitValues[traitCode],
+        value: unit.card.traitValues?.[traitCode] ?? 1,
       });
     }
 
-    // Remove old evolution subscriptions, register new ones
+    // Replace only evolution subscriptions; equipment ignition subscriptions
+    // remain attached to the bearer across a unit evolution.
     if (gameState._triggerManager) {
-      gameState._triggerManager.unregisterAll(unit.id);
-      if (targetCard.evolveInto) {
+      gameState._triggerManager.unregisterAll(unit.id, "evolution");
+      if (unit.card.evolveInto) {
         gameState._triggerManager.registerTransformation(
           unit.id,
-          targetCard.evolveInto.triggers,
-          targetCard.evolveInto.cardId,
+          unit.card.evolveInto.triggers,
+          unit.card.evolveInto.cardId,
           "evolution",
           gameState
         );
@@ -245,6 +260,32 @@ export default class LifecycleEngine {
     });
   }
 
+  /** Transform an attached equipment card into its ignited definition. */
+  static transformEquipment(gameState, unit, targetCardId, equipmentId = null) {
+    const targetCard = gameState.constructor.cards[targetCardId];
+    const attachments = LifecycleEngine._getEquipment(unit);
+    const attachmentIndex = equipmentId
+      ? attachments.findIndex((entry) => entry.id === equipmentId)
+      : 0;
+    if (attachmentIndex < 0) throw new Error("Cannot ignite equipment that is not attached.");
+    if (!targetCard || targetCard.type !== "equipment") {
+      throw new Error(`Target card ${targetCardId} is not equipment`);
+    }
+
+    const oldEquipment = attachments[attachmentIndex];
+    gameState.modifierStack.removeBySource(oldEquipment.id);
+    const ignited = new Card(targetCardId, targetCard, unit.owner, gameState.eventBus);
+    attachments[attachmentIndex] = ignited;
+    LifecycleEngine._syncEquipment(unit, attachments);
+    LifecycleEngine._resolveEquipmentEffects(gameState, unit, ignited);
+    gameState.eventBus.emit("equipment:ignited", {
+      unitId: unit.id,
+      equipment: ignited,
+      fromCardId: oldEquipment.cardId,
+      toCardId: targetCardId,
+    });
+  }
+
   /**
    * Attach equipment to a unit.
    * Validates Irregular multi-equip rule, replaces existing equipment.
@@ -253,34 +294,41 @@ export default class LifecycleEngine {
     const player = gameState.playerStates[username];
     if (!player) throw new Error(`Player "${username}" not found`);
 
-    const card = ZoneService.removeFromHand(player, handIndex);
+    // As with deployment, read before mutating the hand so direct service
+    // use remains transactional when validation fails.
+    const card = player.hand?.[handIndex];
     if (!card || card.type !== "equipment") throw new Error("Card is not equipment.");
 
-    // Cost check
-    let cost = card.cost;
-    if (player.compressAmount > 0) {
-      cost = Math.max(0, cost - player.compressAmount);
-      player.compressAmount = 0;
-    }
+    const cost = Math.max(0, card.cost - (card.costReduction || 0));
     if (!ShinsuService.canAfford(player, cost)) {
       throw new Error("Not enough shinsu to equip.");
     }
 
-    // Irregular can have multiple equipment
+    // Irregulars may retain several unique equipment instances. Store every
+    // attachment in one canonical list; `equipment` remains a compatibility
+    // alias for callers and the client projection.
     const isIrregular = gameState.modifierStack.has(targetUnit.id, "attribute", "irregular") ||
       (targetUnit.card?.attributes || []).includes("irregular");
+    const attachments = LifecycleEngine._getEquipment(targetUnit);
 
-    if (targetUnit.equipment && !isIrregular) {
-      // Replace existing equipment — return to hand
-      LifecycleEngine.detachEquipment(gameState, targetUnit);
+    if (attachments.length > 0 && !isIrregular) {
+      // A normal bearer replaces its existing equipment.
+      LifecycleEngine.detachEquipment(gameState, targetUnit, attachments[0]);
+    }
+    if (isIrregular && attachments.some((attached) => attached.cardId === card.cardId)) {
+      throw new Error("An Irregular can only equip unique equipment cards.");
     }
 
+    ZoneService.removeFromHand(player, handIndex);
     ShinsuService.spend(player, cost);
-    targetUnit.equipment = card;
+    const updatedAttachments = LifecycleEngine._getEquipment(targetUnit);
+    updatedAttachments.push(card);
+    LifecycleEngine._syncEquipment(targetUnit, updatedAttachments);
 
-    // Apply equipment effects via ModifierStack
-    const sourceId = IdFactory.equipSource(card.cardId);
-    // (Effect application is handled by the action system in Phase 3)
+    // Effects are resolved immediately and retain card-instance provenance so
+    // replacing one copy cannot revoke another copy's modifiers.
+    const sourceId = card.id;
+    LifecycleEngine._resolveEquipmentEffects(gameState, targetUnit, card);
 
     // Register ignition trigger
     if (card.igniteInto && gameState._triggerManager) {
@@ -289,7 +337,8 @@ export default class LifecycleEngine {
         card.igniteInto.triggers,
         card.igniteInto.cardId,
         "ignition",
-        gameState
+        gameState,
+        card.id
       );
     }
 
@@ -301,44 +350,62 @@ export default class LifecycleEngine {
   }
 
   /**
-   * Detach equipment: return to hand (de-ignited), remove modifiers.
+   * Detach one equipment card, or every attachment when no card is specified.
+   * Detached ignited cards return as fresh base-form instances.
    */
-  static detachEquipment(gameState, unit) {
-    if (!unit.equipment) return;
+  static detachEquipment(gameState, unit, equipment = null) {
+    const attachments = LifecycleEngine._getEquipment(unit);
+    const toDetach = equipment ? attachments.filter((entry) => entry === equipment) : attachments;
+    if (toDetach.length === 0) return;
 
-    const equip = unit.equipment;
-    const sourceId = IdFactory.equipSource(equip.cardId);
-
-    // Remove all modifiers from this equipment
-    gameState.modifierStack.removeBySource(sourceId);
-
-    // Remove ignition subscriptions
-    if (gameState._triggerManager) {
-      gameState._triggerManager.unregisterAll(unit.id);
-    }
-
-    unit.equipment = null;
-
-    // Return to hand (de-ignited — use base form)
     const player = gameState.playerStates[unit.owner];
-    if (player && equip) {
-      // If ignited, find base form
-      if (equip.ignitedFrom !== undefined && equip.ignitedFrom !== null) {
-        const baseCardData = gameState.constructor.cards[equip.ignitedFrom];
-        if (baseCardData) {
-          // Create new Card instance for base form
-          const Card = Card;
-          const baseCard = new Card(equip.ignitedFrom, baseCardData, unit.owner, gameState.eventBus);
-          ZoneService.addToHand(player, baseCard);
+    for (const equip of toDetach) {
+      gameState.modifierStack.removeBySource(equip.id);
+      gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
+
+      if (player) {
+        if (equip.ignitedFrom !== undefined && equip.ignitedFrom !== null) {
+          const baseCardData = gameState.constructor.cards[equip.ignitedFrom];
+          if (baseCardData) {
+            ZoneService.addToHand(player, new Card(equip.ignitedFrom, baseCardData, unit.owner, gameState.eventBus));
+          }
+        } else {
+          ZoneService.addToHand(player, equip);
         }
-      } else {
-        ZoneService.addToHand(player, equip);
       }
+
+      gameState.eventBus.emit("equipment:detached", {
+        unitId: unit.id,
+        equipment: equip,
+      });
     }
 
-    gameState.eventBus.emit("equipment:detached", {
-      unitId: unit.id,
-      equipment: equip,
+    LifecycleEngine._syncEquipment(unit, attachments.filter((entry) => !toDetach.includes(entry)));
+  }
+
+  static _getEquipment(unit) {
+    if (Array.isArray(unit.equipmentAttachments)) return unit.equipmentAttachments;
+    return unit.equipment ? [unit.equipment] : [];
+  }
+
+  static _syncEquipment(unit, equipment) {
+    unit.equipmentAttachments = equipment;
+    // Keep the historic single-card property stable for existing callers and
+    // clients while Irregular-only consumers read equipmentAttachments.
+    unit.equipment = equipment[0] || null;
+  }
+
+  static _resolveEquipmentEffects(gameState, unit, equipment) {
+    const context = {
+      emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload),
+    };
+    resolveEffects(equipment.effects, context, gameState, {
+      owner: unit.owner,
+      sourceId: equipment.id,
+      sourceType: "equipment",
+      sourceUnit: unit,
+      sourceOwner: unit.owner,
+      targetId: unit.id,
     });
   }
 }

@@ -18,10 +18,10 @@ import LifecycleEngine from "./LifecycleEngine.js";
 export default class TriggerManager {
   constructor(eventBus) {
     this._bus = eventBus;
-    /** @type {Map<string, Array<{unitId, trigger, targetCardId, type}>>} */
-    this._registrations = new Map(); // unitId → registration list
-    /** @type {Map<string, Function>} */
-    this._unsubscribers = new Map(); // unitId → unsubscribe function
+    /** @type {Map<string, Array<{unitId, triggers, targetCardId, type}>>} */
+    this._registrations = new Map();
+    /** @type {Map<string, Array<{type: string, unsubscribe: Function}>>} */
+    this._unsubscribers = new Map();
   }
 
   /**
@@ -33,65 +33,117 @@ export default class TriggerManager {
    * @param {"evolution"|"ignition"} transformType
    * @param {GameState} gameState
    */
-  registerTransformation(unitId, triggers, targetCardId, transformType, gameState) {
+  registerTransformation(unitId, triggers, targetCardId, transformType, gameState, equipmentId = null) {
     if (!triggers || triggers.length === 0) return;
 
     // Store registration
     if (!this._registrations.has(unitId)) {
       this._registrations.set(unitId, []);
     }
-    this._registrations.get(unitId).push({ unitId, triggers, targetCardId, type: transformType });
+    this._registrations.get(unitId).push({ unitId, triggers, targetCardId, type: transformType, equipmentId });
 
     // Subscribe to relevant events based on trigger types
     for (const trigger of triggers) {
-      this._subscribeTrigger(unitId, trigger, targetCardId, transformType, gameState);
+      this._subscribeTrigger(unitId, trigger, targetCardId, transformType, gameState, equipmentId);
     }
   }
 
   /**
    * Remove all trigger subscriptions for a unit.
    */
-  unregisterAll(unitId) {
-    const unsub = this._unsubscribers.get(unitId);
-    if (unsub) {
-      unsub();
-      this._unsubscribers.delete(unitId);
+  unregisterAll(unitId, transformType = null, equipmentId = null) {
+    const subscriptions = this._unsubscribers.get(unitId) || [];
+    const retained = [];
+    for (const subscription of subscriptions) {
+      if ((!transformType || subscription.type === transformType) &&
+          (!equipmentId || subscription.equipmentId === equipmentId)) {
+        subscription.unsubscribe();
+      } else {
+        retained.push(subscription);
+      }
     }
-    this._registrations.delete(unitId);
+    if (retained.length > 0) this._unsubscribers.set(unitId, retained);
+    else this._unsubscribers.delete(unitId);
+
+    const registrations = this._registrations.get(unitId) || [];
+    const remainingRegistrations = transformType
+      ? registrations.filter((registration) => registration.type !== transformType)
+      : [];
+    if (remainingRegistrations.length > 0) this._registrations.set(unitId, remainingRegistrations);
+    else this._registrations.delete(unitId);
+  }
+
+  _trackUnsubscriber(unitId, type, unsubscribe, equipmentId = null) {
+    const subscriptions = this._unsubscribers.get(unitId) || [];
+    subscriptions.push({ type, unsubscribe, equipmentId });
+    this._unsubscribers.set(unitId, subscriptions);
   }
 
   /**
    * Subscribe to event(s) matching a single typed trigger.
    */
-  _subscribeTrigger(unitId, trigger, targetCardId, transformType, gameState) {
+  _subscribeTrigger(unitId, trigger, targetCardId, transformType, gameState, equipmentId = null) {
     switch (trigger.type) {
       case "equip":
-        this._onEquip(unitId, trigger, targetCardId, transformType, gameState);
+        this._onEquip(unitId, trigger, targetCardId, transformType, gameState, equipmentId);
         break;
 
       case "slay":
-        this._onSlay(unitId, trigger, targetCardId, transformType, gameState);
+        this._onSlay(unitId, trigger, targetCardId, transformType, gameState, equipmentId);
         break;
 
       case "deploy":
-        if (transformType === "evolution") {
-          // Auto-evolve on deploy (unusual but valid)
-          // This triggers immediately when the unit is summoned
-        }
+        this._subscribeEvent(unitId, "unit:summoned", targetCardId, transformType, gameState,
+          (payload) => payload.unitId === unitId, equipmentId);
         break;
-
       case "given":
-        // "when given a specific card" — watches for card:reclaimed or similar
-        // Actually, "given" means a skill was played on this unit
         this._onGiven(unitId, trigger, targetCardId, transformType, gameState);
         break;
-
-      default:
+      case "kill":
+        this._subscribeEvent(unitId, "unit:killed", targetCardId, transformType, gameState,
+          (payload) => (payload.killerId === unitId || payload.sourceId === unitId) &&
+            (!trigger.rank || gameState._findUnit(payload.targetId)?.card?.rank === trigger.rank) &&
+            (!trigger.target || trigger.target === "unit"));
         break;
+      case "ally_dies":
+        this._subscribeEvent(unitId, "unit:destroyed", targetCardId, transformType, gameState,
+          (payload) => {
+            const owner = gameState._findUnit(unitId)?.owner;
+            return Boolean(owner && payload.owner === owner && payload.unitId !== unitId);
+          });
+        break;
+      case "damaged_by":
+        this._subscribeEvent(unitId, "unit:damage:applied", targetCardId, transformType, gameState,
+          (payload) => payload.targetId === unitId &&
+            (!trigger.source || gameState._findUnit(payload.sourceId)?.card?.name?.toLowerCase() === trigger.source));
+        break;
+      case "round_start":
+        this._subscribeEvent(unitId, "round:started", targetCardId, transformType, gameState, () => true);
+        break;
+      case "round_end":
+        this._subscribeEvent(unitId, "round:ended", targetCardId, transformType, gameState, () => true);
+        break;
+      case "deal_damage":
+        this._subscribeEvent(unitId, "unit:damage:applied", targetCardId, transformType, gameState,
+          (payload) => payload.sourceId === unitId);
+        break;
+      case "ability_used":
+        this._subscribeEvent(unitId, "unit:ability:used", targetCardId, transformType, gameState,
+          (payload) => payload.unitId === unitId);
+        break;
+      default:
+        throw new Error(`Unsupported compiled trigger type: ${trigger.type}`);
     }
   }
 
-  _onEquip(unitId, trigger, targetCardId, transformType, gameState) {
+  _subscribeEvent(unitId, eventName, targetCardId, transformType, gameState, matches, equipmentId = null) {
+    const handler = (payload) => {
+      if (matches(payload)) this._executeTransform(unitId, targetCardId, transformType, gameState, equipmentId);
+    };
+    this._trackUnsubscriber(unitId, transformType, this._bus.on(eventName, handler, { phase: "post" }), equipmentId);
+  }
+
+  _onEquip(unitId, trigger, targetCardId, transformType, gameState, equipmentId = null) {
     const handler = (payload) => {
       // Check position requirement if present
       if (trigger.position) {
@@ -113,10 +165,10 @@ export default class TriggerManager {
     };
 
     const unsub = this._bus.on("equipment:attached", handler, { phase: "post" });
-    this._unsubscribers.set(unitId + "_equip_" + trigger.cardName, unsub);
+    this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
   }
 
-  _onSlay(unitId, trigger, targetCardId, transformType, gameState) {
+  _onSlay(unitId, trigger, targetCardId, transformType, gameState, equipmentId = null) {
     const handler = (payload) => {
       // For ignition: "the bearer Slays a unit"
       // Check if the slayer has this equipment
@@ -130,10 +182,10 @@ export default class TriggerManager {
     };
 
     const unsub = this._bus.on("unit:killed", handler, { phase: "post" });
-    this._unsubscribers.set(unitId + "_slay", unsub);
+    this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
   }
 
-  _onGiven(unitId, trigger, targetCardId, transformType, gameState) {
+  _onGiven(unitId, trigger, targetCardId, transformType, gameState, equipmentId = null) {
     // "when I am given Redan" → watches for skill played on this unit
     const itemName = trigger.item;
 
@@ -146,19 +198,22 @@ export default class TriggerManager {
 
     // Subscribe to a generic "skill:applied" or "card:given" event
     const unsub = this._bus.on("skill:applied", handler, { phase: "post" });
-    this._unsubscribers.set(unitId + "_given_" + itemName, unsub);
+    this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
   }
 
   /**
    * Execute the transformation.
    */
-  _executeTransform(unitId, targetCardId, transformType, gameState, trigger) {
+  _executeTransform(unitId, targetCardId, transformType, gameState, equipmentId = null) {
     const unit = gameState._findUnit(unitId);
     if (!unit || !unit.isAlive()) return;
 
-    LifecycleEngine.transformUnit(gameState, unit, targetCardId);
+    if (transformType === "ignition") {
+      LifecycleEngine.transformEquipment(gameState, unit, targetCardId, equipmentId);
+    } else {
+      LifecycleEngine.transformUnit(gameState, unit, targetCardId);
+    }
 
-    // Unregister all triggers for this unit (transformation complete)
-    this.unregisterAll(unitId);
+    this.unregisterAll(unitId, transformType, equipmentId);
   }
 }

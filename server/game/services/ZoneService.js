@@ -2,13 +2,12 @@
  * Authoritative card zone service — the only path for card movement.
  *
  * Zones per player: deck (top=last), hand, discard, field (frontline/backline).
- * Enforces deck constraints (unreachable), empty-deck loss, and draw rules.
+ * Deck legality is enforced at deck construction; generated unreachable cards may draw normally.
  */
 
 export default class ZoneService {
   /**
-   * Draw cards from deck to hand.
-   * Skips unreachable cards. Emits `game:deck:empty` on exhaustion.
+   * Draw cards from deck to hand. Emits `game:deck:empty` on exhaustion.
    * @returns {{ drawn: number, cards: Card[] }}
    */
   static draw(playerState, amount, gameState) {
@@ -20,11 +19,9 @@ export default class ZoneService {
     }
 
     const drawn = [];
-    const skipped = [];
 
     for (let i = 0; i < amount; i++) {
       if (playerState.deck.length === 0) {
-        // Empty deck — emit loss event
         if (gameState?.eventBus) {
           gameState.eventBus.emit("game:deck:empty", {
             username: playerState.username,
@@ -34,19 +31,11 @@ export default class ZoneService {
       }
 
       const card = playerState.deck.pop();
-
-      // Skip unreachable cards
-      if (card.isUnreachable?.() || card._isUnreachable) {
-        skipped.push(card);
-        i--; // redraw to replace skipped card
-        continue;
-      }
-
       playerState.hand.push(card);
       drawn.push(card);
     }
 
-    return { drawn: drawn.length, cards: drawn, skipped: skipped.length };
+    return { drawn: drawn.length, cards: drawn, skipped: 0 };
   }
 
   /**

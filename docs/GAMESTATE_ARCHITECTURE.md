@@ -37,7 +37,6 @@ Each player state has typed zones:
   shinsu:      { normalAvailable, normalSpent, recharged },
   combatSlots: { fisherman: { available }, light-bearer: { available }, ... },
   shinheuhSlot:{ available, used },
-  compressAmount: number,  // per-turn cost reduction
   fireCharges:    number,  // Hwayeomsa resource
 }
 ```
@@ -46,21 +45,21 @@ Each player state has typed zones:
 
 ## Rules Enforced
 
-| Rule                       | Enforcement                                    |
-| -------------------------- | ---------------------------------------------- |
-| Max 5 units per line       | `LifecycleEngine.deployUnit` destroys oldest   |
-| Same-name unit check       | `LifecycleEngine.deployUnit` rejects duplicate |
-| Landmark replacement       | `LifecycleEngine.deployUnit` destroys old      |
-| Frontline blocks backline  | `TargetResolver.getValidEnemyTargets`          |
-| Taunt forces targeting     | `TargetResolver.applyTauntFilter`              |
-| Conditions end-of-round    | `GameState` round end handler                  |
-| Barrier resets per round   | `GameState` round start handler                |
-| Shinsu max = round num     | `ShinsuService.reset`                          |
-| Recharged shinsu max 2     | `ShinsuService.reset`                          |
-| Equipment returns on death | `LifecycleEngine.destroyUnit`                  |
-| Empty deck → loss          | `ZoneService.draw`                             |
-| 0 lighthouses → loss       | `GameState.modifyLighthouses`                  |
-| Unreachable cards          | `ZoneService.draw` skips                       |
+| Rule                       | Enforcement                                       |
+| -------------------------- | ------------------------------------------------- |
+| Max 5 units per line       | `LifecycleEngine.deployUnit` requests a choice    |
+| Same-name unit check       | `LifecycleEngine.deployUnit` rejects duplicate    |
+| Landmark replacement       | `LifecycleEngine.deployUnit` destroys old         |
+| Frontline blocks backline  | `TargetResolver.resolveTargets`                   |
+| Taunt forces targeting     | `TargetResolver.applyTauntFilter`                 |
+| Conditions end-of-round    | `GameState` round end handler                     |
+| Barrier resets per round   | `GameState` round start handler                   |
+| Shinsu max = round num     | `ShinsuService.reset`                             |
+| Recharged shinsu max 2     | `ShinsuService.reset`                             |
+| Equipment returns on death | `LifecycleEngine.destroyUnit`                     |
+| Empty deck → loss          | `ZoneService.draw` → `GameState` game-over        |
+| 0 lighthouses → loss       | Lighthouse-depleted event → `GameState` game-over |
+| Unreachable cards          | Deck construction rejects them; draws do not skip |
 
 ---
 
@@ -97,9 +96,6 @@ All events use `namespace:subject:verb` format via `EventCatalog.js`:
 | `OnTurnEnd`         | `turn:ended`    |
 | `OnDeployUnit`      | `unit:deployed` |
 | `OnSummonUnit`      | `unit:summoned` |
-
-Legacy PascalCase names are kept for backward compatibility.
-New code uses `EVT.*` constants exclusively.
 
 ---
 

@@ -14,6 +14,7 @@ export default class Card {
     this.rarity = cardData.rarity;
     this.maxHp = cardData.hp ?? null;
     this.cost = cardData.cost;
+    this.costReduction = 0;
     this.visible = false; // whether the card is visible to the opponent
 
     this.affiliations = this.#mapCodesToDictionary(cardData.affiliations || [], affiliations);
@@ -25,6 +26,14 @@ export default class Card {
 
     this.abilities = cardData.abilities || [];   // unified DSL objects
     this.passiveAbilities = cardData.passives || []; // unified DSL objects
+    this.attributes = cardData.attributes || [];
+    this.requirements = cardData.requirements || [];
+    this.effects = cardData.effects || [];
+    this.deckConstraints = cardData.deckConstraints || [];
+    this.evolveInto = cardData.evolveInto || null;
+    this.evolvedFrom = cardData.evolvedFrom ?? null;
+    this.igniteInto = cardData.igniteInto || null;
+    this.ignitedFrom = cardData.ignitedFrom ?? null;
 
     this.owner = owner; // player username
     this.artworkPath = `/assets/images/artworks/${this.cardId}.png`;
@@ -83,6 +92,8 @@ export default class Card {
       rarity: this.rarity,
       maxHp: this.maxHp,
       cost: this.cost,
+      costReduction: this.costReduction,
+      effectiveCost: Math.max(0, this.cost - this.costReduction),
       visible: this.visible,
       affiliations: this.affiliations,
       positions: this.positions,

@@ -15,17 +15,19 @@ All handlers must use it — no ad-hoc target logic.
 
 ## Valid Target Descriptors
 
-| Descriptor | Behavior |
-|---|---|
-| `self` | The source unit itself |
-| `ally` | One allied unit (excluding self) |
-| `enemy` | One enemy unit (frontline-first, taunt-constrained) |
-| `bearer` | The equipment's bearer (resolved by caller) |
-| `all_allies` | All allied units |
-| `all_enemies` | All enemy units (frontline-first, taunt ignored for mass) |
-| `enemy_frontline` | Enemy frontline units only |
-| `enemy_backline` | Enemy backline units only |
-| `unit` | Any unit on either board |
+| Descriptor          | Behavior                                                  |
+| ------------------- | --------------------------------------------------------- |
+| `self`              | The source unit itself                                    |
+| `ally`              | One allied unit (excluding self)                          |
+| `enemy`             | One enemy unit (frontline-first, taunt-constrained)       |
+| `bearer`            | The equipment's bearer (resolved by caller)               |
+| `all_allies`        | All allied units                                          |
+| `all_enemies`       | All enemy units (frontline-first)                         |
+| `enemies`           | Player-selected enemy targets, constrained by Taunt       |
+| `enemy_frontline`   | Enemy frontline units only                                |
+| `enemy_backline`    | Enemy backline units only                                 |
+| `enemy_lighthouses` | Opponent lighthouses when only Ghost/no enemies remain    |
+| `unit`              | Any unit on either board                                  |
 
 ---
 
@@ -48,22 +50,25 @@ they can target any enemy regardless of frontline/backline.
 
 ### Taunt enforcement
 
-If any enemy on the valid target list has **Taunt**, single-target effects
-MUST target the taunting unit. Sharpshooter bypasses this. Mass-target
-effects (all_enemies, all_allies) ignore taunt.
+Taunt applies only to effects originating from an **enemy unit**. It does
+not constrain targetable skills. A single-target effect MUST target a valid
+Taunt unit. For a player-selected multi-target effect, every valid Taunt unit
+must be selected before any other enemy unit may be selected. Effects that
+unconditionally target all enemies do not require a choice and include all
+valid enemies.
 
 ---
 
 ## Optional Filters
 
-| Filter | Example |
-|---|---|
-| `condition` | Only units with this condition: `"rooted"` |
+| Filter           | Example                                             |
+| ---------------- | --------------------------------------------------- |
+| `condition`      | Only units with this condition: `"rooted"`          |
 | `conditionValue` | Threshold: `condition: "burned", conditionValue: 2` |
-| `trait` | Only units with this trait: `"taunt"` |
-| `rank` | Only units of this rank: `"ranker"` |
-| `position` | Only units at this position: `"fisherman"` |
-| `count` | Max targets: `count: 2` for "2 enemies" |
+| `trait`          | Only units with this trait: `"taunt"`               |
+| `rank`           | Only units of this rank: `"ranker"`                 |
+| `position`       | Only units at this position: `"fisherman"`          |
+| `count`          | Max targets: `count: 2` for "2 enemies"             |
 
 ---
 

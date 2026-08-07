@@ -1,9 +1,8 @@
 import ActionHandler from "../ActionHandler.js";
-import Unit from "../Unit.js";
-import EVT from "../EventCatalog.js";
+import LifecycleEngine from "../services/LifecycleEngine.js";
 
 /**
- * Deploy a unit from a player's hand to a specified position on the board.
+ * Deploy a unit through the authoritative lifecycle engine.
  */
 export default class DeployUnitAction extends ActionHandler {
   static schema = {
@@ -27,11 +26,12 @@ export default class DeployUnitAction extends ActionHandler {
       throw new Error(`Invalid placedPositionCode: ${placedPositionCode}`);
 
     const card = playerState.hand[handId];
-    if (!card) throw new Error("Card not found in hand.");
+    if (!card || card.type !== "unit") throw new Error("Card is not a unit or not in hand.");
     if (!(placedPositionCode in card.positions))
       throw new Error(`Card cannot be placed in position ${placedPositionCode}.`);
 
-    if (card.cost > gameState.getTotalShinsu(username))
+    const effectiveCost = Math.max(0, card.cost - (card.costReduction || 0));
+    if (effectiveCost > gameState.getTotalShinsu(username))
       throw new Error("Not enough shinsu to deploy this unit.");
 
     return true;
@@ -39,18 +39,7 @@ export default class DeployUnitAction extends ActionHandler {
 
   execute(data, gameState) {
     const { username, handId, placedPositionCode } = data;
-    const player = gameState.playerStates[username];
-    const [card] = player.hand.splice(handId, 1);
-
-    const unit = new Unit(card, placedPositionCode);
-    const line = player.field[gameState.constructor.positions[placedPositionCode].line];
-    line.push(unit);
-
-    gameState.spendShinsu(username, card.cost);
-
-    gameState.eventBus.emit(EVT.UNIT_DEPLOYED, { username, unit });
-    gameState.eventBus.emit(EVT.UNIT_SUMMONED, { username, unit });
-    unit.onSummon(gameState);
-    gameState.endTurn();
+    LifecycleEngine.deployUnit(gameState, username, handId, placedPositionCode);
+    gameState.completeActionAfterDecision(() => gameState.endTurn());
   }
 }

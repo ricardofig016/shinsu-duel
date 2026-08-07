@@ -145,18 +145,19 @@ Additional fields depend on `type` (see below).
 
 ### Common additional fields
 
-| Field            | Types that use it                                                                                                                                                      | Description                                                                |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `amount`         | `deal_damage`, `heal`, `spend_shinsu`, `give_condition`, `grant_trait`, `create_lighthouse`, `destroy_lighthouse`, `reclaim_cards`, `compress_shinsu`, `charge_shinsu` | Numeric value                                                              |
-| `target`         | `deal_damage`, `heal`, `cleanse`, `give_condition`, `grant_trait`, `grant_ability`                                                                                     | `"enemy"`, `"ally"`, `"self"`, `"bearer"`, `"all_enemies"`, `"all_allies"` |
-| `condition`      | `give_condition`                                                                                                                                                       | `"burned"`, `"poisoned"`, `"rooted"`, etc.                                 |
-| `trait`          | `grant_trait`                                                                                                                                                          | `"barrier"`, `"strong"`, `"lethal"`, etc.                                  |
-| `quick`          | abilities, effects                                                                                                                                                     | `true` if the ability/effect has Quick keyword                             |
-| `position`       | abilities, passives                                                                                                                                                    | Position code if position-scoped, else `null`                              |
-| `effect`         | `spend_shinsu`                                                                                                                                                         | Nested DSL object — the effect that costs shinsu                           |
-| `ability`        | `grant_ability`                                                                                                                                                        | Nested DSL object — the granted ability                                    |
-| `count`          | `deal_damage`, `give_condition`                                                                                                                                        | Number of targets (e.g., "2 enemies")                                      |
-| `conditionValue` | `deal_damage`                                                                                                                                                          | Conditional targeting (e.g., "deal 3 to all Rooted enemies")               |
+| Field                | Types that use it                                                                                                                                                      | Description                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `amount`             | `deal_damage`, `heal`, `spend_shinsu`, `give_condition`, `grant_trait`, `create_lighthouse`, `destroy_lighthouse`, `reclaim_cards`, `compress_shinsu`, `charge_shinsu` | Numeric value                                                              |
+| `target`             | `deal_damage`, `heal`, `cleanse`, `give_condition`, `grant_trait`, `grant_ability`                                                                                     | `"enemy"`, `"ally"`, `"self"`, `"bearer"`, `"all_enemies"`, `"all_allies"` |
+| `targetCardSelector` | `compress_shinsu`                                                                                                                                                      | Selector after `from`, resolved against the owner's hand                   |
+| `condition`          | `give_condition`                                                                                                                                                       | `"burned"`, `"poisoned"`, `"rooted"`, etc.                                 |
+| `trait`              | `grant_trait`                                                                                                                                                          | `"barrier"`, `"strong"`, `"lethal"`, etc.                                  |
+| `quick`              | abilities, effects                                                                                                                                                     | `true` if the ability/effect has Quick keyword                             |
+| `position`           | abilities, passives                                                                                                                                                    | Position code if position-scoped, else `null`                              |
+| `effect`             | `spend_shinsu`                                                                                                                                                         | Nested DSL object — the effect that costs shinsu                           |
+| `ability`            | `grant_ability`                                                                                                                                                        | Nested DSL object — the granted ability                                    |
+| `count`              | `deal_damage`, `give_condition`                                                                                                                                        | Number of targets (e.g., "2 enemies")                                      |
+| `conditionValue`     | `deal_damage`                                                                                                                                                          | Conditional targeting (e.g., "deal 3 to all Rooted enemies")               |
 
 ---
 
@@ -164,20 +165,20 @@ Additional fields depend on `type` (see below).
 
 ### Structured types (have handlers)
 
-| `type`               | Handler                    | Example `raw`                            |
-| -------------------- | -------------------------- | ---------------------------------------- |
-| `deal_damage`        | `DealDamageHandler`        | `"deal 7 to an enemy"`                   |
-| `heal`               | `HealHandler`              | `"heal me 3 HP"`                         |
-| `cleanse`            | `CleanseHandler`           | `"Cleanse an ally"`                      |
-| `give_condition`     | `GiveConditionHandler`     | `"give Burned 1 to all enemies"`         |
-| `grant_trait`        | `GrantTraitHandler`        | `"the bearer has Bloodthirsty 1"`        |
-| `spend_shinsu`       | `SpendShinsuHandler`       | `"spend 1: give Rooted to 2 enemies"`    |
-| `create_lighthouse`  | `CreateLighthouseHandler`  | `"create 1"`                             |
-| `destroy_lighthouse` | `DestroyLighthouseHandler` | `"destroy 1"`                            |
-| `charge_shinsu`      | `ChargeShinsuHandler`      | `"Charge 2"`                             |
-| `compress_shinsu`    | `CompressShinsuHandler`    | `"Compress 1"`                           |
-| `reclaim_cards`      | `ReclaimCardsHandler`      | `"reclaim 1"`                            |
-| `grant_ability`      | `GrantAbilityHandler`      | `"ability: give Poisoned 4 to an enemy"` |
+| `type`               | Handler                    | Example `raw`                                |
+| -------------------- | -------------------------- | -------------------------------------------- |
+| `deal_damage`        | `DealDamageHandler`        | `"deal 7 to an enemy"`                       |
+| `heal`               | `HealHandler`              | `"heal me 3 HP"`                             |
+| `cleanse`            | `CleanseHandler`           | `"Cleanse an ally"`                          |
+| `give_condition`     | `GiveConditionHandler`     | `"give Burned 1 to all enemies"`             |
+| `grant_trait`        | `GrantTraitHandler`        | `"the bearer has Bloodthirsty 1"`            |
+| `spend_shinsu`       | `SpendShinsuHandler`       | `"spend 1: give Rooted to 2 enemies"`        |
+| `create_lighthouse`  | `CreateLighthouseHandler`  | `"create 1"`                                 |
+| `destroy_lighthouse` | `DestroyLighthouseHandler` | `"destroy 1"`                                |
+| `charge_shinsu`      | `ChargeShinsuHandler`      | `"Charge 2"`                                 |
+| `compress_shinsu`    | `CompressShinsuHandler`    | `"Compress 1 from a Hwayeomsa in your hand"` |
+| `reclaim_cards`      | `ReclaimCardsHandler`      | `"reclaim 1"`                                |
+| `grant_ability`      | `GrantAbilityHandler`      | `"ability: give Poisoned 4 to an enemy"`     |
 
 All 12 DSL types now have runtime handlers. `custom` type effects remain unresolved.
 
@@ -305,8 +306,8 @@ Hwayeomsa attribute cards, all `unreachable`:
 ]
 ```
 
-- `"unreachable"` — card cannot be drawn normally. Must be created by
-  an effect (Thorn Fragments, Enryu's Thorn, Shinwonryu).
+- `"unreachable"` — card cannot be included in a constructed deck. It may
+  still be created during play and is drawn normally after entering a deck.
 
 ---
 

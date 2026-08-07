@@ -22,6 +22,7 @@ import CompressShinsuHandler from "./handlers/CompressShinsuHandler.js";
 import ReclaimCardsHandler from "./handlers/ReclaimCardsHandler.js";
 import GrantAbilityHandler from "./handlers/GrantAbilityHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
+import TargetResolver from "./TargetResolver.js";
 
 // Singleton handler registry — populated at module load
 let _registry = null;
@@ -96,16 +97,69 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Build payload from DSL + extra context
   const payload = { ...effect, ...extra };
 
+  // Single-target descriptors with multiple candidates require an explicit
+  // server-validated player choice before the effect resolves.
+  const choiceTargets = new Set(["ally", "enemy", "enemies", "unit", "bearer"]);
+  if (!payload.targetId && choiceTargets.has(payload.target)) {
+    const candidates = TargetResolver.resolveTargets(gameState, {
+      target: payload.target,
+      sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
+      sourceOwner: payload.sourceOwner || payload.owner,
+      condition: payload.condition,
+      conditionValue: payload.conditionValue,
+      count: Number.MAX_SAFE_INTEGER,
+    });
+    if (candidates.length > 1) {
+      const maxChoices = payload.count && payload.count > 1 ? Math.min(payload.count, candidates.length) : 1;
+      gameState.createPendingDecision({
+        owner: payload.owner || payload.sourceOwner,
+        type: "target_selection",
+        candidates: candidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+        minChoices: maxChoices,
+        maxChoices,
+        resolve: (targetIds) => {
+          TargetResolver.validateTauntSelection(
+            candidates,
+            targetIds,
+            gameState,
+            payload.sourceUnit || gameState._findUnit(payload.sourceId)
+          );
+          targetIds.forEach((targetId) => resolveEffect(effect, context, gameState, { ...extra, targetId }));
+        },
+      });
+      return { pending: true };
+    }
+    if (candidates.length === 1) payload.targetId = candidates[0].id;
+  }
+
+  // Mass-target effects are resolved once for each target, preserving normal
+  // handler semantics and making future handlers independent of target count.
+  if (!payload.targetId && ["all_allies", "all_enemies"].includes(payload.target)) {
+    const targets = TargetResolver.resolveTargets(gameState, {
+      target: payload.target,
+      sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
+      sourceOwner: payload.sourceOwner || payload.owner,
+      condition: payload.condition,
+      conditionValue: payload.conditionValue,
+      trait: payload.trait,
+      rank: payload.rank,
+      position: payload.position,
+      count: Number.MAX_SAFE_INTEGER,
+    });
+    return targets.map((target) => resolveEffect(effect, context, gameState, { ...extra, targetId: target.id }));
+  }
+
   // Validate before execute
   handler.validate(payload, context);
 
   // Execute
   const result = handler.execute(payload, context, gameState);
 
-  // Recursively resolve nested effects
+  // Recursively resolve nested effects. Propagate a pending child so callers
+  // suspend their own follow-up work until the child choice is complete.
   if (effect.effect) {
-    // spend_shinsu wraps an inner effect — resolve it after shinsu deduction
-    resolveEffect(effect.effect, context, gameState, extra);
+    const nestedResult = resolveEffect(effect.effect, context, gameState, extra);
+    if (nestedResult?.pending) return nestedResult;
   }
 
   if (effect.ability) {
@@ -121,7 +175,21 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
  */
 export function resolveEffects(effects, context, gameState, extra = {}) {
   if (!Array.isArray(effects)) return [];
-  return effects.map((effect) => resolveEffect(effect, context, gameState, extra));
+
+  const results = [];
+  for (let index = 0; index < effects.length; index++) {
+    const result = resolveEffect(effects[index], context, gameState, extra);
+    results.push(result);
+    if (result?.pending) {
+      // A card's effects resolve in order. Defer every remaining effect until
+      // the current target choice is resolved rather than mutating ahead of it.
+      gameState.appendPendingDecisionContinuation(() => {
+        resolveEffects(effects.slice(index + 1), context, gameState, extra);
+      });
+      break;
+    }
+  }
+  return results;
 }
 
 export default { initEffectResolver, resolveEffect, resolveEffects };

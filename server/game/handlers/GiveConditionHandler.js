@@ -30,6 +30,12 @@ export default class GiveConditionHandler extends BaseHandler {
       const targets = TargetResolver.resolveTargets(gameState, {
         target: payload.target,
         sourceUnit,
+        sourceOwner: payload.sourceOwner || payload.owner,
+        condition: payload.conditionFilter,
+        conditionValue: payload.conditionValue,
+        trait: payload.trait,
+        rank: payload.rank,
+        position: payload.position,
         count: payload.count || 1,
       });
       if (targets.length === 0) return { blocked: true, reason: "no targets" };

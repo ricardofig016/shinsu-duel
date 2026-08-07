@@ -1,5 +1,5 @@
 import GameState from "../GameState.js";
-import { advanceToRound, expectShinsuState, getCardIdByName } from "./utils.js";
+import { advanceToRound, createLegalDeck, expectShinsuState, getCardIdByName } from "./utils.js";
 
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
@@ -175,11 +175,8 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
 describe("deck behavior", () => {
   test("constructor accepts custom decks and draws initial hand from deck (pop semantics)", () => {
     const cardNames = ["Rak Wraithraiser", "Rachel", "Khun Aguero Agnes", "Evankhell"];
-    const aliceDeck = [
-      ...Array.from({ length: 26 }, () => 0),
-      ...cardNames.map((n) => getCardIdByName(n)),
-    ];
-    const bobDeck = Array(30).fill(0);
+    const aliceDeck = createLegalDeck(cardNames.map((name) => getCardIdByName(name)));
+    const bobDeck = createLegalDeck();
 
     const decks = { Alice: aliceDeck, Bob: bobDeck };
     const game = new GameState(ROOM_CODE, USERNAMES, decks);
@@ -188,8 +185,7 @@ describe("deck behavior", () => {
     const aliceClient = game.getClientState("Alice").you;
     expect(aliceClient.hand.length).toBe(GameState.INIT_HAND_SIZE);
 
-    // Because draw uses pop(), Alice's hand should contain the named cards in reverse order
-    // followed by filler cards (26 zeros in deck, 1 poppable zero)
+    // Because draw uses pop(), Alice's hand contains the requested cards in reverse order.
     const aliceHandNames = aliceClient.hand.map((c) => c.name);
     expect(aliceHandNames.slice(0, 4)).toEqual([...cardNames].reverse());
 
@@ -203,7 +199,7 @@ describe("deck behavior", () => {
   });
 
   test("getClientState.deckSize matches internal deck length", () => {
-    const decks = { Alice: Array(30).fill(0), Bob: Array(30).fill(0) };
+    const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
     const game = new GameState(ROOM_CODE, USERNAMES, decks);
 
     const aliceClient = game.getClientState("Alice").you;
@@ -233,7 +229,7 @@ describe("deck behavior", () => {
   });
 
   test("drawing when deck is empty does not crash and does not increase hand", () => {
-    const decks = { Alice: Array(30).fill(0), Bob: Array(30).fill(0) };
+    const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
     const game = new GameState(ROOM_CODE, USERNAMES, decks);
 
     // Simulate Alice's deck becoming empty

@@ -21,16 +21,16 @@ fails. This forces explicit modeling of every trigger type.
 
 ## Trigger AST Types
 
-| `type`             | Canonical pattern                       | Runtime event                         |
-| ------------------ | --------------------------------------- | ------------------------------------- |
-| `equip`            | "i am equipped with X" / "equip with X" | `equipment:attached`                  |
-| `equip` (position) | "Fisherman: equip with X"               | `equipment:attached` + position check |
-| `slay`             | "the bearer Slays a unit"               | `unit:killed`                         |
-| `deploy`           | "when i am deployed"                    | `unit:summoned`                       |
-| `given`            | "when I am given X" / "i consume X"     | `skill:applied`                       |
-| `kill`             | "when i kill a Ranker"                  | `unit:killed`                         |
-| `ally_dies`        | "when an ally dies"                     | `unit:destroyed`                      |
-| `damaged_by`       | "when i am damaged by X"                | `unit:damage:applied`                 |
+| `type`             | Canonical pattern                         | Runtime event                         |
+| ------------------ | ----------------------------------------- | ------------------------------------- |
+| `equip`            | "i am equipped with X" / "equip with X"   | `equipment:attached`                  |
+| `equip` (position) | "Fisherman: equip with X"                 | `equipment:attached` + position check |
+| `slay`             | "the bearer Slays a unit"                 | `unit:killed`                         |
+| `deploy`           | "when i am deployed"                      | `unit:summoned`                       |
+| `given`            | "when I am given X" / "X is played on me" | `skill:applied`                       |
+| `kill`             | "when i kill a Ranker"                    | `unit:killed`                         |
+| `ally_dies`        | "when an ally dies"                       | `unit:destroyed`                      |
+| `damaged_by`       | "when i am damaged by X"                  | `unit:damage:applied`                 |
 
 ### AST Object Shape
 
@@ -75,7 +75,8 @@ Position-scoped variant:
 `TriggerManager` subscribes to EventBus events matching each trigger AST
 type. When the event fires, it checks the payload against the trigger
 conditions (card name matches, position matches, etc.) and if satisfied,
-calls `LifecycleEngine.transformUnit()`.
+calls `LifecycleEngine.transformUnit()` for evolution or
+`LifecycleEngine.transformEquipment()` for ignition.
 
 ### Registration
 

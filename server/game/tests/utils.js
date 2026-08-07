@@ -36,30 +36,31 @@ export function expectShinsuState(playerState, normalSpent, normalAvailable, rec
   expect(playerState.shinsu.recharged).toBe(recharged);
 }
 
-// Helper to create a game with specific cards in hand
-// Accepts card names (strings) for readability
+export function createLegalDeck(preferredCardIds = []) {
+  const eligible = Object.values(cardsData)
+    .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
+    .map((card) => card.cardId);
+  const preferred = [...new Set(preferredCardIds)];
+  const fillers = eligible.filter((id) => !preferred.includes(id));
+  return [...fillers.slice(0, 30 - preferred.length), ...preferred];
+}
+
+// Helper to create a game with specific cards in hand.
+// Deck construction remains legal even when tests request repeated display cards.
 export function setupGameWithCardsInHand(cardsInHand) {
-  // Convert names to card IDs if strings are provided
-  const cardIds = cardsInHand.map((c) =>
-    typeof c === "string" ? getCardIdByName(c) : c
-  );
-
-  const deckCards = Array(26).fill(0);
-  const fullDeck = [...deckCards, ...cardIds];
+  const cardIds = cardsInHand.map((c) => typeof c === "string" ? getCardIdByName(c) : c);
+  const preferred = [...new Set(cardIds)];
+  const base = createLegalDeck(preferred);
+  const requestedInDrawOrder = [...preferred].reverse();
+  const remaining = base.filter((id) => !preferred.includes(id));
   const decks = {
-    Alice: fullDeck,
-    Bob: Array(30).fill(0),
+    Alice: [...remaining, ...requestedInDrawOrder],
+    Bob: createLegalDeck(),
   };
-
-  const newGame = new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
-  return newGame;
+  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
 }
 
 // Helper to create a basic test game
 export function createTestGame() {
-  const decks = {
-    Alice: Array(30).fill(0),
-    Bob: Array(30).fill(0),
-  };
-  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
+  return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0]);
 }

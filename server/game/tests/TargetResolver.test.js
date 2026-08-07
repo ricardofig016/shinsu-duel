@@ -56,4 +56,28 @@ describe("TargetResolver", () => {
     expect(targets.length).toBe(1); // backline now reachable
     expect(targets[0].id).toBe("enemy2");
   });
+
+  test("Taunt requires all targetable taunters before other enemies in a multi-target choice", () => {
+    const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
+    const taunter = { id: "taunter", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const otherEnemy = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    game.modifierStack.has = (id, type, key) => id === "taunter" && type === "trait" && key === "taunt";
+
+    expect(() => TargetResolver.validateTauntSelection(
+      [taunter, otherEnemy], [otherEnemy.id], game, source
+    )).toThrow(/Taunt/);
+    expect(TargetResolver.validateTauntSelection(
+      [taunter, otherEnemy], [taunter.id, otherEnemy.id], game, source
+    )).toBe(true);
+  });
+
+  test("Taunt does not constrain targetable skills without a source unit", () => {
+    const taunter = { id: "taunter", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const otherEnemy = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    game.modifierStack.has = (id, type, key) => id === "taunter" && type === "trait" && key === "taunt";
+
+    expect(TargetResolver.validateTauntSelection(
+      [taunter, otherEnemy], [otherEnemy.id], game, null
+    )).toBe(true);
+  });
 });

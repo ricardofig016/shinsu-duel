@@ -163,9 +163,23 @@ function parseEffectText(raw) {
     return { type: "create_lighthouse", amount: Number(createMatch[1]), raw: sourceText, handler: null };
   }
 
-  const compressMatch = /^compress\s+(\d+)$/i.exec(text);
+  const compressKeywordMatch = /^compress\s+(\d+)$/i.exec(text);
+  if (compressKeywordMatch) {
+    return { type: "compress_shinsu", amount: Number(compressKeywordMatch[1]), raw: sourceText, handler: null };
+  }
+
+  // Canonical form: "Compress <amount> from <selector> in your hand".
+  // The selector is compiled without interpretation so runtime can resolve
+  // exact names, attributes, and future hand-card selectors consistently.
+  const compressMatch = /^compress\s+(\d+)\s+from\s+(.+?)\s+in your hand$/i.exec(text);
   if (compressMatch) {
-    return { type: "compress_shinsu", amount: Number(compressMatch[1]), raw: sourceText, handler: null };
+    return {
+      type: "compress_shinsu",
+      amount: Number(compressMatch[1]),
+      targetCardSelector: compressMatch[2].trim(),
+      raw: sourceText,
+      handler: null,
+    };
   }
 
   const chargeMatch = /^charge\s+(\d+)$/i.exec(text);
@@ -397,10 +411,14 @@ function parseTrigger(raw) {
     return { type: "damaged_by", source: damagedByMatch[1].trim().toLowerCase() };
   }
 
-  // "when I am given X"
+  // "when I am given X" / "X is played on me"
   const givenMatch = /^when i am given (.+)$/i.exec(text);
   if (givenMatch) {
     return { type: "given", item: givenMatch[1].trim() };
+  }
+  const playedOnMeMatch = /^(.+?) is played on me$/i.exec(text);
+  if (playedOnMeMatch) {
+    return { type: "given", item: playedOnMeMatch[1].trim() };
   }
 
   // "round start" 
@@ -444,7 +462,9 @@ function resolveEvolveInto(card, allCards) {
   const expectedName = card.name + " (evolved)";
   const evolvedCard = allCards.find((c) => c.name === expectedName);
 
-  if (!evolvedCard) return null;
+  if (!evolvedCard) {
+    throw new Error(`Evolution target "${expectedName}" for "${card.name}" does not exist or is not a unit.`);
+  }
 
   // Build typed trigger ASTs from evolve list
   const triggers = evolveTriggers
@@ -485,7 +505,9 @@ function resolveIgniteInto(card, allCards) {
   const expectedName = card.name + " (ignited)";
   const ignitedCard = allCards.find((c) => c.name === expectedName);
 
-  if (!ignitedCard) return null;
+  if (!ignitedCard) {
+    throw new Error(`Ignition target "${expectedName}" for "${card.name}" does not exist or is not equipment.`);
+  }
 
   // Build typed trigger ASTs from ignition list
   const triggers = ignitionTriggers

@@ -21,7 +21,7 @@ export default class AnimaEngine {
     if (!unit || !gameState) return;
 
     // Subscribe to round start — create Shinheuh slot
-    const unsub = this._bus.on("game:round:start", () => {
+    const unsub = this._bus.on("round:started", () => {
       this._grantShinheuhSlot(unit.owner, gameState);
     }, { phase: "execute" });
 

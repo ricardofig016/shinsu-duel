@@ -41,9 +41,115 @@
       "light-bearer",
       "wave-controller"
     ],
-    "traits": [],
-    "attributes": [],
-    "affiliations": [],
+    "traits": [
+      {
+        "code": "barrier"
+      },
+      {
+        "code": "bloodthirsty"
+      },
+      {
+        "code": "creator"
+      },
+      {
+        "code": "dealer",
+        "value": 10
+      },
+      {
+        "code": "immune"
+      },
+      {
+        "code": "last-one-standing",
+        "value": 10
+      },
+      {
+        "code": "lethal"
+      },
+      {
+        "code": "pierce",
+        "value": 10
+      },
+      {
+        "code": "reflect",
+        "value": 10
+      },
+      {
+        "code": "regenerate",
+        "value": 10
+      },
+      {
+        "code": "resilient",
+        "value": 10
+      },
+      {
+        "code": "ruthless",
+        "value": 10
+      },
+      {
+        "code": "sharpshooter"
+      },
+      {
+        "code": "strong",
+        "value": 10
+      },
+      {
+        "code": "taunt"
+      },
+      {
+        "code": "vengeful",
+        "value": 10
+      }
+    ],
+    "attributes": [
+      "anima",
+      "silver-dwarf",
+      "red-witch",
+      "hwayeomsa",
+      "jeonsulsa",
+      "irregular",
+      "living-ignition-weapon"
+    ],
+    "affiliations": [
+      "team-aka",
+      "team-baam",
+      "team-bero",
+      "team-chang",
+      "team-fug",
+      "team-khel-hellam",
+      "team-novick",
+      "team-rachel",
+      "team-sachi",
+      "team-ship",
+      "team-sweet-and-sour",
+      "khuns-team",
+      "fug",
+      "hidden-grove",
+      "karakas-servants",
+      "revolution",
+      "wolhaiksong",
+      "zahards-army",
+      "zahards-princesses",
+      "great-warriors",
+      "shining-ones",
+      "arie-family",
+      "khun-family",
+      "ha-family",
+      "tu-perie-family",
+      "eurasia-family",
+      "po-bidau-family",
+      "yeon-family",
+      "ari-family",
+      "lo-po-bia-family",
+      "hendo-lok-family",
+      "blitz-family",
+      "grand-family",
+      "edrok-family",
+      "mule-family",
+      "nissam-family",
+      "canines",
+      "data-humans",
+      "prince-of-the-redlight-district"
+    ],
     "abilities": [],
     "passives": [],
     "deckConstraints": []
@@ -371,8 +477,10 @@
         "handler": null
       },
       {
-        "type": "custom",
-        "raw": "Compress 1 Hwayeomsa in your hand",
+        "type": "compress_shinsu",
+        "amount": 1,
+        "targetCardSelector": "a Hwayeomsa",
+        "raw": "Compress 1 from a Hwayeomsa in your hand",
         "handler": null
       }
     ],
@@ -1297,7 +1405,7 @@
         {
           "type": "given",
           "item": "Redan",
-          "raw": "i consume Redan"
+          "raw": "Redan is played on me"
         }
       ],
       "cardId": 39
@@ -1433,6 +1541,35 @@
   },
   "42": {
     "cardId": 42,
+    "type": "unit",
+    "name": "Name Hunt Station",
+    "cost": 4,
+    "hp": 8,
+    "positions": [
+      "landmark"
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": [
+      {
+        "type": "custom",
+        "raw": "deploy: chose a position",
+        "handler": null,
+        "position": null
+      },
+      {
+        "type": "custom",
+        "raw": "all units in <position> cannot evolve, have Rooted, and cannot be equipped",
+        "handler": null,
+        "position": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "43": {
+    "cardId": 43,
     "type": "equipment",
     "name": "Narumada",
     "cost": 2,
@@ -1452,11 +1589,11 @@
           "raw": "the bearer Slays a unit"
         }
       ],
-      "cardId": 43
+      "cardId": 44
     }
   },
-  "43": {
-    "cardId": 43,
+  "44": {
+    "cardId": 44,
     "type": "equipment",
     "name": "Narumada (ignited)",
     "cost": 2,
@@ -1468,10 +1605,10 @@
       }
     ],
     "deckConstraints": [],
-    "ignitedFrom": 42
+    "ignitedFrom": 43
   },
-  "44": {
-    "cardId": 44,
+  "45": {
+    "cardId": 45,
     "type": "unit",
     "name": "Pedro",
     "cost": 3,
@@ -1508,8 +1645,8 @@
     ],
     "deckConstraints": []
   },
-  "45": {
-    "cardId": 45,
+  "46": {
+    "cardId": 46,
     "type": "equipment",
     "name": "Purple Dementor",
     "cost": 3,
@@ -1542,8 +1679,8 @@
     ],
     "deckConstraints": []
   },
-  "46": {
-    "cardId": 46,
+  "47": {
+    "cardId": 47,
     "type": "unit",
     "name": "Quaetro Blitz",
     "cost": 2,
@@ -1590,8 +1727,8 @@
     ],
     "deckConstraints": []
   },
-  "47": {
-    "cardId": 47,
+  "48": {
+    "cardId": 48,
     "type": "unit",
     "name": "Rachel",
     "cost": 1,
@@ -1635,8 +1772,8 @@
     "passives": [],
     "deckConstraints": []
   },
-  "48": {
-    "cardId": 48,
+  "49": {
+    "cardId": 49,
     "type": "unit",
     "name": "Rak Wraithraiser",
     "cost": 2,
@@ -1671,8 +1808,8 @@
     "passives": [],
     "deckConstraints": []
   },
-  "49": {
-    "cardId": 49,
+  "50": {
+    "cardId": 50,
     "type": "equipment",
     "name": "Red Thryssa",
     "cost": 3,
@@ -1693,8 +1830,8 @@
     ],
     "deckConstraints": []
   },
-  "50": {
-    "cardId": 50,
+  "51": {
+    "cardId": 51,
     "type": "skill",
     "name": "Redan",
     "cost": 1,
@@ -1710,8 +1847,8 @@
     ],
     "deckConstraints": []
   },
-  "51": {
-    "cardId": 51,
+  "52": {
+    "cardId": 52,
     "type": "equipment",
     "name": "Second Thorn Fragment",
     "cost": 1,
@@ -1744,8 +1881,8 @@
       }
     ]
   },
-  "52": {
-    "cardId": 52,
+  "53": {
+    "cardId": 53,
     "type": "skill",
     "name": "Shinwonryu",
     "cost": 4,
@@ -1770,8 +1907,8 @@
       }
     ]
   },
-  "53": {
-    "cardId": 53,
+  "54": {
+    "cardId": 54,
     "type": "equipment",
     "name": "Steel Tree",
     "cost": 3,
@@ -1787,8 +1924,49 @@
     ],
     "deckConstraints": []
   },
-  "54": {
-    "cardId": 54,
+  "55": {
+    "cardId": 55,
+    "type": "unit",
+    "name": "Stone Doll",
+    "cost": 0,
+    "hp": 20,
+    "positions": [
+      "frontline-shinheuh"
+    ],
+    "traits": [
+      {
+        "code": "taunt"
+      }
+    ],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [
+      {
+        "type": "custom",
+        "raw": "Free: Spend 1: deal 1 to an enemy",
+        "handler": null,
+        "quick": false,
+        "position": null
+      }
+    ],
+    "passives": [
+      {
+        "type": "custom",
+        "raw": "Unreachable",
+        "handler": null,
+        "position": null
+      },
+      {
+        "type": "custom",
+        "raw": "Spear bearers deal +4 damage to me",
+        "handler": null,
+        "position": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "56": {
+    "cardId": 56,
     "type": "skill",
     "name": "Submerged Fish",
     "cost": 4,
@@ -1801,8 +1979,8 @@
     ],
     "deckConstraints": []
   },
-  "55": {
-    "cardId": 55,
+  "57": {
+    "cardId": 57,
     "type": "unit",
     "name": "Sunwoo Nare",
     "cost": 2,
@@ -1839,8 +2017,37 @@
     ],
     "deckConstraints": []
   },
-  "56": {
-    "cardId": 56,
+  "58": {
+    "cardId": 58,
+    "type": "unit",
+    "name": "The Hand Of Arlen",
+    "cost": 2,
+    "hp": 6,
+    "positions": [
+      "landmark"
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": [
+      {
+        "type": "custom",
+        "raw": "when an ability with Free is played, the unit destroys 5 of their own lighthouses",
+        "handler": null,
+        "position": null
+      },
+      {
+        "type": "custom",
+        "raw": "when i die, summon Stone Doll on both players' fields",
+        "handler": null,
+        "position": null
+      }
+    ],
+    "deckConstraints": []
+  },
+  "59": {
+    "cardId": 59,
     "type": "skill",
     "name": "The Workshop",
     "cost": 3,
@@ -1862,7 +2069,9 @@
         "handler": null
       },
       {
-        "type": "custom",
+        "type": "compress_shinsu",
+        "amount": 1,
+        "targetCardSelector": "the most expensive card",
         "raw": "Compress 1 from the most expensive card in your hand",
         "handler": null
       },
@@ -1880,8 +2089,8 @@
     ],
     "deckConstraints": []
   },
-  "57": {
-    "cardId": 57,
+  "60": {
+    "cardId": 60,
     "type": "equipment",
     "name": "Third Thorn Fragment",
     "cost": 1,
@@ -1914,8 +2123,8 @@
       }
     ]
   },
-  "58": {
-    "cardId": 58,
+  "61": {
+    "cardId": 61,
     "type": "unit",
     "name": "Twenty-Fifth Baam",
     "cost": 5,
@@ -1952,12 +2161,12 @@
           "raw": "i am equipped with Enryu's Thorn"
         }
       ],
-      "cardId": 59
+      "cardId": 62
     },
     "deckConstraints": []
   },
-  "59": {
-    "cardId": 59,
+  "62": {
+    "cardId": 62,
     "type": "unit",
     "name": "Twenty-Fifth Baam (evolved)",
     "cost": 5,
@@ -1996,11 +2205,11 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 58,
+    "evolvedFrom": 61,
     "deckConstraints": []
   },
-  "60": {
-    "cardId": 60,
+  "63": {
+    "cardId": 63,
     "type": "unit",
     "name": "Urek Mazino",
     "cost": 8,
@@ -2061,8 +2270,8 @@
     ],
     "deckConstraints": []
   },
-  "61": {
-    "cardId": 61,
+  "64": {
+    "cardId": 64,
     "type": "unit",
     "name": "Water Stadium",
     "cost": 2,
@@ -2084,8 +2293,8 @@
     ],
     "deckConstraints": []
   },
-  "62": {
-    "cardId": 62,
+  "65": {
+    "cardId": 65,
     "type": "skill",
     "name": "Weights",
     "cost": 1,
@@ -2101,8 +2310,8 @@
     ],
     "deckConstraints": []
   },
-  "63": {
-    "cardId": 63,
+  "66": {
+    "cardId": 66,
     "type": "unit",
     "name": "Wooden Horse",
     "cost": 2,
@@ -2124,8 +2333,8 @@
     ],
     "deckConstraints": []
   },
-  "64": {
-    "cardId": 64,
+  "67": {
+    "cardId": 67,
     "type": "equipment",
     "name": "Woon's Hammer",
     "cost": 2,
@@ -2141,8 +2350,8 @@
     ],
     "deckConstraints": []
   },
-  "65": {
-    "cardId": 65,
+  "68": {
+    "cardId": 68,
     "type": "unit",
     "name": "Yeo Goseng",
     "cost": 1,
@@ -2179,8 +2388,8 @@
     ],
     "deckConstraints": []
   },
-  "66": {
-    "cardId": 66,
+  "69": {
+    "cardId": 69,
     "type": "unit",
     "name": "Yeo Miseng",
     "cost": 2,
@@ -2219,8 +2428,8 @@
     ],
     "deckConstraints": []
   },
-  "67": {
-    "cardId": 67,
+  "70": {
+    "cardId": 70,
     "type": "unit",
     "name": "Yeon Woon",
     "cost": 5,
@@ -2269,8 +2478,8 @@
     ],
     "deckConstraints": []
   },
-  "68": {
-    "cardId": 68,
+  "71": {
+    "cardId": 71,
     "type": "unit",
     "name": "Yeon Yihwa",
     "cost": 5,
@@ -2307,8 +2516,8 @@
     ],
     "deckConstraints": []
   },
-  "69": {
-    "cardId": 69,
+  "72": {
+    "cardId": 72,
     "type": "unit",
     "name": "Yu Han Sung",
     "cost": 6,
@@ -2331,8 +2540,10 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "Compress Submerged Fish in your hand 1",
+        "type": "compress_shinsu",
+        "amount": 1,
+        "targetCardSelector": "Submerged Fish",
+        "raw": "Compress 1 from Submerged Fish in your hand",
         "handler": null,
         "quick": false,
         "position": null
@@ -2355,8 +2566,8 @@
     ],
     "deckConstraints": []
   },
-  "70": {
-    "cardId": 70,
+  "73": {
+    "cardId": 73,
     "type": "unit",
     "name": "Yuga",
     "cost": 4,

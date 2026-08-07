@@ -70,18 +70,45 @@ export default class GameState {
     this.currentTurn = firstPlayer || this.usernames[0];
     this.roundEndOnTurnEnd = false;
     this.gameOver = null; // { winner, reason }
+    this.pendingDecision = null;
+    this._nextDecisionId = 1;
 
     // initialize game state
     this.playerStates = {
       [this.usernames[0]]: this.#initializePlayerState(this.usernames[0], decks[this.usernames[0]]),
       [this.usernames[1]]: this.#initializePlayerState(this.usernames[1], decks[this.usernames[1]]),
     };
-    this.#draw(this.usernames, GameState.INIT_HAND_SIZE);
+    for (const username of this.usernames) {
+      ZoneService.draw(this.playerStates[username], GameState.INIT_HAND_SIZE, this);
+    }
     this.#resetShinsu(this.usernames);
 
     // Wire Barrier reset and condition cleanup lifecycle events
+    this.eventBus.on(EVT.GAME_DECK_EMPTY, ({ username, owner }) => {
+      const loser = username || owner;
+      if (!loser || this.gameOver) return;
+      this.gameOver = {
+        winner: this.#getOpponentUsername(loser),
+        reason: "deck exhausted",
+      };
+      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
+    }, { phase: "execute" });
+
+    this.eventBus.on(EVT.GAME_LIGHTHOUSES_DEPLETED, ({ owner, loser }) => {
+      const defeatedPlayer = owner || loser;
+      if (!defeatedPlayer || this.gameOver) return;
+      this.gameOver = {
+        winner: this.#getOpponentUsername(defeatedPlayer),
+        reason: "lighthouses depleted",
+      };
+      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
+    }, { phase: "execute" });
+
     this.eventBus.on(EVT.ROUND_START, () => {
       this._barrierUsedThisRound.clear();
+      for (const username of this.usernames) {
+        this.#resetCombatSlots(username);
+      }
     }, { phase: "execute" });
 
     this.eventBus.on(EVT.ROUND_END, () => {
@@ -95,10 +122,8 @@ export default class GameState {
             (m) => m.targetId === unit.id && m.type === "condition"
           );
         }
-        // Reset Anima Shinheuh slot
+        // Reset Anima Shinheuh slot; combat slots reset at round start.
         AnimaEngine.resetSlot(username, this);
-        // Reset combat slots
-        this.#resetCombatSlots(username);
       }
     }, { phase: "execute" });
 
@@ -133,7 +158,6 @@ export default class GameState {
       hand: [],
       shinsu: {},
       shinheuhSlot: { available: false, used: false },
-      compressAmount: 0,
       fireCharges: 0,
       username: username,
     };
@@ -165,9 +189,17 @@ export default class GameState {
       throw new Error(`deck must be an array of ${GameState.INIT_DECK_SIZE} cardIds.`);
 
     const deck = [];
+    const seenCardIds = new Set();
     cardIds.forEach((cardId) => {
+      if (seenCardIds.has(cardId)) {
+        throw new Error(`Card with cardId ${cardId} appears more than once; decks cannot contain repeated cards.`);
+      }
+      seenCardIds.add(cardId);
       const cardData = GameState.cards[cardId];
       if (cardData === undefined) throw new Error(`Card with cardId ${cardId} does not exist`);
+      if ((cardData.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) {
+        throw new Error(`Card "${cardData.name}" is unreachable and cannot be included in a deck.`);
+      }
       deck.push(new Card(cardId, cardData, username, this.eventBus));
     });
     return deck;
@@ -178,16 +210,15 @@ export default class GameState {
    * @returns {Array<number>} Array of cardIds
    */
   #generateRandomDeckOfCardIds() {
-    const deck = Array.from({ length: GameState.INIT_DECK_SIZE }, () => {
-      // return 2; // for testing purposes, use only cardId 2 (khun)
-      return this.#getRandomCardId();
-    });
-    return deck;
-  }
+    const eligible = Object.values(GameState.cards)
+      .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
+      .map((card) => card.cardId);
+    if (eligible.length < GameState.INIT_DECK_SIZE) {
+      throw new Error("Not enough eligible cards to generate a legal deck.");
+    }
 
-  #getRandomCardId() {
-    const maxCardId = Object.keys(GameState.cards).length - 1;
-    return Math.floor(Math.random() * (maxCardId + 1));
+    // Deterministic default deck; caller-provided decks define actual gameplay setup.
+    return eligible.slice(0, GameState.INIT_DECK_SIZE);
   }
 
   #draw(usernames, amount) {
@@ -226,18 +257,30 @@ export default class GameState {
       discardSize: playerState.discard?.length ?? 0,
       lighthouses: playerState.lighthouses,
       shinheuhSlot: playerState.shinheuhSlot ? { ...playerState.shinheuhSlot } : null,
-      compressAmount: playerState.compressAmount ?? 0,
       fireCharges: playerState.fireCharges ?? 0,
+      pendingDecision: this.pendingDecision && this.pendingDecision.owner === username
+        ? {
+            decisionId: this.pendingDecision.decisionId,
+            type: this.pendingDecision.type,
+            candidates: this.pendingDecision.candidates,
+            minChoices: this.pendingDecision.minChoices,
+            maxChoices: this.pendingDecision.maxChoices,
+          }
+        : null,
       field: {
         frontline: playerState.field.frontline.map((unit) => ({
           ...unit.toSanitizedObject(),
-          equipment: unit.equipment?.name || null,
+          equipment: Array.isArray(unit.equipment)
+            ? unit.equipment.map((card) => card.name)
+            : unit.equipment?.name || null,
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
         })),
         backline: playerState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
-          equipment: unit.equipment?.name || null,
+          equipment: Array.isArray(unit.equipment)
+            ? unit.equipment.map((card) => card.name)
+            : unit.equipment?.name || null,
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
         })),
@@ -302,10 +345,6 @@ export default class GameState {
   }
 
   endTurn(isPassAction = false) {
-    // Clear compress amount at turn end
-    const player = this.playerStates[this.currentTurn];
-    if (player) player.compressAmount = 0;
-
     this.eventBus.emit(EVT.TURN_END, {
       username: this.currentTurn,
       round: this.round,
@@ -382,6 +421,11 @@ export default class GameState {
   }
 
   processAction(action) {
+    if (this.gameOver) throw new Error("The game is over.");
+    if (this.pendingDecision) {
+      throw new Error("A player decision must be resolved before another action.");
+    }
+
     const { type, data } = action;
     const handler = this.actionRegistry[type];
     if (!handler)
@@ -391,6 +435,33 @@ export default class GameState {
 
     handler.validate(data, this);
     handler.execute(data, this);
+  }
+
+  /**
+   * End a player action now, or defer it until an active decision has resolved.
+   * Actions that produce a choice must not advance the turn before that choice
+   * has changed the authoritative state.
+   */
+  completeActionAfterDecision(completion) {
+    if (this.pendingDecision) {
+      this.appendPendingDecisionContinuation(completion);
+      return { pending: true };
+    }
+    completion();
+    return { pending: false };
+  }
+
+  /** Add FIFO work that must run after the current decision resolves. */
+  appendPendingDecisionContinuation(continuation) {
+    if (!this.pendingDecision) {
+      continuation();
+      return;
+    }
+    const previous = this.pendingDecision.onResolved;
+    this.pendingDecision.onResolved = () => {
+      previous?.();
+      continuation();
+    };
   }
 
   /**
@@ -424,7 +495,6 @@ export default class GameState {
         discardSize: p.discard?.length ?? 0,
         combatSlots: { ...p.combatSlots },
         shinheuhSlot: p.shinheuhSlot ? { ...p.shinheuhSlot } : null,
-        compressAmount: p.compressAmount ?? 0,
         fireCharges: p.fireCharges ?? 0,
         frontline: p.field?.frontline?.map((u) => ({
           id: u.id,
@@ -464,16 +534,58 @@ export default class GameState {
     return player.lighthouses.amount;
   }
 
-  // Pending-decision protocol
-  /**
-   * @param {{ decisionId: string, type: string, choices: any[] }} decision
-   */
-  resolveDecision(decision) {
-    // Placeholder — Phase 3+ will implement full decision resolution
-    // For now, just validate the decision exists
-    if (!decision || !decision.decisionId) {
-      throw new Error("Invalid decision payload");
+  /** Create and publish the single authoritative pending decision. */
+  createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve }) {
+    if (this.pendingDecision) throw new Error("A player decision is already pending.");
+    if (!this.usernames.includes(owner)) throw new Error("Decision owner must be a game player.");
+    if (!Array.isArray(candidates) || candidates.length < minChoices) {
+      throw new Error("Not enough valid candidates for the requested decision.");
     }
-    // Future: look up pending decision by ID, validate choices, resume event chain
+
+    const decision = {
+      decisionId: `decision#${this._nextDecisionId++}`,
+      owner,
+      type,
+      candidates: candidates.map(({ id, name, hp }) => ({ id, name, hp })),
+      minChoices,
+      maxChoices,
+      resolve,
+      onResolved: null,
+    };
+    this.pendingDecision = decision;
+    this.eventBus.emit("pending-decision", {
+      decisionId: decision.decisionId,
+      owner,
+      type,
+      candidates: decision.candidates,
+      minChoices,
+      maxChoices,
+    });
+    return decision.decisionId;
+  }
+
+  /** Resolve the currently pending, server-validated player decision. */
+  resolveDecision({ decisionId, choices, username } = {}) {
+    const pending = this.pendingDecision;
+    if (!pending) throw new Error("There is no pending decision.");
+    if (username && username !== pending.owner) throw new Error("Only the decision owner may resolve it.");
+    if (decisionId !== pending.decisionId) throw new Error("Decision ID does not match the pending decision.");
+    if (!Array.isArray(choices)) throw new Error("Decision choices must be an array.");
+    if (choices.length < pending.minChoices || choices.length > pending.maxChoices) {
+      throw new Error("Invalid number of selected choices.");
+    }
+    if (new Set(choices).size !== choices.length) throw new Error("Decision choices must be unique.");
+
+    const candidateIds = new Set(pending.candidates.map((candidate) => candidate.id));
+    if (choices.some((choice) => !candidateIds.has(choice))) {
+      throw new Error("Decision contains an invalid candidate.");
+    }
+
+    // Resolve the selected state first, then clear this decision before running
+    // continuations so a later effect may legitimately create its own choice.
+    pending.resolve?.(choices);
+    this.pendingDecision = null;
+    pending.onResolved?.();
+    this.eventBus.emit("decision:resolved", { decisionId, owner: pending.owner, type: pending.type, choices });
   }
 }

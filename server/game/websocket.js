@@ -70,7 +70,7 @@ export function initializeGameWebSocket(io) {
       const game = activeGames.get(roomCode);
       if (!game) return;
       try {
-        game.resolveDecision(decision);
+        game.resolveDecision({ ...decision, username });
         broadcast(io, roomCode, "game-update", (playerSocket) =>
           game.getClientState(playerSocket.request.session.username)
         );
