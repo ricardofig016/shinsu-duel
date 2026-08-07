@@ -1,0 +1,15 @@
+type: unit
+name: Name Hunt Station
+cost: 4
+hp: 8
+rank: 
+positions:
+  - landmark
+passives:
+  - "deploy: chose a position"
+  - all units in <position> cannot evolve, have Rooted, and cannot be equipped
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:
