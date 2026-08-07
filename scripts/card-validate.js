@@ -382,6 +382,12 @@ function validateUnit(card) {
     addError(errors, "abilities", "must be an array");
   }
 
+  const abilities = ensureArray(card.abilities);
+  const isLandmark = positions.some((p) => p.toLowerCase() === "landmark");
+  if (isLandmark && abilities.length > 0) {
+    addError(errors, "abilities", "landmark units cannot have abilities");
+  }
+
   const evolve = ensureArray(card.evolve);
   validateEvolve(evolve, errors);
 
