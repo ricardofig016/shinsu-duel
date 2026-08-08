@@ -22,7 +22,7 @@
 ### Phase 2: Missing Handler Implementations _(parallel)_
 
 - `ChargeShinsuHandler` — add shinsu to normal pool (capped at round max)
-- `CompressShinsuHandler` — reduce next card cost, clears at turn end
+- `CompressShinsuHandler` — reduce card cost
 - `ReclaimCardsHandler` — move cards from discard to hand
 - `GrantAbilityHandler` — register inner ability as active on bearer, cleanup on source removal
 

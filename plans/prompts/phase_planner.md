@@ -6,8 +6,6 @@ all phases up until this phase are completely implemented. carefully analyse eve
 
 maximize and thrive for excelent, enterprise-level design and architecture, code cleanliness, maintainability, extensibility, and scalability. identify exactly what is the porpuse of this phase, how it ties together with the previous and following phases, and its role in the overall project and project resurrection. identify all the gaps, pitfalls, and features that need to be addressed in this phase. provide clear acceptance criteria for each task and subtask. ensure that the plan aligns with the overall project resurrection goals and objectives. the most important thing here that i need you to constantly keep in mind while planning out this phase is that we need to expect that the most unique and complex cards with the most unique and complex interactions will be added to the game in the future, and this phase needs to be designed to handle everything that any hypothetical game mechanic can throw at it. don't be too afraid to overengineer the architecture in the persuit of perfection.
 
-take some time at the end of your reasoning to actually brainstorm the most absurd and complex interactions you can think of, and analyse how your architecture and design would handle them.
-
 make sure that the implemented components are well encorporated into the existing project, and not just thrown in as an independent module. the implementation should feel like it fits in with the previous phases.
 
 every component should be thoroughly tested and every major architecture component should be documented in docs/ in the style, structure, format, and vibe of the existing docs there.
