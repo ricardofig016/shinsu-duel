@@ -1074,7 +1074,7 @@
     "abilities": [
       {
         "type": "custom",
-        "raw": "deal 1 for each trait i have to an enemy",
+        "raw": "Silence an enemy that has at least one passive",
         "handler": null,
         "quick": false,
         "position": null
@@ -1753,7 +1753,7 @@
     "abilities": [
       {
         "type": "custom",
-        "raw": "kill an ally to Create 3",
+        "raw": "kill an ally to Create 3 and give me a random numeric trait",
         "handler": null,
         "quick": false,
         "position": null
