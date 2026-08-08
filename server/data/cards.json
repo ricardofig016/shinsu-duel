@@ -712,7 +712,7 @@
         "type": "heal",
         "amount": 5,
         "target": "ally",
-        "raw": "heal an ally 5 hp",
+        "raw": "heal an ally 5 HP",
         "handler": null
       }
     ],

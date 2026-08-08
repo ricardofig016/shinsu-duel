@@ -3,4 +3,4 @@ name: Healing Potion
 cost: 2
 requirements:
 effects:
-  - heal an ally 5 hp
+  - heal an ally 5 HP
