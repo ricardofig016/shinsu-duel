@@ -16,6 +16,34 @@ export default class UseAbilityAction extends ActionHandler {
   };
   static sourceAccess = { player: true, system: false };
 
+  /**
+   * Resolve an abilityCode into its DSL and provenance.
+   *
+   * Native abilities are addressed by numeric index into `card.abilities`
+   * (unchanged, backward compatible). Abilities granted at runtime (e.g. by
+   * equipment via `grant_ability`) are addressed as `granted:<modifierId>`
+   * and read back from the ModifierStack, so unequipping automatically
+   * revokes access to them.
+   */
+  static resolveAbility(gameState, unit, abilityCode) {
+    if (typeof abilityCode === "string" && abilityCode.startsWith("granted:")) {
+      const modifierId = abilityCode.slice("granted:".length);
+      const modifier = gameState.modifierStack.getModifiers(unit.id, "ability")
+        .find((mod) => mod.id === modifierId && mod.enabled);
+      if (!modifier) return null;
+      try {
+        return { ability: JSON.parse(modifier.value), sourceType: modifier.sourceType, sourceId: modifier.sourceId };
+      } catch {
+        return null;
+      }
+    }
+
+    const abilityIndex = Number(abilityCode);
+    const ability = unit.card.abilities?.[abilityIndex];
+    if (!Number.isInteger(abilityIndex) || !ability) return null;
+    return { ability, sourceType: "unit", sourceId: unit.id };
+  }
+
   validate(data, gameState) {
     super.validate(data);
     const { username, unitId, abilityCode } = data;
@@ -27,9 +55,9 @@ export default class UseAbilityAction extends ActionHandler {
     const unit = [...playerState.field.frontline, ...playerState.field.backline].find((u) => u.id === unitId);
     if (!unit) throw new Error(`Unit ${unitId} not found in your field.`);
 
-    const abilityIndex = Number(abilityCode);
-    const ability = unit.card.abilities?.[abilityIndex];
-    if (!Number.isInteger(abilityIndex) || !ability) throw new Error("Invalid abilityCode.");
+    const resolved = UseAbilityAction.resolveAbility(gameState, unit, abilityCode);
+    if (!resolved) throw new Error("Invalid abilityCode.");
+    const { ability } = resolved;
     if (ability.position && ability.position !== unit.placedPositionCode) {
       throw new Error(`Ability requires the ${ability.position} position.`);
     }
@@ -57,7 +85,7 @@ export default class UseAbilityAction extends ActionHandler {
     const { username, unitId, abilityCode } = data;
     const playerState = gameState.playerStates[username];
     const unit = gameState._findUnit(unitId);
-    const ability = unit.card.abilities[Number(abilityCode)];
+    const { ability } = UseAbilityAction.resolveAbility(gameState, unit, abilityCode);
 
     const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
     if (isShinheuh) {
@@ -79,7 +107,7 @@ export default class UseAbilityAction extends ActionHandler {
       targetOwner: gameState.usernames.find((candidate) => candidate !== username),
     });
     gameState.completeActionAfterDecision(() => {
-      gameState.eventBus.emit("unit:ability:used", { username, unitId, abilityCode: Number(abilityCode) });
+      gameState.eventBus.emit("unit:ability:used", { username, unitId, abilityCode });
       if (poison > 0 && unit.isAlive()) {
         const poisonContext = { emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload) };
         resolveEffect({ type: "deal_damage", amount: poison, targetId: unit.id, raw: "Poisoned", handler: null }, poisonContext, gameState, {

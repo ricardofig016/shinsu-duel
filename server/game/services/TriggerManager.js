@@ -161,7 +161,7 @@ export default class TriggerManager {
       if (payload.unitId !== unitId) return;
 
       // Transform!
-      this._executeTransform(unitId, targetCardId, transformType, gameState, trigger);
+      this._executeTransform(unitId, targetCardId, transformType, gameState, equipmentId);
     };
 
     const unsub = this._bus.on("equipment:attached", handler, { phase: "post" });
@@ -177,7 +177,7 @@ export default class TriggerManager {
 
       // The unit killed a unit (via Slay keyword or damage)
       if (payload.sourceId === unitId || payload.slayerId === unitId) {
-        this._executeTransform(unitId, targetCardId, transformType, gameState, trigger);
+        this._executeTransform(unitId, targetCardId, transformType, gameState, equipmentId);
       }
     };
 
@@ -192,7 +192,7 @@ export default class TriggerManager {
     const handler = (payload) => {
       if (payload.targetId !== unitId) return;
       if (!itemName || payload.cardName === itemName || payload.effectName === itemName) {
-        this._executeTransform(unitId, targetCardId, transformType, gameState, trigger);
+        this._executeTransform(unitId, targetCardId, transformType, gameState, equipmentId);
       }
     };
 

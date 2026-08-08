@@ -1227,10 +1227,13 @@
         "position": null
       },
       {
-        "type": "custom",
+        "type": "deal_damage",
+        "amount": 3,
+        "target": "all_enemies",
+        "condition": "rooted",
         "raw": "round end: deal 3 to all Rooted enemies",
         "handler": null,
-        "position": null
+        "trigger": "round end"
       }
     ],
     "evolvedFrom": 33,

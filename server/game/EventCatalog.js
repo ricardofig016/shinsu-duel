@@ -42,6 +42,7 @@ const EVT = {
   SHINSU_SPENT:     "shinsu:spent",
   SHINSU_CHANGED:   "state:shinsu:changed",
   TRAIT_GRANTED:    "state:trait:granted",
+  EFFECT_UNSUPPORTED: "effect:unsupported",
 
   // ── Equipment ─────────────────────────────────────────────────────────────
   EQUIPMENT_ATTACHED: "equipment:attached",

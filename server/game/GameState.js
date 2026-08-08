@@ -2,6 +2,7 @@ import ShinsuService from "./services/ShinsuService.js";
 import ZoneService from "./services/ZoneService.js";
 import LifecycleEngine from "./services/LifecycleEngine.js";
 import TriggerManager from "./services/TriggerManager.js";
+import PassiveManager from "./services/PassiveManager.js";
 import AttributeRegistry from "./attributes/AttributeRegistry.js";
 import AnimaEngine from "./attributes/AnimaEngine.js";
 import HwayeomsaEngine from "./attributes/HwayeomsaEngine.js";
@@ -52,8 +53,9 @@ export default class GameState {
       snapshotFn: () => this._createSnapshot(),
     });
 
-    // Trigger Manager
+    // Trigger and passive managers own event subscriptions for field units.
     this._triggerManager = new TriggerManager(this.eventBus);
+    this._passiveManager = new PassiveManager(this.eventBus);
 
     // Attribute Registry
     this._attributeRegistry = new AttributeRegistry();
@@ -275,6 +277,7 @@ export default class GameState {
             : unit.equipment?.name || null,
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+          grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
         backline: playerState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
@@ -283,6 +286,7 @@ export default class GameState {
             : unit.equipment?.name || null,
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+          grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
       },
       hand: playerState.hand.map((card) => card.toSanitizedObject()),
@@ -293,6 +297,24 @@ export default class GameState {
         text: passButtonText,
       },
     };
+  }
+
+  /**
+   * Project a unit's runtime-granted abilities (e.g. from equipment via
+   * `grant_ability`) into client-addressable `abilityCode`s. Each code is
+   * `granted:<modifierId>` and resolves back through UseAbilityAction.
+   */
+  #getGrantedAbilities(unitId) {
+    return this.modifierStack.getModifiers(unitId, "ability")
+      .filter((mod) => mod.enabled)
+      .map((mod) => {
+        try {
+          return { abilityCode: `granted:${mod.id}`, ability: JSON.parse(mod.value), sourceId: mod.sourceId };
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
   }
 
   #getOpponentUsername(username) {

@@ -87,13 +87,20 @@ triggerManager.registerTransformation(
   targetCardId, // card to transform into
   "evolution", // or "ignition"
   gameState,
+  equipmentId, // ignition only — which attached card instance this trigger belongs to
 );
 ```
+
+**`equipmentId` disambiguates ignition triggers when a bearer holds more
+than one equipment card (Irregular units).** Without it, killing a unit
+while holding two ignitable equipments would be ambiguous about which one
+ignites. It's `null` for evolution, which always targets the unit itself.
 
 ### Subscription cleanup
 
 When a unit transforms or is destroyed, all its trigger subscriptions
-are removed via `unregisterAll(unitId)`.
+are removed via `unregisterAll(unitId)`. Detaching a single equipment card
+removes only that card's subscriptions via `unregisterAll(unitId, "ignition", equipmentId)`.
 
 ---
 

@@ -142,6 +142,8 @@ export default class LifecycleEngine {
       );
     }
 
+    gameState._passiveManager?.registerUnit(unit, gameState);
+
     // Wire attribute engines
     if (gameState._attributeRegistry) {
       gameState._attributeRegistry.onUnitDeployed(unit, gameState);
@@ -189,6 +191,7 @@ export default class LifecycleEngine {
     }
 
     gameState._triggerManager?.unregisterAll(unit.id);
+    gameState._passiveManager?.unregisterUnit(unit.id);
     gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
 
     // Emit destroyed event (ModifierStack auto-cleans via listener)
@@ -248,6 +251,11 @@ export default class LifecycleEngine {
         );
       }
     }
+
+    // Passives are tied to the card definition, so replacing it must replace
+    // its event subscriptions while preserving the unit identity.
+    gameState._passiveManager?.unregisterUnit(unit.id);
+    gameState._passiveManager?.registerUnit(unit, gameState);
 
     // Emit transformation event
     gameState.eventBus.emit("unit:evolved", {

@@ -200,7 +200,7 @@ function resolveEffect(effect, context, gameState) {
 }
 ```
 
-### `grant_ability` (2 occurrences)
+### `grant_ability`
 
 ```json
 {
@@ -217,9 +217,13 @@ function resolveEffect(effect, context, gameState) {
 ```
 
 The inner `ability` is a full DSL object with its own `type`, `amount`,
-`target` etc. It must be treated as a fully-resolvable ability — the
-`GrantAbilityHandler` should register it as an event handler on
-`unit:ability:use` for the bearer, not execute it immediately.
+`target` etc. `GrantAbilityHandler` registers it on the bearer via
+`ModifierStack` (`type: "ability"`) instead of executing it immediately.
+
+The bearer's player can then use it through `UseAbilityAction`, addressed
+as `granted:<modifierId>` instead of a numeric ability index. Unequipping
+the source removes the modifier, which makes the ability unusable again —
+no separate cleanup path is needed.
 
 ---
 

@@ -4,6 +4,7 @@
 
 - [ ] frontend: change board background to something from the webtoon
 - [ ] data: rename all ` (evolved)`/` (ignited)` to ` - Evolved`/` - Ignited`
+- [ ] generic: irregular attribute is being confused with living ignition weapon
 
 ## In Progress
 

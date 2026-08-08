@@ -10,13 +10,14 @@ This document describes the GameState architecture: zone model, service layer, l
 services and owns the complete game state tree. No handler, action, or
 engine mutates state directly — all mutations go through services.
 
-| Service               | Responsibility                                     |
-| --------------------- | -------------------------------------------------- |
-| **ShinsuService**     | Shinsu pool math: reset, spend, gain, total        |
-| **ZoneService**       | Card movement: draw, discard, add/remove from hand |
-| **LifecycleEngine**   | Unit lifecycle: deploy, destroy, transform, equip  |
-| **TriggerManager**    | Evolution/ignition: AST→event subscriptions        |
-| **AttributeRegistry** | Pluggable attribute engines (Anima, Hwayeomsa)     |
+| Service               | Responsibility                                            |
+| --------------------- | --------------------------------------------------------- |
+| **ShinsuService**     | Shinsu pool math: reset, spend, gain, total               |
+| **ZoneService**       | Card movement: draw, discard, add/remove from hand        |
+| **LifecycleEngine**   | Unit lifecycle: deploy, destroy, transform, equip         |
+| **TriggerManager**    | Evolution/ignition: AST→event subscriptions               |
+| **PassiveManager**    | Timed passives (round start/end): DSL→event subscriptions |
+| **AttributeRegistry** | Pluggable attribute engines (Anima, Hwayeomsa)            |
 
 ---
 
@@ -63,6 +64,30 @@ Each player state has typed zones:
 
 ---
 
+## Pending Decisions
+
+Some effects and actions require a player choice mid-resolution (target
+selection, line-overflow destruction). `GameState.createPendingDecision()`
+publishes the choice and blocks further `processAction()` calls until
+`resolveDecision()` is called with a validated selection.
+
+Callers that still have work to do after the choice resolves — e.g. ending
+the turn, or resolving the next effect in a card's effect list — register a
+continuation instead of running that work inline:
+
+```js
+gameState.completeActionAfterDecision(() => {
+  // Runs immediately if there's no pending decision, or once the
+  // current one resolves. Multiple continuations queue in order.
+  gameState.endTurn();
+});
+```
+
+This guarantees an action never advances the turn (or a card never resolves
+its next effect) before the player's choice has actually changed state.
+
+---
+
 ## LifecycleEngine API
 
 ```js
@@ -75,13 +100,20 @@ LifecycleEngine.destroyUnit(gameState, unit)
 
 // Atomic transformation (evolution/ignition)
 LifecycleEngine.transformUnit(gameState, unit, targetCardId)
+LifecycleEngine.transformEquipment(gameState, unit, targetCardId, equipmentId)
 
-// Attach equipment to unit
+// Attach equipment to unit. Normal units hold one equipment (replaced on
+// re-equip); Irregular units accumulate distinct equipment cards.
 LifecycleEngine.attachEquipment(gameState, username, handIndex, targetUnit)
 
-// Detach equipment (returns to hand, de-ignited)
-LifecycleEngine.detachEquipment(gameState, unit)
+// Detach one equipment card (or all, if omitted). Ignited equipment
+// reverts to its base form when it returns to hand.
+LifecycleEngine.detachEquipment(gameState, unit, equipment?)
 ```
+
+`unit.equipment` always holds the first/only attached card for backward
+compatibility; `unit.equipmentAttachments` holds the full list and is what
+Irregular-aware code should read.
 
 ---
 
@@ -109,7 +141,6 @@ Logger. It includes:
 - Equipment attachments
 - Combat slot status
 - Shinheuh slot status
-- Compress amount
 - Fire charges
 - Discard pile size
 

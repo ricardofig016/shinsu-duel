@@ -13,13 +13,13 @@ all represented as `Modifier` objects with a tracked **source**. This
 provenance tracking is what makes reversible effects (unequip, cleanse,
 silence) correct without manual bookkeeping.
 
-| Concept | Implementation |
-|---|---|
-| Every state change is a `Modifier` | `stack.apply(spec)` |
-| Equipment unequip removes only its modifiers | `stack.removeBySource("Equip#17")` |
-| Silence disables traits without deleting them | `stack.disableByTarget(id, "trait")` |
-| Cleanse removes conditions only | `stack.removeWhere(m => m.type === "condition")` |
-| Unit death cleans up all modifiers on it | Auto-hook on `unit:destroyed` |
+| Concept                                       | Implementation                                   |
+| --------------------------------------------- | ------------------------------------------------ |
+| Every state change is a `Modifier`            | `stack.apply(spec)`                              |
+| Equipment unequip removes only its modifiers  | `stack.removeBySource("Equip#17")`               |
+| Silence disables traits without deleting them | `stack.disableByTarget(id, "trait")`             |
+| Cleanse removes conditions only               | `stack.removeWhere(m => m.type === "condition")` |
+| Unit death cleans up all modifiers on it      | Auto-hook on `unit:destroyed`                    |
 
 ---
 
@@ -42,21 +42,25 @@ silence) correct without manual bookkeeping.
 
 ### Type values
 
-| `type` | Used for | Examples |
-|---|---|---|
-| `trait` | Native card traits + equipment-granted traits | Barrier, Strong, Lethal |
-| `condition` | Negative temporary effects | Burned, Poisoned, Rooted |
-| `stat` | HP/damage/cost modifications | +2 HP from equipment, -1 cost |
-| `ability` | Granted abilities | Red Thryssa grants "deal 5 to an enemy" |
-| `keyword` | Keyword overrides | Quick, Free, Sharpshooter |
+| `type`      | Used for                                                      | Examples                                |
+| ----------- | ------------------------------------------------------------- | --------------------------------------- |
+| `trait`     | Native card traits + equipment-granted traits                 | Barrier, Strong, Lethal                 |
+| `condition` | Negative temporary effects                                    | Burned, Poisoned, Rooted                |
+| `stat`      | HP/damage/cost modifications                                  | +2 HP from equipment, -1 cost           |
+| `ability`   | Granted abilities, `value` holds the JSON-encoded ability DSL | Red Thryssa grants "deal 5 to an enemy" |
+| `keyword`   | Keyword overrides                                             | Quick, Free, Sharpshooter               |
+
+Granted abilities are addressed by the bearer's player as
+`granted:<modifierId>` through `UseAbilityAction`. Removing the modifier
+(e.g. unequip) makes the code invalid — there is no separate revocation step.
 
 ### Operation values
 
-| Operation | Behavior | Use case |
-|---|---|---|
-| `add` | Sums with other modifiers of same key | Most traits/conditions |
-| `set` | Overrides all other values (returns immediately in getEffective) | Absolute stat setting |
-| `override` | Like set but also blocks future adds | Hard overrides |
+| Operation  | Behavior                                                         | Use case               |
+| ---------- | ---------------------------------------------------------------- | ---------------------- |
+| `add`      | Sums with other modifiers of same key                            | Most traits/conditions |
+| `set`      | Overrides all other values (returns immediately in getEffective) | Absolute stat setting  |
+| `override` | Like set but also blocks future adds                             | Hard overrides         |
 
 ---
 
@@ -65,15 +69,15 @@ silence) correct without manual bookkeeping.
 Source IDs **must be unique strings**. The codebase uses these
 conventions:
 
-| Source | Pattern | Example |
-|---|---|---|
-| Unit's native traits | `"Unit#<card.id>"` | `"Unit#a3f9c2b"` |
-| Equipment on bearer | `"Equip#<card.id>"` | `"Equip#d7e1a4f"` |
-| Passive ability | `"Passive#<unitId>#<index>"` | `"Passive#a3f9c2b#0"` |
-| Activated ability | `"Ability#<unitId>#<index>"` | `"Ability#a3f9c2b#1"` |
-| Skill (one-shot) | `"Skill#<card.id>"` | `"Skill#b2c8d9e"` |
-| System (game rules) | `"system"` | shinsu reset, round-end cleanup |
-| Landmark | `"Landmark#<unitId>"` | `"Landmark#f4a1b7c"` |
+| Source               | Pattern                      | Example                         |
+| -------------------- | ---------------------------- | ------------------------------- |
+| Unit's native traits | `"Unit#<card.id>"`           | `"Unit#a3f9c2b"`                |
+| Equipment on bearer  | `"Equip#<card.id>"`          | `"Equip#d7e1a4f"`               |
+| Passive ability      | `"Passive#<unitId>#<index>"` | `"Passive#a3f9c2b#0"`           |
+| Activated ability    | `"Ability#<unitId>#<index>"` | `"Ability#a3f9c2b#1"`           |
+| Skill (one-shot)     | `"Skill#<card.id>"`          | `"Skill#b2c8d9e"`               |
+| System (game rules)  | `"system"`                   | shinsu reset, round-end cleanup |
+| Landmark             | `"Landmark#<unitId>"`        | `"Landmark#f4a1b7c"`            |
 
 **⚠️ The caller of `stack.apply()` is responsible for generating unique source IDs.**
 The ModifierStack does not validate uniqueness across sources — it will happily
@@ -93,7 +97,7 @@ const mod = stack.apply({
   type: "trait",
   key: "barrier",
   value: 1,
-  operation: "add",   // default
+  operation: "add", // default
 });
 // Emits: "modifier:trait:granted"
 ```
@@ -101,9 +105,9 @@ const mod = stack.apply({
 ### Removal
 
 ```js
-stack.removeBySource("Equip#17");     // unequip — removes all modifiers from that source
-stack.removeByTarget("Unit#8");       // unit destroyed — removes all on that target
-stack.removeWhere(m => m.type === "condition");  // cleanse — removes conditions only
+stack.removeBySource("Equip#17"); // unequip — removes all modifiers from that source
+stack.removeByTarget("Unit#8"); // unit destroyed — removes all on that target
+stack.removeWhere((m) => m.type === "condition"); // cleanse — removes conditions only
 ```
 
 **⚠️ `removeBySource` and `removeByTarget` copy the array before iterating**
@@ -113,10 +117,10 @@ method, follow the same pattern: `[...arr]` or collect IDs first.
 ### Silence / Unsilence
 
 ```js
-stack.disableByTarget("Unit#8", "trait");        // silence — flips enabled=false
-stack.disableByTarget("Unit#8", ["trait", "stat"]);  // silence multiple types
+stack.disableByTarget("Unit#8", "trait"); // silence — flips enabled=false
+stack.disableByTarget("Unit#8", ["trait", "stat"]); // silence multiple types
 
-stack.enableByTarget("Unit#8", "trait");         // unsilence — flips enabled=true
+stack.enableByTarget("Unit#8", "trait"); // unsilence — flips enabled=true
 ```
 
 **⚠️ `disableByTarget` does NOT delete modifiers.** They remain in the stack
@@ -126,11 +130,11 @@ with `enabled: false`. This is the key design choice that prevents the
 ### Query
 
 ```js
-stack.getEffective("Unit#8", "trait", "strong");   // → 3 (sum of all add modifiers)
-stack.getActiveKeys("Unit#8", "trait");             // → Set{"barrier", "strong"}
-stack.has("Unit#8", "trait", "immune");             // → true/false
-stack.getModifiers("Unit#8", "condition");          // → [{...}, {...}]
-stack.getSources("Unit#8");                         // → ["Equip#17", "Unit#a3f9c2b"]
+stack.getEffective("Unit#8", "trait", "strong"); // → 3 (sum of all add modifiers)
+stack.getActiveKeys("Unit#8", "trait"); // → Set{"barrier", "strong"}
+stack.has("Unit#8", "trait", "immune"); // → true/false
+stack.getModifiers("Unit#8", "condition"); // → [{...}, {...}]
+stack.getSources("Unit#8"); // → ["Equip#17", "Unit#a3f9c2b"]
 ```
 
 **⚠️ `getEffective` respects `enabled`** — disabled modifiers contribute 0.
@@ -180,12 +184,12 @@ a ghost negative value.
 
 ## Events Emitted
 
-| Event | When |
-|---|---|
-| `modifier:<type>:granted` | `apply()` called |
-| `modifier:<type>:revoked` | `_removeOne()` called |
-| `modifier:disabled` | `disableByTarget()` called |
-| `modifier:enabled` | `enableByTarget()` called |
+| Event                     | When                       |
+| ------------------------- | -------------------------- |
+| `modifier:<type>:granted` | `apply()` called           |
+| `modifier:<type>:revoked` | `_removeOne()` called      |
+| `modifier:disabled`       | `disableByTarget()` called |
+| `modifier:enabled`        | `enableByTarget()` called  |
 
 These are informational — the ModifierStack does its own state management.
 External systems (Logger, UI) subscribe to them for auditing.

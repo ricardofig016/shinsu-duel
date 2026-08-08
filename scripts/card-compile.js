@@ -347,6 +347,14 @@ function compilePassive(raw) {
   const str = sourceText.trim();
   if (!str) return null;
 
+  const timedMatch = /^(round start|round end):\s*(.+)$/i.exec(str);
+  if (timedMatch) {
+    const parsed = parseEffectWithMetadata(timedMatch[2]);
+    if (parsed) {
+      return { ...parsed, raw: sourceText, trigger: timedMatch[1].toLowerCase() };
+    }
+  }
+
   let position = null;
   let effectText = str;
 

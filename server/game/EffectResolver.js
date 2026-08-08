@@ -23,6 +23,7 @@ import ReclaimCardsHandler from "./handlers/ReclaimCardsHandler.js";
 import GrantAbilityHandler from "./handlers/GrantAbilityHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
+import EVT from "./EventCatalog.js";
 
 // Singleton handler registry — populated at module load
 let _registry = null;
@@ -76,12 +77,17 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
 
   const type = effect.type;
 
-  // Skip unresolved custom effects — Phase 4 responsibility
+  // Preserve unsupported card text but surface it clearly in the game log.
+  // This keeps compilation forward-compatible without silently claiming that
+  // an authored mechanic resolved.
   if (type === "custom") {
-    if (gameState.logger) {
-      // Log as warning but don't crash
-    }
-    return { skipped: true, type: "custom", raw: effect.raw };
+    const result = { skipped: true, reason: "unsupported_effect", type: "custom", raw: effect.raw };
+    gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, {
+      ...result,
+      owner: extra.owner || extra.sourceOwner || null,
+      sourceId: extra.sourceId || null,
+    });
+    return result;
   }
 
   const registry = getRegistry();
