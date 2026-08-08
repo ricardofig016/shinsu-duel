@@ -9,6 +9,8 @@
  * Using a Shinheuh ability consumes the slot for the round.
  */
 
+import EVT from "../EventCatalog.js";
+
 export default class AnimaEngine {
   constructor(eventBus) {
     this._bus = eventBus;
@@ -21,7 +23,7 @@ export default class AnimaEngine {
     if (!unit || !gameState) return;
 
     // Subscribe to round start — create Shinheuh slot
-    const unsub = this._bus.on("round:started", () => {
+    const unsub = this._bus.on(EVT.ROUND_START, () => {
       this._grantShinheuhSlot(unit.owner, gameState);
     }, { phase: "execute" });
 
@@ -51,7 +53,7 @@ export default class AnimaEngine {
     // Grant slot if not already available
     if (!player.shinheuhSlot.available && !player.shinheuhSlot.used) {
       player.shinheuhSlot.available = true;
-      this._bus.emit("shinheuh:slot:granted", { owner });
+      this._bus.emit(EVT.SHINHEUH_SLOT_GRANTED, { owner });
     }
   }
 

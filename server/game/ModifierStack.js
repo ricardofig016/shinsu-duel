@@ -3,6 +3,8 @@
  *
  * Every trait, condition, stat change, and granted ability is represented
  * as a `Modifier` with a tracked source. This enables:
+
+const EVT = null; // dynamic event names use template literals
  *
  *  - Equipment unequip: remove only modifiers from that equipment.
  *  - Silence: disable trait modifiers without deleting them.

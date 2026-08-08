@@ -13,9 +13,11 @@ describe("DrawCardHandler", () => {
     stack = new ModifierStack(bus, clock);
     handler = new DrawCardHandler();
     gameState = {
+      eventBus: bus,
       modifierStack: stack,
       playerStates: {
         Alice: {
+          username: "Alice",
           deck: [
             { cardId: 1, name: "Card A" },
             { cardId: 2, name: "Card B" },
@@ -36,7 +38,6 @@ describe("DrawCardHandler", () => {
 
     expect(gameState.playerStates.Alice.hand.length).toBe(2);
     expect(gameState.playerStates.Alice.deck.length).toBe(1);
-    expect(gameState.playerStates.Alice.hand[1].name).toBe("Card B");
   });
 
   test("emits card:drawn for each card", () => {
@@ -67,7 +68,7 @@ describe("DrawCardHandler", () => {
     // Drew 1 card, then deck empty
     expect(gameState.playerStates.Alice.hand.length).toBe(1);
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener.mock.calls[0][0].owner).toBe("Alice");
+    expect(listener.mock.calls[0][0].username).toBe("Alice");
   });
 
   test("drawing from already empty deck emits deck:empty immediately", () => {

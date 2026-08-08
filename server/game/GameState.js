@@ -65,7 +65,7 @@ export default class GameState {
     // Barrier tracking (reset on round start)
     this._barrierUsedThisRound = new Set();
 
-    // Deterministic first player (use index 0 as default instead of Math.random)
+    // Deterministic first player
     this.roomCode = roomCode;
     this.usernames = usernames;
     this.round = 1;
@@ -571,7 +571,7 @@ export default class GameState {
       onResolved: null,
     };
     this.pendingDecision = decision;
-    this.eventBus.emit("pending-decision", {
+    this.eventBus.emit(EVT.DECISION_PENDING, {
       decisionId: decision.decisionId,
       owner,
       type,
@@ -604,6 +604,6 @@ export default class GameState {
     pending.resolve?.(choices);
     this.pendingDecision = null;
     pending.onResolved?.();
-    this.eventBus.emit("decision:resolved", { decisionId, owner: pending.owner, type: pending.type, choices });
+    this.eventBus.emit(EVT.DECISION_RESOLVED, { decisionId, owner: pending.owner, type: pending.type, choices });
   }
 }

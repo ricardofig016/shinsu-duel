@@ -1,4 +1,6 @@
 import BaseHandler from "./BaseHandler.js";
+import ShinsuService from "../services/ShinsuService.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Adds shinsu to the player's normal pool (not recharged).
@@ -22,14 +24,10 @@ export default class ChargeShinsuHandler extends BaseHandler {
     const player = gameState.playerStates[owner];
     if (!player) throw new Error(`Player "${owner}" not found`);
 
-    const maxShinsu = Math.min(10, gameState.round);
-    const before = player.shinsu.normalAvailable;
+    // Delegate to authoritative ShinsuService
+    const { gained } = ShinsuService.gain(player, amount, gameState.round);
 
-    // Add to normal pool only, capped at round maximum
-    player.shinsu.normalAvailable = Math.min(maxShinsu, player.shinsu.normalAvailable + amount);
-    const gained = player.shinsu.normalAvailable - before;
-
-    context.emitChild("shinsu:charged", {
+    context.emitChild(EVT.SHINSU_CHARGED, {
       owner,
       amount: gained,
       total: player.shinsu.normalAvailable + player.shinsu.recharged,

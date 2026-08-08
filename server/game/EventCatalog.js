@@ -62,6 +62,32 @@ const EVT = {
   // Skill
   SKILL_APPLIED: "skill:applied",
   UNIT_ABILITY_GRANTED: "unit:ability:granted",
+
+  // Ability usage
+  UNIT_ABILITY_USED:      "unit:ability:used",
+  UNIT_ABILITY_INTENT:    "unit:ability:intent",
+  UNIT_ABILITY_RESOLVED:  "unit:ability:resolved",
+
+  // Decision protocol
+  DECISION_PENDING:  "pending-decision",
+  DECISION_RESOLVED: "decision:resolved",
+
+  // Position switching
+  UNIT_POSITION_SWITCHED: "unit:position:switched",
+
+  // Condition-specific
+  CONDITION_CLEANSED:  "state:condition:cleansed",
+  CONDITION_APPLIED:   "state:condition:applied",
+  CONDITION_BLOCKED:   "state:condition:blocked",
+
+  // Lighthouse
+  LIGHTHOUSE_CHANGED: "state:lighthouse:changed",
+
+  // Heal
+  HEAL_APPLIED: "unit:heal:applied",
+
+  // Compression
+  SHINSU_COMPRESSED: "shinsu:compressed",
 };
 
 export default EVT;

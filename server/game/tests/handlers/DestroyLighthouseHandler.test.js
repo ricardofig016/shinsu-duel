@@ -15,6 +15,11 @@ describe("DestroyLighthouseHandler", () => {
     gameState = {
       modifierStack: stack,
       usernames: ["Alice", "Bob"],
+      modifyLighthouses: (username, delta) => {
+        const p = gameState.playerStates[username];
+        if (!p) throw new Error("Player \"" + username + "\" not found");
+        p.lighthouses.amount = Math.max(0, p.lighthouses.amount + delta);
+      },
       playerStates: {
         Alice: { lighthouses: { amount: 20 } },
         Bob:   { lighthouses: { amount: 5 } },

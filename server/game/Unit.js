@@ -1,4 +1,5 @@
 import * as IdFactory from "./IdFactory.js";
+import EVT from "./EventCatalog.js";
 
 /**
  * Represents a unit placed on the battlefield.
@@ -26,11 +27,11 @@ export default class Unit {
 
   // Stub — Phase 3/4 will implement ability/passive activation
   onSummon(gameState) {
-    this.bus.emit("unit:summoned", { unitId: this.id });
+    this.bus.emit(EVT.UNIT_SUMMONED, { unitId: this.id });
   }
 
   onRemove(gameState) {
-    this.bus.emit("unit:destroyed", { unitId: this.id });
+    this.bus.emit(EVT.UNIT_DESTROYED, { unitId: this.id });
   }
 
   isAlive() {
@@ -41,7 +42,7 @@ export default class Unit {
     const damageAmount = Math.max(0, parseInt(amount) || 0);
 
     // Emit event before damage is applied (allows for damage modification)
-    this.bus.emit("unit:damage:intent", {
+    this.bus.emit(EVT.DAMAGE_INTENT, {
       source: this.toSanitizedObject(),
       target: this.toSanitizedObject(),
       damageAmount: damageAmount,
@@ -52,7 +53,7 @@ export default class Unit {
     this.currentHp = Math.max(0, this.currentHp - damageAmount);
 
     // Emit event after damage is applied
-    this.bus.emit("unit:damage:applied", {
+    this.bus.emit(EVT.DAMAGE_APPLIED, {
       unit: this.toSanitizedObject(),
       damageAmount: damageAmount,
       message: `${this.card.name} took ${damageAmount} damage from itself and is now at ${this.currentHp} HP`,
@@ -62,13 +63,13 @@ export default class Unit {
   }
 
   useAbility(abilityCode, targetInfo = null, gameState) {
-    this.bus.emit("unit:ability:intent", {
+    this.bus.emit(EVT.UNIT_ABILITY_INTENT, {
       unitId: this.id,
       abilityCode,
       targetInfo,
       gameState,
     });
-    this.bus.emit("unit:ability:resolved", {
+    this.bus.emit(EVT.UNIT_ABILITY_RESOLVED, {
       unitId: this.id,
       abilityCode,
       targetInfo,

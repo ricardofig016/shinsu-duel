@@ -1,4 +1,5 @@
 import LifecycleEngine from "./LifecycleEngine.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Maps typed trigger ASTs (from compiler) to runtime event subscriptions.
@@ -93,42 +94,42 @@ export default class TriggerManager {
         break;
 
       case "deploy":
-        this._subscribeEvent(unitId, "unit:summoned", targetCardId, transformType, gameState,
+        this._subscribeEvent(unitId, EVT.UNIT_SUMMONED, targetCardId, transformType, gameState,
           (payload) => payload.unitId === unitId, equipmentId);
         break;
       case "given":
         this._onGiven(unitId, trigger, targetCardId, transformType, gameState);
         break;
       case "kill":
-        this._subscribeEvent(unitId, "unit:killed", targetCardId, transformType, gameState,
+        this._subscribeEvent(unitId, EVT.UNIT_KILLED, targetCardId, transformType, gameState,
           (payload) => (payload.killerId === unitId || payload.sourceId === unitId) &&
             (!trigger.rank || gameState._findUnit(payload.targetId)?.card?.rank === trigger.rank) &&
             (!trigger.target || trigger.target === "unit"));
         break;
       case "ally_dies":
-        this._subscribeEvent(unitId, "unit:destroyed", targetCardId, transformType, gameState,
+        this._subscribeEvent(unitId, EVT.UNIT_DESTROYED, targetCardId, transformType, gameState,
           (payload) => {
             const owner = gameState._findUnit(unitId)?.owner;
             return Boolean(owner && payload.owner === owner && payload.unitId !== unitId);
           });
         break;
       case "damaged_by":
-        this._subscribeEvent(unitId, "unit:damage:applied", targetCardId, transformType, gameState,
+        this._subscribeEvent(unitId, EVT.DAMAGE_APPLIED, targetCardId, transformType, gameState,
           (payload) => payload.targetId === unitId &&
             (!trigger.source || gameState._findUnit(payload.sourceId)?.card?.name?.toLowerCase() === trigger.source));
         break;
       case "round_start":
-        this._subscribeEvent(unitId, "round:started", targetCardId, transformType, gameState, () => true);
+        this._subscribeEvent(unitId, EVT.ROUND_START, targetCardId, transformType, gameState, () => true);
         break;
       case "round_end":
-        this._subscribeEvent(unitId, "round:ended", targetCardId, transformType, gameState, () => true);
+        this._subscribeEvent(unitId, EVT.ROUND_END, targetCardId, transformType, gameState, () => true);
         break;
       case "deal_damage":
-        this._subscribeEvent(unitId, "unit:damage:applied", targetCardId, transformType, gameState,
+        this._subscribeEvent(unitId, EVT.DAMAGE_APPLIED, targetCardId, transformType, gameState,
           (payload) => payload.sourceId === unitId);
         break;
       case "ability_used":
-        this._subscribeEvent(unitId, "unit:ability:used", targetCardId, transformType, gameState,
+        this._subscribeEvent(unitId, EVT.UNIT_ABILITY_USED, targetCardId, transformType, gameState,
           (payload) => payload.unitId === unitId);
         break;
       default:
@@ -164,7 +165,7 @@ export default class TriggerManager {
       this._executeTransform(unitId, targetCardId, transformType, gameState, equipmentId);
     };
 
-    const unsub = this._bus.on("equipment:attached", handler, { phase: "post" });
+    const unsub = this._bus.on(EVT.EQUIPMENT_ATTACHED, handler, { phase: "post" });
     this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
   }
 
@@ -181,7 +182,7 @@ export default class TriggerManager {
       }
     };
 
-    const unsub = this._bus.on("unit:killed", handler, { phase: "post" });
+    const unsub = this._bus.on(EVT.UNIT_KILLED, handler, { phase: "post" });
     this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
   }
 
@@ -197,7 +198,7 @@ export default class TriggerManager {
     };
 
     // Subscribe to a generic "skill:applied" or "card:given" event
-    const unsub = this._bus.on("skill:applied", handler, { phase: "post" });
+    const unsub = this._bus.on(EVT.SKILL_APPLIED, handler, { phase: "post" });
     this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
   }
 

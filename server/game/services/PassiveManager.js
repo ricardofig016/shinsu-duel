@@ -1,5 +1,6 @@
 import * as IdFactory from "../IdFactory.js";
 import { resolveEffect } from "../EffectResolver.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Registers compiled, event-driven passives for a unit while it is on field.
@@ -45,7 +46,7 @@ export default class PassiveManager {
     if (!passive?.trigger || passive.type === "custom") return null;
 
     return {
-      eventName: passive.trigger === "round start" ? "round:started" : "round:ended",
+      eventName: passive.trigger === "round start" ? EVT.ROUND_START : EVT.ROUND_END,
       effect: passive,
     };
   }

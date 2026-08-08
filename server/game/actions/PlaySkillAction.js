@@ -2,6 +2,7 @@ import ActionHandler from "../ActionHandler.js";
 import ZoneService from "../services/ZoneService.js";
 import ShinsuService from "../services/ShinsuService.js";
 import RequirementValidator from "../services/RequirementValidator.js";
+import EVT from "../EventCatalog.js";
 import { resolveEffects } from "../EffectResolver.js";
 
 /** Plays a one-shot skill through the DSL effect resolver. */
@@ -32,7 +33,7 @@ export default class PlaySkillAction extends ActionHandler {
     const cost = Math.max(0, card.cost - (card.costReduction || 0));
     ShinsuService.spend(player, cost);
 
-    gameState.eventBus.emit("skill:applied", { owner: data.username, cardName: card.name, card });
+    gameState.eventBus.emit(EVT.SKILL_APPLIED, { owner: data.username, cardName: card.name, card });
     const effectContext = {
       emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload),
     };

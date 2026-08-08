@@ -9,7 +9,9 @@
  */
 
 import ZoneService from "../services/ZoneService.js";
+import ShinsuService from "../services/ShinsuService.js";
 import Card from "../Card.js";
+import EVT from "../EventCatalog.js";
 
 export default class HwayeomsaEngine {
   constructor(eventBus, cards) {
@@ -52,7 +54,7 @@ export default class HwayeomsaEngine {
     if (gameState.getTotalShinsu(username) < 1) {
       return { success: false, reason: "Not enough shinsu" };
     }
-    gameState.spendShinsu(username, 1);
+    ShinsuService.spend(player, 1);
 
     // Gain fire charge
     player.fireCharges = (player.fireCharges || 0) + 1;
@@ -74,7 +76,7 @@ export default class HwayeomsaEngine {
       }
     }
 
-    this._bus.emit("hwayeomsa:charge:gained", {
+    this._bus.emit(EVT.HWAYEOMSA_CHARGE_GAINED, {
       username,
       charges: player.fireCharges,
     });
@@ -113,7 +115,7 @@ export default class HwayeomsaEngine {
     );
     ZoneService.addToHand(player, incinerate);
 
-    this._bus.emit("hwayeomsa:incinerate:created", {
+    this._bus.emit(EVT.HWAYEOMSA_INCINERATE_CREATED, {
       username,
       level,
       chargesRemaining: player.fireCharges,

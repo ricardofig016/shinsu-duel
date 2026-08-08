@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Reduces the shinsu cost of one card instance in its owner's hand.
@@ -35,7 +36,7 @@ export default class CompressShinsuHandler extends BaseHandler {
     }
 
     target.costReduction = (target.costReduction || 0) + amount;
-    context.emitChild("shinsu:compressed", {
+    context.emitChild(EVT.SHINSU_COMPRESSED, {
       owner,
       targetCardId: target.id,
       cardName: target.name,

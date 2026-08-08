@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Creates (regains) lighthouses for a player.
@@ -18,22 +19,17 @@ export default class CreateLighthouseHandler extends BaseHandler {
 
   execute(payload, context, gameState) {
     const { owner, amount } = payload;
-    const player = gameState.playerStates[owner];
-    if (!player) throw new Error(`Player "${owner}" not found`);
 
-    const oldAmount = player.lighthouses.amount;
-    const newAmount = Math.min(oldAmount + amount, 40); // max 40
-    const actualGain = newAmount - oldAmount;
+    const oldAmount = gameState.playerStates[owner]?.lighthouses?.amount ?? 0;
+    gameState.modifyLighthouses(owner, amount);
 
-    player.lighthouses.amount = newAmount;
-
-    context.emitChild("state:lighthouse:changed", {
+    context.emitChild(EVT.LIGHTHOUSE_CHANGED, {
       owner,
       oldAmount,
-      newAmount,
-      delta: actualGain,
+      newAmount: gameState.playerStates[owner].lighthouses.amount,
+      delta: gameState.playerStates[owner].lighthouses.amount - oldAmount,
     });
 
-    return { created: actualGain, current: newAmount };
+    return { created: gameState.playerStates[owner].lighthouses.amount - oldAmount, current: gameState.playerStates[owner].lighthouses.amount };
   }
 }

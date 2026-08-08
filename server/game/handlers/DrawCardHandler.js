@@ -1,4 +1,6 @@
 import BaseHandler from "./BaseHandler.js";
+import ZoneService from "../services/ZoneService.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Draws cards from a player's deck.
@@ -23,20 +25,11 @@ export default class DrawCardHandler extends BaseHandler {
     const player = gameState.playerStates[owner];
     if (!player) throw new Error(`Player "${owner}" not found`);
 
-    const drawn = [];
+    // Delegate to authoritative ZoneService
+    const { drawn, cards } = ZoneService.draw(player, amount, gameState);
 
-    for (let i = 0; i < amount; i++) {
-      if (player.deck.length === 0) {
-        // Deck empty — player loses
-        context.emitChild("game:deck:empty", { owner });
-        break;
-      }
-
-      const card = player.deck.pop();
-      player.hand.push(card);
-      drawn.push(card);
-
-      context.emitChild("card:drawn", {
+    for (const card of cards) {
+      context.emitChild(EVT.CARD_DRAWN, {
         owner,
         cardId: card.cardId,
         cardName: card.name,
@@ -45,6 +38,6 @@ export default class DrawCardHandler extends BaseHandler {
       });
     }
 
-    return { drawn: drawn.length, cards: drawn };
+    return { drawn, cards };
   }
 }

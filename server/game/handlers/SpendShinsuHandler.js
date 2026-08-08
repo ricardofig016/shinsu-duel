@@ -1,4 +1,6 @@
 import BaseHandler from "./BaseHandler.js";
+import ShinsuService from "../services/ShinsuService.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Validates and deducts shinsu from a player.
@@ -21,21 +23,13 @@ export default class SpendShinsuHandler extends BaseHandler {
     const player = gameState.playerStates[owner];
     if (!player) throw new Error(`Player "${owner}" not found`);
 
-    const total = player.shinsu.normalAvailable + player.shinsu.recharged;
-    if (total < amount) {
-      throw new Error(`Player "${owner}" has insufficient shinsu (need ${amount}, have ${total})`);
-    }
-
     const beforeNormal = player.shinsu.normalAvailable;
     const beforeRecharged = player.shinsu.recharged;
 
-    // Deduct from recharged first, then normal
-    const fromRecharged = Math.min(player.shinsu.recharged, amount);
-    player.shinsu.recharged -= fromRecharged;
-    player.shinsu.normalAvailable -= (amount - fromRecharged);
-    player.shinsu.normalSpent += (amount - fromRecharged);
+    // Delegate to authoritative ShinsuService
+    ShinsuService.spend(player, amount);
 
-    context.emitChild("state:shinsu:changed", {
+    context.emitChild(EVT.SHINSU_CHANGED, {
       owner,
       before: { normal: beforeNormal, recharged: beforeRecharged },
       after: {

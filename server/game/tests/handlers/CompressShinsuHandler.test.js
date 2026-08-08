@@ -1,4 +1,5 @@
 import { jest } from "@jest/globals";
+import EVT from "../../EventCatalog.js";
 import Card from "../../Card.js";
 import CompressShinsuHandler from "../../handlers/CompressShinsuHandler.js";
 import { createTestGame, getCardIdByName } from "../utils.js";
@@ -32,7 +33,7 @@ describe("CompressShinsuHandler", () => {
     expect(result).toEqual(expect.objectContaining({ targetCardId: target.id, totalReduction: 2 }));
     expect(target.costReduction).toBe(2);
     expect(untouched.costReduction).toBe(0);
-    expect(context.emitChild).toHaveBeenCalledWith("shinsu:compressed", expect.objectContaining({
+    expect(context.emitChild).toHaveBeenCalledWith(EVT.SHINSU_COMPRESSED, expect.objectContaining({
       targetCardId: target.id,
       amount: 2,
     }));

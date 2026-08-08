@@ -51,7 +51,7 @@ export default class ShinsuService {
 
     const total = ShinsuService.getTotal(playerState);
     if (total < amount) {
-      throw new Error(`Insufficient shinsu (need ${amount}, have ${total})`);
+      throw new Error(`insufficient shinsu (need ${amount}, have ${total})`);
     }
 
     const fromRecharged = Math.min(s.recharged, amount);

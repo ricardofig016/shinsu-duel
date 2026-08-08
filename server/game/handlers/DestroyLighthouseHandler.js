@@ -1,18 +1,11 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Destroys enemy lighthouses.
  *
- * The game rule: a player loses when they reach 0 lighthouses.
- * This handler enforces the floor at 0 and emits the loss event
- * if the player's lighthouses are exhausted.
- *
  * Payload:
  *   { owner, amount }
- *
- * Emits children:
- *   - state:lighthouse:changed  (on every destruction)
- *   - game:lighthouses:depleted  (when lighthouses reach 0)
  */
 export default class DestroyLighthouseHandler extends BaseHandler {
   validate(payload) {
@@ -26,31 +19,25 @@ export default class DestroyLighthouseHandler extends BaseHandler {
 
   execute(payload, context, gameState) {
     const { owner, amount } = payload;
-    const player = gameState.playerStates[owner];
-    if (!player) throw new Error(`Player "${owner}" not found`);
 
-    const oldAmount = player.lighthouses.amount;
-    const newAmount = Math.max(oldAmount - amount, 0);
-    const actualLoss = oldAmount - newAmount;
+    const oldAmount = gameState.playerStates[owner]?.lighthouses?.amount ?? 0;
+    gameState.modifyLighthouses(owner, -amount);
 
-    player.lighthouses.amount = newAmount;
-
-    context.emitChild("state:lighthouse:changed", {
+    context.emitChild(EVT.LIGHTHOUSE_CHANGED, {
       owner,
       oldAmount,
-      newAmount,
-      delta: -actualLoss,
+      newAmount: gameState.playerStates[owner].lighthouses.amount,
+      delta: gameState.playerStates[owner].lighthouses.amount - oldAmount,
     });
 
-    // Loss condition: lighthouses reach 0
-    // Phase 2 will wire this event to game-over logic
-    if (newAmount <= 0) {
-      context.emitChild("game:lighthouses:depleted", {
+    if (gameState.playerStates[owner].lighthouses.amount <= 0) {
+      context.emitChild(EVT.GAME_LIGHTHOUSES_DEPLETED, {
         owner,
+        loser: owner,
         opponent: gameState.usernames.find((u) => u !== owner),
       });
     }
 
-    return { destroyed: actualLoss, current: newAmount, depleted: newAmount <= 0 };
+    return { destroyed: oldAmount - gameState.playerStates[owner].lighthouses.amount, current: gameState.playerStates[owner].lighthouses.amount, depleted: gameState.playerStates[owner].lighthouses.amount <= 0 };
   }
 }

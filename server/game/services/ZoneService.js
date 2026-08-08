@@ -5,6 +5,8 @@
  * Deck legality is enforced at deck construction; generated unreachable cards may draw normally.
  */
 
+import EVT from "../EventCatalog.js";
+
 export default class ZoneService {
   /**
    * Draw cards from deck to hand. Emits `game:deck:empty` on exhaustion.
@@ -23,7 +25,7 @@ export default class ZoneService {
     for (let i = 0; i < amount; i++) {
       if (playerState.deck.length === 0) {
         if (gameState?.eventBus) {
-          gameState.eventBus.emit("game:deck:empty", {
+          gameState.eventBus.emit(EVT.GAME_DECK_EMPTY, {
             username: playerState.username,
           });
         }

@@ -1,4 +1,5 @@
 import ActionHandler from "../ActionHandler.js";
+import EVT from "../EventCatalog.js";
 
 /** Spend a turn to move one owned unit to another position printed on its card. */
 export default class SwitchPositionAction extends ActionHandler {
@@ -41,7 +42,7 @@ export default class SwitchPositionAction extends ActionHandler {
     player.field[oldLine].splice(oldIndex, 1);
     player.field[newLine].push(unit);
     unit.placedPositionCode = data.positionCode;
-    gameState.eventBus.emit("unit:position:switched", {
+    gameState.eventBus.emit(EVT.UNIT_POSITION_SWITCHED, {
       unitId: unit.id,
       owner: unit.owner,
       positionCode: data.positionCode,

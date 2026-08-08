@@ -12,6 +12,7 @@ import Unit from "../Unit.js";
 import ZoneService from "./ZoneService.js";
 import ShinsuService from "./ShinsuService.js";
 import Card from "../Card.js";
+import EVT from "../EventCatalog.js";
 import { resolveEffects } from "../EffectResolver.js";
 
 export default class LifecycleEngine {
@@ -103,14 +104,14 @@ export default class LifecycleEngine {
     }
 
     // Emit deploy event chain
-    gameState.eventBus.emit("unit:deployed", {
+    gameState.eventBus.emit(EVT.UNIT_DEPLOYED, {
       username,
       unit,
       positionCode,
       cost,
     });
 
-    gameState.eventBus.emit("unit:summoned", {
+    gameState.eventBus.emit(EVT.UNIT_SUMMONED, {
       username,
       unit,
       unitId: unit.id,
@@ -160,7 +161,7 @@ export default class LifecycleEngine {
     if (!unit) return;
 
     // Emit pre-destroy intent (can be cancelled by handlers)
-    const result = gameState.eventBus.emit("unit:destroy:intent", {
+    const result = gameState.eventBus.emit(EVT.UNIT_DESTROY_INTENT, {
       unitId: unit.id,
       unit,
     });
@@ -195,7 +196,7 @@ export default class LifecycleEngine {
     gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
 
     // Emit destroyed event (ModifierStack auto-cleans via listener)
-    gameState.eventBus.emit("unit:destroyed", {
+    gameState.eventBus.emit(EVT.UNIT_DESTROYED, {
       unitId: unit.id,
       unit,
       owner: unit.owner,
@@ -258,7 +259,7 @@ export default class LifecycleEngine {
     gameState._passiveManager?.registerUnit(unit, gameState);
 
     // Emit transformation event
-    gameState.eventBus.emit("unit:evolved", {
+    gameState.eventBus.emit(EVT.UNIT_EVOLVED, {
       unitId: unit.id,
       unit,
       from: oldCard.name,
@@ -354,7 +355,7 @@ export default class LifecycleEngine {
       );
     }
 
-    gameState.eventBus.emit("equipment:attached", {
+    gameState.eventBus.emit(EVT.EQUIPMENT_ATTACHED, {
       unitId: targetUnit.id,
       equipment: card,
       sourceId,
@@ -386,7 +387,7 @@ export default class LifecycleEngine {
         }
       }
 
-      gameState.eventBus.emit("equipment:detached", {
+      gameState.eventBus.emit(EVT.EQUIPMENT_DETACHED, {
         unitId: unit.id,
         equipment: equip,
       });

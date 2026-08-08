@@ -14,6 +14,11 @@ describe("CreateLighthouseHandler", () => {
     handler = new CreateLighthouseHandler();
     gameState = {
       modifierStack: stack,
+      modifyLighthouses: (username, amount) => {
+        const p = gameState.playerStates[username];
+        if (!p) throw new Error("Player \"" + username + "\" not found");
+        p.lighthouses.amount = Math.max(0, Math.min(40, p.lighthouses.amount + amount));
+      },
       playerStates: {
         Alice: { lighthouses: { amount: 20 } },
         Bob: { lighthouses: { amount: 15 } },

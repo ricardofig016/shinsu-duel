@@ -2,6 +2,7 @@ import ActionHandler from "../ActionHandler.js";
 import AnimaEngine from "../attributes/AnimaEngine.js";
 import RequirementValidator from "../services/RequirementValidator.js";
 import ShinsuService from "../services/ShinsuService.js";
+import EVT from "../EventCatalog.js";
 import { resolveEffect } from "../EffectResolver.js";
 
 /**
@@ -107,7 +108,7 @@ export default class UseAbilityAction extends ActionHandler {
       targetOwner: gameState.usernames.find((candidate) => candidate !== username),
     });
     gameState.completeActionAfterDecision(() => {
-      gameState.eventBus.emit("unit:ability:used", { username, unitId, abilityCode });
+      gameState.eventBus.emit(EVT.UNIT_ABILITY_USED, { username, unitId, abilityCode });
       if (poison > 0 && unit.isAlive()) {
         const poisonContext = { emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload) };
         resolveEffect({ type: "deal_damage", amount: poison, targetId: unit.id, raw: "Poisoned", handler: null }, poisonContext, gameState, {
