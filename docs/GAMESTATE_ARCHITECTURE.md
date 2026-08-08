@@ -102,8 +102,8 @@ LifecycleEngine.destroyUnit(gameState, unit)
 LifecycleEngine.transformUnit(gameState, unit, targetCardId)
 LifecycleEngine.transformEquipment(gameState, unit, targetCardId, equipmentId)
 
-// Attach equipment to unit. Normal units hold one equipment (replaced on
-// re-equip); Irregular units accumulate distinct equipment cards.
+// Attach equipment to unit. Normal units hold one equipment (replaced on re-equip);
+// Living Ignition Weapons accumulate distinct equipment card definitions.
 LifecycleEngine.attachEquipment(gameState, username, handIndex, targetUnit)
 
 // Detach one equipment card (or all, if omitted). Ignited equipment
@@ -111,9 +111,8 @@ LifecycleEngine.attachEquipment(gameState, username, handIndex, targetUnit)
 LifecycleEngine.detachEquipment(gameState, unit, equipment?)
 ```
 
-`unit.equipment` always holds the first/only attached card for backward
-compatibility; `unit.equipmentAttachments` holds the full list and is what
-Irregular-aware code should read.
+`unit.equipmentAttachments` is the canonical equipment representation.
+It contains every attached card instance.
 
 ---
 

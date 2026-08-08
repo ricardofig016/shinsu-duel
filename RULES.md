@@ -165,7 +165,7 @@ Unlike unit/uquipment abilities, skills can target any unit unless otherwise spe
 
 Equipments can be attached to ally deployed units for enhancements. Equiping a unit ends your turn.
 
-Units can only hold 1 equipment at a time, unless they are [Irregular](#irregular).
+Units can only hold 1 equipment at a time, unless they are a [Living Ignition Weapon](#living-ignition-weapon).
 
 Equipments may have requirements that must all be met when and how it is played.
 
@@ -291,6 +291,8 @@ Some specific units have an attribute, which changes the core of how they functi
 
 ### Anima
 
+**Descripttion:**
+
 Anima summon and control special creatures called [Shinheuh](#shinheuh) to fight for them. Yu Han Sung is an Anima.
 
 **Core in-game mechanic:**
@@ -307,6 +309,8 @@ Round start: gain a single-use Shinheuh combat slot if you don't already have on
 - `**Ability**: spend 1: Summon a random 2-3 cost Shinheuh`
 
 ### Guide
+
+**Descripttion:**
 
 Guides are support units that help their team by providing information. They can tell what's the best move and predict the future.
 
@@ -341,6 +345,8 @@ You can always see your opponent's hand and the top card of both players' decks.
 
 ### Hwayeomsa
 
+**Descripttion:**
+
 Hwayeomsa are flame users who are able to convert shinsu into fire. They deal team-wide massive fire damage. Yeon Yihwa is a Hwayeomsa.
 
 **Core in-game mechanic:**
@@ -362,6 +368,8 @@ Spend 1, Free: Charge 1 **Fire Charge** and create **Fire Core** in your hand if
 
 ### Jeonsulsa
 
+**Descripttion:**
+
 Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units. Khun Eduan is a Jeonsulsa.
 
 **Core in-game mechanic:**
@@ -382,7 +390,9 @@ When I'm deployed, heal 2 HP from or summon **Conduit** on the enemy backline.
 
 ### Irregular
 
-Irregulars are extremely powerful individuals who were not selected by Headon. Instead, they entered the First Floor from outside the Tower. They ramp up when killing enemies by stacking multiple different traits on themselves. Twenty-Fifth Baam is an Irregular.
+**Descripttion:**
+
+Irregulars are extremely powerful individuals who were not selected by Headon and came from outside the Tower. They ramp up when killing enemies by stacking multiple different traits on themselves. Jyu Viole Grace is an Irregular.
 
 **Core in-game mechanic:**
 
@@ -402,6 +412,10 @@ Slay: Grant me a random **Outsider Power** that I don't already have.
 - `**Passive**: Silence doesnt affect me`
 
 ### Living Ignition Weapon
+
+**Descripttion:**
+
+Living Ignition Weapons are living beings who were fused with a Weapon by the Workshop. They can use a plethora of equipments to adapt to any circumstance. Kang Horyang is a Living Ignition Weapon.
 
 **Core in-game mechanic:**
 

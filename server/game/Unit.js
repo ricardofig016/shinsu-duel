@@ -19,8 +19,9 @@ export default class Unit {
     this.owner = card.owner; // player username
     this.bus = card.bus;
 
-    // Equipment attachment tracking
-    this.equipment = null; // currently attached equipment Card, null if none
+    // Canonical equipment attachment tracking. Every attached card is kept
+    // individually so its modifiers and ignition subscriptions remain scoped.
+    this.equipmentAttachments = [];
   }
 
   // Stub — Phase 3/4 will implement ability/passive activation

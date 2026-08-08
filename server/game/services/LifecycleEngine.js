@@ -167,7 +167,7 @@ export default class LifecycleEngine {
     if (result?.cancelled) return;
 
     // Detach equipment — returns to hand (de-ignited per RULES.md)
-    if (unit.equipment) {
+    if (LifecycleEngine._getEquipment(unit).length > 0) {
       LifecycleEngine.detachEquipment(gameState, unit);
     }
 
@@ -296,7 +296,8 @@ export default class LifecycleEngine {
 
   /**
    * Attach equipment to a unit.
-   * Validates Irregular multi-equip rule, replaces existing equipment.
+   * Living Ignition Weapons retain distinct equipment definitions; all other
+   * units replace their existing attachment.
    */
   static attachEquipment(gameState, username, handIndex, targetUnit) {
     const player = gameState.playerStates[username];
@@ -312,19 +313,22 @@ export default class LifecycleEngine {
       throw new Error("Not enough shinsu to equip.");
     }
 
-    // Irregulars may retain several unique equipment instances. Store every
-    // attachment in one canonical list; `equipment` remains a compatibility
-    // alias for callers and the client projection.
-    const isIrregular = gameState.modifierStack.has(targetUnit.id, "attribute", "irregular") ||
-      (targetUnit.card?.attributes || []).includes("irregular");
+    // Living Ignition Weapons may retain several equipment cards, but each
+    // attachment must be a different card definition. Attachments are stored
+    // canonically so modifiers and ignition triggers retain card-instance scope.
+    const isLivingIgnitionWeapon = gameState.modifierStack.has(
+      targetUnit.id,
+      "attribute",
+      "living ignition weapon"
+    ) || (targetUnit.card?.attributes || []).includes("living ignition weapon");
     const attachments = LifecycleEngine._getEquipment(targetUnit);
 
-    if (attachments.length > 0 && !isIrregular) {
-      // A normal bearer replaces its existing equipment.
-      LifecycleEngine.detachEquipment(gameState, targetUnit, attachments[0]);
+    if (isLivingIgnitionWeapon && attachments.some((attached) => attached.cardId === card.cardId)) {
+      throw new Error("A Living Ignition Weapon can only equip unique equipment cards.");
     }
-    if (isIrregular && attachments.some((attached) => attached.cardId === card.cardId)) {
-      throw new Error("An Irregular can only equip unique equipment cards.");
+    if (attachments.length > 0 && !isLivingIgnitionWeapon) {
+      // Normal units, including Irregulars, replace their existing equipment.
+      LifecycleEngine.detachEquipment(gameState, targetUnit, attachments[0]);
     }
 
     ZoneService.removeFromHand(player, handIndex);
@@ -392,15 +396,17 @@ export default class LifecycleEngine {
   }
 
   static _getEquipment(unit) {
-    if (Array.isArray(unit.equipmentAttachments)) return unit.equipmentAttachments;
-    return unit.equipment ? [unit.equipment] : [];
+    // Test and effect fixtures may provide lightweight unit-shaped objects.
+    // Normalize them to the canonical representation; no legacy equipment
+    // property is read or reconstructed.
+    if (!Array.isArray(unit.equipmentAttachments)) {
+      unit.equipmentAttachments = [];
+    }
+    return unit.equipmentAttachments;
   }
 
-  static _syncEquipment(unit, equipment) {
-    unit.equipmentAttachments = equipment;
-    // Keep the historic single-card property stable for existing callers and
-    // clients while Irregular-only consumers read equipmentAttachments.
-    unit.equipment = equipment[0] || null;
+  static _syncEquipment(unit, equipmentAttachments) {
+    unit.equipmentAttachments = equipmentAttachments;
   }
 
   static _resolveEquipmentEffects(gameState, unit, equipment) {

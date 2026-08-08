@@ -20,7 +20,7 @@ describe("TriggerManager ignition and given triggers", () => {
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipmentHandId, targetUnitId: bearer.id },
     });
-    expect(bearer.equipment.name).toBe("Narumada");
+    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada"]);
 
     const victimCardId = getCardIdByName("Monkeyman");
     const victimCard = new Card(victimCardId, game.constructor.cards[victimCardId], "Bob", game.eventBus);
@@ -38,6 +38,6 @@ describe("TriggerManager ignition and given triggers", () => {
     game.eventBus.emit("unit:damage:applied", { sourceId: bearer.id, targetId: victim.id, amount: 5 });
     game.eventBus.emit("unit:killed", { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
-    expect(bearer.equipment.name).toBe("Narumada (ignited)");
+    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada (ignited)"]);
   });
 });

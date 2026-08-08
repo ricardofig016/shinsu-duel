@@ -92,9 +92,9 @@ triggerManager.registerTransformation(
 ```
 
 **`equipmentId` disambiguates ignition triggers when a bearer holds more
-than one equipment card (Irregular units).** Without it, killing a unit
-while holding two ignitable equipments would be ambiguous about which one
-ignites. It's `null` for evolution, which always targets the unit itself.
+than one equipment card (Living Ignition Weapon units).** Without it, killing
+a unit while holding two ignitable equipments would be ambiguous about which
+one ignites.
 
 ### Subscription cleanup
 

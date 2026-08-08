@@ -272,18 +272,14 @@ export default class GameState {
       field: {
         frontline: playerState.field.frontline.map((unit) => ({
           ...unit.toSanitizedObject(),
-          equipment: Array.isArray(unit.equipment)
-            ? unit.equipment.map((card) => card.name)
-            : unit.equipment?.name || null,
+          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
         backline: playerState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
-          equipment: Array.isArray(unit.equipment)
-            ? unit.equipment.map((card) => card.name)
-            : unit.equipment?.name || null,
+          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
           grantedAbilities: this.#getGrantedAbilities(unit.id),
@@ -337,13 +333,13 @@ export default class GameState {
       field: {
         frontline: opponentState.field.frontline.map((unit) => ({
           ...unit.toSanitizedObject(),
-          equipment: unit.equipment?.name || null,
+          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
         })),
         backline: opponentState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
-          equipment: unit.equipment?.name || null,
+          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
         })),
@@ -524,7 +520,7 @@ export default class GameState {
           hp: u.currentHp,
           maxHp: u.card?.maxHp,
           position: u.placedPositionCode,
-          equipment: u.equipment?.name || null,
+          equipmentAttachments: (u.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
         })) ?? [],
@@ -534,7 +530,7 @@ export default class GameState {
           hp: u.currentHp,
           maxHp: u.card?.maxHp,
           position: u.placedPositionCode,
-          equipment: u.equipment?.name || null,
+          equipmentAttachments: (u.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
         })) ?? [],
