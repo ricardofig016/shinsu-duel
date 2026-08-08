@@ -7,7 +7,7 @@ positions:
   - light bearer
 passives:
 abilities:
-  - kill an ally to Create 3
+  - kill an ally to Create 3 and give me a random numeric trait
   - "spend 3: summon Akryung from your deck or hand"
 evolve:
 traits:

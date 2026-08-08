@@ -7,7 +7,7 @@ positions:
   - wave controller
 passives:
 abilities:
-  - deal 1 for each trait i have to an enemy
+  - Silence an enemy that has at least one passive
   - "spend 2: use an enemy ability"
 evolve:
 traits:

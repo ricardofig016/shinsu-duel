@@ -327,7 +327,7 @@ export default class LifecycleEngine {
       throw new Error("A Living Ignition Weapon can only equip unique equipment cards.");
     }
     if (attachments.length > 0 && !isLivingIgnitionWeapon) {
-      // Normal units, including Irregulars, replace their existing equipment.
+      // Normal units replace their existing equipment.
       LifecycleEngine.detachEquipment(gameState, targetUnit, attachments[0]);
     }
 

@@ -392,24 +392,13 @@ When I'm deployed, heal 2 HP from or summon **Conduit** on the enemy backline.
 
 **Descripttion:**
 
-Irregulars are extremely powerful individuals who were not selected by Headon and came from outside the Tower. They ramp up when killing enemies by stacking multiple different traits on themselves. Jyu Viole Grace is an Irregular.
+Irregulars are powerful individuals who were not selected by Headon and came from outside the Tower. They don't follow the rules of the Tower and so are unaltered by many card effects. Jyu Viole Grace is an Irregular.
 
 **Core in-game mechanic:**
 
 ```md
-Slay: Grant me a random **Outsider Power** that I don't already have.
-**Power of Fortitude**: Immune and Regenerate
-**Power of Aegis**: Resilient and Barrier
-**Power of Ruin**: Pierce and Ruthless
-**Power of Vigor**: Bloodthirsty and Strong
-**Power of Defiance**: Reflect and Taunt
+Unit passives and landmarks have no effect on me.
 ```
-
-**Example Synergies:**
-
-- `**Ability**: deal 1 for every trait i have to an enemy`
-- `**Ability**: spend 3: give me Lethal`
-- `**Passive**: Silence doesnt affect me`
 
 ### Living Ignition Weapon
 

@@ -4,13 +4,15 @@
 
 - [ ] frontend: change board background to something from the webtoon
 - [ ] data: rename all ` (evolved)`/` (ignited)` to ` - Evolved`/` - Ignited`
+- [ ] lookup: sending results in duplicated `>npm run lookup living ignition weapon: Twenty-Fifth Baam (attributes=living ignition weapon, attributes=living ignition weapon, attributes=living ignition weapon)`
+- [ ] data: change Creator and Dealer from `When I am deployed` to `Round start`
 
 ## In Progress
 
-- [ ] generic: irregular attribute is being confused with living ignition weapon
 
 ## Completed
 
+- [x] generic: irregular attribute is being confused with living ignition weapon
 - [x] targetting engine: make sure taunt enforces first target on mass-target effects
 - [x] targetting engine: sharpshooter bypasses taunt when it should not
 - [x] targetting engine: enemy lighthouses should be targetable when no non-ghost enemies are on the board

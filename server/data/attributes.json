@@ -21,7 +21,7 @@
   },
   "irregular": {
     "name": "Irregular",
-    "description": "Slay: Grant me a random Outsider Power that I don't already have."
+    "description": "Unit passives and landmarks have no effect on me."
   },
   "living-ignition-weapon": {
     "name": "Living Ignition Weapon",
