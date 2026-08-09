@@ -1,0 +1,7 @@
+type: skill
+name: Thunder Baang
+cost: 1
+requirements:
+effects:
+  - i am a Jeonsul Baang
+  - give Exhausted 1 to a unit
