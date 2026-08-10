@@ -14,6 +14,8 @@ if you check of a todo item, simply change `[ ]` to `[x]` on that item. do not m
 
 always follow these principles:
 
+Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. you should always want to fix imperfections, never patch them up.
+
 maximize and thrive for excelent, enterprise-level design and architecture, code cleanliness, maintainability, extensibility, and scalability. identify exactly what is the purpose of these changes and their role in the overall project and project resurrection. identify all the gaps, pitfalls, and features that need to be addressed in this feature. provide clear acceptance criteria for each task. ensure that the changes align with the overall project resurrection goals and objectives. the most important thing here that i need you to constantly keep in mind is that we need to expect that the most unique and complex cards, interactions, and game mechanics will be added to the game in the future, and it needs to be designed to handle everything that any hypothetical game mechanic can throw at it. don't be too afraid to overengineer the architecture in the pursuit of perfection.
 
 make sure that the implemented components are well encorporated into the existing project, and not just thrown in as an independent module. the implementation should feel like it fits in with the existing code.
