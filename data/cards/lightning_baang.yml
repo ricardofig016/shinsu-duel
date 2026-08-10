@@ -1,0 +1,7 @@
+type: skill
+name: Lightning Baang
+cost: 1
+requirements:
+effects:
+  - i am a Jeonsul Baang
+  - give Burned 1 to a unit

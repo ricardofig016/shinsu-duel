@@ -9,11 +9,12 @@ positions:
 passives:
 abilities:
   - deal 3 to a frontline enemy
-  - deal 2 to a backline enemy
+  - heal enemy Conduit 2 HP
 evolve:
   - Redan is played on me
 traits:
 attributes:
+  - jeonsulsa
 affiliations:
   - team fug
   - team novick

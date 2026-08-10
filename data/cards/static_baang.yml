@@ -1,0 +1,7 @@
+type: skill
+name: Static Baang
+cost: 1
+requirements:
+effects:
+  - i am a Jeonsul Baang
+  - give Weak 1 to a unit

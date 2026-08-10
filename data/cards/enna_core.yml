@@ -1,0 +1,7 @@
+type: skill
+name: Enna Core
+cost: 2
+requirements:
+effects:
+  - Quick
+  - Reclaim 2 equipments

@@ -1,0 +1,16 @@
+type: unit
+name: Conduit
+cost: 0
+hp: 2
+rank:
+positions:
+passives:
+  - Unreachable
+  - "round start: give me Ghost"
+  - "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+  - "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+abilities:
+evolve:
+traits:
+attributes:
+affiliations:
