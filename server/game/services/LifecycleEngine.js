@@ -287,7 +287,7 @@ export default class LifecycleEngine {
     attachments[attachmentIndex] = ignited;
     LifecycleEngine._syncEquipment(unit, attachments);
     LifecycleEngine._resolveEquipmentEffects(gameState, unit, ignited);
-    gameState.eventBus.emit("equipment:ignited", {
+    gameState.eventBus.emit(EVT.EQUIPMENT_IGNITED, {
       unitId: unit.id,
       equipment: ignited,
       fromCardId: oldEquipment.cardId,
