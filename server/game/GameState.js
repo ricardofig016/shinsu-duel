@@ -73,7 +73,7 @@ export default class GameState {
     this.roundEndOnTurnEnd = false;
     this.gameOver = null; // { winner, reason }
     this.pendingDecision = null;
-    this._nextDecisionId = 1;
+    this._pendingDecisions = []; // stack for nested pending decisions
 
     // initialize game state
     this.playerStates = {
@@ -409,38 +409,12 @@ export default class GameState {
   }
 
   /**
-   * Reset shinsu for the given usernames. This is called primarily at the end of a round.
-   * @param {*} usernames - array of strings, with each username to reset
+   * Shinsu is now fully managed by ShinsuService.
    */
-  #resetShinsu(usernames) {
-    usernames.forEach((username) => {
-      const player = this.playerStates[username];
-      if (player) {
-        const unspentShinsu = player.shinsu.recharged + player.shinsu.normalAvailable || 0;
-        player.shinsu = {
-          normalSpent: 0,
-          normalAvailable: Math.min(GameState.MAX_NORMAL_SHINSU, this.round),
-          recharged: Math.min(GameState.MAX_RECHARGED_SHINSU, unspentShinsu),
-        };
-      }
-    });
-  }
-
-  /**
-   * First, deduct from recharged shinsu, then deduct the rest from normal shinsu
-   * @param {string} username
-   * @param {number} cost - the cost to deduct (int)
-   */
-  spendShinsu(username, cost) {
-    const player = this.playerStates[username];
-    if (!player) throw new Error(`Player ${username} not found.`);
-    if (!Number.isInteger(cost) || cost < 0) return;
-    ShinsuService.spend(player, cost);
-  }
 
   processAction(action) {
     if (this.gameOver) throw new Error("The game is over.");
-    if (this.pendingDecision) {
+    if (this.pendingDecision || this._pendingDecisions.length > 0) {
       throw new Error("A player decision must be resolved before another action.");
     }
 
@@ -539,7 +513,21 @@ export default class GameState {
     return snap;
   }
 
-  // Check and set lighthouses (with game-over detection)
+  /**
+   * Reset shinsu for both players at game start.
+   */
+  #resetShinsu(usernames) {
+    usernames.forEach((username) => {
+      const player = this.playerStates[username];
+      if (player) {
+        player.shinsu = {
+          normalSpent: 0,
+          normalAvailable: Math.min(GameState.MAX_NORMAL_SHINSU, this.round),
+          recharged: 0,
+        };
+      }
+    });
+  }
   modifyLighthouses(username, amount) {
     const player = this.playerStates[username];
     if (!player) throw new Error(`Player ${username} not found.`);
@@ -552,16 +540,15 @@ export default class GameState {
     return player.lighthouses.amount;
   }
 
-  /** Create and publish the single authoritative pending decision. */
+  /** Create and publish a pending decision. If a decision is already active, push onto the stack. */
   createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve }) {
-    if (this.pendingDecision) throw new Error("A player decision is already pending.");
     if (!this.usernames.includes(owner)) throw new Error("Decision owner must be a game player.");
     if (!Array.isArray(candidates) || candidates.length < minChoices) {
       throw new Error("Not enough valid candidates for the requested decision.");
     }
 
     const decision = {
-      decisionId: `decision#${this._nextDecisionId++}`,
+      decisionId: IdFactory.decisionId(),
       owner,
       type,
       candidates: candidates.map(({ id, name, hp }) => ({ id, name, hp })),
@@ -570,7 +557,13 @@ export default class GameState {
       resolve,
       onResolved: null,
     };
+
+    // If a decision is already pending, push current to stack
+    if (this.pendingDecision) {
+      this._pendingDecisions.push(this.pendingDecision);
+    }
     this.pendingDecision = decision;
+
     this.eventBus.emit(EVT.DECISION_PENDING, {
       decisionId: decision.decisionId,
       owner,
@@ -602,8 +595,19 @@ export default class GameState {
     // Resolve the selected state first, then clear this decision before running
     // continuations so a later effect may legitimately create its own choice.
     pending.resolve?.(choices);
-    this.pendingDecision = null;
+    this.pendingDecision = this._pendingDecisions.pop() || null;
     pending.onResolved?.();
     this.eventBus.emit(EVT.DECISION_RESOLVED, { decisionId, owner: pending.owner, type: pending.type, choices });
+    // If a stacked decision is now active, notify the client
+    if (this.pendingDecision) {
+      this.eventBus.emit(EVT.DECISION_PENDING, {
+        decisionId: this.pendingDecision.decisionId,
+        owner: this.pendingDecision.owner,
+        type: this.pendingDecision.type,
+        candidates: this.pendingDecision.candidates,
+        minChoices: this.pendingDecision.minChoices,
+        maxChoices: this.pendingDecision.maxChoices,
+      });
+    }
   }
 }

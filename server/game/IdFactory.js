@@ -21,11 +21,13 @@
 let _cardInstanceSeq = 0;
 let _unitInstanceSeq = 0;
 let _modifierSeq = 0;
+let _decisionSeq = 0;
 
 export function resetAll() {
   _cardInstanceSeq = 0;
   _unitInstanceSeq = 0;
   _modifierSeq = 0;
+  _decisionSeq = 0;
 }
 
 // ── Source IDs (ModifierStack) ──────────────────────────────────────────────
@@ -74,6 +76,10 @@ export function modifierId() {
   return `mod_${++_modifierSeq}`;
 }
 
+export function decisionId() {
+  return `decision#${++_decisionSeq}`;
+}
+
 export default {
   resetAll,
   unitSource,
@@ -86,4 +92,5 @@ export default {
   cardInstance,
   unitInstance,
   modifierId,
+  decisionId,
 };

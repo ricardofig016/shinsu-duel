@@ -82,9 +82,10 @@ export default class ZoneService {
 
   /**
    * Shuffle the deck using a seeded RNG (deterministic).
+   * Callers MUST provide a deterministic RNG; no Math.random fallback.
    */
-  static shuffleDeck(playerState, rng = Math.random) {
-    if (!playerState.deck) return;
+  static shuffleDeck(playerState, rng) {
+    if (!playerState.deck || !rng) return;
     const arr = playerState.deck;
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1));

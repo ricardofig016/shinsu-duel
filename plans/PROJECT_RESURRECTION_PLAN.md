@@ -7,8 +7,8 @@ This document is the implementation contract for rebuilding the game engine with
 | Phase                            | Status      | Scope                                                                       |
 | -------------------------------- | ----------- | --------------------------------------------------------------------------- |
 | 0 — Foundation and data pipeline | Complete    | Source validation, compilation, runtime card contract, rules/data alignment |
-| 1 — EventBus                     | In progress | Mutation-capable event pipeline, tests, and validator tests                 |
-| 2 — GameState                    | Not started | Rules-complete authoritative game state                                     |
+| 1 — EventBus                     | Complete    | Mutation-capable event pipeline, tests, and validator tests                 |
+| 2 — GameState                    | Complete    | Rules-complete authoritative game state with service-layer mutations         |
 | 3 — Actions                      | Not started | Complete player action model                                                |
 | 4 — Effects and passives         | Not started | Generic DSL execution and custom handlers                                   |
 | 5 — Integration testing          | Not started | Cross-system and regression coverage                                        |
