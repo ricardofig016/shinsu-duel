@@ -68,7 +68,7 @@ export default class UseAbilityAction extends ActionHandler {
     const heavy = gameState.modifierStack.getEffective(unit.id, "condition", "heavy");
     const abilityCost = baseCost + heavy;
     if (!ShinsuService.canAfford(playerState, abilityCost)) throw new Error("Not enough shinsu to use this ability.");
-    RequirementValidator.validate(ability.requirements, { gameState, sourceUnit: unit, card: unit.card });
+    RequirementValidator.validate(ability.requirements, { gameState, username, sourceUnit: unit, card: unit.card });
     return true;
   }
 

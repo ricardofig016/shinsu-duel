@@ -24,7 +24,7 @@ export default class PlaySkillAction extends ActionHandler {
     if (!ShinsuService.canAfford(player, Math.max(0, card.cost - (card.costReduction || 0)))) {
       throw new Error("Not enough shinsu to play this skill.");
     }
-    RequirementValidator.validate(card.requirements, { gameState, card });
+    RequirementValidator.validate(card.requirements, { gameState, username: data.username, card });
   }
 
   execute(data, gameState) {
@@ -32,6 +32,7 @@ export default class PlaySkillAction extends ActionHandler {
     const card = ZoneService.removeFromHand(player, data.handId);
     const cost = Math.max(0, card.cost - (card.costReduction || 0));
     ShinsuService.spend(player, cost);
+    gameState.recordCardPlayed(data.username);
 
     gameState.eventBus.emit(EVT.SKILL_APPLIED, { owner: data.username, cardName: card.name, card });
     const effectContext = {

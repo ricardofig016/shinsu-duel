@@ -25,12 +25,13 @@ export default class EquipEquipmentAction extends ActionHandler {
 
     const cost = Math.max(0, card.cost - (card.costReduction || 0));
     if (!ShinsuService.canAfford(player, cost)) throw new Error("Not enough shinsu to equip.");
-    RequirementValidator.validate(card.requirements, { gameState, card, sourceUnit: targetUnit, targetUnit });
+    RequirementValidator.validate(card.requirements, { gameState, username: data.username, card, sourceUnit: targetUnit, targetUnit });
   }
 
   execute(data, gameState) {
     const targetUnit = gameState._findUnit(data.targetUnitId);
     LifecycleEngine.attachEquipment(gameState, data.username, data.handId, targetUnit);
+    gameState.recordCardPlayed(data.username);
     gameState.endTurn();
   }
 }

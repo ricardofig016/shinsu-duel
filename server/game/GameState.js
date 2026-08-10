@@ -71,6 +71,12 @@ export default class GameState {
     // Barrier tracking (reset on round start)
     this._barrierUsedThisRound = new Set();
 
+    // Unit lookup index (O(1) by id)
+    this._unitIndex = new Map();
+
+    // Track cards played per player per round for "first card" requirements
+    this._cardsPlayedThisRound = new Map();
+
     // Deterministic first player
     this.roomCode = roomCode;
     this.usernames = usernames;
@@ -114,6 +120,7 @@ export default class GameState {
 
     this.eventBus.on(EVT.ROUND_START, () => {
       this._barrierUsedThisRound.clear();
+      this._cardsPlayedThisRound.clear();
       for (const username of this.usernames) {
         CombatSlotService.resetAll(this.playerStates[username]);
       }
@@ -426,10 +433,13 @@ export default class GameState {
   }
 
   /**
-   * Find a unit by its instance ID across both players' fields.
-   * Used by handlers that need to modify unit state.
+   * Find a unit by its instance ID — O(1) via index, with linear fallback
+   * for test-created unit stubs that bypass the LifecycleEngine.
    */
   _findUnit(unitId) {
+    const indexed = this._unitIndex.get(unitId);
+    if (indexed) return indexed;
+    // Fallback linear scan (test harnesses that push raw objects)
     for (const username of this.usernames) {
       const field = this.playerStates[username]?.field;
       if (!field) continue;
@@ -438,6 +448,16 @@ export default class GameState {
       }
     }
     return null;
+  }
+
+  /** Index a newly deployed unit for O(1) lookup. */
+  _indexUnit(unit) {
+    if (unit?.id) this._unitIndex.set(unit.id, unit);
+  }
+
+  /** Remove a unit from the index. */
+  _unindexUnit(unitId) {
+    this._unitIndex.delete(unitId);
   }
 
   /**
@@ -499,6 +519,14 @@ export default class GameState {
   }
   modifyLighthouses(username, amount) {
     return LighthouseService.modify(this, username, amount);
+  }
+
+  /**
+   * Record a card play for "first card this round" requirement tracking.
+   */
+  recordCardPlayed(username) {
+    const count = this._cardsPlayedThisRound.get(username) || 0;
+    this._cardsPlayedThisRound.set(username, count + 1);
   }
 
   /**

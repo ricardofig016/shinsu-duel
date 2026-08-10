@@ -40,6 +40,7 @@ export default class DeployUnitAction extends ActionHandler {
   execute(data, gameState) {
     const { username, handId, placedPositionCode } = data;
     LifecycleEngine.deployUnit(gameState, username, handId, placedPositionCode);
+    gameState.recordCardPlayed(username);
     gameState.completeActionAfterDecision(() => gameState.endTurn());
   }
 }

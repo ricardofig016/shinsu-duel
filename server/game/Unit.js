@@ -1,5 +1,4 @@
 import * as IdFactory from "./IdFactory.js";
-import EVT from "./EventCatalog.js";
 
 /**
  * Represents a unit placed on the battlefield.
@@ -23,15 +22,6 @@ export default class Unit {
     // Canonical equipment attachment tracking. Every attached card is kept
     // individually so its modifiers and ignition subscriptions remain scoped.
     this.equipmentAttachments = [];
-  }
-
-  // Stub — Phase 3/4 will implement ability/passive activation
-  onSummon(gameState) {
-    this.bus.emit(EVT.UNIT_SUMMONED, { unitId: this.id });
-  }
-
-  onRemove(gameState) {
-    this.bus.emit(EVT.UNIT_DESTROYED, { unitId: this.id });
   }
 
   isAlive() {

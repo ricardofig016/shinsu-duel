@@ -81,6 +81,7 @@ export default class LifecycleEngine {
     const unit = new Unit(card, positionCode);
     const line = player.field[positionDef.line];
     line.push(unit);
+    gameState._indexUnit(unit);
 
     // Check line overflow (max 5 units). The owner chooses one of the six
     // units, including the new deployment, to destroy before play continues.
@@ -173,6 +174,7 @@ export default class LifecycleEngine {
     }
 
     // Remove from field
+    gameState._unindexUnit(unit.id);
     for (const username of gameState.usernames) {
       const field = gameState.playerStates[username]?.field;
       if (!field) continue;
