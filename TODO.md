@@ -3,21 +3,23 @@
 ## Tasks
 
 - [ ] frontend: change board background to something from the webtoon
-- [ ] data: rename all ` (evolved)`/` (ignited)` to ` - Evolved`/` - Ignited`
+- [ ] data: rename all ` (evolved)`/` (ignited)` cards to ` - Evolved`/` - Ignited`
 - [ ] lookup: sending results in duplicated `>npm run lookup living ignition weapon: Twenty-Fifth Baam (attributes=living ignition weapon, attributes=living ignition weapon, attributes=living ignition weapon)`
 - [ ] data: change Creator and Dealer from `When I am deployed` to `Round start`
+- [ ] data: implement Disabled, Blinded, and Undying
+- [ ] rules: update jeonsulsa attribute
 - [ ] rules: add Disarm keyword - unequip a unit and send the equipment back to the owners hand (choose on LIW) 
 - [ ] rules: add Contracts - set of ~15 game modifier effects
-- [ ] rules: add Disabled condtion - passives turned off
-- [ ] rules: add Blinded condtion - targeted abilities are instead chosen at random
-- [ ] rules: add Tenacious trait - when i would die, i survive with 1hp instead
-- [ ] rules: update jeonsulsa attribute
+- [ ] data/cards: support folders for organization
 
 ## In Progress
 
 
 ## Completed
 
+- [x] rules: add Disabled condtion - passives turned off
+- [x] rules: add Blinded condtion - targeted abilities are instead chosen at random
+- [x] rules: add Undying trait - when i would die, i survive with 1hp instead
 - [x] data: make Conduit card pass validation
 - [x] generic: irregular attribute is being confused with living ignition weapon
 - [x] targetting engine: make sure taunt enforces first target on mass-target effects

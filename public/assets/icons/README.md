@@ -9,9 +9,9 @@ Icons are **512×512 PNG** files with transparent backgrounds.
 
 Traits are color coded per RULES.md:
 
-- **Defensive Buffs (Yellow)**
-- **Damage Buffs (Orange)**
-- **Utility Buffs (Blue)**
+- **Defensive Buffs (Yellow #FFFF00)**
+- **Damage Buffs (Orange #FFA500)**
+- **Utility Buffs (Blue #00FFFF)**
 
 - barrier (yellow)
 - bloodthirsty (blue)
@@ -28,19 +28,22 @@ Traits are color coded per RULES.md:
 - sharpshooter (blue)
 - strong (orange)
 - taunt (yellow)
+- undying (yellow)
 - vengeful (orange)
 
 ## Conditions (11 total — `conditions/`)
 
 Conditions are color coded per RULES.md:
 
-- **Damage Debuffs (Red)**
-- **Utility Debuffs (Purple)**
+- **Damage Debuffs (Red #FF0000)**
+- **Utility Debuffs (Purple #AA00FF)**
 
+- blinded (purple)
 - burned (red)
 - cursed (red)
+- disabled (purple)
 - doomed (red)
-- exhausted (purple)
+- exhausted (red)
 - frozen (purple)
 - ghost (purple)
 - heavy (purple)
