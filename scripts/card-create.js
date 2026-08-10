@@ -9,6 +9,12 @@ const cardsDirectory = path.join(projectRoot, "data", "cards");
 
 const allowedTypes = new Set(["unit", "skill", "equipment"]);
 
+const FOLDER_MAP = {
+  unit: "units",
+  skill: "skills",
+  equipment: "equipments",
+};
+
 const templates = {
   unit: `type: unit
 name: 
@@ -72,11 +78,13 @@ async function main() {
 
   const normalizedName = normalizeName(nameArg);
   const filename = `${normalizedName}.yml`;
-  const filePath = path.join(cardsDirectory, filename);
+  const subDir = FOLDER_MAP[type];
+  const targetDir = path.join(cardsDirectory, subDir);
+  const filePath = path.join(targetDir, filename);
 
   try {
     await fs.access(filePath);
-    console.error(`${colors.red}Card file already exists: ${filename}${colors.reset}`);
+    console.error(`${colors.red}Card file already exists: ${path.relative(cardsDirectory, filePath)}${colors.reset}`);
     process.exitCode = 1;
     return;
   } catch {
@@ -98,9 +106,9 @@ async function main() {
   }
 
   try {
-    await fs.mkdir(cardsDirectory, { recursive: true });
+    await fs.mkdir(targetDir, { recursive: true });
     await fs.writeFile(filePath, template, "utf-8");
-    console.log(`${colors.green}✓ Created ${colors.cyan}${filename}${colors.green} (${type})${colors.reset}`);
+    console.log(`${colors.green}✓ Created ${colors.cyan}${path.relative(cardsDirectory, filePath)}${colors.green} (${type})${colors.reset}`);
   } catch (err) {
     console.error(`${colors.red}Failed to create file: ${err.message}${colors.reset}`);
     process.exitCode = 1;

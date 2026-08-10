@@ -130,10 +130,7 @@ function normalizeCardForSchema(card) {
 // ── Find and load cards ─────────────────────────────────────────────────────
 
 async function findCardFiles() {
-  const entries = await fs.readdir(cardsDirectory);
-  return entries
-    .filter((entry) => entry.endsWith(".yml") || entry.endsWith(".yaml"))
-    .map((entry) => path.join(cardsDirectory, entry));
+  return collectCardFiles(cardsDirectory);
 }
 
 async function loadCard(filePath) {

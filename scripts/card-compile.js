@@ -760,18 +760,15 @@ async function main() {
     stdio: "inherit",
   });
 
-  // 1. Read all YAML files
-  const entries = await fs.readdir(cardsDirectory);
-  const yamlFiles = entries
-    .filter((e) => e.endsWith(".yml") || e.endsWith(".yaml"))
-    .sort(); // alphabetical for stable ordering
+  // 1. Read all YAML files recursively
+  const yamlFiles = await collectCardFiles(cardsDirectory);
 
   const rawCards = [];
   const errors = [];
 
   for (const file of yamlFiles) {
     try {
-      const raw = await fs.readFile(path.join(cardsDirectory, file), "utf-8");
+      const raw = await fs.readFile(file, "utf-8");
       const card = yaml.load(raw);
       if (card && card.type) {
         rawCards.push(card);
