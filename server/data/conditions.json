@@ -1,4 +1,12 @@
 {
+  "blinded": {
+    "name": "Blinded",
+    "description": "My targets are chosen at random",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": false,
+    "iconPath": "conditions/blinded.png"
+  },
   "burned": {
     "name": "Burned",
     "description": "Turn end: I take x damage",
@@ -14,6 +22,14 @@
     "colorName": "Damage Debuff",
     "numeric": true,
     "iconPath": "conditions/cursed.png"
+  },
+  "disabled": {
+    "name": "Disabled",
+    "description": "My passives have no effect",
+    "color": "purple",
+    "colorName": "Utility Debuff",
+    "numeric": false,
+    "iconPath": "conditions/disabled.png"
   },
   "doomed": {
     "name": "Doomed",

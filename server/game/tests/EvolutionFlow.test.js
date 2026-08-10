@@ -25,8 +25,8 @@ describe("evolution flow", () => {
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    // Karaka should now be Karaka (evolved), HP delta preserved (7→9 max, full HP)
-    expect(karaka.card.name).toBe("Karaka (evolved)");
+    // Karaka should now be Karaka - Evolved, HP delta preserved (7→9 max, full HP)
+    expect(karaka.card.name).toBe("Karaka - Evolved");
     expect(karaka.currentHp).toBe(9);
 
     // Evolved unit should have its new passive (round end: deal 3 to all Rooted enemies)
@@ -80,7 +80,7 @@ describe("evolution flow", () => {
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    expect(karaka.card.name).toBe("Karaka (evolved)");
+    expect(karaka.card.name).toBe("Karaka - Evolved");
     expect(game.modifierStack.getEffective(karaka.id, "condition", "burned")).toBe(1);
   });
 });
@@ -127,12 +127,12 @@ describe("ignition revert on unequip", () => {
     game.eventBus.emit("unit:killed", { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
     // Narumada should be ignited
-    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Narumada (ignited)"]);
+    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Narumada - Ignited"]);
 
     // Detach → should revert to base form in hand
     LifecycleEngine.detachEquipment(game, bearer);
     expect(bearer.equipmentAttachments.length).toBe(0);
     expect(game.playerStates.Alice.hand.some((c) => c.name === "Narumada")).toBe(true);
-    expect(game.playerStates.Alice.hand.some((c) => c.name === "Narumada (ignited)")).toBe(false);
+    expect(game.playerStates.Alice.hand.some((c) => c.name === "Narumada - Ignited")).toBe(false);
   });
 });

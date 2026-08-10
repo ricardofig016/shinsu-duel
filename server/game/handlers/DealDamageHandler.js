@@ -103,6 +103,20 @@ export default class DealDamageHandler extends BaseHandler {
 
     // Kill check
     if (!unit.isAlive()) {
+      // Emit cancellable death-intent before unit:killed.
+      // Undying (and future cheat-death mechanics) intercept here.
+      const deathResult = context.emitChild(EVT.UNIT_DEATH_INTENT, {
+        sourceId: payload.sourceId,
+        targetId,
+        killerId: payload.sourceId,
+        killerOwner: payload.sourceOwner,
+        damage: actualDamage,
+      });
+
+      if (deathResult?.cancelled) {
+        return { damageDealt: actualDamage, killed: false, undyingSaved: true };
+      }
+
       context.emitChild(EVT.UNIT_KILLED, {
         sourceId: payload.sourceId,
         targetId,

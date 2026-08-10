@@ -52,6 +52,9 @@ export default class PassiveManager {
   }
 
   _matches(trigger, unit, payload, gameState) {
+    // Disabled: passives have no effect (RULES.md).
+    // TODO: Phase 4 always-on passive application must also respect Disabled.
+    if (gameState.modifierStack.has(unit.id, "condition", "disabled")) return false;
     return gameState._findUnit(unit.id) === unit && unit.isAlive();
   }
 }

@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import Ajv from "ajv";
 
+import { collectCardFiles } from "./lib/collect-card-files.js";
+
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const cardsDirectory = path.join(projectRoot, "data", "cards");
@@ -68,14 +70,14 @@ function dslObject(raw, handler = null, extras = {}) {
 }
 
 const conditionNames = new Set([
-  "burned", "cursed", "doomed", "exhausted", "frozen", "ghost",
-  "heavy", "poisoned", "rooted", "stunned", "weak",
+  "blinded", "burned", "cursed", "disabled", "doomed", "exhausted",
+  "frozen", "ghost", "heavy", "poisoned", "rooted", "stunned", "weak",
 ]);
 
 const traitNames = new Set([
   "barrier", "bloodthirsty", "creator", "dealer", "immune",
   "last one standing", "lethal", "pierce", "reflect", "regenerate",
-  "resilient", "ruthless", "sharpshooter", "strong", "taunt", "vengeful",
+  "resilient", "ruthless", "sharpshooter", "strong", "taunt", "undying", "vengeful",
 ]);
 
 const targetAliases = new Map([
@@ -465,13 +467,12 @@ function resolveEvolveInto(card, allCards) {
   const evolveTriggers = card.evolve;
   if (!Array.isArray(evolveTriggers) || evolveTriggers.length === 0) return null;
 
-  // Find the evolved form of this card
-  // Convention: "{name} (evolved)" or "{name} evolved"
-  const expectedName = card.name + " (evolved)";
-  const evolvedCard = allCards.find((c) => c.name === expectedName);
+  // Convention: "{name} - Evolved"
+  const expectedEvolvedName = card.name + " - Evolved";
+  const evolvedCard = allCards.find((c) => c.name === expectedEvolvedName);
 
   if (!evolvedCard) {
-    throw new Error(`Evolution target "${expectedName}" for "${card.name}" does not exist or is not a unit.`);
+    throw new Error(`Evolution target "${expectedEvolvedName}" for "${card.name}" does not exist or is not a unit.`);
   }
 
   // Build typed trigger ASTs from evolve list
@@ -496,10 +497,10 @@ function resolveEvolveInto(card, allCards) {
 
 function resolveEvolvedFrom(card, allCards) {
   if (card.type !== "unit") return null;
-  // Check if this is an evolved card: name contains "(evolved)"
-  if (!card.name.toLowerCase().includes("(evolved)")) return null;
+  // Check if this is an evolved card: name contains " - Evolved"
+  if (!card.name.toLowerCase().includes(" - evolved")) return null;
 
-  const baseName = card.name.replace(/\s*\(evolved\)\s*/i, "").trim();
+  const baseName = card.name.replace(/\s*-\s*evolved\s*/i, "").trim();
   const baseCard = allCards.find((c) => c.name === baseName);
   return baseCard ? baseCard.cardId : null;
 }
@@ -509,12 +510,12 @@ function resolveIgniteInto(card, allCards) {
   const ignitionTriggers = card.ignition;
   if (!Array.isArray(ignitionTriggers) || ignitionTriggers.length === 0) return null;
 
-  // Find the ignited form: "{name} (ignited)"
-  const expectedName = card.name + " (ignited)";
-  const ignitedCard = allCards.find((c) => c.name === expectedName);
+  // Convention: "{name} - Ignited"
+  const expectedIgnitedName = card.name + " - Ignited";
+  const ignitedCard = allCards.find((c) => c.name === expectedIgnitedName);
 
   if (!ignitedCard) {
-    throw new Error(`Ignition target "${expectedName}" for "${card.name}" does not exist or is not equipment.`);
+    throw new Error(`Ignition target "${expectedIgnitedName}" for "${card.name}" does not exist or is not equipment.`);
   }
 
   // Build typed trigger ASTs from ignition list
@@ -539,9 +540,9 @@ function resolveIgniteInto(card, allCards) {
 
 function resolveIgnitedFrom(card, allCards) {
   if (card.type !== "equipment") return null;
-  if (!card.name.toLowerCase().includes("(ignited)")) return null;
+  if (!card.name.toLowerCase().includes(" - ignited")) return null;
 
-  const baseName = card.name.replace(/\s*\(ignited\)\s*/i, "").trim();
+  const baseName = card.name.replace(/\s*-\s*ignited\s*/i, "").trim();
   const baseCard = allCards.find((c) => c.name === baseName);
   return baseCard ? baseCard.cardId : null;
 }

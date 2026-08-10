@@ -3,7 +3,7 @@ import Card from "../Card.js";
 import { setupGameWithCardsInHand, advanceToRound, getCardIdByName } from "./utils.js";
 
 describe("TriggerManager ignition and given triggers", () => {
-  test("a slay while equipped with Narumada ignites it into Narumada (ignited)", () => {
+  test("a slay while equipped with Narumada ignites it into Narumada - Ignited", () => {
     const game = setupGameWithCardsInHand(["Monkeyman", "Narumada", "Monkeyman", "Monkeyman"]);
     advanceToRound(game, 3);
     game.currentTurn = "Alice";
@@ -38,6 +38,6 @@ describe("TriggerManager ignition and given triggers", () => {
     game.eventBus.emit("unit:damage:applied", { sourceId: bearer.id, targetId: victim.id, amount: 5 });
     game.eventBus.emit("unit:killed", { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
-    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada (ignited)"]);
+    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada - Ignited"]);
   });
 });

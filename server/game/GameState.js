@@ -39,8 +39,10 @@ export default class GameState {
    * @param {Array<string>} usernames array of exactly 2 usernames
    * @param {Object} decks (optional) dictionary mapping each username to an array of cardIds to use as that player's deck. If null, a random deck will be generated.
    * @param {string} firstPlayer (optional) username of the player to take the first turn. If null, a random player will be chosen.
+   * @param {Object} options (optional) additional configuration options.
+   * @param {Function} options.rng optional seeded RNG for deterministic random events (Blinded targeting, etc.). Defaults to Math.random.
    */
-  constructor(roomCode, usernames, decks = {}, firstPlayer = null) {
+  constructor(roomCode, usernames, decks = {}, firstPlayer = null, options = {}) {
     if (!roomCode || !usernames || usernames.length !== 2)
       throw new Error(
         "Invalid arguments: roomCode and usernames are required and must have exactly 2 usernames."
@@ -77,6 +79,9 @@ export default class GameState {
     // Track cards played per player per round for "first card" requirements
     this._cardsPlayedThisRound = new Map();
 
+    // Injectable RNG for deterministic random behavior (Blinded, etc.)
+    this._rng = options.rng || Math.random;
+
     // Deterministic first player
     this.roomCode = roomCode;
     this.usernames = usernames;
@@ -96,6 +101,21 @@ export default class GameState {
       ZoneService.draw(this.playerStates[username], GameState.INIT_HAND_SIZE, this);
     }
     this.#resetShinsu(this.usernames);
+
+    // Undying interception: restore to 1 HP and consume the trait on lethal hit.
+    this.eventBus.on(EVT.UNIT_DEATH_INTENT, (payload, context) => {
+      const { targetId } = payload;
+      const unit = this._findUnit(targetId);
+      if (!unit || !this.modifierStack.has(targetId, "trait", "undying")) return;
+
+      // Restore to 1 HP and consume the Undying trait (single-use per RULES.md).
+      unit.currentHp = 1;
+      this.modifierStack.removeWhere(
+        (m) => m.targetId === targetId && m.type === "trait" && m.key === "undying"
+      );
+      this.eventBus.emit(EVT.UNIT_UNDYING_TRIGGERED, { unitId: targetId, unit });
+      context.cancel("undying");
+    }, { phase: "pre" });
 
     // Wire Barrier reset and condition cleanup lifecycle events
     this.eventBus.on(EVT.GAME_DECK_EMPTY, ({ username, owner }) => {

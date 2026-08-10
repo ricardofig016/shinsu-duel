@@ -17,7 +17,7 @@
   },
   "creator": {
     "name": "Creator",
-    "description": "When I am deployed, Create x",
+    "description": "Round start: Create x",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -25,7 +25,7 @@
   },
   "dealer": {
     "name": "Dealer",
-    "description": "When I am deployed, draw x cards",
+    "description": "Round start: draw x cards",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -118,6 +118,14 @@
     "colorName": "Defensive Buff",
     "numeric": false,
     "iconPath": "traits/taunt.png"
+  },
+  "undying": {
+    "name": "Undying",
+    "description": "When I would die, I survive with 1 HP instead",
+    "color": "yellow",
+    "colorName": "Defensive Buff",
+    "numeric": false,
+    "iconPath": "traits/undying.png"
   },
   "vengeful": {
     "name": "Vengeful",

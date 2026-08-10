@@ -4,6 +4,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 
+import { collectCardFiles } from "./lib/collect-card-files.js";
+
 const currentFile = fileURLToPath(import.meta.url);
 const scriptsDirectory = path.dirname(currentFile);
 const cardsDirectory = path.join(scriptsDirectory, "..", "data", "cards");
@@ -74,10 +76,7 @@ ${colors.Yellow}WILDCARD${colors.Reset}
 // ---------------------------------------------------------------------------
 
 async function findCardFiles() {
-  const entries = await fs.readdir(cardsDirectory);
-  return entries
-    .filter((e) => e.endsWith(".yml") || e.endsWith(".yaml"))
-    .map((e) => path.join(cardsDirectory, e));
+  return collectCardFiles(cardsDirectory);
 }
 
 async function loadCard(filePath) {
@@ -94,7 +93,8 @@ async function loadCard(filePath) {
 // ---------------------------------------------------------------------------
 
 function parseArgs(rawArgs) {
-  const queries = [];
+  const flags = [];
+  const queryArgs = [];
   let dist = false;
   let help = false;
 
@@ -107,18 +107,20 @@ function parseArgs(rawArgs) {
       help = true;
       continue;
     }
-    queries.push(a);
+    queryArgs.push(a);
   }
 
+  // Join all non-flag args with a single space, then split on commas for AND queries.
+  // This means "npm run lookup living ignition weapon" becomes one global query for
+  // "living ignition weapon", while commas are the documented AND delimiter.
+  const joined = queryArgs.join(" ");
+  const andParts = joined.split(",");
+
   const parsedQueries = [];
-  for (const q of queries) {
-    // Split on comma, but only if it's a delimiter between queries
-    const parts = q.split(",");
-    for (const part of parts) {
-      const trimmed = part.trim();
-      if (trimmed.length > 0) {
-        parsedQueries.push(part.trim());
-      }
+  for (const part of andParts) {
+    const trimmed = part.trim();
+    if (trimmed.length > 0) {
+      parsedQueries.push(trimmed);
     }
   }
 
@@ -247,9 +249,15 @@ function fieldValueGetMatches(card, field, lookupValue) {
   }
 
   if (Array.isArray(raw)) {
-    const values = asList(raw).filter((v) => fieldMatches(card, field, lookupValue) || substringMatch(v, lookupValue));
-    if (values.length > 0) {
-      return [{ field, values }];
+    const matchedElements = asList(raw).filter((v) => {
+      if (typeof v === "string") {
+        // Per-element: try substring match on the element itself
+        return substringMatch(v, lookupValue);
+      }
+      return false;
+    });
+    if (matchedElements.length > 0) {
+      return [{ field, values: matchedElements }];
     }
     return [];
   }
@@ -429,7 +437,14 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(`${colors.Red}${error}${colors.Reset}`);
-  process.exitCode = 1;
-});
+// Only run main() when invoked directly (not imported by tests).
+const isMain = process.argv[1] && (process.argv[1] === fileURLToPath(import.meta.url) || process.argv[1].endsWith(path.basename(fileURLToPath(import.meta.url))));
+
+if (isMain) {
+  main().catch((error) => {
+    console.error(`${colors.Red}${error}${colors.Reset}`);
+    process.exitCode = 1;
+  });
+}
+
+export { parseArgs, legacyGetMatches, fieldValueGetMatches, findCardFiles, loadCard, fieldMatches, showDistribution };

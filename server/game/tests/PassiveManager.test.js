@@ -25,7 +25,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const karaka = putInHand(game, "Alice", "Karaka (evolved)");
+    const karaka = putInHand(game, "Alice", "Karaka - Evolved");
 
     const handIndex = game.playerStates.Alice.hand.indexOf(karaka);
     const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "wave-controller");

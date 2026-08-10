@@ -270,6 +270,18 @@ export function resolveTargets(gameState, options) {
   candidates = filterByRank(candidates, rank);
   candidates = filterByPosition(candidates, position);
 
+  // Blinded: randomize choice-descriptor targets (RULES.md).
+  // Self, bearer, all_enemies/all_allies, and enemy_lighthouses are not randomized.
+  const choiceDescriptors = new Set(["enemy", "ally", "enemies", "unit", "enemy_frontline", "enemy_backline"]);
+  if (sourceUnit && gameState.modifierStack.has(sourceUnit.id, "condition", "blinded") && choiceDescriptors.has(target) && candidates.length > 1) {
+    const rng = gameState._rng || Math.random;
+    // Fisher-Yates shuffle with injected RNG for deterministic testing.
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+  }
+
   // Limit count if specified
   if (count && count < candidates.length) {
     candidates = candidates.slice(0, count);

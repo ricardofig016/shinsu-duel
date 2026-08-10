@@ -28,6 +28,7 @@ traits:
   - sharpshooter
   - strong 10
   - taunt
+  - undying
   - vengeful 10
 attributes:
   - anima

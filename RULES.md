@@ -379,10 +379,10 @@ Jeonsulsa are lightning users who have the ability to give electrical properties
 
 ```md
 When I'm deployed, heal 2 HP from or summon **Conduit** on the enemy backline.
-**Conduit**: Ghost. Round start or Activation: If there is no Jeonsulsa on the enemy team, i die. For every 2 HP that I have, play 1 random **Jeonsul Baang** on yourself. No position. 2 HP.
-**Lightning Baang**: Deal 2 to a random ally.
-**Thunder Baang**: Give Rooted to random ally that is not already Rooted.
-**Static Baang**: Give Weak to a random ally.
+**Conduit**: No position. 2 HP. Round start: give me Ghost. Round start or Activation: if there is no Jeonsulsa on the enemy team, Slay me. Round start or Activation: for every 2 HP that I have, play 1 random **Jeonsul Baang** on a random ally.
+**Lightning Baang**: give Burned 1 to a unit.
+**Thunder Baang**: give Exhausted 1 to a unit.
+**Static Baang**: give Weak 1 to a unit.
 ```
 
 **Example Synergies:**

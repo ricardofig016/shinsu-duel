@@ -35,6 +35,10 @@ const EVT = {
   DAMAGE_APPLIED:   "unit:damage:applied", // was OnDealDamageApplied
   BARRIER_ABSORBED: "unit:barrier:absorbed",
 
+  // Death (before unit:killed; cancellable by Undying)
+  UNIT_DEATH_INTENT:      "unit:death:intent",
+  UNIT_UNDYING_TRIGGERED: "unit:undying:saved",
+
   // State changes
   CARD_DRAWN:     "card:drawn",
   CARD_RECLAIMED: "card:reclaimed",

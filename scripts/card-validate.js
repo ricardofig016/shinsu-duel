@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import Ajv from "ajv";
 
+import { collectCardFiles } from "./lib/collect-card-files.js";
+
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const cardsDirectory = path.join(projectRoot, "data", "cards");
@@ -36,7 +38,7 @@ const positionsRequiringNullRank = new Set([
 const traitNames = new Set([
   "barrier", "bloodthirsty", "creator", "dealer", "immune",
   "last one standing", "lethal", "pierce", "reflect", "regenerate",
-  "resilient", "ruthless", "sharpshooter", "strong", "taunt", "vengeful",
+  "resilient", "ruthless", "sharpshooter", "strong", "taunt", "undying", "vengeful",
 ]);
 
 const traitNamesWithNumericValue = new Set([
@@ -327,7 +329,7 @@ function validateCrossReferences(allCards, failuresByFile) {
 
     // Check evolve references for units
     if (card.type === "unit" && Array.isArray(card.evolve) && card.evolve.length > 0) {
-      const targetName = `${card.name} (evolved)`;
+      const targetName = `${card.name} - Evolved`;
       const target = nameToFile.get(targetName);
       if (!target || target.card.type !== "unit") {
         fileErrors.push(`evolve: target card "${targetName}" does not exist`);
@@ -335,7 +337,7 @@ function validateCrossReferences(allCards, failuresByFile) {
     }
 
     if (card.type === "equipment" && Array.isArray(card.ignition) && card.ignition.length > 0) {
-      const targetName = `${card.name} (ignited)`;
+      const targetName = `${card.name} - Ignited`;
       const target = nameToFile.get(targetName);
       if (!target || target.card.type !== "equipment") {
         fileErrors.push(`ignition: target card "${targetName}" does not exist`);
