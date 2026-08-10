@@ -6,6 +6,12 @@
 - [ ] data: rename all ` (evolved)`/` (ignited)` to ` - Evolved`/` - Ignited`
 - [ ] lookup: sending results in duplicated `>npm run lookup living ignition weapon: Twenty-Fifth Baam (attributes=living ignition weapon, attributes=living ignition weapon, attributes=living ignition weapon)`
 - [ ] data: change Creator and Dealer from `When I am deployed` to `Round start`
+- [ ] data: make Conduit card pass validation
+- [ ] rules: add Disarm keyword - unequip a unit and send the equipment back to the owners hand (choose on LIW) 
+- [ ] rules: add Contracts - set of ~15 game modifier effects
+- [ ] rules: add Disabled condtion - passives turned off
+- [ ] rules: add Blinded condtion - targeted abilities are instead chosen at random
+- [ ] rules: add Tenacious trait - when i would die, i survive with 1hp instead
 
 ## In Progress
 
