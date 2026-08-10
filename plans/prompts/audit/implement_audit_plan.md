@@ -2,7 +2,7 @@ implement the changes recommended by the audit and fix the problems it surfaced.
 
 do not edit documentation files.
 
-do not be afraid to ask me questions. im here for them. do not suppose anything nor guess, ask me. if anything is unclear at all, ask me. make your questions and options verbose, always include an open answer.
+do not be afraid to ask me questions. im here for them. do not suppose anything nor guess, ask me. if anything is unclear at all, ask me. make your questions and options verbose, always include an open answer. for every question, i want to know why it appeared, what everything means, which option you recommend and why, i want everything well explained. verbose.
 
 do not edit card yml files, if you feel like a card should be better written to fit with the compiler and the rest of the cards, ask me directly using the QA tool.
 
