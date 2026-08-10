@@ -81,9 +81,10 @@ hold no per-invocation state.
 `abilityCode` into `{ ability, sourceId, sourceType }`:
 
 - numeric index → the unit's compiled DSL ability (`unit.card.abilities[i]`)
-- `granted:<modifierId>` → an ability granted at runtime (e.g. by equipment
-  via `grant_ability`), stored as a ModifierStack modifier. Removing the
-  source (unequip) revokes the modifier and makes the code unresolvable.
+- `granted:<sourceId>:<type>` → an ability granted at runtime (e.g. by
+  equipment via `grant_ability`), resolved through `GameState._abilityRegistry`
+  (see `HANDLER_SYSTEM_ARCHITECTURE.md`). Removing the source (unequip)
+  revokes the registry entry and makes the code unresolvable.
 
 ### Quick / Free semantics
 

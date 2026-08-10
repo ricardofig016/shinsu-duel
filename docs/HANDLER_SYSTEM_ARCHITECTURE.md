@@ -16,12 +16,14 @@ validate it, and execute state changes through the `ModifierStack` and
 Handlers never mutate `playerState` fields directly. Shared-resource changes
 delegate to the authoritative services:
 
-| Resource    | Service / method                              |
-| ----------- | --------------------------------------------- |
-| Shinsu      | `ShinsuService.spend` / `ShinsuService.gain`  |
-| Card zones  | `ZoneService.draw` / `discard` / `reclaimTop` |
-| Lighthouses | `GameState.modifyLighthouses`                 |
-| Unit state  | `ModifierStack`                               |
+| Resource     | Service / method                                 |
+| ------------ | ------------------------------------------------ |
+| Shinsu       | `ShinsuService.spend` / `ShinsuService.gain`     |
+| Card zones   | `ZoneService.draw` / `discard` / `reclaimTop`    |
+| Compression  | `CompressionService.compress` / `clearReduction` |
+| Combat slots | `CombatSlotService.consume` / `resetAll`         |
+| Lighthouses  | `GameState.modifyLighthouses`                    |
+| Unit state   | `ModifierStack`                                  |
 
 | Concept           | Implementation                                                             |
 | ----------------- | -------------------------------------------------------------------------- |
@@ -118,7 +120,7 @@ At runtime, the resolution engine:
 3. Calls `handler.validate(payload)`
 4. Calls `handler.execute(payload, context, gameState)`
 
-For `type: "custom"` effects (~130 in the card set), there is **no handler registered**. These are raw-text effects that the resolution engine must skip gracefully (log a warning, don't crash).
+For `type: "custom"` effects (~116 in the card set), there is **no handler registered**. These are raw-text effects that the resolution engine must skip gracefully (log a warning, don't crash).
 
 ---
 
@@ -140,14 +142,33 @@ For `type: "custom"` effects (~130 in the card set), there is **no handler regis
 
 ## Additional Handlers
 
-| Handler                 | DSL `type`        | Key behavior                                                                           |
-| ----------------------- | ----------------- | -------------------------------------------------------------------------------------- |
-| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`         |
-| `CompressShinsuHandler` | `compress_shinsu` | Reduces a card's cost via `costReduction`, selected by structured `targetCardSelector` |
-| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                          |
-| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability DSL via ModifierStack; cleaned up on source removal            |
+| Handler                 | DSL `type`        | Key behavior                                                                            |
+| ----------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`          |
+| `CompressShinsuHandler` | `compress_shinsu` | Delegates to `CompressionService.compress`; selected by structured `targetCardSelector` |
+| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                           |
+| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability via `AbilityRegistry`; revoked on source removal                |
 
-All 12 structured DSL types have handler implementations. `custom` type effects (~130) remain unresolved until custom handlers are written.
+All 12 structured DSL types have handler implementations. `custom` type effects (~116) remain unresolved until custom handlers are written.
+
+## Ability Registry
+
+`server/game/registries/abilityRegistry.js` is the authoritative store for
+runtime-granted abilities (created by `grant_ability`). It holds the inner
+ability as a structured DSL object (not serialized JSON) with its provenance:
+
+```js
+gameState._abilityRegistry.grant(targetId, sourceId, sourceType, ability)
+  → { code: "granted:<sourceId>:<type>", ability }
+
+gameState._abilityRegistry.resolve(targetId, code)
+  → { ability, sourceType, sourceId } | null
+```
+
+`UseAbilityAction` resolves granted ability codes through the registry
+(see `ACTION_SYSTEM_ARCHITECTURE.md`). `LifecycleEngine` revokes entries on
+unit destroy and per-source on equipment detach, so an unequipped ability is
+no longer addressable.
 
 ## EffectResolver
 
@@ -227,13 +248,14 @@ function resolveEffect(effect, context, gameState) {
 ```
 
 The inner `ability` is a full DSL object with its own `type`, `amount`,
-`target` etc. `GrantAbilityHandler` registers it on the bearer via
-`ModifierStack` (`type: "ability"`) instead of executing it immediately.
+`target` etc. `GrantAbilityHandler` registers it in the `AbilityRegistry`
+(see the Ability Registry section) and records a `type: "ability"`
+`ModifierStack` marker keyed by the generated code.
 
 The bearer's player can then use it through `UseAbilityAction`, addressed
-as `granted:<modifierId>` instead of a numeric ability index. Unequipping
-the source removes the modifier, which makes the ability unusable again —
-no separate cleanup path is needed.
+as `granted:<sourceId>:<type>` instead of a numeric ability index.
+Unequipping the source revokes the modifier and the registry entry, which
+makes the ability unusable again — no separate cleanup path is needed.
 
 ---
 

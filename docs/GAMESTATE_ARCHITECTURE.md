@@ -10,14 +10,20 @@ This document describes the GameState architecture: zone model, service layer, l
 services and owns the complete game state tree. No handler, action, or
 engine mutates state directly — all mutations go through services.
 
-| Service               | Responsibility                                            |
-| --------------------- | --------------------------------------------------------- |
-| **ShinsuService**     | Shinsu pool math: reset, spend, gain, total               |
-| **ZoneService**       | Card movement: draw, discard, add/remove from hand        |
-| **LifecycleEngine**   | Unit lifecycle: deploy, destroy, transform, equip         |
-| **TriggerManager**    | Evolution/ignition: AST→event subscriptions               |
-| **PassiveManager**    | Timed passives (round start/end): DSL→event subscriptions |
-| **AttributeRegistry** | Pluggable attribute engines (Anima, Hwayeomsa)            |
+| Service                | Responsibility                                            |
+| ---------------------- | --------------------------------------------------------- |
+| **ShinsuService**      | Shinsu pool math: reset, spend, gain, total               |
+| **ZoneService**        | Card movement: draw, discard, add/remove from hand        |
+| **CompressionService** | Card cost compression (per card instance)                 |
+| **CombatSlotService**  | Position and Shinheuh combat slots                        |
+| **LighthouseService**  | Lighthouse life total (cap 40, game-over at 0)            |
+| **LifecycleEngine**    | Unit lifecycle: deploy, destroy, transform, equip         |
+| **TriggerManager**     | Evolution/ignition: AST→event subscriptions               |
+| **PassiveManager**     | Timed passives (round start/end): DSL→event subscriptions |
+| **AttributeRegistry**  | Pluggable attribute engines (Anima, Hwayeomsa)            |
+
+Each service owns one resource; nothing outside the service mutates it.
+See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.
 
 ---
 
@@ -54,6 +60,8 @@ Each player state has typed zones:
 | Frontline blocks backline  | `TargetResolver.resolveTargets`                   |
 | Taunt forces targeting     | `TargetResolver.applyTauntFilter`                 |
 | Conditions end-of-round    | `GameState` round end handler                     |
+| Card requirements          | `RequirementValidator` before cost deduction      |
+| First card this round      | `GameState._cardsPlayedThisRound` tracking        |
 | Barrier resets per round   | `GameState` round start handler                   |
 | Shinsu max = round num     | `ShinsuService.reset`                             |
 | Recharged shinsu max 2     | `ShinsuService.reset`                             |
@@ -121,6 +129,15 @@ LifecycleEngine.detachEquipment(gameState, unit, equipment?)
 
 `unit.equipmentAttachments` is the canonical equipment representation.
 It contains every attached card instance.
+
+---
+
+## Unit Lookup
+
+`GameState._findUnit(unitId)` resolves a unit by instance ID through an
+O(1) `_unitIndex` map, kept in sync by `LifecycleEngine` (`_indexUnit` on
+deploy, `_unindexUnit` on destroy). A linear scan over both fields serves
+as a fallback for unit-shaped test stubs that bypass the lifecycle engine.
 
 ---
 

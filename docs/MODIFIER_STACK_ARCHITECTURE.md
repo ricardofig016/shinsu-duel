@@ -33,7 +33,7 @@ silence) correct without manual bookkeeping.
   targetId:   "Unit#8",         // who receives the effect
   type:       "trait",          // trait | condition | stat | ability | keyword
   key:        "barrier",        // what is being modified
-  value:      1,                // numeric value (or string for ability grants)
+  value:      1,                // numeric value
   operation:  "add",            // add | set | override
   enabled:    true,             // Silence flips to false
   createdAt:  42,               // GameClock tick
@@ -42,17 +42,20 @@ silence) correct without manual bookkeeping.
 
 ### Type values
 
-| `type`      | Used for                                                      | Examples                                |
-| ----------- | ------------------------------------------------------------- | --------------------------------------- |
-| `trait`     | Native card traits + equipment-granted traits                 | Barrier, Strong, Lethal                 |
-| `condition` | Negative temporary effects                                    | Burned, Poisoned, Rooted                |
-| `stat`      | HP/damage/cost modifications                                  | +2 HP from equipment, -1 cost           |
-| `ability`   | Granted abilities, `value` holds the JSON-encoded ability DSL | Red Thryssa grants "deal 5 to an enemy" |
-| `keyword`   | Keyword overrides                                             | Quick, Free, Sharpshooter               |
+| `type`      | Used for                                                   | Examples                           |
+| ----------- | ---------------------------------------------------------- | ---------------------------------- |
+| `trait`     | Native card traits + equipment-granted traits              | Barrier, Strong, Lethal            |
+| `condition` | Negative temporary effects                                 | Burned, Poisoned, Rooted           |
+| `stat`      | HP/damage/cost modifications                               | +2 HP from equipment, -1 cost      |
+| `ability`   | Granted-ability lifetime marker; `key` is the ability code | Tracks `grant_ability` for cleanup |
+| `keyword`   | Keyword overrides                                          | Quick, Free, Sharpshooter          |
 
-Granted abilities are addressed by the bearer's player as
-`granted:<modifierId>` through `UseAbilityAction`. Removing the modifier
-(e.g. unequip) makes the code invalid — there is no separate revocation step.
+Granted abilities themselves live in the `AbilityRegistry` (structured DSL,
+not JSON) and are addressed by the bearer's player as
+`granted:<sourceId>:<type>` through `UseAbilityAction`. The ModifierStack
+entry with `type: "ability"` exists purely to tie the grant's lifetime to
+its source: removing the source (e.g. unequip) revokes both the modifier and
+the registry entry.
 
 ### Operation values
 

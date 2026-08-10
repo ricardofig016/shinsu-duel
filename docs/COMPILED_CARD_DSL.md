@@ -40,18 +40,24 @@ source and recompile. The compiled file is a build artifact.
     /* card object */
   },
   "...": {},
-  "65": {
+  "50": {
     /* card object */
   }
 }
 ```
 
-Keys are string representations of card IDs (`"0"` through `"65"` for 66
-cards). IDs are assigned alphabetically by card name at compile time.
+Keys are string representations of card IDs. IDs are assigned alphabetically by card name at compile time.
 
 **⚠️ Card IDs are stable within a compile run but may shift when cards
 are added or renamed.** Do not hardcode card IDs in game logic — look
 up by name or use the compiled `cardId` field.
+
+### Special case: Conduit
+
+**Conduit** is a Jeonsulsa-mechanic unit with no positions or rank in its
+source YAML. The validator and compiler normalize it to a dummy
+`positions: ["landmark"]` so schema validation passes; its actual placement
+is governed by the Jeonsulsa mechanics at runtime, not by a position field.
 
 ---
 
@@ -123,6 +129,29 @@ up by name or use the compiled `cardId` field.
 
 ---
 
+## Requirements
+
+`requirements` is an optional array of raw strings gating card play or use.
+They are validated by `RequirementValidator` before any cost is paid.
+Supported patterns (all enforced; unknown patterns fail validation):
+
+| Pattern                                  | Example                                              |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `deployed as <position>`                 | `"deployed as Fisherman"`                            |
+| `target is an ally` / `enemy`            | `"target is an ally"`                                |
+| `target is a <rank>`                     | `"target is a Ranker"`                               |
+| `<name> is in your board`                | `"Yeon Woon is in your board"`                       |
+| `I'm the first card you play this round` | —                                                    |
+| `<affiliation> member`                   | `"khun family member"`                               |
+| `you have an ally <A> or <B>`            | `"you have an ally yeon family member or Hwayeomsa"` |
+| `have an ally <attribute>`               | `"have an ally Irregular"`                           |
+
+Patterns that reference the board (`member`, `is in your board`, `ally`)
+check the current player's field; affiliation and attribute matches include
+runtime-granted modifiers from the `ModifierStack`.
+
+---
+
 ## DSL Object Shape
 
 Every ability, passive, and effect is a **DSL object** with this base shape:
@@ -187,7 +216,7 @@ All 12 DSL types now have runtime handlers. `custom` type effects remain unresol
 
 | `type`   | Occurrences | Description                                           |
 | -------- | ----------- | ----------------------------------------------------- |
-| `custom` | ~130        | Raw text, `handler: null`. Requires a custom handler. |
+| `custom` | ~116        | Raw text, `handler: null`. Requires a custom handler. |
 
 ---
 

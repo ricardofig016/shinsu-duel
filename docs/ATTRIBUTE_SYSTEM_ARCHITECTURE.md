@@ -34,15 +34,20 @@ independently.
 
 ### State
 
-Per-player: `shinheuhSlot: { available: boolean, used: boolean }`
+Per-player: `shinheuhSlot: { available: boolean, used: boolean }` — owned
+by `CombatSlotService`; the engine only decides _when_ to grant.
 
 ### Lifecycle
 
 1. **Round start:** If an Anima unit is on the field and no Shinheuh slot
-   exists, create one (`available = true`).
-2. **Shinheuh ability use:** `AnimaEngine.consumeSlot()` checks availability,
-   consumes it (`available = false, used = true`).
-3. **Round end:** `AnimaEngine.resetSlot()` clears both flags.
+   exists, `AnimaEngine` asks `CombatSlotService.grantShinheuhSlot()` to
+   create one (`available = true`).
+2. **Shinheuh ability use:** `AnimaEngine.consumeSlot()` delegates to
+   `CombatSlotService.consumeShinheuhSlot()` (`available = false, used = true`).
+3. **Round end:** `CombatSlotService.resetShinheuhSlot()` clears both flags.
+
+All Shinheuh slot mutations go through `CombatSlotService` — the engine
+never touches `playerState.shinheuhSlot` directly.
 
 ### API
 
@@ -50,10 +55,10 @@ Per-player: `shinheuhSlot: { available: boolean, used: boolean }`
 // Called by GameState when Anima unit is deployed
 animaEngine.onDeploy(unit, gameState);
 
-// Called when a Shinheuh uses an ability
+// Called when a Shinheuh uses an ability (delegates to CombatSlotService)
 AnimaEngine.consumeSlot(owner, gameState) → boolean;
 
-// Called at round end
+// Called at round end (delegates to CombatSlotService)
 AnimaEngine.resetSlot(owner, gameState);
 
 // Called when unit leaves play
@@ -71,7 +76,8 @@ animaEngine.cleanup(unit);
 
 ### State
 
-Per-player: `fireCharges: number`
+Per-player: `fireCharges: number` — mutated only through
+`GameState._modifyFireCharges(username, delta)`.
 
 ### Fire Charge Generation
 
@@ -129,7 +135,7 @@ hwayeomsaEngine.getAvailableLevels(username, gameState)
 
 ## Attribute List
 
-| Attribute | Engine |
-|---|---|
-| Anima | `AnimaEngine.js` |
+| Attribute | Engine               |
+| --------- | -------------------- |
+| Anima     | `AnimaEngine.js`     |
 | Hwayeomsa | `HwayeomsaEngine.js` |
