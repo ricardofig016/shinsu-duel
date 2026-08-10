@@ -98,6 +98,10 @@ function ensureArray(value) {
   return value;
 }
 
+function isConduit(card) {
+  return card.name && card.name.trim().toLowerCase() === "conduit";
+}
+
 function normalizeCardForSchema(card) {
   const normalized = { ...card };
   const arrayFields = [
@@ -109,6 +113,13 @@ function normalizeCardForSchema(card) {
     if (normalized[field] === null || normalized[field] === undefined) {
       normalized[field] = [];
     }
+  }
+
+  // Conduit is a special Jeonsulsa-mechanic card with no position or rank.
+  // Give it dummy data so AJV passes; custom rules skip these fields.
+  if (isConduit(card)) {
+    normalized.positions = ["landmark"];
+    normalized.rank = "regular";
   }
 
   return normalized;
@@ -355,14 +366,20 @@ function validateUnit(card) {
     addError(errors, "hp", `must be a positive integer (got ${card.hp})`);
   }
 
+  // Conduit is a special card (Jeonsulsa mechanic) with no position or rank.
+  // It spawns directly on the enemy backline via its own effect.
+  const isConduit = card.name && card.name.trim().toLowerCase() === "conduit";
+
   const positions = ensureArray(card.positions);
-  if (positions.length === 0) {
+  if (!isConduit && positions.length === 0) {
     addError(errors, "positions", "must be a non-empty array");
-  } else {
+  } else if (positions.length > 0) {
     validatePositions(positions, errors);
   }
 
-  validateRankAndCost(card, errors);
+  if (!isConduit) {
+    validateRankAndCost(card, errors);
+  }
 
   const traits = ensureArray(card.traits);
   validateTraits(traits, errors);

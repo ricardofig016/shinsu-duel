@@ -1,6 +1,7 @@
 import BaseHandler from "./BaseHandler.js";
 import TargetResolver from "../TargetResolver.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Resolves damage through Barrier → Resilient → apply → kill check → Slay.
@@ -59,7 +60,7 @@ export default class DealDamageHandler extends BaseHandler {
         }
         gameState._barrierUsedThisRound.add(targetId);
         damage = 0;
-        context.emitChild("unit:barrier:absorbed", { targetId, originalAmount: amount });
+        context.emitChild(EVT.BARRIER_ABSORBED, { targetId, originalAmount: amount });
       }
     }
 
@@ -76,7 +77,7 @@ export default class DealDamageHandler extends BaseHandler {
     }
 
     // Emit pre-damage event for any last-minute modifications
-    const preResult = context.emitChild("unit:damage:intent", {
+    const preResult = context.emitChild(EVT.DAMAGE_INTENT, {
       sourceId: payload.sourceId,
       targetId,
       amount: damage,
@@ -93,7 +94,7 @@ export default class DealDamageHandler extends BaseHandler {
     const actualDamage = Math.min(damage, unit.currentHp);
     unit.currentHp -= actualDamage;
 
-    context.emitChild("unit:damage:applied", {
+    context.emitChild(EVT.DAMAGE_APPLIED, {
       sourceId: payload.sourceId,
       targetId,
       amount: actualDamage,
@@ -102,7 +103,7 @@ export default class DealDamageHandler extends BaseHandler {
 
     // Kill check
     if (!unit.isAlive()) {
-      context.emitChild("unit:killed", {
+      context.emitChild(EVT.UNIT_KILLED, {
         sourceId: payload.sourceId,
         targetId,
         killerId: payload.sourceId,
@@ -115,7 +116,7 @@ export default class DealDamageHandler extends BaseHandler {
       if (gameState.playerStates && gameState.eventBus) {
         LifecycleEngine.destroyUnit(gameState, unit);
       } else {
-        context.emitChild("unit:destroyed", { unitId: targetId, owner: payload.targetOwner });
+        context.emitChild(EVT.UNIT_DESTROYED, { unitId: targetId, owner: payload.targetOwner });
       }
     }
 

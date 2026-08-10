@@ -1,10 +1,11 @@
+import EVT from "./EventCatalog.js";
+
 /**
  * Provenance-tracked modifier stack for all state changes in Shinsu Duel.
  *
  * Every trait, condition, stat change, and granted ability is represented
  * as a `Modifier` with a tracked source. This enables:
 
-const EVT = null; // dynamic event names use template literals
  *
  *  - Equipment unequip: remove only modifiers from that equipment.
  *  - Silence: disable trait modifiers without deleting them.
@@ -178,7 +179,7 @@ export default class ModifierStack {
         mod.enabled = false;
       }
     }
-    this._bus.emit("modifier:disabled", { targetId, types: [...typeSet] });
+    this._bus.emit(EVT.MODIFIER_DISABLED, { targetId, types: [...typeSet] });
   }
 
   /**
@@ -195,7 +196,7 @@ export default class ModifierStack {
         mod.enabled = true;
       }
     }
-    this._bus.emit("modifier:enabled", { targetId, types: [...typeSet] });
+    this._bus.emit(EVT.MODIFIER_ENABLED, { targetId, types: [...typeSet] });
   }
 
   // -----------------------------------------------------------------------

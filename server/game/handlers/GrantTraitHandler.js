@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Grants a trait to a target unit via the ModifierStack.
@@ -29,7 +30,7 @@ export default class GrantTraitHandler extends BaseHandler {
       operation: "add",
     });
 
-    context.emitChild("state:trait:granted", {
+    context.emitChild(EVT.TRAIT_GRANTED, {
       targetId,
       trait,
       amount,

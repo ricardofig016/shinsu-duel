@@ -10,51 +10,35 @@
  */
 
 import EVT from "../EventCatalog.js";
+import CombatSlotService from "../services/CombatSlotService.js";
 
 export default class AnimaEngine {
   constructor(eventBus) {
     this._bus = eventBus;
   }
 
-  /**
-   * Called when an Anima unit is deployed. Registers round-start handler.
-   */
   onDeploy(unit, gameState) {
     if (!unit || !gameState) return;
 
-    // Subscribe to round start — create Shinheuh slot
     const unsub = this._bus.on(EVT.ROUND_START, () => {
       this._grantShinheuhSlot(unit.owner, gameState);
     }, { phase: "execute" });
 
-    // Store unsubscribe for cleanup
     if (!unit._animaCleanup) unit._animaCleanup = [];
     unit._animaCleanup.push(unsub);
   }
 
-  /**
-   * Grant a Shinheuh combat slot to the player.
-   */
   _grantShinheuhSlot(owner, gameState) {
     const player = gameState.playerStates[owner];
     if (!player) return;
 
-    if (!player.shinheuhSlot) {
-      player.shinheuhSlot = { available: false, used: false };
-    }
-
-    // Check if any Anima unit is on the field
     const hasAnima = this._hasAnimaOnField(owner, gameState);
     if (!hasAnima) {
-      player.shinheuhSlot.available = false;
+      CombatSlotService.revokeShinheuhSlot(player);
       return;
     }
 
-    // Grant slot if not already available
-    if (!player.shinheuhSlot.available && !player.shinheuhSlot.used) {
-      player.shinheuhSlot.available = true;
-      this._bus.emit(EVT.SHINHEUH_SLOT_GRANTED, { owner });
-    }
+    CombatSlotService.grantShinheuhSlot(player, this._bus, owner);
   }
 
   /**
@@ -70,28 +54,12 @@ export default class AnimaEngine {
     );
   }
 
-  /**
-   * Consume the Shinheuh slot when a Shinheuh uses an ability.
-   * Returns true if slot was available and consumed.
-   */
   static consumeSlot(owner, gameState) {
-    const player = gameState.playerStates[owner];
-    if (!player?.shinheuhSlot?.available) return false;
-
-    player.shinheuhSlot.available = false;
-    player.shinheuhSlot.used = true;
-    return true;
+    return CombatSlotService.consumeShinheuhSlot(gameState.playerStates[owner]);
   }
 
-  /**
-   * Reset Shinheuh slot at round end.
-   */
   static resetSlot(owner, gameState) {
-    const player = gameState.playerStates[owner];
-    if (player?.shinheuhSlot) {
-      player.shinheuhSlot.available = false;
-      player.shinheuhSlot.used = false;
-    }
+    CombatSlotService.resetShinheuhSlot(gameState.playerStates[owner]);
   }
 
   /**

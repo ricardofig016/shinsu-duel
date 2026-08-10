@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 
 /**
  * Removes all conditions from a target unit.
@@ -27,7 +28,7 @@ export default class CleanseHandler extends BaseHandler {
     );
 
     if (removed.length > 0) {
-      context.emitChild("state:condition:cleansed", {
+      context.emitChild(EVT.CONDITION_CLEANSED, {
         targetId,
         removed,
       });

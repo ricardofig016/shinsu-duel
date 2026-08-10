@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 import TargetResolver from "../TargetResolver.js";
 
 /**
@@ -45,7 +46,7 @@ export default class GiveConditionHandler extends BaseHandler {
 
     // Check if target is Immune
     if (gameState.modifierStack.has(targetId, "trait", "immune")) {
-      context.emitChild("state:condition:blocked", {
+      context.emitChild(EVT.CONDITION_BLOCKED, {
         targetId,
         condition,
         reason: "immune",
@@ -63,7 +64,7 @@ export default class GiveConditionHandler extends BaseHandler {
       operation: "add",
     });
 
-    context.emitChild("state:condition:applied", {
+    context.emitChild(EVT.CONDITION_APPLIED, {
       targetId,
       condition,
       amount,

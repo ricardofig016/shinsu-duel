@@ -1,17 +1,18 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 
 /**
- * Registers a new ability on a target unit.
+ * Registers a new active ability on a target unit via the AbilityRegistry.
  *
  * DSL type: grant_ability
- * Inner `ability` DSL is NOT executed immediately — it's registered as an
- * event-triggered ability on the target unit.
+ * Inner `ability` DSL is NOT executed immediately — it's registered as a
+ * usable action on the target unit.
  *
  * Payload:
- *   { sourceId, targetId, ability }
+ *   { sourceId, targetId, ability, sourceType }
  *
- * The ability is tracked via ModifierStack so it is removed when the
- * source (e.g., equipment) is removed.
+ * The ability is tracked by the authoritative AbilityRegistry, which
+ * supports source-level cleanup (e.g. unequipping removes the ability).
  */
 export default class GrantAbilityHandler extends BaseHandler {
   validate(payload) {
@@ -23,27 +24,35 @@ export default class GrantAbilityHandler extends BaseHandler {
   }
 
   execute(payload, context, gameState) {
-    const { sourceId, targetId, ability } = payload;
+    const { sourceId, targetId, ability, sourceType } = payload;
 
-    // Register the granted ability via ModifierStack for source tracking
+    // Register the granted ability via the authoritative AbilityRegistry
+    const { code } = gameState._abilityRegistry.grant(
+      targetId,
+      sourceId,
+      sourceType || "equipment",
+      ability
+    );
+
+    // Also track via ModifierStack for source-lifetime cleanup
+    // (when the source is removed, the modifier is auto-revoked and
+    // LifecycleEngine cleans up the registry entry)
     const mod = gameState.modifierStack.apply({
       sourceId,
       sourceType: payload.sourceType || "equipment",
       targetId,
       type: "ability",
-      key: `granted_${ability.type || "custom"}`,
-      value: JSON.stringify(ability), // store the full DSL object
+      key: code,
       operation: "add",
     });
 
-    // Emit child event so trigger system can pick it up
-    context.emitChild("unit:ability:granted", {
+    context.emitChild(EVT.UNIT_ABILITY_GRANTED, {
       targetId,
       sourceId,
       ability,
-      modifierId: mod.id,
+      abilityCode: code,
     });
 
-    return { modifierId: mod.id, ability };
+    return { abilityCode: code, ability };
   }
 }

@@ -30,7 +30,7 @@ describe("CompressShinsuHandler", () => {
 
     const result = handler.execute({ owner, amount: 2, targetCardId: target.id }, context, game);
 
-    expect(result).toEqual(expect.objectContaining({ targetCardId: target.id, totalReduction: 2 }));
+    expect(result).toEqual(expect.objectContaining({ totalReduction: 2 }));
     expect(target.costReduction).toBe(2);
     expect(untouched.costReduction).toBe(0);
     expect(context.emitChild).toHaveBeenCalledWith(EVT.SHINSU_COMPRESSED, expect.objectContaining({

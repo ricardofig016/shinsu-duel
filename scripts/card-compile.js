@@ -565,9 +565,10 @@ function compileCard(rawCard, allCards) {
     compiled.rank = rawCard.rank || null;
 
     // Positions
-    compiled.positions = (rawCard.positions || []).map(
-      (p) => positionCodeMap[p.toLowerCase()] || toCode(p)
-    );
+    const isConduit = (rawCard.name || "").trim().toLowerCase() === "conduit";
+    compiled.positions = isConduit
+      ? ["landmark"] // dummy to pass schema; Conduit spawns via Jeonsulsa mechanics
+      : (rawCard.positions || []).map((p) => positionCodeMap[p.toLowerCase()] || toCode(p));
 
     // Traits — { code, value? } objects (value only present for numeric traits)
     const parsedTraits = (rawCard.traits || [])

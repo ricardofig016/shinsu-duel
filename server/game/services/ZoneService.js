@@ -6,6 +6,7 @@
  */
 
 import EVT from "../EventCatalog.js";
+import CompressionService from "./CompressionService.js";
 
 export default class ZoneService {
   /**
@@ -47,6 +48,7 @@ export default class ZoneService {
     if (!Array.isArray(playerState.discard)) {
       playerState.discard = [];
     }
+    CompressionService.clearReduction(card);
     playerState.discard.push(card);
   }
 
@@ -69,7 +71,9 @@ export default class ZoneService {
   static removeFromHand(playerState, handIndex) {
     if (!Array.isArray(playerState.hand)) return null;
     if (handIndex < 0 || handIndex >= playerState.hand.length) return null;
-    return playerState.hand.splice(handIndex, 1)[0];
+    const card = playerState.hand.splice(handIndex, 1)[0];
+    CompressionService.clearReduction(card);
+    return card;
   }
 
   /**

@@ -22,9 +22,9 @@ describe("granted abilities can be used by their bearer", () => {
     });
     game.currentTurn = "Alice";
 
-    const grantedMod = game.modifierStack.getModifiers(bearer.id, "ability").find((mod) => mod.enabled);
-    expect(grantedMod).toBeDefined();
-    const abilityCode = `granted:${grantedMod.id}`;
+    const grantedEntries = game._abilityRegistry.getGranted(bearer.id);
+    expect(grantedEntries.length).toBe(1);
+    const abilityCode = grantedEntries[0].code;
 
     expect(game.getClientState("Alice").you.field.frontline[0].grantedAbilities)
       .toEqual(expect.arrayContaining([expect.objectContaining({ abilityCode })]));
@@ -49,6 +49,6 @@ describe("granted abilities can be used by their bearer", () => {
     expect(game.modifierStack.getEffective(victim.id, "condition", "poisoned")).toBe(4);
 
     LifecycleEngine.detachEquipment(game, bearer);
-    expect(game.modifierStack.getModifiers(bearer.id, "ability").some((mod) => mod.enabled)).toBe(false);
+    expect(game._abilityRegistry.getGranted(bearer.id).length).toBe(0);
   });
 });

@@ -1,7 +1,7 @@
 import ActionHandler from "../ActionHandler.js";
-import AnimaEngine from "../attributes/AnimaEngine.js";
 import RequirementValidator from "../services/RequirementValidator.js";
 import ShinsuService from "../services/ShinsuService.js";
+import CombatSlotService from "../services/CombatSlotService.js";
 import EVT from "../EventCatalog.js";
 import { resolveEffect } from "../EffectResolver.js";
 
@@ -20,23 +20,13 @@ export default class UseAbilityAction extends ActionHandler {
   /**
    * Resolve an abilityCode into its DSL and provenance.
    *
-   * Native abilities are addressed by numeric index into `card.abilities`
-   * (unchanged, backward compatible). Abilities granted at runtime (e.g. by
-   * equipment via `grant_ability`) are addressed as `granted:<modifierId>`
-   * and read back from the ModifierStack, so unequipping automatically
-   * revokes access to them.
+   * Native abilities are addressed by numeric index into `card.abilities`.
+   * Abilities granted at runtime (e.g. by equipment via `grant_ability`) are
+   * resolved through the authoritative AbilityRegistry.
    */
   static resolveAbility(gameState, unit, abilityCode) {
     if (typeof abilityCode === "string" && abilityCode.startsWith("granted:")) {
-      const modifierId = abilityCode.slice("granted:".length);
-      const modifier = gameState.modifierStack.getModifiers(unit.id, "ability")
-        .find((mod) => mod.id === modifierId && mod.enabled);
-      if (!modifier) return null;
-      try {
-        return { ability: JSON.parse(modifier.value), sourceType: modifier.sourceType, sourceId: modifier.sourceId };
-      } catch {
-        return null;
-      }
+      return gameState._abilityRegistry.resolve(unit.id, abilityCode);
     }
 
     const abilityIndex = Number(abilityCode);
@@ -68,7 +58,7 @@ export default class UseAbilityAction extends ActionHandler {
 
     const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
     if (isShinheuh) {
-      if (!playerState.shinheuhSlot?.available) throw new Error("Shinheuh combat slot is unavailable.");
+      if (!CombatSlotService.isShinheuhSlotAvailable(playerState)) throw new Error("Shinheuh combat slot is unavailable.");
     } else if (!ability.free) {
       const slot = playerState.combatSlots?.[unit.placedPositionCode];
       if (slot && !slot.available) throw new Error(`Combat slot for ${unit.placedPositionCode} is already used this round.`);
@@ -90,9 +80,9 @@ export default class UseAbilityAction extends ActionHandler {
 
     const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
     if (isShinheuh) {
-      AnimaEngine.consumeSlot(username, gameState);
-    } else if (!ability.free && playerState.combatSlots?.[unit.placedPositionCode]) {
-      playerState.combatSlots[unit.placedPositionCode].available = false;
+      CombatSlotService.consumeShinheuhSlot(playerState);
+    } else if (!ability.free) {
+      CombatSlotService.consume(playerState, unit.placedPositionCode);
     }
 
     const baseCost = ability.type === "spend_shinsu" ? ability.amount : 0;

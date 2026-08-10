@@ -80,6 +80,17 @@ export function decisionId() {
   return `decision#${++_decisionSeq}`;
 }
 
+/**
+ * Create a code for a granted ability.
+ * Format: granted:<sourceId>:<abilityType>
+ *
+ * Example: "granted:Equip#17:deal_damage"
+ */
+export function grantedAbilityCode(sourceId, ability) {
+  const type = ability?.type || "custom";
+  return `granted:${sourceId}:${type}`;
+}
+
 export default {
   resetAll,
   unitSource,

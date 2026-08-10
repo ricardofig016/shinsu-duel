@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import EVT from "../EventCatalog.js";
 import TargetResolver from "../TargetResolver.js";
 
 /**
@@ -43,7 +44,7 @@ export default class HealHandler extends BaseHandler {
 
     if (healAmount > 0) {
       unit.currentHp += healAmount;
-      context.emitChild("unit:heal:applied", {
+      context.emitChild(EVT.HEAL_APPLIED, {
         targetId,
         amount: healAmount,
         currentHp: unit.currentHp,

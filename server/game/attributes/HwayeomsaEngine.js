@@ -34,7 +34,7 @@ export default class HwayeomsaEngine {
     // Initialize fire charges if not present
     const player = gameState.playerStates[unit.owner];
     if (player && typeof player.fireCharges !== "number") {
-      player.fireCharges = 0;
+      gameState._modifyFireCharges(unit.owner, 0);
     }
   }
 
@@ -57,7 +57,7 @@ export default class HwayeomsaEngine {
     ShinsuService.spend(player, 1);
 
     // Gain fire charge
-    player.fireCharges = (player.fireCharges || 0) + 1;
+    gameState._modifyFireCharges(username, 1);
 
     // Create Fire Core in hand if not already present
     const hasFireCore = (player.hand || []).some(
@@ -100,7 +100,7 @@ export default class HwayeomsaEngine {
     }
 
     // Consume charges
-    player.fireCharges -= config.chargesNeeded;
+    gameState._modifyFireCharges(username, -config.chargesNeeded);
 
     // Find the Incinerate card data
     const cardData = this._findCardByName(config.name);

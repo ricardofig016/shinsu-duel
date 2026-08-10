@@ -3,9 +3,12 @@ import ZoneService from "./services/ZoneService.js";
 import LifecycleEngine from "./services/LifecycleEngine.js";
 import TriggerManager from "./services/TriggerManager.js";
 import PassiveManager from "./services/PassiveManager.js";
+import LighthouseService from "./services/LighthouseService.js";
+import CombatSlotService from "./services/CombatSlotService.js";
 import AttributeRegistry from "./attributes/AttributeRegistry.js";
 import AnimaEngine from "./attributes/AnimaEngine.js";
 import HwayeomsaEngine from "./attributes/HwayeomsaEngine.js";
+import AbilityRegistry from "./registries/abilityRegistry.js";
 import * as IdFactory from "./IdFactory.js";
 import EVT from "./EventCatalog.js";
 import cards from "../data/cards.json" with { type: "json" };
@@ -56,6 +59,9 @@ export default class GameState {
     // Trigger and passive managers own event subscriptions for field units.
     this._triggerManager = new TriggerManager(this.eventBus);
     this._passiveManager = new PassiveManager(this.eventBus);
+
+    // Ability Registry for runtime-granted abilities
+    this._abilityRegistry = new AbilityRegistry();
 
     // Attribute Registry
     this._attributeRegistry = new AttributeRegistry();
@@ -109,7 +115,7 @@ export default class GameState {
     this.eventBus.on(EVT.ROUND_START, () => {
       this._barrierUsedThisRound.clear();
       for (const username of this.usernames) {
-        this.#resetCombatSlots(username);
+        CombatSlotService.resetAll(this.playerStates[username]);
       }
     }, { phase: "execute" });
 
@@ -125,7 +131,7 @@ export default class GameState {
           );
         }
         // Reset Anima Shinheuh slot; combat slots reset at round start.
-        AnimaEngine.resetSlot(username, this);
+        CombatSlotService.resetShinheuhSlot(this.playerStates[username]);
       }
     }, { phase: "execute" });
 
@@ -152,7 +158,7 @@ export default class GameState {
 
     return {
       combatSlotCodes: combatSlotCodes,
-      combatSlots: this.#initCombatSlots(combatSlotCodes),
+      combatSlots: Object.fromEntries(combatSlotCodes.map((code) => [code, { available: true }])),
       deck: this.#buildDeckFromCardIds(deck, username),
       discard: [],
       lighthouses: { amount: GameState.INIT_LIGHTHOUSE_AMOUNT, max: 40 },
@@ -163,22 +169,6 @@ export default class GameState {
       fireCharges: 0,
       username: username,
     };
-  }
-
-  #initCombatSlots(codes) {
-    const slots = {};
-    for (const code of codes) {
-      slots[code] = { available: true };
-    }
-    return slots;
-  }
-
-  #resetCombatSlots(username) {
-    const player = this.playerStates[username];
-    if (!player?.combatSlots) return;
-    for (const code of Object.keys(player.combatSlots)) {
-      player.combatSlots[code].available = true;
-    }
   }
 
   /**
@@ -221,19 +211,6 @@ export default class GameState {
 
     // Deterministic default deck; caller-provided decks define actual gameplay setup.
     return eligible.slice(0, GameState.INIT_DECK_SIZE);
-  }
-
-  #draw(usernames, amount) {
-    // ensure usernames is an array
-    if (!Array.isArray(usernames)) usernames = [usernames];
-    usernames.forEach((username) => {
-      const player = this.playerStates[username];
-      if (!player || !player.deck) throw new Error(`Player ${username} does not have a valid deck.`);
-      for (let i = 0; i < amount; i++) {
-        if (player.deck.length === 0) return;
-        player.hand.push(player.deck.pop());
-      }
-    });
   }
 
   #filterYouState(username) {
@@ -297,20 +274,12 @@ export default class GameState {
 
   /**
    * Project a unit's runtime-granted abilities (e.g. from equipment via
-   * `grant_ability`) into client-addressable `abilityCode`s. Each code is
-   * `granted:<modifierId>` and resolves back through UseAbilityAction.
+   * `grant_ability`) into client-addressable objects. Each entry uses the
+   * ability's canonical code from the AbilityRegistry.
    */
   #getGrantedAbilities(unitId) {
-    return this.modifierStack.getModifiers(unitId, "ability")
-      .filter((mod) => mod.enabled)
-      .map((mod) => {
-        try {
-          return { abilityCode: `granted:${mod.id}`, ability: JSON.parse(mod.value), sourceId: mod.sourceId };
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean);
+    return this._abilityRegistry.getGranted(unitId)
+      .map((entry) => ({ abilityCode: entry.code, ability: entry.ability, sourceId: entry.sourceId }));
   }
 
   #getOpponentUsername(username) {
@@ -529,15 +498,18 @@ export default class GameState {
     });
   }
   modifyLighthouses(username, amount) {
+    return LighthouseService.modify(this, username, amount);
+  }
+
+  /**
+   * Modify player's Fire Charges. Used by HwayeomsaEngine.
+   * All fire charge mutations must go through this method.
+   */
+  _modifyFireCharges(username, delta) {
     const player = this.playerStates[username];
-    if (!player) throw new Error(`Player ${username} not found.`);
-    player.lighthouses.amount = Math.max(0, Math.min(40, player.lighthouses.amount + amount));
-    if (player.lighthouses.amount <= 0) {
-      this.gameOver = { winner: this.#getOpponentUsername(username), reason: "lighthouses depleted" };
-      this.eventBus.emit(EVT.GAME_LIGHTHOUSES_DEPLETED, { loser: username, winner: this.gameOver.winner });
-      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
-    }
-    return player.lighthouses.amount;
+    if (!player) return;
+    player.fireCharges = Math.max(0, (player.fireCharges || 0) + delta);
+    return player.fireCharges;
   }
 
   /** Create and publish a pending decision. If a decision is already active, push onto the stack. */

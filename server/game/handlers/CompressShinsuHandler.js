@@ -1,11 +1,13 @@
 import BaseHandler from "./BaseHandler.js";
-import EVT from "../EventCatalog.js";
+import CompressionService from "../services/CompressionService.js";
 
 /**
  * Reduces the shinsu cost of one card instance in its owner's hand.
  *
  * Payload:
  *   { owner, amount, targetCardId? | targetCardSelector? }
+ *
+ * Delegates to the authoritative CompressionService for mutation.
  */
 export default class CompressShinsuHandler extends BaseHandler {
   validate(payload) {
@@ -35,15 +37,7 @@ export default class CompressShinsuHandler extends BaseHandler {
       throw new Error("CompressShinsuHandler: a card in the owner's hand must be selected");
     }
 
-    target.costReduction = (target.costReduction || 0) + amount;
-    context.emitChild(EVT.SHINSU_COMPRESSED, {
-      owner,
-      targetCardId: target.id,
-      cardName: target.name,
-      amount,
-      totalReduction: target.costReduction,
-    });
-
-    return { compressed: amount, targetCardId: target.id, totalReduction: target.costReduction };
+    // Delegate to authoritative CompressionService
+    return CompressionService.compress(target, amount, context);
   }
 }
