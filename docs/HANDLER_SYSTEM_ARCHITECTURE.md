@@ -13,6 +13,16 @@ classes** that extend `BaseHandler`. Handlers receive a structured payload,
 validate it, and execute state changes through the `ModifierStack` and
 `EventBus`.
 
+Handlers never mutate `playerState` fields directly. Shared-resource changes
+delegate to the authoritative services:
+
+| Resource    | Service / method                              |
+| ----------- | --------------------------------------------- |
+| Shinsu      | `ShinsuService.spend` / `ShinsuService.gain`  |
+| Card zones  | `ZoneService.draw` / `discard` / `reclaimTop` |
+| Lighthouses | `GameState.modifyLighthouses`                 |
+| Unit state  | `ModifierStack`                               |
+
 | Concept           | Implementation                                                             |
 | ----------------- | -------------------------------------------------------------------------- |
 | Handler contract  | `BaseHandler` with `validate()` + `execute()`                              |
@@ -114,28 +124,28 @@ For `type: "custom"` effects (~130 in the card set), there is **no handler regis
 
 ## Baseline Handlers
 
-| Handler                    | DSL `type`           | Key behavior                                                                                |
-| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
-| `DealDamageHandler`        | `deal_damage`        | Barrier → Resilient → Weak → apply → kill check → emitChildren                              |
-| `HealHandler`              | `heal`               | Applies healing, capped at max HP                                                           |
-| `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                                 |
-| `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                                   |
-| `CleanseHandler`           | `cleanse`            | `stack.removeWhere(m => m.type === "condition")`                                            |
-| `CreateLighthouseHandler`  | `create_lighthouse`  | Modifies `playerState.lighthouses.amount` (cap 40)                                          |
-| `DestroyLighthouseHandler` | `destroy_lighthouse` | Modifies `playerState.lighthouses.amount` (floor 0); emits `game:lighthouses:depleted` on 0 |
-| `SpendShinsuHandler`       | `spend_shinsu`       | Deducts recharged first, then normal                                                        |
-| `DrawCardHandler`          | `draw_card`          | Pops from deck; emits `game:deck:empty` on exhaustion                                       |
+| Handler                    | DSL `type`           | Key behavior                                                                            |
+| -------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
+| `DealDamageHandler`        | `deal_damage`        | Barrier → Resilient → Weak → apply → kill check → emitChildren                          |
+| `HealHandler`              | `heal`               | Applies healing, capped at max HP                                                       |
+| `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                             |
+| `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                               |
+| `CleanseHandler`           | `cleanse`            | `stack.removeWhere(m => m.type === "condition")`                                        |
+| `CreateLighthouseHandler`  | `create_lighthouse`  | Delegates to `GameState.modifyLighthouses` (cap 40)                                     |
+| `DestroyLighthouseHandler` | `destroy_lighthouse` | Delegates to `GameState.modifyLighthouses` (floor 0); emits `game:lighthouses:depleted` |
+| `SpendShinsuHandler`       | `spend_shinsu`       | Delegates to `ShinsuService.spend`; recharged first, then normal                        |
+| `DrawCardHandler`          | `draw_card`          | Delegates to `ZoneService.draw`; emits `game:deck:empty` on exhaustion                  |
 
 ---
 
 ## Additional Handlers
 
-| Handler                 | DSL `type`        | Key behavior                                                                |
-| ----------------------- | ----------------- | --------------------------------------------------------------------------- |
-| `ChargeShinsuHandler`   | `charge_shinsu`   | Adds shinsu to normal pool, capped at round max; emits `shinsu:charged`     |
-| `CompressShinsuHandler` | `compress_shinsu` | Reduces the selected card instance's cost via `costReduction`               |
-| `ReclaimCardsHandler`   | `reclaim_cards`   | Moves `amount` cards from discard to hand; emits `card:reclaimed`           |
-| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability DSL via ModifierStack; cleaned up on source removal |
+| Handler                 | DSL `type`        | Key behavior                                                                           |
+| ----------------------- | ----------------- | -------------------------------------------------------------------------------------- |
+| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`         |
+| `CompressShinsuHandler` | `compress_shinsu` | Reduces a card's cost via `costReduction`, selected by structured `targetCardSelector` |
+| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                          |
+| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability DSL via ModifierStack; cleaned up on source removal            |
 
 All 12 structured DSL types have handler implementations. `custom` type effects (~130) remain unresolved until custom handlers are written.
 

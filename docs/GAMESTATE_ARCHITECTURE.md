@@ -71,6 +71,14 @@ selection, line-overflow destruction). `GameState.createPendingDecision()`
 publishes the choice and blocks further `processAction()` calls until
 `resolveDecision()` is called with a validated selection.
 
+Decisions are **stacked**, not single-valued. If a resolution produces a
+second choice while one is already pending (e.g. a line overflow during a
+card whose effect list still contains a target selection), the active
+decision is pushed onto an internal stack and the new one becomes current.
+Resolving the current decision pops the previous one back and re-publishes
+it via the `pending-decision` event, so a client always resolves exactly
+one choice at a time, LIFO.
+
 Callers that still have work to do after the choice resolves — e.g. ending
 the turn, or resolving the next effect in a card's effect list — register a
 continuation instead of running that work inline:

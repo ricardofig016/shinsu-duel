@@ -258,54 +258,78 @@ Handlers use `context.emitChild()` for cascading effects and the
 | `GrantTraitHandler`       | Creates ModifierStack modifier for trait                      |
 | `GiveConditionHandler`    | Creates ModifierStack modifier for condition; respects Immune |
 | `CleanseHandler`          | Removes all condition modifiers from target                   |
-| `CreateLighthouseHandler` | Modifies lighthouse count (cap 40)                            |
-| `SpendShinsuHandler`      | Validates and deducts shinsu (recharged first)                |
-| `DrawCardHandler`         | Draws from deck; emits `game:deck:empty` on exhaustion        |
+| `CreateLighthouseHandler` | Delegates to `GameState.modifyLighthouses` (cap 40)           |
+| `SpendShinsuHandler`      | Delegates to `ShinsuService.spend` (recharged first)          |
+| `DrawCardHandler`         | Delegates to `ZoneService.draw`; emits `game:deck:empty`      |
 
 ---
 
 ## Standard Event Catalog
 
-### Game Lifecycle
+### Game & Round Lifecycle
 
-- `game:round:start` — new round begins
-- `game:round:end` — round ends
-- `game:turn:start` — player's turn begins
-- `game:turn:end` — player's turn ends
+- `game:started` — game constructed
+- `game:over` — game ended (loss condition met)
+- `round:started` / `round:ended` — round boundaries
+- `turn:started` / `turn:ended` — player turn boundaries
 
 ### Unit Lifecycle
 
-- `unit:deploy` — unit enters battlefield
+- `unit:deployed` — unit enters battlefield
+- `unit:summoned` — unit summoned (incl. Shinheuh)
+- `unit:destroy:intent` — cancellable pre-destroy hook
 - `unit:destroyed` — unit leaves battlefield (ModifierStack auto-cleans)
+- `unit:evolved` — unit transformed (evolution)
+- `unit:killed` — unit HP reached 0
+- `unit:position:switched` — unit moved to another position
+- `unit:ability:used` — ability resolved
+- `unit:ability:granted` — ability granted to a unit
+
+### Damage & Healing
+
 - `unit:damage:intent` — before damage resolution
 - `unit:damage:applied` — after damage applied
-- `unit:heal:applied` — after healing applied
-- `unit:killed` — unit HP reached 0
 - `unit:barrier:absorbed` — Barrier negated damage
+- `unit:heal:applied` — healing applied
 
 ### Equipment
 
-- `equipment:attach` — equipment attached to unit
-- `equipment:detach` — equipment removed from unit
+- `equipment:attached` — equipment attached to unit
+- `equipment:detached` — equipment removed from unit
+- `equipment:ignited` — attached equipment ignited
 
 ### Modifier Events (emitted by ModifierStack)
 
-- `modifier:trait:granted` / `modifier:trait:revoked`
-- `modifier:condition:granted` / `modifier:condition:revoked`
+- `modifier:<type>:granted` / `modifier:<type>:revoked`
 - `modifier:disabled` / `modifier:enabled`
 
 ### State Changes
 
 - `state:shinsu:changed` — shinsu pool changed
+- `shinsu:charged` / `shinsu:compressed` — resource gains/reductions
 - `state:lighthouse:changed` — lighthouse count changed
 - `game:lighthouses:depleted` — player's lighthouses reached 0 (triggers loss)
 - `state:trait:granted` / `state:trait:revoked`
 - `state:condition:applied` / `state:condition:blocked` / `state:condition:cleansed`
 
-### Card
+### Cards
 
 - `card:drawn` — card drawn from deck
+- `card:reclaimed` — card reclaimed from discard
 - `game:deck:empty` — player's deck exhausted (triggers loss)
+- `effect:unsupported` — `custom` effect skipped with a warning
+
+### Skills & Decisions
+
+- `skill:applied` — skill played on a target
+- `pending-decision` — a player choice is requested
+- `decision:resolved` — a player choice was resolved
+
+### Attributes
+
+- `shinheuh:slot:granted` — Anima Shinheuh combat slot granted
+- `hwayeomsa:charge:gained` — Fire Charge gained
+- `hwayeomsa:incinerate:created` — Incinerate created
 
 ---
 

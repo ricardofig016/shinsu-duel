@@ -203,31 +203,29 @@ higher `priority` wins; tied priorities use most-recent-first (`createdAt`).
 
 ### Expiration
 
-Modifiers can have `expiresAt: number` (GameClock tick). Call
-`stack.removeExpired(now)` to clean up timed modifiers.
+Modifiers can carry `expiresAt: number` (GameClock tick) for future timed
+effects; the field is stored but no cleanup pass is wired yet.
 
 ### Snapshot
 
-`stack.snapshot()` returns a deep copy of all modifiers indexed by targetId,
-for Logger diffs and serialization.
+Modifier state is surfaced through `GameState._createSnapshot()`, which
+includes active conditions, traits, equipment, combat slots, shinheuh slots,
+and fire charges per unit — so Logger diffs reflect all modifier-based state
+changes.
 
 ### ID Generation
 
 `IdFactory.js` provides canonical source IDs: `Unit#<cardId>`, `Equip#<cardId>`,
 `Ability#<unitId>#<idx>`, `Passive#<unitId>#<idx>`, `Skill#<cardId>`,
 `Landmark#<unitId>`, `System`. All callers use `IdFactory` — no ad-hoc IDs.
+Instance IDs (`Card#<cardId>#<seq>`, `Unit#<cardId>#<seq>`) and pending-decision
+IDs (`decisionId()`) come from the same factory.
 
 ### Auto-Cleanup Integration
 
 - `unit:destroyed` — `removeByTarget`
-- `game:round:end` — `removeWhere(m => m.type === "condition")`, wired in the GameState constructor
-- Barrier tracking resets on `game:round:start`
-
-### Snapshot Extension
-
-`GameState._createSnapshot()` now includes active conditions, traits, equipment,
-combat slots, shinheuh slots, and fire charges per unit — so Logger diffs
-reflect all modifier-based state changes.
+- `round:ended` — `removeWhere(m => m.type === "condition")`, wired in the GameState constructor
+- Barrier tracking resets on `round:started`
 
 ---
 
