@@ -84,6 +84,24 @@ random targeting can be deterministic in tests and replays.
 
 ---
 
+## Card-in-Hand Targeting
+
+Some effects target cards still in the player's hand (e.g. `compress_shinsu`).
+These use `TargetResolver.resolveCardTarget(playerState, selector)` — the
+same architectural boundary as unit targeting.
+
+| Selector                      | Behavior                                              |
+| ----------------------------- | ----------------------------------------------------- |
+| `"<card name>"`               | Exact card name match (case-insensitive)              |
+| `"the most expensive card"`   | Highest printed-cost card in hand                     |
+| `"a <attribute>"`             | First card with the given attribute (e.g. "a Hwayeomsa") |
+
+`EffectResolver` pre-resolves `targetCardSelector` to a concrete
+`targetCardId` before invoking any handler. Handlers only receive
+`targetCardId` — they never interpret the selector string.
+
+---
+
 ## Pending-Decision Protocol
 
 When an effect requires player choice (multi-target, overflow destruction

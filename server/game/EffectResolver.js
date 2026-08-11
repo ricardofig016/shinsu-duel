@@ -177,6 +177,22 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     return targets.map((target) => resolveEffect(effect, context, gameState, { ...extra, targetId: target.id }));
   }
 
+  // Card-in-hand selectors (compress_shinsu): resolve before handler invocation.
+  // Handlers must never interpret target descriptors themselves — all
+  // selector resolution happens here or in TargetResolver.
+  if (payload.targetCardSelector && !payload.targetCardId) {
+    const owner = payload.owner || payload.sourceOwner || extra.owner;
+    const player = owner ? gameState.playerStates[owner] : null;
+    if (player) {
+      const cardId = TargetResolver.resolveCardTarget(player, payload.targetCardSelector);
+      if (cardId) {
+        payload.targetCardId = cardId;
+      }
+      // If no card matched, handlers validate for a required target
+      // and throw a descriptive error.
+    }
+  }
+
   // Validate before execute
   handler.validate(payload, context);
 

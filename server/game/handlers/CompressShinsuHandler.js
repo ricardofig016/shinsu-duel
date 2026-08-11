@@ -5,34 +5,29 @@ import CompressionService from "../services/CompressionService.js";
  * Reduces the shinsu cost of one card instance in its owner's hand.
  *
  * Payload:
- *   { owner, amount, targetCardId? | targetCardSelector? }
+ *   { owner, amount, targetCardId }
+ *
+ * The `targetCardId` is always pre-resolved by EffectResolver/TargetResolver
+ * from the compiled `targetCardSelector`. Handlers never interpret target
+ * descriptors themselves.
  *
  * Delegates to the authoritative CompressionService for mutation.
  */
 export default class CompressShinsuHandler extends BaseHandler {
   validate(payload) {
     if (!payload.owner) throw new Error("CompressShinsuHandler: payload.owner is required");
+    if (!payload.targetCardId) throw new Error("CompressShinsuHandler: payload.targetCardId is required");
     BaseHandler.requirePositiveInt(payload.amount, "amount");
   }
 
   execute(payload, context, gameState) {
-    const { owner, amount, targetCardId, targetCardSelector } = payload;
+    const { owner, amount, targetCardId } = payload;
     const player = gameState.playerStates[owner];
     if (!player) throw new Error(`Player "${owner}" not found`);
 
-    const selector = targetCardSelector?.toLowerCase();
-    const target = targetCardId
-      ? player.hand.find((card) => card.id === targetCardId)
-      : selector === "the most expensive card"
-        ? player.hand.reduce((mostExpensive, card) =>
-          !mostExpensive || card.cost > mostExpensive.cost ? card : mostExpensive, null)
-        : selector?.startsWith("a ")
-          ? player.hand.find((card) => card.attributes?.includes(selector.slice(2).replaceAll(" ", "-")))
-          : selector
-            ? player.hand.find((card) => card.name.toLowerCase() === selector)
-            : null;
+    const target = player.hand.find((card) => card.id === targetCardId);
     if (!target) {
-      throw new Error("CompressShinsuHandler: a card in the owner's hand must be selected");
+      throw new Error("CompressShinsuHandler: the target card is no longer in the owner's hand");
     }
 
     // Delegate to authoritative CompressionService

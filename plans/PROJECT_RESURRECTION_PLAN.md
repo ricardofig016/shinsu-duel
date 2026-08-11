@@ -75,33 +75,6 @@ The compiler assigns stable alphabetical `cardId` values and emits a sparse repr
 
 The compiler is a finite pattern matcher, not an NLP system. It must not silently reinterpret non-canonical aliases. When a pattern is not supported, preserve it as custom text and add execution support in a later phase.
 
-### Phase 0 checklist
-
-- [x] Keep all card YAML in `data/cards/`, including test cards.
-- [x] Add direct `ajv` and `dotenv` dependencies and require Node 20+.
-- [x] Add source and compiled schemas with separate roles.
-- [x] Validate source YAML before compilation.
-- [x] Validate generated JSON after compilation.
-- [x] Keep `server/data/cards.json` generated and present.
-- [x] Correct Wave Controller metadata to frontline.
-- [x] Keep test cards in the production source set.
-- [x] Add optional evolution/ignition target checks.
-- [x] Preserve raw source card text in compiled DSL entries.
-- [x] Normalize card wording to canonical vocabulary without aliases.
-- [x] Cross-check `server/data/*.json` metadata against `RULES.md` and remove stale annotations.
-- [x] Update icon inventory (`ICONS_TODO.md`) for current positions, including the Shinheuh combat-slot icon.
-- [x] Defer remaining custom-effect patterns to Phase 4; current simple-effect parser coverage is sufficient for Phase 0.
-
-### Phase 0 verification
-
-Run these commands before starting Phase 1:
-
-```powershell
-npm run validate:cards
-npm run compile:cards
-npm test -- --runInBand
-```
-
 Phase 0 is complete when all three commands pass, generated data is current, and this document accurately describes the contracts above. The card total is reported by the commands and is not a contractual constant.
 
 ## Phase 1 — EventBus redesign
@@ -121,15 +94,6 @@ Phase 0 is complete when all three commands pass, generated data is current, and
 - Handler errors that identify the event and do not hide the original error.
 
 `Logger` should subscribe in `post` or `resolved`, use safe structured payload copies, and not depend on a removed event list.
-
-### Phase 1 checklist
-
-- [x] Rewrite `server/game/EventBus.js`.
-- [x] Update `server/game/Logger.js`.
-- [x] Preserve existing callers through `subscribe`/`publish` compatibility adapters.
-- [x] Add EventBus tests for pub/sub, ordering, mutation, cancellation, once, unsubscribe, and cleanup.
-- [x] Run the full Jest suite.
-- [ ] Add focused validator tests for malformed source, invalid vocabulary, and broken transformations (moved from Phase 0).
 
 Phase 1 implementation is complete for the current compatibility scope. A later Phase 2/3 migration may replace legacy `publish` calls with explicit phase-aware `emit` calls when game-state mutation is redesigned.
 
@@ -175,7 +139,6 @@ Update the Socket.IO protocol and UI only after the authoritative engine contrac
 
 A phase is complete only when:
 
-- Its checklist is complete.
 - Focused tests and the full Jest suite pass.
 - Generated card data is regenerated when source or compiler behavior changes.
 - Documentation describes actual code, paths, and contracts.

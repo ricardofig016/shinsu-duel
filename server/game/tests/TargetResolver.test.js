@@ -81,3 +81,36 @@ describe("TargetResolver", () => {
     )).toBe(true);
   });
 });
+
+describe("TargetResolver.resolveCardTarget", () => {
+  test("returns null for empty hand", () => {
+    const state = { hand: [] };
+    expect(TargetResolver.resolveCardTarget(state, "anything")).toBeNull();
+    expect(TargetResolver.resolveCardTarget(null, "anything")).toBeNull();
+    expect(TargetResolver.resolveCardTarget({ hand: [] }, null)).toBeNull();
+  });
+
+  test("resolves by exact card name (case-insensitive)", () => {
+    const card = { id: "card#1", name: "Fiery Elephant", cost: 2 };
+    const state = { hand: [card] };
+    expect(TargetResolver.resolveCardTarget(state, "Fiery Elephant")).toBe("card#1");
+    expect(TargetResolver.resolveCardTarget(state, "fiery elephant")).toBe("card#1");
+    expect(TargetResolver.resolveCardTarget(state, "Nonexistent")).toBeNull();
+  });
+
+  test("resolves 'the most expensive card'", () => {
+    const cheap = { id: "card#1", name: "A", cost: 1 };
+    const expensive = { id: "card#2", name: "B", cost: 5 };
+    const state = { hand: [cheap, expensive] };
+    expect(TargetResolver.resolveCardTarget(state, "the most expensive card")).toBe("card#2");
+  });
+
+  test("resolves 'a <attribute>' selector", () => {
+    const hwayeomsa = { id: "card#1", name: "Yeon Yihwa", cost: 2, attributes: ["hwayeomsa"] };
+    const other = { id: "card#2", name: "Monkeyman", cost: 1, attributes: [] };
+    const state = { hand: [other, hwayeomsa] };
+    expect(TargetResolver.resolveCardTarget(state, "a Hwayeomsa")).toBe("card#1");
+    expect(TargetResolver.resolveCardTarget(state, "a hwayeomsa")).toBe("card#1");
+    expect(TargetResolver.resolveCardTarget(state, "a Nonexistent")).toBeNull();
+  });
+});

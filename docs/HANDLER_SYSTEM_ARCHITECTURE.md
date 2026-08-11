@@ -149,12 +149,12 @@ reports through the unsupported-effect event. They are not parsed at runtime.
 
 ## Additional Handlers
 
-| Handler                 | DSL `type`        | Key behavior                                                                            |
-| ----------------------- | ----------------- | --------------------------------------------------------------------------------------- |
-| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`          |
-| `CompressShinsuHandler` | `compress_shinsu` | Delegates to `CompressionService.compress`; selected by structured `targetCardSelector` |
-| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                           |
-| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability via `AbilityRegistry`; revoked on source removal                |
+| Handler                 | DSL `type`        | Key behavior                                                                                           |
+| ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`                         |
+| `CompressShinsuHandler` | `compress_shinsu` | Delegates to `CompressionService.compress`; receives `targetCardId` from EffectResolver/TargetResolver |
+| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                                          |
+| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability via `AbilityRegistry`; revoked on source removal                               |
 
 All structured DSL types listed above have handler implementations. `custom`
 effects remain unresolved; the runtime skips them safely and reports an
@@ -269,6 +269,7 @@ as `granted:<sourceId>:<type>` instead of a numeric ability index.
 Unequipping the source revokes the modifier and the registry entry, which
 makes the ability unusable again — no separate cleanup path is needed.
 The same cleanup occurs when the bearer is destroyed.
+
 ---
 
 ## Handler Payload Conventions

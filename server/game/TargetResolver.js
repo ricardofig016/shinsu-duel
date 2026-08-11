@@ -294,4 +294,46 @@ export function resolveTargets(gameState, options) {
   return candidates;
 }
 
-export default { resolveTargets, canTargetEnemyLighthouses, validateTauntSelection };
+/**
+ * Resolve a card-in-hand selector to a concrete card ID.
+ *
+ * Card-in-hand selectors are used by effects like `compress_shinsu` that
+ * target cards still in the player's hand rather than units on the field.
+ * Only concrete `targetCardId` should reach handlers — this function is
+ * the single point where selectors are interpreted.
+ *
+ * Supported selectors:
+ *   "the most expensive card" — highest-cost card in hand
+ *   "a <attribute>"            — first card with the given attribute
+ *   "<card name>"              — exact card name match
+ *
+ * @param {object} playerState — player's hand, shinsu, etc.
+ * @param {string} selector — compiled targetCardSelector
+ * @returns {string|null} concrete card.id, or null if no match
+ */
+export function resolveCardTarget(playerState, selector) {
+  if (!playerState?.hand || !selector) return null;
+
+  const lowered = selector.toLowerCase();
+
+  if (lowered === "the most expensive card") {
+    const target = playerState.hand.reduce((best, card) =>
+      !best || card.cost > best.cost ? card : best, null);
+    return target?.id ?? null;
+  }
+
+  if (lowered.startsWith("a ")) {
+    // "a Hwayeomsa" → match cards with attribute "hwayeomsa"
+    const attribute = lowered.slice(2).replaceAll(" ", "-");
+    const target = playerState.hand.find((card) =>
+      card.attributes?.includes(attribute));
+    return target?.id ?? null;
+  }
+
+  // Exact card name match (case-insensitive)
+  const target = playerState.hand.find((card) =>
+    card.name.toLowerCase() === lowered);
+  return target?.id ?? null;
+}
+
+export default { resolveTargets, resolveCardTarget, canTargetEnemyLighthouses, validateTauntSelection };

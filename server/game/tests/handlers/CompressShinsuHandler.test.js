@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import EVT from "../../EventCatalog.js";
 import Card from "../../Card.js";
 import CompressShinsuHandler from "../../handlers/CompressShinsuHandler.js";
+import { resolveCardTarget } from "../../TargetResolver.js";
 import { createTestGame, getCardIdByName } from "../utils.js";
 
 function addCardToHand(game, username, name) {
@@ -39,35 +40,59 @@ describe("CompressShinsuHandler", () => {
     }));
   });
 
-  test("resolves canonical name and attribute selectors", () => {
+  test("selector resolution is done by TargetResolver, handler receives concrete targetCardId", () => {
     const [owner] = game.usernames;
     game.playerStates[owner].hand = [];
     const namedTarget = addCardToHand(game, owner, "Fiery Elephant");
     const hwayeomsaTarget = addCardToHand(game, owner, "Yeon Yihwa");
 
-    handler.execute({ owner, amount: 1, targetCardSelector: "Fiery Elephant" }, context, game);
-    handler.execute({ owner, amount: 2, targetCardSelector: "a Hwayeomsa" }, context, game);
+    // Selectors are resolved by TargetResolver.resolveCardTarget before
+    // the handler is invoked (this is what EffectResolver does).
+    const nameCardId = resolveCardTarget(game.playerStates[owner], "Fiery Elephant");
+    const attrCardId = resolveCardTarget(game.playerStates[owner], "a Hwayeomsa");
+
+    expect(nameCardId).toBe(namedTarget.id);
+    expect(attrCardId).toBe(hwayeomsaTarget.id);
+
+    // Handler receives only concrete targetCardId.
+    handler.execute({ owner, amount: 1, targetCardId: nameCardId }, context, game);
+    handler.execute({ owner, amount: 2, targetCardId: attrCardId }, context, game);
 
     expect(namedTarget.costReduction).toBe(1);
     expect(hwayeomsaTarget.costReduction).toBe(2);
   });
 
-  test("selects the highest printed cost for the canonical most-expensive selector", () => {
+  test("TargetResolver resolves the most-expensive selector", () => {
     const [owner] = game.usernames;
     game.playerStates[owner].hand = [];
     const cheaper = addCardToHand(game, owner, "Fiery Elephant");
     const expensive = addCardToHand(game, owner, "The Workshop");
 
-    handler.execute({ owner, amount: 1, targetCardSelector: "the most expensive card" }, context, game);
+    const cardId = resolveCardTarget(game.playerStates[owner], "the most expensive card");
+    expect(cardId).toBe(expensive.id);
+
+    // Handler receives only concrete targetCardId.
+    handler.execute({ owner, amount: 1, targetCardId: cardId }, context, game);
 
     expect(cheaper.costReduction).toBe(0);
     expect(expensive.costReduction).toBe(1);
   });
 
-  test("rejects compression without a selected hand card", () => {
-    const [owner] = game.usernames;
+  test("validate rejects missing targetCardId", () => {
+    expect(() => handler.validate({ owner: "Alice", amount: 1 }, context))
+      .toThrow(/targetCardId/i);
+  });
 
-    expect(() => handler.execute({ owner, amount: 1 }, context, game))
-      .toThrow(/card in the owner's hand/i);
+  test("execute rejects when the pre-resolved card is no longer in hand", () => {
+    const [owner] = game.usernames;
+    game.playerStates[owner].hand = [];
+    const target = addCardToHand(game, owner, "Fiery Elephant");
+    const cardId = target.id;
+
+    // Remove the card from hand (simulates a race condition)
+    game.playerStates[owner].hand = [];
+
+    expect(() => handler.execute({ owner, amount: 1, targetCardId: cardId }, context, game))
+      .toThrow(/no longer in/i);
   });
 });
