@@ -6,6 +6,7 @@
 - [ ] rules: add Disarm keyword - unequip a unit and send the equipment back to the owners hand (choose on LIW) 
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
+- [ ] docs: fix newline based line wrapping - switch to single line paragraphs
 
 ## In Progress
 

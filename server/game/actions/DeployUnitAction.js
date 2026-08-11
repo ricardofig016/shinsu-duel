@@ -40,7 +40,13 @@ export default class DeployUnitAction extends ActionHandler {
   execute(data, gameState) {
     const { username, handId, placedPositionCode } = data;
     LifecycleEngine.deployUnit(gameState, username, handId, placedPositionCode);
-    gameState.recordCardPlayed(username);
-    gameState.completeActionAfterDecision(() => gameState.endTurn());
+
+    // Overflow deployments defer every gameplay mutation until the owner has
+    // chosen the unit destroyed by the deployment. The card is still played
+    // when it is chosen as that destroyed unit, so record it in either case.
+    gameState.completeActionAfterDecision(() => {
+      gameState.recordCardPlayed(username);
+      gameState.endTurn();
+    });
   }
 }

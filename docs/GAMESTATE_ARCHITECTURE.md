@@ -81,6 +81,11 @@ selection, line-overflow destruction). `GameState.createPendingDecision()`
 publishes the choice and blocks further `processAction()` calls until
 `resolveDecision()` is called with a validated selection.
 
+A line-overflow deployment is deferred: the card remains in hand and no
+shinsu is spent while its owner chooses. Resolving a field-unit choice
+destroys it before the card enters play; resolving the pending-card choice
+pays for and discards that card without ever exceeding the five-unit limit.
+
 Decisions are **stacked**, not single-valued. If a resolution produces a
 second choice while one is already pending (e.g. a line overflow during a
 card whose effect list still contains a target selection), the active

@@ -30,12 +30,13 @@ function addUnit(game, owner, name, position = "fisherman") {
 }
 
 describe("pending decision continuations", () => {
-  test("overflow deployment does not end the turn until the chosen unit is destroyed", () => {
+  test("overflow deployment keeps the card and cost pending until a field unit is destroyed", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
     const unitId = getCardIdByName("Monkeyman");
-    game.playerStates.Alice.hand = [new Card(unitId, game.constructor.cards[unitId], "Alice", game.eventBus)];
+    const pendingCard = new Card(unitId, game.constructor.cards[unitId], "Alice", game.eventBus);
+    game.playerStates.Alice.hand = [pendingCard];
 
     for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Rachel");
 
@@ -46,12 +47,47 @@ describe("pending decision continuations", () => {
 
     expect(game.pendingDecision?.type).toBe("line_overflow");
     expect(game.currentTurn).toBe("Alice");
-    expect(game.playerStates.Alice.field.frontline).toHaveLength(6);
+    expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
+    expect(game.playerStates.Alice.hand).toEqual([pendingCard]);
+    expect(game.getTotalShinsu("Alice")).toBe(10);
 
     const [chosen] = game.pendingDecision.candidates;
     game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [chosen.id] });
 
     expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
+    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Monkeyman")).toBe(true);
+    expect(game.playerStates.Alice.hand).toHaveLength(0);
+    expect(game.getTotalShinsu("Alice")).toBe(9);
+    expect(game.currentTurn).toBe("Bob");
+  });
+
+  test("choosing the pending card for overflow pays for and discards it without exceeding capacity", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const unitId = getCardIdByName("Monkeyman");
+    const pendingCard = new Card(unitId, game.constructor.cards[unitId], "Alice", game.eventBus);
+    game.playerStates.Alice.hand = [pendingCard];
+
+    for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Rachel");
+
+    game.processAction({
+      type: "deploy-unit-action",
+      data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" },
+    });
+
+    const pendingCandidate = game.pendingDecision.candidates.find((candidate) => candidate.name === "Monkeyman");
+    game.resolveDecision({
+      decisionId: game.pendingDecision.decisionId,
+      username: "Alice",
+      choices: [pendingCandidate.id],
+    });
+
+    expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
+    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Monkeyman")).toBe(false);
+    expect(game.playerStates.Alice.hand).toHaveLength(0);
+    expect(game.playerStates.Alice.discard).toContain(pendingCard);
+    expect(game.getTotalShinsu("Alice")).toBe(9);
     expect(game.currentTurn).toBe("Bob");
   });
 

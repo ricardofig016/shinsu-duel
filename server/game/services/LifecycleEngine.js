@@ -73,36 +73,67 @@ export default class LifecycleEngine {
       }
     }
 
+    const line = player.field[positionDef.line];
+
+    // A field line may never temporarily exceed its five-unit capacity. When
+    // deployment would overflow, defer *all* deployment mutations until the
+    // owner chooses which of the five current units or the pending card to
+    // destroy. The card remains in hand and no cost is paid while the choice
+    // is pending, so the continuation is atomic from the board's perspective.
+    if (line.length >= 5 && !options.overflowSelection) {
+      const pendingCardId = `pending-deploy:${card.id}`;
+      gameState.createPendingDecision({
+        owner: username,
+        type: "line_overflow",
+        candidates: [
+          ...line.map((candidate) => ({
+            id: candidate.id,
+            name: candidate.card.name,
+            hp: candidate.currentHp,
+          })),
+          { id: pendingCardId, name: card.name, hp: card.maxHp },
+        ],
+        resolve: ([selectedId]) => {
+          // A pending decision blocks player actions, but validate the card
+          // identity and capacity again to keep this continuation safe when
+          // future system effects can resolve while a decision is open.
+          const pendingCard = player.hand?.[handIndex];
+          if (pendingCard !== card) {
+            throw new Error("Pending overflow deployment card is no longer in hand.");
+          }
+
+          if (selectedId === pendingCardId) {
+            // The pending card is a valid overflow choice. It is paid for and
+            // discarded as the deployment's destroyed unit, but is never put
+            // on the field, preserving the five-unit invariant.
+            ZoneService.removeFromHand(player, handIndex);
+            ShinsuService.spend(player, cost);
+            ZoneService.discard(player, card);
+            return;
+          }
+
+          const selectedUnit = gameState._findUnit(selectedId);
+          if (!selectedUnit || !line.includes(selectedUnit)) {
+            throw new Error("Selected overflow unit is no longer in the deployment line.");
+          }
+          LifecycleEngine.destroyUnit(gameState, selectedUnit);
+          LifecycleEngine.deployUnit(gameState, username, handIndex, positionCode, {
+            ...options,
+            overflowSelection: true,
+          });
+        },
+      });
+      return { unit: null, overflowDestroyed: true, pending: true };
+    }
+
     // Mutate only after every synchronous validation above has succeeded.
     ZoneService.removeFromHand(player, handIndex);
     ShinsuService.spend(player, cost);
 
-    // Create unit
+    // Create unit. Capacity is guaranteed by the overflow continuation above.
     const unit = new Unit(card, positionCode);
-    const line = player.field[positionDef.line];
     line.push(unit);
     gameState._indexUnit(unit);
-
-    // Check line overflow (max 5 units). The owner chooses one of the six
-    // units, including the new deployment, to destroy before play continues.
-    let overflowDestroyed = false;
-    if (line.length > 5) {
-      const candidates = line.map((candidate) => ({
-        id: candidate.id,
-        name: candidate.card.name,
-        hp: candidate.currentHp,
-      }));
-      gameState.createPendingDecision({
-        owner: username,
-        type: "line_overflow",
-        candidates,
-        resolve: ([unitId]) => {
-          const overflowUnit = gameState._findUnit(unitId);
-          if (overflowUnit) LifecycleEngine.destroyUnit(gameState, overflowUnit);
-        },
-      });
-      overflowDestroyed = true;
-    }
 
     // Emit deploy event chain
     gameState.eventBus.emit(EVT.UNIT_DEPLOYED, {
@@ -151,7 +182,7 @@ export default class LifecycleEngine {
       gameState._attributeRegistry.onUnitDeployed(unit, gameState);
     }
 
-    return { unit, overflowDestroyed };
+    return { unit, overflowDestroyed: false, pending: false };
   }
 
   /**
