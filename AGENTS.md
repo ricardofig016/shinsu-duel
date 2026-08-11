@@ -1,5 +1,7 @@
 # Agent Guidelines
 
+All agents must strictly follow the instructions and guidelines in this file.
+
 ## Mission
 
 Treat every change as part of the long-term resurrection and evolution of this project. Preserve the project's rules, architectural integrity, and ability to support increasingly complex cards, interactions, and game mechanics.

@@ -81,18 +81,44 @@ selection, line-overflow destruction). `GameState.createPendingDecision()`
 publishes the choice and blocks further `processAction()` calls until
 `resolveDecision()` is called with a validated selection.
 
+### Resolution Lifecycle State
+
+The engine tracks an explicit `ResolutionState`:
+
+| State       | Meaning                                                       |
+| ----------- | ------------------------------------------------------------- |
+| `IDLE`      | No pending decisions; accepting actions and normal event flow |
+| `RESOLVING` | One or more pending decisions exist; actions are blocked      |
+
+`hasUnresolvedDecisions()` exposes the current state. The state
+transitions `IDLE → RESOLVING` on `createPendingDecision()` and
+`RESOLVING → IDLE` when the last decision is resolved and no stacked
+decisions remain.
+
 A line-overflow deployment is deferred: the card remains in hand and no
 shinsu is spent while its owner chooses. Resolving a field-unit choice
 destroys it before the card enters play; resolving the pending-card choice
 pays for and discards that card without ever exceeding the five-unit limit.
 
-Decisions are **stacked**, not single-valued. If a resolution produces a
-second choice while one is already pending (e.g. a line overflow during a
-card whose effect list still contains a target selection), the active
-decision is pushed onto an internal stack and the new one becomes current.
-Resolving the current decision pops the previous one back and re-publishes
-it via the `pending-decision` event, so a client always resolves exactly
-one choice at a time, LIFO.
+### Nested Decisions & Stacking
+
+Decisions are **stacked** LIFO. When a resolve callback creates a new
+pending decision (e.g. an overflow destroy triggers a target-selection
+effect), the new decision becomes the active one — the resolving decision
+is **not** pushed to the stack since it's being cleaned up by the
+resolution's `finally` block. Decisions created outside of a resolve
+callback (while one is already pending) are pushed to the stack normally.
+
+Nesting is capped at `MAX_RESOLUTION_DEPTH` (16) to prevent infinite
+decision loops from buggy resolution callbacks.
+
+### Re-entrancy Guard
+
+`resolveDecision()` is NOT re-entrant: calling it from within a resolve
+callback or `onResolved` continuation throws. Nested decisions must
+use `createPendingDecision()` instead. The `finally` block always cleans
+up the decision stack and transitions to `IDLE` when empty, even if the
+resolve callback throws.
 
 Callers that still have work to do after the choice resolves — e.g. ending
 the turn, or resolving the next effect in a card's effect list — register a

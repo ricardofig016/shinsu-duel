@@ -20,6 +20,24 @@ import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
 import Card from "./Card.js";
 
+/**
+ * Explicit lifecycle state for the game engine.
+ *
+ * IDLE       — no pending decisions; accepting player actions and normal
+ *              event flow.
+ * RESOLVING  — one or more pending decisions exist; player actions are
+ *              blocked; the game is waiting for a human choice before
+ *              continuing resolution.
+ */
+export const ResolutionState = Object.freeze({
+  IDLE: "idle",
+  RESOLVING: "resolving",
+});
+
+/** Maximum nested pending decision depth before the engine rejects
+ *  re-entrancy as a probable infinite loop. */
+const MAX_RESOLUTION_DEPTH = 16;
+
 export default class GameState {
   // game settings
   static INIT_HAND_SIZE = 5;
@@ -98,8 +116,13 @@ export default class GameState {
     this.currentTurn = firstPlayer || this.usernames[0];
     this.roundEndOnTurnEnd = false;
     this.gameOver = null; // { winner, reason }
+
+    // ── Pending decision lifecycle ──────────────────────────────────────
+    this._resolutionState = ResolutionState.IDLE;
+    this._resolutionDepth = 0;
+    this._isExecutingResolution = false;
     this.pendingDecision = null;
-    this._pendingDecisions = []; // stack for nested pending decisions
+    this._pendingDecisions = []; // LIFO stack for nested pending decisions
 
     // initialize game state
     this.playerStates = {
@@ -417,12 +440,17 @@ export default class GameState {
   }
 
   /**
-   * Shinsu is now fully managed by ShinsuService.
+   * Whether the game is currently waiting for one or more player decisions
+   * and must not accept new actions or modify the board outside the
+   * resolution pipeline.
    */
+  hasUnresolvedDecisions() {
+    return this._resolutionState === ResolutionState.RESOLVING;
+  }
 
   processAction(action) {
     if (this.gameOver) throw new Error("The game is over.");
-    if (this.pendingDecision || this._pendingDecisions.length > 0) {
+    if (this._resolutionState !== ResolutionState.IDLE) {
       throw new Error("A player decision must be resolved before another action.");
     }
 
@@ -574,8 +602,22 @@ export default class GameState {
     return player.fireCharges;
   }
 
-  /** Create and publish a pending decision. If a decision is already active, push onto the stack. */
+  /**
+   * Create and publish a pending decision, transitioning the game into
+   * RESOLVING state. Nested decisions (a decision created while another
+   * is already pending) are stacked LIFO — the newest is always resolved
+   * first.
+   *
+   * Re-entrancy is capped at MAX_RESOLUTION_DEPTH to prevent infinite
+   * decision loops.
+   */
   createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve }) {
+    if (this._resolutionDepth >= MAX_RESOLUTION_DEPTH) {
+      throw new Error(
+        `Maximum nested pending decision depth (${MAX_RESOLUTION_DEPTH}) exceeded. ` +
+        "Check for infinite decision loops in resolution callbacks."
+      );
+    }
     if (!this.usernames.includes(owner)) throw new Error("Decision owner must be a game player.");
     if (!Array.isArray(candidates) || candidates.length < minChoices) {
       throw new Error("Not enough valid candidates for the requested decision.");
@@ -597,11 +639,16 @@ export default class GameState {
       onResolved: null,
     };
 
-    // If a decision is already pending, push current to stack
-    if (this.pendingDecision) {
+    // If a decision is already pending, push current to stack (LIFO).
+    // When called from within a resolve callback (_isExecutingResolution),
+    // the current decision is being resolved and will be cleaned up by the
+    // resolveDecision finally block — don't double-stack it.
+    if (this.pendingDecision && !this._isExecutingResolution) {
       this._pendingDecisions.push(this.pendingDecision);
     }
     this.pendingDecision = decision;
+    this._resolutionState = ResolutionState.RESOLVING;
+    this._resolutionDepth++;
 
     this.eventBus.emit(EVT.DECISION_PENDING, {
       decisionId: decision.decisionId,
@@ -614,8 +661,20 @@ export default class GameState {
     return decision.decisionId;
   }
 
-  /** Resolve the currently pending, server-validated player decision. */
+  /**
+   * Resolve the currently pending player decision.
+   *
+   * This method is NOT re-entrant: calling resolveDecision from within
+   * a decision's resolve callback or continuation is rejected. Nested
+   * decisions must use createPendingDecision instead.
+   */
   resolveDecision({ decisionId, choices, username } = {}) {
+    if (this._isExecutingResolution) {
+      throw new Error(
+        "Cannot resolve a decision from within a resolution callback. " +
+        "Use createPendingDecision for nested decisions."
+      );
+    }
     const pending = this.pendingDecision;
     if (!pending) throw new Error("There is no pending decision.");
     if (username && username !== pending.owner) throw new Error("Only the decision owner may resolve it.");
@@ -644,11 +703,30 @@ export default class GameState {
 
     // Resolve the selected state first, then clear this decision before running
     // continuations so a later effect may legitimately create its own choice.
-    pending.resolve?.(choices);
-    this.pendingDecision = this._pendingDecisions.pop() || null;
+    this._isExecutingResolution = true;
+    try {
+      pending.resolve?.(choices);
+    } finally {
+      this._isExecutingResolution = false;
+      // Only pop from the stack if the current decision is still the one
+      // being resolved (the resolve callback may have created a nested
+      // decision, which is now the active one).
+      if (this.pendingDecision === pending) {
+        this.pendingDecision = this._pendingDecisions.pop() || null;
+      }
+      this._resolutionDepth = Math.max(0, this._resolutionDepth - 1);
+      if (!this.pendingDecision) {
+        this._resolutionState = ResolutionState.IDLE;
+      }
+    }
+
+    // Run continuations while NOT in the execution guard so continuations
+    // that produce new pending decisions (via createPendingDecision) work.
     pending.onResolved?.();
+
     this.eventBus.emit(EVT.DECISION_RESOLVED, { decisionId, owner: pending.owner, type: pending.type, choices });
-    // If a stacked decision is now active, notify the client
+
+    // If a stacked decision is now active, re-notify the client.
     if (this.pendingDecision) {
       this.eventBus.emit(EVT.DECISION_PENDING, {
         decisionId: this.pendingDecision.decisionId,
