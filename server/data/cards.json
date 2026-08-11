@@ -212,13 +212,11 @@
     "cardId": 4,
     "type": "skill",
     "name": "Baang",
-    "cost": 1,
+    "cost": 0,
     "effects": [
       {
-        "type": "deal_damage",
-        "amount": 2,
-        "target": "enemy",
-        "raw": "deal 2 to an enemy",
+        "type": "custom",
+        "raw": "if you have an ally Wave Controller deal 2 to an enemy, otherwise deal 1",
         "handler": null
       }
     ],

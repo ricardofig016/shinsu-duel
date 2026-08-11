@@ -1,6 +1,6 @@
 type: skill
 name: Baang
-cost: 1
+cost: 0
 requirements:
 effects:
-  - deal 2 to an enemy
+  - if you have an ally Wave Controller deal 2 to an enemy, otherwise deal 1
