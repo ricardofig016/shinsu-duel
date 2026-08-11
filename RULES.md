@@ -180,7 +180,7 @@ Equipments return to hand when their bearer dies or is equiped when another equi
 ## Deck
 
 1. A deck must have exactly 30 cards
-2. Repeated cards are not allowed
+2. A deck may contain up to 3 copies of each card
 3. Starting hand: 5 cards, no mulligan
 4. If at any point a player tries to draw and their deck is empty, they lose the game
 
@@ -193,14 +193,15 @@ Keywords are special terms that provide additional context to cards and abilitie
 3. **Compress `x`**: Reduce shinsu cost by `x`
 4. **Create `x`**: Regain `x` lighthouses
 5. **Destroy `x`**: Destroy `x` enemy lighthouses
-6. **Free**: Doesn't expend a combat slot
-7. **Quick**: Doesn't end your turn
-8. **Reclaim `x`**: Put `x` cards from your discard pile into your hand
-9. **Silence**: Remove all traits
-10. **Slay `x`**: Kill `x` units
-11. **Spend `x`**: Spend `x` shinsu
-12. **Unreachable**: You can't put me in your deck during deckbuilding
-13. **<position>**: available only when played as <position>
+6. **Disarm**: Send a unit's equipment back to it's owners hand
+7. **Free**: Doesn't expend a combat slot
+8. **Quick**: Doesn't end your turn
+9. **Reclaim `x`**: Put `x` cards from your discard pile into your hand
+10. **Silence**: Remove all traits
+11. **Slay `x`**: Kill `x` units
+12. **Spend `x`**: Spend `x` shinsu
+13. **Unreachable**: You can't put me in your deck during deckbuilding
+14. **<position>**: available only when played as <position>
 
 ## Positions
 

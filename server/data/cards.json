@@ -220,11 +220,6 @@
         "target": "enemy",
         "raw": "deal 2 to an enemy",
         "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "you can put 3 of me in your deck during deckbuilding",
-        "handler": null
       }
     ],
     "deckConstraints": []

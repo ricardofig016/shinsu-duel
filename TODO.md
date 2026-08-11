@@ -3,18 +3,18 @@
 ## Tasks
 
 - [ ] frontend: change board background to something from the webtoon
-- [ ] rules: add Disarm keyword - unequip a unit and send the equipment back to the owners hand (choose on LIW) 
+- [ ] game: add Disarm keyword - Send a unit's equipment back to it's owners hand (choose on LIW)
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
 - [ ] docs: fix newline based line wrapping - switch to single line paragraphs
 - [ ] tests: organize server\game\tests better
-- [ ] rules: think about max copies of a card during deckbuilding (maybe 3)
 
 ## In Progress
 
 
 ## Completed
 
+- [x] rules: think about max copies of a card during deckbuilding (maybe 3) - revisit Baang
 - [x] data/cards: support folders for organization
 - [x] rules: update jeonsulsa attribute in RULES.md
 - [x] data: implement Disabled, Blinded, and Undying
