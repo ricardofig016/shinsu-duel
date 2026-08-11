@@ -518,6 +518,7 @@ export default class GameState {
           equipmentAttachments: (u.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
+          grantedAbilities: this._abilityRegistry.getGranted(u.id).map((e) => e.code),
         })) ?? [],
         backline: p.field?.backline?.map((u) => ({
           id: u.id,
@@ -528,6 +529,7 @@ export default class GameState {
           equipmentAttachments: (u.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
+          grantedAbilities: this._abilityRegistry.getGranted(u.id).map((e) => e.code),
         })) ?? [],
       };
     }

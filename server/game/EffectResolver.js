@@ -105,16 +105,28 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Build payload from DSL + extra context
   const payload = { ...effect, ...extra };
 
-  // Single-target descriptors with multiple candidates require an explicit
-  // server-validated player choice before the effect resolves.
-  const choiceTargets = new Set(["ally", "enemy", "enemies", "unit", "bearer"]);
-  if (!payload.targetId && choiceTargets.has(payload.target)) {
+  // Single-target and non-choice descriptors — resolve immediately through
+  // TargetResolver so handlers only ever receive a pre-resolved targetId.
+  // This ensures taunt, frontline blocking, ghost, sharpshooter, blinded,
+  // and condition filters are always applied consistently.
+  const immediateTargets = new Set(["self", "ally", "enemy", "enemies", "bearer", "enemy_frontline", "enemy_backline", "unit"]);
+  if (!payload.targetId && immediateTargets.has(payload.target)) {
+    // The `condition` DSL field is an overloaded term:
+    //   - deal_damage: filter targets to those with this condition
+    //   - give_condition: the condition being applied (NOT a filter)
+    // Only pass it as a target filter when the effect type uses it that way.
+    const conditionIsFilter = !["give_condition", "grant_trait", "cleanse", "heal"].includes(type);
+    const targetCondition = conditionIsFilter ? payload.condition : undefined;
+
     const candidates = TargetResolver.resolveTargets(gameState, {
       target: payload.target,
       sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
       sourceOwner: payload.sourceOwner || payload.owner,
-      condition: payload.condition,
+      condition: targetCondition,
       conditionValue: payload.conditionValue,
+      trait: payload.trait,
+      rank: payload.rank,
+      position: payload.position,
       count: Number.MAX_SAFE_INTEGER,
     });
     if (candidates.length > 1) {
@@ -140,14 +152,22 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     if (candidates.length === 1) payload.targetId = candidates[0].id;
   }
 
+  // If a target descriptor was given but no valid targets were found,
+  // the effect was targeting something that doesn't exist — it's a legal
+  // no-op, not an error. Handlers only run when a concrete target exists.
+  if (!payload.targetId && immediateTargets.has(payload.target)) {
+    return { skipped: true, reason: "no valid targets" };
+  }
+
   // Mass-target effects are resolved once for each target, preserving normal
   // handler semantics and making future handlers independent of target count.
   if (!payload.targetId && ["all_allies", "all_enemies"].includes(payload.target)) {
+    const conditionIsFilter = !["give_condition", "grant_trait", "cleanse", "heal"].includes(type);
     const targets = TargetResolver.resolveTargets(gameState, {
       target: payload.target,
       sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
       sourceOwner: payload.sourceOwner || payload.owner,
-      condition: payload.condition,
+      condition: conditionIsFilter ? payload.condition : undefined,
       conditionValue: payload.conditionValue,
       trait: payload.trait,
       rank: payload.rank,

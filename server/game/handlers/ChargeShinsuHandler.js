@@ -14,9 +14,7 @@ import EVT from "../EventCatalog.js";
 export default class ChargeShinsuHandler extends BaseHandler {
   validate(payload) {
     if (!payload.owner) throw new Error("ChargeShinsuHandler: payload.owner is required");
-    if (typeof payload.amount !== "number" || payload.amount <= 0) {
-      throw new Error("ChargeShinsuHandler: payload.amount must be a positive number");
-    }
+    BaseHandler.requirePositiveInt(payload.amount, "amount");
   }
 
   execute(payload, context, gameState) {

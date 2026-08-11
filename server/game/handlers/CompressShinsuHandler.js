@@ -12,9 +12,7 @@ import CompressionService from "../services/CompressionService.js";
 export default class CompressShinsuHandler extends BaseHandler {
   validate(payload) {
     if (!payload.owner) throw new Error("CompressShinsuHandler: payload.owner is required");
-    if (typeof payload.amount !== "number" || payload.amount <= 0) {
-      throw new Error("CompressShinsuHandler: payload.amount must be a positive number");
-    }
+    BaseHandler.requirePositiveInt(payload.amount, "amount");
   }
 
   execute(payload, context, gameState) {

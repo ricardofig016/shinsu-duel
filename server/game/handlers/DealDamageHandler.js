@@ -1,5 +1,4 @@
 import BaseHandler from "./BaseHandler.js";
-import TargetResolver from "../TargetResolver.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
 import EVT from "../EventCatalog.js";
 
@@ -9,42 +8,21 @@ import EVT from "../EventCatalog.js";
  * Payload:
  *   { sourceId, targetId, amount, sourceOwner, targetOwner }
  *
- * Emits children:
- *   - unit:damage:applied  (after damage is resolved)
- *   - unit:killed           (if HP reaches 0)
+ * targetId is always pre-resolved by EffectResolver before this handler runs.
  */
 export default class DealDamageHandler extends BaseHandler {
   validate(payload) {
-    if (typeof payload.amount !== "number" || payload.amount < 0) {
-      throw new Error("DealDamageHandler: payload.amount must be a non-negative number");
+    if (typeof payload.amount !== "number" || !Number.isFinite(payload.amount) || payload.amount < 0) {
+      throw new Error("DealDamageHandler: payload.amount must be a non-negative finite number");
     }
-    // targetId is optional now — can also use target descriptor + sourceUnit
-    if (!payload.targetId && !payload.target) {
-      throw new Error("DealDamageHandler: payload.targetId or payload.target is required");
+    if (!payload.targetId) {
+      throw new Error("DealDamageHandler: payload.targetId is required");
     }
   }
 
   execute(payload, context, gameState) {
-    const { amount } = payload;
+    const { amount, targetId } = payload;
     const modStack = gameState.modifierStack;
-
-    // Resolve target — use TargetResolver if target descriptor provided
-    let targetId = payload.targetId;
-    if (!targetId && payload.target) {
-      const sourceUnit = payload.sourceUnit || gameState._findUnit(payload.sourceId);
-      const targets = TargetResolver.resolveTargets(gameState, {
-        target: payload.target,
-        sourceUnit,
-        sourceOwner: payload.sourceOwner || payload.owner,
-        condition: payload.condition,
-        conditionValue: payload.conditionValue,
-        count: payload.count || 1,
-      });
-      if (targets.length === 0) return { damageDealt: 0, killed: false };
-      targetId = targets[0].id;
-    }
-
-    if (!targetId) return { damageDealt: 0, killed: false };
     let damage = amount;
 
     // Barrier: negate first damage each round

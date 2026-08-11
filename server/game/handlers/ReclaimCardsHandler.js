@@ -11,9 +11,7 @@ import EVT from "../EventCatalog.js";
 export default class ReclaimCardsHandler extends BaseHandler {
   validate(payload) {
     if (!payload.owner) throw new Error("ReclaimCardsHandler: payload.owner is required");
-    if (typeof payload.amount !== "number" || payload.amount <= 0) {
-      throw new Error("ReclaimCardsHandler: payload.amount must be a positive number");
-    }
+    BaseHandler.requirePositiveInt(payload.amount, "amount");
   }
 
   execute(payload, context, gameState) {

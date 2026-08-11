@@ -9,9 +9,7 @@ import EVT from "../EventCatalog.js";
  */
 export default class CreateLighthouseHandler extends BaseHandler {
   validate(payload) {
-    if (typeof payload.amount !== "number" || payload.amount <= 0) {
-      throw new Error("CreateLighthouseHandler: payload.amount must be a positive number");
-    }
+    BaseHandler.requirePositiveInt(payload.amount, "amount");
     if (!payload.owner) {
       throw new Error("CreateLighthouseHandler: payload.owner is required");
     }
