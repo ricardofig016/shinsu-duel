@@ -55,6 +55,44 @@ Position-scoped variant:
 
 ---
 
+## Canonical Trigger Timing
+
+Every transformation trigger subscribes in the **`post`** phase of its
+canonical runtime event. The `post` phase runs after the event's `execute`
+phase has completed all authoritative mutations, so a transformation always
+sees the fully-resolved state of the triggering action.
+
+### Event selection rationale
+
+| Trigger        | Canonical event       | Why                                                                                                                                                                                          |
+| -------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equip`        | `equipment:attached`  | Emitted after equipment effects are resolved, abilities registered, and ignition triggers created. Evolution observes the fully-equipped state.                                              |
+| `deploy`       | `unit:summoned`       | Emitted after `unit:deployed`, once native traits, evolution registration, passives, and attribute engines are wired. The unit's complete observable state exists before this trigger fires. |
+| `slay`         | `unit:killed`         | Emitted when a unit's HP reaches 0, after death-intent and Undying interception. Distinct from `unit:destroyed`.                                                                             |
+| `kill`         | `unit:killed`         | Same canonical event as `slay`; the trigger's `matches` filter distinguishes killer identity, rank, and target type.                                                                         |
+| `ally_dies`    | `unit:destroyed`      | Emitted by `LifecycleEngine.destroyUnit` after equipment detach, field removal, and subsystem cleanup. Fires for any unit removal, not only lethal damage.                                   |
+| `damaged_by`   | `unit:damage:applied` | Emitted in the `post` phase after Barrier/Resilient/Weak reduction. The final damage amount is known.                                                                                        |
+| `round_start`  | `round:started`       | Emitted at the top of each round after shinsu reset and card draw.                                                                                                                           |
+| `round_end`    | `round:ended`         | Emitted before condition cleanup; a passive reading conditions sees them before they are cleared.                                                                                            |
+| `deal_damage`  | `unit:damage:applied` | Same canonical event as `damaged_by`; the `matches` filter distinguishes source vs target perspective.                                                                                       |
+| `ability_used` | `unit:ability:used`   | Emitted after ability resolution completes.                                                                                                                                                  |
+
+### DFS ordering guarantee
+
+`TriggerManager` subscribes with default priority 0 in the `post` phase.
+Other `post` handlers with lower priority run first. After the
+transformation:
+
+1. `LifecycleEngine.transformUnit` / `transformEquipment` runs synchronously.
+2. The old trigger subscriptions are removed (`unregisterAll`).
+3. `unit:evolved` / `equipment:ignited` is emitted.
+4. Subsequent `post` handlers of the original event see the transformed unit.
+
+This ordering is verified by the DFS-ordering tests in
+`server/game/tests/TriggerTiming.test.js`.
+
+---
+
 ## Compiler Integration
 
 `parseTrigger(raw)` is called during `resolveEvolveInto()` and
