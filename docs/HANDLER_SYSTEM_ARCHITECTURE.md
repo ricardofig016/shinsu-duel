@@ -175,9 +175,13 @@ gameState._abilityRegistry.resolve(targetId, code)
 ```
 
 `UseAbilityAction` resolves granted ability codes through the registry
-(see `ACTION_SYSTEM_ARCHITECTURE.md`). `LifecycleEngine` revokes entries on
-unit destroy and per-source on equipment detach, so an unequipped ability is
-no longer addressable.
+(see `ACTION_SYSTEM_ARCHITECTURE.md`). AbilityRegistry cleanup is driven
+exclusively through the `ModifierStack.onRevoke` bridge: when a modifier of
+type `"ability"` is removed (by `removeBySource` on unequip, or
+`removeByTarget` on unit destroy), the bridge cascades to
+`AbilityRegistry.revokeBySource`. `LifecycleEngine` never calls
+`AbilityRegistry` directly — it cleans up through `ModifierStack` and the
+bridge handles the rest.
 
 ## EffectResolver
 

@@ -232,7 +232,8 @@ export default class LifecycleEngine {
     gameState._triggerManager?.unregisterAll(unit.id);
     gameState._passiveManager?.unregisterUnit(unit.id);
     gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
-    gameState._abilityRegistry?.revokeAll(unit.id);
+    // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
+    // (triggered by the UNIT_DESTROYED → removeByTarget cascade below).
 
     // Emit destroyed event (ModifierStack auto-cleans via listener)
     gameState.eventBus.emit(EVT.UNIT_DESTROYED, {
@@ -421,7 +422,8 @@ export default class LifecycleEngine {
     for (const equip of toDetach) {
       gameState.modifierStack.removeBySource(equip.id);
       gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
-      gameState._abilityRegistry?.revokeBySource(unit.id, equip.id);
+      // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
+      // (triggered by removeBySource above).
 
       if (player) {
         if (equip.ignitedFrom !== undefined && equip.ignitedFrom !== null) {

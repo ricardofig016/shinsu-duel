@@ -155,11 +155,32 @@ by most recent `createdAt`).
 
 ---
 
+## Cross-System Cleanup (onRevoke Bridge)
+
+```js
+stack.onRevoke((mod) => {
+  if (mod.type === "ability") {
+    abilityRegistry.revokeBySource(mod.targetId, mod.sourceId);
+  }
+});
+```
+
+The `onRevoke` callback is invoked for **every** removed modifier. It is the
+**sole bridge** from ModifierStack cleanup to external registries.
+`GameState` wires it to cascade ability-type modifier removal to
+`AbilityRegistry` cleanup. No other system calls `AbilityRegistry`
+cleanup methods directly — all paths go through this bridge.
+
+This ensures a single ownership model: `ModifierStack` owns modifier
+lifetimes, `AbilityRegistry` owns ability DSL data, and the bridge keeps
+them synchronized without duplicated cleanup calls.
+
 ## Auto-Cleanup Hook
 
 The ModifierStack registers `bus.on("unit:destroyed", ...)` in its constructor.
 When a unit is destroyed, `removeByTarget(unitId)` fires, cleaning up all
-modifiers on that unit and all modifiers sourced from it.
+modifiers on that unit and all modifiers sourced from it. The `onRevoke`
+bridge then cascades to any registered external cleanup (e.g. AbilityRegistry).
 
 **⚠️ This means `unit:destroyed` MUST be emitted for every unit removal.**
 If you bypass the event and just splice the unit from the field array, the
