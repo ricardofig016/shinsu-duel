@@ -12,7 +12,7 @@ start by reading PROJECT_RESURRECTION_PLAN.md, RULES.md, and all the md files in
 
 if you check of a todo item, simply change `[ ]` to `[x]` on that item. do not make any modifications to TODO.md besides that.
 
-always follow these principles:
+always follow these core principles:
 
 Never under any circumstances sacrifice good architecture and cleanliness for backwards compatability and legacy implementation. you should always want to fix imperfections, never patch them up.
 
