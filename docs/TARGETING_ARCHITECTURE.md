@@ -9,7 +9,9 @@ rules, taunt/ghost/sharpshooter interactions, and the pending-decision protocol.
 
 `TargetResolver.resolveTargets(gameState, options)` is the **sole authority**
 for resolving human-readable target descriptors into validated unit lists.
-All handlers must use it — no ad-hoc target logic.
+`EffectResolver` is the integration boundary: it calls `TargetResolver`,
+converts resolved targets into concrete `targetId` payloads, and only then
+invokes a handler. Handlers never accept or interpret target descriptors.
 
 ---
 
@@ -104,8 +106,9 @@ socket.emit("game-decision", {
 });
 ```
 
-The engine validates choices and resumes the event chain.
-
+The engine validates choices and resumes the event chain. Validation includes
+the decision ID, owner, choice count, uniqueness, candidate membership, and
+whether a real unit candidate was destroyed while the decision was pending.
 Decisions stack. If a resolution creates a second choice while one is still
 pending, the active decision is pushed aside and the new one becomes current;
 resolving it pops the previous one back and re-emits `pending-decision` for

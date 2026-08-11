@@ -26,9 +26,8 @@ game.processAction({
 ```
 
 Actions **validate first, mutate second**. They never mutate `playerState`
-fields directly — card movement, shinsu, and lighthouse changes delegate to
-the same services handlers use (`ZoneService`, `ShinsuService`,
-`GameState.modifyLighthouses`, `LifecycleEngine`).
+fields directly — card movement and shinsu changes delegate to the same
+services handlers use (`ZoneService`, `ShinsuService`, `LifecycleEngine`).
 
 ---
 
@@ -60,7 +59,8 @@ export default class ActionHandler {
    from reaching game logic.
 2. **Source access** — `sourceAccess[data.source]` must be truthy. `player`
    is the normal entry point; `system` is reserved for server-internal
-   mutations (e.g. `add-lighthouse-action`).
+   actions when one is required. Resource mutations that are not player
+   choices, bypass the action layer.
 
 Subclass `validate()` then adds **game-rule checks**: the actor exists, it is
 their turn, the card/unit exists, costs are affordable, and requirements are

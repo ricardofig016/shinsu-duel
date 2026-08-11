@@ -164,6 +164,7 @@ Logger. It includes:
 
 - Active conditions per unit (from ModifierStack)
 - Active traits per unit (from ModifierStack)
+- Runtime-granted ability codes per unit (from AbilityRegistry)
 - Equipment attachments
 - Combat slot status
 - Shinheuh slot status

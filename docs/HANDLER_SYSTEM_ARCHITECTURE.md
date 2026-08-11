@@ -13,6 +13,10 @@ classes** that extend `BaseHandler`. Handlers receive a structured payload,
 validate it, and execute state changes through the `ModifierStack` and
 `EventBus`.
 
+Target descriptors are resolved before handler execution by
+`EffectResolver`/`TargetResolver`. Handlers receive concrete `targetId` values
+and must not resolve targets themselves.
+
 Handlers never mutate `playerState` fields directly. Shared-resource changes
 delegate to the authoritative services:
 
@@ -116,11 +120,14 @@ The compiled `cards.json` contains effect objects like:
 At runtime, the resolution engine:
 
 1. Reads `effect.type` → `"deal_damage"`
-2. Looks up `registry.get("deal_damage")` → `DealDamageHandler`
-3. Calls `handler.validate(payload)`
-4. Calls `handler.execute(payload, context, gameState)`
+2. Resolves any target descriptor through `TargetResolver`
+3. Looks up `registry.get("deal_damage")` → `DealDamageHandler`
+4. Calls `handler.validate(payload)` with concrete `targetId` values
+5. Calls `handler.execute(payload, context, gameState)`
 
-For `type: "custom"` effects (~116 in the card set), there is **no handler registered**. These are raw-text effects that the resolution engine must skip gracefully (log a warning, don't crash).
+For `type: "custom"` effects, there is **no handler registered**. These are
+unresolved raw-text effects that the resolution engine skips gracefully and
+reports through the unsupported-effect event. They are not parsed at runtime.
 
 ---
 
@@ -149,7 +156,9 @@ For `type: "custom"` effects (~116 in the card set), there is **no handler regis
 | `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                           |
 | `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability via `AbilityRegistry`; revoked on source removal                |
 
-All 12 structured DSL types have handler implementations. `custom` type effects (~116) remain unresolved until custom handlers are written.
+All structured DSL types listed above have handler implementations. `custom`
+effects remain unresolved; the runtime skips them safely and reports an
+unsupported-effect event rather than parsing raw text.
 
 ## Ability Registry
 
@@ -216,18 +225,17 @@ Resolution flow:
 **⚠️ This requires a recursive resolution function**:
 
 ```js
-function resolveEffect(effect, context, gameState) {
+function resolveEffect(effect, context, gameState, extra = {}) {
   if (effect.type === "custom") {
-    // Skip — custom types are handled elsewhere
-    return;
+    // Skip unresolved raw text and emit an unsupported-effect event.
+    return { skipped: true };
   }
-  const handler = registry.get(effect.type);
-  handler.execute(effect, context, gameState);
-
-  // If the effect wraps an inner effect, recurse
-  if (effect.effect) {
-    resolveEffect(effect.effect, context, gameState);
-  }
+  // TargetResolver is called here, before the handler, when effect.target
+  // is a descriptor. The handler receives only concrete targetId values.
+  const payload = { ...effect, ...extra };
+  const handler = registry.get(payload.type);
+  handler.validate(payload, context);
+  return handler.execute(payload, context, gameState);
 }
 ```
 
@@ -256,7 +264,7 @@ The bearer's player can then use it through `UseAbilityAction`, addressed
 as `granted:<sourceId>:<type>` instead of a numeric ability index.
 Unequipping the source revokes the modifier and the registry entry, which
 makes the ability unusable again — no separate cleanup path is needed.
-
+The same cleanup occurs when the bearer is destroyed.
 ---
 
 ## Handler Payload Conventions

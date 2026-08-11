@@ -183,7 +183,7 @@ Additional fields depend on `type` (see below).
 | `amount`             | `deal_damage`, `heal`, `spend_shinsu`, `give_condition`, `grant_trait`, `create_lighthouse`, `destroy_lighthouse`, `reclaim_cards`, `compress_shinsu`, `charge_shinsu` | Numeric value                                                              |
 | `target`             | `deal_damage`, `heal`, `cleanse`, `give_condition`, `grant_trait`, `grant_ability`                                                                                     | `"enemy"`, `"ally"`, `"self"`, `"bearer"`, `"all_enemies"`, `"all_allies"` |
 | `targetCardSelector` | `compress_shinsu`                                                                                                                                                      | Selector after `from`, resolved against the owner's hand                   |
-| `condition`          | `give_condition`                                                                                                                                                       | `"burned"`, `"poisoned"`, `"rooted"`, etc.                                 |
+| `condition`          | `give_condition`                                                                                                                                                       | Condition to apply, such as `"burned"`, `"poisoned"`, or `"rooted"`.       |
 | `trigger`            | passives only                                                                                                                                                          | `"round start"` or `"round end"` — see `PASSIVE_SYSTEM_ARCHITECTURE.md`    |
 | `trait`              | `grant_trait`                                                                                                                                                          | `"barrier"`, `"strong"`, `"lethal"`, etc.                                  |
 | `quick`              | abilities, effects                                                                                                                                                     | `true` if the ability/effect has Quick keyword                             |
@@ -214,13 +214,14 @@ Additional fields depend on `type` (see below).
 | `reclaim_cards`      | `ReclaimCardsHandler`      | `"reclaim 1"`                                |
 | `grant_ability`      | `GrantAbilityHandler`      | `"ability: give Poisoned 4 to an enemy"`     |
 
-All 12 DSL types now have runtime handlers. `custom` type effects remain unresolved.
+All structured DSL types listed above have runtime handlers. `custom`
+effects remain unresolved and are skipped safely by the runtime.
 
 ### Unresolved type
 
-| `type`   | Occurrences | Description                                           |
-| -------- | ----------- | ----------------------------------------------------- |
-| `custom` | ~116        | Raw text, `handler: null`. Requires a custom handler. |
+| `type`   | Description                                                                       |
+| -------- | --------------------------------------------------------------------------------- |
+| `custom` | Raw text with `handler: null`; reported as unsupported and not parsed at runtime. |
 
 ---
 
