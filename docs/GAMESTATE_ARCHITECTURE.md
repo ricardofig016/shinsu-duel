@@ -40,10 +40,10 @@ Each player state has typed zones:
     frontline: Unit[],
     backline:  Unit[],
   },
-  lighthouses: { amount, max: 40 },
-  shinsu:      { normalAvailable, normalSpent, recharged },
-  combatSlots: { fisherman: { available }, light-bearer: { available }, ... },
-  shinheuhSlot:{ available, used },
+  lighthouses:  { amount, max: 40 },
+  shinsu:       { normalAvailable, normalSpent, recharged },
+  combatSlots:  { fisherman: { available }, light-bearer: { available }, ... },
+  shinheuhSlot: { available, used },
   fireCharges:    number,  // Hwayeomsa resource
 }
 ```
@@ -60,6 +60,8 @@ Each player state has typed zones:
 | Frontline blocks backline  | `TargetResolver.resolveTargets`                   |
 | Taunt forces targeting     | `TargetResolver.applyTauntFilter`                 |
 | Conditions end-of-round    | `GameState` round end handler                     |
+| Disabled suppresses passives | `PassiveManager` condition check                |
+| Undying intercepts lethal damage | `unit:death:intent` before `unit:killed`     |
 | Card requirements          | `RequirementValidator` before cost deduction      |
 | First card this round      | `GameState._cardsPlayedThisRound` tracking        |
 | Barrier resets per round   | `GameState` round start handler                   |

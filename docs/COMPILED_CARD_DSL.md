@@ -13,9 +13,13 @@ The card compiler reads YAML source files from `data/cards/`, validates
 them, and produces a single `server/data/cards.json` file. This file is
 the **sole runtime data source** — the game engine never reads YAML directly.
 
-| Source             | Compiled                 | Validated by                                                                    |
-| ------------------ | ------------------------ | ------------------------------------------------------------------------------- |
-| `data/cards/*.yml` | `server/data/cards.json` | `scripts/card-validate.js` (YAML) + `schemas/compiled-cards.schema.json` (JSON) |
+| Source                | Compiled                 | Validated by                                                                    |
+| --------------------- | ------------------------ | ------------------------------------------------------------------------------- |
+| `data/cards/**/*.yml` | `server/data/cards.json` | `scripts/card-validate.js` (YAML) + `schemas/compiled-cards.schema.json` (JSON) |
+
+Card source files may be organized under `data/cards/` subdirectories. The
+compiler and validator discover YAML files recursively; directory names do
+not affect card identity or compiled IDs.
 
 Commands:
 
@@ -276,6 +280,10 @@ Resolution: find all enemies, filter by `condition`, deal damage to each.
 ---
 
 ## Transformation Objects
+
+Transformation targets use the canonical names `<base name> - Evolved` and
+`<base name> - Ignited`. The compiler resolves these names at compile time;
+transformation targets must exist and have the expected card type.
 
 ### Evolution
 

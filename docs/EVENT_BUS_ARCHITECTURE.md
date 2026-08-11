@@ -278,6 +278,8 @@ Handlers use `context.emitChild()` for cascading effects and the
 - `unit:deployed` — unit enters battlefield
 - `unit:summoned` — unit summoned (incl. Shinheuh)
 - `unit:destroy:intent` — cancellable pre-destroy hook
+- `unit:death:intent` — cancellable lethal-damage hook before `unit:killed`
+- `unit:undying:saved` — Undying prevented a lethal damage result
 - `unit:destroyed` — unit leaves battlefield (ModifierStack auto-cleans)
 - `unit:evolved` — unit transformed (evolution)
 - `unit:killed` — unit HP reached 0

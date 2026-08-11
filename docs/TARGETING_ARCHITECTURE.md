@@ -57,6 +57,16 @@ must be selected before any other enemy unit may be selected. Effects that
 unconditionally target all enemies do not require a choice and include all
 valid enemies.
 
+### Blinded
+
+A unit with the `Blinded` condition cannot choose targeted units. For choice
+descriptors such as `enemy`, `ally`, and `unit`, `TargetResolver` shuffles the
+already-filtered valid candidates and selects from that order. Line blocking,
+Ghost, Sharpshooter, Taunt, and other filters are applied before randomization.
+Self, bearer, all-target descriptors, and lighthouse targeting are not
+randomized. The resolver uses the game's injectable RNG (`gameState._rng`) so
+random targeting can be deterministic in tests and replays.
+
 ---
 
 ## Optional Filters

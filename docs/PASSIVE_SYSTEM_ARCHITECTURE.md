@@ -73,6 +73,14 @@ tracked like any other effect.
 - Passives only fire while their unit is alive and still on the field —
   checked on every trigger, not just at registration time.
 
+### Disabled
+
+A unit with the `Disabled` condition does not trigger any registered passive.
+The condition is checked when the round event reaches the passive handler, so
+applying or removing it during the game takes effect without rebuilding the
+subscription. Disabled affects passive abilities; it does not remove traits
+or other modifiers.
+
 ### Ordering
 
 Passive handlers run at `phase: "execute"` with a low priority, so they
@@ -82,7 +90,7 @@ like Rooted or Burned. A passive that reads a condition (e.g. Karaka's
 
 ---
 
-## Example: Khun Ran (evolved)
+## Example: Khun Ran - Evolved
 
 ```yaml
 passives:
