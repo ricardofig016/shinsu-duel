@@ -52,25 +52,25 @@ Each player state has typed zones:
 
 ## Rules Enforced
 
-| Rule                       | Enforcement                                       |
-| -------------------------- | ------------------------------------------------- |
-| Max 5 units per line       | `LifecycleEngine.deployUnit` requests a choice    |
-| Same-name unit check       | `LifecycleEngine.deployUnit` rejects duplicate    |
-| Landmark replacement       | `LifecycleEngine.deployUnit` destroys old         |
-| Frontline blocks backline  | `TargetResolver.resolveTargets`                   |
-| Taunt forces targeting     | `TargetResolver.applyTauntFilter`                 |
-| Conditions end-of-round    | `GameState` round end handler                     |
-| Disabled suppresses passives | `PassiveManager` condition check                |
-| Undying intercepts lethal damage | `unit:death:intent` before `unit:killed`     |
-| Card requirements          | `RequirementValidator` before cost deduction      |
-| First card this round      | `GameState._cardsPlayedThisRound` tracking        |
-| Barrier resets per round   | `GameState` round start handler                   |
-| Shinsu max = round num     | `ShinsuService.reset`                             |
-| Recharged shinsu max 2     | `ShinsuService.reset`                             |
-| Equipment returns on death | `LifecycleEngine.destroyUnit`                     |
-| Empty deck → loss          | `ZoneService.draw` → `GameState` game-over        |
-| 0 lighthouses → loss       | Lighthouse-depleted event → `GameState` game-over |
-| Unreachable cards          | Deck construction rejects them; draws do not skip |
+| Rule                             | Enforcement                                       |
+| -------------------------------- | ------------------------------------------------- |
+| Max 5 units per line             | `LifecycleEngine.deployUnit` requests a choice    |
+| Same-name unit check             | `LifecycleEngine.deployUnit` rejects duplicate    |
+| Landmark replacement             | `LifecycleEngine.deployUnit` destroys old         |
+| Frontline blocks backline        | `TargetResolver.resolveTargets`                   |
+| Taunt forces targeting           | `TargetResolver.applyTauntFilter`                 |
+| Conditions end-of-round          | `GameState` round end handler                     |
+| Disabled suppresses passives     | `PassiveManager` condition check                  |
+| Undying intercepts lethal damage | `unit:death:intent` before `unit:killed`          |
+| Card requirements                | `RequirementValidator` before cost deduction      |
+| First card this round            | `GameState._cardsPlayedThisRound` tracking        |
+| Barrier resets per round         | `GameState` round start handler                   |
+| Shinsu max = round num           | `ShinsuService.reset`                             |
+| Recharged shinsu max 2           | `ShinsuService.reset`                             |
+| Equipment returns on death       | `LifecycleEngine.destroyUnit`                     |
+| Empty deck → loss                | `ZoneService.draw` → `GameState` game-over        |
+| 0 lighthouses → loss             | Lighthouse-depleted event → `GameState` game-over |
+| Unreachable cards                | Deck construction rejects them; draws do not skip |
 
 ---
 
