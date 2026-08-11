@@ -16,7 +16,12 @@ to the registry:
 ```js
 game.processAction({
   type: "deploy-unit-action",
-  data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" },
+  data: {
+    source: "player",
+    username: "Alice",
+    handId: 0,
+    placedPositionCode: "scout",
+  },
 });
 ```
 
@@ -33,11 +38,17 @@ the same services handlers use (`ZoneService`, `ShinsuService`,
 // server/game/ActionHandler.js
 
 export default class ActionHandler {
-  static schema = { /* field name → expected typeof */ };
+  static schema = {
+    /* field name → expected typeof */
+  };
   static sourceAccess = { player: boolean, system: boolean };
 
-  validate(data, gameState) { /* schema + game-rule checks; throw on failure */ }
-  execute(data, gameState)   { /* perform the mutation */ }
+  validate(data, gameState) {
+    /* schema + game-rule checks; throw on failure */
+  }
+  execute(data, gameState) {
+    /* perform the mutation */
+  }
 }
 ```
 
@@ -63,17 +74,15 @@ a failed action leaves the game untouched.
 `actionRegistry.js` maps wire type strings to singleton instances. Handlers
 hold no per-invocation state.
 
-| Type                       | Class                 | Schema fields                        | Ends turn |
-| -------------------------- | --------------------- | ------------------------------------ | --------- |
-| `deploy-unit-action`       | `DeployUnitAction`    | `source, username, handId, placedPositionCode` | Yes (deferred on overflow) |
-| `equip-equipment-action`   | `EquipEquipmentAction`| `source, username, handId, targetUnitId`      | Yes |
-| `use-ability-action`       | `UseAbilityAction`    | `source, username, unitId, abilityCode`       | Only if not Quick |
-| `play-skill-action`        | `PlaySkillAction`     | `source, username, handId`                    | Yes (deferred on choice) |
-| `pass-turn-action`         | `PassTurnAction`      | `source, username`                            | Yes |
-| `switch-position-action`   | `SwitchPositionAction`| `source, username, unitId, positionCode`      | Yes |
-| `generate-fire-charge-action` | `GenerateFireChargeAction` | `source, username`                      | No |
-| `create-incinerate-action` | `CreateIncinerateAction` | `source, username`                       | No |
-| `add-lighthouse-action`    | `AddLighthousesAction`| `source, username, amount`                   | No (system only) |
+| Type                          | Class                      | Schema fields                                  | Ends turn                  |
+| ----------------------------- | -------------------------- | ---------------------------------------------- | -------------------------- |
+| `deploy-unit-action`          | `DeployUnitAction`         | `source, username, handId, placedPositionCode` | Yes (deferred on overflow) |
+| `equip-equipment-action`      | `EquipEquipmentAction`     | `source, username, handId, targetUnitId`       | Yes                        |
+| `use-ability-action`          | `UseAbilityAction`         | `source, username, unitId, abilityCode`        | Only if not Quick          |
+| `play-skill-action`           | `PlaySkillAction`          | `source, username, handId`                     | Yes (deferred on choice)   |
+| `pass-turn-action`            | `PassTurnAction`           | `source, username`                             | Yes                        |
+| `switch-position-action`      | `SwitchPositionAction`     | `source, username, unitId, positionCode`       | Yes                        |
+| `generate-fire-charge-action` | `GenerateFireChargeAction` | `source, username`                             | No                         |
 
 ### Ability resolution
 

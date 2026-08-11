@@ -111,65 +111,7 @@ export default class GameState {
     }
     this.#resetShinsu(this.usernames);
 
-    // Undying interception: restore to 1 HP and consume the trait on lethal hit.
-    this.eventBus.on(EVT.UNIT_DEATH_INTENT, (payload, context) => {
-      const { targetId } = payload;
-      const unit = this._findUnit(targetId);
-      if (!unit || !this.modifierStack.has(targetId, "trait", "undying")) return;
-
-      // Restore to 1 HP and consume the Undying trait (single-use per RULES.md).
-      unit.currentHp = 1;
-      this.modifierStack.removeWhere(
-        (m) => m.targetId === targetId && m.type === "trait" && m.key === "undying"
-      );
-      this.eventBus.emit(EVT.UNIT_UNDYING_TRIGGERED, { unitId: targetId, unit });
-      context.cancel("undying");
-    }, { phase: "pre" });
-
-    // Wire Barrier reset and condition cleanup lifecycle events
-    this.eventBus.on(EVT.GAME_DECK_EMPTY, ({ username, owner }) => {
-      const loser = username || owner;
-      if (!loser || this.gameOver) return;
-      this.gameOver = {
-        winner: this.#getOpponentUsername(loser),
-        reason: "deck exhausted",
-      };
-      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
-    }, { phase: "execute" });
-
-    this.eventBus.on(EVT.GAME_LIGHTHOUSES_DEPLETED, ({ owner, loser }) => {
-      const defeatedPlayer = owner || loser;
-      if (!defeatedPlayer || this.gameOver) return;
-      this.gameOver = {
-        winner: this.#getOpponentUsername(defeatedPlayer),
-        reason: "lighthouses depleted",
-      };
-      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
-    }, { phase: "execute" });
-
-    this.eventBus.on(EVT.ROUND_START, () => {
-      this._barrierUsedThisRound.clear();
-      this._cardsPlayedThisRound.clear();
-      for (const username of this.usernames) {
-        CombatSlotService.resetAll(this.playerStates[username]);
-      }
-    }, { phase: "execute" });
-
-    this.eventBus.on(EVT.ROUND_END, () => {
-      // Conditions last "until end of round" per RULES.md
-      for (const username of this.usernames) {
-        const field = this.playerStates[username]?.field;
-        if (!field) continue;
-        const allUnits = [...(field.frontline || []), ...(field.backline || [])];
-        for (const unit of allUnits) {
-          this.modifierStack.removeWhere(
-            (m) => m.targetId === unit.id && m.type === "condition"
-          );
-        }
-        // Reset Anima Shinheuh slot; combat slots reset at round start.
-        CombatSlotService.resetShinheuhSlot(this.playerStates[username]);
-      }
-    }, { phase: "execute" });
+    this.#wireLifecycleEvents();
 
     // Emit initial game events using canonical names
     this.eventBus.emit(EVT.GAME_STARTED, this.playerStates);
@@ -182,6 +124,67 @@ export default class GameState {
       username: this.currentTurn,
       round: this.round,
     });
+  }
+
+  /**
+   * Wire authoritative lifecycle event handlers.
+   *
+   * Centralised here so every rule backed by a lifecycle phase
+   * is clearly visible and testable by emitting the matching event.
+   */
+  #wireLifecycleEvents() {
+    // Undying: intercept lethal damage, restore to 1 HP, consume trait.
+    this.eventBus.on(EVT.UNIT_DEATH_INTENT, (payload, context) => {
+      const { targetId } = payload;
+      const unit = this._findUnit(targetId);
+      if (!unit || !this.modifierStack.has(targetId, "trait", "undying")) return;
+      unit.currentHp = 1;
+      this.modifierStack.removeWhere(
+        (m) => m.targetId === targetId && m.type === "trait" && m.key === "undying"
+      );
+      this.eventBus.emit(EVT.UNIT_UNDYING_TRIGGERED, { unitId: targetId, unit });
+      context.cancel("undying");
+    }, { phase: "pre" });
+
+    // Game-over: deck exhausted
+    this.eventBus.on(EVT.GAME_DECK_EMPTY, ({ username, owner }) => {
+      const loser = username || owner;
+      if (!loser || this.gameOver) return;
+      this.gameOver = { winner: this.#getOpponentUsername(loser), reason: "deck exhausted" };
+      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
+    }, { phase: "execute" });
+
+    // Game-over: lighthouses depleted
+    this.eventBus.on(EVT.GAME_LIGHTHOUSES_DEPLETED, ({ owner, loser }) => {
+      const defeatedPlayer = owner || loser;
+      if (!defeatedPlayer || this.gameOver) return;
+      this.gameOver = { winner: this.#getOpponentUsername(defeatedPlayer), reason: "lighthouses depleted" };
+      this.eventBus.emit(EVT.GAME_OVER, this.gameOver);
+    }, { phase: "execute" });
+
+    // Round start: reset barriers, card-play tracking, combat slots
+    this.eventBus.on(EVT.ROUND_START, () => {
+      this._barrierUsedThisRound.clear();
+      this._cardsPlayedThisRound.clear();
+      for (const username of this.usernames) {
+        CombatSlotService.resetAll(this.playerStates[username]);
+      }
+    }, { phase: "execute" });
+
+    // Round end: remove conditions, reset Shinheuh slot
+    this.eventBus.on(EVT.ROUND_END, () => {
+      for (const username of this.usernames) {
+        const field = this.playerStates[username]?.field;
+        if (!field) continue;
+        const allUnits = [...(field.frontline || []), ...(field.backline || [])];
+        for (const unit of allUnits) {
+          this.modifierStack.removeWhere(
+            (m) => m.targetId === unit.id && m.type === "condition"
+          );
+        }
+        CombatSlotService.resetShinheuhSlot(this.playerStates[username]);
+      }
+    }, { phase: "execute" });
   }
 
   #initializePlayerState(username, deck = null) {
@@ -580,7 +583,12 @@ export default class GameState {
       decisionId: IdFactory.decisionId(),
       owner,
       type,
-      candidates: candidates.map(({ id, name, hp }) => ({ id, name, hp })),
+      candidates: candidates.map(({ id, name, hp }) => {
+        // Track whether each candidate is a real game unit so we can
+        // reject choices for units destroyed while the decision was pending.
+        const isUnit = Boolean(this._findUnit(id));
+        return { id, name, hp, _isUnit: isUnit };
+      }),
       minChoices,
       maxChoices,
       resolve,
@@ -619,6 +627,17 @@ export default class GameState {
     const candidateIds = new Set(pending.candidates.map((candidate) => candidate.id));
     if (choices.some((choice) => !candidateIds.has(choice))) {
       throw new Error("Decision contains an invalid candidate.");
+    }
+
+    // Reject choices referencing units that were destroyed while the
+    // decision was pending. Only enforced for candidates that were real
+    // game units at decision-creation time.
+    const stale = choices.filter((id) => {
+      const candidate = pending.candidates.find((c) => c.id === id);
+      return candidate?._isUnit && !this._findUnit(id);
+    });
+    if (stale.length > 0) {
+      throw new Error(`Cannot select destroyed unit(s): ${stale.join(", ")}.`);
     }
 
     // Resolve the selected state first, then clear this decision before running
