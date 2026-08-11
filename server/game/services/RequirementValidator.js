@@ -23,7 +23,7 @@ function hasAffiliation(unit, affCode) {
   return typeof affs.flat === "function" ? affs.includes(affCode) : affCode in (affs || {});
 }
 
-function hasAttribute(unit, attrCode) {
+function hasAttribute(unit, attrCode, gameState) {
   return (unit.card?.attributes || []).includes(attrCode) ||
     gameState.modifierStack?.has(unit.id, "attribute", attrCode);
 }
@@ -36,7 +36,7 @@ function hasAffiliationOnBoard(units, affCode, gameState) {
 }
 
 function hasAttributeOnBoard(units, attrCode, gameState) {
-  return units.some((u) => hasAttribute(u, attrCode));
+  return units.some((u) => hasAttribute(u, attrCode, gameState));
 }
 
 // ── Single-requirement resolvers ────────────────────────────────────────────
@@ -148,10 +148,7 @@ function checkAllyWithAttribute(text, ctx) {
   const attrName = match[1].trim().toLowerCase();
   const attrCode = attrName.replace(/\s+/g, "-");
   const units = allOwnUnits(ctx.username, ctx.gameState);
-  if (!units.some((u) =>
-    (u.card?.attributes || []).includes(attrCode) ||
-    ctx.gameState.modifierStack.has(u.id, "attribute", attrCode)
-  )) {
+  if (!hasAttributeOnBoard(units, attrCode, ctx.gameState)) {
     throw new Error(`Requirement not met: need an allied ${attrName} on your board`);
   }
   return true;
