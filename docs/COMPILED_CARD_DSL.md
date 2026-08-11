@@ -346,7 +346,9 @@ Hwayeomsa attribute cards, all `unreachable`:
 ```
 
 - `"unreachable"` — card cannot be included in a constructed deck. It may
-  still be created during play and is drawn normally after entering a deck.
+  still be created during play and is drawn normally if a runtime effect
+  places it in a deck; `ZoneService.draw` enforces exhaustion, not deck
+  legality.
 
 ---
 

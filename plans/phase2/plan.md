@@ -31,7 +31,7 @@
 
 - **Zone data structures** — typed `deck`, `hand`, `discard`, `field`, `lighthouses`, `shinsu`, `combatSlots`, `shinheuhSlot`, `compressAmount`, `fireCharges`
 - **ShinsuService** — extract shinsu logic with round cap and recharged pool rules
-- **ZoneService** — sole card movement path, `draw` enforces unreachable/exhaustion
+- **ZoneService** — sole card movement path; `draw` enforces deck exhaustion, while unreachable-card legality is enforced at deck construction (runtime-generated unreachable cards may enter and draw normally)
 - **LifecycleEngine** — `deployUnit`, `destroyUnit`, `transformUnit`, `attach/detachEquipment`
 - **Standardize event names** — `OnTurnEnd` → `turn:ended`, create `EventCatalog.js` with constants
 - Rewrite GameState.js as thin orchestrator over services

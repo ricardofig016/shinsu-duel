@@ -70,7 +70,7 @@ Each player state has typed zones:
 | Equipment returns on death       | `LifecycleEngine.destroyUnit`                     |
 | Empty deck → loss                | `ZoneService.draw` → `GameState` game-over        |
 | 0 lighthouses → loss             | Lighthouse-depleted event → `GameState` game-over |
-| Unreachable cards                | Deck construction rejects them; draws do not skip |
+| Unreachable cards                | Deck construction rejects them;                   |
 
 ---
 
