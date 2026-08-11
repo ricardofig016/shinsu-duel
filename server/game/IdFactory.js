@@ -23,11 +23,19 @@ let _unitInstanceSeq = 0;
 let _modifierSeq = 0;
 let _decisionSeq = 0;
 
+let _resetModCounter = null;
+
+/** Register a hook to reset the ModifierStack counter for deterministic replays. */
+export function registerModifierReset(fn) {
+  _resetModCounter = fn;
+}
+
 export function resetAll() {
   _cardInstanceSeq = 0;
   _unitInstanceSeq = 0;
   _modifierSeq = 0;
   _decisionSeq = 0;
+  if (_resetModCounter) _resetModCounter();
 }
 
 // ── Source IDs (ModifierStack) ──────────────────────────────────────────────

@@ -30,6 +30,12 @@ import EVT from "./EventCatalog.js";
  */
 
 let _idCounter = 0;
+
+/** Reset the global modifier counter for deterministic replays. */
+export function resetModifierCounter() {
+  _idCounter = 0;
+}
+
 function nextId() {
   return `mod_${++_idCounter}`;
 }
@@ -61,6 +67,17 @@ export default class ModifierStack {
     this._bus.on("unit:destroyed", (payload) => {
       this.removeByTarget(payload.unitId);
     }, { phase: "post" });
+
+    /** @type {Function|null} Called with each removed modifier for cross-system cleanup. */
+    this._onRevoke = null;
+  }
+
+  /**
+   * Register a callback invoked for every removed modifier.
+   * Used by GameState to synchronize AbilityRegistry cleanup.
+   */
+  onRevoke(callback) {
+    this._onRevoke = callback;
   }
 
   // -----------------------------------------------------------------------
@@ -315,5 +332,8 @@ export default class ModifierStack {
       key: mod.key,
       value: mod.value,
     });
+
+    // Notify cross-system cleanup callback (e.g. AbilityRegistry)
+    if (this._onRevoke) this._onRevoke(mod);
   }
 }

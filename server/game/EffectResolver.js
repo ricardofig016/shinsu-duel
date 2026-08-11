@@ -21,6 +21,7 @@ import ChargeShinsuHandler from "./handlers/ChargeShinsuHandler.js";
 import CompressShinsuHandler from "./handlers/CompressShinsuHandler.js";
 import ReclaimCardsHandler from "./handlers/ReclaimCardsHandler.js";
 import GrantAbilityHandler from "./handlers/GrantAbilityHandler.js";
+import CreateIncinerateHandler from "./handlers/CreateIncinerateHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
 import EVT from "./EventCatalog.js";
@@ -48,6 +49,7 @@ function getRegistry() {
     _registry.register("compress_shinsu", CompressShinsuHandler);
     _registry.register("reclaim_cards", ReclaimCardsHandler);
     _registry.register("grant_ability", GrantAbilityHandler);
+    _registry.register("create_incinerate", CreateIncinerateHandler);
   }
   return _registry;
 }

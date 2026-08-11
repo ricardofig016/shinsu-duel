@@ -248,6 +248,12 @@ function parseEffectText(raw) {
     };
   }
 
+  // Hwayeomsa: Fire Core resolves to create the highest affordable Incinerate
+  const incinerateMatch = /^spend fire charges to create the highest affordable incinerate in your hand$/i.exec(text);
+  if (incinerateMatch) {
+    return { type: "create_incinerate", raw: sourceText, handler: null };
+  }
+
   return null;
 }
 

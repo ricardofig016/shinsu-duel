@@ -1,5 +1,6 @@
 import GameState from "../GameState.js";
 import * as IdFactory from "../IdFactory.js";
+import { resetModifierCounter } from "../ModifierStack.js";
 import { createLegalDeck, setupGameWithCardsInHand } from "./utils.js";
 
 const players = ["Alice", "Bob"];
@@ -44,7 +45,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     expect(game.pendingDecision).toBeNull();
   });
 
-  test("Hwayeomsa core actions create Fire Core then highest affordable Incinerate", () => {
+  test("Hwayeomsa core actions create Fire Core then highest affordable Incinerate via play-skill", () => {
     const game = setupGameWithCardsInHand(["Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa"]);
     game.round = 5;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -56,9 +57,14 @@ describe("Phase 2 authoritative-engine regressions", () => {
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 1, recharged: 0 };
 
+    // Generate Fire Charge → creates Fire Core in hand
     game.processAction({ type: "generate-fire-charge-action", data: { source: "player", username: "Alice" } });
     game.playerStates.Alice.fireCharges = 3;
-    game.processAction({ type: "create-incinerate-action", data: { source: "player", username: "Alice" } });
+
+    // Playing Fire Core as a skill now automatically creates the incinerate
+    const fireCoreIdx = game.playerStates.Alice.hand.findIndex((card) => card.name === "Fire Core");
+    expect(fireCoreIdx).not.toBe(-1);
+    game.processAction({ type: "play-skill-action", data: { source: "player", username: "Alice", handId: fireCoreIdx } });
 
     expect(game.playerStates.Alice.hand.some((card) => card.name === "Fire Core")).toBe(false);
     expect(game.playerStates.Alice.discard.some((card) => card.name === "Fire Core")).toBe(true);
@@ -71,6 +77,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     const snapshots = [];
     for (let i = 0; i < 20; i++) {
       IdFactory.resetAll();
+      resetModifierCounter();
       const game = new GameState("DET", players, decks);
       snapshots.push(JSON.stringify(game._createSnapshot()));
     }
@@ -82,6 +89,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     const logOrder = [];
     const run = () => {
       IdFactory.resetAll();
+      resetModifierCounter();
       const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
       const game = new GameState("ORD", players, decks);
       // Capture event order

@@ -557,9 +557,10 @@
     "cost": 0,
     "effects": [
       {
-        "type": "custom",
+        "type": "create_incinerate",
         "raw": "Quick: Spend Fire Charges to create the highest affordable Incinerate in your hand",
-        "handler": null
+        "handler": null,
+        "quick": true
       },
       {
         "type": "custom",

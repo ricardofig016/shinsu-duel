@@ -10,7 +10,8 @@
 - Parse all raw trigger text at compile time — unsupported triggers **fail compilation** until modeled
 - Update `compiled-cards.schema.json` with trigger shapes
 - Create 5 new YAML cards: `fire_core.yml`, `incinerate_i.yml` through `incinerate_iv.yml` (unreachable)
-- Recompile all 71 cards
+- Recompile all cards
+- **Note:** Unresolved effects compile as `type: "custom"` and are silently skipped at runtime with a logged warning. This is intentional for forward compatibility — new structured types are added to the compiler as their handlers are implemented.
 
 ### Phase 1: Foundational Services _(parallel sub-steps)_
 

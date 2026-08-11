@@ -157,9 +157,14 @@ export default class LifecycleEngine {
   /**
    * Destroy a unit: remove from field, move card to discard,
    * clean up ModifierStack, detach equipment.
+   * Idempotent — calling destroy on an already-destroyed unit is a no-op.
    */
   static destroyUnit(gameState, unit) {
     if (!unit) return;
+
+    // Idempotency guard: if the unit is already not on the field, skip.
+    const stillOnField = gameState._findUnit(unit.id);
+    if (!stillOnField || stillOnField !== unit) return;
 
     // Emit pre-destroy intent (can be cancelled by handlers)
     const result = gameState.eventBus.emit(EVT.UNIT_DESTROY_INTENT, {
@@ -260,6 +265,13 @@ export default class LifecycleEngine {
     // its event subscriptions while preserving the unit identity.
     gameState._passiveManager?.unregisterUnit(unit.id);
     gameState._passiveManager?.registerUnit(unit, gameState);
+
+    // Re-evaluate attribute engines for the transformed unit.
+    // The unit may have gained or lost attributes through transformation.
+    if (gameState._attributeRegistry) {
+      gameState._attributeRegistry.onUnitRemoved(unit, gameState);
+      gameState._attributeRegistry.onUnitDeployed(unit, gameState);
+    }
 
     // Emit transformation event
     gameState.eventBus.emit(EVT.UNIT_EVOLVED, {

@@ -1,7 +1,8 @@
 import ActionHandler from "../ActionHandler.js";
 
 /**
- * Deploy a unit from a player's hand to a specified position on the board.
+ * System-internal action for adding lighthouses (e.g. Creator trait).
+ * Not exposed to players — only callable by system-internal processes.
  */
 export default class AddLighthousesAction extends ActionHandler {
   static schema = {

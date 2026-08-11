@@ -53,6 +53,15 @@ export default class GameState {
     this._clock = new GameClock();
     this.eventBus = new EventBus(this._clock);
     this.modifierStack = new ModifierStack(this.eventBus, this._clock);
+
+    // Cross-system cleanup: when an ability modifier is revoked,
+    // remove the corresponding AbilityRegistry entry.
+    this.modifierStack.onRevoke((mod) => {
+      if (mod.type === "ability" && this._abilityRegistry) {
+        this._abilityRegistry.revokeBySource(mod.targetId, mod.sourceId);
+      }
+    });
+
     this.actionRegistry = createActionRegistry();
     this.logger = new Logger(this.eventBus, {
       snapshotFn: () => this._createSnapshot(),

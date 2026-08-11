@@ -7,6 +7,16 @@
 
 export default class BaseHandler {
   /**
+   * Validate that a value is a positive finite integer.
+   */
+  static requirePositiveInt(value, label = "value") {
+    if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value) || value <= 0) {
+      throw new Error(`${label} must be a positive integer, got ${value}`);
+    }
+    return value;
+  }
+
+  /**
    * Validate the payload before execution. Throws on invalid input.
    * @param {object} payload
    * @param {import('../EventBus.js').EventContext} context

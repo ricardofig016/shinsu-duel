@@ -3,7 +3,6 @@ import PassTurnAction from "../actions/PassTurnAction.js";
 import UseAbilityAction from "../actions/UseAbilityAction.js";
 import AddLighthousesAction from "../actions/AddLighthousesAction.js";
 import GenerateFireChargeAction from "../actions/GenerateFireChargeAction.js";
-import CreateIncinerateAction from "../actions/CreateIncinerateAction.js";
 import PlaySkillAction from "../actions/PlaySkillAction.js";
 import EquipEquipmentAction from "../actions/EquipEquipmentAction.js";
 import SwitchPositionAction from "../actions/SwitchPositionAction.js";
@@ -15,7 +14,6 @@ export default function createActionRegistry() {
     "use-ability-action": new UseAbilityAction(),
     "add-lighthouses-action": new AddLighthousesAction(),
     "generate-fire-charge-action": new GenerateFireChargeAction(),
-    "create-incinerate-action": new CreateIncinerateAction(),
     "play-skill-action": new PlaySkillAction(),
     "equip-equipment-action": new EquipEquipmentAction(),
     "switch-position-action": new SwitchPositionAction(),
