@@ -304,18 +304,27 @@ describe("EventBus", () => {
   });
 
   // -----------------------------------------------------------------------
-  // Error isolation
+  // Failure handling
   // -----------------------------------------------------------------------
 
-  describe("error isolation", () => {
-    test("one handler error does not prevent other handlers", () => {
+  describe("failure handling", () => {
+    test("a handler failure stops later mutations and reaction phases", () => {
       const bus = new EventBus();
-      const good = jest.fn();
-      bus.on("Test", () => { throw new Error("boom"); }, { phase: "execute" });
-      bus.on("Test", good, { phase: "execute" });
-      bus.on("Test", good, { phase: "post" });
-      expect(() => bus.emit("Test")).toThrow("handler error");
-      expect(good).toHaveBeenCalledTimes(2);
+      const state = { mutations: 0, reactions: 0 };
+      const laterMutation = jest.fn(() => { state.mutations++; });
+      const reaction = jest.fn(() => { state.reactions++; });
+
+      bus.on("Test", () => {
+        state.mutations++;
+        throw new Error("boom");
+      }, { phase: "execute" });
+      bus.on("Test", laterMutation, { phase: "execute" });
+      bus.on("Test", reaction, { phase: "post" });
+
+      expect(() => bus.emit("Test")).toThrow("[Test:execute]");
+      expect(state).toEqual({ mutations: 1, reactions: 0 });
+      expect(laterMutation).not.toHaveBeenCalled();
+      expect(reaction).not.toHaveBeenCalled();
     });
 
     test("error message includes event name, phase, and handler info", () => {
@@ -338,7 +347,7 @@ describe("EventBus", () => {
         timeline.push("parent-after");
       }, { phase: "execute" });
       bus.on("Child", () => { throw new Error("child boom"); }, { phase: "execute" });
-      expect(() => bus.emit("Parent")).toThrow("handler error");
+      expect(() => bus.emit("Parent")).toThrow("child boom");
       expect(timeline).toEqual(["parent"]);
     });
   });

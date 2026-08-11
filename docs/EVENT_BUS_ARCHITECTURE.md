@@ -104,11 +104,13 @@ const result = bus.emit("event:name", payload);
 // result: { cancelled, reason, finalPayload, children }
 ```
 
-### Error Handling
+### Failure Handling
 
-Handler errors are **isolated** — one handler throwing does not prevent
-other handlers from running. Errors are collected and thrown as a single
-aggregate error at the end of emission. Each error is wrapped with:
+Handler errors are **fail-closed**: dispatch stops immediately and the
+wrapped exception is rethrown. This prevents later handlers from applying
+additional mutations or reactions after an authoritative handler has failed.
+Completed state changes are not rolled back, so mutation handlers must
+validate all inputs before writing state. Each error identifies:
 
 - Event name
 - Phase

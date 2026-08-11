@@ -28,10 +28,13 @@
  * A `pre` or `execute` handler may call `context.cancel(reason)`. The current
  * phase stops immediately. Child events that already ran are NOT rolled back.
  *
- * ## Error isolation
+ * ## Failure semantics
  *
- * One handler throwing does not prevent other handlers from running.
- * Errors are collected and wrapped with event/phase/handler identity.
+ * Handler failures are fail-closed: dispatch stops immediately and the
+ * wrapped error identifies the event, phase, and handler. This prevents a
+ * partially failed authoritative mutation from being followed by additional
+ * mutations or reactions. State changes completed before the failure are not
+ * rolled back; handlers must validate before they mutate.
  */
 
 const PHASE_ORDER = ["pre", "execute", "post", "resolved"];
@@ -232,7 +235,6 @@ export default class EventBus {
     validateEventName(eventName);
 
     const rootCtx = new EventContext(this, eventName, "pre", depth);
-    const errors = [];
 
     for (const phase of PHASE_ORDER) {
       if (rootCtx._cancelled) break;
@@ -247,21 +249,16 @@ export default class EventBus {
         try {
           entry.handler(payload, rootCtx);
         } catch (err) {
-          errors.push(this._wrapError(err, eventName, phase, entry));
-        }
-
-        // Clean up once handlers
-        if (entry.once && !entry._removed) {
-          entry._removed = true;
-          this._removeEntry(eventName, entry);
+          throw this._wrapError(err, eventName, phase, entry);
+        } finally {
+          // A once-handler is consumed by its attempted invocation, including
+          // a failed one, so retries cannot repeat a partial side effect.
+          if (entry.once && !entry._removed) {
+            entry._removed = true;
+            this._removeEntry(eventName, entry);
+          }
         }
       }
-    }
-
-    // Throw collected errors after all handlers have run
-    if (errors.length > 0) {
-      const msg = errors.map((e) => e.message).join("\n");
-      throw new Error(`${errors.length} handler error(s) during "${eventName}":\n${msg}`);
     }
 
     return {
@@ -276,7 +273,6 @@ export default class EventBus {
   _emitSinglePhase(eventName, payload, phase) {
     const ctx = new EventContext(this, eventName, normalizePhase(phase), 0);
     const handlers = this._collectHandlers(eventName, normalizePhase(phase));
-    const errors = [];
 
     for (const entry of handlers) {
       if (ctx._cancelled) break;
@@ -285,18 +281,13 @@ export default class EventBus {
       try {
         entry.handler(payload, ctx);
       } catch (err) {
-        errors.push(this._wrapError(err, eventName, phase, entry));
+        throw this._wrapError(err, eventName, phase, entry);
+      } finally {
+        if (entry.once && !entry._removed) {
+          entry._removed = true;
+          this._removeEntry(eventName, entry);
+        }
       }
-
-      if (entry.once && !entry._removed) {
-        entry._removed = true;
-        this._removeEntry(eventName, entry);
-      }
-    }
-
-    if (errors.length > 0) {
-      const msg = errors.map((e) => e.message).join("\n");
-      throw new Error(`${errors.length} handler error(s) during "${eventName}":\n${msg}`);
     }
 
     return {

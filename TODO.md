@@ -7,6 +7,8 @@
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
 - [ ] docs: fix newline based line wrapping - switch to single line paragraphs
+- [ ] tests: organize server\game\tests better
+- [ ] rules: think about max copies of a card during deckbuilding (maybe 3)
 
 ## In Progress
 
