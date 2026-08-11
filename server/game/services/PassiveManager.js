@@ -52,8 +52,10 @@ export default class PassiveManager {
   }
 
   _matches(trigger, unit, payload, gameState) {
-    // Disabled: passives have no effect (RULES.md).
-    // TODO: Phase 4 always-on passive application must also respect Disabled.
+    // Disabled suppresses timed passives (RULES.md §Conditions).
+    // Always-on passive modifiers (traits, stat buffs) stored in the
+    // ModifierStack are automatically suppressed by getEffective /
+    // getActiveKeys respecting disabledCount — no extra wiring needed.
     if (gameState.modifierStack.has(unit.id, "condition", "disabled")) return false;
     return gameState._findUnit(unit.id) === unit && unit.isAlive();
   }

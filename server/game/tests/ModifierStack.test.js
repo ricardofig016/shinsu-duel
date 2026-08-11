@@ -212,10 +212,10 @@ describe("ModifierStack", () => {
       // Modifier still indexed by source
       expect(stack.getSources("Unit#1")).toContain("Equip#1");
 
-      // getModifiers still returns it (caller can check enabled prop)
+      // getModifiers still returns it (caller can check disabledCount prop)
       const mods = stack.getModifiers("Unit#1", "trait");
       expect(mods.length).toBe(1);
-      expect(mods[0].enabled).toBe(false);
+      expect(mods[0].disabledCount).toBe(1);
     });
 
     test("enableByTarget restores disabled modifiers", () => {
@@ -300,6 +300,119 @@ describe("ModifierStack", () => {
 
       expect(stack.getEffective("Unit#1", "trait", "strong")).toBe(0);
       expect(stack.getEffective("Unit#1", "condition", "burned")).toBe(0);
+    });
+
+    // ── Overlapping silence ────────────────────────────────────────────────
+    // Two silence effects applied → traits suppressed. One silence removed
+    // → traits still suppressed. Both removed → traits active again.
+
+    test("overlapping silence: two disables require two enables to restore", () => {
+      stack.apply({
+        sourceId: "A", sourceType: "unit",
+        targetId: "Unit#1", type: "trait", key: "strong", value: 2,
+      });
+
+      stack.disableByTarget("Unit#1", "trait");
+      stack.disableByTarget("Unit#1", "trait");
+      expect(stack.getEffective("Unit#1", "trait", "strong")).toBe(0);
+
+      stack.enableByTarget("Unit#1", "trait");
+      expect(stack.getEffective("Unit#1", "trait", "strong")).toBe(0);
+
+      stack.enableByTarget("Unit#1", "trait");
+      expect(stack.getEffective("Unit#1", "trait", "strong")).toBe(2);
+    });
+
+    test("overlapping silence: enableByTarget never goes below disabledCount 0", () => {
+      stack.apply({
+        sourceId: "A", sourceType: "unit",
+        targetId: "Unit#1", type: "trait", key: "strong", value: 1,
+      });
+
+      stack.disableByTarget("Unit#1", "trait");
+      stack.enableByTarget("Unit#1", "trait");
+      // Extra enable — should not cause negative count
+      stack.enableByTarget("Unit#1", "trait");
+      expect(stack.getEffective("Unit#1", "trait", "strong")).toBe(1);
+    });
+
+    test("unequip while double-silenced: removed source leaves no residue", () => {
+      stack.apply({
+        sourceId: "Equip#DoubleSilence", sourceType: "equipment",
+        targetId: "Unit#1", type: "trait", key: "barrier", value: 1,
+      });
+
+      stack.disableByTarget("Unit#1", "trait");
+      stack.disableByTarget("Unit#1", "trait");
+      stack.removeBySource("Equip#DoubleSilence");
+      expect(stack.getSources("Unit#1")).toEqual([]);
+
+      stack.enableByTarget("Unit#1", "trait");
+      stack.enableByTarget("Unit#1", "trait");
+      expect(stack.getEffective("Unit#1", "trait", "barrier")).toBe(0);
+    });
+
+    // ── Operation precedence ───────────────────────────────────────────────
+
+    test("override trumps set which trumps add in getEffective", () => {
+      // add below a set
+      stack.apply({
+        sourceId: "A", sourceType: "unit",
+        targetId: "Unit#1", type: "stat", key: "hp", value: 2,
+      });
+      stack.apply({
+        sourceId: "B", sourceType: "equipment",
+        targetId: "Unit#1", type: "stat", key: "hp",
+        value: 5, operation: "set",
+      });
+      expect(stack.getEffective("Unit#1", "stat", "hp")).toBe(5);
+
+      // override above the set
+      stack.apply({
+        sourceId: "C", sourceType: "system",
+        targetId: "Unit#1", type: "stat", key: "hp",
+        value: 10, operation: "override",
+      });
+      expect(stack.getEffective("Unit#1", "stat", "hp")).toBe(10);
+    });
+
+    test("disabled override is ignored — falls back to set", () => {
+      stack.apply({
+        sourceId: "A", sourceType: "equipment",
+        targetId: "Unit#1", type: "stat", key: "hp",
+        value: 5, operation: "set",
+      });
+      stack.apply({
+        sourceId: "B", sourceType: "system",
+        targetId: "Unit#1", type: "stat", key: "hp",
+        value: 10, operation: "override",
+      });
+
+      // Silence the override modifier's type
+      stack.disableByTarget("Unit#1", "stat");
+      expect(stack.getEffective("Unit#1", "stat", "hp")).toBe(0);
+
+      // Unsilence — override should win again
+      stack.enableByTarget("Unit#1", "stat");
+      expect(stack.getEffective("Unit#1", "stat", "hp")).toBe(10);
+    });
+
+    test("two overrides: highest priority wins, createdAt breaks ties", () => {
+      const clock = new GameClock();
+      const localBus = new EventBus(clock);
+      const localStack = new ModifierStack(localBus, clock);
+
+      localStack.apply({
+        sourceId: "low", sourceType: "system",
+        targetId: "U", type: "stat", key: "hp",
+        value: 3, operation: "override", priority: 1,
+      });
+      localStack.apply({
+        sourceId: "high", sourceType: "system",
+        targetId: "U", type: "stat", key: "hp",
+        value: 7, operation: "override", priority: 2,
+      });
+      expect(localStack.getEffective("U", "stat", "hp")).toBe(7);
     });
   });
 

@@ -23,7 +23,9 @@ import EVT from "./EventCatalog.js";
  *     key:       "barrier" | "hp" | "strong" | "burned" | "quick",
  *     value:     1 | -1 | "barrier",
  *     operation: "add" | "set" | "override",
- *     enabled:   boolean (Silence flips to false)
+ *     disabledCount: number (0 = active; each silence/disarm increments this;
+ *                           re-enabling decrements it — reaches 0 only when
+ *                           every silencing effect has been removed)
  *     priority:  number (higher is better)
  *     expiresAt: date (when the modifier expires)
  *   }
@@ -109,7 +111,7 @@ export default class ModifierStack {
       key: spec.key,
       value: spec.value,
       operation: spec.operation || "add",
-      enabled: true,
+      disabledCount: 0,
       createdAt: this._clock.now(),
       priority: spec.priority ?? 0,
       expiresAt: spec.expiresAt ?? null,
@@ -183,8 +185,12 @@ export default class ModifierStack {
   // -----------------------------------------------------------------------
 
   /**
-   * Disable all modifiers of the given type(s) on a target.
-   * Used by Silence to suppress traits without deleting them.
+   * Suppress all modifiers of the given type(s) on a target.
+   * Each call increments `disabledCount`. A modifier becomes active only
+   * when every suppression has been reversed (disabledCount === 0).
+   *
+   * Used by Silence (traits), Disarm (equipment effects), and any future
+   * effect that temporarily suppresses modifiers without deleting them.
    */
   disableByTarget(targetId, types) {
     const typeSet = new Set(Array.isArray(types) ? types : [types]);
@@ -193,15 +199,16 @@ export default class ModifierStack {
 
     for (const mod of mods) {
       if (typeSet.has(mod.type)) {
-        mod.enabled = false;
+        mod.disabledCount++;
       }
     }
     this._bus.emit(EVT.MODIFIER_DISABLED, { targetId, types: [...typeSet] });
   }
 
   /**
-   * Re-enable all modifiers of the given type(s) on a target.
-   * Used when Silence ends.
+   * Remove one level of suppression for the given type(s) on a target.
+   * Each call decrements `disabledCount` (never below 0). A modifier
+   * only becomes active when disabledCount reaches 0.
    */
   enableByTarget(targetId, types) {
     const typeSet = new Set(Array.isArray(types) ? types : [types]);
@@ -209,8 +216,8 @@ export default class ModifierStack {
     if (!mods) return;
 
     for (const mod of mods) {
-      if (typeSet.has(mod.type)) {
-        mod.enabled = true;
+      if (typeSet.has(mod.type) && mod.disabledCount > 0) {
+        mod.disabledCount--;
       }
     }
     this._bus.emit(EVT.MODIFIER_ENABLED, { targetId, types: [...typeSet] });
@@ -221,18 +228,33 @@ export default class ModifierStack {
   // -----------------------------------------------------------------------
 
   // ── Priority-based getEffective (Phase 2) ──────────────────────────────
-  // Multiple "set" modifiers: highest priority wins. On tie, most recent.
+  //
+  // Override > Set > Add precedence:
+  //   If any enabled `override` exists for a key, choose the highest-
+  //   priority one and ignore all `set` and `add` modifiers for that key.
+  //   Otherwise, if any enabled `set` exists, choose the highest-priority
+  //   one and ignore `add` modifiers.
+  //   Otherwise, sum all enabled `add` modifiers.
   getEffective(targetId, type, key) {
     const mods = this._byTarget.get(targetId);
     if (!mods) return 0;
 
-    let total = 0;
+    let sumAdd = 0;
     let bestSet = null;
+    let bestOverride = null;
 
     for (const mod of mods) {
-      if (!mod.enabled || mod.type !== type || mod.key !== key) continue;
+      if (mod.disabledCount > 0 || mod.type !== type || mod.key !== key) continue;
 
-      if (mod.operation === "set" || mod.operation === "override") {
+      if (mod.operation === "override") {
+        if (!bestOverride || mod.priority > bestOverride.priority ||
+            (mod.priority === bestOverride.priority && mod.createdAt > bestOverride.createdAt)) {
+          bestOverride = mod;
+        }
+        continue;
+      }
+
+      if (mod.operation === "set") {
         if (!bestSet || mod.priority > bestSet.priority ||
             (mod.priority === bestSet.priority && mod.createdAt > bestSet.createdAt)) {
           bestSet = mod;
@@ -241,11 +263,12 @@ export default class ModifierStack {
       }
 
       if (mod.operation === "add") {
-        total += (typeof mod.value === "number" ? mod.value : 0);
+        sumAdd += (typeof mod.value === "number" ? mod.value : 0);
       }
     }
 
-    return bestSet ? bestSet.value : total;
+    if (bestOverride) return bestOverride.value;
+    return bestSet ? bestSet.value : sumAdd;
   }
 
   /**
@@ -258,7 +281,7 @@ export default class ModifierStack {
 
     const keys = new Set();
     for (const mod of mods) {
-      if (mod.enabled && mod.type === type) {
+      if (mod.disabledCount === 0 && mod.type === type) {
         keys.add(mod.key);
       }
     }

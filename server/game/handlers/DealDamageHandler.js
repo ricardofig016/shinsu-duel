@@ -27,7 +27,7 @@ export default class DealDamageHandler extends BaseHandler {
 
     // Barrier: negate first damage each round
     const barrierMods = modStack.getModifiers(targetId, "trait")
-      .filter((m) => m.key === "barrier" && m.enabled);
+      .filter((m) => m.key === "barrier" && m.disabledCount === 0);
     if (barrierMods.length > 0) {
       // Check if barrier was already used this round
       const barrierUsed = gameState._barrierUsedThisRound?.has(targetId);

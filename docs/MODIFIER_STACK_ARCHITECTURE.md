@@ -35,7 +35,7 @@ silence) correct without manual bookkeeping.
   key:        "barrier",        // what is being modified
   value:      1,                // numeric value
   operation:  "add",            // add | set | override
-  enabled:    true,             // Silence flips to false
+  disabledCount: 0,             // 0 = active; each silence/disable increments
   createdAt:  42,               // GameClock tick
 }
 ```
@@ -59,11 +59,11 @@ the registry entry.
 
 ### Operation values
 
-| Operation  | Behavior                                                         | Use case               |
-| ---------- | ---------------------------------------------------------------- | ---------------------- |
-| `add`      | Sums with other modifiers of same key                            | Most traits/conditions |
-| `set`      | Overrides all other values (returns immediately in getEffective) | Absolute stat setting  |
-| `override` | Like set but also blocks future adds                             | Hard overrides         |
+| Operation  | Behavior                                                                                                                              | Use case               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `add`      | Sums with other modifiers of same key                                                                                                 | Most traits/conditions |
+| `set`      | Overrides `add` modifiers; highest-priority set wins                                                                                  | Absolute stat setting  |
+| `override` | Overrides both `set` and `add` modifiers; the highest-priority enabled override wins and all other modifiers for that key are ignored | Hard overrides         |
 
 ---
 
@@ -120,15 +120,21 @@ method, follow the same pattern: `[...arr]` or collect IDs first.
 ### Silence / Unsilence
 
 ```js
-stack.disableByTarget("Unit#8", "trait"); // silence — flips enabled=false
+stack.disableByTarget("Unit#8", "trait"); // silence — increments disabledCount
 stack.disableByTarget("Unit#8", ["trait", "stat"]); // silence multiple types
 
-stack.enableByTarget("Unit#8", "trait"); // unsilence — flips enabled=true
+stack.enableByTarget("Unit#8", "trait"); // unsilence — decrements disabledCount
 ```
 
-**⚠️ `disableByTarget` does NOT delete modifiers.** They remain in the stack
-with `enabled: false`. This is the key design choice that prevents the
-"negative trait after unequip + unsilence" bug.
+**⚠️ `disableByTarget` does NOT delete modifiers.** It increments
+`disabledCount`. Only when every silencing effect has been reversed
+(disabledCount === 0) does the modifier become active again.
+
+**Overlapping silence:** Two silence effects on the same target increment
+`disabledCount` to 2. Removing one silence decrements to 1 — the modifier
+is still suppressed. Both must be removed for the modifier to reappear.
+This is the key design choice that prevents the "negative trait after
+unequip + unsilence" bug and makes overlapping suppression effects safe.
 
 ### Query
 
@@ -140,9 +146,12 @@ stack.getModifiers("Unit#8", "condition"); // → [{...}, {...}]
 stack.getSources("Unit#8"); // → ["Equip#17", "Unit#a3f9c2b"]
 ```
 
-**⚠️ `getEffective` respects `enabled`** — disabled modifiers contribute 0.
-**⚠️ `getEffective` short-circuits on `operation: "set"` or `"override"`**
-— returns the set value immediately, ignoring other modifiers of the same key.
+**⚠️ `getEffective` respects `disabledCount`** — suppressed modifiers contribute 0.
+**⚠️ `getEffective` precedence:** `override` > `set` > `add`. A single enabled
+`override` ignores all `set` and `add` modifiers for that key.
+A single enabled `set` ignores all `add` modifiers. When multiple
+`override` or `set` modifiers exist, highest priority wins (ties break
+by most recent `createdAt`).
 
 ---
 
@@ -167,7 +176,7 @@ This is the canonical interaction that drove the design:
              → getEffective("barrier") = 1 ✓
 
 2. SILENCE:  stack.disableByTarget("Unit#8", "trait")
-             → modifier still exists, enabled=false
+             → modifier still exists, disabledCount=1
              → getEffective("barrier") = 0 ✓
 
 3. UNEQUIP:  stack.removeBySource("Equip#17")
@@ -175,7 +184,8 @@ This is the canonical interaction that drove the design:
              → getSources() = [] ✓
 
 4. UNSILENCE: stack.enableByTarget("Unit#8", "trait")
-             → nothing to re-enable
+             → nothing to re-enable (disabledCount was already 0 for
+               the removed modifier)
              → getEffective("barrier") = 0 ✓  (NOT -1!)
 ```
 
