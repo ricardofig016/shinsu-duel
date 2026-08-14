@@ -11,6 +11,7 @@
 - [ ] tests: add more to increase coverage
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
 - [ ] game: remove `Math.random()` as fallback if no seed is provided. all games must be seeded
+- [ ] public: plan how image artworks should be organized
 
 ## In Progress
 

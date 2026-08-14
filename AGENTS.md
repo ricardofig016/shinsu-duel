@@ -26,17 +26,16 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Read the relevant architecture documents in `docs/` before making any changes to the codebase.
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
-- When a requirement or rule is ambiguous, do not guess. Ask for clarification before implementation.
+- When a requirement or rule is ambiguous, never guess. Ask the user for clarification before implementation.
 
 ## Planning and Implementation
 
-Before coding a non-trivial change:
+Before implementing a non-trivial change:
 
 1. Identify the purpose of the change and its role in the project's broader goals.
 2. Inspect existing implementations, contracts, tests, and documentation.
 3. Identify gaps, risks, invariants, edge cases, and interactions with future mechanics.
 4. Define clear acceptance criteria for the work.
-5. Choose the smallest coherent architectural change that solves the underlying problem without limiting future extensibility.
 
 During implementation:
 
