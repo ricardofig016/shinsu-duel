@@ -144,6 +144,15 @@ An **observer** failure never aborts the transaction. The wrapped error is
 appended to the emit result's `observerErrors` array (with the same event,
 phase, and handler metadata) and dispatch continues to the next handler.
 
+### Abort Notification
+
+`bus.onAbort(fn)` registers a callback invoked immediately before an
+authoritative failure is rethrown, with `(error, { eventName, phase,
+handlerName, ctx })`. The `Logger` uses this to record failed and
+partially-resolved event chains (`EventFailure` entries). A throwing abort
+listener never masks the original error. Observer failures do **not** trigger
+`onAbort`.
+
 ### Transaction Boundary
 
 A root `emit()` is a single transaction. Every `emitChild` chain spawned

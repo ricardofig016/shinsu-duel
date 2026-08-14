@@ -148,9 +148,43 @@ export default class EventBus {
   constructor(clock, maxDepth = 50) {
     /** @type {Map<string, Array<object>>} */
     this._listeners = new Map();
+    /** @type {Array<Function>} */
+    this._abortListeners = [];
     this._registrationOrder = 0;
     this._clock = clock ?? { now: () => 0 };
     this._maxDepth = maxDepth;
+  }
+
+  // -----------------------------------------------------------------------
+  // Abort notification
+  // -----------------------------------------------------------------------
+
+  /**
+   * Register a callback invoked immediately before an authoritative failure
+   * is rethrown to the emit caller. Observers (e.g. the Logger) use this to
+   * record failed/partially-resolved event chains. Listener failures never
+   * mask the original error.
+   *
+   * @param {(error: Error, info: object) => void} fn
+   * @returns {Function} Unsubscribe function.
+   */
+  onAbort(fn) {
+    this._abortListeners.push(fn);
+    return () => {
+      const idx = this._abortListeners.indexOf(fn);
+      if (idx !== -1) this._abortListeners.splice(idx, 1);
+    };
+  }
+
+  /** @private */
+  _notifyAbort(wrapped, ctx, eventName, phase, handlerName) {
+    for (const fn of this._abortListeners) {
+      try {
+        fn(wrapped, { eventName, phase, handlerName, ctx });
+      } catch {
+        // A throwing abort listener must never mask the original failure.
+      }
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -279,6 +313,7 @@ export default class EventBus {
             // Observer failure must not abort the authoritative transaction
             rootCtx.observerErrors.push(wrapped);
           } else {
+            this._notifyAbort(wrapped, rootCtx, eventName, phase, wrapped.handlerName);
             throw wrapped;
           }
         } finally {
@@ -317,6 +352,7 @@ export default class EventBus {
         if (entry.role === "observer") {
           ctx.observerErrors.push(wrapped);
         } else {
+          this._notifyAbort(wrapped, ctx, eventName, phase, wrapped.handlerName);
           throw wrapped;
         }
       } finally {

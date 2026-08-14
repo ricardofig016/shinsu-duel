@@ -132,4 +132,83 @@ describe("Logger", () => {
     // c was added
     expect(diff.added).toContainEqual({ key: "c", value: true });
   });
+
+  test("captures the original payload before handlers mutate it", () => {
+    bus.on("Mutate", (payload) => { payload.amount = 999; }, { phase: "execute" });
+    bus.emit("Mutate", { amount: 5 });
+
+    const entry = logger.getLogs()[0];
+    expect(entry.originalPayload).toEqual({ amount: 5 });
+  });
+
+  test("records a full-depth causation tree (4+ levels)", () => {
+    bus.on("A", (p, ctx) => ctx.emitChild("B", {}), { phase: "execute" });
+    bus.on("B", (p, ctx) => ctx.emitChild("C", {}), { phase: "execute" });
+    bus.on("C", (p, ctx) => ctx.emitChild("D", {}), { phase: "execute" });
+    bus.emit("A");
+
+    const tree = logger.getLogs()[0].causationTree;
+    expect(tree.eventName).toBe("A");
+    expect(tree.children[0].eventName).toBe("B");
+    expect(tree.children[0].children[0].eventName).toBe("C");
+    expect(tree.children[0].children[0].children[0].eventName).toBe("D");
+  });
+
+  test("records an EventFailure entry via onAbort", () => {
+    bus.on("Boom", () => { throw new Error("authoritative failure"); }, { phase: "execute" });
+    expect(() => bus.emit("Boom")).toThrow("authoritative failure");
+
+    const failure = logger.getLogs().find((l) => l.type === "EventFailure");
+    expect(failure).toBeDefined();
+    expect(failure.eventName).toBe("Boom");
+    expect(failure.phase).toBe("execute");
+    expect(failure.error.message).toContain("authoritative failure");
+  });
+
+  test("records deterministic sequence instead of a wall-clock timestamp", () => {
+    bus.emit("Test");
+    const entry = logger.getLogs()[0];
+    expect(entry.sequence).toBeGreaterThan(0);
+    expect(entry.timestamp).toBeUndefined();
+  });
+
+  test("records InitialState and UserAction entries", () => {
+    const fullState = { round: 1 };
+    const stateLogger = new Logger(bus, {
+      snapshotFn: () => ({}),
+      serializeFn: () => ({ ...fullState }),
+    });
+
+    stateLogger.recordInitialState({ roomCode: "R", usernames: ["Alice", "Bob"] });
+    stateLogger.beginUserInput({ kind: "action", payload: { type: "pass" } });
+    fullState.round = 2;
+    stateLogger.endUserInput({ ok: true });
+
+    const logs = stateLogger.getLogs();
+    const initial = logs.find((l) => l.type === "InitialState");
+    const action = logs.find((l) => l.type === "UserAction");
+    expect(initial.meta.roomCode).toBe("R");
+    expect(initial.state).toEqual({ round: 1 });
+    expect(action.action).toEqual({ type: "pass" });
+    expect(action.stateBefore).toEqual({ round: 1 });
+    expect(action.stateAfter).toEqual({ round: 2 });
+    expect(action.ok).toBe(true);
+  });
+
+  test("getReplayLog returns a JSON-safe initial + actions structure", () => {
+    const stateLogger = new Logger(bus, {
+      snapshotFn: () => ({}),
+      serializeFn: () => ({ round: 3 }),
+    });
+    stateLogger.recordInitialState({ roomCode: "R" });
+    stateLogger.beginUserInput({ kind: "action", payload: { type: "pass" } });
+    stateLogger.endUserInput({ ok: true });
+
+    const replay = stateLogger.getReplayLog();
+    expect(replay.initial.type).toBe("InitialState");
+    expect(replay.actions).toHaveLength(1);
+    expect(replay.actions[0].type).toBe("UserAction");
+    // Round-trips through JSON (deep-clone guarantee).
+    expect(JSON.parse(JSON.stringify(replay))).toEqual(replay);
+  });
 });

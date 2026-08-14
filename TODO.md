@@ -10,6 +10,7 @@
 - [ ] tests: organize server\game\tests better - i like the 3 folders but theres too many tests directly in tests\
 - [ ] tests: add more to increase coverage
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
+- [ ] game: remove `Math.random()` as fallback if no seed is provided. all games must be seeded
 
 ## In Progress
 

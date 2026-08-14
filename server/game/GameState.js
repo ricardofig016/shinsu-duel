@@ -15,7 +15,7 @@ import cards from "../data/cards.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import GameClock from "./GameClock.js";
 import EventBus from "./EventBus.js";
-import ModifierStack from "./ModifierStack.js";
+import ModifierStack, { getModifierCounter } from "./ModifierStack.js";
 import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
 import Card from "./Card.js";
@@ -68,6 +68,11 @@ export default class GameState {
     if (firstPlayer && !usernames.includes(firstPlayer))
       throw new Error("firstPlayer must be one of the usernames in the game");
 
+    // Capture the ID counters BEFORE this game generates any entities, so a
+    // replay can restore the exact starting position and reproduce identical ids.
+    this._startingCounters = IdFactory.getCounters();
+    this._startingModifierCounter = getModifierCounter();
+
     this._clock = new GameClock();
     this.eventBus = new EventBus(this._clock);
     this.modifierStack = new ModifierStack(this.eventBus, this._clock);
@@ -83,6 +88,7 @@ export default class GameState {
     this.actionRegistry = createActionRegistry();
     this.logger = new Logger(this.eventBus, {
       snapshotFn: () => this._createSnapshot(),
+      serializeFn: () => this.toSerializedState(),
     });
 
     // Trigger and passive managers own event subscriptions for field units.
@@ -129,12 +135,32 @@ export default class GameState {
       [this.usernames[0]]: this.#initializePlayerState(this.usernames[0], decks[this.usernames[0]]),
       [this.usernames[1]]: this.#initializePlayerState(this.usernames[1], decks[this.usernames[1]]),
     };
+
+    // Capture the FULL deck before the initial draw so a replay
+    // can reconstruct the identical starting deck.
+    const decksMeta = {};
+    for (const username of this.usernames) {
+      decksMeta[username] = this.playerStates[username].deck.map((c) => c.cardId);
+    }
+
     for (const username of this.usernames) {
       ZoneService.draw(this.playerStates[username], GameState.INIT_HAND_SIZE, this);
     }
     this.#resetShinsu(this.usernames);
 
     this.#wireLifecycleEvents();
+
+    // Record the initial state for replay before any event fires.
+    const rngSeed = typeof this._rng?.getState === "function" ? this._rng.getState().seed : null;
+    this.logger.recordInitialState({
+      roomCode,
+      usernames: [...this.usernames],
+      decks: decksMeta,
+      firstPlayer: this.currentTurn,
+      rngSeed,
+      startingCounters: this._startingCounters,
+      startingModifierCounter: this._startingModifierCounter,
+    });
 
     // Emit initial game events using canonical names
     this.eventBus.emit(EVT.GAME_STARTED, this.playerStates);
@@ -461,8 +487,15 @@ export default class GameState {
         `${type} is an invalid action type\nAvailable types: ${Object.keys(this.actionRegistry).join(", ")}`
       );
 
-    handler.validate(data, this);
-    handler.execute(data, this);
+    this.logger.beginUserInput({ kind: "action", payload: action });
+    try {
+      handler.validate(data, this);
+      handler.execute(data, this);
+      this.logger.endUserInput({ ok: true });
+    } catch (error) {
+      this.logger.endUserInput({ ok: false, error });
+      throw error;
+    }
   }
 
   /**
@@ -562,6 +595,98 @@ export default class GameState {
       };
     }
     return snap;
+  }
+
+  /**
+   * Complete, deterministic serialization of the authoritative game state.
+   *
+   * Unlike `_createSnapshot()` (a flat, cheap diff view), this captures every
+   * piece of state required to replay a game: ordered zone contents, full
+   * modifier and granted-ability dumps, pending-decision metadata, ID/RNG/clock
+   * counters, and round-tracking sets. All Map/Set iterations are sorted so
+   * identical states serialize to identical JSON.
+   *
+   * @returns {object} JSON-safe deterministic state.
+   */
+  toSerializedState() {
+    const serializeCard = (card) => ({
+      cardId: card.cardId,
+      id: card.id,
+      costReduction: card.costReduction ?? 0,
+      visible: card.visible ?? false,
+    });
+
+    const serializeUnit = (unit) => ({
+      id: unit.id,
+      cardId: unit.card?.cardId,
+      currentHp: unit.currentHp,
+      placedPositionCode: unit.placedPositionCode,
+      owner: unit.owner,
+      equipmentAttachments: (unit.equipmentAttachments || [])
+        .map((c) => ({ cardId: c.cardId, id: c.id }))
+        .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
+    });
+
+    const players = {};
+    for (const username of this.usernames) {
+      const p = this.playerStates[username];
+      if (!p) continue;
+      const combatSlots = {};
+      for (const code of Object.keys(p.combatSlots || {}).sort()) {
+        combatSlots[code] = { ...p.combatSlots[code] };
+      }
+      players[username] = {
+        deck: (p.deck || []).map(serializeCard),
+        hand: (p.hand || []).map(serializeCard),
+        discard: (p.discard || []).map(serializeCard),
+        lighthouses: p.lighthouses ? { amount: p.lighthouses.amount, max: p.lighthouses.max } : null,
+        shinsu: p.shinsu ? { normalSpent: p.shinsu.normalSpent, normalAvailable: p.shinsu.normalAvailable, recharged: p.shinsu.recharged } : null,
+        combatSlots,
+        shinheuhSlot: p.shinheuhSlot ? { available: p.shinheuhSlot.available, used: p.shinheuhSlot.used } : null,
+        fireCharges: p.fireCharges ?? 0,
+        frontline: (p.field?.frontline || []).map(serializeUnit),
+        backline: (p.field?.backline || []).map(serializeUnit),
+      };
+    }
+
+    const pending = this.pendingDecision
+      ? {
+          decisionId: this.pendingDecision.decisionId,
+          owner: this.pendingDecision.owner,
+          type: this.pendingDecision.type,
+          candidates: this.pendingDecision.candidates.map(({ id, name, hp }) => ({ id, name, hp })),
+          minChoices: this.pendingDecision.minChoices,
+          maxChoices: this.pendingDecision.maxChoices,
+        }
+      : null;
+
+    const cardsPlayed = {};
+    for (const [username, count] of [...this._cardsPlayedThisRound.entries()].sort()) {
+      cardsPlayed[username] = count;
+    }
+
+    return {
+      roomCode: this.roomCode,
+      usernames: [...this.usernames],
+      round: this.round,
+      currentTurn: this.currentTurn,
+      roundEndOnTurnEnd: this.roundEndOnTurnEnd,
+      gameOver: this.gameOver,
+      resolutionState: this._resolutionState,
+      resolutionDepth: this._resolutionDepth,
+      isExecutingResolution: this._isExecutingResolution,
+      players,
+      modifiers: this.modifierStack.toSerializedState(),
+      grantedAbilities: this._abilityRegistry.toSerializedState(),
+      pendingDecision: pending,
+      pendingDecisionStackDepth: this._pendingDecisions.length,
+      counters: IdFactory.getCounters(),
+      modifierCounter: getModifierCounter(),
+      clock: this._clock.peek(),
+      rng: typeof this._rng?.getState === "function" ? this._rng.getState() : null,
+      barrierUsedThisRound: [...this._barrierUsedThisRound].sort(),
+      cardsPlayedThisRound: cardsPlayed,
+    };
   }
 
   /**
@@ -703,39 +828,47 @@ export default class GameState {
 
     // Resolve the selected state first, then clear this decision before running
     // continuations so a later effect may legitimately create its own choice.
-    this._isExecutingResolution = true;
+    this.logger.beginUserInput({ kind: "decision", payload: { decisionId, choices, username } });
     try {
-      pending.resolve?.(choices);
-    } finally {
-      this._isExecutingResolution = false;
-      // Only pop from the stack if the current decision is still the one
-      // being resolved (the resolve callback may have created a nested
-      // decision, which is now the active one).
-      if (this.pendingDecision === pending) {
-        this.pendingDecision = this._pendingDecisions.pop() || null;
+      this._isExecutingResolution = true;
+      try {
+        pending.resolve?.(choices);
+      } finally {
+        this._isExecutingResolution = false;
+        // Only pop from the stack if the current decision is still the one
+        // being resolved (the resolve callback may have created a nested
+        // decision, which is now the active one).
+        if (this.pendingDecision === pending) {
+          this.pendingDecision = this._pendingDecisions.pop() || null;
+        }
+        this._resolutionDepth = Math.max(0, this._resolutionDepth - 1);
+        if (!this.pendingDecision) {
+          this._resolutionState = ResolutionState.IDLE;
+        }
       }
-      this._resolutionDepth = Math.max(0, this._resolutionDepth - 1);
-      if (!this.pendingDecision) {
-        this._resolutionState = ResolutionState.IDLE;
+
+      // Run continuations while NOT in the execution guard so continuations
+      // that produce new pending decisions (via createPendingDecision) work.
+      pending.onResolved?.();
+
+      this.eventBus.emit(EVT.DECISION_RESOLVED, { decisionId, owner: pending.owner, type: pending.type, choices });
+
+      // If a stacked decision is now active, re-notify the client.
+      if (this.pendingDecision) {
+        this.eventBus.emit(EVT.DECISION_PENDING, {
+          decisionId: this.pendingDecision.decisionId,
+          owner: this.pendingDecision.owner,
+          type: this.pendingDecision.type,
+          candidates: this.pendingDecision.candidates,
+          minChoices: this.pendingDecision.minChoices,
+          maxChoices: this.pendingDecision.maxChoices,
+        });
       }
-    }
 
-    // Run continuations while NOT in the execution guard so continuations
-    // that produce new pending decisions (via createPendingDecision) work.
-    pending.onResolved?.();
-
-    this.eventBus.emit(EVT.DECISION_RESOLVED, { decisionId, owner: pending.owner, type: pending.type, choices });
-
-    // If a stacked decision is now active, re-notify the client.
-    if (this.pendingDecision) {
-      this.eventBus.emit(EVT.DECISION_PENDING, {
-        decisionId: this.pendingDecision.decisionId,
-        owner: this.pendingDecision.owner,
-        type: this.pendingDecision.type,
-        candidates: this.pendingDecision.candidates,
-        minChoices: this.pendingDecision.minChoices,
-        maxChoices: this.pendingDecision.maxChoices,
-      });
+      this.logger.endUserInput({ ok: true });
+    } catch (error) {
+      this.logger.endUserInput({ ok: false, error });
+      throw error;
     }
   }
 }

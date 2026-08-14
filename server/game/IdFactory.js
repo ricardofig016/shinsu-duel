@@ -38,6 +38,31 @@ export function resetAll() {
   if (_resetModCounter) _resetModCounter();
 }
 
+/**
+ * Snapshot the module-level ID counters for deterministic serialization.
+ * @returns {{ cardInstanceSeq: number, unitInstanceSeq: number, modifierSeq: number, decisionSeq: number }}
+ */
+export function getCounters() {
+  return {
+    cardInstanceSeq: _cardInstanceSeq,
+    unitInstanceSeq: _unitInstanceSeq,
+    modifierSeq: _modifierSeq,
+    decisionSeq: _decisionSeq,
+  };
+}
+
+/**
+ * Restore the module-level ID counters (used by replay).
+ * @param {{ cardInstanceSeq?: number, unitInstanceSeq?: number, modifierSeq?: number, decisionSeq?: number }} counters
+ */
+export function setCounters(counters) {
+  if (!counters) return;
+  _cardInstanceSeq = counters.cardInstanceSeq ?? 0;
+  _unitInstanceSeq = counters.unitInstanceSeq ?? 0;
+  _modifierSeq = counters.modifierSeq ?? 0;
+  _decisionSeq = counters.decisionSeq ?? 0;
+}
+
 // ── Source IDs (ModifierStack) ──────────────────────────────────────────────
 
 export function unitSource(cardId) {
@@ -101,6 +126,8 @@ export function grantedAbilityCode(sourceId, ability) {
 
 export default {
   resetAll,
+  getCounters,
+  setCounters,
   unitSource,
   equipSource,
   abilitySource,

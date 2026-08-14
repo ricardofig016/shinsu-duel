@@ -428,6 +428,54 @@ describe("EventBus", () => {
   });
 
   // -----------------------------------------------------------------------
+  // Abort notification
+  // -----------------------------------------------------------------------
+
+  describe("onAbort", () => {
+    test("is invoked for an authoritative failure with metadata", () => {
+      const bus = new EventBus();
+      const aborts = [];
+      bus.onAbort((error, info) => aborts.push({ error, info }));
+      bus.on("Test", () => { throw new Error("boom"); }, { phase: "execute" });
+
+      expect(() => bus.emit("Test")).toThrow("boom");
+      expect(aborts).toHaveLength(1);
+      expect(aborts[0].info.eventName).toBe("Test");
+      expect(aborts[0].info.phase).toBe("execute");
+      expect(aborts[0].info.handlerName).toBeDefined();
+      expect(aborts[0].error.message).toContain("boom");
+    });
+
+    test("is NOT invoked for an observer failure", () => {
+      const bus = new EventBus();
+      const aborts = [];
+      bus.onAbort(() => aborts.push(true));
+      bus.on("Test", () => { throw new Error("observer boom"); }, { role: "observer" });
+
+      bus.emit("Test");
+      expect(aborts).toHaveLength(0);
+    });
+
+    test("a throwing abort listener does not mask the original error", () => {
+      const bus = new EventBus();
+      bus.onAbort(() => { throw new Error("listener boom"); });
+      bus.on("Test", () => { throw new Error("original boom"); });
+
+      expect(() => bus.emit("Test")).toThrow("original boom");
+    });
+
+    test("returns an unsubscribe function", () => {
+      const bus = new EventBus();
+      const aborts = [];
+      const unsub = bus.onAbort(() => aborts.push(true));
+      unsub();
+      bus.on("Test", () => { throw new Error("boom"); });
+      expect(() => bus.emit("Test")).toThrow("boom");
+      expect(aborts).toHaveLength(0);
+    });
+  });
+
+  // -----------------------------------------------------------------------
   // Recursion guard
   // -----------------------------------------------------------------------
 

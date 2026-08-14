@@ -104,4 +104,26 @@ export default class AbilityRegistry {
     if (!entry) return null;
     return { ability: entry.ability, sourceType: entry.sourceType, sourceId: entry.sourceId };
   }
+
+  /**
+   * Deterministic full serialization of all granted abilities.
+   * Sorted by targetId (and entry code) for reproducible output.
+   *
+   * @returns {Array<{ targetId: string, entries: Array<object> }>}
+   */
+  toSerializedState() {
+    const targets = [...this._abilities.keys()].sort();
+    return targets.map((targetId) => ({
+      targetId,
+      entries: this._abilities
+        .get(targetId)
+        .map((entry) => ({
+          code: entry.code,
+          ability: entry.ability,
+          sourceId: entry.sourceId,
+          sourceType: entry.sourceType,
+        }))
+        .sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0)),
+    }));
+  }
 }

@@ -9,18 +9,22 @@ causation trees and state transitions for debugging, replay, and auditing.
 
 The Logger hooks into the EventBus to capture **before/after snapshots**
 of game state for every root event, along with the full **causation tree**
-from DFS event resolution. This enables:
+from DFS event resolution. It also records the authoritative player-input
+stream (`processAction` / `resolveDecision`) with the full deterministic state
+on each side, enabling faithful **action-level replay**. This enables:
 
-- **Replay**: given the initial state and log, replay every event.
+- **Replay**: given the initial state and the recorded action stream,
+  `ReplayDriver` reconstructs the game and verifies every step byte-for-byte.
 - **Debugging**: see exactly what changed and which event caused it.
 - **Auditing**: trace the full chain from action → effect → cascade.
 
-| Feature | Implementation |
-|---|---|
-| State snapshots | `snapshotFn()` called before and after each root event |
-| Causation trees | `ctx._children` from DFS resolution |
-| Pluggable backends | `MemoryBackend`, `ConsoleBackend`, custom |
-| Diff computation | Added/removed/changed keys between snapshots |
+| Feature            | Implementation                                                 |
+| ------------------ | -------------------------------------------------------------- |
+| State snapshots    | `snapshotFn()` (flat diff view) + `serializeFn()` (full state) |
+| Causation trees    | `ctx._children` from DFS resolution (full depth)               |
+| Pluggable backends | `MemoryBackend`, `ConsoleBackend`, custom                      |
+| Diff computation   | Added/removed/changed keys between snapshots                   |
+| Replay log         | `recordInitialState` + `begin/endUserInput` → `getReplayLog()` |
 
 ---
 
@@ -52,10 +56,11 @@ handlers in that phase — otherwise the "after" snapshot misses mutations.
 ```js
 {
   id: 42,
-  timestamp: "2026-08-01T22:00:00.000Z",
+  sequence: 42,
   rootEvent: "unit:damage:intent",
   cancelled: false,
   cancelReason: null,
+  originalPayload: { /* deep-cloned payload BEFORE handlers mutate it */ },
   causationTree: {
     eventName: "unit:damage:intent",
     cancelled: false,
@@ -95,10 +100,20 @@ handlers in that phase — otherwise the "after" snapshot misses mutations.
 
 ### Causation tree depth
 
-The tree currently captures **3 levels**: root → children → grandchildren.
-Deeper nesting is flattened (grandchildren's children are omitted).
-This is a pragmatic limit — most game event chains are 2-3 levels deep.
-If deeper chains are ever needed, `_buildCausationTree` can recurse fully instead of hardcoding 3 levels.
+The tree is fully recursive: `_buildCausationTree` follows `ctx._children`
+arbitrarily deep, so arbitrarily nested DFS event chains are captured in full.
+
+### Entry types
+
+In addition to root-event entries (shown above), the Logger writes:
+
+- `InitialState` — the reconstructed construction metadata (decks, first
+  player, RNG seed, starting ID counters) plus the full serialized state.
+- `UserAction` / `UserDecision` — one entry per `processAction` /
+  `resolveDecision`, with `stateBefore`/`stateAfter` (full serialization),
+  `ok`, and `error` (for failed inputs).
+- `EventFailure` — written via `EventBus.onAbort` when an authoritative
+  handler failure aborts a transaction.
 
 ---
 
@@ -119,12 +134,21 @@ class ConsoleBackend {
 ```
 
 **Adding a custom backend:**
+
 ```js
 class FileBackend {
-  constructor(filepath) { this.path = filepath; }
-  write(entry) { fs.appendFileSync(this.path, JSON.stringify(entry) + "\n"); }
-  getAll() { /* read and parse file */ }
-  clear() { fs.writeFileSync(this.path, ""); }
+  constructor(filepath) {
+    this.path = filepath;
+  }
+  write(entry) {
+    fs.appendFileSync(this.path, JSON.stringify(entry) + "\n");
+  }
+  getAll() {
+    /* read and parse file */
+  }
+  clear() {
+    fs.writeFileSync(this.path, "");
+  }
 }
 
 logger.addBackend(new FileBackend("./logs/game-42.jsonl"));
@@ -138,14 +162,20 @@ need to transform.
 
 ## Snapshot Function
 
-The Logger receives a `snapshotFn` from the caller. In production, this is
-`GameState._createSnapshot()`. The snapshot function must be:
+The Logger receives two capture functions from the caller. In production
+(`GameState`), these are `_createSnapshot()` and `toSerializedState()`.
 
-1. **Synchronous** — it's called inside event handlers.
-2. **Deterministic** — same state must produce same snapshot.
-3. **Cheap** — it runs on every root event (potentially hundreds per turn).
+1. **`snapshotFn`** — the flat, cheap diff view (`GameState._createSnapshot()`).
+   Called before/after every root event. Used for the `diff` field.
+2. **`serializeFn`** — the complete deterministic serialization
+   (`GameState.toSerializedState()`). Used for `InitialState`, `UserAction`,
+   `UserDecision`, and `EventFailure` entries. This is what makes replay possible.
 
-The current `GameState._createSnapshot()` returns:
+Both must be **synchronous**, **deterministic** (same state → same output),
+and the flat view must stay **cheap** (it runs on every root event).
+
+The flat `GameState._createSnapshot()` returns:
+
 ```js
 {
   round: 3,
@@ -162,7 +192,10 @@ The current `GameState._createSnapshot()` returns:
 }
 ```
 
-The snapshot captures the game state seen by the logger. Modifier state (traits granted by equipment, active conditions) is included per unit so diffs reflect trait/condition changes.
+The complete `GameState.toSerializedState()` captures ordered zone contents
+(deck/hand/discard card ids + runtime fields), full `ModifierStack` and
+`AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters,
+and round-tracking sets — all deterministically sorted.
 
 ---
 
@@ -196,14 +229,30 @@ before/after snapshots.
 
 ```js
 const logger = new Logger(eventBus, {
-  debug: false,                          // enable ConsoleBackend
-  snapshotFn: () => gameState.snapshot() // state capture function
+  debug: false, // enable ConsoleBackend
+  snapshotFn: () => gameState._createSnapshot(), // flat diff view
+  serializeFn: () => gameState.toSerializedState(), // full deterministic state
 });
 
-logger.getLogs();     // → Array of log entries (from MemoryBackend)
-logger.clear();       // → empty all backends
+logger.recordInitialState(meta); // called by GameState's constructor
+logger.beginUserInput({ kind: "action", payload }); // called by processAction
+logger.endUserInput({ ok, error }); // called after the action resolves
+
+logger.getLogs(); // → Array of log entries (from MemoryBackend)
+logger.getReplayLog(); // → { initial, actions } JSON-safe replay log
+logger.clear(); // → empty all backends
 logger.addBackend(b); // → register custom backend
 ```
+
+## Replay
+
+`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters,
+reconstructs `GameState` from the `InitialState` metadata (decks, first
+player, seeded RNG), verifies the initial serialization, then re-applies each
+`UserAction`/`UserDecision`, asserting the full state matches after every step.
+
+Replay requires a **seeded RNG** (see `SeededRng`) — an unseeded `Math.random`
+game has no captureable random state and is not replayable.
 
 ---
 

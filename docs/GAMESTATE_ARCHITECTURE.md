@@ -176,17 +176,24 @@ as a fallback for unit-shaped test stubs that bypass the lifecycle engine.
 
 ## Snapshot Design
 
-`GameState._createSnapshot()` captures the complete game state for the
-Logger. It includes:
+The engine exposes two capture functions to the Logger:
 
-- Active conditions per unit (from ModifierStack)
-- Active traits per unit (from ModifierStack)
-- Runtime-granted ability codes per unit (from AbilityRegistry)
-- Equipment attachments
-- Combat slot status
-- Shinheuh slot status
-- Fire charges
-- Discard pile size
+1. **`_createSnapshot()`** — the flat, cheap diff view, called before/after
+   every root event. It includes per unit:
+   - Active conditions per unit (from ModifierStack)
+   - Active traits per unit (from ModifierStack)
+   - Runtime-granted ability codes per unit (from AbilityRegistry)
+   - Equipment attachments
+   - Combat slot status, Shinheuh slot status, fire charges
+   - Hand/deck/discard sizes, lighthouses, shinsu
 
-The snapshot is called before/after each root event, enabling state diffs
-that reflect trait/condition/charge changes.
+2. **`toSerializedState()`** — the complete deterministic serialization for
+   replay. It additionally captures ordered zone contents (deck/hand/discard
+   card ids and runtime fields), the full `ModifierStack` and
+   `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters,
+   and round-tracking sets — all deterministically sorted so identical states
+   serialize to identical JSON.
+
+`_createSnapshot()` is used for state diffs; `toSerializedState()` is used by
+the `InitialState`, `UserAction`, `UserDecision`, and `EventFailure` log
+entries and by `ReplayDriver`.

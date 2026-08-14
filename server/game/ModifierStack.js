@@ -38,6 +38,16 @@ export function resetModifierCounter() {
   _idCounter = 0;
 }
 
+/** @returns {number} The current global modifier id counter. */
+export function getModifierCounter() {
+  return _idCounter;
+}
+
+/** @param {number} value Restore the global modifier id counter (for replay). */
+export function setModifierCounter(value) {
+  _idCounter = value ?? 0;
+}
+
 function nextId() {
   return `mod_${++_idCounter}`;
 }
@@ -321,6 +331,30 @@ export default class ModifierStack {
     this._byId.clear();
     this._byTarget.clear();
     this._bySource.clear();
+  }
+
+  /**
+   * Deterministic full serialization of every modifier in the stack.
+   * Sorted by modifier id so identical stacks produce identical output.
+   *
+   * @returns {Array<object>}
+   */
+  toSerializedState() {
+    const mods = [...this._byId.values()].map((m) => ({
+      id: m.id,
+      sourceId: m.sourceId,
+      sourceType: m.sourceType,
+      targetId: m.targetId,
+      type: m.type,
+      key: m.key,
+      value: m.value,
+      operation: m.operation,
+      disabledCount: m.disabledCount,
+      priority: m.priority,
+      expiresAt: m.expiresAt,
+    }));
+    mods.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    return mods;
   }
 
   // -----------------------------------------------------------------------
