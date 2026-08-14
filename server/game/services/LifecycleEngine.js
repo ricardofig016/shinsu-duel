@@ -11,6 +11,7 @@ import * as IdFactory from "../IdFactory.js";
 import Unit from "../Unit.js";
 import ZoneService from "./ZoneService.js";
 import ShinsuService from "./ShinsuService.js";
+import UnitService from "./UnitService.js";
 import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
 import { resolveEffects } from "../EffectResolver.js";
@@ -264,7 +265,7 @@ export default class LifecycleEngine {
     // Swap card definition while preserving damage. A transformation may enter
     // with 0 HP only when the caller already allowed a lethal state.
     unit.card = new Card(targetCardId, targetCard, unit.owner, gameState.eventBus);
-    unit.currentHp = Math.max(0, unit.card.maxHp - lostHp);
+    UnitService.setHp(unit, unit.card.maxHp - lostHp);
 
     // Re-apply native traits with new source
     const sourceId = IdFactory.unitSource(unit.id);
@@ -474,5 +475,35 @@ export default class LifecycleEngine {
       sourceOwner: unit.owner,
       targetId: unit.id,
     });
+  }
+
+  /**
+   * Move a unit to another position printed on its card.
+   *
+   * Sole path for position changes: removes the unit from its current line,
+   * appends it to the target line, and updates `placedPositionCode`.
+   * Validation (ownership, turn, Rooted, position legality, no-op moves)
+   * is the caller's responsibility and happens before this mutation.
+   *
+   * @param {GameState} gameState
+   * @param {object} unit — deployed unit owned by a player
+   * @param {string} positionCode — target position code
+   */
+  static switchPosition(gameState, unit, positionCode) {
+    const player = gameState.playerStates[unit.owner];
+    if (!player) throw new Error(`Player ${unit.owner} not found.`);
+
+    const oldLine = gameState.constructor.positions[unit.placedPositionCode]?.line;
+    const newLine = gameState.constructor.positions[positionCode]?.line;
+    if (!oldLine || !newLine) {
+      throw new Error(`Invalid position transition: ${unit.placedPositionCode} → ${positionCode}.`);
+    }
+
+    const oldIndex = player.field[oldLine].indexOf(unit);
+    if (oldIndex === -1) throw new Error(`Unit ${unit.id} is not on its expected line.`);
+
+    player.field[oldLine].splice(oldIndex, 1);
+    player.field[newLine].push(unit);
+    unit.placedPositionCode = positionCode;
   }
 }

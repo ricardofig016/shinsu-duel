@@ -28,44 +28,6 @@ export default class Unit {
     return this.currentHp > 0;
   }
 
-  takeDamage(amount) {
-    const damageAmount = Math.max(0, parseInt(amount) || 0);
-
-    // Emit event before damage is applied (allows for damage modification)
-    this.bus.emit(EVT.DAMAGE_INTENT, {
-      source: this.toSanitizedObject(),
-      target: this.toSanitizedObject(),
-      damageAmount: damageAmount,
-      message: `${this.card.name} is about to take ${damageAmount} damage from itself`,
-    });
-
-    // Apply damage
-    this.currentHp = Math.max(0, this.currentHp - damageAmount);
-
-    // Emit event after damage is applied
-    this.bus.emit(EVT.DAMAGE_APPLIED, {
-      unit: this.toSanitizedObject(),
-      damageAmount: damageAmount,
-      message: `${this.card.name} took ${damageAmount} damage from itself and is now at ${this.currentHp} HP`,
-    });
-
-    return this.currentHp;
-  }
-
-  useAbility(abilityCode, targetInfo = null, gameState) {
-    this.bus.emit(EVT.UNIT_ABILITY_INTENT, {
-      unitId: this.id,
-      abilityCode,
-      targetInfo,
-      gameState,
-    });
-    this.bus.emit(EVT.UNIT_ABILITY_RESOLVED, {
-      unitId: this.id,
-      abilityCode,
-      targetInfo,
-    });
-  }
-
   toSanitizedObject() {
     return {
       id: this.id,

@@ -20,14 +20,15 @@ and must not resolve targets themselves.
 Handlers never mutate `playerState` fields directly. Shared-resource changes
 delegate to the authoritative services:
 
-| Resource     | Service / method                                 |
-| ------------ | ------------------------------------------------ |
-| Shinsu       | `ShinsuService.spend` / `ShinsuService.gain`     |
-| Card zones   | `ZoneService.draw` / `discard` / `reclaimTop`    |
-| Compression  | `CompressionService.compress` / `clearReduction` |
-| Combat slots | `CombatSlotService.consume` / `resetAll`         |
-| Lighthouses  | `GameState.modifyLighthouses`                    |
-| Unit state   | `ModifierStack`                                  |
+| Resource       | Service / method                                 |
+| -------------- | ------------------------------------------------ |
+| Shinsu         | `ShinsuService.spend` / `ShinsuService.gain`     |
+| Card zones     | `ZoneService.draw` / `discard` / `reclaimTop`    |
+| Compression    | `CompressionService.compress` / `clearReduction` |
+| Combat slots   | `CombatSlotService.consume` / `resetAll`         |
+| Lighthouses    | `GameState.modifyLighthouses`                    |
+| Unit HP        | `UnitService.damage` / `heal` / `setHp`          |
+| Unit modifiers | `ModifierStack`                                  |
 
 | Concept           | Implementation                                                             |
 | ----------------- | -------------------------------------------------------------------------- |
@@ -135,8 +136,8 @@ reports through the unsupported-effect event. They are not parsed at runtime.
 
 | Handler                    | DSL `type`           | Key behavior                                                                            |
 | -------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| `DealDamageHandler`        | `deal_damage`        | Barrier → Resilient → Weak → apply → kill check → emitChildren                          |
-| `HealHandler`              | `heal`               | Applies healing, capped at max HP                                                       |
+| `DealDamageHandler`        | `deal_damage`        | Barrier → Resilient → Weak → `UnitService.damage` → kill check → emitChildren           |
+| `HealHandler`              | `heal`               | Applies healing via `UnitService.heal`, capped at max HP                                |
 | `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                             |
 | `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                               |
 | `CleanseHandler`           | `cleanse`            | `stack.removeWhere(m => m.type === "condition")`                                        |

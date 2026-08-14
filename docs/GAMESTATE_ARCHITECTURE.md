@@ -8,7 +8,10 @@ This document describes the GameState architecture: zone model, service layer, l
 
 `GameState.js` is the authoritative runtime engine. It orchestrates all
 services and owns the complete game state tree. No handler, action, or
-engine mutates state directly — all mutations go through services.
+engine mutates player-state resource fields directly — all resource
+mutations go through the owning service. `GameState` itself writes only its
+own orchestration fields (round, turn, pass state, game-over, pending
+decisions).
 
 | Service                | Responsibility                                            |
 | ---------------------- | --------------------------------------------------------- |
@@ -17,7 +20,8 @@ engine mutates state directly — all mutations go through services.
 | **CompressionService** | Card cost compression (per card instance)                 |
 | **CombatSlotService**  | Position and Shinheuh combat slots                        |
 | **LighthouseService**  | Lighthouse life total (cap 40, game-over at 0)            |
-| **LifecycleEngine**    | Unit lifecycle: deploy, destroy, transform, equip         |
+| **UnitService**        | Unit combat HP: damage, heal, setHp                       |
+| **LifecycleEngine**    | Unit lifecycle: deploy, destroy, transform, equip, move   |
 | **TriggerManager**     | Evolution/ignition: AST→event subscriptions               |
 | **PassiveManager**     | Timed passives (round start/end): DSL→event subscriptions |
 | **AttributeRegistry**  | Pluggable attribute engines (Anima, Hwayeomsa)            |

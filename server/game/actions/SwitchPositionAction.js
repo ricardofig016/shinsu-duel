@@ -1,4 +1,5 @@
 import ActionHandler from "../ActionHandler.js";
+import LifecycleEngine from "../services/LifecycleEngine.js";
 import EVT from "../EventCatalog.js";
 
 /** Spend a turn to move one owned unit to another position printed on its card. */
@@ -35,13 +36,7 @@ export default class SwitchPositionAction extends ActionHandler {
 
   execute(data, gameState) {
     const unit = gameState._findUnit(data.unitId);
-    const player = gameState.playerStates[data.username];
-    const oldLine = gameState.constructor.positions[unit.placedPositionCode].line;
-    const newLine = gameState.constructor.positions[data.positionCode].line;
-    const oldIndex = player.field[oldLine].indexOf(unit);
-    player.field[oldLine].splice(oldIndex, 1);
-    player.field[newLine].push(unit);
-    unit.placedPositionCode = data.positionCode;
+    LifecycleEngine.switchPosition(gameState, unit, data.positionCode);
     gameState.eventBus.emit(EVT.UNIT_POSITION_SWITCHED, {
       unitId: unit.id,
       owner: unit.owner,

@@ -5,6 +5,7 @@ import TriggerManager from "./services/TriggerManager.js";
 import PassiveManager from "./services/PassiveManager.js";
 import LighthouseService from "./services/LighthouseService.js";
 import CombatSlotService from "./services/CombatSlotService.js";
+import UnitService from "./services/UnitService.js";
 import AttributeRegistry from "./attributes/AttributeRegistry.js";
 import AnimaEngine from "./attributes/AnimaEngine.js";
 import HwayeomsaEngine from "./attributes/HwayeomsaEngine.js";
@@ -187,7 +188,7 @@ export default class GameState {
       const { targetId } = payload;
       const unit = this._findUnit(targetId);
       if (!unit || !this.modifierStack.has(targetId, "trait", "undying")) return;
-      unit.currentHp = 1;
+      UnitService.setHp(unit, 1);
       this.modifierStack.removeWhere(
         (m) => m.targetId === targetId && m.type === "trait" && m.key === "undying"
       );
@@ -696,11 +697,7 @@ export default class GameState {
     usernames.forEach((username) => {
       const player = this.playerStates[username];
       if (player) {
-        player.shinsu = {
-          normalSpent: 0,
-          normalAvailable: Math.min(GameState.MAX_NORMAL_SHINSU, this.round),
-          recharged: 0,
-        };
+        ShinsuService.reset(player, this.round);
       }
     });
   }

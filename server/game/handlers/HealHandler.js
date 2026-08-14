@@ -1,4 +1,5 @@
 import BaseHandler from "./BaseHandler.js";
+import UnitService from "../services/UnitService.js";
 import EVT from "../EventCatalog.js";
 
 /**
@@ -24,11 +25,9 @@ export default class HealHandler extends BaseHandler {
     const unit = gameState._findUnit(targetId);
     if (!unit || !unit.isAlive()) return { healed: 0 };
 
-    const maxHp = unit.card.maxHp;
-    const healAmount = Math.min(amount, maxHp - unit.currentHp);
+    const { healed: healAmount } = UnitService.heal(unit, amount);
 
     if (healAmount > 0) {
-      unit.currentHp += healAmount;
       context.emitChild(EVT.HEAL_APPLIED, {
         targetId,
         amount: healAmount,

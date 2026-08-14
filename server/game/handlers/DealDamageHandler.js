@@ -1,5 +1,6 @@
 import BaseHandler from "./BaseHandler.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
+import UnitService from "../services/UnitService.js";
 import EVT from "../EventCatalog.js";
 
 /**
@@ -69,8 +70,7 @@ export default class DealDamageHandler extends BaseHandler {
     if (!unit || !unit.isAlive()) return { damageDealt: 0, killed: false };
 
     damage = preResult?.finalPayload?.amount ?? damage;
-    const actualDamage = Math.min(damage, unit.currentHp);
-    unit.currentHp -= actualDamage;
+    const { applied: actualDamage } = UnitService.damage(unit, damage);
 
     context.emitChild(EVT.DAMAGE_APPLIED, {
       sourceId: payload.sourceId,

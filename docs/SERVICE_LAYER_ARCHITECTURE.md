@@ -18,13 +18,14 @@ mechanics cannot corrupt state by writing around the rules.
 services that need game-wide context (e.g. game-over detection) and keeps
 direct references for the rest.
 
-| Service               | Resource                       | Mutation API                                           |
-| --------------------- | ------------------------------ | ------------------------------------------------------ |
-| **ShinsuService**     | `playerState.shinsu`           | `reset`, `spend`, `gain`, `getTotal`, `canAfford`      |
-| **ZoneService**       | `deck` / `hand` / `discard`    | `draw`, `discard`, `reclaimTop`, `removeFromHand`, `addToHand` |
-| **CompressionService**| `card.costReduction`           | `compress`, `clearReduction`, `getReduction`           |
-| **CombatSlotService** | `combatSlots` + `shinheuhSlot` | position slots + Shinheuh slot (see below)             |
-| **LighthouseService** | `playerState.lighthouses`      | `modify` (cap 0–40, game-over at 0)                    |
+| Service                | Resource                       | Mutation API                                                   |
+| ---------------------- | ------------------------------ | -------------------------------------------------------------- |
+| **ShinsuService**      | `playerState.shinsu`           | `reset`, `spend`, `gain`, `getTotal`, `canAfford`              |
+| **ZoneService**        | `deck` / `hand` / `discard`    | `draw`, `discard`, `reclaimTop`, `removeFromHand`, `addToHand` |
+| **CompressionService** | `card.costReduction`           | `compress`, `clearReduction`, `getReduction`                   |
+| **CombatSlotService**  | `combatSlots` + `shinheuhSlot` | position slots + Shinheuh slot (see below)                     |
+| **LighthouseService**  | `playerState.lighthouses`      | `modify` (cap 0–40, game-over at 0)                            |
+| **UnitService**        | `unit.currentHp`               | `damage`, `heal`, `setHp` (clamped/capped)                     |
 
 ---
 
@@ -58,7 +59,7 @@ Owns **all** combat slots: the five position slots plus the Shinheuh slot.
 Position slots reset each round and are consumed by non-Free ability use.
 The Shinheuh slot (Anima attribute) is granted at round start, consumed by
 Shinheuh ability use, and reset at round end — all through this service;
-`AnimaEngine` only decides *when* to grant, never touches the slot directly.
+`AnimaEngine` only decides _when_ to grant, never touches the slot directly.
 
 ```js
 CombatSlotService.isAvailable(playerState, "fisherman");
@@ -79,6 +80,20 @@ sets `gameState.gameOver` and emits `game:lighthouses:depleted` +
 `game:over`. `GameState.modifyLighthouses()` is a thin wrapper that forwards
 to it.
 
+## UnitService
+
+Owns a unit's combat HP (`unit.currentHp`). `damage` clamps to remaining
+HP, `heal` caps at `card.maxHp`, and `setHp` floors at 0 — every write to a
+unit's HP goes through one of these. The service is pure math and emits no
+events; callers (`DealDamageHandler`, `HealHandler`, the Undying lifecycle
+hook, `LifecycleEngine.transformUnit`) emit the damage/heal events themselves.
+
+```js
+UnitService.damage(unit, amount); // → { applied, currentHp }
+UnitService.heal(unit, amount); // → { healed, currentHp }
+UnitService.setHp(unit, value); // → currentHp (floored at 0)
+```
+
 ---
 
 ## Integration
@@ -87,7 +102,8 @@ to it.
   `HANDLER_SYSTEM_ARCHITECTURE.md`).
 - **Actions** validate via the same services before mutating (see
   `ACTION_SYSTEM_ARCHITECTURE.md`).
-- **LifecycleEngine** composes them for deploy/destroy/equip.
+- **LifecycleEngine** composes them for deploy/destroy/equip, and owns
+  position movement via `switchPosition`.
 - **Attribute engines** mutate only through `GameState` delegation
   (`CombatSlotService` for the Shinheuh slot, `_modifyFireCharges` for fire
   charges), never by writing resource fields directly.
