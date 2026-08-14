@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import AnimaEngine from "../../attributes/AnimaEngine.js";
+import EVT from "../../EventCatalog.js";
 import { createLegalDeck, getCardIdByName } from "../utils.js";
 
 describe("AnimaEngine", () => {
@@ -45,6 +46,42 @@ describe("AnimaEngine", () => {
     engine.onDeploy(unit, game);
 
     expect(unit._animaCleanup.length).toBe(1);
+  });
+
+  test("round start grants a Shinheuh slot when an Anima unit is on the field", () => {
+    game.playerStates.Alice.shinheuhSlot = { available: false, used: false };
+    const engine = game._attributeRegistry.get("anima");
+    const unit = { id: "Unit#anima", owner: "Alice", card: { attributes: ["anima"] } };
+    game.playerStates.Alice.field.frontline = [unit];
+    engine.onDeploy(unit, game);
+
+    game.eventBus.emit(EVT.ROUND_START, { round: 2 });
+
+    expect(game.playerStates.Alice.shinheuhSlot.available).toBe(true);
+  });
+
+  test("round start revokes the slot when no Anima unit is on the field", () => {
+    game.playerStates.Alice.shinheuhSlot = { available: true, used: false };
+    const engine = game._attributeRegistry.get("anima");
+    const unit = { id: "Unit#noanima", owner: "Alice", card: { attributes: [] } };
+    game.playerStates.Alice.field.frontline = [unit];
+    engine.onDeploy(unit, game);
+
+    game.eventBus.emit(EVT.ROUND_START, { round: 2 });
+
+    expect(game.playerStates.Alice.shinheuhSlot.available).toBe(false);
+  });
+
+  test("_hasAnimaOnField recognizes an anima attribute granted via modifier", () => {
+    const engine = game._attributeRegistry.get("anima");
+    const unit = { id: "Unit#mod", owner: "Alice", card: { attributes: [] } };
+    game.playerStates.Alice.field.frontline = [unit];
+    game.modifierStack.apply({
+      sourceId: "System", sourceType: "system", targetId: unit.id,
+      type: "attribute", key: "anima", value: 1,
+    });
+
+    expect(engine._hasAnimaOnField("Alice", game)).toBe(true);
   });
 
   test("cleanup removes subscriptions", () => {

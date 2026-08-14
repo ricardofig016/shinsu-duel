@@ -6,7 +6,6 @@
 - [ ] game: add Disarm keyword - Send a unit's equipment back to it's owners hand (choose on LIW)
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
-- [ ] tests: add more to increase coverage
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
 - [ ] public: plan how image artworks should be organized
 - [ ] new card: equipment - my bearer can assume any position
@@ -18,6 +17,7 @@
 
 ## Completed
 
+- [x] tests: add more to increase coverage
 - [x] tests: organize server\game\tests better - there's too many tests directly in tests\
 - [x] docs: fix newline based line wrapping - switch to single line paragraphs
 - [x] game: remove `Math.random()` as fallback if no seed is provided. all games must be seeded

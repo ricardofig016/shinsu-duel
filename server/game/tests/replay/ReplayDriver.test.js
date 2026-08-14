@@ -72,6 +72,38 @@ describe("ReplayDriver", () => {
     expect(() => ReplayDriver.replay({ initial: null, actions: [] })).toThrow("initial state");
   });
 
+  test("throws on an unknown replay entry type", () => {
+    const game = makeSeededGame();
+    const replayLog = game.logger.getReplayLog();
+    replayLog.actions.push({ type: "BogusEntry", ok: true, stateAfter: game.toSerializedState() });
+
+    expect(() => ReplayDriver.replay(replayLog)).toThrow("Unknown replay entry type");
+  });
+
+  test("throws when an entry expected to fail succeeds", () => {
+    const game = makeSeededGame();
+    const replayLog = game.logger.getReplayLog();
+    // A valid pass action that should succeed, but is recorded as a failure.
+    replayLog.actions.push({
+      type: "UserAction",
+      ok: false,
+      action: { type: "pass-turn-action", data: { source: "player", username: "Alice" } },
+      stateAfter: game.toSerializedState(),
+    });
+
+    expect(() => ReplayDriver.replay(replayLog)).toThrow("Expected replay step");
+  });
+
+  test("throws when the replay diverges from the recorded state", () => {
+    const game = makeSeededGame();
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });
+    const replayLog = game.logger.getReplayLog();
+    // Tamper with the recorded post-action state to force a divergence.
+    replayLog.actions[0].stateAfter = { tampered: true };
+
+    expect(() => ReplayDriver.replay(replayLog)).toThrow("Replay divergence");
+  });
+
   test("replay is deterministic across 20 runs of the same log", () => {
     const game = makeSeededGame(555);
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });

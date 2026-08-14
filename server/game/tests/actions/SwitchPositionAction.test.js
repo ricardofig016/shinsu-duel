@@ -53,6 +53,75 @@ describe("switch-position-action", () => {
     ).toThrow("already in that position");
   });
 
+  test("rejects switching a unit the player does not own", () => {
+    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    advanceToRound(game, 2);
+    game.currentTurn = "Alice";
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+    const unit = deployScoutThenWave(game);
+    game.currentTurn = "Bob";
+    game.playerStates.Bob.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+
+    expect(() =>
+      game.processAction({
+        type: "switch-position-action",
+        data: { source: "player", username: "Bob", unitId: unit.id, positionCode: "fisherman" },
+      })
+    ).toThrow("Unit must be deployed on your field");
+  });
+
+  test("rejects switching a rooted unit", () => {
+    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    advanceToRound(game, 2);
+    game.currentTurn = "Alice";
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+    const unit = deployScoutThenWave(game);
+    game.currentTurn = "Alice";
+    game.modifierStack.apply({
+      sourceId: "System", sourceType: "system", targetId: unit.id,
+      type: "condition", key: "rooted", value: 1,
+    });
+
+    expect(() =>
+      game.processAction({
+        type: "switch-position-action",
+        data: { source: "player", username: "Alice", unitId: unit.id, positionCode: "fisherman" },
+      })
+    ).toThrow("Rooted");
+  });
+
+  test("rejects an unknown position code", () => {
+    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    advanceToRound(game, 2);
+    game.currentTurn = "Alice";
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+    const unit = deployScoutThenWave(game);
+    game.currentTurn = "Alice";
+
+    expect(() =>
+      game.processAction({
+        type: "switch-position-action",
+        data: { source: "player", username: "Alice", unitId: unit.id, positionCode: "not-a-position" },
+      })
+    ).toThrow("Invalid position");
+  });
+
+  test("rejects a position the unit cannot occupy", () => {
+    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    advanceToRound(game, 2);
+    game.currentTurn = "Alice";
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+    const unit = deployScoutThenWave(game);
+    game.currentTurn = "Alice";
+
+    expect(() =>
+      game.processAction({
+        type: "switch-position-action",
+        data: { source: "player", username: "Alice", unitId: unit.id, positionCode: "light-bearer" },
+      })
+    ).toThrow("Unit cannot be placed in position");
+  });
+
   test("LifecycleEngine.switchPosition throws when the unit is not on its line", () => {
     const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
     advanceToRound(game, 2);
