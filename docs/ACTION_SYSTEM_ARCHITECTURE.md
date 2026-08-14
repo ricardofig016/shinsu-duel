@@ -1,17 +1,12 @@
 # Action System Architecture — Shinsu Duel
 
-This document describes the player-action layer: how client requests become
-validated, authoritative game-state mutations.
+This document describes the player-action layer: how client requests become validated, authoritative game-state mutations.
 
 ---
 
 ## Overview
 
-Actions are the **only entry point** for a player to interact with the game
-(playing cards, using abilities, passing). Every action is a class extending
-`ActionHandler`, registered in `server/game/registries/actionRegistry.js`
-under a kebab-case type string. `GameState.processAction(action)` dispatches
-to the registry:
+Actions are the **only entry point** for a player to interact with the game (playing cards, using abilities, passing). Every action is a class extending `ActionHandler`, registered in `server/game/registries/actionRegistry.js` under a kebab-case type string. `GameState.processAction(action)` dispatches to the registry:
 
 ```js
 game.processAction({
@@ -25,9 +20,7 @@ game.processAction({
 });
 ```
 
-Actions **validate first, mutate second**. They never mutate `playerState`
-fields directly — card movement and shinsu changes delegate to the same
-services handlers use (`ZoneService`, `ShinsuService`, `LifecycleEngine`).
+Actions **validate first, mutate second**. They never mutate `playerState` fields directly — card movement and shinsu changes delegate to the same services handlers use (`ZoneService`, `ShinsuService`, `LifecycleEngine`).
 
 ---
 
@@ -53,26 +46,16 @@ export default class ActionHandler {
 
 `super.validate(data)` runs two layers before any game-rule check:
 
-1. **Schema validation** (`validateSchema`) — every field in `schema` must be
-   present with the declared `typeof`; any field outside the schema is
-   rejected (`Unexpected field`). This prevents malformed or tampered payloads
-   from reaching game logic.
-2. **Source access** — `sourceAccess[data.source]` must be truthy. `player`
-   is the normal entry point; `system` is reserved for server-internal
-   actions when one is required. Resource mutations that are not player
-   choices, bypass the action layer.
+1. **Schema validation** (`validateSchema`) — every field in `schema` must be present with the declared `typeof`; any field outside the schema is rejected (`Unexpected field`). This prevents malformed or tampered payloads from reaching game logic.
+2. **Source access** — `sourceAccess[data.source]` must be truthy. `player` is the normal entry point; `system` is reserved for server-internal actions when one is required. Resource mutations that are not player choices, bypass the action layer.
 
-Subclass `validate()` then adds **game-rule checks**: the actor exists, it is
-their turn, the card/unit exists, costs are affordable, and requirements are
-met (via `RequirementValidator`). These checks run before any state change, so
-a failed action leaves the game untouched.
+Subclass `validate()` then adds **game-rule checks**: the actor exists, it is their turn, the card/unit exists, costs are affordable, and requirements are met (via `RequirementValidator`). These checks run before any state change, so a failed action leaves the game untouched.
 
 ---
 
 ## Registry
 
-`actionRegistry.js` maps wire type strings to singleton instances. Handlers
-hold no per-invocation state.
+`actionRegistry.js` maps wire type strings to singleton instances. Handlers hold no per-invocation state.
 
 | Type                          | Class                      | Schema fields                                  | Ends turn                  |
 | ----------------------------- | -------------------------- | ---------------------------------------------- | -------------------------- |
@@ -86,14 +69,10 @@ hold no per-invocation state.
 
 ### Ability resolution
 
-`UseAbilityAction.resolveAbility(gameState, unit, abilityCode)` resolves an
-`abilityCode` into `{ ability, sourceId, sourceType }`:
+`UseAbilityAction.resolveAbility(gameState, unit, abilityCode)` resolves an `abilityCode` into `{ ability, sourceId, sourceType }`:
 
 - numeric index → the unit's compiled DSL ability (`unit.card.abilities[i]`)
-- `granted:<sourceId>:<type>` → an ability granted at runtime (e.g. by
-  equipment via `grant_ability`), resolved through `GameState._abilityRegistry`
-  (see `HANDLER_SYSTEM_ARCHITECTURE.md`). Removing the source (unequip)
-  revokes the registry entry and makes the code unresolvable.
+- `granted:<sourceId>:<type>` → an ability granted at runtime (e.g. by equipment via `grant_ability`), resolved through `GameState._abilityRegistry` (see `HANDLER_SYSTEM_ARCHITECTURE.md`). Removing the source (unequip) revokes the registry entry and makes the code unresolvable.
 
 ### Quick / Free semantics
 
@@ -102,17 +81,13 @@ hold no per-invocation state.
 - **Free** (`ability.free`) — does not consume the unit's combat slot.
 - **Quick** (`ability.quick`) — does not call `gameState.endTurn()`.
 
-Non-Free abilities mark the position's combat slot spent; Shinheuh abilities
-consume the Anima Shinheuh slot instead. `Heavy` condition adds to the ability
-cost; `Poisoned` triggers after resolution if the unit survives.
+Non-Free abilities mark the position's combat slot spent; Shinheuh abilities consume the Anima Shinheuh slot instead. `Heavy` condition adds to the ability cost; `Poisoned` triggers after resolution if the unit survives.
 
 ---
 
 ## Decision Continuations
 
-Actions that produce a player choice (line overflow, target selection) must
-not advance the turn before that choice has mutated state. They register the
-rest of their work as a continuation:
+Actions that produce a player choice (line overflow, target selection) must not advance the turn before that choice has mutated state. They register the rest of their work as a continuation:
 
 ```js
 gameState.completeActionAfterDecision(() => {
@@ -120,9 +95,7 @@ gameState.completeActionAfterDecision(() => {
 });
 ```
 
-This runs immediately when no decision is pending, or after the current
-decision resolves. Multiple continuations queue in FIFO order, so a card's
-remaining effects and the turn end always run in the correct sequence.
+This runs immediately when no decision is pending, or after the current decision resolves. Multiple continuations queue in FIFO order, so a card's remaining effects and the turn end always run in the correct sequence.
 
 ---
 
@@ -130,6 +103,5 @@ remaining effects and the turn end always run in the correct sequence.
 
 - **Don't mutate state in `validate()`** — validation must be side-effect free.
 - **Don't bypass the registry** — always go through `processAction()`.
-- **Don't end the turn inline** when a decision may be pending — use
-  `completeActionAfterDecision`.
+- **Don't end the turn inline** when a decision may be pending — use `completeActionAfterDecision`.
 - **Don't hand-parse `abilityCode` strings** — use `resolveAbility()`.

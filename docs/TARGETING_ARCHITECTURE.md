@@ -1,17 +1,12 @@
 # Targeting Architecture — Shinsu Duel
 
-This document describes the canonical target resolution system: line blocking
-rules, taunt/ghost/sharpshooter interactions, and the pending-decision protocol.
+This document describes the canonical target resolution system: line blocking rules, taunt/ghost/sharpshooter interactions, and the pending-decision protocol.
 
 ---
 
 ## Overview
 
-`TargetResolver.resolveTargets(gameState, options)` is the **sole authority**
-for resolving human-readable target descriptors into validated unit lists.
-`EffectResolver` is the integration boundary: it calls `TargetResolver`,
-converts resolved targets into concrete `targetId` payloads, and only then
-invokes a handler. Handlers never accept or interpret target descriptors.
+`TargetResolver.resolveTargets(gameState, options)` is the **sole authority** for resolving human-readable target descriptors into validated unit lists. `EffectResolver` is the integration boundary: it calls `TargetResolver`, converts resolved targets into concrete `targetId` payloads, and only then invokes a handler. Handlers never accept or interpret target descriptors.
 
 ---
 
@@ -37,37 +32,23 @@ invokes a handler. Handlers never accept or interpret target descriptors.
 
 ### Frontline blocks backline
 
-A unit can only target backline enemies if the enemy frontline is **empty**
-(no non-Ghost, alive units on frontline).
+A unit can only target backline enemies if the enemy frontline is **empty** (no non-Ghost, alive units on frontline).
 
 ### Ghost bypass
 
-Units with the **Ghost** condition don't count as blockers — enemies behind
-them can be targeted even when frontline is technically non-empty.
+Units with the **Ghost** condition don't count as blockers — enemies behind them can be targeted even when frontline is technically non-empty.
 
 ### Sharpshooter bypass
 
-Units with the **Sharpshooter** trait ignore line restrictions entirely —
-they can target any enemy regardless of frontline/backline.
+Units with the **Sharpshooter** trait ignore line restrictions entirely — they can target any enemy regardless of frontline/backline.
 
 ### Taunt enforcement
 
-Taunt applies only to effects originating from an **enemy unit**. It does
-not constrain targetable skills. A single-target effect MUST target a valid
-Taunt unit. For a player-selected multi-target effect, every valid Taunt unit
-must be selected before any other enemy unit may be selected. Effects that
-unconditionally target all enemies do not require a choice and include all
-valid enemies.
+Taunt applies only to effects originating from an **enemy unit**. It does not constrain targetable skills. A single-target effect MUST target a valid Taunt unit. For a player-selected multi-target effect, every valid Taunt unit must be selected before any other enemy unit may be selected. Effects that unconditionally target all enemies do not require a choice and include all valid enemies.
 
 ### Blinded
 
-A unit with the `Blinded` condition cannot choose targeted units. For choice
-descriptors such as `enemy`, `ally`, and `unit`, `TargetResolver` shuffles the
-already-filtered valid candidates and selects from that order. Line blocking,
-Ghost, Sharpshooter, Taunt, and other filters are applied before randomization.
-Self, bearer, all-target descriptors, and lighthouse targeting are not
-randomized. The resolver uses the game's seeded RNG so random targeting is
-deterministic in tests and replays.
+A unit with the `Blinded` condition cannot choose targeted units. For choice descriptors such as `enemy`, `ally`, and `unit`, `TargetResolver` shuffles the already-filtered valid candidates and selects from that order. Line blocking, Ghost, Sharpshooter, Taunt, and other filters are applied before randomization. Self, bearer, all-target descriptors, and lighthouse targeting are not randomized. The resolver uses the game's seeded RNG so random targeting is deterministic in tests and replays.
 
 ---
 
@@ -86,9 +67,7 @@ deterministic in tests and replays.
 
 ## Card-in-Hand Targeting
 
-Some effects target cards still in the player's hand (e.g. `compress_shinsu`).
-These use `TargetResolver.resolveCardTarget(playerState, selector)` — the
-same architectural boundary as unit targeting.
+Some effects target cards still in the player's hand (e.g. `compress_shinsu`). These use `TargetResolver.resolveCardTarget(playerState, selector)` — the same architectural boundary as unit targeting.
 
 | Selector                      | Behavior                                              |
 | ----------------------------- | ----------------------------------------------------- |
@@ -96,16 +75,13 @@ same architectural boundary as unit targeting.
 | `"the most expensive card"`   | Highest printed-cost card in hand                     |
 | `"a <attribute>"`             | First card with the given attribute (e.g. "a Hwayeomsa") |
 
-`EffectResolver` pre-resolves `targetCardSelector` to a concrete
-`targetCardId` before invoking any handler. Handlers only receive
-`targetCardId` — they never interpret the selector string.
+`EffectResolver` pre-resolves `targetCardSelector` to a concrete `targetCardId` before invoking any handler. Handlers only receive `targetCardId` — they never interpret the selector string.
 
 ---
 
 ## Pending-Decision Protocol
 
-When an effect requires player choice (multi-target, overflow destruction
-choice, etc.), the engine emits a `pending-decision` event and pauses:
+When an effect requires player choice (multi-target, overflow destruction choice, etc.), the engine emits a `pending-decision` event and pauses:
 
 ```js
 // Engine emits
@@ -124,10 +100,4 @@ socket.emit("game-decision", {
 });
 ```
 
-The engine validates choices and resumes the event chain. Validation includes
-the decision ID, owner, choice count, uniqueness, candidate membership, and
-whether a real unit candidate was destroyed while the decision was pending.
-Decisions stack. If a resolution creates a second choice while one is still
-pending, the active decision is pushed aside and the new one becomes current;
-resolving it pops the previous one back and re-emits `pending-decision` for
-it. Clients always resolve exactly one choice at a time.
+The engine validates choices and resumes the event chain. Validation includes the decision ID, owner, choice count, uniqueness, candidate membership, and whether a real unit candidate was destroyed while the decision was pending. Decisions stack. If a resolution creates a second choice while one is still pending, the active decision is pushed aside and the new one becomes current; resolving it pops the previous one back and re-emits `pending-decision` for it. Clients always resolve exactly one choice at a time.

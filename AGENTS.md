@@ -16,10 +16,6 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Keep authoritative state mutation behind the appropriate service or engine. Avoid direct mutation when an existing authoritative boundary exists.
 - Avoid hidden coupling, duplicated sources of truth, ambiguous ownership, and APIs that accept multiple competing representations of the same concept.
 - Prefer explicit, typed or schema-validated contracts and fail clearly when input cannot be modeled safely.
-- Keep public behavior and documentation aligned with the actual implementation.
-- Keep architecture documentation concise and practical. Document what a component is, why it has its design, how it integrates with related components, and how to use it. Do not write implementation history, phase reports, or unnecessary commentary.
-- Before changing documentation, review all relevant files in `docs/`; update only the sections affected by the current contract or architecture, and add a new document only when an important complex component is not adequately covered.
-- Avoid unecessary comments
 
 ## Rules and Project Context
 
@@ -28,6 +24,7 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
 - When a requirement or rule is ambiguous, never guess. Ask the user for clarification before implementation.
+- The only edits you are allowed to do to `TODO.md` is change `[ ]` to `[x]`, nothing else
 
 ## Planning and Implementation
 
@@ -46,6 +43,14 @@ During implementation:
 - Handle failure, cancellation, stale state, re-entrancy, and repeated calls explicitly.
 - Keep changes focused. Do not alter unrelated behavior or documentation unnecessarily.
 - Update documentation when a component's contract, ownership, integration, or usage changes.
+
+## Documentation
+
+- Keep public behavior and documentation aligned with the actual implementation.
+- Keep architecture documentation concise and practical. Document what a component is, why it has its design, how it integrates with related components, and how to use it. Do not write implementation history, phase reports, or unnecessary commentary.
+- Before changing documentation, review all relevant files in `docs/`; update only the sections affected by the current contract or architecture, and add a new document only when an important complex component is not adequately covered.
+- Keep documentation concise and include only what is needed, no more.
+- Avoid unecessary comments in code.
 
 ## Testing and Bug Discipline
 

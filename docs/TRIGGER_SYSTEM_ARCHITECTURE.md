@@ -13,9 +13,7 @@ The trigger system has two layers:
 | **Compiler** | `scripts/card-compile.js` `parseTrigger()` | Converts raw trigger text to typed ASTs at compile time |
 | **Runtime**  | `server/game/services/TriggerManager.js`   | Maps typed ASTs to EventBus subscriptions               |
 
-**Critical design constraint:** The runtime never parses raw trigger text.
-If a trigger pattern is not recognized by `parseTrigger()`, compilation
-fails. This forces explicit modeling of every trigger type.
+**Critical design constraint:** The runtime never parses raw trigger text. If a trigger pattern is not recognized by `parseTrigger()`, compilation fails. This forces explicit modeling of every trigger type.
 
 ---
 
@@ -57,10 +55,7 @@ Position-scoped variant:
 
 ## Canonical Trigger Timing
 
-Every transformation trigger subscribes in the **`post`** phase of its
-canonical runtime event. The `post` phase runs after the event's `execute`
-phase has completed all authoritative mutations, so a transformation always
-sees the fully-resolved state of the triggering action.
+Every transformation trigger subscribes in the **`post`** phase of its canonical runtime event. The `post` phase runs after the event's `execute` phase has completed all authoritative mutations, so a transformation always sees the fully-resolved state of the triggering action.
 
 ### Event selection rationale
 
@@ -79,25 +74,20 @@ sees the fully-resolved state of the triggering action.
 
 ### DFS ordering guarantee
 
-`TriggerManager` subscribes with default priority 0 in the `post` phase.
-Other `post` handlers with lower priority run first. After the
-transformation:
+`TriggerManager` subscribes with default priority 0 in the `post` phase. Other `post` handlers with lower priority run first. After the transformation:
 
 1. `LifecycleEngine.transformUnit` / `transformEquipment` runs synchronously.
 2. The old trigger subscriptions are removed (`unregisterAll`).
 3. `unit:evolved` / `equipment:ignited` is emitted.
 4. Subsequent `post` handlers of the original event see the transformed unit.
 
-This ordering is verified by the DFS-ordering tests in
-`server/game/tests/TriggerTiming.test.js`.
+This ordering is verified by the DFS-ordering tests in `server/game/tests/TriggerTiming.test.js`.
 
 ---
 
 ## Compiler Integration
 
-`parseTrigger(raw)` is called during `resolveEvolveInto()` and
-`resolveIgniteInto()` in `scripts/card-compile.js`. It converts
-`{ type: "custom", raw, handler: null }` trigger objects into typed ASTs.
+`parseTrigger(raw)` is called during `resolveEvolveInto()` and `resolveIgniteInto()` in `scripts/card-compile.js`. It converts `{ type: "custom", raw, handler: null }` trigger objects into typed ASTs.
 
 **Adding a new trigger pattern:**
 
@@ -110,11 +100,7 @@ This ordering is verified by the DFS-ordering tests in
 
 ## Runtime TriggerManager
 
-`TriggerManager` subscribes to EventBus events matching each trigger AST
-type. When the event fires, it checks the payload against the trigger
-conditions (card name matches, position matches, etc.) and if satisfied,
-calls `LifecycleEngine.transformUnit()` for evolution or
-`LifecycleEngine.transformEquipment()` for ignition.
+`TriggerManager` subscribes to EventBus events matching each trigger AST type. When the event fires, it checks the payload against the trigger conditions (card name matches, position matches, etc.) and if satisfied, calls `LifecycleEngine.transformUnit()` for evolution or `LifecycleEngine.transformEquipment()` for ignition.
 
 ### Registration
 
@@ -129,16 +115,11 @@ triggerManager.registerTransformation(
 );
 ```
 
-**`equipmentId` disambiguates ignition triggers when a bearer holds more
-than one equipment card (Living Ignition Weapon units).** Without it, killing
-a unit while holding two ignitable equipments would be ambiguous about which
-one ignites.
+**`equipmentId` disambiguates ignition triggers when a bearer holds more than one equipment card (Living Ignition Weapon units).** Without it, killing a unit while holding two ignitable equipments would be ambiguous about which one ignites.
 
 ### Subscription cleanup
 
-When a unit transforms or is destroyed, all its trigger subscriptions
-are removed via `unregisterAll(unitId)`. Detaching a single equipment card
-removes only that card's subscriptions via `unregisterAll(unitId, "ignition", equipmentId)`.
+When a unit transforms or is destroyed, all its trigger subscriptions are removed via `unregisterAll(unitId)`. Detaching a single equipment card removes only that card's subscriptions via `unregisterAll(unitId, "ignition", equipmentId)`.
 
 ---
 
@@ -153,5 +134,4 @@ removes only that card's subscriptions via `unregisterAll(unitId, "ignition", eq
 
 ### Ignition revert
 
-When an ignited equipment is detached (bearer dies or equipment replaced),
-the equipment reverts to its base form when returned to hand.
+When an ignited equipment is detached (bearer dies or equipment replaced), the equipment reverts to its base form when returned to hand.

@@ -1,20 +1,14 @@
 # Logger Architecture — Shinsu Duel
 
-This document describes the full-state-diff logger that captures event
-causation trees and state transitions for debugging, replay, and auditing.
+This document describes the full-state-diff logger that captures event causation trees and state transitions for debugging, replay, and auditing.
 
 ---
 
 ## Overview
 
-The Logger hooks into the EventBus to capture **before/after snapshots**
-of game state for every root event, along with the full **causation tree**
-from DFS event resolution. It also records the authoritative player-input
-stream (`processAction` / `resolveDecision`) with the full deterministic state
-on each side, enabling faithful **action-level replay**. This enables:
+The Logger hooks into the EventBus to capture **before/after snapshots** of game state for every root event, along with the full **causation tree** from DFS event resolution. It also records the authoritative player-input stream (`processAction` / `resolveDecision`) with the full deterministic state on each side, enabling faithful **action-level replay**. This enables:
 
-- **Replay**: given the initial state and the recorded action stream,
-  `ReplayDriver` reconstructs the game and verifies every step byte-for-byte.
+- **Replay**: given the initial state and the recorded action stream, `ReplayDriver` reconstructs the game and verifies every step byte-for-byte.
 - **Debugging**: see exactly what changed and which event caused it.
 - **Auditing**: trace the full chain from action → effect → cascade.
 
@@ -38,16 +32,11 @@ Phase "pre",      priority  9999  → capture CANCELLED events (they never reach
 Phase "resolved", priority  9999  → capture COMPLETED events and write entry
 ```
 
-**Why two capture points?** Cancelled events skip all remaining phases
-(including `resolved`). The `pre` priority-9999 hook catches them right
-after the cancellation takes effect. Non-cancelled events are captured
-in `resolved` for consistency.
+**Why two capture points?** Cancelled events skip all remaining phases (including `resolved`). The `pre` priority-9999 hook catches them right after the cancellation takes effect. Non-cancelled events are captured in `resolved` for consistency.
 
-**Why priority -9999 for the snapshot?** The snapshot MUST run before any
-handler modifies state — otherwise the "before" snapshot is wrong.
+**Why priority -9999 for the snapshot?** The snapshot MUST run before any handler modifies state — otherwise the "before" snapshot is wrong.
 
-**Why priority 9999 for the writes?** The write MUST run after all other
-handlers in that phase — otherwise the "after" snapshot misses mutations.
+**Why priority 9999 for the writes?** The write MUST run after all other handlers in that phase — otherwise the "after" snapshot misses mutations.
 
 ---
 
@@ -100,20 +89,15 @@ handlers in that phase — otherwise the "after" snapshot misses mutations.
 
 ### Causation tree depth
 
-The tree is fully recursive: `_buildCausationTree` follows `ctx._children`
-arbitrarily deep, so arbitrarily nested DFS event chains are captured in full.
+The tree is fully recursive: `_buildCausationTree` follows `ctx._children` arbitrarily deep, so arbitrarily nested DFS event chains are captured in full.
 
 ### Entry types
 
 In addition to root-event entries (shown above), the Logger writes:
 
-- `InitialState` — the reconstructed construction metadata (decks, first
-  player, RNG seed, starting ID counters) plus the full serialized state.
-- `UserAction` / `UserDecision` — one entry per `processAction` /
-  `resolveDecision`, with `stateBefore`/`stateAfter` (full serialization),
-  `ok`, and `error` (for failed inputs).
-- `EventFailure` — written via `EventBus.onAbort` when an authoritative
-  handler failure aborts a transaction.
+- `InitialState` — the reconstructed construction metadata (decks, first player, RNG seed, starting ID counters) plus the full serialized state.
+- `UserAction` / `UserDecision` — one entry per `processAction` / `resolveDecision`, with `stateBefore`/`stateAfter` (full serialization), `ok`, and `error` (for failed inputs).
+- `EventFailure` — written via `EventBus.onAbort` when an authoritative handler failure aborts a transaction.
 
 ---
 
@@ -154,25 +138,18 @@ class FileBackend {
 logger.addBackend(new FileBackend("./logs/game-42.jsonl"));
 ```
 
-**⚠️ Backends receive the entry object by reference.** If a backend mutates
-the entry, subsequent backends see the mutated version. Always copy if you
-need to transform.
+**⚠️ Backends receive the entry object by reference.** If a backend mutates the entry, subsequent backends see the mutated version. Always copy if you need to transform.
 
 ---
 
 ## Snapshot Function
 
-The Logger receives two capture functions from the caller. In production
-(`GameState`), these are `_createSnapshot()` and `toSerializedState()`.
+The Logger receives two capture functions from the caller. In production (`GameState`), these are `_createSnapshot()` and `toSerializedState()`.
 
-1. **`snapshotFn`** — the flat, cheap diff view (`GameState._createSnapshot()`).
-   Called before/after every root event. Used for the `diff` field.
-2. **`serializeFn`** — the complete deterministic serialization
-   (`GameState.toSerializedState()`). Used for `InitialState`, `UserAction`,
-   `UserDecision`, and `EventFailure` entries. This is what makes replay possible.
+1. **`snapshotFn`** — the flat, cheap diff view (`GameState._createSnapshot()`). Called before/after every root event. Used for the `diff` field.
+2. **`serializeFn`** — the complete deterministic serialization (`GameState.toSerializedState()`). Used for `InitialState`, `UserAction`, `UserDecision`, and `EventFailure` entries. This is what makes replay possible.
 
-Both must be **synchronous**, **deterministic** (same state → same output),
-and the flat view must stay **cheap** (it runs on every root event).
+Both must be **synchronous**, **deterministic** (same state → same output), and the flat view must stay **cheap** (it runs on every root event).
 
 The flat `GameState._createSnapshot()` returns:
 
@@ -192,10 +169,7 @@ The flat `GameState._createSnapshot()` returns:
 }
 ```
 
-The complete `GameState.toSerializedState()` captures ordered zone contents
-(deck/hand/discard card ids + runtime fields), full `ModifierStack` and
-`AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters,
-and round-tracking sets — all deterministically sorted.
+The complete `GameState.toSerializedState()` captures ordered zone contents (deck/hand/discard card ids + runtime fields), full `ModifierStack` and `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters, and round-tracking sets — all deterministically sorted.
 
 ---
 
@@ -219,9 +193,7 @@ _computeDiff(before, after) {
 
 **⚠️ Uses `JSON.stringify` for deep comparison.** This works for the flat key structure but would be expensive with deeply nested objects. If snapshot values become deeply nested, switch to a structural diff.
 
-**⚠️ Keys are flat strings like `"Alice.frontline.Unit#a3f.hp"`.** The
-snapshot function controls the key namespace. Keep keys consistent between
-before/after snapshots.
+**⚠️ Keys are flat strings like `"Alice.frontline.Unit#a3f.hp"`.** The snapshot function controls the key namespace. Keep keys consistent between before/after snapshots.
 
 ---
 
@@ -246,16 +218,9 @@ logger.addBackend(b); // → register custom backend
 
 ## Replay
 
-`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters,
-reconstructs `GameState` from the `InitialState` metadata (decks, first
-player, seeded RNG), verifies the initial serialization, then re-applies each
-`UserAction`/`UserDecision`, asserting the full state matches after every step.
+`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters, reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision`, asserting the full state matches after every step.
 
-Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`.
-`gameFactory` turns a room's persisted seed into the seeded first-player roll
-and shuffled default decks, then passes them explicitly to `GameState`. The
-engine's constructor therefore never consumes RNG, so replay reconstruction
-always matches the recorded initial state.
+Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`. `gameFactory` turns a room's persisted seed into the seeded first-player roll and shuffled default decks, then passes them explicitly to `GameState`. The engine's constructor therefore never consumes RNG, so replay reconstruction always matches the recorded initial state.
 
 ---
 
@@ -263,5 +228,4 @@ always matches the recorded initial state.
 
 - **Don't mutate `getLogs()` return value** — it's a shallow copy.
 - **Don't call `getLogs()` in hot paths** — it copies the entire array.
-- **Don't add expensive work to `snapshotFn`** — it runs synchronously
-  inside event handlers.
+- **Don't add expensive work to `snapshotFn`** — it runs synchronously inside event handlers.

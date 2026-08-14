@@ -6,8 +6,7 @@ This document describes the pluggable attribute engine system and the attribute 
 
 ## Overview
 
-Attributes change core gameplay mechanics for specific units. Each attribute
-is an independent engine registered with the `AttributeRegistry`:
+Attributes change core gameplay mechanics for specific units. Each attribute is an independent engine registered with the `AttributeRegistry`:
 
 ```js
 const registry = new AttributeRegistry();
@@ -21,8 +20,7 @@ When a unit is deployed, `GameState` calls:
 this._attributeRegistry.onUnitDeployed(unit, this);
 ```
 
-Each engine subscribes to its own EventBus events and manages cleanup
-independently.
+Each engine subscribes to its own EventBus events and manages cleanup independently.
 
 ---
 
@@ -34,20 +32,15 @@ independently.
 
 ### State
 
-Per-player: `shinheuhSlot: { available: boolean, used: boolean }` — owned
-by `CombatSlotService`; the engine only decides _when_ to grant.
+Per-player: `shinheuhSlot: { available: boolean, used: boolean }` — owned by `CombatSlotService`; the engine only decides _when_ to grant.
 
 ### Lifecycle
 
-1. **Round start:** If an Anima unit is on the field and no Shinheuh slot
-   exists, `AnimaEngine` asks `CombatSlotService.grantShinheuhSlot()` to
-   create one (`available = true`).
-2. **Shinheuh ability use:** `AnimaEngine.consumeSlot()` delegates to
-   `CombatSlotService.consumeShinheuhSlot()` (`available = false, used = true`).
+1. **Round start:** If an Anima unit is on the field and no Shinheuh slot exists, `AnimaEngine` asks `CombatSlotService.grantShinheuhSlot()` to create one (`available = true`).
+2. **Shinheuh ability use:** `AnimaEngine.consumeSlot()` delegates to `CombatSlotService.consumeShinheuhSlot()` (`available = false, used = true`).
 3. **Round end:** `CombatSlotService.resetShinheuhSlot()` clears both flags.
 
-All Shinheuh slot mutations go through `CombatSlotService` — the engine
-never touches `playerState.shinheuhSlot` directly.
+All Shinheuh slot mutations go through `CombatSlotService` — the engine never touches `playerState.shinheuhSlot` directly.
 
 ### API
 
@@ -76,8 +69,7 @@ animaEngine.cleanup(unit);
 
 ### State
 
-Per-player: `fireCharges: number` — mutated only through
-`GameState._modifyFireCharges(username, delta)`.
+Per-player: `fireCharges: number` — mutated only through `GameState._modifyFireCharges(username, delta)`.
 
 ### Fire Charge Generation
 
@@ -86,8 +78,7 @@ hwayeomsaEngine.generateFireCharge(username, gameState)
   → { success: boolean, charges: number, reason?: string }
 ```
 
-Validates: Hwayeomsa unit on field, sufficient shinsu (1). Creates Fire
-Core card in hand if not already present.
+Validates: Hwayeomsa unit on field, sufficient shinsu (1). Creates Fire Core card in hand if not already present.
 
 ### Incinerate Consumption
 
@@ -128,8 +119,7 @@ hwayeomsaEngine.getAvailableLevels(username, gameState)
    );
    ```
 
-3. No changes needed to `LifecycleEngine` or `GameState` — the registry
-   pattern handles everything generically.
+3. No changes needed to `LifecycleEngine` or `GameState` — the registry pattern handles everything generically.
 
 ---
 

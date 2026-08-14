@@ -21,10 +21,7 @@ The event system has four core components:
 
 ### Why DFS over BFS?
 
-When an event handler triggers a child event, the child **fully resolves**
-(all 4 phases + any grandchildren) before the next handler at the parent
-level runs. This preserves causality — you see one chain complete before
-another begins.
+When an event handler triggers a child event, the child **fully resolves** (all 4 phases + any grandchildren) before the next handler at the parent level runs. This preserves causality — you see one chain complete before another begins.
 
 **Example:** Damage → Kill → Destroy → Draw
 
@@ -47,8 +44,7 @@ emit("unit:damage:intent")
   resolved: logging
 ```
 
-With BFS, all post handlers would run first, then all kill handlers, then
-all destroy handlers — the causality chain is lost.
+With BFS, all post handlers would run first, then all kill handlers, then all destroy handlers — the causality chain is lost.
 
 ### Four Phases
 
@@ -59,9 +55,7 @@ all destroy handlers — the causality chain is lost.
 | `post`     | Reactions (when damaged, when killed) | No          | Yes            |
 | `resolved` | Logging, cleanup                      | No          | No             |
 
-**Phase transition rule:** When any handler calls `context.cancel()`,
-the current phase finishes (all handlers in that phase still run),
-then remaining phases are skipped.
+**Phase transition rule:** When any handler calls `context.cancel()`, the current phase finishes (all handlers in that phase still run), then remaining phases are skipped.
 
 ### Deterministic Ordering
 
@@ -71,9 +65,7 @@ Within a phase, handlers run in this order:
 2. **Source age** (ascending — older sources run first)
 3. **Registration order** (ascending — first registered runs first)
 
-**Why source age?** If Unit A (deployed round 1) and Unit B (deployed
-round 3) both have "round end" passives, Unit A fires first because
-it's been waiting longer. This is more intuitive and deterministic.
+**Why source age?** If Unit A (deployed round 1) and Unit B (deployed round 3) both have "round end" passives, Unit A fires first because it's been waiting longer. This is more intuitive and deterministic.
 
 ### API
 
@@ -123,53 +115,31 @@ Every handler is classified at registration via `options.role`:
 | `authoritative` | ✅      | Abort the whole event transaction and rethrow to the original caller       |
 | `observer`      | —       | Isolate the error, record it in `result.observerErrors`, continue dispatch |
 
-Authoritative handlers perform transactional state mutations. Observers are
-read-only (logging, telemetry, replay) and must never mutate authoritative
-state, which is what makes their failure safe to isolate.
+Authoritative handlers perform transactional state mutations. Observers are read-only (logging, telemetry, replay) and must never mutate authoritative state, which is what makes their failure safe to isolate.
 
 ### Failure Handling
 
-An **authoritative** failure is **fail-closed**: dispatch stops immediately at
-the exact deterministic point (priority, source age, registration order) and
-the wrapped exception is rethrown. This prevents later handlers from applying
-additional mutations or reactions after an authoritative handler has failed.
-Completed state changes are not rolled back, so mutation handlers must
-validate all inputs before writing state. Each error identifies:
+An **authoritative** failure is **fail-closed**: dispatch stops immediately at the exact deterministic point (priority, source age, registration order) and the wrapped exception is rethrown. This prevents later handlers from applying additional mutations or reactions after an authoritative handler has failed. Completed state changes are not rolled back, so mutation handlers must validate all inputs before writing state. Each error identifies:
 
 - Event name
 - Phase
 - Handler identity (function name)
 
-An **observer** failure never aborts the transaction. The wrapped error is
-appended to the emit result's `observerErrors` array (with the same event,
-phase, and handler metadata) and dispatch continues to the next handler.
+An **observer** failure never aborts the transaction. The wrapped error is appended to the emit result's `observerErrors` array (with the same event, phase, and handler metadata) and dispatch continues to the next handler.
 
 ### Abort Notification
 
-`bus.onAbort(fn)` registers a callback invoked immediately before an
-authoritative failure is rethrown, with `(error, { eventName, phase,
-handlerName, ctx })`. The `Logger` uses this to record failed and
-partially-resolved event chains (`EventFailure` entries). A throwing abort
-listener never masks the original error. Observer failures do **not** trigger
-`onAbort`.
+`bus.onAbort(fn)` registers a callback invoked immediately before an authoritative failure is rethrown, with `(error, { eventName, phase, handlerName, ctx })`. The `Logger` uses this to record failed and partially-resolved event chains (`EventFailure` entries). A throwing abort listener never masks the original error. Observer failures do **not** trigger `onAbort`.
 
 ### Transaction Boundary
 
-A root `emit()` is a single transaction. Every `emitChild` chain spawned
-during its resolution belongs to the same transaction: an authoritative
-failure anywhere in the DFS chain aborts the entire transaction and
-propagates to the root caller. Observer failures are isolated to the event
-whose dispatch they belong to — an observer failure in a child event is
-reported on the child's result, not the root's. Cancellation and failure
-ordering are deterministic for identical inputs.
+A root `emit()` is a single transaction. Every `emitChild` chain spawned during its resolution belongs to the same transaction: an authoritative failure anywhere in the DFS chain aborts the entire transaction and propagates to the root caller. Observer failures are isolated to the event whose dispatch they belong to — an observer failure in a child event is reported on the child's result, not the root's. Cancellation and failure ordering are deterministic for identical inputs.
 
-The built-in `Logger` registers its wildcard subscriptions as observers, so a
-logging or snapshot failure never corrupts the game state it observes.
+The built-in `Logger` registers its wildcard subscriptions as observers, so a logging or snapshot failure never corrupts the game state it observes.
 
 ### Recursion Guard
 
-The `maxDepth` parameter (default 50) prevents infinite event loops.
-If a handler chain exceeds this depth, a descriptive error is thrown.
+The `maxDepth` parameter (default 50) prevents infinite event loops. If a handler chain exceeds this depth, a descriptive error is thrown.
 
 ---
 
@@ -177,15 +147,11 @@ If a handler chain exceeds this depth, a descriptive error is thrown.
 
 ### Why provenance tracking?
 
-The `ModifierStack` solves the class of problems where effects need to be
-**reversible** based on their source. The canonical example:
+The `ModifierStack` solves the class of problems where effects need to be **reversible** based on their source. The canonical example:
 
-**Equipment grants trait → Silence disables it → Unequip removes source →
-Unsilence should NOT restore the trait.**
+**Equipment grants trait → Silence disables it → Unequip removes source → Unsilence should NOT restore the trait.**
 
-Without source tracking, you'd need to manually track "who gave what to whom"
-and risk creating negative stats (e.g., removing Barrier when it was already
-removed by Silence).
+Without source tracking, you'd need to manually track "who gave what to whom" and risk creating negative stats (e.g., removing Barrier when it was already removed by Silence).
 
 ### Modifier structure
 
@@ -243,8 +209,7 @@ stack.getSources(id); // All source IDs affecting a target
 
 ### Design
 
-The Logger captures **state diffs** before/after each root event and
-records **causation trees** from DFS event resolution.
+The Logger captures **state diffs** before/after each root event and records **causation trees** from DFS event resolution.
 
 ### Log entry structure
 
@@ -298,8 +263,7 @@ Each handler extends `BaseHandler` and implements:
 - `validate(payload, context)` — throws on invalid input
 - `execute(payload, context, gameState)` — performs the effect
 
-Handlers use `context.emitChild()` for cascading effects and the
-`ModifierStack` for state changes — never mutate state directly.
+Handlers use `context.emitChild()` for cascading effects and the `ModifierStack` for state changes — never mutate state directly.
 
 ### Baseline handlers
 
@@ -341,42 +305,24 @@ Handlers use `context.emitChild()` for cascading effects and the
 
 #### Distinguishing overlapping unit events
 
-Some unit events sound similar but carry distinct semantics and payloads.
-Subscribers must bind to the correct one.
+Some unit events sound similar but carry distinct semantics and payloads. Subscribers must bind to the correct one.
 
 **`unit:deployed` vs `unit:summoned`**
 
-- `unit:deployed` — battlefield-entry announcement, emitted first. Payload:
-  `{ username, unit, positionCode, cost }`. No trigger subscribes to it; it
-  exists so observers (logging, future on-arrival effects) can react to the
-  raw arrival.
-- `unit:summoned` — the canonical event for `deploy` triggers, emitted
-  immediately after `unit:deployed`, once native traits, evolution-trigger
-  registration, passives, and attribute engines are fully wired. Payload:
-  `{ username, unit, unitId }`. A unit's own "when I am deployed" evolution
-  subscribes here and sees its complete observable state.
+- `unit:deployed` — battlefield-entry announcement, emitted first. Payload: `{ username, unit, positionCode, cost }`. No trigger subscribes to it; it exists so observers (logging, future on-arrival effects) can react to the raw arrival.
+- `unit:summoned` — the canonical event for `deploy` triggers, emitted immediately after `unit:deployed`, once native traits, evolution-trigger registration, passives, and attribute engines are fully wired. Payload: `{ username, unit, unitId }`. A unit's own "when I am deployed" evolution subscribes here and sees its complete observable state.
 
 Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 
 **`unit:killed` vs `unit:destroyed`**
 
-- `unit:killed` — emitted by `DealDamageHandler` when a unit's HP reaches 0,
-  after `unit:death:intent` and Undying interception. The unit is still on the
-  field at this point. Payload: `{ sourceId, targetId, killerId, killerOwner }`.
-  Canonical for `slay` and `kill` triggers.
-- `unit:destroyed` — emitted by `LifecycleEngine.destroyUnit` after the unit
-  has been detached from equipment, removed from the field, moved to the
-  discard pile, and had its subsystems cleaned up. `ModifierStack` auto-cleans
-  its modifiers here. Payload: `{ unitId, unit, owner }`. Canonical for
-  `ally_dies` triggers. It fires for **any** unit removal (lethal damage, line
-  overflow, landmark replacement), not just combat deaths.
+- `unit:killed` — emitted by `DealDamageHandler` when a unit's HP reaches 0, after `unit:death:intent` and Undying interception. The unit is still on the field at this point. Payload: `{ sourceId, targetId, killerId, killerOwner }`. Canonical for `slay` and `kill` triggers.
+- `unit:destroyed` — emitted by `LifecycleEngine.destroyUnit` after the unit has been detached from equipment, removed from the field, moved to the discard pile, and had its subsystems cleaned up. `ModifierStack` auto-cleans its modifiers here. Payload: `{ unitId, unit, owner }`. Canonical for `ally_dies` triggers. It fires for **any** unit removal (lethal damage, line overflow, landmark replacement), not just combat deaths.
 
 **Cancellable intent hooks**
 
-- `unit:destroy:intent` — cancellable pre-removal hook emitted by
-  `destroyUnit` before any mutation; cancelling prevents destruction.
-- `unit:death:intent` — cancellable lethal-damage hook emitted before
-  `unit:killed`; Undying cancels here to keep the unit alive at 1 HP.
+- `unit:destroy:intent` — cancellable pre-removal hook emitted by `destroyUnit` before any mutation; cancelling prevents destruction.
+- `unit:death:intent` — cancellable lethal-damage hook emitted before `unit:killed`; Undying cancels here to keep the unit alive at 1 HP.
 
 ### Damage & Healing
 
@@ -462,14 +408,11 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 
 ## Determinism Guarantees
 
-Two runs with the same initial state, same clock ticks, same handler
-registrations, and same action sequence will produce:
+Two runs with the same initial state, same clock ticks, same handler registrations, and same action sequence will produce:
 
 1. Identical handler execution order
 2. Identical event causation trees
 3. Identical final state
 4. Identical log entries
 
-This is verified by the determinism tests in `EventBus.test.js` and
-`EventBus.integration.test.js` which run the same setup 20+ times and
-assert identical output.
+This is verified by the determinism tests in `EventBus.test.js` and `EventBus.integration.test.js` which run the same setup 20+ times and assert identical output.

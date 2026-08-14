@@ -6,12 +6,7 @@ This document describes the GameState architecture: zone model, service layer, l
 
 ## Overview
 
-`GameState.js` is the authoritative runtime engine. It orchestrates all
-services and owns the complete game state tree. No handler, action, or
-engine mutates player-state resource fields directly — all resource
-mutations go through the owning service. `GameState` itself writes only its
-own orchestration fields (round, turn, pass state, game-over, pending
-decisions).
+`GameState.js` is the authoritative runtime engine. It orchestrates all services and owns the complete game state tree. No handler, action, or engine mutates player-state resource fields directly — all resource mutations go through the owning service. `GameState` itself writes only its own orchestration fields (round, turn, pass state, game-over, pending decisions).
 
 | Service                | Responsibility                                            |
 | ---------------------- | --------------------------------------------------------- |
@@ -26,8 +21,7 @@ decisions).
 | **PassiveManager**     | Timed passives (round start/end): DSL→event subscriptions |
 | **AttributeRegistry**  | Pluggable attribute engines (Anima, Hwayeomsa)            |
 
-Each service owns one resource; nothing outside the service mutates it.
-See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.
+Each service owns one resource; nothing outside the service mutates it. See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.
 
 ---
 
@@ -80,10 +74,7 @@ Each player state has typed zones:
 
 ## Pending Decisions
 
-Some effects and actions require a player choice mid-resolution (target
-selection, line-overflow destruction). `GameState.createPendingDecision()`
-publishes the choice and blocks further `processAction()` calls until
-`resolveDecision()` is called with a validated selection.
+Some effects and actions require a player choice mid-resolution (target selection, line-overflow destruction). `GameState.createPendingDecision()` publishes the choice and blocks further `processAction()` calls until `resolveDecision()` is called with a validated selection.
 
 ### Resolution Lifecycle State
 
@@ -94,39 +85,21 @@ The engine tracks an explicit `ResolutionState`:
 | `IDLE`      | No pending decisions; accepting actions and normal event flow |
 | `RESOLVING` | One or more pending decisions exist; actions are blocked      |
 
-`hasUnresolvedDecisions()` exposes the current state. The state
-transitions `IDLE → RESOLVING` on `createPendingDecision()` and
-`RESOLVING → IDLE` when the last decision is resolved and no stacked
-decisions remain.
+`hasUnresolvedDecisions()` exposes the current state. The state transitions `IDLE → RESOLVING` on `createPendingDecision()` and `RESOLVING → IDLE` when the last decision is resolved and no stacked decisions remain.
 
-A line-overflow deployment is deferred: the card remains in hand and no
-shinsu is spent while its owner chooses. Resolving a field-unit choice
-destroys it before the card enters play; resolving the pending-card choice
-pays for and discards that card without ever exceeding the five-unit limit.
+A line-overflow deployment is deferred: the card remains in hand and no shinsu is spent while its owner chooses. Resolving a field-unit choice destroys it before the card enters play; resolving the pending-card choice pays for and discards that card without ever exceeding the five-unit limit.
 
 ### Nested Decisions & Stacking
 
-Decisions are **stacked** LIFO. When a resolve callback creates a new
-pending decision (e.g. an overflow destroy triggers a target-selection
-effect), the new decision becomes the active one — the resolving decision
-is **not** pushed to the stack since it's being cleaned up by the
-resolution's `finally` block. Decisions created outside of a resolve
-callback (while one is already pending) are pushed to the stack normally.
+Decisions are **stacked** LIFO. When a resolve callback creates a new pending decision (e.g. an overflow destroy triggers a target-selection effect), the new decision becomes the active one — the resolving decision is **not** pushed to the stack since it's being cleaned up by the resolution's `finally` block. Decisions created outside of a resolve callback (while one is already pending) are pushed to the stack normally.
 
-Nesting is capped at `MAX_RESOLUTION_DEPTH` (16) to prevent infinite
-decision loops from buggy resolution callbacks.
+Nesting is capped at `MAX_RESOLUTION_DEPTH` (16) to prevent infinite decision loops from buggy resolution callbacks.
 
 ### Re-entrancy Guard
 
-`resolveDecision()` is NOT re-entrant: calling it from within a resolve
-callback or `onResolved` continuation throws. Nested decisions must
-use `createPendingDecision()` instead. The `finally` block always cleans
-up the decision stack and transitions to `IDLE` when empty, even if the
-resolve callback throws.
+`resolveDecision()` is NOT re-entrant: calling it from within a resolve callback or `onResolved` continuation throws. Nested decisions must use `createPendingDecision()` instead. The `finally` block always cleans up the decision stack and transitions to `IDLE` when empty, even if the resolve callback throws.
 
-Callers that still have work to do after the choice resolves — e.g. ending
-the turn, or resolving the next effect in a card's effect list — register a
-continuation instead of running that work inline:
+Callers that still have work to do after the choice resolves — e.g. ending the turn, or resolving the next effect in a card's effect list — register a continuation instead of running that work inline:
 
 ```js
 gameState.completeActionAfterDecision(() => {
@@ -136,8 +109,7 @@ gameState.completeActionAfterDecision(() => {
 });
 ```
 
-This guarantees an action never advances the turn (or a card never resolves
-its next effect) before the player's choice has actually changed state.
+This guarantees an action never advances the turn (or a card never resolves its next effect) before the player's choice has actually changed state.
 
 ---
 
@@ -164,17 +136,13 @@ LifecycleEngine.attachEquipment(gameState, username, handIndex, targetUnit)
 LifecycleEngine.detachEquipment(gameState, unit, equipment?)
 ```
 
-`unit.equipmentAttachments` is the canonical equipment representation.
-It contains every attached card instance.
+`unit.equipmentAttachments` is the canonical equipment representation. It contains every attached card instance.
 
 ---
 
 ## Unit Lookup
 
-`GameState._findUnit(unitId)` resolves a unit by instance ID through an
-O(1) `_unitIndex` map, kept in sync by `LifecycleEngine` (`_indexUnit` on
-deploy, `_unindexUnit` on destroy). A linear scan over both fields serves
-as a fallback for unit-shaped test stubs that bypass the lifecycle engine.
+`GameState._findUnit(unitId)` resolves a unit by instance ID through an O(1) `_unitIndex` map, kept in sync by `LifecycleEngine` (`_indexUnit` on deploy, `_unindexUnit` on destroy). A linear scan over both fields serves as a fallback for unit-shaped test stubs that bypass the lifecycle engine.
 
 ---
 
@@ -182,8 +150,7 @@ as a fallback for unit-shaped test stubs that bypass the lifecycle engine.
 
 The engine exposes two capture functions to the Logger:
 
-1. **`_createSnapshot()`** — the flat, cheap diff view, called before/after
-   every root event. It includes per unit:
+1. **`_createSnapshot()`** — the flat, cheap diff view, called before/after every root event. It includes per unit:
    - Active conditions per unit (from ModifierStack)
    - Active traits per unit (from ModifierStack)
    - Runtime-granted ability codes per unit (from AbilityRegistry)
@@ -191,13 +158,6 @@ The engine exposes two capture functions to the Logger:
    - Combat slot status, Shinheuh slot status, fire charges
    - Hand/deck/discard sizes, lighthouses, shinsu
 
-2. **`toSerializedState()`** — the complete deterministic serialization for
-   replay. It additionally captures ordered zone contents (deck/hand/discard
-   card ids and runtime fields), the full `ModifierStack` and
-   `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters,
-   and round-tracking sets — all deterministically sorted so identical states
-   serialize to identical JSON.
+2. **`toSerializedState()`** — the complete deterministic serialization for replay. It additionally captures ordered zone contents (deck/hand/discard card ids and runtime fields), the full `ModifierStack` and `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters, and round-tracking sets — all deterministically sorted so identical states serialize to identical JSON.
 
-`_createSnapshot()` is used for state diffs; `toSerializedState()` is used by
-the `InitialState`, `UserAction`, `UserDecision`, and `EventFailure` log
-entries and by `ReplayDriver`.
+`_createSnapshot()` is used for state diffs; `toSerializedState()` is used by the `InitialState`, `UserAction`, `UserDecision`, and `EventFailure` log entries and by `ReplayDriver`.

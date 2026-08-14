@@ -1,25 +1,18 @@
 # Compiled Card DSL — Shinsu Duel
 
-This document describes the contract between the card compiler
-(`scripts/card-compile.js`) and the runtime engine. It specifies
-what the runtime can expect from `server/data/cards.json` and how to
-interpret each DSL type.
+This document describes the contract between the card compiler (`scripts/card-compile.js`) and the runtime engine. It specifies what the runtime can expect from `server/data/cards.json` and how to interpret each DSL type.
 
 ---
 
 ## Overview
 
-The card compiler reads YAML source files from `data/cards/`, validates
-them, and produces a single `server/data/cards.json` file. This file is
-the **sole runtime data source** — the game engine never reads YAML directly.
+The card compiler reads YAML source files from `data/cards/`, validates them, and produces a single `server/data/cards.json` file. This file is the **sole runtime data source** — the game engine never reads YAML directly.
 
 | Source                | Compiled                 | Validated by                                                                    |
 | --------------------- | ------------------------ | ------------------------------------------------------------------------------- |
 | `data/cards/**/*.yml` | `server/data/cards.json` | `scripts/card-validate.js` (YAML) + `schemas/compiled-cards.schema.json` (JSON) |
 
-Card source files may be organized under `data/cards/` subdirectories. The
-compiler and validator discover YAML files recursively; directory names do
-not affect card identity or compiled IDs.
+Card source files may be organized under `data/cards/` subdirectories. The compiler and validator discover YAML files recursively; directory names do not affect card identity or compiled IDs.
 
 Commands:
 
@@ -28,8 +21,7 @@ npm run validate:cards   # validate YAML only
 npm run compile:cards    # validate YAML → compile → validate JSON → write
 ```
 
-**⚠️ Never edit `server/data/cards.json` by hand.** Always edit the YAML
-source and recompile. The compiled file is a build artifact.
+**⚠️ Never edit `server/data/cards.json` by hand.** Always edit the YAML source and recompile. The compiled file is a build artifact.
 
 ---
 
@@ -52,16 +44,11 @@ source and recompile. The compiled file is a build artifact.
 
 Keys are string representations of card IDs. IDs are assigned alphabetically by card name at compile time.
 
-**⚠️ Card IDs are stable within a compile run but may shift when cards
-are added or renamed.** Do not hardcode card IDs in game logic — look
-up by name or use the compiled `cardId` field.
+**⚠️ Card IDs are stable within a compile run but may shift when cards are added or renamed.** Do not hardcode card IDs in game logic — look up by name or use the compiled `cardId` field.
 
 ### Special case: Conduit
 
-**Conduit** is a Jeonsulsa-mechanic unit with no positions or rank in its
-source YAML. The validator and compiler normalize it to a dummy
-`positions: ["landmark"]` so schema validation passes; its actual placement
-is governed by the Jeonsulsa mechanics at runtime, not by a position field.
+**Conduit** is a Jeonsulsa-mechanic unit with no positions or rank in its source YAML. The validator and compiler normalize it to a dummy `positions: ["landmark"]` so schema validation passes; its actual placement is governed by the Jeonsulsa mechanics at runtime, not by a position field.
 
 ---
 
@@ -135,9 +122,7 @@ is governed by the Jeonsulsa mechanics at runtime, not by a position field.
 
 ## Requirements
 
-`requirements` is an optional array of raw strings gating card play or use.
-They are validated by `RequirementValidator` before any cost is paid.
-Supported patterns (all enforced; unknown patterns fail validation):
+`requirements` is an optional array of raw strings gating card play or use. They are validated by `RequirementValidator` before any cost is paid. Supported patterns (all enforced; unknown patterns fail validation):
 
 | Pattern                                  | Example                                              |
 | ---------------------------------------- | ---------------------------------------------------- |
@@ -150,9 +135,7 @@ Supported patterns (all enforced; unknown patterns fail validation):
 | `you have an ally <A> or <B>`            | `"you have an ally yeon family member or Hwayeomsa"` |
 | `have an ally <attribute>`               | `"have an ally Irregular"`                           |
 
-Patterns that reference the board (`member`, `is in your board`, `ally`)
-check the current player's field; affiliation and attribute matches include
-runtime-granted modifiers from the `ModifierStack`.
+Patterns that reference the board (`member`, `is in your board`, `ally`) check the current player's field; affiliation and attribute matches include runtime-granted modifiers from the `ModifierStack`.
 
 ---
 
@@ -214,8 +197,7 @@ Additional fields depend on `type` (see below).
 | `reclaim_cards`      | `ReclaimCardsHandler`      | `"reclaim 1"`                                |
 | `grant_ability`      | `GrantAbilityHandler`      | `"ability: give Poisoned 4 to an enemy"`     |
 
-All structured DSL types listed above have runtime handlers. `custom`
-effects remain unresolved and are skipped safely by the runtime.
+All structured DSL types listed above have runtime handlers. `custom` effects remain unresolved and are skipped safely by the runtime.
 
 ### Unresolved type
 
@@ -261,8 +243,7 @@ Resolution: validate shinsu → deduct → resolve `effect` through registry.
 }
 ```
 
-Resolution: register the inner `ability` as a usable ability on the bearer
-(don't execute it immediately).
+Resolution: register the inner `ability` as a usable ability on the bearer (don't execute it immediately).
 
 ### `deal_damage` with conditional targeting
 
@@ -282,9 +263,7 @@ Resolution: find all enemies, filter by `condition`, deal damage to each.
 
 ## Transformation Objects
 
-Transformation targets use the canonical names `<base name> - Evolved` and
-`<base name> - Ignited`. The compiler resolves these names at compile time;
-transformation targets must exist and have the expected card type.
+Transformation targets use the canonical names `<base name> - Evolved` and `<base name> - Ignited`. The compiler resolves these names at compile time; transformation targets must exist and have the expected card type.
 
 ### Evolution
 
@@ -345,10 +324,7 @@ Hwayeomsa attribute cards, all `unreachable`:
 ]
 ```
 
-- `"unreachable"` — card cannot be included in a constructed deck. It may
-  still be created during play and is drawn normally if a runtime effect
-  places it in a deck; `ZoneService.draw` enforces exhaustion, not deck
-  legality.
+- `"unreachable"` — card cannot be included in a constructed deck. It may still be created during play and is drawn normally if a runtime effect places it in a deck; `ZoneService.draw` enforces exhaustion, not deck legality.
 
 ---
 
