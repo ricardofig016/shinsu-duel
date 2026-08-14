@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import DrawCardHandler from "../../handlers/DrawCardHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("DrawCardHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -42,7 +43,7 @@ describe("DrawCardHandler", () => {
 
   test("emits card:drawn for each card", () => {
     const listener = jest.fn();
-    bus.on("card:drawn", listener, { phase: "post" });
+    bus.on(EVT.CARD_DRAWN, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 2 }, ctx, gameState);
@@ -57,7 +58,7 @@ describe("DrawCardHandler", () => {
     gameState.playerStates.Alice.deck = [{ cardId: 99, name: "Last" }];
 
     const listener = jest.fn();
-    bus.on("game:deck:empty", listener, { phase: "post" });
+    bus.on(EVT.GAME_DECK_EMPTY, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 3 }, ctx, gameState);
@@ -75,7 +76,7 @@ describe("DrawCardHandler", () => {
     gameState.playerStates.Alice.deck = [];
 
     const listener = jest.fn();
-    bus.on("game:deck:empty", listener, { phase: "post" });
+    bus.on(EVT.GAME_DECK_EMPTY, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 1 }, ctx, gameState);

@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import HealHandler from "../../handlers/HealHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("HealHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -44,7 +45,7 @@ describe("HealHandler", () => {
 
   test("emits unit:heal:applied child event", () => {
     const listener = jest.fn();
-    bus.on("unit:heal:applied", listener, { phase: "post" });
+    bus.on(EVT.HEAL_APPLIED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ targetId: "Unit#1", amount: 3 }, ctx, gameState);

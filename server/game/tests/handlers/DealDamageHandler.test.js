@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import DealDamageHandler from "../../handlers/DealDamageHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("DealDamageHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -114,8 +115,8 @@ describe("DealDamageHandler", () => {
   test("kill check: emits unit:killed and unit:destroyed when HP reaches 0", () => {
     const killedListener = jest.fn();
     const destroyedListener = jest.fn();
-    bus.on("unit:killed", killedListener, { phase: "post" });
-    bus.on("unit:destroyed", destroyedListener, { phase: "post" });
+    bus.on(EVT.UNIT_KILLED, killedListener, { phase: "post" });
+    bus.on(EVT.UNIT_DESTROYED, destroyedListener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({
@@ -134,7 +135,7 @@ describe("DealDamageHandler", () => {
 
   test("no kill event when damage doesn't kill", () => {
     const killedListener = jest.fn();
-    bus.on("unit:killed", killedListener, { phase: "post" });
+    bus.on(EVT.UNIT_KILLED, killedListener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({

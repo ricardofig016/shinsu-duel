@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import CleanseHandler from "../../handlers/CleanseHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("CleanseHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -74,7 +75,7 @@ describe("CleanseHandler", () => {
     });
 
     const listener = jest.fn();
-    bus.on("state:condition:cleansed", listener, { phase: "post" });
+    bus.on(EVT.CONDITION_CLEANSED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ targetId: "Unit#1" }, ctx, gameState);

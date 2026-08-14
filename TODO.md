@@ -8,6 +8,7 @@
 - [ ] plan: audit phase 2 again
 - [ ] docs: fix newline based line wrapping - switch to single line paragraphs
 - [ ] tests: organize server\game\tests better
+- [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
 
 ## In Progress
 

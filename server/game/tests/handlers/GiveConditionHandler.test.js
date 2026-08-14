@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import GiveConditionHandler from "../../handlers/GiveConditionHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("GiveConditionHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -56,7 +57,7 @@ describe("GiveConditionHandler", () => {
 
   test("emits child event on successful application", () => {
     const listener = jest.fn();
-    bus.on("state:condition:applied", listener, { phase: "post" });
+    bus.on(EVT.CONDITION_APPLIED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({
@@ -80,7 +81,7 @@ describe("GiveConditionHandler", () => {
     });
 
     const listener = jest.fn();
-    bus.on("state:condition:blocked", listener, { phase: "post" });
+    bus.on(EVT.CONDITION_BLOCKED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({

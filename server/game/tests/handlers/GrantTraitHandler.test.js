@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import GrantTraitHandler from "../../handlers/GrantTraitHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("GrantTraitHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -61,7 +62,7 @@ describe("GrantTraitHandler", () => {
 
   test("emits state:trait:granted child event", () => {
     const listener = jest.fn();
-    bus.on("state:trait:granted", listener, { phase: "post" });
+    bus.on(EVT.TRAIT_GRANTED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({

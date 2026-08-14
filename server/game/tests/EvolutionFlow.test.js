@@ -1,5 +1,6 @@
 import LifecycleEngine from "../services/LifecycleEngine.js";
 import Card from "../Card.js";
+import EVT from "../EventCatalog.js";
 import { setupGameWithCardsInHand, getCardIdByName } from "./utils.js";
 
 describe("evolution flow", () => {
@@ -124,7 +125,7 @@ describe("ignition revert on unequip", () => {
     game._indexUnit(victim);
 
     // Emit kill event to trigger ignition
-    game.eventBus.emit("unit:killed", { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
+    game.eventBus.emit(EVT.UNIT_KILLED, { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
     // Narumada should be ignited
     expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Narumada - Ignited"]);

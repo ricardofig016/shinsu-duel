@@ -174,20 +174,6 @@ as a fallback for unit-shaped test stubs that bypass the lifecycle engine.
 
 ---
 
-## Event Catalog
-
-All events use `namespace:subject:verb` format via `EventCatalog.js`:
-
-| Legacy (PascalCase) | Canonical (EVT) |
-| ------------------- | --------------- |
-| `OnGameStart`       | `game:started`  |
-| `OnRoundStart`      | `round:started` |
-| `OnTurnEnd`         | `turn:ended`    |
-| `OnDeployUnit`      | `unit:deployed` |
-| `OnSummonUnit`      | `unit:summoned` |
-
----
-
 ## Snapshot Design
 
 `GameState._createSnapshot()` captures the complete game state for the

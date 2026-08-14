@@ -1,6 +1,7 @@
 import GameState from "../GameState.js";
 import Card from "../Card.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
+import EVT from "../EventCatalog.js";
 import { resolveEffect } from "../EffectResolver.js";
 import { createLegalDeck, getCardIdByName } from "./utils.js";
 
@@ -49,12 +50,12 @@ describe("PassiveManager", () => {
       value: 1,
     });
 
-    game.eventBus.emit("round:ended", { round: game.round });
+    game.eventBus.emit(EVT.ROUND_END, { round: game.round });
     expect(target.currentHp).toBe(targetCard.maxHp - 3);
 
     LifecycleEngine.destroyUnit(game, unit);
     target.currentHp = targetCard.maxHp;
-    game.eventBus.emit("round:ended", { round: game.round });
+    game.eventBus.emit(EVT.ROUND_END, { round: game.round });
     expect(target.currentHp).toBe(targetCard.maxHp);
   });
 

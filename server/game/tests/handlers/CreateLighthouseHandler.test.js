@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import CreateLighthouseHandler from "../../handlers/CreateLighthouseHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("CreateLighthouseHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -50,7 +51,7 @@ describe("CreateLighthouseHandler", () => {
 
   test("emits state:lighthouse:changed child event", () => {
     const listener = jest.fn();
-    bus.on("state:lighthouse:changed", listener, { phase: "post" });
+    bus.on(EVT.LIGHTHOUSE_CHANGED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Bob", amount: 2 }, ctx, gameState);

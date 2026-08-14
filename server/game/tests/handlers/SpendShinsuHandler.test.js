@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import SpendShinsuHandler from "../../handlers/SpendShinsuHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("SpendShinsuHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -52,7 +53,7 @@ describe("SpendShinsuHandler", () => {
 
   test("emits state:shinsu:changed child event", () => {
     const listener = jest.fn();
-    bus.on("state:shinsu:changed", listener, { phase: "post" });
+    bus.on(EVT.SHINSU_CHANGED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 1 }, ctx, gameState);

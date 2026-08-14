@@ -64,8 +64,8 @@ handlers in that phase — otherwise the "after" snapshot misses mutations.
         eventName: "unit:killed",
         cancelled: false,
         children: [
-          { eventName: "unit:slay",    cancelled: false, children: [] },
-          { eventName: "card:draw",    cancelled: false, children: [] }
+          { eventName: "unit:destroyed", cancelled: false, children: [] },
+          { eventName: "card:drawn",    cancelled: false, children: [] }
         ]
       },
       {

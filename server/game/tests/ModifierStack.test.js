@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import EventBus from "../EventBus.js";
 import GameClock from "../GameClock.js";
 import ModifierStack from "../ModifierStack.js";
+import EVT from "../EventCatalog.js";
 
 describe("ModifierStack", () => {
   let bus, clock, stack;
@@ -128,7 +129,7 @@ describe("ModifierStack", () => {
 
     test("removeBySource emits revocation events", () => {
       const listener = jest.fn();
-      bus.on("modifier:trait:revoked", listener, { phase: "post" });
+      bus.on(EVT.MODIFIER_REVOKED("trait"), listener, { phase: "post" });
 
       stack.apply({
         sourceId: "Equip#1", sourceType: "equipment",
@@ -423,7 +424,7 @@ describe("ModifierStack", () => {
   describe("event emission", () => {
     test("apply emits modifier:<type>:granted event", () => {
       const listener = jest.fn();
-      bus.on("modifier:trait:granted", listener, { phase: "post" });
+      bus.on(EVT.MODIFIER_GRANTED("trait"), listener, { phase: "post" });
 
       stack.apply({
         sourceId: "Card#1", sourceType: "unit",
@@ -436,7 +437,7 @@ describe("ModifierStack", () => {
 
     test("apply emits modifier:condition:granted for conditions", () => {
       const listener = jest.fn();
-      bus.on("modifier:condition:granted", listener, { phase: "post" });
+      bus.on(EVT.MODIFIER_GRANTED("condition"), listener, { phase: "post" });
 
       stack.apply({
         sourceId: "Unit#2", sourceType: "unit",
@@ -450,8 +451,8 @@ describe("ModifierStack", () => {
     test("removing a modifier emits revocation event", () => {
       const granted = jest.fn();
       const revoked = jest.fn();
-      bus.on("modifier:trait:granted", granted, { phase: "post" });
-      bus.on("modifier:trait:revoked", revoked, { phase: "post" });
+      bus.on(EVT.MODIFIER_GRANTED("trait"), granted, { phase: "post" });
+      bus.on(EVT.MODIFIER_REVOKED("trait"), revoked, { phase: "post" });
 
       stack.apply({
         sourceId: "Card#1", sourceType: "unit",
@@ -469,7 +470,7 @@ describe("ModifierStack", () => {
         targetId: "Unit#1", type: "trait", key: "strong", value: 3,
       });
 
-      bus.emit("unit:destroyed", { unitId: "Unit#1" });
+      bus.emit(EVT.UNIT_DESTROYED, { unitId: "Unit#1" });
 
       expect(stack.getEffective("Unit#1", "trait", "strong")).toBe(0);
       expect(stack.getSources("Unit#1")).toEqual([]);

@@ -2,6 +2,7 @@ import { createTestGame } from "../utils.js";
 import CombatSlotService from "../../services/CombatSlotService.js";
 import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
+import EVT from "../../EventCatalog.js";
 
 describe("CombatSlotService", () => {
   let game;
@@ -55,7 +56,7 @@ describe("CombatSlotService", () => {
     const clock = new GameClock();
     const bus = new EventBus(clock);
     const emitted = [];
-    bus.on("shinheuh:slot:granted", (p) => emitted.push(p), { phase: "post" });
+    bus.on(EVT.SHINHEUH_SLOT_GRANTED, (p) => emitted.push(p), { phase: "post" });
 
     const player = game.playerStates.Alice;
     CombatSlotService.grantShinheuhSlot(player, bus, "Alice");

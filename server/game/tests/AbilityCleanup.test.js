@@ -15,6 +15,7 @@
 import GameState from "../GameState.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
 import Card from "../Card.js";
+import EVT from "../EventCatalog.js";
 import { createTestGame, getCardIdByName, setupGameWithCardsInHand, advanceToRound } from "./utils.js";
 
 describe("Ability cleanup ownership (onRevoke bridge)", () => {
@@ -120,7 +121,7 @@ describe("Ability cleanup ownership (onRevoke bridge)", () => {
 
     // Simulate the destroyUnit flow: emit UNIT_DESTROYED which triggers
     // ModifierStack's auto-listener → removeByTarget → onRevoke bridge.
-    game.eventBus.emit("unit:destroyed", { unitId: unit.id });
+    game.eventBus.emit(EVT.UNIT_DESTROYED, { unitId: unit.id });
 
     expect(game._abilityRegistry.getGranted(unit.id).length).toBe(0);
   });

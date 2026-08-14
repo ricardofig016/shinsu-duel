@@ -57,10 +57,10 @@ describe("trigger DFS-ordering — equip evolution", () => {
     // equipment:attached is emitted, so the equip trigger in the post phase
     // always sees the fully-equipped state.
     const attachedPostIdx = timeline.findIndex((e) =>
-      e === `post:${EVT.EQUIPMENT_ATTACHED}` || e.startsWith(`post:equipment:attached`)
+      e === `post:${EVT.EQUIPMENT_ATTACHED}`
     );
     const evolvedIdx = timeline.findIndex((e) =>
-      e.startsWith("execute:") && (e === `execute:${EVT.UNIT_EVOLVED}` || e === "execute:unit:evolved")
+      e === `execute:${EVT.UNIT_EVOLVED}`
     );
 
     expect(attachedPostIdx).toBeGreaterThan(-1);
@@ -68,17 +68,17 @@ describe("trigger DFS-ordering — equip evolution", () => {
     // Evolution happens as a child event during equipment:attached post phase,
     // so it appears between attached pre and attached resolved.
     const attachedPreIdx = timeline.findIndex((e) =>
-      e === `pre:${EVT.EQUIPMENT_ATTACHED}` || e === "pre:equipment:attached"
+      e === `pre:${EVT.EQUIPMENT_ATTACHED}`
     );
     const attachedResolvedIdx = timeline.findIndex((e) =>
-      e === `resolved:${EVT.EQUIPMENT_ATTACHED}` || e === "resolved:equipment:attached"
+      e === `resolved:${EVT.EQUIPMENT_ATTACHED}`
     );
     expect(attachedPreIdx).toBeLessThan(evolvedIdx);
     expect(evolvedIdx).toBeLessThan(attachedResolvedIdx);
 
     // Clean assertion on the triggered transformation
     const equipTriggerPost = timeline.filter((e) =>
-      e === `post:${EVT.EQUIPMENT_ATTACHED}` || e === "post:equipment:attached"
+      e === `post:${EVT.EQUIPMENT_ATTACHED}`
     );
     expect(equipTriggerPost.length).toBeGreaterThanOrEqual(1);
   });
@@ -96,8 +96,8 @@ describe("trigger DFS-ordering — equip evolution", () => {
     });
 
     // unit:deployed must appear before unit:summoned in the timeline
-    const deployedIdx = timeline.findIndex((e) => e.includes("unit:deployed"));
-    const summonedIdx = timeline.findIndex((e) => e.includes("unit:summoned"));
+    const deployedIdx = timeline.findIndex((e) => e.includes(EVT.UNIT_DEPLOYED));
+    const summonedIdx = timeline.findIndex((e) => e.includes(EVT.UNIT_SUMMONED));
 
     expect(deployedIdx).toBeGreaterThan(-1);
     expect(summonedIdx).toBeGreaterThan(-1);
@@ -105,6 +105,50 @@ describe("trigger DFS-ordering — equip evolution", () => {
 
     // The deploy trigger (if this card had one) subscribes to unit:summoned,
     // not unit:deployed. That is the documented canonical event.
+  });
+});
+
+describe("trigger DFS-ordering — deploy", () => {
+  test("unit wiring precedes deploy/summon events, and a unit's own deploy trigger fires on unit:summoned", () => {
+    const game = setupGameWithCardsInHand(["_Test Deploy Evolve"]);
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+
+    const timeline = recordTimeline(game);
+
+    game.processAction({
+      type: "deploy-unit-action",
+      data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" },
+    });
+
+    // The unit's own deploy trigger subscribed to unit:summoned and fired
+    // before the summon event finished resolving, evolving the unit.
+    const unit = game.playerStates.Alice.field.frontline[0];
+    expect(unit.card.name).toBe("_Test Deploy Evolve - Evolved");
+
+    // Native traits are wired before the announce events: the barrier trait
+    // is granted (modifier:trait:granted) before unit:deployed is emitted.
+    const traitGrantedIdx = timeline.findIndex((e) => e.includes(EVT.MODIFIER_GRANTED("trait")));
+    const deployedIdx = timeline.findIndex((e) => e.includes(EVT.UNIT_DEPLOYED));
+    const summonedIdx = timeline.findIndex((e) => e.includes(EVT.UNIT_SUMMONED));
+
+    expect(traitGrantedIdx).toBeGreaterThan(-1);
+    expect(deployedIdx).toBeGreaterThan(-1);
+    expect(summonedIdx).toBeGreaterThan(-1);
+    expect(traitGrantedIdx).toBeLessThan(deployedIdx);
+    expect(deployedIdx).toBeLessThan(summonedIdx);
+
+    // The deploy trigger fires in the post phase of unit:summoned, so
+    // unit:evolved appears between unit:summoned pre and resolved.
+    const summonedPreIdx = timeline.findIndex((e) => e === `pre:${EVT.UNIT_SUMMONED}`);
+    const evolvedIdx = timeline.findIndex((e) => e === `execute:${EVT.UNIT_EVOLVED}`);
+    const summonedResolvedIdx = timeline.findIndex((e) => e === `resolved:${EVT.UNIT_SUMMONED}`);
+
+    expect(summonedPreIdx).toBeGreaterThan(-1);
+    expect(evolvedIdx).toBeGreaterThan(-1);
+    expect(summonedResolvedIdx).toBeGreaterThan(-1);
+    expect(summonedPreIdx).toBeLessThan(evolvedIdx);
+    expect(evolvedIdx).toBeLessThan(summonedResolvedIdx);
   });
 });
 
@@ -153,11 +197,11 @@ describe("trigger DFS-ordering — slay ignition", () => {
 
     // The ignition happens during the post phase of unit:killed.
     // equipment:ignited must appear between unit:killed pre and resolved.
-    const killedPreIdx = timeline.findIndex((e) => e === `pre:${EVT.UNIT_KILLED}` || e === "pre:unit:killed");
+    const killedPreIdx = timeline.findIndex((e) => e === `pre:${EVT.UNIT_KILLED}`);
     const ignitedIdx = timeline.findIndex((e) =>
-      (e === `execute:${EVT.EQUIPMENT_IGNITED}` || e === "execute:equipment:ignited")
+      e === `execute:${EVT.EQUIPMENT_IGNITED}`
     );
-    const killedResolvedIdx = timeline.findIndex((e) => e === `resolved:${EVT.UNIT_KILLED}` || e === "resolved:unit:killed");
+    const killedResolvedIdx = timeline.findIndex((e) => e === `resolved:${EVT.UNIT_KILLED}`);
 
     expect(killedPreIdx).toBeGreaterThan(-1);
     expect(ignitedIdx).toBeGreaterThan(-1);
@@ -169,7 +213,7 @@ describe("trigger DFS-ordering — slay ignition", () => {
 
 describe("trigger DFS-ordering — ally_dies", () => {
   test("ally_dies trigger fires in post phase of unit:destroyed", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Monkeyman", "Pedro"]);
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
@@ -193,8 +237,8 @@ describe("trigger DFS-ordering — ally_dies", () => {
     LifecycleEngine.destroyUnit(game, ally);
 
     // unit:destroy:intent → unit:destroyed.
-    const destroyIntentIdx = timeline.findIndex((e) => e.includes("unit:destroy:intent"));
-    const destroyedIdx = timeline.findIndex((e) => e.includes("unit:destroyed") && !e.includes("intent"));
+    const destroyIntentIdx = timeline.findIndex((e) => e.includes(EVT.UNIT_DESTROY_INTENT));
+    const destroyedIdx = timeline.findIndex((e) => e.includes(EVT.UNIT_DESTROYED) && !e.includes(EVT.UNIT_DESTROY_INTENT));
 
     expect(destroyIntentIdx).toBeGreaterThan(-1);
     expect(destroyedIdx).toBeGreaterThan(-1);
@@ -232,8 +276,8 @@ describe("trigger DFS-ordering — round_start / round_end", () => {
 
     // round:ended fires before condition cleanup (GameState wireLifecycleEvents).
     // round:started fires after shinsu reset and card draw.
-    const roundEndIdx = timeline.findIndex((e) => e.includes("round:ended"));
-    const roundStartIdx = timeline.findIndex((e) => e.includes("round:started"));
+    const roundEndIdx = timeline.findIndex((e) => e.includes(EVT.ROUND_END));
+    const roundStartIdx = timeline.findIndex((e) => e.includes(EVT.ROUND_START));
 
     expect(roundEndIdx).toBeGreaterThan(-1);
     expect(roundStartIdx).toBeGreaterThan(-1);
@@ -270,10 +314,10 @@ describe("trigger DFS-ordering — chain through silence/unequip is safe", () =>
     // The equip trigger fires in equipment:attached post.
     // unit:evolved must fire before turn:ended.
     const evolvedIdx = timeline.findIndex((e) =>
-      e === "execute:unit:evolved"
+      e === `execute:${EVT.UNIT_EVOLVED}`
     );
     const turnEndedIdx = timeline.findIndex((e) =>
-      e === "execute:turn:ended"
+      e === `execute:${EVT.TURN_END}`
     );
 
     expect(evolvedIdx).toBeGreaterThan(-1);

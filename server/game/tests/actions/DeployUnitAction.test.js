@@ -1,5 +1,6 @@
 import { advanceToRound, setupGameWithCardsInHand } from "../utils.js";
 import { jest } from "@jest/globals";
+import EVT from "../../EventCatalog.js";
 
 const USERNAMES = ["Alice", "Bob"];
 
@@ -151,10 +152,10 @@ describe("place cards on field", () => {
     });
 
     // Check events were emitted
-    expect(emitSpy).toHaveBeenCalledWith("unit:deployed", expect.any(Object));
-    expect(emitSpy).toHaveBeenCalledWith("unit:summoned", expect.any(Object));
-    expect(emitSpy).toHaveBeenCalledWith("turn:ended", expect.any(Object));
-    expect(emitSpy).toHaveBeenCalledWith("turn:started", expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith(EVT.UNIT_DEPLOYED, expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith(EVT.UNIT_SUMMONED, expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith(EVT.TURN_END, expect.any(Object));
+    expect(emitSpy).toHaveBeenCalledWith(EVT.TURN_START, expect.any(Object));
 
     // Check turn switched
     expect(game.currentTurn).toBe(USERNAMES[1]);

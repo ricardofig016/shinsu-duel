@@ -3,36 +3,34 @@
  *
  * All event names follow the convention: namespace:subject:verb (kebab-case).
  * Use these constants instead of raw strings throughout the codebase.
- *
- * Phase 1 legacy names (PascalCase) are listed in comments for migration reference.
  */
 
 const EVT = {
   // Game lifecycle
-  GAME_STARTED:     "game:started", // was OnGameStart
+  GAME_STARTED:     "game:started",
   GAME_OVER:        "game:over",
   GAME_DECK_EMPTY:  "game:deck:empty",
   GAME_LIGHTHOUSES_DEPLETED: "game:lighthouses:depleted",
 
   // Round lifecycle
-  ROUND_START:  "round:started", // was OnRoundStart
-  ROUND_END:    "round:ended", // was OnRoundEnd
+  ROUND_START:  "round:started",
+  ROUND_END:    "round:ended",
 
   // Turn lifecycle
-  TURN_START: "turn:started", // was OnTurnStart
-  TURN_END:   "turn:ended", // was OnTurnEnd
+  TURN_START: "turn:started",
+  TURN_END:   "turn:ended",
 
   // Unit lifecycle
-  UNIT_DEPLOYED:  "unit:deployed", // was OnDeployUnit
-  UNIT_SUMMONED:  "unit:summoned", // was OnSummonUnit
+  UNIT_DEPLOYED:  "unit:deployed",
+  UNIT_SUMMONED:  "unit:summoned",
   UNIT_DESTROY_INTENT: "unit:destroy:intent",
-  UNIT_DESTROYED: "unit:destroyed", // was OnUnitRemoved
+  UNIT_DESTROYED: "unit:destroyed",
   UNIT_EVOLVED:   "unit:evolved",
   UNIT_KILLED:    "unit:killed",
 
   // Damage
-  DAMAGE_INTENT:    "unit:damage:intent", // was OnDealDamageIntent
-  DAMAGE_APPLIED:   "unit:damage:applied", // was OnDealDamageApplied
+  DAMAGE_INTENT:    "unit:damage:intent",
+  DAMAGE_APPLIED:   "unit:damage:applied",
   BARRIER_ABSORBED: "unit:barrier:absorbed",
 
   // Death (before unit:killed; cancellable by Undying)

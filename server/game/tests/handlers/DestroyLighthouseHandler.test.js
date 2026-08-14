@@ -3,6 +3,7 @@ import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
 import DestroyLighthouseHandler from "../../handlers/DestroyLighthouseHandler.js";
+import EVT from "../../EventCatalog.js";
 
 describe("DestroyLighthouseHandler", () => {
   let clock, bus, stack, gameState, handler;
@@ -49,7 +50,7 @@ describe("DestroyLighthouseHandler", () => {
 
   test("emits state:lighthouse:changed child event with negative delta", () => {
     const listener = jest.fn();
-    bus.on("state:lighthouse:changed", listener, { phase: "post" });
+    bus.on(EVT.LIGHTHOUSE_CHANGED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 2 }, ctx, gameState);
@@ -65,7 +66,7 @@ describe("DestroyLighthouseHandler", () => {
 
   test("emits game:lighthouses:depleted when lighthouses reach 0", () => {
     const listener = jest.fn();
-    bus.on("game:lighthouses:depleted", listener, { phase: "post" });
+    bus.on(EVT.GAME_LIGHTHOUSES_DEPLETED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Bob", amount: 5 }, ctx, gameState);
@@ -80,7 +81,7 @@ describe("DestroyLighthouseHandler", () => {
 
   test("does NOT emit depleted when lighthouses stay above 0", () => {
     const listener = jest.fn();
-    bus.on("game:lighthouses:depleted", listener, { phase: "post" });
+    bus.on(EVT.GAME_LIGHTHOUSES_DEPLETED, listener, { phase: "post" });
 
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Bob", amount: 3 }, ctx, gameState);

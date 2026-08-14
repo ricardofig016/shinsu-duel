@@ -66,7 +66,7 @@ export default class ModifierStack {
     this._byId = new Map();
 
     // Auto-cleanup when a unit is destroyed
-    this._bus.on("unit:destroyed", (payload) => {
+    this._bus.on(EVT.UNIT_DESTROYED, (payload) => {
       this.removeByTarget(payload.unitId);
     }, { phase: "post" });
 

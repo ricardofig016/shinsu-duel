@@ -135,20 +135,6 @@ export default class LifecycleEngine {
     line.push(unit);
     gameState._indexUnit(unit);
 
-    // Emit deploy event chain
-    gameState.eventBus.emit(EVT.UNIT_DEPLOYED, {
-      username,
-      unit,
-      positionCode,
-      cost,
-    });
-
-    gameState.eventBus.emit(EVT.UNIT_SUMMONED, {
-      username,
-      unit,
-      unitId: unit.id,
-    });
-
     // Apply native traits via ModifierStack
     const sourceId = IdFactory.unitSource(unit.id);
     // `Card.traits` is a dictionary keyed by canonical trait code. Apply both
@@ -181,6 +167,23 @@ export default class LifecycleEngine {
     if (gameState._attributeRegistry) {
       gameState._attributeRegistry.onUnitDeployed(unit, gameState);
     }
+
+    // Emit the deploy event chain AFTER the unit is fully wired. `unit:deployed`
+    // announces battlefield entry; `unit:summoned` is the canonical event for
+    // `deploy` triggers, so the unit's complete observable state (native traits,
+    // evolution triggers, passives, attribute engines) must exist first.
+    gameState.eventBus.emit(EVT.UNIT_DEPLOYED, {
+      username,
+      unit,
+      positionCode,
+      cost,
+    });
+
+    gameState.eventBus.emit(EVT.UNIT_SUMMONED, {
+      username,
+      unit,
+      unitId: unit.id,
+    });
 
     return { unit, overflowDestroyed: false, pending: false };
   }

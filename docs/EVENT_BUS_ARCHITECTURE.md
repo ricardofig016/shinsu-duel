@@ -26,7 +26,7 @@ When an event handler triggers a child event, the child **fully resolves**
 level runs. This preserves causality — you see one chain complete before
 another begins.
 
-**Example:** Damage → Kill → Slay → Draw Card
+**Example:** Damage → Kill → Destroy → Draw
 
 ```
 emit("unit:damage:intent")
@@ -36,18 +36,19 @@ emit("unit:damage:intent")
     handler A: checks kill → emitChild("unit:killed")
       pre:    ...
       execute: unit dies
-      post:   Slay trigger → emitChild("unit:slay")
-        pre:    ...
-        execute: draw card
-        post:   ...
-        resolved: ...
+      post:   Slay trigger fires (subscribed to unit:killed)
       resolved: ...
-    handler B: (runs AFTER the entire kill chain completes)
+    handler B: emitChild("unit:destroyed")
+      pre:    ...
+      execute: unit removed from field
+      post:   on-death trigger → emitChild("card:drawn")
+      resolved: ...
+    handler C: (runs AFTER the entire kill chain completes)
   resolved: logging
 ```
 
 With BFS, all post handlers would run first, then all kill handlers, then
-all slay handlers — the causality chain is lost.
+all destroy handlers — the causality chain is lost.
 
 ### Four Phases
 
@@ -213,8 +214,8 @@ records **causation trees** from DFS event resolution.
         eventName: "unit:killed",
         cancelled: false,
         children: [
-          { eventName: "unit:slay", cancelled: false, children: [] },
-          { eventName: "card:draw", cancelled: false, children: [] }
+          { eventName: "unit:destroyed", cancelled: false, children: [] },
+          { eventName: "card:drawn", cancelled: false, children: [] }
         ]
       }
     ]
@@ -289,6 +290,45 @@ Handlers use `context.emitChild()` for cascading effects and the
 - `unit:ability:used` — ability resolved
 - `unit:ability:granted` — ability granted to a unit
 
+#### Distinguishing overlapping unit events
+
+Some unit events sound similar but carry distinct semantics and payloads.
+Subscribers must bind to the correct one.
+
+**`unit:deployed` vs `unit:summoned`**
+
+- `unit:deployed` — battlefield-entry announcement, emitted first. Payload:
+  `{ username, unit, positionCode, cost }`. No trigger subscribes to it; it
+  exists so observers (logging, future on-arrival effects) can react to the
+  raw arrival.
+- `unit:summoned` — the canonical event for `deploy` triggers, emitted
+  immediately after `unit:deployed`, once native traits, evolution-trigger
+  registration, passives, and attribute engines are fully wired. Payload:
+  `{ username, unit, unitId }`. A unit's own "when I am deployed" evolution
+  subscribes here and sees its complete observable state.
+
+Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
+
+**`unit:killed` vs `unit:destroyed`**
+
+- `unit:killed` — emitted by `DealDamageHandler` when a unit's HP reaches 0,
+  after `unit:death:intent` and Undying interception. The unit is still on the
+  field at this point. Payload: `{ sourceId, targetId, killerId, killerOwner }`.
+  Canonical for `slay` and `kill` triggers.
+- `unit:destroyed` — emitted by `LifecycleEngine.destroyUnit` after the unit
+  has been detached from equipment, removed from the field, moved to the
+  discard pile, and had its subsystems cleaned up. `ModifierStack` auto-cleans
+  its modifiers here. Payload: `{ unitId, unit, owner }`. Canonical for
+  `ally_dies` triggers. It fires for **any** unit removal (lethal damage, line
+  overflow, landmark replacement), not just combat deaths.
+
+**Cancellable intent hooks**
+
+- `unit:destroy:intent` — cancellable pre-removal hook emitted by
+  `destroyUnit` before any mutation; cancelling prevents destruction.
+- `unit:death:intent` — cancellable lethal-damage hook emitted before
+  `unit:killed`; Undying cancels here to keep the unit alive at 1 HP.
+
 ### Damage & Healing
 
 - `unit:damage:intent` — before damage resolution
@@ -313,7 +353,7 @@ Handlers use `context.emitChild()` for cascading effects and the
 - `shinsu:charged` / `shinsu:compressed` — resource gains/reductions
 - `state:lighthouse:changed` — lighthouse count changed
 - `game:lighthouses:depleted` — player's lighthouses reached 0 (triggers loss)
-- `state:trait:granted` / `state:trait:revoked`
+- `state:trait:granted` — trait granted via a `grant_trait` effect
 - `state:condition:applied` / `state:condition:blocked` / `state:condition:cleansed`
 
 ### Cards

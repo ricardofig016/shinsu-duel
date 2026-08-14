@@ -1,5 +1,6 @@
 import LifecycleEngine from "../services/LifecycleEngine.js";
 import Card from "../Card.js";
+import EVT from "../EventCatalog.js";
 import { setupGameWithCardsInHand, advanceToRound, getCardIdByName } from "./utils.js";
 
 describe("TriggerManager ignition and given triggers", () => {
@@ -34,9 +35,9 @@ describe("TriggerManager ignition and given triggers", () => {
     };
     game.playerStates.Bob.field.frontline.push(victim);
 
-    game.eventBus.emit("unit:damage:intent", { sourceId: bearer.id, targetId: victim.id, amount: 5 });
-    game.eventBus.emit("unit:damage:applied", { sourceId: bearer.id, targetId: victim.id, amount: 5 });
-    game.eventBus.emit("unit:killed", { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
+    game.eventBus.emit(EVT.DAMAGE_INTENT, { sourceId: bearer.id, targetId: victim.id, amount: 5 });
+    game.eventBus.emit(EVT.DAMAGE_APPLIED, { sourceId: bearer.id, targetId: victim.id, amount: 5 });
+    game.eventBus.emit(EVT.UNIT_KILLED, { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
     expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada - Ignited"]);
   });
