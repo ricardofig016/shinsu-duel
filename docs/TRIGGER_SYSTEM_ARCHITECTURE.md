@@ -81,7 +81,7 @@ Every transformation trigger subscribes in the **`post`** phase of its canonical
 3. `unit:evolved` / `equipment:ignited` is emitted.
 4. Subsequent `post` handlers of the original event see the transformed unit.
 
-This ordering is verified by the DFS-ordering tests in `server/game/tests/TriggerTiming.test.js`.
+This ordering is verified by the DFS-ordering tests in `server/game/tests/integration/TriggerTiming.test.js`.
 
 ---
 

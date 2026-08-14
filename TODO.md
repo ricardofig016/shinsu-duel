@@ -6,7 +6,6 @@
 - [ ] game: add Disarm keyword - Send a unit's equipment back to it's owners hand (choose on LIW)
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
-- [ ] tests: organize server\game\tests better - i like the 3 folders but theres too many tests directly in tests\
 - [ ] tests: add more to increase coverage
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
 - [ ] public: plan how image artworks should be organized
@@ -19,6 +18,7 @@
 
 ## Completed
 
+- [x] tests: organize server\game\tests better - there's too many tests directly in tests\
 - [x] docs: fix newline based line wrapping - switch to single line paragraphs
 - [x] game: remove `Math.random()` as fallback if no seed is provided. all games must be seeded
 - [x] rules: think about max copies of a card during deckbuilding (maybe 3) - revisit Baang

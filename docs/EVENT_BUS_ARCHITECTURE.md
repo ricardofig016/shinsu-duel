@@ -415,4 +415,4 @@ Two runs with the same initial state, same clock ticks, same handler registratio
 3. Identical final state
 4. Identical log entries
 
-This is verified by the determinism tests in `EventBus.test.js` and `EventBus.integration.test.js` which run the same setup 20+ times and assert identical output.
+This is verified by the determinism tests in `tests/core/EventBus.test.js` and `tests/integration/EventBus.integration.test.js` which run the same setup 20+ times and assert identical output.
