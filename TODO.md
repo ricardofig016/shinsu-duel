@@ -7,7 +7,8 @@
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
 - [ ] docs: fix newline based line wrapping - switch to single line paragraphs
-- [ ] tests: organize server\game\tests better
+- [ ] tests: organize server\game\tests better - i like the 3 folders but theres too many tests directly in tests\
+- [ ] tests: add more to increase coverage
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
 
 ## In Progress

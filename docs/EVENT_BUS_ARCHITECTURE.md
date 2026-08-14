@@ -89,8 +89,17 @@ const unsub = bus.on(
     // ctx.emitChild("child:event", childPayload);  // DFS child
     // ctx.cancel("reason");                        // cancel event
   },
-  { phase: "execute", priority: 0, sourceAge: clock.now() },
+  {
+    phase: "execute",
+    priority: 0,
+    sourceAge: clock.now(),
+    role: "authoritative",
+  },
 );
+
+// Read-only observers (logging, telemetry) must be registered as such so their
+// failures are isolated and never abort the authoritative transaction.
+bus.on("event:name", observer, { role: "observer" });
 
 // One-shot
 bus.once("event:name", handler, options);
@@ -102,13 +111,27 @@ bus.removeAllListeners(); // clear all
 
 // Emit
 const result = bus.emit("event:name", payload);
-// result: { cancelled, reason, finalPayload, children }
+// result: { cancelled, reason, finalPayload, children, observerErrors }
 ```
+
+### Handler Roles
+
+Every handler is classified at registration via `options.role`:
+
+| Role            | Default | On failure                                                                 |
+| --------------- | ------- | -------------------------------------------------------------------------- |
+| `authoritative` | ✅      | Abort the whole event transaction and rethrow to the original caller       |
+| `observer`      | —       | Isolate the error, record it in `result.observerErrors`, continue dispatch |
+
+Authoritative handlers perform transactional state mutations. Observers are
+read-only (logging, telemetry, replay) and must never mutate authoritative
+state, which is what makes their failure safe to isolate.
 
 ### Failure Handling
 
-Handler errors are **fail-closed**: dispatch stops immediately and the
-wrapped exception is rethrown. This prevents later handlers from applying
+An **authoritative** failure is **fail-closed**: dispatch stops immediately at
+the exact deterministic point (priority, source age, registration order) and
+the wrapped exception is rethrown. This prevents later handlers from applying
 additional mutations or reactions after an authoritative handler has failed.
 Completed state changes are not rolled back, so mutation handlers must
 validate all inputs before writing state. Each error identifies:
@@ -116,6 +139,23 @@ validate all inputs before writing state. Each error identifies:
 - Event name
 - Phase
 - Handler identity (function name)
+
+An **observer** failure never aborts the transaction. The wrapped error is
+appended to the emit result's `observerErrors` array (with the same event,
+phase, and handler metadata) and dispatch continues to the next handler.
+
+### Transaction Boundary
+
+A root `emit()` is a single transaction. Every `emitChild` chain spawned
+during its resolution belongs to the same transaction: an authoritative
+failure anywhere in the DFS chain aborts the entire transaction and
+propagates to the root caller. Observer failures are isolated to the event
+whose dispatch they belong to — an observer failure in a child event is
+reported on the child's result, not the root's. Cancellation and failure
+ordering are deterministic for identical inputs.
+
+The built-in `Logger` registers its wildcard subscriptions as observers, so a
+logging or snapshot failure never corrupts the game state it observes.
 
 ### Recursion Guard
 

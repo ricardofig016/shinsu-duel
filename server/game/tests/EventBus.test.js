@@ -353,6 +353,81 @@ describe("EventBus", () => {
   });
 
   // -----------------------------------------------------------------------
+  // Handler roles (authoritative vs observer)
+  // -----------------------------------------------------------------------
+
+  describe("handler roles", () => {
+    test("rejects an invalid role at registration", () => {
+      const bus = new EventBus();
+      expect(() => bus.on("Test", () => {}, { role: "watcher" })).toThrow("Invalid event handler role");
+    });
+
+    test("default role is authoritative: failure aborts dispatch", () => {
+      const bus = new EventBus();
+      const later = jest.fn();
+      bus.on("Test", () => { throw new Error("authoritative boom"); });
+      bus.on("Test", later);
+      expect(() => bus.emit("Test")).toThrow("[Test:execute]");
+      expect(later).not.toHaveBeenCalled();
+    });
+
+    test("observer failure is isolated and dispatch continues", () => {
+      const bus = new EventBus();
+      const later = jest.fn();
+      const observer = () => { throw new Error("observer boom"); };
+      bus.on("Test", observer, { role: "observer", phase: "execute" });
+      bus.on("Test", later, { phase: "execute" });
+
+      const result = bus.emit("Test");
+
+      expect(later).toHaveBeenCalledTimes(1);
+      expect(result.observerErrors).toHaveLength(1);
+      expect(result.observerErrors[0].message).toContain("observer boom");
+      expect(result.observerErrors[0].eventName).toBe("Test");
+      expect(result.observerErrors[0].phase).toBe("execute");
+      expect(result.observerErrors[0].handlerName).toBe("observer");
+    });
+
+    test("observer failure in a child event does not abort the parent", () => {
+      const bus = new EventBus();
+      const timeline = [];
+      bus.on("Parent", (p, ctx) => {
+        timeline.push("parent-start");
+        const child = ctx.emitChild("Child", {});
+        timeline.push(`child-errors:${child.observerErrors.length}`);
+        timeline.push("parent-after");
+      }, { phase: "execute" });
+      bus.on("Child", () => { throw new Error("child observer boom"); }, { role: "observer", phase: "execute" });
+
+      const result = bus.emit("Parent");
+
+      expect(timeline).toEqual(["parent-start", "child-errors:1", "parent-after"]);
+      expect(result.observerErrors).toHaveLength(0); // isolated to the child result
+    });
+
+    test("authoritative failure in a child still bubbles to the root", () => {
+      const bus = new EventBus();
+      bus.on("Parent", (p, ctx) => ctx.emitChild("Child", {}), { phase: "execute" });
+      bus.on("Child", () => { throw new Error("authoritative child boom"); }, { phase: "execute" });
+      expect(() => bus.emit("Parent")).toThrow("authoritative child boom");
+    });
+
+    test("single-phase emit records observer errors instead of throwing", () => {
+      const bus = new EventBus();
+      bus.on("Test", () => { throw new Error("observer boom"); }, { role: "observer", phase: "pre" });
+      const result = bus.emit("Test", {}, { phase: "pre" });
+      expect(result.observerErrors).toHaveLength(1);
+      expect(result.observerErrors[0].message).toContain("observer boom");
+    });
+
+    test("clean emit returns an empty observerErrors array", () => {
+      const bus = new EventBus();
+      const result = bus.emit("NoHandlers");
+      expect(result.observerErrors).toEqual([]);
+    });
+  });
+
+  // -----------------------------------------------------------------------
   // Recursion guard
   // -----------------------------------------------------------------------
 

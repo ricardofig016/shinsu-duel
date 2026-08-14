@@ -28,13 +28,28 @@
  * A `pre` or `execute` handler may call `context.cancel(reason)`. The current
  * phase stops immediately. Child events that already ran are NOT rolled back.
  *
- * ## Failure semantics
+ * ## Handler roles
  *
- * Handler failures are fail-closed: dispatch stops immediately and the
- * wrapped error identifies the event, phase, and handler. This prevents a
- * partially failed authoritative mutation from being followed by additional
- * mutations or reactions. State changes completed before the failure are not
- * rolled back; handlers must validate before they mutate.
+ * Every handler is classified at registration via `options.role`:
+ *
+ *  - `authoritative` (default) — transactional state mutations. A failure
+ *    aborts the whole event transaction: dispatch stops at the exact
+ *    deterministic point (priority, source age, registration order) and the
+ *    wrapped error is rethrown to the original `emit` caller. State written
+ *    before the failure is NOT rolled back, so authoritative handlers must
+ *    validate everything before mutating anything.
+ *  - `observer` — read-only reactions (logging, telemetry). A failure is
+ *    isolated: the error is recorded on the emit result under
+ *    `observerErrors` and dispatch continues. Observers must never mutate
+ *    authoritative state, so their failure cannot corrupt the transaction.
+ *
+ * ## Transaction boundary
+ *
+ * A root `emit()` is a single transaction. Every `emitChild` chain spawned
+ * during its resolution belongs to the same transaction: an authoritative
+ * failure anywhere in the DFS chain aborts the entire transaction and
+ * propagates to the root caller. Cancellation and failure ordering are
+ * deterministic for identical inputs.
  */
 
 const PHASE_ORDER = ["pre", "execute", "post", "resolved"];
@@ -62,6 +77,14 @@ function normalizePhase(raw) {
   return p;
 }
 
+const ROLES = new Set(["authoritative", "observer"]);
+
+function normalizeRole(raw) {
+  const r = String(raw ?? "authoritative").toLowerCase();
+  if (!ROLES.has(r)) throw new Error(`Invalid event handler role: ${raw}`);
+  return r;
+}
+
 /**
  * Build the sort key for handler ordering:
  *   [priority, sourceAge, registrationOrder]
@@ -83,6 +106,7 @@ class EventContext {
     this._cancelled = false;
     this._cancelReason = null;
     this._children = [];       // records child event results for logging
+    this.observerErrors = [];  // wrapped observer failures (isolated, non-fatal)
   }
 
   /**
@@ -142,6 +166,7 @@ export default class EventBus {
    * @param {string} [options.phase="execute"]
    * @param {number} [options.priority=0]
    * @param {number} [options.sourceAge]  Source age for tiebreaking. Uses clock if omitted.
+   * @param {"authoritative"|"observer"} [options.role="authoritative"]
    * @returns {Function} Unsubscribe function.
    */
   on(eventName, handler, options = {}) {
@@ -209,7 +234,7 @@ export default class EventBus {
    * @param {*} payload            Will be mutated in-place by handlers.
    * @param {object} [options]
    * @param {string} [options.phase]  Only run a single phase (for partial emits).
-   * @returns {{ cancelled: boolean, reason: string|null, finalPayload: *, children: Array }}
+   * @returns {{ cancelled: boolean, reason: string|null, finalPayload: *, children: Array, observerErrors: Array<Error> }}
    */
   emit(eventName, payload = {}, options = {}) {
     if (options.phase) {
@@ -249,7 +274,13 @@ export default class EventBus {
         try {
           entry.handler(payload, rootCtx);
         } catch (err) {
-          throw this._wrapError(err, eventName, phase, entry);
+          const wrapped = this._wrapError(err, eventName, phase, entry);
+          if (entry.role === "observer") {
+            // Observer failure must not abort the authoritative transaction
+            rootCtx.observerErrors.push(wrapped);
+          } else {
+            throw wrapped;
+          }
         } finally {
           // A once-handler is consumed by its attempted invocation, including
           // a failed one, so retries cannot repeat a partial side effect.
@@ -266,6 +297,7 @@ export default class EventBus {
       reason: rootCtx._cancelReason,
       finalPayload: payload,
       children: rootCtx._children,
+      observerErrors: rootCtx.observerErrors,
     };
   }
 
@@ -281,7 +313,12 @@ export default class EventBus {
       try {
         entry.handler(payload, ctx);
       } catch (err) {
-        throw this._wrapError(err, eventName, phase, entry);
+        const wrapped = this._wrapError(err, eventName, phase, entry);
+        if (entry.role === "observer") {
+          ctx.observerErrors.push(wrapped);
+        } else {
+          throw wrapped;
+        }
       } finally {
         if (entry.once && !entry._removed) {
           entry._removed = true;
@@ -295,6 +332,7 @@ export default class EventBus {
       reason: ctx._cancelReason,
       modifiedPayload: payload,
       children: ctx._children,
+      observerErrors: ctx.observerErrors,
     };
   }
 
@@ -341,6 +379,7 @@ export default class EventBus {
       sourceAge: options.sourceAge ?? this._clock.now(),
       order: this._registrationOrder++,
       once: false,
+      role: normalizeRole(options.role),
       _removed: false,
     };
   }

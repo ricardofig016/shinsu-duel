@@ -112,7 +112,7 @@ export default class Logger {
       if (ctx.depth === 0) {
         this._pendingSnapshot = this._snapshotFn();
       }
-    }, { phase: "pre", priority: -9999 });
+    }, { phase: "pre", priority: -9999, role: "observer" });
 
     // Record LAST in pre phase (priority 9999) for cancelled events.
     // CANCELLED events never reach resolved, so we record here.
@@ -124,7 +124,7 @@ export default class Logger {
       const stateBefore = this._pendingSnapshot ?? {};
       this._pendingSnapshot = null;
       this._writeEntry(ctx, stateBefore, stateAfter);
-    }, { phase: "pre", priority: 9999 });
+    }, { phase: "pre", priority: 9999, role: "observer" });
 
     // Record in resolved phase for non-cancelled events
     this._bus.on("*", (payload, ctx) => {
@@ -134,7 +134,7 @@ export default class Logger {
       const stateBefore = this._pendingSnapshot ?? {};
       this._pendingSnapshot = null;
       this._writeEntry(ctx, stateBefore, stateAfter);
-    }, { phase: "resolved", priority: 9999 });
+    }, { phase: "resolved", priority: 9999, role: "observer" });
   }
 
   _writeEntry(ctx, stateBefore, stateAfter) {
