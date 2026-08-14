@@ -66,8 +66,8 @@ descriptors such as `enemy`, `ally`, and `unit`, `TargetResolver` shuffles the
 already-filtered valid candidates and selects from that order. Line blocking,
 Ghost, Sharpshooter, Taunt, and other filters are applied before randomization.
 Self, bearer, all-target descriptors, and lighthouse targeting are not
-randomized. The resolver uses the game's injectable RNG (`gameState._rng`) so
-random targeting can be deterministic in tests and replays.
+randomized. The resolver uses the game's seeded RNG so random targeting is
+deterministic in tests and replays.
 
 ---
 

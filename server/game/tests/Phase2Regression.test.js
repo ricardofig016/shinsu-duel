@@ -1,4 +1,5 @@
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import * as IdFactory from "../IdFactory.js";
 import { resetModifierCounter } from "../ModifierStack.js";
 import { createLegalDeck, setupGameWithCardsInHand } from "./utils.js";
@@ -10,7 +11,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
     game.playerStates.Alice.deck = [];
 
     const first = game.currentTurn;
@@ -25,7 +26,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
     const resolved = [];
     const decisionId = game.createPendingDecision({
       owner: "Alice",
@@ -78,7 +79,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     for (let i = 0; i < 20; i++) {
       IdFactory.resetAll();
       resetModifierCounter();
-      const game = new GameState("DET", players, decks);
+      const game = new GameState("DET", players, decks, null, { rng: new SeededRng(1) });
       snapshots.push(JSON.stringify(game._createSnapshot()));
     }
     const first = snapshots[0];
@@ -91,7 +92,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
       IdFactory.resetAll();
       resetModifierCounter();
       const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-      const game = new GameState("ORD", players, decks);
+      const game = new GameState("ORD", players, decks, null, { rng: new SeededRng(1) });
       // Capture event order
       const events = [];
       game.eventBus.on("*", (_, ctx) => { if (ctx.phase === "execute") events.push(ctx.eventName); }, { phase: "execute", priority: 0 });
@@ -122,7 +123,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     const game = new GameState("LH", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
     game.modifyLighthouses("Alice", 5);
     expect(game.playerStates.Alice.lighthouses.amount).toBe(25);
     game.modifyLighthouses("Alice", -30);
@@ -135,7 +136,7 @@ describe("Phase 2 authoritative-engine regressions", () => {
     const game = new GameState("NEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
     const resolved = [];
     game.createPendingDecision({
       owner: "Alice", type: "line_overflow",

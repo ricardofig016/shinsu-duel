@@ -10,14 +10,17 @@
 - [ ] tests: organize server\game\tests better - i like the 3 folders but theres too many tests directly in tests\
 - [ ] tests: add more to increase coverage
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
-- [ ] game: remove `Math.random()` as fallback if no seed is provided. all games must be seeded
 - [ ] public: plan how image artworks should be organized
+- [ ] new card: equipment - my bearer can assume any position
+- [ ] new card: passive - allies in my position have +x HP
+- [ ] new card: landmark - round start: give frontline units Blinded
 
 ## In Progress
 
 
 ## Completed
 
+- [x] game: remove `Math.random()` as fallback if no seed is provided. all games must be seeded
 - [x] rules: think about max copies of a card during deckbuilding (maybe 3) - revisit Baang
 - [x] data/cards: support folders for organization
 - [x] rules: update jeonsulsa attribute in RULES.md

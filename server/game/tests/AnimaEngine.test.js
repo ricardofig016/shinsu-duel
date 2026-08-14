@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import AnimaEngine from "../attributes/AnimaEngine.js";
 import { createLegalDeck, getCardIdByName } from "./utils.js";
 
@@ -10,7 +11,7 @@ describe("AnimaEngine", () => {
     game = new GameState("ANIMA", ["Alice", "Bob"], {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
   });
 
   test("initial state has no shinheuh slot available", () => {

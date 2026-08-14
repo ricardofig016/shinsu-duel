@@ -13,6 +13,7 @@
 
 import { resolveEffect } from "../EffectResolver.js";
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import Card from "../Card.js";
 import { getCardIdByName, createLegalDeck } from "./utils.js";
 
@@ -36,7 +37,7 @@ describe("condition-field regression (EffectResolver)", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
 
     const src = makeUnit("Monkeyman", "Alice");
     const victim = makeUnit("Monkeyman", "Bob");
@@ -64,7 +65,7 @@ describe("condition-field regression (EffectResolver)", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
 
     const src = makeUnit("Monkeyman", "Alice");
     const victim = makeUnit("Monkeyman", "Bob");
@@ -88,7 +89,7 @@ describe("condition-field regression (EffectResolver)", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
 
     const src = makeUnit("Monkeyman", "Alice");
     const victim = makeUnit("Monkeyman", "Bob");

@@ -1,4 +1,4 @@
-import SeededRng from "../utils/SeededRng.js";
+import SeededRng, { generateSeed } from "../utils/SeededRng.js";
 
 describe("SeededRng", () => {
   test("same seed produces the identical sequence", () => {
@@ -53,5 +53,16 @@ describe("SeededRng", () => {
     const rng = new SeededRng(1);
     expect(() => rng.restoreState(null)).toThrow("requires { seed, calls }");
     expect(() => rng.restoreState({})).toThrow("requires { seed, calls }");
+  });
+});
+
+describe("generateSeed", () => {
+  test("returns an integer in [0, 2^32 - 1]", () => {
+    for (let i = 0; i < 100; i++) {
+      const seed = generateSeed();
+      expect(Number.isInteger(seed)).toBe(true);
+      expect(seed).toBeGreaterThanOrEqual(0);
+      expect(seed).toBeLessThan(0x100000000);
+    }
   });
 });

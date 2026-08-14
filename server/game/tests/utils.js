@@ -1,4 +1,5 @@
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import cardsData from "../../data/cards.json" with { type: "json" };
 
 const ROOM_CODE = "TEST";
@@ -57,10 +58,10 @@ export function setupGameWithCardsInHand(cardsInHand) {
     Alice: [...remaining, ...requestedInDrawOrder],
     Bob: createLegalDeck(),
   };
-  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0]);
+  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0], { rng: new SeededRng(1) });
 }
 
 // Helper to create a basic test game
 export function createTestGame() {
-  return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0]);
+  return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0], { rng: new SeededRng(1) });
 }

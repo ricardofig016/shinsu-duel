@@ -6,6 +6,7 @@
  */
 
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import Card from "../Card.js";
 import { resolveEffect, initEffectResolver } from "../EffectResolver.js";
 import { createLegalDeck, getCardIdByName } from "./utils.js";
@@ -18,7 +19,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     game = new GameState("TEST", ["Alice", "Bob"], {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    });
+    }, null, { rng: new SeededRng(1) });
     // Clear hand for controlled setup
     game.playerStates.Alice.hand = [];
   });

@@ -24,6 +24,7 @@
  */
 
 import GameState from "./GameState.js";
+import shuffle from "./utils/shuffle.js";
 
 // Who owns a unit relative to the source unit's owner
 function isAlly(unit, sourceOwner) {
@@ -274,12 +275,7 @@ export function resolveTargets(gameState, options) {
   // Self, bearer, all_enemies/all_allies, and enemy_lighthouses are not randomized.
   const choiceDescriptors = new Set(["enemy", "ally", "enemies", "unit", "enemy_frontline", "enemy_backline"]);
   if (sourceUnit && gameState.modifierStack.has(sourceUnit.id, "condition", "blinded") && choiceDescriptors.has(target) && candidates.length > 1) {
-    const rng = gameState._rng || Math.random;
-    // Fisher-Yates shuffle with injected RNG for deterministic testing.
-    for (let i = candidates.length - 1; i > 0; i--) {
-      const j = Math.floor(rng() * (i + 1));
-      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-    }
+    shuffle(candidates, gameState._rng);
   }
 
   // Limit count if specified

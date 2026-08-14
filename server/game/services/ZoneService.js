@@ -7,6 +7,7 @@
 
 import EVT from "../EventCatalog.js";
 import CompressionService from "./CompressionService.js";
+import shuffle from "../utils/shuffle.js";
 
 export default class ZoneService {
   /**
@@ -90,10 +91,6 @@ export default class ZoneService {
    */
   static shuffleDeck(playerState, rng) {
     if (!playerState.deck || !rng) return;
-    const arr = playerState.deck;
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(rng() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+    shuffle(playerState.deck, rng);
   }
 }

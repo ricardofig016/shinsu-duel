@@ -1,4 +1,5 @@
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import { advanceToRound, createLegalDeck, expectShinsuState, getCardIdByName } from "./utils.js";
 
 const ROOM_CODE = "TEST";
@@ -9,7 +10,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   let game, firstPlayer, secondPlayer;
 
   beforeEach(() => {
-    game = new GameState(ROOM_CODE, USERNAMES);
+    game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1) });
     firstPlayer = game.currentTurn;
     secondPlayer = firstPlayer === "Alice" ? "Bob" : "Alice";
     advanceToRound(game, round);
@@ -179,7 +180,7 @@ describe("deck behavior", () => {
     const bobDeck = createLegalDeck();
 
     const decks = { Alice: aliceDeck, Bob: bobDeck };
-    const game = new GameState(ROOM_CODE, USERNAMES, decks);
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) });
 
     // After constructor, initial hand size GameState INIT_HAND_SIZE
     const aliceClient = game.getClientState("Alice").you;
@@ -200,7 +201,7 @@ describe("deck behavior", () => {
 
   test("getClientState.deckSize matches internal deck length", () => {
     const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-    const game = new GameState(ROOM_CODE, USERNAMES, decks);
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) });
 
     const aliceClient = game.getClientState("Alice").you;
     expect(aliceClient.deckSize).toBe(game.playerStates.Alice.deck.length);
@@ -210,14 +211,14 @@ describe("deck behavior", () => {
     // Alice deck has wrong length
     const badAliceDeck = Array.from({ length: 29 }, () => 0);
     const decks = { Alice: badAliceDeck, Bob: Array(30).fill(0) };
-    expect(() => new GameState(ROOM_CODE, USERNAMES, decks)).toThrow(/deck must be an array of/);
+    expect(() => new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) })).toThrow(/deck must be an array of/);
   });
 
   test("constructor throws for invalid deck length (too long)", () => {
     // Alice deck has wrong length
     const badAliceDeck = Array.from({ length: 31 }, () => 0);
     const decks = { Alice: badAliceDeck, Bob: Array(30).fill(0) };
-    expect(() => new GameState(ROOM_CODE, USERNAMES, decks)).toThrow(/deck must be an array of/);
+    expect(() => new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) })).toThrow(/deck must be an array of/);
   });
 
   test("constructor throws for invalid card id", () => {
@@ -225,12 +226,12 @@ describe("deck behavior", () => {
     const invalidCardId = 999999;
     const badDeck = Array.from({ length: 30 }, () => invalidCardId);
     const decks = { Alice: badDeck, Bob: Array(30).fill(0) };
-    expect(() => new GameState(ROOM_CODE, USERNAMES, decks)).toThrow(/does not exist/);
+    expect(() => new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) })).toThrow(/does not exist/);
   });
 
   test("drawing when deck is empty does not crash and does not increase hand", () => {
     const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-    const game = new GameState(ROOM_CODE, USERNAMES, decks);
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) });
 
     // Simulate Alice's deck becoming empty
     game.playerStates.Alice.deck = [];

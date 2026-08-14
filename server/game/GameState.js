@@ -56,10 +56,10 @@ export default class GameState {
    *
    * @param {string} roomCode unique room code for this game
    * @param {Array<string>} usernames array of exactly 2 usernames
-   * @param {Object} decks (optional) dictionary mapping each username to an array of cardIds to use as that player's deck. If null, a random deck will be generated.
-   * @param {string} firstPlayer (optional) username of the player to take the first turn. If null, a random player will be chosen.
+   * @param {Object} decks (optional) dictionary mapping each username to an array of cardIds to use as that player's deck. If omitted, a deterministic default deck is generated.
+   * @param {string} firstPlayer (optional) username of the player to take the first turn. If omitted, the first username is chosen deterministically.
    * @param {Object} options (optional) additional configuration options.
-   * @param {Function} options.rng optional seeded RNG for deterministic random events (Blinded targeting, etc.). Defaults to Math.random.
+   * @param {SeededRng} options.rng required seeded RNG (implementing next() and getState()) for deterministic random events (Blinded targeting, etc.). There is no Math.random fallback.
    */
   constructor(roomCode, usernames, decks = {}, firstPlayer = null, options = {}) {
     if (!roomCode || !usernames || usernames.length !== 2)
@@ -114,7 +114,13 @@ export default class GameState {
     this._cardsPlayedThisRound = new Map();
 
     // Injectable RNG for deterministic random behavior (Blinded, etc.)
-    this._rng = options.rng || Math.random;
+    if (!options.rng || typeof options.rng.next !== "function" || typeof options.rng.getState !== "function") {
+      throw new Error(
+        "GameState requires a seeded RNG (options.rng) implementing next() and getState(); " +
+          "construct one with `new SeededRng(seed)`."
+      );
+    }
+    this._rng = options.rng;
 
     // Deterministic first player
     this.roomCode = roomCode;
@@ -238,7 +244,7 @@ export default class GameState {
   }
 
   #initializePlayerState(username, deck = null) {
-    if (!deck) deck = this.#generateRandomDeckOfCardIds();
+    if (!deck) deck = this.#defaultDeckOfCardIds();
 
     // codes for all non special positions
     const combatSlotCodes = Object.keys(GameState.positions)
@@ -287,18 +293,28 @@ export default class GameState {
   }
 
   /**
-   * Generate a random array of valid cardIds.
-   * @returns {Array<number>} Array of cardIds
+   * Card ids eligible for deck construction (excludes `unreachable` cards).
+   * Single source of truth shared by the default-deck fallback and gameFactory.
+   * @returns {Array<number>}
    */
-  #generateRandomDeckOfCardIds() {
-    const eligible = Object.values(GameState.cards)
+  static getEligibleCardIds() {
+    return Object.values(GameState.cards)
       .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
       .map((card) => card.cardId);
+  }
+
+  /**
+   * Deterministic fallback deck used only when a caller omits `decks`.
+   * Randomized deck generation (shuffling) is handled by `gameFactory` so the
+   * engine's constructor never consumes RNG — keeping replay construction
+   * RNG-neutral.
+   * @returns {Array<number>} Array of cardIds
+   */
+  #defaultDeckOfCardIds() {
+    const eligible = GameState.getEligibleCardIds();
     if (eligible.length < GameState.INIT_DECK_SIZE) {
       throw new Error("Not enough eligible cards to generate a legal deck.");
     }
-
-    // Deterministic default deck; caller-provided decks define actual gameplay setup.
     return eligible.slice(0, GameState.INIT_DECK_SIZE);
   }
 

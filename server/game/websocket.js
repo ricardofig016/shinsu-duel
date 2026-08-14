@@ -1,5 +1,5 @@
 import { readJsonFile } from "../utils/file-util.js";
-import GameState from "./GameState.js";
+import { createSeededGame } from "./gameFactory.js";
 import { roomsFilePath } from "../routes/game.js";
 
 const activeGames = new Map();
@@ -29,11 +29,19 @@ export function initializeGameWebSocket(io) {
       }
       // Initialize the game state only if there are 2 players in the room
       if (roomSockets.size == 2) {
-        const game = new GameState(roomCode, rooms[roomCode].players);
-        activeGames.set(roomCode, game);
-        broadcast(io, roomCode, "game-init", (playerSocket) =>
-          game.getClientState(playerSocket.request.session.username)
-        );
+        try {
+          const game = createSeededGame({
+            roomCode,
+            usernames: rooms[roomCode].players,
+            seed: rooms[roomCode].seed,
+          });
+          activeGames.set(roomCode, game);
+          broadcast(io, roomCode, "game-init", (playerSocket) =>
+            game.getClientState(playerSocket.request.session.username)
+          );
+        } catch (error) {
+          socket.emit("game-error", error.message);
+        }
       }
     }
 

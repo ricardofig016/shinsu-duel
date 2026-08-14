@@ -19,6 +19,7 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Keep public behavior and documentation aligned with the actual implementation.
 - Keep architecture documentation concise and practical. Document what a component is, why it has its design, how it integrates with related components, and how to use it. Do not write implementation history, phase reports, or unnecessary commentary.
 - Before changing documentation, review all relevant files in `docs/`; update only the sections affected by the current contract or architecture, and add a new document only when an important complex component is not adequately covered.
+- Avoid unecessary comments
 
 ## Rules and Project Context
 

@@ -1,4 +1,5 @@
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import Card from "../Card.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
 import EVT from "../EventCatalog.js";
@@ -11,7 +12,7 @@ function createGame() {
   return new GameState("TEST", players, {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  });
+  }, null, { rng: new SeededRng(1) });
 }
 
 function putInHand(game, username, name) {

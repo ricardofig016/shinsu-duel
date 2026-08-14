@@ -1,7 +1,9 @@
 import express from "express";
 import path from "path";
+import crypto from "node:crypto";
 import winston from "winston";
 import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
+import { generateSeed } from "../game/utils/SeededRng.js";
 
 const router = express.Router();
 export const roomsFilePath = path.resolve("server/data/rooms.json");
@@ -43,9 +45,14 @@ router.post("/createRoom", isAuthenticated, async (req, res) => {
 
   const rooms = await readJsonFile(roomsFilePath);
   let roomCode;
-  do roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  do roomCode = crypto.randomInt(0, 36 ** 6).toString(36).toUpperCase().padStart(6, "0");
   while (rooms[roomCode]);
-  rooms[roomCode] = { players: [], opponent, difficulty: opponent === "bot" ? difficulty : null };
+  rooms[roomCode] = {
+    players: [],
+    opponent,
+    difficulty: opponent === "bot" ? difficulty : null,
+    seed: generateSeed(),
+  };
 
   await writeJsonFile(roomsFilePath, rooms);
   logger.info(`Room created with code: ${roomCode}, opponent: ${opponent}, difficulty: ${difficulty}`);

@@ -12,6 +12,8 @@
  *    reproducing the identical subsequent sequence.
  */
 
+import crypto from "node:crypto";
+
 export default class SeededRng {
   /**
    * @param {number} seed 32-bit unsigned integer seed.
@@ -61,4 +63,14 @@ export default class SeededRng {
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     }
   }
+}
+
+/**
+ * Generate a cryptographically secure 32-bit unsigned seed for a new game.
+ * This is the only acceptable source of a game seed in production
+ *
+ * @returns {number} an integer in [0, 2^32 - 1].
+ */
+export function generateSeed() {
+  return crypto.randomInt(0, 0x100000000);
 }

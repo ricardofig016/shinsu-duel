@@ -251,8 +251,11 @@ reconstructs `GameState` from the `InitialState` metadata (decks, first
 player, seeded RNG), verifies the initial serialization, then re-applies each
 `UserAction`/`UserDecision`, asserting the full state matches after every step.
 
-Replay requires a **seeded RNG** (see `SeededRng`) — an unseeded `Math.random`
-game has no captureable random state and is not replayable.
+Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`.
+`gameFactory` turns a room's persisted seed into the seeded first-player roll
+and shuffled default decks, then passes them explicitly to `GameState`. The
+engine's constructor therefore never consumes RNG, so replay reconstruction
+always matches the recorded initial state.
 
 ---
 

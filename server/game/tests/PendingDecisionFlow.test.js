@@ -1,4 +1,5 @@
 import GameState from "../GameState.js";
+import SeededRng from "../utils/SeededRng.js";
 import { createLegalDeck, getCardIdByName } from "./utils.js";
 import Card from "../Card.js";
 import { resolveEffect } from "../EffectResolver.js";
@@ -9,7 +10,7 @@ function createGame() {
   return new GameState("TEST", players, {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  });
+  }, null, { rng: new SeededRng(1) });
 }
 
 function addUnit(game, owner, name, position = "fisherman") {

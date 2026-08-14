@@ -2,7 +2,7 @@ import { resolveTargets } from "../TargetResolver.js";
 import { createTestGame } from "./utils.js";
 
 function unit(id, owner) { return { id, owner, isAlive: () => true, card: { rank: "regular" } }; }
-function srng(...v) { let i = 0; return () => v[i++ % v.length]; }
+function srng(...v) { let i = 0; return { next: () => v[i++ % v.length] }; }
 
 describe("Blinded condition", () => {
   function makeGame() {
