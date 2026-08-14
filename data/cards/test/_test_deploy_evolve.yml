@@ -1,0 +1,19 @@
+type: unit
+name: _Test Deploy Evolve
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+  - scout
+  - light bearer
+  - wave controller
+passives:
+abilities:
+evolve:
+  - when i am deployed
+traits:
+  - barrier
+attributes:
+affiliations:
