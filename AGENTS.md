@@ -51,6 +51,7 @@ During implementation:
 - Before changing documentation, review all relevant files in `docs/`; update only the sections affected by the current contract or architecture, and add a new document only when an important complex component is not adequately covered.
 - Keep documentation concise and include only what is needed, no more.
 - Avoid unecessary comments in code.
+- Do not waste tokens reading files when all you need is already documented in docs/. Trust the documentation
 
 ## Testing and Bug Discipline
 
