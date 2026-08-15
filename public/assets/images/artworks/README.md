@@ -25,5 +25,5 @@ They were then cropped to 3x2 aspect ratio, upscaled to >1200x800 using [Microso
 Raw images were normalized to **1200×800 PNG** files (**3x2** aspect ratio) using `magick`:
 
 ```sh
-magick mogrify -path .\public\assets\images\artworks\ -filter Lanczos -resize "1200x800>" .\public\assets\images\artworks\raw\*.png
+magick mogrify -path .\public\assets\images\artworks\ -format png -filter Lanczos -resize "1200x800>" .\public\assets\images\artworks\raw\*.*
 ```
