@@ -49,7 +49,7 @@
   },
   "frozen": {
     "name": "Frozen",
-    "description": "When I use an ability, spend all combat slots",
+    "description": "When I use an ability, spend all ally combat slots",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": false,
