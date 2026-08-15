@@ -52,6 +52,19 @@
       },
       "additionalProperties": false
     },
+    "deckConstraint": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["unreachable", "generated_by"] },
+        "resource": { "type": "string", "minLength": 1 },
+        "amount": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "generated_by" } } }, "then": { "required": ["resource", "amount"] } }
+      ]
+    },
     "predicate": {
       "oneOf": [
         { "type": "object", "required": ["type", "target"], "properties": { "type": { "const": "has_unit" }, "target": { "$ref": "#/definitions/unitTarget" }, "negate": { "type": "boolean" } }, "additionalProperties": false },
@@ -65,7 +78,7 @@
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "attack", "summon", "draw", "free_ability_played", "quick_ability_used", "round_start_or_activation"] },
+        "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "attack", "summon", "draw", "free_ability_played", "quick_ability_used", "round_start_or_activation", "skill_played"] },
         "raw": { "type": "string", "minLength": 1 },
         "cardName": { "type": "string", "minLength": 1 },
         "target": { "type": "string", "minLength": 1 },
@@ -80,9 +93,10 @@
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "sequence", "conditional"] },
+        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "sequence", "conditional", "noop", "repeat_play"] },
         "raw": { "type": "string", "minLength": 1 },
         "quick": { "type": "boolean" },
+        "free": { "type": "boolean" },
         "position": { "type": ["string", "null"] },
         "trigger": { "$ref": "#/definitions/trigger" },
         "amount": { "type": "integer", "minimum": 0 },
@@ -136,7 +150,8 @@
         { "if": { "properties": { "type": { "const": "copy_ability" } } }, "then": { "required": ["source"] } },
         { "if": { "properties": { "type": { "const": "peek_hand" } } }, "then": { "required": ["owner"] } },
         { "if": { "properties": { "type": { "const": "sequence" } } }, "then": { "required": ["steps"] } },
-        { "if": { "properties": { "type": { "const": "conditional" } } }, "then": { "required": ["if", "then"] } }
+        { "if": { "properties": { "type": { "const": "conditional" } } }, "then": { "required": ["if", "then"] } },
+        { "if": { "properties": { "type": { "const": "repeat_play" } } }, "then": { "required": ["amount"] } }
       ]
     },
     "modifierNode": {
@@ -191,7 +206,9 @@
     "affiliations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "requirements": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "effects": { "type": "array", "items": { "$ref": "#/definitions/effectEntry" } },
-    "ignition": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+    "ignition": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "keywords": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
   },
   "oneOf": [
     { "properties": { "type": { "const": "unit" }, "positions": { "type": "array", "minItems": 1 } }, "required": ["type", "name", "cost", "hp", "rank", "positions", "passives", "abilities", "traits", "attributes", "affiliations"] },

@@ -52,10 +52,18 @@ Every node is an object with a discriminator `type` and a field set that depends
 | `type`     | every node                   | One of the node types in the catalog below.    |
 | `raw`      | top-level entries (required) | Authored display text. Never parsed.           |
 | `quick`    | abilities, effects           | `true` if the entry has the Quick keyword.     |
+| `free`     | abilities, effects           | `true` if the entry has the Free keyword.      |
 | `position` | abilities, passives          | Position code if position-scoped, else `null`. |
 | `trigger`  | passives                     | The event that activates a triggered passive.  |
 
 Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) require `raw`. Nested nodes (`sequence.steps[]`, `spend_shinsu.effect`, `grant_ability.ability`, `conditional.then/otherwise`) omit `raw`.
+
+### Card metadata
+
+Two card-level fields sit alongside node entries:
+
+- `keywords` — identity markers, independent of `type`/`attributes` (e.g. `keywords: ["jeonsul-baang"]`). The Jeonsulsa engine and future identity mechanics query it.
+- `deckConstraints` — deck-construction rules authored in YAML (see [Deck constraints](#deck-constraints)).
 
 ---
 
@@ -104,10 +112,12 @@ Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) requi
 
 ### Structural
 
-| `type`        | Fields                     | Meaning                                           |
-| ------------- | -------------------------- | ------------------------------------------------- |
-| `sequence`    | `steps`                    | Resolve `steps` in order.                         |
-| `conditional` | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`. |
+| `type`        | Fields                     | Meaning                                                          |
+| ------------- | -------------------------- | ---------------------------------------------------------------- |
+| `sequence`    | `steps`                    | Resolve `steps` in order.                                        |
+| `conditional` | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                |
+| `repeat_play` | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played. |
+| `noop`        | —                          | Explicit no-op (test placeholders, identity stubs).              |
 
 `spend_shinsu` and `grant_ability` are also structural: they wrap a nested `effect` / `ability` that is resolved (or registered) after their own step.
 
@@ -192,16 +202,17 @@ Modifiers carry their own `predicate` (via a `conditional`-style `if`) when gate
 
 Triggers drive triggered passives and transformations (`evolveInto` / `igniteInto`). Trigger `type` values:
 
-`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`.
+`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`.
 
 ---
 
 ## Deck constraints
 
-```json
-"deckConstraints": [
-  { "type": "unreachable" }
-]
+Deck constraints are authored as a top-level YAML field and compiled to the card:
+
+```yaml
+deckConstraints:
+  - type: unreachable
 ```
 
 - `unreachable` — cannot be included in a constructed deck; may still be created during play.
@@ -221,6 +232,8 @@ The compiler normalizes human-readable vocab into codes before emitting `cards.j
 | `khun family`  | `khun-family`  |
 
 The compiled schema is **closed**: `type` must be a known node type, unknown fields are rejected, and there is no `custom` type and no `handler` field. The runtime throws on any `type` with no registered handler.
+
+> **Transitional behavior** — while handlers are being brought online per `type`, a node whose `type` is valid but unregistered emits `EFFECT_UNSUPPORTED` and is skipped. Once the catalog is fully implemented, the runtime throws on any unregistered `type`.
 
 ---
 
