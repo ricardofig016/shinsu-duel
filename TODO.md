@@ -3,7 +3,6 @@
 ## Tasks
 
 - [ ] frontend: change board background to something from the webtoon
-- [ ] game: add Disarm keyword - Send a unit's equipment back to it's owners hand (choose on LIW)
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
 - [ ] rules: revisit position switching (maybe make it cost 1 shinsu)
