@@ -24,23 +24,42 @@ rank:
 positions:
 passives:
 abilities:
+  # - type: deal_damage
+  #   amount: 2
+  #   target: { side: enemy }
+  #   raw: "deal 2 to an enemy"
 evolve:
 traits:
 attributes:
 affiliations:
+keywords:
+deckConstraints:
 `,
   skill: `type: skill
 name: 
 cost: 
 requirements:
 effects:
+  # - type: deal_damage
+  #   amount: 2
+  #   target: { side: enemy }
+  #   raw: "deal 2 to an enemy"
+keywords:
+deckConstraints:
 `,
   equipment: `type: equipment
 name: 
 cost: 
 requirements:
 effects:
+  # - type: grant_trait
+  #   trait: strong
+  #   amount: 1
+  #   target: { side: bearer }
+  #   raw: "the bearer has Strong 1"
 ignition:
+keywords:
+deckConstraints:
 `,
 };
 

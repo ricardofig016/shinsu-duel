@@ -59,325 +59,96 @@ function parseTrait(raw) {
   };
 }
 
-// ── Unified DSL object factory ──────────────────────────────────────────────
-// All effect-like things (abilities, passives, effects, triggers) use the
-// same shape. `type: "custom"` means "hand-written handler needed."
-// Phase 4 expands the pattern matcher to produce typed objects like
-// `{ type: "deal_damage", target: "enemy", amount: 7 }`.
+// ── Structured DSL node compilation ─────────────────────────────────────────
+// Effects, abilities, and passives are authored as structured DSL nodes in
+// YAML (see docs/COMPILED_CARD_DSL.md). The compiler validates and normalizes
+// them — it never guesses meaning from prose. `raw` is display-only text and
+// is preserved verbatim. Human-readable vocab in code-bearing fields is
+// normalized to internal codes before the compiled-schema check.
 
-function dslObject(raw, handler = null, extras = {}) {
-  return { type: "custom", raw, handler, ...extras };
+const NESTED_NODE_KEYS = ["effect", "ability", "then", "otherwise"];
+const NESTED_DESCRIPTOR_KEYS = ["target", "card", "source", "if", "trigger"];
+
+function normalizeCondition(value) {
+  return String(value).trim().toLowerCase();
 }
 
-const conditionNames = new Set([
-  "blinded", "burned", "cursed", "disabled", "doomed", "exhausted",
-  "frozen", "ghost", "heavy", "poisoned", "rooted", "stunned", "weak",
-]);
-
-const traitNames = new Set([
-  "barrier", "bloodthirsty", "creator", "dealer", "immune",
-  "last one standing", "lethal", "pierce", "reflect", "regenerate",
-  "resilient", "ruthless", "sharpshooter", "strong", "taunt", "undying", "vengeful",
-]);
-
-const targetAliases = new Map([
-  ["me", "self"],
-  ["i", "self"],
-  ["the bearer", "bearer"],
-  ["an ally", "ally"],
-  ["all allies", "all_allies"],
-  ["an enemy", "enemy"],
-  ["a frontline enemy", "enemy_frontline"],
-  ["a backline enemy", "enemy_backline"],
-  ["all enemies", "all_enemies"],
-  ["a unit", "unit"],
-]);
-
-function normalizeTarget(rawTarget) {
-  const target = String(rawTarget).trim().toLowerCase().replace(/\s+/g, " ");
-  return targetAliases.get(target) || null;
+function normalizeTrait(value) {
+  return toCode(value);
 }
 
-function parseTargetWithCondition(rawTarget) {
-  const targetText = String(rawTarget).trim();
-  const target = normalizeTarget(targetText);
-  if (target) return { target };
-
-  const conditionalTarget = /^(an enemy|all enemies) with ([a-z ]+?)(?:\s+(\d+)\+?)?$/i.exec(targetText);
-  if (conditionalTarget && conditionNames.has(conditionalTarget[2].toLowerCase())) {
-    return {
-      target: normalizeTarget(conditionalTarget[1]),
-      condition: conditionalTarget[2].toLowerCase(),
-      conditionValue: conditionalTarget[3] ? Number(conditionalTarget[3]) : undefined,
-    };
-  }
-
-  const prefixedCondition = /^all ([a-z ]+?)(?:\s+(\d+)\+?)? enemies$/i.exec(targetText);
-  if (prefixedCondition && conditionNames.has(prefixedCondition[1].toLowerCase())) {
-    return {
-      target: "all_enemies",
-      condition: prefixedCondition[1].toLowerCase(),
-      conditionValue: prefixedCondition[2] ? Number(prefixedCondition[2]) : undefined,
-    };
-  }
-
-  return null;
+function normalizePosition(value) {
+  if (value === null) return null;
+  const str = String(value);
+  return positionCodeMap[str.toLowerCase()] || toCode(str);
 }
 
-function parseSimpleTarget(rawTarget) {
-  const target = normalizeTarget(rawTarget);
-  if (target) return { target };
-
-  const multipleEnemies = /^(\d+) enemies$/i.exec(String(rawTarget).trim());
-  if (multipleEnemies) return { target: "enemies", count: Number(multipleEnemies[1]) };
-
-  return null;
+function normalizeAffiliation(value) {
+  return toCode(value);
 }
 
-function parseEffectText(raw) {
-  const sourceText = String(raw);
-  const text = sourceText.trim();
-  const abilityMatch = /^ability:\s*(.+)$/i.exec(text);
-  if (abilityMatch) {
-    const ability = parseEffectWithMetadata(abilityMatch[1]) || dslObject(abilityMatch[1].trim());
-    return {
-      type: "grant_ability",
-      target: "bearer",
-      ability,
-      raw: sourceText,
-      handler: null,
-    };
+function normalizeAttribute(value) {
+  const str = String(value);
+  return attributeCodeMap[str.toLowerCase()] || toCode(str);
+}
+
+function normalizeRank(value) {
+  // Ranks keep their space ("high ranker"), unlike dashed codes.
+  return String(value).trim().toLowerCase();
+}
+
+function normalizeEffectObject(obj, context) {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
+    throw new Error(`${context}: expected an object`);
   }
 
-  const spendMatch = /^spend\s+(\d+):\s*(.+)$/i.exec(text);
-  if (spendMatch) {
-    return {
-      type: "spend_shinsu",
-      amount: Number(spendMatch[1]),
-      effect: parseEffectWithMetadata(spendMatch[2]) || dslObject(spendMatch[2].trim()),
-      raw: sourceText,
-      handler: null,
-    };
-  }
+  const normalized = { ...obj };
 
-  const createMatch = /^create\s+(\d+)$/i.exec(text);
-  if (createMatch) {
-    return { type: "create_lighthouse", amount: Number(createMatch[1]), raw: sourceText, handler: null };
-  }
+  if (obj.condition !== undefined) normalized.condition = normalizeCondition(obj.condition);
+  if (obj.trait !== undefined) normalized.trait = normalizeTrait(obj.trait);
+  if (obj.position !== undefined) normalized.position = normalizePosition(obj.position);
+  if (obj.affiliation !== undefined) normalized.affiliation = normalizeAffiliation(obj.affiliation);
+  if (obj.attribute !== undefined) normalized.attribute = normalizeAttribute(obj.attribute);
+  if (obj.rank !== undefined) normalized.rank = normalizeRank(obj.rank);
 
-  const compressKeywordMatch = /^compress\s+(\d+)$/i.exec(text);
-  if (compressKeywordMatch) {
-    return { type: "compress_shinsu", amount: Number(compressKeywordMatch[1]), raw: sourceText, handler: null };
+  // Nested effect nodes: sequence.steps is an array; the rest are single.
+  if (obj.steps !== undefined) {
+    if (!Array.isArray(obj.steps)) {
+      throw new Error(`${context}.steps: expected an array`);
+    }
+    normalized.steps = obj.steps.map((step, i) =>
+      normalizeEffectObject(step, `${context}.steps[${i}]`)
+    );
   }
-
-  // Canonical form: "Compress <amount> from <selector> in your hand".
-  // The selector is compiled without interpretation so runtime can resolve
-  // exact names, attributes, and future hand-card selectors consistently.
-  const compressMatch = /^compress\s+(\d+)\s+from\s+(.+?)\s+in your hand$/i.exec(text);
-  if (compressMatch) {
-    return {
-      type: "compress_shinsu",
-      amount: Number(compressMatch[1]),
-      targetCardSelector: compressMatch[2].trim(),
-      raw: sourceText,
-      handler: null,
-    };
-  }
-
-  const chargeMatch = /^charge\s+(\d+)$/i.exec(text);
-  if (chargeMatch) {
-    return { type: "charge_shinsu", amount: Number(chargeMatch[1]), raw: sourceText, handler: null };
-  }
-
-  const destroyMatch = /^destroy\s+(\d+)$/i.exec(text);
-  if (destroyMatch) {
-    return { type: "destroy_lighthouse", amount: Number(destroyMatch[1]), raw: sourceText, handler: null };
-  }
-
-  const reclaimMatch = /^reclaim\s+(\d+)$/i.exec(text);
-  if (reclaimMatch) {
-    return { type: "reclaim_cards", amount: Number(reclaimMatch[1]), raw: sourceText, handler: null };
-  }
-
-  const cleanseMatch = /^cleanse(?:\s+(.+))?$/i.exec(text);
-  if (cleanseMatch) {
-    const target = cleanseMatch[1] ? parseSimpleTarget(cleanseMatch[1]) : { target: "self" };
-    if (target) return { type: "cleanse", ...target, raw: sourceText, handler: null };
-  }
-
-  const dealMatch = /^deal\s+(\d+)\s+to\s+(.+)$/i.exec(text);
-  if (dealMatch) {
-    const target = parseTargetWithCondition(dealMatch[2]);
-    if (target) {
-      return { type: "deal_damage", amount: Number(dealMatch[1]), ...target, raw: sourceText, handler: null };
+  for (const key of NESTED_NODE_KEYS) {
+    if (obj[key] !== undefined) {
+      normalized[key] = normalizeEffectObject(obj[key], `${context}.${key}`);
     }
   }
 
-  const healMatch = /^heal\s+(.+?)\s+(\d+)\s*hp$/i.exec(text);
-  if (healMatch) {
-    const target = parseSimpleTarget(healMatch[1]);
-    if (target) {
-      return { type: "heal", amount: Number(healMatch[2]), ...target, raw: sourceText, handler: null };
+  // Descriptor/predicate/trigger objects — recurse only when object-valued
+  // (a trigger's `target`/`source` are plain strings, left as-is).
+  for (const key of NESTED_DESCRIPTOR_KEYS) {
+    if (obj[key] !== undefined && typeof obj[key] === "object") {
+      normalized[key] = normalizeEffectObject(obj[key], `${context}.${key}`);
     }
   }
 
-  const giveConditionMatch = /^give\s+([a-z]+)(?:\s+(\d+))?\s+to\s+(.+)$/i.exec(text);
-  if (giveConditionMatch && conditionNames.has(giveConditionMatch[1].toLowerCase())) {
-    const target = parseSimpleTarget(giveConditionMatch[3]);
-    if (target) {
-      return {
-        type: "give_condition",
-        condition: giveConditionMatch[1].toLowerCase(),
-        ...(giveConditionMatch[2] ? { amount: Number(giveConditionMatch[2]) } : {}),
-        ...target,
-        raw: sourceText,
-        handler: null,
-      };
-    }
-  }
-
-  const traitMatch = /^(the bearer|i)\s+has\s+(.+?)(?:\s+(\d+))?$/i.exec(text);
-  if (traitMatch && traitNames.has(traitMatch[2].toLowerCase())) {
-    return {
-      type: "grant_trait",
-      target: traitMatch[1].toLowerCase() === "i" ? "self" : "bearer",
-      trait: traitMatch[2].toLowerCase(),
-      ...(traitMatch[3] ? { amount: Number(traitMatch[3]) } : {}),
-      raw: sourceText,
-      handler: null,
-    };
-  }
-
-  // Hwayeomsa: Fire Core resolves to create the highest affordable Incinerate
-  const incinerateMatch = /^spend fire charges to create the highest affordable incinerate in your hand$/i.exec(text);
-  if (incinerateMatch) {
-    return { type: "create_incinerate", raw: sourceText, handler: null };
-  }
-
-  return null;
+  return normalized;
 }
 
-function parseEffectWithMetadata(raw) {
-  const sourceText = String(raw);
-  const text = sourceText.trim();
-  const positionMatch = /^(.+?):\s*(.+)$/.exec(text);
-  const position = positionMatch
-    ? positionCodeMap[positionMatch[1].trim().toLowerCase()] || null
-    : null;
-  const effectText = position ? positionMatch[2].trim() : text;
-  const quick = /^quick:?\s*/i.test(effectText);
-  const normalizedEffect = quick ? effectText.replace(/^quick:?\s*/i, "").trim() : effectText;
-  const parsed = parseEffectText(normalizedEffect);
-
-  if (!parsed) return null;
-  return { ...parsed, raw: sourceText, ...(quick ? { quick: true } : {}), ...(position ? { position } : {}) };
+function compileNode(node, context) {
+  if (node === null || typeof node !== "object" || Array.isArray(node)) {
+    throw new Error(`${context}: expected a structured effect object`);
+  }
+  if (typeof node.type !== "string" || node.type.trim() === "") {
+    throw new Error(`${context}: missing non-empty "type"`);
+  }
+  return normalizeEffectObject(node, context);
 }
 
-// ── Effect compilation (keyword expansion) ──────────────────────────────────
-
-const UNREACHABLE_KEYWORDS = new Set([
-  "unreachable", "unreachable.",
-]);
-
-function isUnreachableKeyword(text) {
-  const t = text.trim().toLowerCase().replace(/[.]$/, "");
-  return UNREACHABLE_KEYWORDS.has(t);
-}
-
-function compileEffects(rawEffects) {
-  const compiled = [];
-  const deckConstraints = [];
-
-  for (const effect of rawEffects) {
-    const sourceText = String(effect);
-    const str = sourceText.trim();
-    if (!str) continue;
-
-    // Check for "Unreachable" keyword → deck constraint
-    if (isUnreachableKeyword(str)) {
-      deckConstraints.push({ type: "unreachable" });
-      // Also keep the effect in compiled effects as a note
-      compiled.push(dslObject(sourceText, "UnreachableKeyword"));
-      continue;
-    }
-
-    if (/^quick:?$/i.test(str)) {
-      compiled.push(dslObject(sourceText, null, { quick: true }));
-      continue;
-    }
-
-    compiled.push(parseEffectWithMetadata(sourceText) || dslObject(sourceText));
-  }
-
-  return { effects: compiled, deckConstraints };
-}
-
-// ── Ability/Passive compilation ─────────────────────────────────────────────
-// Both produce the same unified DSL shape as effects.
-// Phase 4: `type` changes from "custom" to structured types as the pattern matcher grows.
-
-function compileAbility(raw) {
-  const sourceText = String(raw);
-  const str = sourceText.trim();
-  if (!str) return null;
-
-  let position = null;
-  let effectText = str;
-
-  // Check for position-scoped ability: "position: effect"
-  const positionMatch = /^(.+?):\s*(.+)$/.exec(str);
-  if (positionMatch) {
-    const posName = positionMatch[1].trim().toLowerCase();
-    const knownPosition = positionCodeMap[posName];
-    if (knownPosition) {
-      position = knownPosition;
-      effectText = positionMatch[2].trim();
-    }
-  }
-
-  // Check for Quick keyword
-  const quickRegex = /^quick:?\s*/i;
-  const isQuick = quickRegex.test(effectText);
-  if (isQuick) {
-    effectText = effectText.replace(quickRegex, "").trim();
-  }
-
-  const parsed = parseEffectText(effectText);
-  if (parsed) {
-    return { ...parsed, raw: sourceText, quick: isQuick, position };
-  }
-
-  return dslObject(sourceText, null, { quick: isQuick, position });
-}
-
-function compilePassive(raw) {
-  const sourceText = String(raw);
-  const str = sourceText.trim();
-  if (!str) return null;
-
-  const timedMatch = /^(round start|round end):\s*(.+)$/i.exec(str);
-  if (timedMatch) {
-    const parsed = parseEffectWithMetadata(timedMatch[2]);
-    if (parsed) {
-      return { ...parsed, raw: sourceText, trigger: timedMatch[1].toLowerCase() };
-    }
-  }
-
-  let position = null;
-  let effectText = str;
-
-  // Check for position-scoped passive
-  const positionMatch = /^(.+?):\s*(.+)$/.exec(str);
-  if (positionMatch) {
-    const posName = positionMatch[1].trim().toLowerCase();
-    const knownPosition = positionCodeMap[posName];
-    if (knownPosition) {
-      position = knownPosition;
-      effectText = positionMatch[2].trim();
-    }
-  }
-
-  return dslObject(sourceText, null, { position });
+function compileEntries(entries, context) {
+  return (entries || []).map((entry, i) => compileNode(entry, `${context}[${i}]`));
 }
 
 // ── Trigger parsing (Phase 2) ───────────────────────────────────────────────
@@ -557,14 +328,17 @@ function resolveIgnitedFrom(card, allCards) {
 
 function compileCard(rawCard, allCards) {
   const type = rawCard.type;
+  const cardName = rawCard.name || "<unnamed>";
 
-  // Base fields
+  // Base fields (shared by all card types)
   const compiled = {
     cardId: null, // assigned after sorting
     type: type,
     name: rawCard.name || "",
     sobriquet: rawCard.sobriquet || null,
     cost: rawCard.cost ?? 0,
+    keywords: (rawCard.keywords || []).map(toCode),
+    deckConstraints: (rawCard.deckConstraints || []).map((constraint) => ({ ...constraint })),
   };
 
   if (type === "unit") {
@@ -594,23 +368,14 @@ function compileCard(rawCard, allCards) {
     // Affiliations
     compiled.affiliations = (rawCard.affiliations || []).map(toCode);
 
-    // Abilities — unified DSL objects (same shape as effects)
-    compiled.abilities = (rawCard.abilities || [])
-      .map(compileAbility)
-      .filter(Boolean);
-
-    // Passives — unified DSL objects (same shape as effects)
-    compiled.passives = (rawCard.passives || [])
-      .map(compilePassive)
-      .filter(Boolean);
+    // Abilities + passives — structured DSL nodes (same shape as effects)
+    compiled.abilities = compileEntries(rawCard.abilities, `${cardName}.abilities`);
+    compiled.passives = compileEntries(rawCard.passives, `${cardName}.passives`);
 
     // Evolution (computed after all cards have cardIds)
     compiled._evolveRaw = rawCard.evolve || [];
     compiled.evolveInto = null;
     compiled.evolvedFrom = null;
-
-    // Deck constraints (units can have "unreachable" keyword too)
-    compiled.deckConstraints = [];
 
     // Effects/Requirements not applicable to units
     compiled.requirements = [];
@@ -621,10 +386,7 @@ function compileCard(rawCard, allCards) {
 
   if (type === "skill") {
     compiled.requirements = rawCard.requirements || [];
-
-    const { effects, deckConstraints } = compileEffects(rawCard.effects || []);
-    compiled.effects = effects;
-    compiled.deckConstraints = deckConstraints;
+    compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`);
 
     // Not applicable to skills
     compiled.hp = null;
@@ -643,10 +405,7 @@ function compileCard(rawCard, allCards) {
 
   if (type === "equipment") {
     compiled.requirements = rawCard.requirements || [];
-
-    const { effects, deckConstraints } = compileEffects(rawCard.effects || []);
-    compiled.effects = effects;
-    compiled.deckConstraints = deckConstraints;
+    compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`);
 
     // Ignition (computed after all cards have cardIds)
     compiled._ignitionRaw = rawCard.ignition || [];
@@ -682,6 +441,7 @@ function cleanCompiled(card) {
   if (card.evolvedFrom === null) delete card.evolvedFrom;
   if (card.igniteInto === null) delete card.igniteInto;
   if (card.ignitedFrom === null) delete card.ignitedFrom;
+  if (card.keywords && card.keywords.length === 0) delete card.keywords;
 
   // Delete type-inappropriate empty arrays (sparse schema per plan)
   // Unit-only arrays — remove from non-unit cards

@@ -108,7 +108,7 @@ function normalizeCardForSchema(card) {
   const normalized = { ...card };
   const arrayFields = [
     "positions", "passives", "abilities", "evolve", "traits", "attributes",
-    "affiliations", "requirements", "effects", "ignition",
+    "affiliations", "requirements", "effects", "ignition", "keywords", "deckConstraints",
   ];
 
   for (const field of arrayFields) {
@@ -252,6 +252,35 @@ function validateAffiliations(affiliations, errors) {
       addError(errors, `affiliations[${index}]`, `duplicate affiliation "${aff}"`);
     }
     seen.add(affLower);
+  });
+}
+
+function validateKeywords(keywords, errors) {
+  const seen = new Set();
+  keywords.forEach((keyword, index) => {
+    if (typeof keyword !== "string" || keyword.trim().length === 0) {
+      addError(errors, `keywords[${index}]`, "must be a non-empty string");
+      return;
+    }
+    const key = keyword.trim().toLowerCase();
+    if (seen.has(key)) {
+      addError(errors, `keywords[${index}]`, `duplicate keyword "${keyword}"`);
+    }
+    seen.add(key);
+  });
+}
+
+function validateDeckConstraints(constraints, errors) {
+  const seen = new Set();
+  constraints.forEach((constraint, index) => {
+    if (!constraint || typeof constraint !== "object" || typeof constraint.type !== "string") {
+      addError(errors, `deckConstraints[${index}]`, 'must be an object with a string "type"');
+      return;
+    }
+    if (seen.has(constraint.type)) {
+      addError(errors, `deckConstraints[${index}]`, `duplicate constraint type "${constraint.type}"`);
+    }
+    seen.add(constraint.type);
   });
 }
 
@@ -498,6 +527,8 @@ function validateCard(card, filename) {
   }
 
   errors.push(...typeErrors);
+  validateKeywords(ensureArray(card.keywords), errors);
+  validateDeckConstraints(ensureArray(card.deckConstraints), errors);
   validateFilename(card, filename, warnings);
 
   // Warnings are informational only — don't fail validation
