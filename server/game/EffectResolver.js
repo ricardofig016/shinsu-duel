@@ -22,6 +22,7 @@ import CompressShinsuHandler from "./handlers/CompressShinsuHandler.js";
 import ReclaimCardsHandler from "./handlers/ReclaimCardsHandler.js";
 import GrantAbilityHandler from "./handlers/GrantAbilityHandler.js";
 import CreateIncinerateHandler from "./handlers/CreateIncinerateHandler.js";
+import NoopHandler from "./handlers/NoopHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
 import EVT from "./EventCatalog.js";
@@ -50,6 +51,7 @@ function getRegistry() {
     _registry.register("reclaim_cards", ReclaimCardsHandler);
     _registry.register("grant_ability", GrantAbilityHandler);
     _registry.register("create_incinerate", CreateIncinerateHandler);
+    _registry.register("noop", NoopHandler);
   }
   return _registry;
 }
@@ -79,25 +81,18 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
 
   const type = effect.type;
 
-  // Preserve unsupported card text but surface it clearly in the game log.
-  // This keeps compilation forward-compatible without silently claiming that
-  // an authored mechanic resolved.
-  if (type === "custom") {
-    const result = { skipped: true, reason: "unsupported_effect", type: "custom", raw: effect.raw };
+  const registry = getRegistry();
+  if (!registry.has(type)) {
+    // Transitional: a valid DSL `type` whose handler is not yet implemented is
+    // skipped and surfaced through EFFECT_UNSUPPORTED rather than throwing.
+    // Once the full catalog is implemented, this path becomes a hard error.
+    const result = { skipped: true, reason: "unsupported_effect", type, raw: effect.raw };
     gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, {
       ...result,
       owner: extra.owner || extra.sourceOwner || null,
       sourceId: extra.sourceId || null,
     });
     return result;
-  }
-
-  const registry = getRegistry();
-  if (!registry.has(type)) {
-    throw new Error(
-      `EffectResolver: no handler registered for type "${type}". ` +
-      `Raw: "${effect.raw}"`
-    );
   }
 
   const handler = registry.get(type);

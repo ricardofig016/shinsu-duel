@@ -28,6 +28,14 @@ describe("PassiveManager", () => {
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
     const karaka = putInHand(game, "Alice", "Karaka - Evolved");
+    karaka.passiveAbilities = [{
+      type: "deal_damage",
+      amount: 3,
+      target: "all_enemies",
+      condition: "rooted",
+      raw: "round end: deal 3 to all Rooted enemies",
+      trigger: { type: "round_end" },
+    }];
 
     const handIndex = game.playerStates.Alice.hand.indexOf(karaka);
     const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "wave-controller");
@@ -60,13 +68,13 @@ describe("PassiveManager", () => {
     expect(target.currentHp).toBe(targetCard.maxHp);
   });
 
-  test("emits an observable event when an unsupported effect is skipped", () => {
+  test("emits an observable event when an unregistered effect type is skipped", () => {
     const game = createGame();
     const events = [];
     game.eventBus.on("effect:unsupported", (payload) => events.push(payload));
 
     const result = resolveEffect(
-      { type: "custom", raw: "unimplemented card text", handler: null },
+      { type: "slay", target: { side: "enemy" }, raw: "Slay an enemy" },
       { emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) },
       game,
       { owner: "Alice", sourceId: "System" }
@@ -76,5 +84,41 @@ describe("PassiveManager", () => {
     expect(events).toEqual(expect.arrayContaining([
       expect.objectContaining({ reason: "unsupported_effect", sourceId: "System" }),
     ]));
+  });
+
+  test("resolves a registered noop effect without error", () => {
+    const game = createGame();
+    const result = resolveEffect(
+      { type: "noop", raw: "test" },
+      { emitChild: () => {} },
+      game,
+      { owner: "Alice" }
+    );
+
+    expect(result).toEqual({ resolved: true });
+  });
+
+  test("_parseTrigger maps structured round triggers and skips unknown ones", () => {
+    const game = createGame();
+    const manager = game._passiveManager;
+
+    const roundStart = manager._parseTrigger({
+      type: "deal_damage", amount: 1, target: { side: "enemy" }, trigger: { type: "round_start" },
+    });
+    expect(roundStart.eventName).toBe(EVT.ROUND_START);
+    expect(roundStart.effect.trigger).toEqual({ type: "round_start" });
+
+    const roundEnd = manager._parseTrigger({
+      type: "heal", amount: 1, target: { side: "self" }, trigger: { type: "round_end" },
+    });
+    expect(roundEnd.eventName).toBe(EVT.ROUND_END);
+
+    expect(manager._parseTrigger({
+      type: "modify_stat", stat: "damage", amount: 1, target: { side: "self" },
+    })).toBeNull();
+    expect(manager._parseTrigger({
+      type: "deal_damage", amount: 1, trigger: { type: "attack" },
+    })).toBeNull();
+    expect(manager._parseTrigger({ type: "deal_damage", amount: 1 })).toBeNull();
   });
 });

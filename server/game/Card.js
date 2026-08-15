@@ -27,6 +27,7 @@ export default class Card {
     this.abilities = cardData.abilities || [];   // unified DSL objects
     this.passiveAbilities = cardData.passives || []; // unified DSL objects
     this.attributes = cardData.attributes || [];
+    this.keywords = cardData.keywords || [];
     this.requirements = cardData.requirements || [];
     this.effects = cardData.effects || [];
     this.deckConstraints = cardData.deckConstraints || [];

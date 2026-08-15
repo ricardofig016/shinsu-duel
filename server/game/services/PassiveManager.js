@@ -43,12 +43,19 @@ export default class PassiveManager {
   }
 
   _parseTrigger(passive) {
-    if (!passive?.trigger || passive.type === "custom") return null;
+    const trigger = passive?.trigger;
+    if (!trigger || typeof trigger !== "object") return null;
 
-    return {
-      eventName: passive.trigger === "round start" ? EVT.ROUND_START : EVT.ROUND_END,
-      effect: passive,
-    };
+    if (trigger.type === "round_start") {
+      return { eventName: EVT.ROUND_START, effect: passive };
+    }
+    if (trigger.type === "round_end") {
+      return { eventName: EVT.ROUND_END, effect: passive };
+    }
+
+    // Other trigger types and always-on modifiers are not yet wired here —
+    // they land in later phases. Skip registration.
+    return null;
   }
 
   _matches(trigger, unit, payload, gameState) {
