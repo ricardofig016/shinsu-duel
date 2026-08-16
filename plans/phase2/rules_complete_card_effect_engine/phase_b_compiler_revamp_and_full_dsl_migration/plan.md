@@ -61,7 +61,3 @@ _Phase B5 — Tests & docs_ _(depends on B3+B4)_
 1. **`raw` as the display contract** — after migration, `raw` is never parsed; all YAML authors must write structured nodes. The compiler's fail-fast errors should include card name + field path to make this authorable.
 2. **`card-lookup.js`** reads YAML — verify substring searches still work on structured YAML (raw text is still present, so likely fine).
 3. **Transitional runtime fidelity** — between Phase B and Phases C–I, migrated cards' unimplemented effects silently skip with `EFFECT_UNSUPPORTED` warnings (same observable behavior as today's `custom` skip). Phase J converts skip→throw and removes the final vestiges.
-
----
-
-If this looks right, you can hand off to implementation. Want me to adjust the batch grouping in B4 (e.g., migrate by file tree `units/`/`skills/`/`equipments/` instead of by cluster), or anything else first?

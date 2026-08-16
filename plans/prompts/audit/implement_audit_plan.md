@@ -10,7 +10,7 @@ RULES.md is the source of truth for how the game should behave. docs/ is the sou
 
 start by reading PROJECT_RESURRECTION_PLAN.md, RULES.md, and all the md files in docs/ before you start making changes, to understand the scope of the project.
 
-if you check of a todo item, simply change `[ ]` to `[x]` on that item. do not make any modifications to TODO.md besides that.
+if you check of a todo item, simply change `[ ]` to `[x]` on that item. do not make any modifications to `todo\TODO.md` besides that.
 
 always follow these core principles:
 
