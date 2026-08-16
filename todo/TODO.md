@@ -5,12 +5,14 @@
 - [ ] frontend: change board background to something from the webtoon
 - [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
-- [ ] rules: revisit position switching (maybe make it cost 1 shinsu / the combat slot)
+- [ ] rules: revisit position switching (cost 1 shinsu / spend a combat slot)
 - [ ] public: plan how image artworks should be organized
 - [ ] new card: equipment - my bearer can assume any position
 - [ ] new card: passive - allies in my position have +x HP
 - [ ] new card: landmark - round start: give frontline units Blinded
 - [ ] data: add yml files for new cards in `todo\cards_to_add.md `
+- [ ] scripts: fix lookup after yml structure changes
+- [ ] rules: add "steal" keyword
 
 ## In Progress
 
