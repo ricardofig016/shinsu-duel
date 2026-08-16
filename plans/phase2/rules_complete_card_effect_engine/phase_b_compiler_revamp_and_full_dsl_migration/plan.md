@@ -4,23 +4,23 @@
 
 **Steps**
 
-_Phase B1 — Schema + DSL contract updates_
+_Phase B1 — Schema + DSL contract updates_ (done)
 
 1. Add to `card.schema.json` + `compiled-cards.schema.json`: `keywords` (card-level, all 3 types), `deckConstraints` (source-level; compiled already has it), `noop` + `repeat_play {amount, cardName?}` in the effectNode enum, `free` boolean in effectNode props, `skill_played {cardName}` in the trigger enum.
 2. Update `COMPILED_CARD_DSL.md`: keywords field, deckConstraints authoring, new node/trigger types, transitional unregistered-skip note.
 
-_Phase B2 — Compiler revamp_ _(depends on B1)_
+_Phase B2 — Compiler revamp_ _(depends on B1)_ (done)
 
 3. Rewrite `card-compile.js` — **delete** `parseEffectText`, `parseEffectWithMetadata`, `dslObject` fallback, regex paths in `compileEffects`/`compileAbility`/`compilePassive`, `isUnreachableKeyword`. **Add** a recursive structured-node validator + normalizer (handles `sequence.steps`, `spend_shinsu.effect`, `grant_ability.ability`, `conditional.then/otherwise`), fail-fast descriptive errors, `raw` preservation, code normalization (position/attribute/affiliation/trait/condition → codes), `deckConstraints` hoisting, `keywords`/`quick`/`free`/`position`/`trigger` passthrough. **Keep** `parseTrigger` (evolve/ignite), cross-ref resolution, name sort + cardId assignment, `cleanCompiled`, `checkIcons`, end-of-pipeline compiled-schema validation.
 4. Update `card-validate.js` (schema-driven; keep rank/cost/position/trait/affiliation domain rules; validate `deckConstraints`/`keywords`) and `card-create.js` templates (structured scaffolds).
 
-_Phase B3 — Runtime transitional_ _(parallel with B2)_
+_Phase B3 — Runtime transitional_ _(parallel with B2)_ (done)
 
 5. `EffectResolver.js`: replace the `type === "custom"` skip with `!registry.has(type)` → skip + emit `EFFECT_UNSUPPORTED` (no throw). Phase J later flips this to throw.
 6. `PassiveManager.js`: `_parseTrigger` reads structured `passive.trigger.type` (`round_start`→`ROUND_START`, `round_end`→`ROUND_END`); unknown triggers / modifiers / no-trigger → `null` (transitional skip).
 7. New `server/game/handlers/NoopHandler.js` + registry registration for `noop`; `Card.js` gains `this.keywords = cardData.keywords || []`.
 
-_Phase B4 — Full YAML migration (all 82 files; atomic, single landing)_ _(depends on B2)_
+_Phase B4 — Full YAML migration (all 82 files; atomic, single landing)_ _(depends on B2)_ (done)
 
 8. Batch 1 (A1–A4): `unreachable` → top-level `deckConstraints` only (drop the duplicated `handler` effect); `Quick` marker → `quick: true` on the real effect; "i am a Jeonsul Baang" → `keywords: [jeonsul-baang]`; `_test_*` → `{type: noop, raw: "test"}`.
 9. Batch 2 (C, D, E, J): compound deal+condition chains → `sequence`; heal+cleanse; simple condition grants; draw/reclaim/create with cost gating (Incinerate "create me" → `deckConstraints: [{type: generated_by, ...}]`).

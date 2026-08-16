@@ -13,6 +13,7 @@
 - [ ] data: add yml files for new cards in `todo\cards_to_add.md `
 - [ ] scripts: fix lookup after yml structure changes
 - [ ] rules: add "steal" keyword
+- [ ] rules: add contracts in `todo\contracts.md`
 
 ## In Progress
 
