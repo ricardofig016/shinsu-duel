@@ -6,8 +6,22 @@ rank:
 positions:
   - landmark
 passives:
-  - "deploy: chose a position"
-  - all units in <position> cannot evolve, have Rooted, and cannot be equipped
+  - type: choose_position
+    trigger: { type: deploy }
+    raw: "deploy: chose a position"
+  - type: global_rule
+    rule: prevent_evolve
+    position: chosen
+    raw: "all units in the chosen position cannot evolve"
+  - type: global_rule
+    rule: prevent_equip
+    position: chosen
+    raw: "all units in the chosen position cannot be equipped"
+  - type: global_rule
+    rule: grant_global_condition
+    condition: rooted
+    position: chosen
+    raw: "all units in the chosen position have Rooted"
 abilities:
 evolve:
 traits:

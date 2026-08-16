@@ -6,9 +6,22 @@ rank: ranker
 positions:
   - scout
 passives:
-  - if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units
+  - type: modify_condition
+    condition: poisoned
+    amount: 2
+    target:
+      side: enemy
+      rank: high ranker
+    if:
+      type: has_equipped
+      cardName: "Purple Dementor"
+    raw: "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
 abilities:
-  - give Poisoned 1 to a backline enemy
+  - type: give_condition
+    condition: poisoned
+    amount: 1
+    target: { side: enemy, scope: backline }
+    raw: "give Poisoned 1 to a backline enemy"
 evolve:
 traits:
 attributes:

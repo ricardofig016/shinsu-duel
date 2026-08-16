@@ -2,6 +2,12 @@ type: skill
 name: Static Baang
 cost: 1
 requirements:
+keywords:
+  - code: jeonsul-baang
+    raw: "i am a Jeonsul Baang"
 effects:
-  - i am a Jeonsul Baang
-  - give Weak 1 to a unit
+  - type: give_condition
+    condition: weak
+    amount: 1
+    target: { side: any }
+    raw: "give Weak 1 to a unit"

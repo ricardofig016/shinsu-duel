@@ -3,5 +3,12 @@ name: Blue Thryssa
 cost: 2
 requirements:
 effects:
-  - "heal the bearer 2 HP and Cleanse the bearer"
+  - type: sequence
+    steps:
+      - type: heal
+        amount: 2
+        target: { side: bearer }
+      - type: cleanse
+        target: { side: bearer }
+    raw: "heal the bearer 2 HP and Cleanse the bearer"
 ignition:

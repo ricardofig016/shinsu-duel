@@ -6,10 +6,27 @@ rank: high ranker
 positions:
   - fisherman
 passives:
-  - if i have an allied Guide, i have Taunt
+  - type: conditional
+    if:
+      type: has_unit
+      target:
+        side: ally
+        attribute: [red witch, silver dwarf]
+    then:
+      type: grant_trait
+      trait: taunt
+      target: { side: self }
+    raw: "if i have an allied Guide, i have Taunt"
 abilities:
-  - deal 6 to an enemy
-  - give me Ruthless 1
+  - type: deal_damage
+    amount: 6
+    target: { side: enemy }
+    raw: "deal 6 to an enemy"
+  - type: grant_trait
+    trait: ruthless
+    amount: 1
+    target: { side: self }
+    raw: "give me Ruthless 1"
 evolve:
 traits:
   - resilient 3

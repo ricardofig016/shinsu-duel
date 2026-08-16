@@ -7,11 +7,26 @@ positions:
   - scout
   - light bearer
 passives:
-  - whenever you draw an equipment, draw again
-  - when i'm equipped with Frog Fisher, Reclaim 1 Equipment card
+  - type: draw_card
+    amount: 1
+    trigger: { type: draw, cardType: equipment }
+    raw: "whenever you draw an equipment, draw again"
+  - type: reclaim_cards
+    amount: 1
+    card:
+      type: equipment
+    trigger: { type: equip, cardName: Frog Fisher }
+    raw: "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
 abilities:
-  - draw an equipment of your choice
-  - force an enemy to switch positions
+  - type: draw_card
+    amount: 1
+    card:
+      type: equipment
+      choose: true
+    raw: "draw an equipment of your choice"
+  - type: switch_position
+    target: { side: enemy }
+    raw: "force an enemy to switch positions"
 evolve:
 traits:
   - creator 3

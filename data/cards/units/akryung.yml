@@ -7,10 +7,22 @@ positions:
   - wave controller
   - spear bearer
 passives:
-  - "round start: give me all traits currently held by an allied Rachel"
+  - type: copy_traits
+    target: { side: self }
+    source:
+      side: ally
+      name: Rachel
+    trigger: { type: round_start }
+    raw: "round start: give me all traits currently held by an allied Rachel"
 abilities:
-  - create Shinwonryu in your hand
-  - heal me 3 HP
+  - type: create_card
+    card:
+      name: Shinwonryu
+    raw: "create Shinwonryu in your hand"
+  - type: heal
+    amount: 3
+    target: { side: self }
+    raw: "heal me 3 HP"
 evolve:
 traits:
   - resilient 1

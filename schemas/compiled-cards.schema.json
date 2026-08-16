@@ -4,6 +4,26 @@
   "title": "Shinsu Duel Compiled Cards",
   "description": "Schema for server/data/cards.json generated from validated YAML source cards. The DSL is closed: every effect/ability/passive node has a known `type`, there is no `custom` type, and no `handler` field (see docs/COMPILED_CARD_DSL.md).",
   "definitions": {
+    "filterValue": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      ]
+    },
+    "unitFilter": {
+      "type": "object",
+      "properties": {
+        "condition": { "type": "string", "minLength": 1 },
+        "conditionValue": { "type": "integer", "minimum": 0 },
+        "trait": { "type": "string", "minLength": 1 },
+        "rank": { "$ref": "#/definitions/filterValue" },
+        "position": { "$ref": "#/definitions/filterValue" },
+        "affiliation": { "$ref": "#/definitions/filterValue" },
+        "attribute": { "$ref": "#/definitions/filterValue" },
+        "name": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
     "unitTarget": {
       "type": "object",
       "required": ["side"],
@@ -16,10 +36,10 @@
         "condition": { "type": "string", "minLength": 1 },
         "conditionValue": { "type": "integer", "minimum": 0 },
         "trait": { "type": "string", "minLength": 1 },
-        "rank": { "type": "string", "minLength": 1 },
-        "position": { "type": "string", "minLength": 1 },
-        "affiliation": { "type": "string", "minLength": 1 },
-        "attribute": { "type": "string", "minLength": 1 },
+        "rank": { "$ref": "#/definitions/filterValue" },
+        "position": { "$ref": "#/definitions/filterValue" },
+        "affiliation": { "$ref": "#/definitions/filterValue" },
+        "attribute": { "$ref": "#/definitions/filterValue" },
         "name": { "type": "string", "minLength": 1 },
         "cost": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["cheapest", "most expensive"] }] }
       },
@@ -32,10 +52,10 @@
         "name": { "type": "string", "minLength": 1 },
         "type": { "enum": ["unit", "skill", "equipment"] },
         "cost": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["cheapest", "most expensive"] }] },
-        "rank": { "type": "string", "minLength": 1 },
-        "position": { "type": "string", "minLength": 1 },
-        "affiliation": { "type": "string", "minLength": 1 },
-        "attribute": { "type": "string", "minLength": 1 },
+        "rank": { "$ref": "#/definitions/filterValue" },
+        "position": { "$ref": "#/definitions/filterValue" },
+        "affiliation": { "$ref": "#/definitions/filterValue" },
+        "attribute": { "$ref": "#/definitions/filterValue" },
         "choose": { "type": "boolean" },
         "random": { "type": "boolean" }
       },
@@ -56,21 +76,23 @@
         { "type": "object", "required": ["type", "line"], "properties": { "type": { "const": "alone_on_line" }, "line": { "enum": ["frontline", "backline"] }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "cardName"], "properties": { "type": { "const": "started_with_card" }, "cardName": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "cardName"], "properties": { "type": { "const": "has_equipped" }, "cardName": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "condition"], "properties": { "type": { "const": "has_condition" }, "condition": { "type": "string", "minLength": 1 }, "conditionValue": { "type": "integer", "minimum": 0 }, "target": { "$ref": "#/definitions/unitTarget" }, "negate": { "type": "boolean" } }, "additionalProperties": false }
+        { "type": "object", "required": ["type", "condition"], "properties": { "type": { "const": "has_condition" }, "condition": { "type": "string", "minLength": 1 }, "conditionValue": { "type": "integer", "minimum": 0 }, "target": { "$ref": "#/definitions/unitTarget" }, "negate": { "type": "boolean" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "cardNames"], "properties": { "type": { "const": "has_all_equipped" }, "cardNames": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "negate": { "type": "boolean" } }, "additionalProperties": false }
       ]
     },
     "trigger": {
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "attack", "summon", "draw", "free_ability_played", "quick_ability_used", "round_start_or_activation", "skill_played"] },
+        "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "attack", "summon", "draw", "free_ability_played", "quick_ability_used", "round_start_or_activation", "skill_played", "reclaim", "dies"] },
         "raw": { "type": "string", "minLength": 1 },
         "cardName": { "type": "string", "minLength": 1 },
         "target": { "type": "string", "minLength": 1 },
         "rank": { "type": "string", "minLength": 1 },
         "source": { "type": "string", "minLength": 1 },
         "item": { "type": "string", "minLength": 1 },
-        "position": { "type": "string", "minLength": 1 }
+        "position": { "type": "string", "minLength": 1 },
+        "cardType": { "enum": ["unit", "skill", "equipment"] }
       },
       "additionalProperties": false
     },
@@ -78,7 +100,7 @@
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "sequence", "conditional", "noop", "repeat_play"] },
+        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "play_jeonsul_baang", "sequence", "conditional", "noop", "repeat_play", "quick", "choose_position"] },
         "raw": { "type": "string", "minLength": 1 },
         "quick": { "type": "boolean" },
         "free": { "type": "boolean" },
@@ -97,10 +119,10 @@
         "target": { "$ref": "#/definitions/unitTarget" },
         "card": { "$ref": "#/definitions/cardTarget" },
         "source": { "$ref": "#/definitions/unitTarget" },
-        "from": { "enum": ["deck", "hand"] },
+        "from": { "enum": ["deck", "hand", "deck_or_hand", "game"] },
         "onto": { "enum": ["self", "opponent", "both"] },
         "random": { "type": "boolean" },
-        "owner": { "enum": ["you", "opponent"] },
+        "owner": { "enum": ["you", "opponent", "self", "enemy"] },
         "to": { "enum": ["hand", "discard"] },
         "cardName": { "type": "string", "minLength": 1 },
         "numeric": { "type": "boolean" },
@@ -143,15 +165,19 @@
       "type": "object",
       "required": ["type", "raw"],
       "properties": {
-        "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "global_rule"] },
+        "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "modify_cost", "modify_condition", "global_rule"] },
         "raw": { "type": "string", "minLength": 1 },
         "target": { "$ref": "#/definitions/unitTarget" },
-        "stat": { "enum": ["damage", "heal", "hp", "cost"] },
+        "stat": { "enum": ["damage", "heal", "hp", "cost", "damage_taken"] },
         "amount": { "type": "integer" },
         "keyword": { "enum": ["quick"] },
-        "rule": { "enum": ["ignore_taunt", "untargetable_by", "disable_passives", "grant_global_trait", "condition_stack_cap", "prevent_evolve", "prevent_equip"] },
+        "rule": { "enum": ["ignore_taunt", "untargetable_by", "disable_passives", "grant_global_trait", "condition_stack_cap", "prevent_evolve", "prevent_equip", "grant_global_condition"] },
         "trait": { "type": "string", "minLength": 1 },
+        "condition": { "type": "string", "minLength": 1 },
+        "position": { "type": "string", "minLength": 1 },
         "cap": { "type": "integer", "minimum": 1 },
+        "when": { "$ref": "#/definitions/unitFilter" },
+        "source": { "$ref": "#/definitions/unitFilter" },
         "if": { "$ref": "#/definitions/predicate" }
       },
       "additionalProperties": false,
@@ -159,13 +185,15 @@
         { "if": { "properties": { "type": { "const": "modify_stat" } } }, "then": { "required": ["stat", "amount", "target"] } },
         { "if": { "properties": { "type": { "const": "modify_keyword" } } }, "then": { "required": ["keyword", "target"] } },
         { "if": { "properties": { "type": { "const": "modify_targeting" } } }, "then": { "required": ["rule", "target"] } },
+        { "if": { "properties": { "type": { "const": "modify_cost" } } }, "then": { "required": ["amount"] } },
+        { "if": { "properties": { "type": { "const": "modify_condition" } } }, "then": { "required": ["condition", "amount", "target"] } },
         { "if": { "properties": { "type": { "const": "global_rule" } } }, "then": { "required": ["rule"] } }
       ]
     },
     "effectEntry": {
-      "allOf": [
-        { "$ref": "#/definitions/effectNode" },
-        { "required": ["raw"] }
+      "oneOf": [
+        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["raw"] }] },
+        { "$ref": "#/definitions/modifierNode" }
       ]
     },
     "passiveEntry": {
@@ -180,6 +208,15 @@
       "properties": {
         "code": { "type": "string", "minLength": 1 },
         "value": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "keyword": {
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "raw": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false
     },
@@ -198,9 +235,10 @@
     },
     "deckConstraint": {
       "type": "object",
-      "required": ["type"],
+      "required": ["type", "raw"],
       "properties": {
         "type": { "enum": ["unreachable", "generated_by"] },
+        "raw": { "type": "string", "minLength": 1 },
         "resource": { "type": "string", "minLength": 1 },
         "amount": { "type": "integer", "minimum": 1 }
       },
@@ -229,7 +267,7 @@
           "traits": { "type": "array", "items": { "$ref": "#/definitions/trait" } },
           "attributes": { "type": "array", "items": { "type": "string" } },
           "affiliations": { "type": "array", "items": { "type": "string" } },
-          "keywords": { "type": "array", "items": { "type": "string" } },
+          "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
           "abilities": { "type": "array", "items": { "$ref": "#/definitions/effectEntry" } },
           "passives": { "type": "array", "items": { "$ref": "#/definitions/passiveEntry" } },
           "evolveInto": { "$ref": "#/definitions/transformation" },
@@ -248,7 +286,7 @@
           "sobriquet": { "type": "string", "minLength": 1 },
           "cost": { "type": "integer", "minimum": 0 },
           "requirements": { "type": "array", "items": { "type": "string" } },
-          "keywords": { "type": "array", "items": { "type": "string" } },
+          "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
           "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/effectEntry" } },
           "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
         }
@@ -264,7 +302,7 @@
           "sobriquet": { "type": "string", "minLength": 1 },
           "cost": { "type": "integer", "minimum": 0 },
           "requirements": { "type": "array", "items": { "type": "string" } },
-          "keywords": { "type": "array", "items": { "type": "string" } },
+          "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
           "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/effectEntry" } },
           "igniteInto": { "$ref": "#/definitions/transformation" },
           "ignitedFrom": { "type": "integer", "minimum": 0 },

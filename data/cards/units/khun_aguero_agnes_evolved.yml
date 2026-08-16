@@ -7,10 +7,20 @@ positions:
   - light bearer
   - spear bearer
 passives:
-  - i ignore Taunt
+  - type: modify_targeting
+    rule: ignore_taunt
+    target: { side: self }
+    raw: "i ignore Taunt"
 abilities:
-  - "light bearer: create 1"
-  - "spear bearer: deal 2 to an enemy"
+  - type: create_lighthouse
+    amount: 1
+    position: light bearer
+    raw: "light bearer: create 1"
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy }
+    position: spear bearer
+    raw: "spear bearer: deal 2 to an enemy"
 evolve:
 traits:
   - creator 1

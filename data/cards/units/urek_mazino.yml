@@ -6,10 +6,34 @@ rank: high ranker
 positions:
   - fisherman
 passives:
-  - "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
+  - type: conditional
+    if:
+      type: alone_on_line
+      line: frontline
+    then:
+      type: sequence
+      steps:
+        - type: grant_trait
+          trait: resilient
+          amount: 1
+          target: { side: self }
+        - type: grant_trait
+          trait: strong
+          amount: 3
+          target: { side: self }
+    raw: "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
 abilities:
-  - "deal 4 to an enemy"
-  - "spend 1: deal 6 to an enemy"
+  - type: deal_damage
+    amount: 4
+    target: { side: enemy }
+    raw: "deal 4 to an enemy"
+  - type: spend_shinsu
+    amount: 1
+    effect:
+      type: deal_damage
+      amount: 6
+      target: { side: enemy }
+    raw: "spend 1: deal 6 to an enemy"
 evolve:
 traits:
   - barrier

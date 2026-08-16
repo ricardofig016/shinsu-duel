@@ -6,8 +6,18 @@ rank:
 positions:
   - landmark
 passives:
-  - when an ability with Free is played, the unit destroys 5 of their own lighthouses
-  - when i die, summon Stone Doll on both players' fields
+  - type: destroy_lighthouse
+    amount: 5
+    owner: self
+    trigger: { type: free_ability_played }
+    raw: "when an ability with Free is played, the unit destroys 5 of their own lighthouses"
+  - type: summon
+    card:
+      name: Stone Doll
+    from: game
+    onto: both
+    trigger: { type: dies }
+    raw: "when i die, summon Stone Doll on both players' fields"
 abilities:
 evolve:
 traits:

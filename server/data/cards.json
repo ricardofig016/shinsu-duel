@@ -4,6 +4,7 @@
     "type": "unit",
     "name": "_Test Deploy Evolve",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
     "positions": [
@@ -30,14 +31,14 @@
         }
       ],
       "cardId": 1
-    },
-    "deckConstraints": []
+    }
   },
   "1": {
     "cardId": 1,
     "type": "unit",
     "name": "_Test Deploy Evolve - Evolved",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
     "positions": [
@@ -52,42 +53,40 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 0,
-    "deckConstraints": []
+    "evolvedFrom": 0
   },
   "2": {
     "cardId": 2,
     "type": "equipment",
     "name": "_Test Equipment",
     "cost": 1,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "test",
-        "handler": null
+        "type": "noop",
+        "raw": "test"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "3": {
     "cardId": 3,
     "type": "skill",
     "name": "_Test Skill",
     "cost": 1,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "test",
-        "handler": null
+        "type": "noop",
+        "raw": "test"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "4": {
     "cardId": 4,
     "type": "unit",
     "name": "_Test Unit",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
     "positions": [
@@ -210,14 +209,14 @@
       "prince-of-the-redlight-district"
     ],
     "abilities": [],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "5": {
     "cardId": 5,
     "type": "unit",
     "name": "Akryung",
     "cost": 4,
+    "deckConstraints": [],
     "hp": 7,
     "rank": "regular",
     "positions": [
@@ -238,65 +237,106 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "create Shinwonryu in your hand",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "create_card",
+        "card": {
+          "name": "Shinwonryu"
+        },
+        "raw": "create Shinwonryu in your hand"
       },
       {
         "type": "heal",
         "amount": 3,
-        "target": "self",
-        "raw": "heal me 3 HP",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "self"
+        },
+        "raw": "heal me 3 HP"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "round start: give me all traits currently held by an allied Rachel",
-        "handler": null,
-        "position": null
+        "type": "copy_traits",
+        "target": {
+          "side": "self"
+        },
+        "source": {
+          "side": "ally",
+          "name": "Rachel"
+        },
+        "trigger": {
+          "type": "round_start"
+        },
+        "raw": "round start: give me all traits currently held by an allied Rachel"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "6": {
     "cardId": 6,
     "type": "skill",
     "name": "Baang",
     "cost": 0,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "if you have an ally Wave Controller deal 2 to an enemy, otherwise deal 1",
-        "handler": null
+        "type": "conditional",
+        "if": {
+          "type": "has_unit",
+          "target": {
+            "side": "ally",
+            "position": "wave-controller"
+          }
+        },
+        "then": {
+          "type": "deal_damage",
+          "amount": 2,
+          "target": {
+            "side": "enemy"
+          }
+        },
+        "otherwise": {
+          "type": "deal_damage",
+          "amount": 1,
+          "target": {
+            "side": "enemy"
+          }
+        },
+        "raw": "if you have an ally Wave Controller deal 2 to an enemy, otherwise deal 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "7": {
     "cardId": 7,
     "type": "equipment",
     "name": "Blue Thryssa",
     "cost": 2,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "heal the bearer 2 HP and Cleanse the bearer",
-        "handler": null
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "heal",
+            "amount": 2,
+            "target": {
+              "side": "bearer"
+            }
+          },
+          {
+            "type": "cleanse",
+            "target": {
+              "side": "bearer"
+            }
+          }
+        ],
+        "raw": "heal the bearer 2 HP and Cleanse the bearer"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "8": {
     "cardId": 8,
     "type": "unit",
     "name": "Bull",
     "cost": 3,
+    "deckConstraints": [],
     "hp": 3,
     "positions": [
       "frontline-shinheuh"
@@ -308,21 +348,21 @@
       {
         "type": "deal_damage",
         "amount": 3,
-        "target": "enemy",
-        "raw": "quick: deal 3 to an enemy",
-        "handler": null,
+        "target": {
+          "side": "enemy"
+        },
         "quick": true,
-        "position": null
+        "raw": "quick: deal 3 to an enemy"
       }
     ],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "9": {
     "cardId": 9,
     "type": "unit",
     "name": "Chang Blarode",
     "cost": 4,
+    "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
     "positions": [
@@ -346,43 +386,52 @@
       {
         "type": "deal_damage",
         "amount": 2,
-        "target": "enemy",
-        "raw": "deal 2 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 2 to an enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "allied Team Chang members have Resilient 1",
-        "handler": null,
-        "position": null
+        "type": "grant_trait",
+        "trait": "resilient",
+        "amount": 1,
+        "target": {
+          "side": "ally",
+          "affiliation": "team-chang"
+        },
+        "raw": "allied Team Chang members have Resilient 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "10": {
     "cardId": 10,
     "type": "skill",
     "name": "Cleanse Spell",
     "cost": 1,
+    "deckConstraints": [],
     "effects": [
       {
         "type": "cleanse",
-        "target": "ally",
-        "raw": "Cleanse an ally",
-        "handler": null
+        "target": {
+          "side": "ally"
+        },
+        "raw": "Cleanse an ally"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "11": {
     "cardId": 11,
     "type": "unit",
     "name": "Conduit",
     "cost": 0,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 2,
     "positions": [
       "landmark"
@@ -393,90 +442,114 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": null,
-        "position": null
+        "type": "give_condition",
+        "condition": "ghost",
+        "target": {
+          "side": "self"
+        },
+        "trigger": {
+          "type": "round_start"
+        },
+        "raw": "round start: give me Ghost"
       },
       {
-        "type": "custom",
-        "raw": "round start: give me Ghost",
-        "handler": null,
-        "position": null
+        "type": "conditional",
+        "trigger": {
+          "type": "round_start_or_activation"
+        },
+        "if": {
+          "type": "has_unit",
+          "target": {
+            "side": "enemy",
+            "attribute": "jeonsulsa"
+          },
+          "negate": true
+        },
+        "then": {
+          "type": "slay",
+          "target": {
+            "side": "self"
+          }
+        },
+        "raw": "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
       },
       {
-        "type": "custom",
-        "raw": "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me",
-        "handler": null,
-        "position": null
-      },
-      {
-        "type": "custom",
-        "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally",
-        "handler": null,
-        "position": null
+        "type": "play_jeonsul_baang",
+        "trigger": {
+          "type": "round_start_or_activation"
+        },
+        "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "12": {
     "cardId": 12,
     "type": "skill",
     "name": "Enna Core",
     "cost": 2,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "Quick",
-        "handler": null,
-        "quick": true
+        "type": "quick",
+        "raw": "i am Quick"
       },
       {
-        "type": "custom",
-        "raw": "Reclaim 2 equipments",
-        "handler": null
+        "type": "reclaim_cards",
+        "amount": 2,
+        "card": {
+          "type": "equipment"
+        },
+        "raw": "Reclaim 2 equipments"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "13": {
     "cardId": 13,
     "type": "equipment",
     "name": "Enryu's Thorn",
     "cost": 0,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": "UnreachableKeyword"
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 2,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's damage-dealing abilities deal +2 damage"
       },
       {
-        "type": "custom",
-        "raw": "the bearer's damage-dealing abilities deal +2 damage",
-        "handler": null
+        "type": "modify_stat",
+        "stat": "heal",
+        "amount": 2,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's healing abilities heal +2 HP"
       },
       {
-        "type": "custom",
-        "raw": "the bearer's healing abilities heal +2 HP",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "the bearer has +2 HP",
-        "handler": null
+        "type": "modify_stat",
+        "stat": "hp",
+        "amount": 2,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has +2 HP"
       },
       {
         "type": "grant_trait",
-        "target": "bearer",
         "trait": "bloodthirsty",
         "amount": 1,
-        "raw": "the bearer has Bloodthirsty 1",
-        "handler": null
-      }
-    ],
-    "deckConstraints": [
-      {
-        "type": "unreachable"
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Bloodthirsty 1"
       }
     ]
   },
@@ -485,6 +558,7 @@
     "type": "unit",
     "name": "Evan Edrok",
     "cost": 6,
+    "deckConstraints": [],
     "hp": 5,
     "rank": "high ranker",
     "positions": [
@@ -505,41 +579,52 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "draw an equipment of your choice",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "draw_card",
+        "amount": 1,
+        "card": {
+          "type": "equipment",
+          "choose": true
+        },
+        "raw": "draw an equipment of your choice"
       },
       {
-        "type": "custom",
-        "raw": "force an enemy to switch positions",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "switch_position",
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "force an enemy to switch positions"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "whenever you draw an equipment, draw again",
-        "handler": null,
-        "position": null
+        "type": "draw_card",
+        "amount": 1,
+        "trigger": {
+          "type": "draw",
+          "cardType": "equipment"
+        },
+        "raw": "whenever you draw an equipment, draw again"
       },
       {
-        "type": "custom",
-        "raw": "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card",
-        "handler": null,
-        "position": null
+        "type": "reclaim_cards",
+        "amount": 1,
+        "card": {
+          "type": "equipment"
+        },
+        "trigger": {
+          "type": "equip",
+          "cardName": "Frog Fisher"
+        },
+        "raw": "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "15": {
     "cardId": 15,
     "type": "unit",
     "name": "Evankhell",
     "cost": 9,
+    "deckConstraints": [],
     "hp": 7,
     "rank": "high ranker",
     "positions": [
@@ -558,68 +643,78 @@
         "type": "give_condition",
         "condition": "burned",
         "amount": 1,
-        "target": "all_enemies",
-        "raw": "give Burned 1 to all enemies",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy",
+          "scope": "all"
+        },
+        "raw": "give Burned 1 to all enemies"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "round end: Slay all enemies with Burned 3+",
-        "handler": null,
-        "position": null
+        "type": "slay",
+        "target": {
+          "side": "enemy",
+          "scope": "all",
+          "condition": "burned",
+          "conditionValue": 3
+        },
+        "trigger": {
+          "type": "round_end"
+        },
+        "raw": "round end: Slay all enemies with Burned 3+"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "16": {
     "cardId": 16,
     "type": "skill",
     "name": "Fiery Elephant",
     "cost": 2,
+    "deckConstraints": [],
     "effects": [
       {
         "type": "give_condition",
         "condition": "burned",
         "amount": 1,
-        "target": "enemy",
-        "raw": "give Burned 1 to an enemy",
-        "handler": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "give Burned 1 to an enemy"
       },
       {
         "type": "compress_shinsu",
         "amount": 1,
-        "targetCardSelector": "a Hwayeomsa",
-        "raw": "Compress 1 from a Hwayeomsa in your hand",
-        "handler": null
+        "card": {
+          "attribute": "hwayeomsa"
+        },
+        "raw": "Compress 1 from a Hwayeomsa in your hand"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "17": {
     "cardId": 17,
     "type": "skill",
     "name": "Fire Core",
     "cost": 0,
-    "effects": [
-      {
-        "type": "create_incinerate",
-        "raw": "Quick: Spend Fire Charges to create the highest affordable Incinerate in your hand",
-        "handler": null,
-        "quick": true
-      },
-      {
-        "type": "custom",
-        "raw": "unreachable",
-        "handler": "UnreachableKeyword"
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
+    "effects": [
+      {
+        "type": "quick",
+        "raw": "i am Quick"
+      },
+      {
+        "type": "create_card",
+        "card": {
+          "type": "skill",
+          "name": "Incinerate"
+        },
+        "raw": "Spend Fire Charges to create the highest affordable Incinerate in your hand"
       }
     ]
   },
@@ -628,32 +723,57 @@
     "type": "equipment",
     "name": "First Thorn Fragment",
     "cost": 1,
-    "effects": [
-      {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": "UnreachableKeyword"
-      },
-      {
-        "type": "custom",
-        "raw": "Quick",
-        "handler": null,
-        "quick": true
-      },
-      {
-        "type": "custom",
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "the bearer's damage-dealing abilities deal +1 damage",
-        "handler": null
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
+    "effects": [
+      {
+        "type": "conditional",
+        "quick": true,
+        "trigger": {
+          "type": "equip"
+        },
+        "if": {
+          "type": "has_all_equipped",
+          "cardNames": [
+            "First Thorn Fragment",
+            "Second Thorn Fragment",
+            "Third Thorn Fragment",
+            "Fourth Thorn Fragment"
+          ]
+        },
+        "then": {
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "discard",
+              "card": {
+                "type": "equipment",
+                "name": "Thorn Fragment"
+              },
+              "owner": "you"
+            },
+            {
+              "type": "create_card",
+              "card": {
+                "name": "Enryu's Thorn"
+              }
+            }
+          ]
+        },
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+      },
+      {
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 1,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's damage-dealing abilities deal +1 damage"
       }
     ]
   },
@@ -662,6 +782,7 @@
     "type": "unit",
     "name": "Floor of Death",
     "cost": 5,
+    "deckConstraints": [],
     "hp": 6,
     "positions": [
       "landmark"
@@ -672,62 +793,90 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "passives have no effect",
-        "handler": null,
-        "position": null
+        "type": "global_rule",
+        "rule": "disable_passives",
+        "raw": "passives have no effect"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "20": {
     "cardId": 20,
     "type": "skill",
     "name": "Flower of Zygaena",
     "cost": 4,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "give ally wolhaiksong and team sweet and sour members strong 2",
-        "handler": null
+        "type": "grant_trait",
+        "trait": "strong",
+        "amount": 2,
+        "target": {
+          "side": "ally",
+          "affiliation": [
+            "wolhaiksong",
+            "team-sweet-and-sour"
+          ]
+        },
+        "raw": "give ally wolhaiksong and team sweet and sour members strong 2"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "21": {
     "cardId": 21,
     "type": "equipment",
     "name": "Fourth Thorn Fragment",
     "cost": 1,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": "UnreachableKeyword"
-      },
-      {
-        "type": "custom",
-        "raw": "Quick",
-        "handler": null,
-        "quick": true
-      },
-      {
-        "type": "custom",
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
-        "handler": null
+        "type": "conditional",
+        "quick": true,
+        "trigger": {
+          "type": "equip"
+        },
+        "if": {
+          "type": "has_all_equipped",
+          "cardNames": [
+            "First Thorn Fragment",
+            "Second Thorn Fragment",
+            "Third Thorn Fragment",
+            "Fourth Thorn Fragment"
+          ]
+        },
+        "then": {
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "discard",
+              "card": {
+                "type": "equipment",
+                "name": "Thorn Fragment"
+              },
+              "owner": "you"
+            },
+            {
+              "type": "create_card",
+              "card": {
+                "name": "Enryu's Thorn"
+              }
+            }
+          ]
+        },
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
       },
       {
         "type": "grant_trait",
-        "target": "bearer",
         "trait": "bloodthirsty",
         "amount": 1,
-        "raw": "the bearer has Bloodthirsty 1",
-        "handler": null
-      }
-    ],
-    "deckConstraints": [
-      {
-        "type": "unreachable"
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Bloodthirsty 1"
       }
     ]
   },
@@ -736,22 +885,24 @@
     "type": "equipment",
     "name": "Frog Fisher",
     "cost": 1,
+    "deckConstraints": [],
     "effects": [
       {
         "type": "grant_trait",
-        "target": "bearer",
         "trait": "barrier",
-        "raw": "the bearer has Barrier",
-        "handler": null
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Barrier"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "23": {
     "cardId": 23,
     "type": "unit",
     "name": "Ha Yuri Zahard",
     "cost": 6,
+    "deckConstraints": [],
     "hp": 8,
     "rank": "high ranker",
     "positions": [
@@ -775,68 +926,101 @@
       {
         "type": "deal_damage",
         "amount": 6,
-        "target": "enemy",
-        "raw": "deal 6 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 6 to an enemy"
       },
       {
-        "type": "custom",
-        "raw": "give me Ruthless 1",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "grant_trait",
+        "trait": "ruthless",
+        "amount": 1,
+        "target": {
+          "side": "self"
+        },
+        "raw": "give me Ruthless 1"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "if i have an allied Guide, i have Taunt",
-        "handler": null,
-        "position": null
+        "type": "conditional",
+        "if": {
+          "type": "has_unit",
+          "target": {
+            "side": "ally",
+            "attribute": [
+              "red-witch",
+              "silver-dwarf"
+            ]
+          }
+        },
+        "then": {
+          "type": "grant_trait",
+          "trait": "taunt",
+          "target": {
+            "side": "self"
+          }
+        },
+        "raw": "if i have an allied Guide, i have Taunt"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "24": {
     "cardId": 24,
     "type": "skill",
     "name": "Healing Flames",
     "cost": 5,
+    "deckConstraints": [],
     "requirements": [
       "you have an ally yeon family member or Hwayeomsa"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "Cleanse all allies and heal each of them 4 HP",
-        "handler": null
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "cleanse",
+            "target": {
+              "side": "ally",
+              "scope": "all"
+            }
+          },
+          {
+            "type": "heal",
+            "amount": 4,
+            "target": {
+              "side": "ally",
+              "scope": "all"
+            }
+          }
+        ],
+        "raw": "Cleanse all allies and heal each of them 4 HP"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "25": {
     "cardId": 25,
     "type": "skill",
     "name": "Healing Potion",
     "cost": 2,
+    "deckConstraints": [],
     "effects": [
       {
         "type": "heal",
         "amount": 5,
-        "target": "ally",
-        "raw": "heal an ally 5 HP",
-        "handler": null
+        "target": {
+          "side": "ally"
+        },
+        "raw": "heal an ally 5 HP"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "26": {
     "cardId": 26,
     "type": "unit",
     "name": "Hell Express",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 6,
     "positions": [
       "landmark"
@@ -847,19 +1031,29 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "all Ranker and High Ranker units have Ghost",
-        "handler": null,
-        "position": null
+        "type": "give_condition",
+        "condition": "ghost",
+        "target": {
+          "side": "any",
+          "scope": "all",
+          "rank": [
+            "ranker",
+            "high ranker"
+          ]
+        },
+        "trigger": {
+          "type": "round_start"
+        },
+        "raw": "round start: give Ghost to all Ranker and High Ranker units"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "27": {
     "cardId": 27,
     "type": "unit",
     "name": "Hon Akraptor",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
     "positions": [
@@ -874,28 +1068,40 @@
       {
         "type": "deal_damage",
         "amount": 4,
-        "target": "enemy",
-        "raw": "deal 4 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 4 to an enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "if I have an allied Yeo Miseng, I have Strong 1",
-        "handler": null,
-        "position": null
+        "type": "conditional",
+        "if": {
+          "type": "has_unit",
+          "target": {
+            "side": "ally",
+            "name": "Yeo Miseng"
+          }
+        },
+        "then": {
+          "type": "grant_trait",
+          "trait": "strong",
+          "amount": 1,
+          "target": {
+            "side": "self"
+          }
+        },
+        "raw": "if I have an allied Yeo Miseng, I have Strong 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "28": {
     "cardId": 28,
     "type": "unit",
     "name": "Hong Chunhwa",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
     "positions": [
@@ -908,31 +1114,29 @@
       {
         "type": "deal_damage",
         "amount": 2,
-        "target": "enemy",
-        "raw": "deal 2 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 2 to an enemy"
       },
       {
         "type": "deal_damage",
         "amount": 3,
-        "target": "enemy",
-        "condition": "exhausted",
-        "raw": "deal 3 to an enemy with Exhausted",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy",
+          "condition": "exhausted"
+        },
+        "raw": "deal 3 to an enemy with Exhausted"
       }
     ],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "29": {
     "cardId": 29,
     "type": "unit",
     "name": "Hwa Ryun",
     "cost": 3,
+    "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
     "positions": [
@@ -949,85 +1153,104 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "your opponent discards a regular of your choice",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "discard",
+        "card": {
+          "rank": "regular",
+          "choose": true
+        },
+        "owner": "opponent",
+        "raw": "your opponent discards a regular of your choice"
       },
       {
         "type": "give_condition",
         "condition": "heavy",
         "amount": 1,
-        "target": "enemy_backline",
-        "raw": "give Heavy 1 to a backline enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy",
+          "scope": "backline"
+        },
+        "raw": "give Heavy 1 to a backline enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "while i have an ally team baam or team fug member, opponents skills cost 1 more",
-        "handler": null,
-        "position": null
+        "type": "modify_stat",
+        "stat": "cost",
+        "amount": 1,
+        "target": {
+          "side": "enemy"
+        },
+        "if": {
+          "type": "has_unit",
+          "target": {
+            "side": "ally",
+            "affiliation": [
+              "team-baam",
+              "team-fug"
+            ]
+          }
+        },
+        "raw": "while i have an ally team baam or team fug member, opponents skills cost 1 more"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "30": {
     "cardId": 30,
     "type": "equipment",
     "name": "Ice Spear",
     "cost": 3,
+    "deckConstraints": [],
     "requirements": [
       "khun family member"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "the bearer's attacks give Frozen to their targets",
-        "handler": null
+        "type": "give_condition",
+        "condition": "frozen",
+        "target": {
+          "side": "enemy"
+        },
+        "trigger": {
+          "type": "attack"
+        },
+        "raw": "the bearer's attacks give Frozen to their targets"
       },
       {
         "type": "grant_trait",
-        "target": "bearer",
         "trait": "pierce",
         "amount": 1,
-        "raw": "the bearer has Pierce 1",
-        "handler": null
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Pierce 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "31": {
     "cardId": 31,
     "type": "skill",
     "name": "Incinerate I",
     "cost": 0,
-    "effects": [
+    "deckConstraints": [
       {
-        "type": "custom",
-        "raw": "create me by spending 1 Fire Charge",
-        "handler": null
+        "type": "unreachable",
+        "raw": "i am Unreachable"
       },
+      {
+        "type": "generated_by",
+        "resource": "fire_charge",
+        "amount": 1,
+        "raw": "create me by spending 1 Fire Charge"
+      }
+    ],
+    "effects": [
       {
         "type": "deal_damage",
         "amount": 1,
-        "target": "enemy",
-        "raw": "deal 1 to an enemy",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "unreachable",
-        "handler": "UnreachableKeyword"
-      }
-    ],
-    "deckConstraints": [
-      {
-        "type": "unreachable"
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 1 to an enemy"
       }
     ]
   },
@@ -1036,26 +1259,27 @@
     "type": "skill",
     "name": "Incinerate II",
     "cost": 0,
-    "effects": [
-      {
-        "type": "custom",
-        "raw": "create me by spending 3 Fire Charges",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "deal 2 to 2 enemies",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "unreachable",
-        "handler": "UnreachableKeyword"
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      },
+      {
+        "type": "generated_by",
+        "resource": "fire_charge",
+        "amount": 3,
+        "raw": "create me by spending 3 Fire Charges"
+      }
+    ],
+    "effects": [
+      {
+        "type": "deal_damage",
+        "amount": 2,
+        "target": {
+          "side": "enemy",
+          "count": 2
+        },
+        "raw": "deal 2 to 2 enemies"
       }
     ]
   },
@@ -1064,26 +1288,40 @@
     "type": "skill",
     "name": "Incinerate III",
     "cost": 0,
-    "effects": [
-      {
-        "type": "custom",
-        "raw": "create me by spending 5 Fire Charges",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "deal 2 to 3 enemies and give them Burn",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "unreachable",
-        "handler": "UnreachableKeyword"
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      },
+      {
+        "type": "generated_by",
+        "resource": "fire_charge",
+        "amount": 5,
+        "raw": "create me by spending 5 Fire Charges"
+      }
+    ],
+    "effects": [
+      {
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "deal_damage",
+            "amount": 2,
+            "target": {
+              "side": "enemy",
+              "count": 3
+            }
+          },
+          {
+            "type": "give_condition",
+            "condition": "burned",
+            "target": {
+              "side": "enemy",
+              "count": 3
+            }
+          }
+        ],
+        "raw": "deal 2 to 3 enemies and give them Burn"
       }
     ]
   },
@@ -1092,26 +1330,41 @@
     "type": "skill",
     "name": "Incinerate IV",
     "cost": 0,
-    "effects": [
-      {
-        "type": "custom",
-        "raw": "create me by spending 7 Fire Charges",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "deal 3 to all enemies and give them Burn 2",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "unreachable",
-        "handler": "UnreachableKeyword"
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      },
+      {
+        "type": "generated_by",
+        "resource": "fire_charge",
+        "amount": 7,
+        "raw": "create me by spending 7 Fire Charges"
+      }
+    ],
+    "effects": [
+      {
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "deal_damage",
+            "amount": 3,
+            "target": {
+              "side": "enemy",
+              "scope": "all"
+            }
+          },
+          {
+            "type": "give_condition",
+            "condition": "burned",
+            "amount": 2,
+            "target": {
+              "side": "enemy",
+              "scope": "all"
+            }
+          }
+        ],
+        "raw": "deal 3 to all enemies and give them Burn 2"
       }
     ]
   },
@@ -1120,6 +1373,7 @@
     "type": "unit",
     "name": "Ja Wangnan",
     "cost": 3,
+    "deckConstraints": [],
     "hp": 5,
     "rank": "regular",
     "positions": [
@@ -1138,38 +1392,59 @@
         "type": "spend_shinsu",
         "amount": 1,
         "effect": {
-          "type": "custom",
-          "raw": "deal 1 to 2 enemies and give Burned 1 to one of them",
-          "handler": null
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "deal_damage",
+              "amount": 1,
+              "target": {
+                "side": "enemy",
+                "count": 2
+              }
+            },
+            {
+              "type": "give_condition",
+              "condition": "burned",
+              "amount": 1,
+              "target": {
+                "side": "enemy"
+              }
+            }
+          ]
         },
-        "raw": "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
       },
       {
-        "type": "custom",
-        "raw": "heal a Prince of the Redlight District member 2 HP",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "heal",
+        "amount": 2,
+        "target": {
+          "side": "ally",
+          "affiliation": "prince-of-the-redlight-district"
+        },
+        "raw": "heal a Prince of the Redlight District member 2 HP"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "i deal +1 damage to Burned units",
-        "handler": null,
-        "position": null
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 1,
+        "target": {
+          "side": "self"
+        },
+        "when": {
+          "condition": "burned"
+        },
+        "raw": "i deal +1 damage to Burned units"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "36": {
     "cardId": 36,
     "type": "unit",
     "name": "Jyu Viole Grace",
     "cost": 4,
+    "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
     "positions": [
@@ -1187,34 +1462,32 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "Silence an enemy that has at least one passive",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "remove_traits",
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "Silence an enemy that has at least one passive"
       },
       {
         "type": "spend_shinsu",
         "amount": 2,
         "effect": {
-          "type": "custom",
-          "raw": "use an enemy ability",
-          "handler": null
+          "type": "copy_ability",
+          "source": {
+            "side": "enemy"
+          }
         },
-        "raw": "spend 2: use an enemy ability",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 2: use an enemy ability"
       }
     ],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "37": {
     "cardId": 37,
     "type": "unit",
     "name": "Karaka",
     "cost": 7,
+    "deckConstraints": [],
     "hp": 7,
     "rank": "high ranker",
     "positions": [
@@ -1235,32 +1508,48 @@
       {
         "type": "deal_damage",
         "amount": 7,
-        "target": "enemy",
-        "raw": "deal 7 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 7 to an enemy"
       },
       {
         "type": "spend_shinsu",
         "amount": 1,
         "effect": {
-          "type": "custom",
-          "raw": "give Rooted to 2 enemies and deal 3 to all Rooted enemies",
-          "handler": null
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "give_condition",
+              "condition": "rooted",
+              "target": {
+                "side": "enemy",
+                "count": 2
+              }
+            },
+            {
+              "type": "deal_damage",
+              "amount": 3,
+              "target": {
+                "side": "enemy",
+                "scope": "all",
+                "condition": "rooted"
+              }
+            }
+          ]
         },
-        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "karaka's servants' abilities have Quick",
-        "handler": null,
-        "position": null
+        "type": "modify_keyword",
+        "keyword": "quick",
+        "target": {
+          "side": "ally",
+          "affiliation": "karakas-servants"
+        },
+        "raw": "karaka's servants' abilities have Quick"
       }
     ],
     "evolveInto": {
@@ -1285,14 +1574,14 @@
         }
       ],
       "cardId": 38
-    },
-    "deckConstraints": []
+    }
   },
   "38": {
     "cardId": 38,
     "type": "unit",
     "name": "Karaka - Evolved",
     "cost": 7,
+    "deckConstraints": [],
     "hp": 9,
     "rank": "high ranker",
     "positions": [
@@ -1313,75 +1602,100 @@
       {
         "type": "deal_damage",
         "amount": 7,
-        "target": "enemy",
-        "raw": "deal 7 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 7 to an enemy"
       },
       {
         "type": "spend_shinsu",
         "amount": 1,
         "effect": {
-          "type": "custom",
-          "raw": "give Rooted to 2 enemies and deal 3 to all Rooted enemies",
-          "handler": null
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "give_condition",
+              "condition": "rooted",
+              "target": {
+                "side": "enemy",
+                "count": 2
+              }
+            },
+            {
+              "type": "deal_damage",
+              "amount": 3,
+              "target": {
+                "side": "enemy",
+                "scope": "all",
+                "condition": "rooted"
+              }
+            }
+          ]
         },
-        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "karaka's servants' abilities have Quick",
-        "handler": null,
-        "position": null
+        "type": "modify_keyword",
+        "keyword": "quick",
+        "target": {
+          "side": "ally",
+          "affiliation": "karakas-servants"
+        },
+        "raw": "karaka's servants' abilities have Quick"
       },
       {
         "type": "deal_damage",
         "amount": 3,
-        "target": "all_enemies",
-        "condition": "rooted",
-        "raw": "round end: deal 3 to all Rooted enemies",
-        "handler": null,
-        "trigger": "round end"
+        "target": {
+          "side": "enemy",
+          "scope": "all",
+          "condition": "rooted"
+        },
+        "trigger": {
+          "type": "round_end"
+        },
+        "raw": "round end: deal 3 to all Rooted enemies"
       }
     ],
-    "evolvedFrom": 37,
-    "deckConstraints": []
+    "evolvedFrom": 37
   },
   "39": {
     "cardId": 39,
     "type": "equipment",
     "name": "Karaka's Armor Suit",
     "cost": 4,
+    "deckConstraints": [],
     "requirements": [
       "deployed as Fisherman"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "if you started the game with Ha Jinsung in your deck, i cost 2 less",
-        "handler": null
+        "type": "modify_cost",
+        "amount": -2,
+        "if": {
+          "type": "started_with_card",
+          "cardName": "Ha Jinsung"
+        },
+        "raw": "if you started the game with Ha Jinsung in your deck, i cost 2 less"
       },
       {
         "type": "grant_trait",
-        "target": "bearer",
         "trait": "barrier",
-        "raw": "the bearer has Barrier",
-        "handler": null
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Barrier"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "40": {
     "cardId": 40,
     "type": "unit",
     "name": "Khun Aguero Agnes",
     "cost": 0,
+    "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
     "positions": [
@@ -1404,10 +1718,7 @@
       {
         "type": "create_lighthouse",
         "amount": 1,
-        "raw": "create 1",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "Create 1"
       }
     ],
     "passives": [],
@@ -1420,14 +1731,14 @@
         }
       ],
       "cardId": 41
-    },
-    "deckConstraints": []
+    }
   },
   "41": {
     "cardId": 41,
     "type": "unit",
     "name": "Khun Aguero Agnes - Evolved",
     "cost": 0,
+    "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
     "positions": [
@@ -1451,37 +1762,37 @@
       {
         "type": "create_lighthouse",
         "amount": 1,
-        "raw": "light bearer: create 1",
-        "handler": null,
-        "quick": false,
-        "position": "light-bearer"
+        "position": "light-bearer",
+        "raw": "light bearer: create 1"
       },
       {
         "type": "deal_damage",
         "amount": 2,
-        "target": "enemy",
-        "raw": "spear bearer: deal 2 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": "spear-bearer"
+        "target": {
+          "side": "enemy"
+        },
+        "position": "spear-bearer",
+        "raw": "spear bearer: deal 2 to an enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "i ignore Taunt",
-        "handler": null,
-        "position": null
+        "type": "modify_targeting",
+        "rule": "ignore_taunt",
+        "target": {
+          "side": "self"
+        },
+        "raw": "i ignore Taunt"
       }
     ],
-    "evolvedFrom": 40,
-    "deckConstraints": []
+    "evolvedFrom": 40
   },
   "42": {
     "cardId": 42,
     "type": "unit",
     "name": "Khun Ran",
     "cost": 3,
+    "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
     "positions": [
@@ -1502,18 +1813,20 @@
       {
         "type": "deal_damage",
         "amount": 3,
-        "target": "enemy_frontline",
-        "raw": "deal 3 to a frontline enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy",
+          "scope": "frontline"
+        },
+        "raw": "deal 3 to a frontline enemy"
       },
       {
-        "type": "custom",
-        "raw": "heal enemy Conduit 2 HP",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "heal",
+        "amount": 2,
+        "target": {
+          "side": "enemy",
+          "name": "Conduit"
+        },
+        "raw": "heal enemy Conduit 2 HP"
       }
     ],
     "passives": [],
@@ -1526,14 +1839,14 @@
         }
       ],
       "cardId": 43
-    },
-    "deckConstraints": []
+    }
   },
   "43": {
     "cardId": 43,
     "type": "unit",
     "name": "Khun Ran - Evolved",
     "cost": 3,
+    "deckConstraints": [],
     "hp": 5,
     "rank": "regular",
     "positions": [
@@ -1552,29 +1865,57 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "deal 3 to a frontline enemy and heal enemy Conduit 2 HP",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "deal_damage",
+            "amount": 3,
+            "target": {
+              "side": "enemy",
+              "scope": "frontline"
+            }
+          },
+          {
+            "type": "heal",
+            "amount": 2,
+            "target": {
+              "side": "enemy",
+              "name": "Conduit"
+            }
+          }
+        ],
+        "raw": "deal 3 to a frontline enemy and heal enemy Conduit 2 HP"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "round end: create Redan in your hand and revert me to Khun Ran",
-        "handler": null,
-        "position": null
+        "type": "sequence",
+        "trigger": {
+          "type": "round_end"
+        },
+        "steps": [
+          {
+            "type": "create_card",
+            "card": {
+              "name": "Redan"
+            }
+          },
+          {
+            "type": "transform",
+            "cardName": "Khun Ran"
+          }
+        ],
+        "raw": "round end: create Redan in your hand and revert me to Khun Ran"
       }
     ],
-    "evolvedFrom": 42,
-    "deckConstraints": []
+    "evolvedFrom": 42
   },
   "44": {
     "cardId": 44,
     "type": "unit",
     "name": "Kurudan",
     "cost": 4,
+    "deckConstraints": [],
     "hp": 7,
     "rank": "ranker",
     "positions": [
@@ -1592,57 +1933,68 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "Disarm an enemy and send the equipment to your discard pile",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "disarm",
+        "target": {
+          "side": "enemy"
+        },
+        "to": "discard",
+        "raw": "Disarm an enemy and send the equipment to your discard pile"
       },
       {
-        "type": "custom",
-        "raw": "give an enemy Heavy 1",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "give_condition",
+        "condition": "heavy",
+        "amount": 1,
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "give an enemy Heavy 1"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "when you reclaim an equipment, Compress 1 from it",
-        "handler": null,
-        "position": null
+        "type": "compress_shinsu",
+        "amount": 1,
+        "card": {
+          "type": "equipment"
+        },
+        "trigger": {
+          "type": "reclaim",
+          "cardType": "equipment"
+        },
+        "raw": "when you reclaim an equipment, Compress 1 from it"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "45": {
     "cardId": 45,
     "type": "skill",
     "name": "Lightning Baang",
     "cost": 1,
-    "effects": [
+    "keywords": [
       {
-        "type": "custom",
-        "raw": "i am a Jeonsul Baang",
-        "handler": null
-      },
+        "code": "jeonsul-baang",
+        "raw": "i am a Jeonsul Baang"
+      }
+    ],
+    "deckConstraints": [],
+    "effects": [
       {
         "type": "give_condition",
         "condition": "burned",
         "amount": 1,
-        "target": "unit",
-        "raw": "give Burned 1 to a unit",
-        "handler": null
+        "target": {
+          "side": "any"
+        },
+        "raw": "give Burned 1 to a unit"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "46": {
     "cardId": 46,
     "type": "unit",
     "name": "Lo Po Bia Ren",
     "cost": 6,
+    "deckConstraints": [],
     "hp": 5,
     "rank": "ranker",
     "positions": [
@@ -1659,41 +2011,67 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "summon a random 2 cost Shinheuh",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "summon",
+        "card": {
+          "position": [
+            "frontline-shinheuh",
+            "backline-shinheuh"
+          ],
+          "cost": 2,
+          "random": true
+        },
+        "from": "game",
+        "onto": "self",
+        "raw": "summon a random 2 cost Shinheuh"
       },
       {
-        "type": "custom",
-        "raw": "steal the enemy's cheapest Shinheuh",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "steal",
+        "card": {
+          "position": [
+            "frontline-shinheuh",
+            "backline-shinheuh"
+          ],
+          "cost": "cheapest"
+        },
+        "raw": "steal the enemy's cheapest Shinheuh"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "wave controller: frontline Shinheuh give Poisoned 1",
-        "handler": null,
-        "position": "wave-controller"
+        "type": "give_condition",
+        "condition": "poisoned",
+        "amount": 1,
+        "position": "wave-controller",
+        "trigger": {
+          "type": "attack",
+          "source": "frontline-shinheuh"
+        },
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "wave controller: frontline Shinheuh give Poisoned 1"
       },
       {
-        "type": "custom",
-        "raw": "scout: backline Shinheuh give Ghost",
-        "handler": null,
-        "position": "scout"
+        "type": "give_condition",
+        "condition": "ghost",
+        "position": "scout",
+        "trigger": {
+          "type": "attack",
+          "source": "backline-shinheuh"
+        },
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "scout: backline Shinheuh give Ghost"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "47": {
     "cardId": 47,
     "type": "unit",
     "name": "Monkeyman",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
     "positions": [
@@ -1707,30 +2085,30 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "scout: quick: see a random card in the opponent's hand",
-        "handler": null,
+        "type": "peek_hand",
+        "owner": "opponent",
         "quick": true,
-        "position": "scout"
+        "position": "scout",
+        "raw": "scout: quick: see a random card in the opponent's hand"
       },
       {
         "type": "deal_damage",
         "amount": 1,
-        "target": "enemy",
-        "raw": "fisherman: deal 1 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": "fisherman"
+        "target": {
+          "side": "enemy"
+        },
+        "position": "fisherman",
+        "raw": "fisherman: deal 1 to an enemy"
       }
     ],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "48": {
     "cardId": 48,
     "type": "unit",
     "name": "Name Hunt Station",
     "cost": 4,
+    "deckConstraints": [],
     "hp": 8,
     "positions": [
       "landmark"
@@ -1741,33 +2119,50 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "deploy: chose a position",
-        "handler": null,
-        "position": null
+        "type": "choose_position",
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "deploy: chose a position"
       },
       {
-        "type": "custom",
-        "raw": "all units in <position> cannot evolve, have Rooted, and cannot be equipped",
-        "handler": null,
-        "position": null
+        "type": "global_rule",
+        "rule": "prevent_evolve",
+        "position": "chosen",
+        "raw": "all units in the chosen position cannot evolve"
+      },
+      {
+        "type": "global_rule",
+        "rule": "prevent_equip",
+        "position": "chosen",
+        "raw": "all units in the chosen position cannot be equipped"
+      },
+      {
+        "type": "global_rule",
+        "rule": "grant_global_condition",
+        "condition": "rooted",
+        "position": "chosen",
+        "raw": "all units in the chosen position have Rooted"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "49": {
     "cardId": 49,
     "type": "equipment",
     "name": "Narumada",
     "cost": 2,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "the bearer's damage-dealing abilities deal +3 damage",
-        "handler": null
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 3,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's damage-dealing abilities deal +3 damage"
       }
     ],
-    "deckConstraints": [],
     "igniteInto": {
       "triggers": [
         {
@@ -1784,14 +2179,30 @@
     "type": "equipment",
     "name": "Narumada - Ignited",
     "cost": 2,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "the bearer's damage-dealing abilities deal +3 damage and give Exhausted 1",
-        "handler": null
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 3,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's damage-dealing abilities deal +3 damage"
+      },
+      {
+        "type": "give_condition",
+        "condition": "exhausted",
+        "amount": 1,
+        "target": {
+          "side": "enemy"
+        },
+        "trigger": {
+          "type": "deal_damage"
+        },
+        "raw": "the bearer's damage-dealing abilities give Exhausted 1"
       }
     ],
-    "deckConstraints": [],
     "ignitedFrom": 49
   },
   "51": {
@@ -1799,6 +2210,7 @@
     "type": "unit",
     "name": "Pedro",
     "cost": 3,
+    "deckConstraints": [],
     "hp": 2,
     "rank": "ranker",
     "positions": [
@@ -1815,62 +2227,72 @@
         "type": "give_condition",
         "condition": "poisoned",
         "amount": 1,
-        "target": "enemy_backline",
-        "raw": "give Poisoned 1 to a backline enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy",
+          "scope": "backline"
+        },
+        "raw": "give Poisoned 1 to a backline enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units",
-        "handler": null,
-        "position": null
+        "type": "modify_condition",
+        "condition": "poisoned",
+        "amount": 2,
+        "target": {
+          "side": "enemy",
+          "rank": "high ranker"
+        },
+        "if": {
+          "type": "has_equipped",
+          "cardName": "Purple Dementor"
+        },
+        "raw": "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "52": {
     "cardId": 52,
     "type": "equipment",
     "name": "Purple Dementor",
     "cost": 3,
+    "deckConstraints": [],
     "requirements": [
       "deployed as Scout"
     ],
     "effects": [
       {
         "type": "grant_trait",
-        "target": "bearer",
         "trait": "resilient",
         "amount": 2,
-        "raw": "the bearer has Resilient 2",
-        "handler": null
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Resilient 2"
       },
       {
         "type": "grant_ability",
-        "target": "bearer",
+        "target": {
+          "side": "bearer"
+        },
         "ability": {
           "type": "give_condition",
           "condition": "poisoned",
           "amount": 4,
-          "target": "enemy",
-          "raw": "give Poisoned 4 to an enemy",
-          "handler": null
+          "target": {
+            "side": "enemy"
+          }
         },
-        "raw": "ability: give Poisoned 4 to an enemy",
-        "handler": null
+        "raw": "ability: give Poisoned 4 to an enemy"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "53": {
     "cardId": 53,
     "type": "unit",
     "name": "Quaetro Blitz",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
     "positions": [
@@ -1893,32 +2315,37 @@
         "effect": {
           "type": "deal_damage",
           "amount": 2,
-          "target": "all_enemies",
-          "condition": "burned",
-          "raw": "deal 2 to all Burned enemies",
-          "handler": null
+          "target": {
+            "side": "enemy",
+            "scope": "all",
+            "condition": "burned"
+          }
         },
-        "raw": "spend 3: deal 2 to all Burned enemies",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 3: deal 2 to all Burned enemies"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "Baang gives Burned 1",
-        "handler": null,
-        "position": null
+        "type": "give_condition",
+        "condition": "burned",
+        "amount": 1,
+        "target": {
+          "side": "enemy"
+        },
+        "trigger": {
+          "type": "skill_played",
+          "cardName": "Baang"
+        },
+        "raw": "Baang gives Burned 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "54": {
     "cardId": 54,
     "type": "unit",
     "name": "Rachel",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
     "positions": [
@@ -1936,34 +2363,50 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "kill an ally to Create 3 and give me a random numeric trait",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "slay",
+            "target": {
+              "side": "ally"
+            }
+          },
+          {
+            "type": "create_lighthouse",
+            "amount": 3
+          },
+          {
+            "type": "grant_random_trait",
+            "target": {
+              "side": "self"
+            },
+            "numeric": true
+          }
+        ],
+        "raw": "kill an ally to Create 3 and give me a random numeric trait"
       },
       {
         "type": "spend_shinsu",
         "amount": 3,
         "effect": {
-          "type": "custom",
-          "raw": "summon Akryung from your deck or hand",
-          "handler": null
+          "type": "summon",
+          "card": {
+            "name": "Akryung"
+          },
+          "from": "deck_or_hand",
+          "onto": "self"
         },
-        "raw": "spend 3: summon Akryung from your deck or hand",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 3: summon Akryung from your deck or hand"
       }
     ],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "55": {
     "cardId": 55,
     "type": "unit",
     "name": "Rak Wraithraiser",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
     "positions": [
@@ -1985,86 +2428,114 @@
       {
         "type": "deal_damage",
         "amount": 4,
-        "target": "enemy",
-        "raw": "deal 4 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 4 to an enemy"
       }
     ],
-    "passives": [],
-    "deckConstraints": []
+    "passives": []
   },
   "56": {
     "cardId": 56,
     "type": "equipment",
     "name": "Red Thryssa",
     "cost": 3,
+    "deckConstraints": [],
     "effects": [
       {
         "type": "grant_ability",
-        "target": "bearer",
+        "target": {
+          "side": "bearer"
+        },
         "ability": {
           "type": "deal_damage",
           "amount": 5,
-          "target": "enemy",
-          "raw": "deal 5 to an enemy",
-          "handler": null
+          "target": {
+            "side": "enemy"
+          }
         },
-        "raw": "ability: deal 5 to an enemy",
-        "handler": null
+        "raw": "ability: deal 5 to an enemy"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "57": {
     "cardId": 57,
     "type": "skill",
     "name": "Redan",
     "cost": 1,
+    "deckConstraints": [],
     "requirements": [
       "target is an ally"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "give Poisoned 1",
-        "handler": null
+        "type": "give_condition",
+        "condition": "poisoned",
+        "amount": 1,
+        "target": {
+          "side": "ally"
+        },
+        "raw": "give Poisoned 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "58": {
     "cardId": 58,
     "type": "equipment",
     "name": "Second Thorn Fragment",
     "cost": 1,
-    "effects": [
-      {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": "UnreachableKeyword"
-      },
-      {
-        "type": "custom",
-        "raw": "Quick",
-        "handler": null,
-        "quick": true
-      },
-      {
-        "type": "custom",
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "the bearer's healing abilities heal +1 HP",
-        "handler": null
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
+    "effects": [
+      {
+        "type": "conditional",
+        "quick": true,
+        "trigger": {
+          "type": "equip"
+        },
+        "if": {
+          "type": "has_all_equipped",
+          "cardNames": [
+            "First Thorn Fragment",
+            "Second Thorn Fragment",
+            "Third Thorn Fragment",
+            "Fourth Thorn Fragment"
+          ]
+        },
+        "then": {
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "discard",
+              "card": {
+                "type": "equipment",
+                "name": "Thorn Fragment"
+              },
+              "owner": "you"
+            },
+            {
+              "type": "create_card",
+              "card": {
+                "name": "Enryu's Thorn"
+              }
+            }
+          ]
+        },
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+      },
+      {
+        "type": "modify_stat",
+        "stat": "heal",
+        "amount": 1,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's healing abilities heal +1 HP"
       }
     ]
   },
@@ -2073,24 +2544,23 @@
     "type": "skill",
     "name": "Shinwonryu",
     "cost": 4,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "requirements": [
       "have an ally Irregular"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": "UnreachableKeyword"
-      },
-      {
-        "type": "custom",
-        "raw": "give an enemy Doomed",
-        "handler": null
-      }
-    ],
-    "deckConstraints": [
-      {
-        "type": "unreachable"
+        "type": "give_condition",
+        "condition": "doomed",
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "give an enemy Doomed"
       }
     ]
   },
@@ -2099,45 +2569,65 @@
     "type": "skill",
     "name": "Static Baang",
     "cost": 1,
-    "effects": [
+    "keywords": [
       {
-        "type": "custom",
-        "raw": "i am a Jeonsul Baang",
-        "handler": null
-      },
+        "code": "jeonsul-baang",
+        "raw": "i am a Jeonsul Baang"
+      }
+    ],
+    "deckConstraints": [],
+    "effects": [
       {
         "type": "give_condition",
         "condition": "weak",
         "amount": 1,
-        "target": "unit",
-        "raw": "give Weak 1 to a unit",
-        "handler": null
+        "target": {
+          "side": "any"
+        },
+        "raw": "give Weak 1 to a unit"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "61": {
     "cardId": 61,
     "type": "equipment",
     "name": "Steel Tree",
     "cost": 3,
+    "deckConstraints": [],
     "requirements": [
       "deployed as Wave Controller"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "the bearer has Immune and Pierce 1",
-        "handler": null
+        "type": "grant_trait",
+        "trait": "immune",
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Immune"
+      },
+      {
+        "type": "grant_trait",
+        "trait": "pierce",
+        "amount": 1,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has Pierce 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "62": {
     "cardId": 62,
     "type": "unit",
     "name": "Stone Doll",
     "cost": 0,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 20,
     "positions": [
       "frontline-shinheuh"
@@ -2151,48 +2641,60 @@
     "affiliations": [],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "Free: Spend 1: deal 1 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "spend_shinsu",
+        "amount": 1,
+        "free": true,
+        "effect": {
+          "type": "deal_damage",
+          "amount": 1,
+          "target": {
+            "side": "enemy"
+          }
+        },
+        "raw": "Free: Spend 1: deal 1 to an enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": null,
-        "position": null
-      },
-      {
-        "type": "custom",
-        "raw": "Spear bearers deal +4 damage to me",
-        "handler": null,
-        "position": null
+        "type": "modify_stat",
+        "stat": "damage_taken",
+        "amount": 4,
+        "target": {
+          "side": "self"
+        },
+        "source": {
+          "position": "spear-bearer"
+        },
+        "raw": "Spear bearers deal +4 damage to me"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "63": {
     "cardId": 63,
     "type": "skill",
     "name": "Submerged Fish",
     "cost": 4,
+    "deckConstraints": [],
     "effects": [
       {
-        "type": "custom",
-        "raw": "Slay an enemy Regular or Ranker",
-        "handler": null
+        "type": "slay",
+        "target": {
+          "side": "enemy",
+          "rank": [
+            "regular",
+            "ranker"
+          ]
+        },
+        "raw": "Slay an enemy Regular or Ranker"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "64": {
     "cardId": 64,
     "type": "unit",
     "name": "Sunwoo Nare",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
     "positions": [
@@ -2209,28 +2711,43 @@
     "affiliations": [],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "if i have an allied Shinheuh, give Exhausted 2 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "conditional",
+        "if": {
+          "type": "has_unit",
+          "target": {
+            "side": "ally",
+            "position": "shinheuh"
+          }
+        },
+        "then": {
+          "type": "give_condition",
+          "condition": "exhausted",
+          "amount": 2,
+          "target": {
+            "side": "enemy"
+          }
+        },
+        "raw": "if i have an allied Shinheuh, give Exhausted 2 to an enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "when you summon a Shinheuh, Charge 1",
-        "handler": null,
-        "position": null
+        "type": "charge_shinsu",
+        "amount": 1,
+        "trigger": {
+          "type": "summon",
+          "source": "shinheuh"
+        },
+        "raw": "when you summon a Shinheuh, Charge 1"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "65": {
     "cardId": 65,
     "type": "unit",
     "name": "The Hand Of Arlen",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 6,
     "positions": [
       "landmark"
@@ -2241,25 +2758,34 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "when an ability with Free is played, the unit destroys 5 of their own lighthouses",
-        "handler": null,
-        "position": null
+        "type": "destroy_lighthouse",
+        "amount": 5,
+        "owner": "self",
+        "trigger": {
+          "type": "free_ability_played"
+        },
+        "raw": "when an ability with Free is played, the unit destroys 5 of their own lighthouses"
       },
       {
-        "type": "custom",
-        "raw": "when i die, summon Stone Doll on both players' fields",
-        "handler": null,
-        "position": null
+        "type": "summon",
+        "card": {
+          "name": "Stone Doll"
+        },
+        "from": "game",
+        "onto": "both",
+        "trigger": {
+          "type": "dies"
+        },
+        "raw": "when i die, summon Stone Doll on both players' fields"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "66": {
     "cardId": 66,
     "type": "skill",
     "name": "The Workshop",
     "cost": 3,
+    "deckConstraints": [],
     "requirements": [
       "I'm the first card you play this round"
     ],
@@ -2267,68 +2793,94 @@
       {
         "type": "destroy_lighthouse",
         "amount": 1,
-        "raw": "Destroy 1",
-        "handler": null
+        "raw": "Destroy 1"
       },
       {
         "type": "heal",
         "amount": 1,
-        "target": "ally",
-        "raw": "heal an ally 1 HP",
-        "handler": null
+        "target": {
+          "side": "ally"
+        },
+        "raw": "heal an ally 1 HP"
       },
       {
         "type": "compress_shinsu",
         "amount": 1,
-        "targetCardSelector": "the most expensive card",
-        "raw": "Compress 1 from the most expensive card in your hand",
-        "handler": null
+        "card": {
+          "cost": "most expensive"
+        },
+        "raw": "Compress 1 from the most expensive card in your hand"
       },
       {
         "type": "reclaim_cards",
         "amount": 1,
-        "raw": "Reclaim 1",
-        "handler": null
+        "raw": "Reclaim 1"
       },
       {
-        "type": "custom",
-        "raw": "Silence an enemy",
-        "handler": null
+        "type": "remove_traits",
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "Silence an enemy"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "67": {
     "cardId": 67,
     "type": "equipment",
     "name": "Third Thorn Fragment",
     "cost": 1,
-    "effects": [
-      {
-        "type": "custom",
-        "raw": "Unreachable",
-        "handler": "UnreachableKeyword"
-      },
-      {
-        "type": "custom",
-        "raw": "Quick",
-        "handler": null,
-        "quick": true
-      },
-      {
-        "type": "custom",
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand",
-        "handler": null
-      },
-      {
-        "type": "custom",
-        "raw": "the bearer has +1 HP",
-        "handler": null
-      }
-    ],
     "deckConstraints": [
       {
-        "type": "unreachable"
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
+    "effects": [
+      {
+        "type": "conditional",
+        "quick": true,
+        "trigger": {
+          "type": "equip"
+        },
+        "if": {
+          "type": "has_all_equipped",
+          "cardNames": [
+            "First Thorn Fragment",
+            "Second Thorn Fragment",
+            "Third Thorn Fragment",
+            "Fourth Thorn Fragment"
+          ]
+        },
+        "then": {
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "discard",
+              "card": {
+                "type": "equipment",
+                "name": "Thorn Fragment"
+              },
+              "owner": "you"
+            },
+            {
+              "type": "create_card",
+              "card": {
+                "name": "Enryu's Thorn"
+              }
+            }
+          ]
+        },
+        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+      },
+      {
+        "type": "modify_stat",
+        "stat": "hp",
+        "amount": 1,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer has +1 HP"
       }
     ]
   },
@@ -2337,28 +2889,31 @@
     "type": "skill",
     "name": "Thunder Baang",
     "cost": 1,
-    "effects": [
+    "keywords": [
       {
-        "type": "custom",
-        "raw": "i am a Jeonsul Baang",
-        "handler": null
-      },
+        "code": "jeonsul-baang",
+        "raw": "i am a Jeonsul Baang"
+      }
+    ],
+    "deckConstraints": [],
+    "effects": [
       {
         "type": "give_condition",
         "condition": "exhausted",
         "amount": 1,
-        "target": "unit",
-        "raw": "give Exhausted 1 to a unit",
-        "handler": null
+        "target": {
+          "side": "any"
+        },
+        "raw": "give Exhausted 1 to a unit"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "69": {
     "cardId": 69,
     "type": "unit",
     "name": "Twenty-Fifth Baam",
     "cost": 5,
+    "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
     "positions": [
@@ -2376,11 +2931,13 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "create a Thorn Fragment of your choice in hand",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "create_card",
+        "card": {
+          "type": "equipment",
+          "name": "Thorn Fragment",
+          "choose": true
+        },
+        "raw": "create a Thorn Fragment of your choice in hand"
       }
     ],
     "passives": [],
@@ -2393,14 +2950,14 @@
         }
       ],
       "cardId": 70
-    },
-    "deckConstraints": []
+    }
   },
   "70": {
     "cardId": 70,
     "type": "unit",
     "name": "Twenty-Fifth Baam - Evolved",
     "cost": 5,
+    "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
     "positions": [
@@ -2424,26 +2981,24 @@
       {
         "type": "spend_shinsu",
         "amount": 2,
-        "effect": {
-          "type": "custom",
-          "raw": "the next time you play Baang this turn, play it 4 more times",
-          "handler": null
-        },
-        "raw": "quick: spend 2: the next time you play Baang this turn, play it 4 more times",
-        "handler": null,
         "quick": true,
-        "position": null
+        "effect": {
+          "type": "repeat_play",
+          "amount": 4,
+          "cardName": "Baang"
+        },
+        "raw": "quick: spend 2: the next time you play Baang this turn, play it 4 more times"
       }
     ],
     "passives": [],
-    "evolvedFrom": 69,
-    "deckConstraints": []
+    "evolvedFrom": 69
   },
   "71": {
     "cardId": 71,
     "type": "unit",
     "name": "Urek Mazino",
     "cost": 8,
+    "deckConstraints": [],
     "hp": 11,
     "rank": "high ranker",
     "positions": [
@@ -2469,11 +3024,10 @@
       {
         "type": "deal_damage",
         "amount": 4,
-        "target": "enemy",
-        "raw": "deal 4 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 4 to an enemy"
       },
       {
         "type": "spend_shinsu",
@@ -2481,31 +3035,51 @@
         "effect": {
           "type": "deal_damage",
           "amount": 6,
-          "target": "enemy",
-          "raw": "deal 6 to an enemy",
-          "handler": null
+          "target": {
+            "side": "enemy"
+          }
         },
-        "raw": "spend 1: deal 6 to an enemy",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 1: deal 6 to an enemy"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "while i am alone on the ally frontline, i have Resilient 1 and Strong 3",
-        "handler": null,
-        "position": null
+        "type": "conditional",
+        "if": {
+          "type": "alone_on_line",
+          "line": "frontline"
+        },
+        "then": {
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "grant_trait",
+              "trait": "resilient",
+              "amount": 1,
+              "target": {
+                "side": "self"
+              }
+            },
+            {
+              "type": "grant_trait",
+              "trait": "strong",
+              "amount": 3,
+              "target": {
+                "side": "self"
+              }
+            }
+          ]
+        },
+        "raw": "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "72": {
     "cardId": 72,
     "type": "unit",
     "name": "Water Stadium",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 7,
     "positions": [
       "landmark"
@@ -2516,36 +3090,37 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "conditions do not stack past 2",
-        "handler": null,
-        "position": null
+        "type": "global_rule",
+        "rule": "condition_stack_cap",
+        "cap": 2,
+        "raw": "conditions do not stack past 2"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "73": {
     "cardId": 73,
     "type": "skill",
     "name": "Weights",
     "cost": 1,
+    "deckConstraints": [],
     "effects": [
       {
         "type": "give_condition",
         "condition": "heavy",
         "amount": 1,
-        "target": "enemy",
-        "raw": "give Heavy 1 to an enemy",
-        "handler": null
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "give Heavy 1 to an enemy"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "74": {
     "cardId": 74,
     "type": "unit",
     "name": "Wooden Horse",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 11,
     "positions": [
       "landmark"
@@ -2556,36 +3131,54 @@
     "abilities": [],
     "passives": [
       {
-        "type": "custom",
-        "raw": "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP",
-        "handler": null,
-        "position": null
+        "type": "sequence",
+        "trigger": {
+          "type": "quick_ability_used"
+        },
+        "steps": [
+          {
+            "type": "charge_shinsu",
+            "amount": 1
+          },
+          {
+            "type": "deal_damage",
+            "amount": 1,
+            "target": {
+              "side": "self"
+            }
+          }
+        ],
+        "raw": "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "75": {
     "cardId": 75,
     "type": "equipment",
     "name": "Woon's Hammer",
     "cost": 2,
+    "deckConstraints": [],
     "requirements": [
       "Yeon Woon is in your board"
     ],
     "effects": [
       {
-        "type": "custom",
-        "raw": "i have Strong 3",
-        "handler": null
+        "type": "grant_trait",
+        "trait": "strong",
+        "amount": 3,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "i have Strong 3"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "76": {
     "cardId": 76,
     "type": "unit",
     "name": "Yeo Goseng",
     "cost": 1,
+    "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
     "positions": [
@@ -2602,28 +3195,34 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "heal a team sweet and sour member 1 HP",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "heal",
+        "amount": 1,
+        "target": {
+          "side": "ally",
+          "affiliation": "team-sweet-and-sour"
+        },
+        "raw": "heal a team sweet and sour member 1 HP"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "team sweet and sour members cost one less",
-        "handler": null,
-        "position": null
+        "type": "modify_stat",
+        "stat": "cost",
+        "amount": -1,
+        "target": {
+          "side": "ally",
+          "affiliation": "team-sweet-and-sour"
+        },
+        "raw": "team sweet and sour members cost one less"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "77": {
     "cardId": 77,
     "type": "unit",
     "name": "Yeo Miseng",
     "cost": 2,
+    "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
     "positions": [
@@ -2639,31 +3238,46 @@
         "type": "spend_shinsu",
         "amount": 3,
         "effect": {
-          "type": "custom",
-          "raw": "give me taunt and barrier",
-          "handler": null
+          "type": "sequence",
+          "steps": [
+            {
+              "type": "grant_trait",
+              "trait": "taunt",
+              "target": {
+                "side": "self"
+              }
+            },
+            {
+              "type": "grant_trait",
+              "trait": "barrier",
+              "target": {
+                "side": "self"
+              }
+            }
+          ]
         },
-        "raw": "spend 3: give me taunt and barrier",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 3: give me taunt and barrier"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "round end: i lose all traits",
-        "handler": null,
-        "position": null
+        "type": "remove_traits",
+        "target": {
+          "side": "self"
+        },
+        "trigger": {
+          "type": "round_end"
+        },
+        "raw": "round end: Silence me"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "78": {
     "cardId": 78,
     "type": "unit",
     "name": "Yeon Woon",
     "cost": 5,
+    "deckConstraints": [],
     "hp": 4,
     "rank": "ranker",
     "positions": [
@@ -2680,40 +3294,42 @@
         "type": "spend_shinsu",
         "amount": 2,
         "effect": {
-          "type": "custom",
-          "raw": "give barrier to 2 allies",
-          "handler": null
+          "type": "grant_trait",
+          "trait": "barrier",
+          "target": {
+            "side": "ally",
+            "count": 2
+          }
         },
-        "raw": "spend 2: give barrier to 2 allies",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "raw": "spend 2: give barrier to 2 allies"
       },
       {
         "type": "heal",
         "amount": 2,
-        "target": "ally",
-        "raw": "heal an ally 2 HP",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "target": {
+          "side": "ally"
+        },
+        "raw": "heal an ally 2 HP"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "ally yeon family members have resilient",
-        "handler": null,
-        "position": null
+        "type": "grant_trait",
+        "trait": "resilient",
+        "target": {
+          "side": "ally",
+          "affiliation": "yeon-family"
+        },
+        "raw": "ally yeon family members have resilient"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "79": {
     "cardId": 79,
     "type": "unit",
     "name": "Yeon Yihwa",
     "cost": 5,
+    "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
     "positions": [
@@ -2730,28 +3346,35 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "give 2 Burned enemies Exhausted",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "give_condition",
+        "condition": "exhausted",
+        "target": {
+          "side": "enemy",
+          "count": 2,
+          "condition": "burned"
+        },
+        "raw": "give 2 Burned enemies Exhausted"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "units with Burned 3+ can't target me",
-        "handler": null,
-        "position": null
+        "type": "modify_targeting",
+        "rule": "untargetable_by",
+        "target": {
+          "side": "any",
+          "condition": "burned",
+          "conditionValue": 3
+        },
+        "raw": "units with Burned 3+ can't target me"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "80": {
     "cardId": 80,
     "type": "unit",
     "name": "Yu Han Sung",
     "cost": 6,
+    "deckConstraints": [],
     "hp": 4,
     "rank": "ranker",
     "positions": [
@@ -2773,35 +3396,54 @@
       {
         "type": "compress_shinsu",
         "amount": 1,
-        "targetCardSelector": "Submerged Fish",
-        "raw": "Compress 1 from Submerged Fish in your hand",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "card": {
+          "name": "Submerged Fish"
+        },
+        "raw": "Compress 1 from Submerged Fish in your hand"
       },
       {
-        "type": "custom",
-        "raw": "quick: create Baang in your hand",
-        "handler": null,
+        "type": "create_card",
         "quick": true,
-        "position": null
+        "card": {
+          "name": "Baang"
+        },
+        "raw": "quick: create Baang in your hand"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "Baang gives Weak 2 and Cursed",
-        "handler": null,
-        "position": null
+        "type": "sequence",
+        "trigger": {
+          "type": "skill_played",
+          "cardName": "Baang"
+        },
+        "steps": [
+          {
+            "type": "give_condition",
+            "condition": "weak",
+            "amount": 2,
+            "target": {
+              "side": "enemy"
+            }
+          },
+          {
+            "type": "give_condition",
+            "condition": "cursed",
+            "target": {
+              "side": "enemy"
+            }
+          }
+        ],
+        "raw": "Baang gives Weak 2 and Cursed"
       }
-    ],
-    "deckConstraints": []
+    ]
   },
   "81": {
     "cardId": 81,
     "type": "unit",
     "name": "Yuga",
     "cost": 4,
+    "deckConstraints": [],
     "hp": 3,
     "rank": "ranker",
     "positions": [
@@ -2818,21 +3460,29 @@
     ],
     "abilities": [
       {
-        "type": "custom",
-        "raw": "give ally Bull Strong 2",
-        "handler": null,
-        "quick": false,
-        "position": null
+        "type": "grant_trait",
+        "trait": "strong",
+        "amount": 2,
+        "target": {
+          "side": "ally",
+          "name": "Bull"
+        },
+        "raw": "give ally Bull Strong 2"
       }
     ],
     "passives": [
       {
-        "type": "custom",
-        "raw": "when I am deployed, summon Bull from your deck or hand",
-        "handler": null,
-        "position": null
+        "type": "summon",
+        "card": {
+          "name": "Bull"
+        },
+        "from": "deck_or_hand",
+        "onto": "self",
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "when I am deployed, summon Bull from your deck or hand"
       }
-    ],
-    "deckConstraints": []
+    ]
   }
 }

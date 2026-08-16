@@ -3,5 +3,10 @@ name: Enna Core
 cost: 2
 requirements:
 effects:
-  - Quick
-  - Reclaim 2 equipments
+  - type: quick
+    raw: "i am Quick"
+  - type: reclaim_cards
+    amount: 2
+    card:
+      type: equipment
+    raw: "Reclaim 2 equipments"

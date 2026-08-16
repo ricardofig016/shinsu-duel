@@ -258,13 +258,30 @@ function validateAffiliations(affiliations, errors) {
 function validateKeywords(keywords, errors) {
   const seen = new Set();
   keywords.forEach((keyword, index) => {
-    if (typeof keyword !== "string" || keyword.trim().length === 0) {
-      addError(errors, `keywords[${index}]`, "must be a non-empty string");
+    let code;
+    if (typeof keyword === "string") {
+      code = keyword.trim();
+      if (code.length === 0) {
+        addError(errors, `keywords[${index}]`, "must be a non-empty string");
+        return;
+      }
+    } else if (keyword && typeof keyword === "object" && typeof keyword.code === "string") {
+      code = keyword.code.trim();
+      if (code.length === 0) {
+        addError(errors, `keywords[${index}]`, "code must be a non-empty string");
+        return;
+      }
+      if (typeof keyword.raw !== "string" || keyword.raw.trim().length === 0) {
+        addError(errors, `keywords[${index}]`, "raw must be a non-empty string");
+        return;
+      }
+    } else {
+      addError(errors, `keywords[${index}]`, 'must be a non-empty string or an object with "code" and "raw"');
       return;
     }
-    const key = keyword.trim().toLowerCase();
+    const key = code.toLowerCase();
     if (seen.has(key)) {
-      addError(errors, `keywords[${index}]`, `duplicate keyword "${keyword}"`);
+      addError(errors, `keywords[${index}]`, `duplicate keyword "${code}"`);
     }
     seen.add(key);
   });

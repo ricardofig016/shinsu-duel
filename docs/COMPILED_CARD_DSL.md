@@ -62,8 +62,20 @@ Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) requi
 
 Two card-level fields sit alongside node entries:
 
-- `keywords` — identity markers, independent of `type`/`attributes` (e.g. `keywords: ["jeonsul-baang"]`). The Jeonsulsa engine and future identity mechanics query it.
-- `deckConstraints` — deck-construction rules authored in YAML (see [Deck constraints](#deck-constraints)).
+- `keywords` — identity markers, independent of `type`/`attributes`. Each item is either a bare string or an object carrying the player-visible identity text:
+
+  ```yaml
+  keywords:
+    - jeonsul-baang # machine identity only
+    - code: jeonsul-baang # identity + visible text
+      raw: "i am a Jeonsul Baang"
+  ```
+
+  The compiled form is a uniform object — `{ code }` or `{ code, raw }` — mirroring compiled traits (`{ code, value? }`). The Jeonsulsa engine and future identity mechanics query by `code`; the UI renders `raw`. Use the object form whenever the player should see the keyword's text on the card.
+
+- `deckConstraints` — deck-construction rules authored in YAML (see [Deck constraints](#deck-constraints)). Each constraint carries required `raw` display text.
+
+Card-level keywords (Quick, Free) that apply to the whole card — not to a single effect — are authored as marker nodes: `{ type: quick, raw: "i am Quick" }`. See [Structural](#structural).
 
 ---
 
@@ -78,19 +90,19 @@ Two card-level fields sit alongside node entries:
 | `compress_shinsu`    | `amount`, `card`   | Reduce a card's cost by `amount`.             |
 | `reclaim_cards`      | `amount`, `card?`  | Put `amount` cards from discard into hand.    |
 | `create_lighthouse`  | `amount`           | Regain `amount` lighthouses.                  |
-| `destroy_lighthouse` | `amount`           | Destroy `amount` enemy lighthouses.           |
+| `destroy_lighthouse` | `amount`, `owner?` | Destroy `amount` lighthouses.                 |
 
 ### Cards and zones
 
-| `type`            | Fields                            | Meaning                                              |
-| ----------------- | --------------------------------- | ---------------------------------------------------- |
-| `draw_card`       | `amount`, `card?`                 | Draw `amount` cards (optionally filtered by `card`). |
-| `create_card`     | `card`, `cost?`                   | Create a card in hand (optionally gated by a cost).  |
-| `summon`          | `card`, `from`, `onto`, `random?` | Put a unit onto a battlefield from deck/hand.        |
-| `discard`         | `card`, `owner`                   | Send a card from an owner's hand to their discard.   |
-| `steal`           | `card`                            | Take a card from the opponent into your control.     |
-| `disarm`          | `target`, `to`                    | Send a unit's equipment to `hand` or `discard`.      |
-| `switch_position` | `target`                          | Force a unit to switch positions.                    |
+| `type`            | Fields                            | Meaning                                                                                                    |
+| ----------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `draw_card`       | `amount`, `card?`                 | Draw `amount` cards (optionally filtered by `card`).                                                       |
+| `create_card`     | `card`, `cost?`                   | Create a card in hand (optionally gated by a cost).                                                        |
+| `summon`          | `card`, `from`, `onto`, `random?` | Put a unit onto a battlefield (`from`: `deck`, `hand`, `deck_or_hand`, or `game` = all existing cards).    |
+| `discard`         | `card`, `owner`                   | Send a card from an owner's hand to their discard.                                                         |
+| `steal`           | `card`                            | Take a card from the opponent into your control.                                                           |
+| `disarm`          | `target`, `to`                    | Send a unit's equipment to `hand` (the equipment owner's hand) or `discard` (the acting player's discard). |
+| `switch_position` | `target`                          | Force a unit to switch positions.                                                                          |
 
 ### Units
 
@@ -102,22 +114,25 @@ Two card-level fields sit alongside node entries:
 | `cleanse`            | `target`                         | Remove all conditions.                             |
 | `grant_trait`        | `trait`, `amount?`, `target`     | Grant a trait (optionally numeric).                |
 | `remove_traits`      | `target`, `trait?`               | Remove all traits, or one named `trait` (Silence). |
-| `copy_traits`        | `target`, `from`                 | Copy traits from `from` onto `target`.             |
+| `copy_traits`        | `target`, `source`               | Copy traits from `source` onto `target`.           |
 | `grant_random_trait` | `target`, `numeric?`             | Grant a random trait.                              |
 | `slay`               | `target`                         | Kill units directly (ignores damage).              |
 | `transform`          | `cardName`                       | Replace the unit with another card (revert).       |
 | `grant_ability`      | `ability`, `target`              | Grant an ability (register, don't execute).        |
-| `copy_ability`       | `from`                           | Use a copy of `from`'s ability.                    |
+| `copy_ability`       | `source`                         | Use a copy of an enemy `source`'s ability.         |
 | `peek_hand`          | `owner`                          | Reveal a card in `owner`'s hand (observer-only).   |
+| `play_jeonsul_baang` | `trigger?`                       | Play a random Jeonsul Baang on a random ally.      |
 
 ### Structural
 
-| `type`        | Fields                     | Meaning                                                          |
-| ------------- | -------------------------- | ---------------------------------------------------------------- |
-| `sequence`    | `steps`                    | Resolve `steps` in order.                                        |
-| `conditional` | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                |
-| `repeat_play` | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played. |
-| `noop`        | —                          | Explicit no-op (test placeholders, identity stubs).              |
+| `type`            | Fields                     | Meaning                                                          |
+| ----------------- | -------------------------- | ---------------------------------------------------------------- |
+| `sequence`        | `steps`                    | Resolve `steps` in order.                                        |
+| `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                |
+| `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played. |
+| `quick`           | —                          | Card-level Quick marker (display-only).                          |
+| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position (cluster R).             |
+| `noop`            | —                          | Explicit no-op (test placeholders).                              |
 
 `spend_shinsu` and `grant_ability` are also structural: they wrap a nested `effect` / `ability` that is resolved (or registered) after their own step.
 
@@ -149,6 +164,8 @@ target:
 
 `self`/`bearer` need only `side`. `any` + `scope: all` addresses both players' units (landmark rules).
 
+`rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh".
+
 ### Card target
 
 ```yaml
@@ -177,22 +194,25 @@ Predicates are the conditions a `conditional` node (or an always-on modifier) ev
 | `alone_on_line`     | `line`, `negate?`                                   | "while i am alone on the ally frontline"  |
 | `started_with_card` | `cardName`, `negate?`                               | "if you started the game with Ha Jinsung" |
 | `has_equipped`      | `cardName`, `negate?`                               | "if i have Purple Dementor equipped"      |
+| `has_all_equipped`  | `cardNames[]`, `negate?`                            | "all 4 Thorn Fragments equipped"          |
 | `has_condition`     | `condition`, `conditionValue?`, `target`, `negate?` | "units with Burned 3+"                    |
 
 ---
 
 ## Modifier grammar (always-on passives)
 
-Always-on passives are **modifiers**, not effects. Each has a `type` discriminator:
+Always-on passives and equipment-granted stat amplifiers are **modifiers**, not effects. Modifiers may appear in a unit's `passives` or an equipment's `effects`. Each has a `type` discriminator:
 
-| `type`             | Fields                              | Meaning                                       |
-| ------------------ | ----------------------------------- | --------------------------------------------- |
-| `modify_stat`      | `stat`, `amount`, `target`          | `stat`: `damage` \| `heal` \| `hp` \| `cost`. |
-| `modify_keyword`   | `keyword`, `target`                 | `keyword`: `quick` (abilities gain Quick).    |
-| `modify_targeting` | `rule`, `target`                    | `rule`: `ignore_taunt` \| `untargetable_by`.  |
-| `global_rule`      | `rule`, `target?`, `trait?`, `cap?` | Landmark-wide rule (see below).               |
+| `type`             | Fields                                                         | Meaning                                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `modify_stat`      | `stat`, `amount`, `target`, `when?`, `source?`                 | `stat`: `damage` \| `heal` \| `hp` \| `cost` \| `damage_taken`. `when` filters the affected targets (outgoing `damage`/`heal`); `source` filters the attackers (incoming `damage_taken`). |
+| `modify_cost`      | `amount`, `if?`                                                | Reduces the card's own cost by `amount`.                                                                                                                                                  |
+| `modify_condition` | `condition`, `amount`, `target`, `if?`                         | My abilities apply +`amount` of `condition` to matching `target`s.                                                                                                                        |
+| `modify_keyword`   | `keyword`, `target`                                            | `keyword`: `quick` (abilities gain Quick).                                                                                                                                                |
+| `modify_targeting` | `rule`, `target`                                               | `rule`: `ignore_taunt` \| `untargetable_by`.                                                                                                                                              |
+| `global_rule`      | `rule`, `target?`, `trait?`, `condition?`, `position?`, `cap?` | Landmark-wide rule (see below).                                                                                                                                                           |
 
-`global_rule` `rule` values: `disable_passives`, `grant_global_trait`, `condition_stack_cap`, `prevent_evolve`, `prevent_equip`.
+`global_rule` `rule` values: `disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, `prevent_equip`. `position` scopes a rule to a position (`chosen` = the deploy-chosen position sentinel).
 
 Modifiers carry their own `predicate` (via a `conditional`-style `if`) when gated — see the migration map for the exact modeling of each card.
 
@@ -202,21 +222,28 @@ Modifiers carry their own `predicate` (via a `conditional`-style `if`) when gate
 
 Triggers drive triggered passives and transformations (`evolveInto` / `igniteInto`). Trigger `type` values:
 
-`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`.
+`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`, `dies`.
+
+`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death (unlike `ally_dies`, which excludes self).
 
 ---
 
 ## Deck constraints
 
-Deck constraints are authored as a top-level YAML field and compiled to the card:
+Deck constraints are authored as a top-level YAML field and compiled to the card. Each constraint requires `raw` — the player-visible text (deck constraints are not effects, so their text lives here):
 
 ```yaml
 deckConstraints:
   - type: unreachable
+    raw: "i am Unreachable"
+  - type: generated_by
+    resource: fire_charge
+    amount: 5
+    raw: "create me by spending 5 Fire Charges"
 ```
 
 - `unreachable` — cannot be included in a constructed deck; may still be created during play.
-- `generated_by` — created during play by spending a resource (Hwayeomsa Incinerates): `{ "type": "generated_by", "resource": "fire_charge", "amount": 5 }`.
+- `generated_by` — created during play by spending a resource (Hwayeomsa Incinerates).
 
 ---
 

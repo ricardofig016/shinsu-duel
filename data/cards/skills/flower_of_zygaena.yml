@@ -3,4 +3,10 @@ name: Flower of Zygaena
 cost: 4
 requirements:
 effects:
-  - give ally wolhaiksong and team sweet and sour members strong 2
+  - type: grant_trait
+    trait: strong
+    amount: 2
+    target:
+      side: ally
+      affiliation: [wolhaiksong, team sweet and sour]
+    raw: "give ally wolhaiksong and team sweet and sour members strong 2"

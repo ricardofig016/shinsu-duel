@@ -3,4 +3,7 @@ name: Healing Potion
 cost: 2
 requirements:
 effects:
-  - heal an ally 5 HP
+  - type: heal
+    amount: 5
+    target: { side: ally }
+    raw: "heal an ally 5 HP"

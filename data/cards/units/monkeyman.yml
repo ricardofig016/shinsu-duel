@@ -8,8 +8,16 @@ positions:
   - scout
 passives:
 abilities:
-  - "scout: quick: see a random card in the opponent's hand"
-  - "fisherman: deal 1 to an enemy"
+  - type: peek_hand
+    owner: opponent
+    quick: true
+    position: scout
+    raw: "scout: quick: see a random card in the opponent's hand"
+  - type: deal_damage
+    amount: 1
+    target: { side: enemy }
+    position: fisherman
+    raw: "fisherman: deal 1 to an enemy"
 evolve:
 traits:
 attributes:

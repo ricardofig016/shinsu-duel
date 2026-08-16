@@ -2,7 +2,21 @@ type: skill
 name: Incinerate IV
 cost: 0
 requirements:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+  - type: generated_by
+    resource: fire_charge
+    amount: 7
+    raw: "create me by spending 7 Fire Charges"
 effects:
-  - create me by spending 7 Fire Charges
-  - deal 3 to all enemies and give them Burn 2
-  - unreachable
+  - type: sequence
+    steps:
+      - type: deal_damage
+        amount: 3
+        target: { side: enemy, scope: all }
+      - type: give_condition
+        condition: burned
+        amount: 2
+        target: { side: enemy, scope: all }
+    raw: "deal 3 to all enemies and give them Burn 2"

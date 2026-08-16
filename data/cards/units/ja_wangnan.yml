@@ -7,10 +7,33 @@ positions:
   - fisherman
   - scout
 passives:
-  - i deal +1 damage to Burned units
+  - type: modify_stat
+    stat: damage
+    amount: 1
+    target: { side: self }
+    when:
+      condition: burned
+    raw: "i deal +1 damage to Burned units"
 abilities:
-  - "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
-  - "heal a Prince of the Redlight District member 2 HP"
+  - type: spend_shinsu
+    amount: 1
+    effect:
+      type: sequence
+      steps:
+        - type: deal_damage
+          amount: 1
+          target: { side: enemy, count: 2 }
+        - type: give_condition
+          condition: burned
+          amount: 1
+          target: { side: enemy }
+    raw: "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
+  - type: heal
+    amount: 2
+    target:
+      side: ally
+      affiliation: prince of the redlight district
+    raw: "heal a Prince of the Redlight District member 2 HP"
 evolve:
 traits:
 attributes:

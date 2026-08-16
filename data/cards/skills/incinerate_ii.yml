@@ -2,7 +2,15 @@ type: skill
 name: Incinerate II
 cost: 0
 requirements:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+  - type: generated_by
+    resource: fire_charge
+    amount: 3
+    raw: "create me by spending 3 Fire Charges"
 effects:
-  - create me by spending 3 Fire Charges
-  - deal 2 to 2 enemies
-  - unreachable
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy, count: 2 }
+    raw: "deal 2 to 2 enemies"

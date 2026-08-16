@@ -67,7 +67,7 @@ function parseTrait(raw) {
 // normalized to internal codes before the compiled-schema check.
 
 const NESTED_NODE_KEYS = ["effect", "ability", "then", "otherwise"];
-const NESTED_DESCRIPTOR_KEYS = ["target", "card", "source", "if", "trigger"];
+const NESTED_DESCRIPTOR_KEYS = ["target", "card", "source", "if", "trigger", "when"];
 
 function normalizeCondition(value) {
   return String(value).trim().toLowerCase();
@@ -75,6 +75,24 @@ function normalizeCondition(value) {
 
 function normalizeTrait(value) {
   return toCode(value);
+}
+
+// Keywords compile to uniform objects: a bare string becomes { code }, and an
+// authored { code, raw } object carries its display text. The compiled shape
+// mirrors compiled traits ({ code, value? }) — one representation per keyword.
+function normalizeKeyword(value) {
+  if (typeof value === "string") {
+    if (value.trim() === "") throw new Error(`keywords: empty keyword`);
+    return { code: toCode(value) };
+  }
+  if (value && typeof value === "object" && typeof value.code === "string" && value.code.trim() !== "") {
+    const keyword = { code: toCode(value.code) };
+    if (typeof value.raw === "string" && value.raw.trim() !== "") {
+      keyword.raw = value.raw;
+    }
+    return keyword;
+  }
+  throw new Error(`keywords: expected a string or { code, raw } object, got ${JSON.stringify(value)}`);
 }
 
 function normalizePosition(value) {
@@ -97,6 +115,13 @@ function normalizeRank(value) {
   return String(value).trim().toLowerCase();
 }
 
+// Filter fields (affiliation/attribute/rank/position) may be a single value or
+// an array expressing OR-matching. Normalize each element the same way.
+function normalizeList(value, fn) {
+  if (Array.isArray(value)) return value.map((item) => fn(item));
+  return fn(value);
+}
+
 function normalizeEffectObject(obj, context) {
   if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
     throw new Error(`${context}: expected an object`);
@@ -106,10 +131,10 @@ function normalizeEffectObject(obj, context) {
 
   if (obj.condition !== undefined) normalized.condition = normalizeCondition(obj.condition);
   if (obj.trait !== undefined) normalized.trait = normalizeTrait(obj.trait);
-  if (obj.position !== undefined) normalized.position = normalizePosition(obj.position);
-  if (obj.affiliation !== undefined) normalized.affiliation = normalizeAffiliation(obj.affiliation);
-  if (obj.attribute !== undefined) normalized.attribute = normalizeAttribute(obj.attribute);
-  if (obj.rank !== undefined) normalized.rank = normalizeRank(obj.rank);
+  if (obj.position !== undefined) normalized.position = normalizeList(obj.position, normalizePosition);
+  if (obj.affiliation !== undefined) normalized.affiliation = normalizeList(obj.affiliation, normalizeAffiliation);
+  if (obj.attribute !== undefined) normalized.attribute = normalizeList(obj.attribute, normalizeAttribute);
+  if (obj.rank !== undefined) normalized.rank = normalizeList(obj.rank, normalizeRank);
 
   // Nested effect nodes: sequence.steps is an array; the rest are single.
   if (obj.steps !== undefined) {
@@ -337,7 +362,7 @@ function compileCard(rawCard, allCards) {
     name: rawCard.name || "",
     sobriquet: rawCard.sobriquet || null,
     cost: rawCard.cost ?? 0,
-    keywords: (rawCard.keywords || []).map(toCode),
+    keywords: (rawCard.keywords || []).map(normalizeKeyword),
     deckConstraints: (rawCard.deckConstraints || []).map((constraint) => ({ ...constraint })),
   };
 

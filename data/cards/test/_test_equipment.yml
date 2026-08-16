@@ -3,5 +3,6 @@ name: _Test Equipment
 cost: 1
 requirements:
 effects:
-  - test
+  - type: noop
+    raw: "test"
 ignition:

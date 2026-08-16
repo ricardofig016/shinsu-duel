@@ -7,11 +7,33 @@ positions:
   - wave controller
   - scout
 passives:
-  - "wave controller: frontline Shinheuh give Poisoned 1"
-  - "scout: backline Shinheuh give Ghost"
+  - type: give_condition
+    condition: poisoned
+    amount: 1
+    position: wave controller
+    trigger: { type: attack, source: frontline-shinheuh }
+    target: { side: enemy }
+    raw: "wave controller: frontline Shinheuh give Poisoned 1"
+  - type: give_condition
+    condition: ghost
+    position: scout
+    trigger: { type: attack, source: backline-shinheuh }
+    target: { side: enemy }
+    raw: "scout: backline Shinheuh give Ghost"
 abilities:
-  - summon a random 2 cost Shinheuh
-  - steal the enemy's cheapest Shinheuh
+  - type: summon
+    card:
+      position: [frontline shinheuh, backline shinheuh]
+      cost: 2
+      random: true
+    from: game
+    onto: self
+    raw: "summon a random 2 cost Shinheuh"
+  - type: steal
+    card:
+      position: [frontline shinheuh, backline shinheuh]
+      cost: cheapest
+    raw: "steal the enemy's cheapest Shinheuh"
 evolve:
 traits:
 attributes:

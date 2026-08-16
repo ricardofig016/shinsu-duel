@@ -3,4 +3,8 @@ name: Weights
 cost: 1
 requirements:
 effects:
-  - give Heavy 1 to an enemy
+  - type: give_condition
+    condition: heavy
+    amount: 1
+    target: { side: enemy }
+    raw: "give Heavy 1 to an enemy"

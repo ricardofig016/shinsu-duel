@@ -6,9 +6,21 @@ rank: regular
 positions:
   - fisherman
 passives:
-  - units with Burned 3+ can't target me
+  - type: modify_targeting
+    rule: untargetable_by
+    target:
+      side: any
+      condition: burned
+      conditionValue: 3
+    raw: "units with Burned 3+ can't target me"
 abilities:
-  - "give 2 Burned enemies Exhausted"
+  - type: give_condition
+    condition: exhausted
+    target:
+      side: enemy
+      count: 2
+      condition: burned
+    raw: "give 2 Burned enemies Exhausted"
 evolve:
 traits:
 attributes:

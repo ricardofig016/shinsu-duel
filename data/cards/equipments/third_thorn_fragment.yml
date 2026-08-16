@@ -2,9 +2,35 @@ type: equipment
 name: Third Thorn Fragment
 cost: 1
 requirements:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 effects:
-  - Unreachable
-  - Quick
-  - when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand
-  - the bearer has +1 HP
+  - type: conditional
+    quick: true
+    trigger: { type: equip }
+    if:
+      type: has_all_equipped
+      cardNames:
+        - "First Thorn Fragment"
+        - "Second Thorn Fragment"
+        - "Third Thorn Fragment"
+        - "Fourth Thorn Fragment"
+    then:
+      type: sequence
+      steps:
+        - type: discard
+          card:
+            type: equipment
+            name: "Thorn Fragment"
+          owner: you
+        - type: create_card
+          card:
+            name: "Enryu's Thorn"
+    raw: "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+  - type: modify_stat
+    stat: hp
+    amount: 1
+    target: { side: bearer }
+    raw: "the bearer has +1 HP"
 ignition:

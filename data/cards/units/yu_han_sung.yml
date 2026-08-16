@@ -6,10 +6,28 @@ rank: ranker
 positions:
   - wave controller
 passives:
-  - Baang gives Weak 2 and Cursed
+  - type: sequence
+    trigger: { type: skill_played, cardName: "Baang" }
+    steps:
+      - type: give_condition
+        condition: weak
+        amount: 2
+        target: { side: enemy }
+      - type: give_condition
+        condition: cursed
+        target: { side: enemy }
+    raw: "Baang gives Weak 2 and Cursed"
 abilities:
-  - Compress 1 from Submerged Fish in your hand
-  - "quick: create Baang in your hand"
+  - type: compress_shinsu
+    amount: 1
+    card:
+      name: Submerged Fish
+    raw: "Compress 1 from Submerged Fish in your hand"
+  - type: create_card
+    quick: true
+    card:
+      name: Baang
+    raw: "quick: create Baang in your hand"
 evolve:
 traits:
   - dealer

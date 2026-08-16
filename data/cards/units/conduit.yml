@@ -4,11 +4,30 @@ cost: 0
 hp: 2
 rank:
 positions:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 passives:
-  - Unreachable
-  - "round start: give me Ghost"
-  - "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
-  - "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+  - type: give_condition
+    condition: ghost
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Ghost"
+  - type: conditional
+    trigger: { type: round_start_or_activation }
+    if:
+      type: has_unit
+      target:
+        side: enemy
+        attribute: jeonsulsa
+      negate: true
+    then:
+      type: slay
+      target: { side: self }
+    raw: "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+  - type: play_jeonsul_baang
+    trigger: { type: round_start_or_activation }
+    raw: "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
 abilities:
 evolve:
 traits:

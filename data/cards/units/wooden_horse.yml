@@ -6,7 +6,15 @@ rank:
 positions:
   - landmark
 passives:
-  - when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP
+  - type: sequence
+    trigger: { type: quick_ability_used }
+    steps:
+      - type: charge_shinsu
+        amount: 1
+      - type: deal_damage
+        amount: 1
+        target: { side: self }
+    raw: "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
 abilities:
 evolve:
 traits:

@@ -6,7 +6,14 @@ rank:
 positions:
   - landmark
 passives:
-  - all Ranker and High Ranker units have Ghost
+  - type: give_condition
+    condition: ghost
+    target:
+      side: any
+      scope: all
+      rank: [ranker, high ranker]
+    trigger: { type: round_start }
+    raw: "round start: give Ghost to all Ranker and High Ranker units"
 abilities:
 evolve:
 traits:

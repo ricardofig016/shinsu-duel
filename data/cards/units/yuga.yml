@@ -7,9 +7,21 @@ positions:
   - wave controller
   - scout
 passives:
-  - when I am deployed, summon Bull from your deck or hand
+  - type: summon
+    card:
+      name: Bull
+    from: deck_or_hand
+    onto: self
+    trigger: { type: deploy }
+    raw: "when I am deployed, summon Bull from your deck or hand"
 abilities:
-  - give ally Bull Strong 2
+  - type: grant_trait
+    trait: strong
+    amount: 2
+    target:
+      side: ally
+      name: Bull
+    raw: "give ally Bull Strong 2"
 evolve:
 traits:
 attributes:

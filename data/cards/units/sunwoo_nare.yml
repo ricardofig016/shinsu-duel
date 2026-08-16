@@ -6,9 +6,23 @@ rank: regular
 positions:
   - scout
 passives:
-  - when you summon a Shinheuh, Charge 1
+  - type: charge_shinsu
+    amount: 1
+    trigger: { type: summon, source: shinheuh }
+    raw: "when you summon a Shinheuh, Charge 1"
 abilities:
-  - if i have an allied Shinheuh, give Exhausted 2 to an enemy
+  - type: conditional
+    if:
+      type: has_unit
+      target:
+        side: ally
+        position: shinheuh
+    then:
+      type: give_condition
+      condition: exhausted
+      amount: 2
+      target: { side: enemy }
+    raw: "if i have an allied Shinheuh, give Exhausted 2 to an enemy"
 evolve:
 traits:
   - sharpshooter

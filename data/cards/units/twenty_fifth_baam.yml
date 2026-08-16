@@ -7,7 +7,12 @@ positions:
   - wave controller
 passives:
 abilities:
-  - create a Thorn Fragment of your choice in hand
+  - type: create_card
+    card:
+      type: equipment
+      name: Thorn Fragment
+      choose: true
+    raw: "create a Thorn Fragment of your choice in hand"
 evolve:
   - i am equipped with Enryu's Thorn
 traits:

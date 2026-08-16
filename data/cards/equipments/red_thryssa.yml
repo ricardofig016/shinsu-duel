@@ -3,5 +3,11 @@ name: Red Thryssa
 cost: 3
 requirements:
 effects:
-  - "ability: deal 5 to an enemy"
+  - type: grant_ability
+    target: { side: bearer }
+    ability:
+      type: deal_damage
+      amount: 5
+      target: { side: enemy }
+    raw: "ability: deal 5 to an enemy"
 ignition:

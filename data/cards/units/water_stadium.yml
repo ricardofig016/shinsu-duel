@@ -6,7 +6,10 @@ rank:
 positions:
   - landmark
 passives:
-  - conditions do not stack past 2 # counter Yeon Yihwa
+  - type: global_rule
+    rule: condition_stack_cap
+    cap: 2
+    raw: "conditions do not stack past 2" # counter Yeon Yihwa
 abilities:
 evolve:
 traits:

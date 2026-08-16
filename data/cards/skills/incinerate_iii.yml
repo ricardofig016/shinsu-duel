@@ -2,7 +2,20 @@ type: skill
 name: Incinerate III
 cost: 0
 requirements:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+  - type: generated_by
+    resource: fire_charge
+    amount: 5
+    raw: "create me by spending 5 Fire Charges"
 effects:
-  - create me by spending 5 Fire Charges
-  - deal 2 to 3 enemies and give them Burn
-  - unreachable
+  - type: sequence
+    steps:
+      - type: deal_damage
+        amount: 2
+        target: { side: enemy, count: 3 }
+      - type: give_condition
+        condition: burned
+        target: { side: enemy, count: 3 }
+    raw: "deal 2 to 3 enemies and give them Burn"

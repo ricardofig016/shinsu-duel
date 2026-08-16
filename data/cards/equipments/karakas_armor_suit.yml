@@ -4,6 +4,14 @@ cost: 4
 requirements:
   - deployed as Fisherman
 effects:
-  - if you started the game with Ha Jinsung in your deck, i cost 2 less
-  - the bearer has Barrier
+  - type: modify_cost
+    amount: -2
+    if:
+      type: started_with_card
+      cardName: Ha Jinsung
+    raw: "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+  - type: grant_trait
+    trait: barrier
+    target: { side: bearer }
+    raw: "the bearer has Barrier"
 ignition:

@@ -6,10 +6,24 @@ rank: ranker
 positions:
   - light bearer
 passives:
-  - ally yeon family members have resilient
+  - type: grant_trait
+    trait: resilient
+    target:
+      side: ally
+      affiliation: yeon family
+    raw: "ally yeon family members have resilient"
 abilities:
-  - "spend 2: give barrier to 2 allies"
-  - "heal an ally 2 HP"
+  - type: spend_shinsu
+    amount: 2
+    effect:
+      type: grant_trait
+      trait: barrier
+      target: { side: ally, count: 2 }
+    raw: "spend 2: give barrier to 2 allies"
+  - type: heal
+    amount: 2
+    target: { side: ally }
+    raw: "heal an ally 2 HP"
 evolve:
 traits:
 attributes:

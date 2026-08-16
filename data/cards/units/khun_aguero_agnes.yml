@@ -7,7 +7,9 @@ positions:
   - light bearer
 passives:
 abilities:
-  - create 1
+  - type: create_lighthouse
+    amount: 1
+    raw: "Create 1"
 evolve:
   - i am equipped with Ice Spear
 traits:

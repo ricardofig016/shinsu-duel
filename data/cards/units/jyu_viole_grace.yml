@@ -7,8 +7,15 @@ positions:
   - wave controller
 passives:
 abilities:
-  - Silence an enemy that has at least one passive
-  - "spend 2: use an enemy ability"
+  - type: remove_traits
+    target: { side: enemy }
+    raw: "Silence an enemy that has at least one passive"
+  - type: spend_shinsu
+    amount: 2
+    effect:
+      type: copy_ability
+      source: { side: enemy }
+    raw: "spend 2: use an enemy ability"
 evolve:
 traits:
 attributes:

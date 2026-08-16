@@ -6,10 +6,22 @@ rank: ranker
 positions:
   - wave controller
 passives:
-  - when you reclaim an equipment, Compress 1 from it
+  - type: compress_shinsu
+    amount: 1
+    card:
+      type: equipment
+    trigger: { type: reclaim, cardType: equipment }
+    raw: "when you reclaim an equipment, Compress 1 from it"
 abilities:
-  - Disarm an enemy and send the equipment to your discard pile
-  - give an enemy Heavy 1
+  - type: disarm
+    target: { side: enemy }
+    to: discard
+    raw: "Disarm an enemy and send the equipment to your discard pile"
+  - type: give_condition
+    condition: heavy
+    amount: 1
+    target: { side: enemy }
+    raw: "give an enemy Heavy 1"
 evolve:
 traits:
   - reflect 2

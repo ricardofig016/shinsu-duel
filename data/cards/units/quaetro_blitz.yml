@@ -6,9 +6,23 @@ rank: regular
 positions:
   - wave controller
 passives:
-  - Baang gives Burned 1
+  - type: give_condition
+    condition: burned
+    amount: 1
+    target: { side: enemy }
+    trigger: { type: skill_played, cardName: "Baang" }
+    raw: "Baang gives Burned 1"
 abilities:
-  - "spend 3: deal 2 to all Burned enemies"
+  - type: spend_shinsu
+    amount: 3
+    effect:
+      type: deal_damage
+      amount: 2
+      target:
+        side: enemy
+        scope: all
+        condition: burned
+    raw: "spend 3: deal 2 to all Burned enemies"
 evolve:
 traits:
   - sharpshooter

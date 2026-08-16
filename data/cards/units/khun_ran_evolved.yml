@@ -7,9 +7,26 @@ positions:
   - fisherman
   - spear bearer
 passives:
-  - "round end: create Redan in your hand and revert me to Khun Ran"
+  - type: sequence
+    trigger: { type: round_end }
+    steps:
+      - type: create_card
+        card: { name: Redan }
+      - type: transform
+        cardName: "Khun Ran"
+    raw: "round end: create Redan in your hand and revert me to Khun Ran"
 abilities:
-  - deal 3 to a frontline enemy and heal enemy Conduit 2 HP
+  - type: sequence
+    steps:
+      - type: deal_damage
+        amount: 3
+        target: { side: enemy, scope: frontline }
+      - type: heal
+        amount: 2
+        target:
+          side: enemy
+          name: Conduit
+    raw: "deal 3 to a frontline enemy and heal enemy Conduit 2 HP"
 evolve:
 traits:
 attributes:

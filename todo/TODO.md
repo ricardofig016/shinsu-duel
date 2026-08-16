@@ -14,6 +14,7 @@
 - [ ] scripts: fix lookup after yml structure changes
 - [ ] rules: add "steal" keyword
 - [ ] rules: add contracts in `todo\contracts.md`
+- [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 
 ## In Progress
 

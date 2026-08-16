@@ -6,9 +6,20 @@ rank: regular
 positions:
   - light bearer
 passives:
-  - team sweet and sour members cost one less
+  - type: modify_stat
+    stat: cost
+    amount: -1
+    target:
+      side: ally
+      affiliation: team sweet and sour
+    raw: "team sweet and sour members cost one less"
 abilities:
-  - heal a team sweet and sour member 1 HP
+  - type: heal
+    amount: 1
+    target:
+      side: ally
+      affiliation: team sweet and sour
+    raw: "heal a team sweet and sour member 1 HP"
 evolve:
 traits:
   - creator

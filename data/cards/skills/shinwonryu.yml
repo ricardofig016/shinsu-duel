@@ -3,6 +3,11 @@ name: Shinwonryu
 cost: 4
 requirements:
   - have an ally Irregular
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 effects:
-  - Unreachable
-  - give an enemy Doomed
+  - type: give_condition
+    condition: doomed
+    target: { side: enemy }
+    raw: "give an enemy Doomed"

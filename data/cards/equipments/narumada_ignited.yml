@@ -3,5 +3,15 @@ name: Narumada - Ignited
 cost: 2
 requirements:
 effects:
-  - the bearer's damage-dealing abilities deal +3 damage and give Exhausted 1 # synergy with Hong Chunhwa
+  - type: modify_stat
+    stat: damage
+    amount: 3
+    target: { side: bearer }
+    raw: "the bearer's damage-dealing abilities deal +3 damage"
+  - type: give_condition
+    condition: exhausted
+    amount: 1
+    target: { side: enemy }
+    trigger: { type: deal_damage }
+    raw: "the bearer's damage-dealing abilities give Exhausted 1" # synergy with Hong Chunhwa
 ignition:

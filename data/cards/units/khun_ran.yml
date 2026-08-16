@@ -8,8 +8,16 @@ positions:
   - spear bearer
 passives:
 abilities:
-  - deal 3 to a frontline enemy
-  - heal enemy Conduit 2 HP
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy, scope: frontline }
+    raw: "deal 3 to a frontline enemy"
+  - type: heal
+    amount: 2
+    target:
+      side: enemy
+      name: Conduit
+    raw: "heal enemy Conduit 2 HP"
 evolve:
   - Redan is played on me
 traits:

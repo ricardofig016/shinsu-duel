@@ -3,5 +3,8 @@ name: Frog Fisher
 cost: 1
 requirements:
 effects:
-  - the bearer has Barrier
+  - type: grant_trait
+    trait: barrier
+    target: { side: bearer }
+    raw: "the bearer has Barrier"
 ignition:

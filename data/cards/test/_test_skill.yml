@@ -3,4 +3,5 @@ name: _Test Skill
 cost: 1
 requirements:
 effects:
-  - test
+  - type: noop
+    raw: "test"

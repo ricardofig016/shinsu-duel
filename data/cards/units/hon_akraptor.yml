@@ -6,9 +6,23 @@ rank: regular
 positions:
   - fisherman
 passives:
-  - if I have an allied Yeo Miseng, I have Strong 1
+  - type: conditional
+    if:
+      type: has_unit
+      target:
+        side: ally
+        name: Yeo Miseng
+    then:
+      type: grant_trait
+      trait: strong
+      amount: 1
+      target: { side: self }
+    raw: "if I have an allied Yeo Miseng, I have Strong 1"
 abilities:
-  - deal 4 to an enemy
+  - type: deal_damage
+    amount: 4
+    target: { side: enemy }
+    raw: "deal 4 to an enemy"
 evolve:
 traits:
 attributes:

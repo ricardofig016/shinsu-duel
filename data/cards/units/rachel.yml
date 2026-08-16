@@ -7,8 +7,25 @@ positions:
   - light bearer
 passives:
 abilities:
-  - kill an ally to Create 3 and give me a random numeric trait
-  - "spend 3: summon Akryung from your deck or hand"
+  - type: sequence
+    steps:
+      - type: slay
+        target: { side: ally }
+      - type: create_lighthouse
+        amount: 3
+      - type: grant_random_trait
+        target: { side: self }
+        numeric: true
+    raw: "kill an ally to Create 3 and give me a random numeric trait"
+  - type: spend_shinsu
+    amount: 3
+    effect:
+      type: summon
+      card:
+        name: Akryung
+      from: deck_or_hand
+      onto: self
+    raw: "spend 3: summon Akryung from your deck or hand"
 evolve:
 traits:
 attributes:

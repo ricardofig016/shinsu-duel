@@ -3,6 +3,10 @@ name: Narumada
 cost: 2
 requirements:
 effects:
-  - the bearer's damage-dealing abilities deal +3 damage
+  - type: modify_stat
+    stat: damage
+    amount: 3
+    target: { side: bearer }
+    raw: "the bearer's damage-dealing abilities deal +3 damage"
 ignition:
   - the bearer Slays a unit

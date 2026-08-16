@@ -20,7 +20,7 @@ _Phase B3 — Runtime transitional_ _(parallel with B2)_ (done)
 6. `PassiveManager.js`: `_parseTrigger` reads structured `passive.trigger.type` (`round_start`→`ROUND_START`, `round_end`→`ROUND_END`); unknown triggers / modifiers / no-trigger → `null` (transitional skip).
 7. New `server/game/handlers/NoopHandler.js` + registry registration for `noop`; `Card.js` gains `this.keywords = cardData.keywords || []`.
 
-_Phase B4 — Full YAML migration (all 82 files; atomic, single landing)_ _(depends on B2)_ (done)
+_Phase B4 — Full YAML migration (all 82 files; source migration complete; artifact landing blocked)_ _(depends on B2)_
 
 8. Batch 1 (A1–A4): `unreachable` → top-level `deckConstraints` only (drop the duplicated `handler` effect); `Quick` marker → `quick: true` on the real effect; "i am a Jeonsul Baang" → `keywords: [jeonsul-baang]`; `_test_*` → `{type: noop, raw: "test"}`.
 9. Batch 2 (C, D, E, J): compound deal+condition chains → `sequence`; heal+cleanse; simple condition grants; draw/reclaim/create with cost gating (Incinerate "create me" → `deckConstraints: [{type: generated_by, ...}]`).
@@ -28,9 +28,10 @@ _Phase B4 — Full YAML migration (all 82 files; atomic, single landing)_ _(depe
 11. Batch 4 (B, I, G, O, K, L, M, R, S, U): stat/cost modifiers, affiliation/name targets, trait copy/random/remove, slay, summon, steal/discard/disarm, switch_position, silence, peek_hand.
 12. Batch 5 (N, H, W): global rules, conditional selection (`started_with_card`), free/spend sequences.
 13. Batch 6 (P, Q, T): Conduit passives (`round_start_or_activation`, `conditional`+`slay`, `play_jeonsul_baang` per-HP), `repeat_play` for Twenty-Fifth Baam - Evolved.
-14. Invariant: recompiled `cards.json` has **zero `type: "custom"`**.
+14. Source invariant: all 82 YAML files validate and contain structured DSL nodes with display `raw` text. **Done.**
+15. Artifact invariant: the checked-in `server/data/cards.json` has **zero `type: "custom"` and no `handler` fields**. **Blocked** until Phases D/E support structured target objects and the migrated `create_card`/Hwayeomsa path; the current artifact remains legacy.
 
-_Phase B5 — Tests & docs_ _(depends on B3+B4)_
+_Phase B5 — Tests & docs_ _(depends on B3+B4 source migration; final audit depends on artifact landing)_
 
 15. New tests: compiler node validation/normalization/fail-fast/hoisting, audit test (zero `custom` outside allowlist), EffectResolver unregistered-skip, PassiveManager structured triggers, NoopHandler. Update tests touching `custom`/`handler` (e.g. `PassiveManager.test.js:69`, IdFactory fallback).
 16. Docs: `HANDLER_SYSTEM_ARCHITECTURE.md` (custom removal, new handlers), `SERVICE_LAYER_ARCHITECTURE.md` (PassiveManager), `TARGETING_ARCHITECTURE.md` if needed.
@@ -38,17 +39,17 @@ _Phase B5 — Tests & docs_ _(depends on B3+B4)_
 **Relevant files**
 
 - `card-compile.js` — regex matcher → structured validator/normalizer
-- `card.schema.json`, `compiled-cards.schema.json` — keywords/deckConstraints/noop/repeat_play/free/skill_played
-- `data/cards/**/*.yml` — all 82 files migrated
+- `card.schema.json`, `compiled-cards.schema.json` — closed structured DSL contract
+- `data/cards/**/*.yml` — all 82 files migrated; runtime artifact landing remains blocked
 - `EffectResolver.js`, `PassiveManager.js`, `server/game/handlers/NoopHandler.js`, `handlerRegistry.js`, `Card.js`
 - `COMPILED_CARD_DSL.md`, `HANDLER_SYSTEM_ARCHITECTURE.md`
 
 **Verification**
 
 1. Per-batch YAML review + ajv spot-checks during migration (compile is only runnable after the full atomic landing, since the new compiler rejects prose).
-2. `npm run compile:cards` + `npm run validate:cards` after B4 — audit test asserts zero `custom`.
-3. Full suite via `node --experimental-vm-modules node_modules/jest/bin/jest.js` (bare `npx jest` breaks ESM); coverage ~97% maintained.
-4. Determinism: cardId stability (names unchanged, `_test` cards kept), Hwayeomsa/Incinerate integration green.
+2. `npm run validate:cards` after B4 — source validation passes for all 82 YAML files. `npm run compile:cards` can generate a zero-`custom` artifact, but checked-in artifact landing and compiled-schema/audit verification wait for Phases D/E.
+3. Full suite via `node --experimental-vm-modules node_modules/jest/bin/jest.js` (bare `npx jest` breaks ESM); current legacy-artifact suite remains green.
+4. Determinism: cardId stability (names unchanged, `_test` cards kept); Hwayeomsa/Incinerate integration is an explicit Phase E/B4 artifact-landing gate.
 
 **Decisions**
 

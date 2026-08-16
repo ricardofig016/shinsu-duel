@@ -3,4 +3,8 @@ name: Submerged Fish
 cost: 4
 requirements:
 effects:
-  - Slay an enemy Regular or Ranker
+  - type: slay
+    target:
+      side: enemy
+      rank: [regular, ranker]
+    raw: "Slay an enemy Regular or Ranker"

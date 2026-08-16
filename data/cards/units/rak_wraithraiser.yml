@@ -7,7 +7,10 @@ positions:
   - spear bearer
 passives:
 abilities:
-  - deal 4 to an enemy
+  - type: deal_damage
+    amount: 4
+    target: { side: enemy }
+    raw: "deal 4 to an enemy"
 evolve:
 traits:
   - bloodthirsty

@@ -21,6 +21,7 @@ Treat every change as part of the long-term resurrection and evolution of this p
 
 - Treat `RULES.md` as the authoritative source for game behavior unless the user explicitly overrides it.
 - Read the relevant architecture documents in `docs/` before making any changes to the codebase.
+- For any card or rule work — adding/editing cards, or adding/editing rules — first read `docs/CARD_AUTHORING.md`.
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
 - When a requirement or rule is ambiguous, never guess. Ask the user for clarification before implementation.

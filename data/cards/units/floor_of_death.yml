@@ -6,7 +6,9 @@ rank:
 positions:
   - landmark
 passives:
-  - passives have no effect
+  - type: global_rule
+    rule: disable_passives
+    raw: "passives have no effect"
 abilities:
 evolve:
 traits:

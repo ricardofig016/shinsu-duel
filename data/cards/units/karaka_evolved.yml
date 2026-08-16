@@ -8,11 +8,34 @@ positions:
   - scout
   - wave controller
 passives:
-  - karaka's servants' abilities have Quick
-  - "round end: deal 3 to all Rooted enemies"
+  - type: modify_keyword
+    keyword: quick
+    target:
+      side: ally
+      affiliation: "karaka's servants"
+    raw: "karaka's servants' abilities have Quick"
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy, scope: all, condition: rooted }
+    trigger: { type: round_end }
+    raw: "round end: deal 3 to all Rooted enemies"
 abilities:
-  - deal 7 to an enemy
-  - "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+  - type: deal_damage
+    amount: 7
+    target: { side: enemy }
+    raw: "deal 7 to an enemy"
+  - type: spend_shinsu
+    amount: 1
+    effect:
+      type: sequence
+      steps:
+        - type: give_condition
+          condition: rooted
+          target: { side: enemy, count: 2 }
+        - type: deal_damage
+          amount: 3
+          target: { side: enemy, scope: all, condition: rooted }
+    raw: "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
 evolve:
 traits:
   - reflect

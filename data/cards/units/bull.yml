@@ -7,7 +7,11 @@ positions:
   - frontline shinheuh
 passives:
 abilities:
-  - "quick: deal 3 to an enemy"
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy }
+    quick: true
+    raw: "quick: deal 3 to an enemy"
 evolve:
 traits:
 attributes:

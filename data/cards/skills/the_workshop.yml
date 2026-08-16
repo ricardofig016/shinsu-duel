@@ -4,8 +4,21 @@ cost: 3
 requirements:
   - I'm the first card you play this round
 effects:
-  - Destroy 1
-  - heal an ally 1 HP
-  - Compress 1 from the most expensive card in your hand
-  - Reclaim 1
-  - Silence an enemy
+  - type: destroy_lighthouse
+    amount: 1
+    raw: "Destroy 1"
+  - type: heal
+    amount: 1
+    target: { side: ally }
+    raw: "heal an ally 1 HP"
+  - type: compress_shinsu
+    amount: 1
+    card:
+      cost: most expensive
+    raw: "Compress 1 from the most expensive card in your hand"
+  - type: reclaim_cards
+    amount: 1
+    raw: "Reclaim 1"
+  - type: remove_traits
+    target: { side: enemy }
+    raw: "Silence an enemy"

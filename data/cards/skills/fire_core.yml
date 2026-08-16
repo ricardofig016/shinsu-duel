@@ -2,6 +2,14 @@ type: skill
 name: Fire Core
 cost: 0
 requirements:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 effects:
-  - "Quick: Spend Fire Charges to create the highest affordable Incinerate in your hand"
-  - unreachable
+  - type: quick
+    raw: "i am Quick"
+  - type: create_card
+    card:
+      type: skill
+      name: Incinerate
+    raw: "Spend Fire Charges to create the highest affordable Incinerate in your hand"

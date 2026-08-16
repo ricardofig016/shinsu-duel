@@ -6,9 +6,23 @@ rank: regular
 positions:
   - scout
 passives:
-  - "round end: i lose all traits"
+  - type: remove_traits
+    target: { side: self }
+    trigger: { type: round_end }
+    raw: "round end: Silence me"
 abilities:
-  - "spend 3: give me taunt and barrier"
+  - type: spend_shinsu
+    amount: 3
+    effect:
+      type: sequence
+      steps:
+        - type: grant_trait
+          trait: taunt
+          target: { side: self }
+        - type: grant_trait
+          trait: barrier
+          target: { side: self }
+    raw: "spend 3: give me taunt and barrier"
 evolve:
 traits:
 attributes:

@@ -52,6 +52,7 @@ function getRegistry() {
     _registry.register("grant_ability", GrantAbilityHandler);
     _registry.register("create_incinerate", CreateIncinerateHandler);
     _registry.register("noop", NoopHandler);
+    _registry.register("quick", NoopHandler); // skill-level Quick marker (display-only)
   }
   return _registry;
 }

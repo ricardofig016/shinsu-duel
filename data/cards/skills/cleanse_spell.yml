@@ -3,4 +3,6 @@ name: Cleanse Spell
 cost: 1
 requirements:
 effects:
-  - Cleanse an ally
+  - type: cleanse
+    target: { side: ally }
+    raw: "Cleanse an ally"

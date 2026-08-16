@@ -4,4 +4,11 @@ cost: 5
 requirements:
   - you have an ally yeon family member or Hwayeomsa
 effects:
-  - Cleanse all allies and heal each of them 4 HP
+  - type: sequence
+    steps:
+      - type: cleanse
+        target: { side: ally, scope: all }
+      - type: heal
+        amount: 4
+        target: { side: ally, scope: all }
+    raw: "Cleanse all allies and heal each of them 4 HP"

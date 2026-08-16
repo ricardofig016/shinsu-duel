@@ -6,9 +6,18 @@ rank: regular
 positions:
   - fisherman
 passives:
-  - allied Team Chang members have Resilient 1
+  - type: grant_trait
+    trait: resilient
+    amount: 1
+    target:
+      side: ally
+      affiliation: team chang
+    raw: "allied Team Chang members have Resilient 1"
 abilities:
-  - deal 2 to an enemy
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy }
+    raw: "deal 2 to an enemy"
 evolve:
 traits:
   - bloodthirsty 1

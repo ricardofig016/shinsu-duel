@@ -7,9 +7,20 @@ positions:
   - fisherman
   - wave controller
 passives:
-  - "round end: Slay all enemies with Burned 3+"
+  - type: slay
+    target:
+      side: enemy
+      scope: all
+      condition: burned
+      conditionValue: 3
+    trigger: { type: round_end }
+    raw: "round end: Slay all enemies with Burned 3+"
 abilities:
-  - give Burned 1 to all enemies
+  - type: give_condition
+    condition: burned
+    amount: 1
+    target: { side: enemy, scope: all }
+    raw: "give Burned 1 to all enemies"
 evolve:
 traits:
 attributes:
