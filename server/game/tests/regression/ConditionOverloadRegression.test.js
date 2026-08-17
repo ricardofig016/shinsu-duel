@@ -50,7 +50,7 @@ describe("condition-field regression (EffectResolver)", () => {
     const result = resolveEffect(
       {
         type: "give_condition", condition: "poisoned", amount: 2,
-        target: "enemy", raw: "give Poisoned 2 to an enemy", handler: null,
+        target: "enemy", raw: "give Poisoned 2 to an enemy",
       },
       ctx, game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice", sourceType: "unit" }
@@ -76,7 +76,7 @@ describe("condition-field regression (EffectResolver)", () => {
     resolveEffect(
       {
         type: "give_condition", condition: "burned", amount: 1,
-        target: "all_enemies", raw: "give Burned 1 to all enemies", handler: null,
+        target: "all_enemies", raw: "give Burned 1 to all enemies",
       },
       ctx, game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice", sourceType: "unit" }
@@ -103,7 +103,7 @@ describe("condition-field regression (EffectResolver)", () => {
       {
         type: "deal_damage", amount: 99,
         target: "all_enemies", condition: "rooted",
-        raw: "deal 99 to all Rooted enemies", handler: null,
+        raw: "deal 99 to all Rooted enemies",
       },
       ctx, game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }

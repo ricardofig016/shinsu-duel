@@ -12,6 +12,7 @@ import ZoneService from "../services/ZoneService.js";
 import ShinsuService from "../services/ShinsuService.js";
 import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
+import { findCardsByName } from "../utils/cardData.js";
 
 export default class HwayeomsaEngine {
   constructor(eventBus, cards) {
@@ -148,9 +149,6 @@ export default class HwayeomsaEngine {
 
   _findCardByName(name) {
     if (!this._cards) return null;
-    for (const key of Object.keys(this._cards)) {
-      if (this._cards[key].name === name) return this._cards[key];
-    }
-    return null;
+    return findCardsByName(this._cards, name)[0] ?? null;
   }
 }

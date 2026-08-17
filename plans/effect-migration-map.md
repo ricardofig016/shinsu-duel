@@ -1,6 +1,6 @@
 # Effect Migration Map
 
-Historical inventory and classification of the legacy `type: "custom"` effects in the pre-migration `server/data/cards.json`, with the target DSL node for each. All 82 YAML source cards have now been migrated; this remains the Phase B audit artifact and maps each cluster to the structured grammar in [`docs/COMPILED_CARD_DSL.md`](../docs/COMPILED_CARD_DSL.md). The checked-in `cards.json` remains legacy until runtime artifact landing is unblocked by Phases D/E.
+Historical inventory and classification of the legacy `type: "custom"` effects in the pre-migration `server/data/cards.json`, with the target DSL node for each. All 82 YAML source cards have now been migrated; this remains the Phase B audit artifact and maps each cluster to the structured grammar in [`docs/COMPILED_CARD_DSL.md`](../docs/COMPILED_CARD_DSL.md). The checked-in `cards.json` has been regenerated with zero `custom`/`handler` entries.
 
 > Counts below refer to the compiled file at the time of the Phase 2 audit (123 `"type": "custom"` occurrences). Some customs are nested inside `spend_shinsu.effect` or `grant_ability.ability`.
 

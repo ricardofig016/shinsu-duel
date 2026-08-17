@@ -120,7 +120,7 @@ export function decisionId() {
  * Example: "granted:Equip#17:deal_damage"
  */
 export function grantedAbilityCode(sourceId, ability) {
-  const type = ability?.type || "custom";
+  const type = ability?.type || "unknown";
   return `granted:${sourceId}:${type}`;
 }
 

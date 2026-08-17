@@ -11,7 +11,6 @@
 - [ ] new card: passive - allies in my position have +x HP
 - [ ] new card: landmark - round start: give frontline units Blinded
 - [ ] data: add yml files for new cards in `todo\cards_to_add.md `
-- [ ] scripts: fix lookup after yml structure changes
 - [ ] rules: add "steal" keyword
 - [ ] rules: add contracts in `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
@@ -21,6 +20,7 @@
 
 ## Completed
 
+- [x] scripts: fix lookup after yml structure changes
 - [x] tests: add more to increase coverage
 - [x] tests: organize server\game\tests better - there's too many tests directly in tests\
 - [x] docs: fix newline based line wrapping - switch to single line paragraphs

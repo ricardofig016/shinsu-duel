@@ -168,6 +168,17 @@ function asList(raw) {
   return [raw];
 }
 
+// Extract matchable/display text from a DSL entry. Abilities, effects, and
+// passives are structured objects whose player-facing text lives in `raw`;
+// other fields (positions, traits, requirements) are plain strings.
+function dslEntryText(entry) {
+  if (typeof entry === "string") return entry;
+  if (entry && typeof entry === "object") {
+    return typeof entry.raw === "string" ? entry.raw : JSON.stringify(entry);
+  }
+  return String(entry);
+}
+
 // ---------------------------------------------------------------------------
 // Per-field matching
 // ---------------------------------------------------------------------------
@@ -189,6 +200,9 @@ function fieldMatches(card, fieldName, lookupValue) {
   if (fieldName === "abilities" || fieldName === "effects" || fieldName === "passives" || fieldName === "requirements") {
     if (typeof cardValue === "string") {
       return substringMatch(cardValue, lookupValue);
+    }
+    if (Array.isArray(cardValue)) {
+      return cardValue.some((entry) => substringMatch(dslEntryText(entry), lookupValue));
     }
     return false;
   }
@@ -212,9 +226,9 @@ function legacyGetMatches(card, lookupTerm) {
     if (raw === null || raw === undefined) continue;
 
     if (Array.isArray(raw)) {
-      const values = asList(raw).filter((v) => substringMatch(v, lookupTerm));
+      const values = asList(raw).filter((v) => substringMatch(dslEntryText(v), lookupTerm));
       if (values.length > 0) {
-        matches.push({ field, values });
+        matches.push({ field, values: values.map(dslEntryText) });
       }
     } else if (typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean") {
       if (substringMatch(String(raw), lookupTerm)) {
@@ -241,7 +255,7 @@ function fieldValueGetMatches(card, field, lookupValue) {
     if (Array.isArray(raw)) {
       const values = asList(raw);
       if (values.length > 0) {
-        return [{ field, values }];
+        return [{ field, values: values.map(dslEntryText) }];
       }
       return [];
     }
@@ -249,15 +263,9 @@ function fieldValueGetMatches(card, field, lookupValue) {
   }
 
   if (Array.isArray(raw)) {
-    const matchedElements = asList(raw).filter((v) => {
-      if (typeof v === "string") {
-        // Per-element: try substring match on the element itself
-        return substringMatch(v, lookupValue);
-      }
-      return false;
-    });
+    const matchedElements = asList(raw).filter((v) => substringMatch(dslEntryText(v), lookupValue));
     if (matchedElements.length > 0) {
-      return [{ field, values: matchedElements }];
+      return [{ field, values: matchedElements.map(dslEntryText) }];
     }
     return [];
   }

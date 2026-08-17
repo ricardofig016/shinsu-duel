@@ -136,12 +136,83 @@ function filterByTrait(targets, gameState, trait) {
 
 function filterByRank(targets, rank) {
   if (!rank) return targets;
-  return targets.filter((u) => u.card?.rank === rank);
+  const ranks = Array.isArray(rank) ? rank : [rank];
+  return targets.filter((u) => ranks.includes(u.card?.rank));
 }
 
 function filterByPosition(targets, position) {
   if (!position) return targets;
-  return targets.filter((u) => u.placedPositionCode === position);
+  const positions = Array.isArray(position) ? position : [position];
+  return targets.filter((u) => positions.includes(u.placedPositionCode));
+}
+
+function filterByAffiliation(targets, affiliation) {
+  if (!affiliation) return targets;
+  const codes = Array.isArray(affiliation) ? affiliation : [affiliation];
+  return targets.filter((u) => codes.some((code) => u.card?.affiliations?.[code] !== undefined));
+}
+
+function filterByAttribute(targets, attribute) {
+  if (!attribute) return targets;
+  const codes = Array.isArray(attribute) ? attribute : [attribute];
+  return targets.filter((u) => codes.some((code) => u.card?.attributes?.includes(code)));
+}
+
+function filterByName(targets, name) {
+  if (!name) return targets;
+  const expected = String(name).toLowerCase();
+  return targets.filter((u) => u.card?.name?.toLowerCase() === expected);
+}
+
+// ─── Structured target translation ──────────────────────────────────────────
+
+/**
+ * Translate a structured unit-target descriptor into the canonical string
+ * target plus filter fields. Structured descriptors are authored in YAML as
+ * `{ side, scope, count, ...filters }`; the resolver speaks a flat string
+ * target (`self`, `enemy`, `all_enemies`, …) with filter options.
+ *
+ * @param {object} descriptor — { side, scope?, count?, condition?, … }
+ * @returns {{ target: string, count?: number, [filter: string]: any }}
+ */
+export function normalizeStructuredTarget(descriptor) {
+  if (descriptor === null || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+    throw new Error("TargetResolver: structured target must be an object");
+  }
+
+  const { side, scope, random, cost, choose, ...filters } = descriptor;
+
+  if (random !== undefined || cost !== undefined) {
+    throw new Error(
+      "TargetResolver: structured target `random`/`cost` selection is not supported yet."
+    );
+  }
+
+  let target;
+  switch (side) {
+    case "self":
+      target = "self";
+      break;
+    case "bearer":
+      target = "bearer";
+      break;
+    case "ally":
+      target = scope === "all" ? "all_allies" : "ally";
+      break;
+    case "enemy":
+      if (scope === "all") target = "all_enemies";
+      else if (scope === "frontline") target = "enemy_frontline";
+      else if (scope === "backline") target = "enemy_backline";
+      else target = "enemy";
+      break;
+    case "any":
+      target = "unit";
+      break;
+    default:
+      throw new Error(`TargetResolver: unknown structured target side "${side}"`);
+  }
+
+  return { target, ...filters };
 }
 
 // ─── Main resolver ──────────────────────────────────────────────────────────
@@ -156,8 +227,11 @@ function filterByPosition(targets, position) {
  * @param {string} [options.condition] — filter: only units with this condition
  * @param {number} [options.conditionValue] — filter: condition value threshold
  * @param {string} [options.trait] — filter: only units with this trait
- * @param {string} [options.rank] — filter: only units of this rank
- * @param {string} [options.position] — filter: only units at this position
+ * @param {string|string[]} [options.rank] — filter: only units of this rank (array = OR)
+ * @param {string|string[]} [options.position] — filter: only units at this position (array = OR)
+ * @param {string|string[]} [options.affiliation] — filter: only units with this affiliation (array = OR)
+ * @param {string|string[]} [options.attribute] — filter: only units with this attribute (array = OR)
+ * @param {string} [options.name] — filter: only units with this exact card name
  * @param {number} [options.count] — max number of targets (for "2 enemies")
  * @returns {Array<Unit>} Validated, filtered target list
  */
@@ -170,6 +244,9 @@ export function resolveTargets(gameState, options) {
     trait = null,
     rank = null,
     position = null,
+    affiliation = null,
+    attribute = null,
+    name = null,
     count = 1,
   } = options;
 
@@ -270,6 +347,9 @@ export function resolveTargets(gameState, options) {
   candidates = filterByTrait(candidates, gameState, trait);
   candidates = filterByRank(candidates, rank);
   candidates = filterByPosition(candidates, position);
+  candidates = filterByAffiliation(candidates, affiliation);
+  candidates = filterByAttribute(candidates, attribute);
+  candidates = filterByName(candidates, name);
 
   // Blinded: randomize choice-descriptor targets (RULES.md).
   // Self, bearer, all_enemies/all_allies, and enemy_lighthouses are not randomized.
@@ -332,4 +412,4 @@ export function resolveCardTarget(playerState, selector) {
   return target?.id ?? null;
 }
 
-export default { resolveTargets, resolveCardTarget, canTargetEnemyLighthouses, validateTauntSelection };
+export default { resolveTargets, resolveCardTarget, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };

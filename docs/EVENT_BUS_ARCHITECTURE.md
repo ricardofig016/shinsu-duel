@@ -355,8 +355,9 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 
 - `card:drawn` — card drawn from deck
 - `card:reclaimed` — card reclaimed from discard
+- `card:created` — a card was created directly into a player's hand (e.g. `create_card`)
 - `game:deck:empty` — player's deck exhausted (triggers loss)
-- `effect:unsupported` — `custom` effect skipped with a warning
+- `effect:unsupported` — an effect `type` with no registered handler is skipped
 
 ### Skills & Decisions
 

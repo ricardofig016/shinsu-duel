@@ -32,7 +32,7 @@ describe("evolution flow", () => {
 
     // Evolved unit should have its new passive (round end: deal 3 to all Rooted enemies)
     const passives = karaka.card.passiveAbilities;
-    expect(passives.some((p) => p.trigger === "round end")).toBe(true);
+    expect(passives.some((p) => p.trigger?.type === "round_end")).toBe(true);
   });
 
   test("Karaka does NOT evolve when equipped in wrong position — req blocks", () => {

@@ -87,7 +87,7 @@ This ordering is verified by the DFS-ordering tests in `server/game/tests/integr
 
 ## Compiler Integration
 
-`parseTrigger(raw)` is called during `resolveEvolveInto()` and `resolveIgniteInto()` in `scripts/card-compile.js`. It converts `{ type: "custom", raw, handler: null }` trigger objects into typed ASTs.
+`parseTrigger(raw)` is called during `resolveEvolveInto()` and `resolveIgniteInto()` in `scripts/card-compile.js`. It parses the string `evolve:` / `ignition:` trigger text (e.g. "when i am deployed") into typed ASTs, failing compilation on an unsupported pattern. Passive and effect triggers are authored as structured `trigger` objects in YAML, not parsed.
 
 **Adding a new trigger pattern:**
 

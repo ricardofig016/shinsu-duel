@@ -12,19 +12,19 @@ This document describes the canonical target resolution system: line blocking ru
 
 ## Valid Target Descriptors
 
-| Descriptor          | Behavior                                                  |
-| ------------------- | --------------------------------------------------------- |
-| `self`              | The source unit itself                                    |
-| `ally`              | One allied unit (excluding self)                          |
-| `enemy`             | One enemy unit (frontline-first, taunt-constrained)       |
-| `bearer`            | The equipment's bearer (resolved by caller)               |
-| `all_allies`        | All allied units                                          |
-| `all_enemies`       | All enemy units (frontline-first)                         |
-| `enemies`           | Player-selected enemy targets, constrained by Taunt       |
-| `enemy_frontline`   | Enemy frontline units only                                |
-| `enemy_backline`    | Enemy backline units only                                 |
-| `enemy_lighthouses` | Opponent lighthouses when only Ghost/no enemies remain    |
-| `unit`              | Any unit on either board                                  |
+| Descriptor          | Behavior                                               |
+| ------------------- | ------------------------------------------------------ |
+| `self`              | The source unit itself                                 |
+| `ally`              | One allied unit (excluding self)                       |
+| `enemy`             | One enemy unit (frontline-first, taunt-constrained)    |
+| `bearer`            | The equipment's bearer (resolved by caller)            |
+| `all_allies`        | All allied units                                       |
+| `all_enemies`       | All enemy units (frontline-first)                      |
+| `enemies`           | Player-selected enemy targets, constrained by Taunt    |
+| `enemy_frontline`   | Enemy frontline units only                             |
+| `enemy_backline`    | Enemy backline units only                              |
+| `enemy_lighthouses` | Opponent lighthouses when only Ghost/no enemies remain |
+| `unit`              | Any unit on either board                               |
 
 ---
 
@@ -54,14 +54,32 @@ A unit with the `Blinded` condition cannot choose targeted units. For choice des
 
 ## Optional Filters
 
-| Filter           | Example                                             |
-| ---------------- | --------------------------------------------------- |
-| `condition`      | Only units with this condition: `"rooted"`          |
-| `conditionValue` | Threshold: `condition: "burned", conditionValue: 2` |
-| `trait`          | Only units with this trait: `"taunt"`               |
-| `rank`           | Only units of this rank: `"ranker"`                 |
-| `position`       | Only units at this position: `"fisherman"`          |
-| `count`          | Max targets: `count: 2` for "2 enemies"             |
+| Filter           | Example                                                       |
+| ---------------- | ------------------------------------------------------------- |
+| `condition`      | Only units with this condition: `"rooted"`                    |
+| `conditionValue` | Threshold: `condition: "burned", conditionValue: 2`           |
+| `trait`          | Only units with this trait: `"taunt"`                         |
+| `rank`           | Only units of this rank: `"ranker"` (array = OR)              |
+| `position`       | Only units at this position: `"fisherman"` (array = OR)       |
+| `affiliation`    | Only units with this affiliation: `"team-chang"` (array = OR) |
+| `attribute`      | Only units with this attribute: `"hwayeomsa"` (array = OR)    |
+| `name`           | Only units with this exact name: `"Conduit"`                  |
+| `count`          | Max targets: `count: 2` for "2 enemies"                       |
+
+---
+
+## Structured Target Descriptors
+
+Compiled cards author unit targets as structured objects — `{ side, scope, count, ...filters }` — rather than string descriptors. `EffectResolver` translates them through `TargetResolver.normalizeStructuredTarget()` into the canonical string target plus filter fields before resolution, so handlers never receive an object target.
+
+| Field   | Values                                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------- |
+| `side`  | `self`, `bearer`, `ally`, `enemy`, `any` (`any` = `unit`)                                      |
+| `scope` | `single`, `all`, `frontline`, `backline` (default `single`)                                    |
+| `count` | Max targets (e.g. `count: 2`)                                                                  |
+| filters | `condition`, `conditionValue`, `trait`, `rank`, `position`, `affiliation`, `attribute`, `name` |
+
+`scope` maps `enemy`+`all` → `all_enemies`, `frontline` → `enemy_frontline`, `backline` → `enemy_backline`, `ally`+`all` → `all_allies`. `random`/`cost` selection and deck/hand/game sources are not yet supported and land in Phase D.
 
 ---
 
@@ -69,11 +87,11 @@ A unit with the `Blinded` condition cannot choose targeted units. For choice des
 
 Some effects target cards still in the player's hand (e.g. `compress_shinsu`). These use `TargetResolver.resolveCardTarget(playerState, selector)` — the same architectural boundary as unit targeting.
 
-| Selector                      | Behavior                                              |
-| ----------------------------- | ----------------------------------------------------- |
-| `"<card name>"`               | Exact card name match (case-insensitive)              |
-| `"the most expensive card"`   | Highest printed-cost card in hand                     |
-| `"a <attribute>"`             | First card with the given attribute (e.g. "a Hwayeomsa") |
+| Selector                    | Behavior                                                 |
+| --------------------------- | -------------------------------------------------------- |
+| `"<card name>"`             | Exact card name match (case-insensitive)                 |
+| `"the most expensive card"` | Highest printed-cost card in hand                        |
+| `"a <attribute>"`           | First card with the given attribute (e.g. "a Hwayeomsa") |
 
 `EffectResolver` pre-resolves `targetCardSelector` to a concrete `targetCardId` before invoking any handler. Handlers only receive `targetCardId` — they never interpret the selector string.
 

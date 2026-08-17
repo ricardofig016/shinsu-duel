@@ -8,35 +8,34 @@ This document describes how timed passive abilities (round start / round end) ar
 
 Most unit passives are conditional checks read by other systems (e.g. "I ignore Taunt") and don't need a runtime subscription. A smaller set are **timed**: they fire automatically at round start or round end for as long as their unit is on the field. Those are compiled into structured DSL and executed by `PassiveManager`.
 
-| Layer        | Location                                     | Purpose                                          |
-| ------------ | -------------------------------------------- | ------------------------------------------------ |
-| **Compiler** | `scripts/card-compile.js` `compilePassive()` | Detects the `round start:` / `round end:` prefix |
-| **Runtime**  | `server/game/services/PassiveManager.js`     | Subscribes the compiled effect to round events   |
+| Layer        | Location                                 | Purpose                                        |
+| ------------ | ---------------------------------------- | ---------------------------------------------- |
+| **Compiler** | `scripts/card-compile.js`                | Validates/normalizes structured passive nodes  |
+| **Runtime**  | `server/game/services/PassiveManager.js` | Subscribes the compiled effect to round events |
 
 ---
 
 ## Compiled Shape
 
-A passive compiles to a timed DSL object only if its prefix is recognized **and** the remaining text resolves to a structured effect (the same parser used for abilities and skill effects):
+A timed passive is a structured DSL node with a structured `trigger` object:
 
 ```json
 {
   "type": "deal_damage",
   "amount": 3,
-  "target": "all_enemies",
-  "condition": "rooted",
-  "raw": "round end: deal 3 to all Rooted enemies",
-  "trigger": "round end"
+  "target": { "side": "enemy", "scope": "all", "condition": "rooted" },
+  "trigger": { "type": "round_end" },
+  "raw": "round end: deal 3 to all Rooted enemies"
 }
 ```
 
-If the remaining text doesn't resolve to a structured effect, the whole passive compiles as `type: "custom"` with no `trigger` field — `PassiveManager` ignores it, same as any other unresolved effect.
+The `trigger.type` selects the subscription. `PassiveManager` currently wires only `round_start` and `round_end`; other trigger types (and always-on modifiers with no `trigger`) are skipped until later phases.
 
 ---
 
 ## Runtime Behavior
 
-`PassiveManager.registerUnit(unit, gameState)` is called by `LifecycleEngine` whenever a unit enters play (deploy or transformation). It scans `unit.card.passiveAbilities`, and for each entry with a `trigger` field, subscribes to `round:started` or `round:ended` and resolves the effect through the normal `EffectResolver` when it fires:
+`PassiveManager.registerUnit(unit, gameState)` is called by `LifecycleEngine` whenever a unit enters play (deploy or transformation). It scans `unit.card.passiveAbilities`, and for each entry with a `trigger.type` of `round_start` or `round_end`, subscribes to the matching round event and resolves the effect through the normal `EffectResolver` when it fires:
 
 ```js
 passiveManager.registerUnit(unit, gameState);
@@ -66,7 +65,14 @@ Passive handlers run at `phase: "execute"` with a low priority, so they resolve 
 
 ```yaml
 passives:
-  - "round end: create Redan in your hand and revert me to Khun Ran"
+  - type: sequence
+    trigger: { type: round_end }
+    steps:
+      - type: create_card
+        card: { name: Redan }
+      - type: transform
+        cardName: Khun Ran
+    raw: "round end: create Redan in your hand and revert me to Khun Ran"
 ```
 
-This compiles as `type: "custom"` — "create ... and revert me" isn't a single structured effect, so it isn't wired to a runtime subscription yet. Extending `parseEffectWithMetadata()` to recognize this pattern is the only change needed to make it timed; `PassiveManager` requires no changes.
+`PassiveManager` wires the `round_end` trigger, but `create_card`/`transform` have no handler yet, so the effect is skipped via `effect:unsupported` until Phase E implements those primitives. `PassiveManager` requires no further changes.

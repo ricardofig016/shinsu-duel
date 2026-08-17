@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import yaml from "js-yaml";
 import Ajv from "ajv";
 
@@ -80,7 +80,7 @@ function normalizeTrait(value) {
 // Keywords compile to uniform objects: a bare string becomes { code }, and an
 // authored { code, raw } object carries its display text. The compiled shape
 // mirrors compiled traits ({ code, value? }) — one representation per keyword.
-function normalizeKeyword(value) {
+export function normalizeKeyword(value) {
   if (typeof value === "string") {
     if (value.trim() === "") throw new Error(`keywords: empty keyword`);
     return { code: toCode(value) };
@@ -117,12 +117,12 @@ function normalizeRank(value) {
 
 // Filter fields (affiliation/attribute/rank/position) may be a single value or
 // an array expressing OR-matching. Normalize each element the same way.
-function normalizeList(value, fn) {
+export function normalizeList(value, fn) {
   if (Array.isArray(value)) return value.map((item) => fn(item));
   return fn(value);
 }
 
-function normalizeEffectObject(obj, context) {
+export function normalizeEffectObject(obj, context) {
   if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
     throw new Error(`${context}: expected an object`);
   }
@@ -162,7 +162,7 @@ function normalizeEffectObject(obj, context) {
   return normalized;
 }
 
-function compileNode(node, context) {
+export function compileNode(node, context) {
   if (node === null || typeof node !== "object" || Array.isArray(node)) {
     throw new Error(`${context}: expected a structured effect object`);
   }
@@ -172,7 +172,7 @@ function compileNode(node, context) {
   return normalizeEffectObject(node, context);
 }
 
-function compileEntries(entries, context) {
+export function compileEntries(entries, context) {
   return (entries || []).map((entry, i) => compileNode(entry, `${context}[${i}]`));
 }
 
@@ -180,7 +180,7 @@ function compileEntries(entries, context) {
 // Converts raw trigger text into typed ASTs so the runtime never parses raw.
 // Unsupported triggers fail compilation until the pattern is modeled here.
 
-function parseTrigger(raw) {
+export function parseTrigger(raw) {
   const text = String(raw).trim();
   if (!text) return null;
 
@@ -351,7 +351,7 @@ function resolveIgnitedFrom(card, allCards) {
 
 // ── Card compilation ────────────────────────────────────────────────────────
 
-function compileCard(rawCard, allCards) {
+export function compileCard(rawCard, allCards) {
   const type = rawCard.type;
   const cardName = rawCard.name || "<unnamed>";
 
@@ -544,15 +544,24 @@ const colors = {
   yellow: "\x1b[33m",
 };
 
-async function main() {
+export async function compileAll(options = {}) {
+  const {
+    cardsDirectory: cardsDir = cardsDirectory,
+    outputPath: outPath = outputPath,
+    compiledSchemaPath: schemaPath = compiledSchemaPath,
+    runValidate = true,
+  } = options;
+
   // Source YAML is the only authoring input. Never compile unvalidated cards.
-  execFileSync(process.execPath, [validatorPath], {
-    cwd: projectRoot,
-    stdio: "inherit",
-  });
+  if (runValidate) {
+    execFileSync(process.execPath, [validatorPath], {
+      cwd: projectRoot,
+      stdio: "inherit",
+    });
+  }
 
   // 1. Read all YAML files recursively
-  const yamlFiles = await collectCardFiles(cardsDirectory);
+  const yamlFiles = await collectCardFiles(cardsDir);
 
   const rawCards = [];
   const errors = [];
@@ -636,7 +645,7 @@ async function main() {
   // 6. Clean up temporary fields
   const finalCards = compiledCards.map(cleanCompiled);
 
-  const compiledSchema = JSON.parse(await fs.readFile(compiledSchemaPath, "utf-8"));
+  const compiledSchema = JSON.parse(await fs.readFile(schemaPath, "utf-8"));
   const ajv = new Ajv({ allErrors: true, strict: false });
   const validateCompiled = ajv.compile(compiledSchema);
 
@@ -650,18 +659,18 @@ async function main() {
     const details = (validateCompiled.errors || [])
       .map((error) => `${error.instancePath || "output"}: ${error.message}`)
       .join("\n  ");
-    throw new Error(`Compiled card data failed ${path.relative(projectRoot, compiledSchemaPath)}:\n  ${details}`);
+    throw new Error(`Compiled card data failed ${path.relative(projectRoot, schemaPath)}:\n  ${details}`);
   }
 
   // 8. Write output
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
-  await fs.writeFile(outputPath, JSON.stringify(output, null, 2) + "\n", "utf-8");
+  await fs.mkdir(path.dirname(outPath), { recursive: true });
+  await fs.writeFile(outPath, JSON.stringify(output, null, 2) + "\n", "utf-8");
 
   // 9. Check icons
   const missingIcons = await checkIcons(finalCards);
 
   // 10. Report
-  console.log(`${colors.green}✓ Compiled ${finalCards.length} cards to ${path.relative(projectRoot, outputPath)}${colors.reset}`);
+  console.log(`${colors.green}✓ Compiled ${finalCards.length} cards to ${path.relative(projectRoot, outPath)}${colors.reset}`);
 
   const units = finalCards.filter((c) => c.type === "unit").length;
   const skills = finalCards.filter((c) => c.type === "skill").length;
@@ -677,10 +686,16 @@ async function main() {
     console.log(`\n${colors.yellow}⚠ Missing ${missingIcons.length} icon(s):${colors.reset}`);
     missingIcons.forEach((icon) => console.log(`  - ${icon}`));
   }
+
+  return finalCards;
 }
 
-main().catch((error) => {
-  console.error(`${colors.red}Fatal error: ${error.message}${colors.reset}`);
-  console.error(error.stack);
-  process.exitCode = 1;
-});
+const isMain = process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
+
+if (isMain) {
+  compileAll().catch((error) => {
+    console.error(`${colors.red}Fatal error: ${error.message}${colors.reset}`);
+    console.error(error.stack);
+    process.exitCode = 1;
+  });
+}

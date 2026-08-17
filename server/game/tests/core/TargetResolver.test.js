@@ -310,3 +310,96 @@ describe("TargetResolver.resolveTargets — remaining descriptors", () => {
     expect(targets.map((t) => t.id)).toEqual(["gf", "eb"]);
   });
 });
+
+describe("TargetResolver.normalizeStructuredTarget", () => {
+  test("maps side + scope to canonical string targets", () => {
+    expect(TargetResolver.normalizeStructuredTarget({ side: "self" }).target).toBe("self");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "bearer" }).target).toBe("bearer");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "ally" }).target).toBe("ally");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "ally", scope: "all" }).target).toBe("all_allies");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy" }).target).toBe("enemy");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", scope: "single" }).target).toBe("enemy");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", scope: "all" }).target).toBe("all_enemies");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", scope: "frontline" }).target).toBe("enemy_frontline");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", scope: "backline" }).target).toBe("enemy_backline");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "any" }).target).toBe("unit");
+  });
+
+  test("carries filter fields through unchanged", () => {
+    const result = TargetResolver.normalizeStructuredTarget({
+      side: "enemy", count: 2, condition: "rooted", trait: "taunt",
+      rank: ["regular", "ranker"], name: "Conduit", affiliation: "team-chang",
+    });
+    expect(result.target).toBe("enemy");
+    expect(result.count).toBe(2);
+    expect(result.condition).toBe("rooted");
+    expect(result.trait).toBe("taunt");
+    expect(result.rank).toEqual(["regular", "ranker"]);
+    expect(result.name).toBe("Conduit");
+    expect(result.affiliation).toBe("team-chang");
+  });
+
+  test("throws on non-object, unknown side, and random/cost selection", () => {
+    expect(() => TargetResolver.normalizeStructuredTarget(null)).toThrow("must be an object");
+    expect(() => TargetResolver.normalizeStructuredTarget({ side: "bogus" })).toThrow("unknown structured target side");
+    expect(() => TargetResolver.normalizeStructuredTarget({ side: "enemy", random: true })).toThrow("not supported yet");
+    expect(() => TargetResolver.normalizeStructuredTarget({ side: "enemy", cost: 2 })).toThrow("not supported yet");
+  });
+});
+
+describe("TargetResolver structured filters", () => {
+  let game;
+
+  beforeEach(() => {
+    game = createTestGame();
+    game.modifierStack.has = () => false;
+  });
+
+  function unit(id, owner, position = "scout", card = {}) {
+    return { id, owner, isAlive: () => true, placedPositionCode: position, card };
+  }
+
+  test("affiliation filter supports single value and array (OR)", () => {
+    const source = unit("s", game.usernames[0], "scout", { name: "Source", affiliations: {}, attributes: [] });
+    const chang = unit("c", game.usernames[1], "scout", { name: "Chang", affiliations: { "team-chang": {} }, attributes: [] });
+    const fug = unit("f", game.usernames[1], "scout", { name: "Fug", affiliations: { "fug": {} }, attributes: [] });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [chang, fug];
+
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, affiliation: "team-chang", count: 10 }).map((t) => t.id)).toEqual(["c"]);
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, affiliation: ["team-chang", "fug"], count: 10 }).map((t) => t.id)).toEqual(["c", "f"]);
+  });
+
+  test("attribute filter", () => {
+    const source = unit("s", game.usernames[0], "scout", { name: "Source", affiliations: {}, attributes: [] });
+    const hway = unit("h", game.usernames[1], "scout", { name: "Yihwa", affiliations: {}, attributes: ["hwayeomsa"] });
+    const other = unit("o", game.usernames[1], "scout", { name: "Other", affiliations: {}, attributes: [] });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [hway, other];
+
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, attribute: "hwayeomsa", count: 10 }).map((t) => t.id)).toEqual(["h"]);
+  });
+
+  test("name filter matches case-insensitively and exactly", () => {
+    const source = unit("s", game.usernames[0], "scout", { name: "Source", affiliations: {}, attributes: [] });
+    const conduit = unit("cd", game.usernames[1], "scout", { name: "Conduit", affiliations: {}, attributes: [] });
+    const other = unit("o", game.usernames[1], "scout", { name: "Rachel", affiliations: {}, attributes: [] });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [conduit, other];
+
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, name: "conduit", count: 10 }).map((t) => t.id)).toEqual(["cd"]);
+  });
+
+  test("rank and position filters accept arrays (OR)", () => {
+    const source = unit("s", game.usernames[0], "scout", { name: "Source", rank: "regular", affiliations: {}, attributes: [] });
+    const regular = unit("r", game.usernames[1], "fisherman", { name: "R", rank: "regular", affiliations: {}, attributes: [] });
+    const ranker = unit("k", game.usernames[1], "spear-bearer", { name: "K", rank: "ranker", affiliations: {}, attributes: [] });
+    const high = unit("h", game.usernames[1], "scout", { name: "H", rank: "high ranker", affiliations: {}, attributes: [] });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [];
+    game.playerStates[game.usernames[1]].field.backline = [regular, ranker, high];
+
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, rank: ["regular", "ranker"], count: 10 }).map((t) => t.id)).toEqual(["r", "k"]);
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, position: ["fisherman", "scout"], count: 10 }).map((t) => t.id)).toEqual(["r", "h"]);
+  });
+});

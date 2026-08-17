@@ -97,7 +97,7 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 | `type`            | Fields                            | Meaning                                                                                                    |
 | ----------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `draw_card`       | `amount`, `card?`                 | Draw `amount` cards (optionally filtered by `card`).                                                       |
-| `create_card`     | `card`, `cost?`                   | Create a card in hand (optionally gated by a cost).                                                        |
+| `create_card`     | `card`                            | Create a card in hand. Exact `card.name` (optionally `card.type`) creates that card.                       |
 | `summon`          | `card`, `from`, `onto`, `random?` | Put a unit onto a battlefield (`from`: `deck`, `hand`, `deck_or_hand`, or `game` = all existing cards).    |
 | `discard`         | `card`, `owner`                   | Send a card from an owner's hand to their discard.                                                         |
 | `steal`           | `card`                            | Take a card from the opponent into your control.                                                           |

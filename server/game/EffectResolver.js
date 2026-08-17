@@ -21,7 +21,7 @@ import ChargeShinsuHandler from "./handlers/ChargeShinsuHandler.js";
 import CompressShinsuHandler from "./handlers/CompressShinsuHandler.js";
 import ReclaimCardsHandler from "./handlers/ReclaimCardsHandler.js";
 import GrantAbilityHandler from "./handlers/GrantAbilityHandler.js";
-import CreateIncinerateHandler from "./handlers/CreateIncinerateHandler.js";
+import CreateCardHandler from "./handlers/CreateCardHandler.js";
 import NoopHandler from "./handlers/NoopHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
@@ -50,7 +50,7 @@ function getRegistry() {
     _registry.register("compress_shinsu", CompressShinsuHandler);
     _registry.register("reclaim_cards", ReclaimCardsHandler);
     _registry.register("grant_ability", GrantAbilityHandler);
-    _registry.register("create_incinerate", CreateIncinerateHandler);
+    _registry.register("create_card", CreateCardHandler);
     _registry.register("noop", NoopHandler);
     _registry.register("quick", NoopHandler); // skill-level Quick marker (display-only)
   }
@@ -101,30 +101,50 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Build payload from DSL + extra context
   const payload = { ...effect, ...extra };
 
+  // Structured unit-target descriptors ({ side, scope, count, ... }) are
+  // translated into the canonical string target + filter fields. Handlers
+  // never receive an object target — there is a single resolution path
+  // through TargetResolver.
+  let targetFilters = {};
+  if (!payload.targetId && payload.target && typeof payload.target === "object" && !Array.isArray(payload.target)) {
+    const structured = TargetResolver.normalizeStructuredTarget(payload.target);
+    payload.target = structured.target;
+    if (structured.count !== undefined) payload.count = structured.count;
+    targetFilters = structured;
+  }
+
+  // Build the filter options handed to TargetResolver. Structured-target
+  // filters take precedence; effect-level filters apply otherwise. Two
+  // effect-level fields are overloaded (they name the thing being applied,
+  // not a target filter): `condition` for give_condition/grant_trait/cleanse/
+  // heal, and `trait` for grant_trait. Effect-level `position` is the ability
+  // position requirement, never a target filter.
+  const buildTargetOptions = () => {
+    const conditionIsFilter = !["give_condition", "grant_trait", "cleanse", "heal"].includes(type);
+    const traitIsFilter = type !== "grant_trait";
+    return {
+      target: payload.target,
+      sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
+      sourceOwner: payload.sourceOwner || payload.owner,
+      condition: targetFilters.condition ?? (conditionIsFilter ? payload.condition : undefined),
+      conditionValue: targetFilters.conditionValue ?? payload.conditionValue,
+      trait: targetFilters.trait ?? (traitIsFilter ? payload.trait : undefined),
+      rank: targetFilters.rank,
+      position: targetFilters.position,
+      affiliation: targetFilters.affiliation,
+      attribute: targetFilters.attribute,
+      name: targetFilters.name,
+      count: Number.MAX_SAFE_INTEGER,
+    };
+  };
+
   // Single-target and non-choice descriptors — resolve immediately through
   // TargetResolver so handlers only ever receive a pre-resolved targetId.
   // This ensures taunt, frontline blocking, ghost, sharpshooter, blinded,
   // and condition filters are always applied consistently.
   const immediateTargets = new Set(["self", "ally", "enemy", "enemies", "bearer", "enemy_frontline", "enemy_backline", "unit"]);
   if (!payload.targetId && immediateTargets.has(payload.target)) {
-    // The `condition` DSL field is an overloaded term:
-    //   - deal_damage: filter targets to those with this condition
-    //   - give_condition: the condition being applied (NOT a filter)
-    // Only pass it as a target filter when the effect type uses it that way.
-    const conditionIsFilter = !["give_condition", "grant_trait", "cleanse", "heal"].includes(type);
-    const targetCondition = conditionIsFilter ? payload.condition : undefined;
-
-    const candidates = TargetResolver.resolveTargets(gameState, {
-      target: payload.target,
-      sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
-      sourceOwner: payload.sourceOwner || payload.owner,
-      condition: targetCondition,
-      conditionValue: payload.conditionValue,
-      trait: payload.trait,
-      rank: payload.rank,
-      position: payload.position,
-      count: Number.MAX_SAFE_INTEGER,
-    });
+    const candidates = TargetResolver.resolveTargets(gameState, buildTargetOptions());
     if (candidates.length > 1) {
       const maxChoices = payload.count && payload.count > 1 ? Math.min(payload.count, candidates.length) : 1;
       gameState.createPendingDecision({
@@ -158,18 +178,7 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Mass-target effects are resolved once for each target, preserving normal
   // handler semantics and making future handlers independent of target count.
   if (!payload.targetId && ["all_allies", "all_enemies"].includes(payload.target)) {
-    const conditionIsFilter = !["give_condition", "grant_trait", "cleanse", "heal"].includes(type);
-    const targets = TargetResolver.resolveTargets(gameState, {
-      target: payload.target,
-      sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
-      sourceOwner: payload.sourceOwner || payload.owner,
-      condition: conditionIsFilter ? payload.condition : undefined,
-      conditionValue: payload.conditionValue,
-      trait: payload.trait,
-      rank: payload.rank,
-      position: payload.position,
-      count: Number.MAX_SAFE_INTEGER,
-    });
+    const targets = TargetResolver.resolveTargets(gameState, buildTargetOptions());
     return targets.map((target) => resolveEffect(effect, context, gameState, { ...extra, targetId: target.id }));
   }
 

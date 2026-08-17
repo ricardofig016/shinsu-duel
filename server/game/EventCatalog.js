@@ -40,6 +40,7 @@ const EVT = {
   // State changes
   CARD_DRAWN:     "card:drawn",
   CARD_RECLAIMED: "card:reclaimed",
+  CARD_CREATED:   "card:created",
   SHINSU_CHARGED: "shinsu:charged",
   SHINSU_SPENT:   "shinsu:spent",
   SHINSU_CHANGED: "state:shinsu:changed",

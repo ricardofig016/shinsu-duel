@@ -1,6 +1,6 @@
 ## Plan: Rules-complete card effect engine
 
-**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phase B has migrated all 82 YAML source cards to structured DSL and the compiler now validates/normalizes them without a `custom` fallback. The remaining work is runtime integration: structured target descriptors, the migrated effect handlers, global rules, Jeonsulsa mechanics, and richer passives/triggers. The recompiled zero-`custom` artifact is not yet landed because the current runtime still expects legacy string targets and does not yet handle all migrated types.
+**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phase B has migrated all 82 YAML source cards to structured DSL and the compiler now validates/normalizes them without a `custom` fallback. The zero-`custom` artifact is landed; structured target descriptors (Phase B5a subset) and the `create_card`/Hwayeomsa path (Phase B6) are runtime-supported. The remaining work is runtime integration: the remaining migrated effect handlers, global rules, Jeonsulsa mechanics, and richer passives/triggers.
 
 The original 123 customs decomposed into **24 semantic clusters** (verified against the pre-migration `cards.json`), from metadata (unreachable markers, Quick flags, identity markers) to compound chains, affiliation/name/cost targeting, always-on stat amplifiers, global landmark rules, and Conduit/Jeonsulsa attribute mechanics.
 
@@ -17,11 +17,11 @@ _Phase B — Compiler revamp + full DSL migration_ (source work done; artifact l
 4. Rewrite `card-compile.js`: delete the regex matcher and `dslObject` custom fallback; validate/normalize structured nodes; fail-fast with descriptive errors; preserve `raw`. Update `card-validate.js` and `card-create.js`. **Done.**
 5. Migrate all 82 YAML files to structured DSL (atomic source migration): metadata clusters (`unreachable` → `deckConstraints` with required `raw`, `quick` → `quick` marker node / `quick: true`, identity markers → `keywords` + visible `noop` line), compound chains → `sequence`/`conditional`, passive triggers → structured `trigger` objects, and every primitive/modifier/global-rule/Jeonsulsa effect. **Done.**
 6. Source invariant: `npm run validate:cards` passes for all 82 YAML files. **Done.**
-7. Artifact invariant: regenerate and land `server/data/cards.json` with zero `type: "custom"`/`handler`. **Blocked** until Phase D structured targeting and Phase E `create_card`/Hwayeomsa runtime integration are complete; the current checked-in artifact remains legacy.
+7. Artifact invariant: regenerate and land `server/data/cards.json` with zero `type: "custom"`/`handler`. **Done.** Structured targeting (B5a subset) and `create_card`/Hwayeomsa (B6) were pulled forward into Phase B.
 
 > **Phase B outcome** — all 82 YAML files are structured and source validation passes. `npm run compile:cards` can emit a zero-`custom`/zero-`handler` artifact, but it is not yet checked in because the runtime still expects legacy string targets and does not handle all migrated types. The schema contract grew beyond Phase A to close the last clusters: `keywords`, `deckConstraints` (required `raw`), `noop`, `quick`, `repeat_play`, `free`, `choose_position`, `play_jeonsul_baang`; `summon.from` (`deck`/`hand`/`deck_or_hand`/`game`); OR filter arrays (`filterValue`); modifiers including `damage_taken`/`when`/`source`/`modify_condition`; global rules including `grant_global_condition`; triggers including `reclaim`/`dies`/`cardType`; `has_all_equipped`; and `owner: self|enemy`.
 >
-> **⚠️ Runtime landing caveat** — landing the regenerated `cards.json` is a Phase D/E acceptance criterion, not a completed B4 result. Current runtime failures include structured target objects and Fire Core's `create_card`/Hwayeomsa path.
+> **⚠️ Runtime landing caveat** — the regenerated `cards.json` is landed. Structured target objects (B5a) and Fire Core's `create_card`/Hwayeomsa path (B6) are runtime-supported. Remaining skips are the still-unimplemented migrated types (Phases C–I).
 
 _Phase C — Resolver structural nodes & predicates_
 
@@ -30,12 +30,12 @@ _Phase C — Resolver structural nodes & predicates_
 
 _Phase D — Targeting extensions_ _(parallel with C)_
 
-9. `TargetResolver`: name/affiliation/attribute/cost filters, seeded-random selection, choice decisions ("of your choice"), multi-owner targets ("both players' fields"), deck/hand/game sources, extended `resolveCardTarget` selectors, and consume the structured `target: {side, scope, count, …}` object form. **This is a B4 artifact-landing blocker.**
+9. `TargetResolver`: name/affiliation/attribute/cost filters, seeded-random selection, choice decisions ("of your choice"), multi-owner targets ("both players' fields"), deck/hand/game sources, extended `resolveCardTarget` selectors, and consume the structured `target: {side, scope, count, …}` object form. The structured `{side, scope, count, filters}` subset — including affiliation/attribute/name filters and array-OR rank/position — already landed in Phase B5a; remaining: `random`/`choice`/`cost` selection and deck/hand/game sources.
 
 _Phase E — New effect primitives_ (each: handler + service integration + validate/execute tests) _depends on C+D_
 
 10. Lifecycle: `slay`, `transform`/revert (reuse `LifecycleEngine`).
-11. Zone movement: `summon`, `create_card` (generalizes the Fire-Charge "create me" mechanic), `steal`, `discard`, `disarm`, `switch_position`. **`create_card`/Hwayeomsa is a B4 artifact-landing blocker.**
+11. Zone movement: `summon`, `create_card` (**landed in Phase B6** — exact-name create + `generated_by`/Hwayeomsa delegation), `steal`, `discard`, `disarm`, `switch_position`.
 12. Unit state: `silence`, `remove_traits`, `copy_traits`, `grant_random_trait`, `peek_hand` (observer-only).
 13. Abilities: `copy_ability` ("use an enemy ability"), delayed repeat-play.
 
@@ -83,7 +83,7 @@ _Phase J — Rules-completeness enforcement + cleanup + docs_ _depends on all_
 1. Run focused Jest per phase and the full suite at the end: `node --experimental-vm-modules node_modules/jest/bin/jest.js` (bare `npx jest` breaks ESM).
 2. `npm run validate:cards` after B4 — passes for all 82 YAML files. `npm run compile:cards` can generate a zero-`custom` artifact, but checked-in artifact landing is deferred until Phase D/E runtime blockers are resolved; then rerun compiled-schema validation and the audit test.
 3. At least one playthrough integration test per cluster (24).
-4. Determinism/replay tests for new random/choice paths; coverage maintained (~97% stmts). Hwayeomsa/Incinerate integration is an explicit Phase E/B4 artifact-landing gate.
+4. Determinism/replay tests for new random/choice paths; coverage maintained (~97% stmts). Hwayeomsa/Incinerate integration is covered by the Phase B6 `create_card` handler (green).
 
 **Decisions**
 

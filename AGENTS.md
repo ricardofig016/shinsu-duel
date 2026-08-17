@@ -61,6 +61,7 @@ During implementation:
 - Regression tests must cover the specific failure mode, including edge cases where practical.
 - Test successful behavior, invalid input, boundary conditions, lifecycle cleanup, repeated operations, failure paths, event ordering, and interactions with related systems.
 - Run the relevant focused tests during development and the full test suite before finishing.
+- Run tests via `npm run test`. Do NOT use bare `npx jest`. The `test` script already wraps Jest with the required Node flags (`node --experimental-vm-modules node_modules/jest/bin/jest.js`).
 
 ## Acceptance Criteria
 

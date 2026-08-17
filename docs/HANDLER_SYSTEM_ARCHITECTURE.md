@@ -99,8 +99,7 @@ The compiled `cards.json` contains effect objects like:
   "type": "deal_damage",
   "amount": 7,
   "target": "enemy",
-  "raw": "deal 7 to an enemy",
-  "handler": null
+  "raw": "deal 7 to an enemy"
 }
 ```
 
@@ -112,7 +111,7 @@ At runtime, the resolution engine:
 4. Calls `handler.validate(payload)` with concrete `targetId` values
 5. Calls `handler.execute(payload, context, gameState)`
 
-For `type: "custom"` effects, there is **no handler registered**. These are unresolved raw-text effects that the resolution engine skips gracefully and reports through the unsupported-effect event. They are not parsed at runtime.
+For a `type` with **no registered handler** (a valid structured type whose handler lands in a later phase), there is **no handler registered**. The resolution engine skips the effect and reports it through the unsupported-effect event; it never parses prose.
 
 ---
 
@@ -140,8 +139,11 @@ For `type: "custom"` effects, there is **no handler registered**. These are unre
 | `CompressShinsuHandler` | `compress_shinsu` | Delegates to `CompressionService.compress`; receives `targetCardId` from EffectResolver/TargetResolver |
 | `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                                          |
 | `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability via `AbilityRegistry`; revoked on source removal                               |
+| `CreateCardHandler`     | `create_card`     | Creates a card in hand (`card:created`); `generated_by` families delegate to the Hwayeomsa engine      |
+| `NoopHandler`           | `noop`            | No-op; resolves to `{ resolved: true }` (test placeholders)                                            |
+| `NoopHandler`           | `quick`           | Display-only Quick marker node; no-op                                                                  |
 
-All structured DSL types listed above have handler implementations. `custom` effects remain unresolved; the runtime skips them safely and reports an unsupported-effect event rather than parsing raw text.
+Structured DSL types not listed above (e.g. `sequence`, `conditional`, `summon`, modifiers, global rules) have no handler yet; the runtime skips them and reports an unsupported-effect event.
 
 ## Ability Registry
 
@@ -168,7 +170,7 @@ resolveEffect(effect, context, gameState, extra);
 1. Reads `effect.type`, looks up handler via `HandlerRegistry`
 2. Handles nested effects: `spend_shinsu.effect` resolved recursively after deduction
 3. `grant_ability.ability` is stored by the GrantAbilityHandler, not resolved immediately
-4. `type: "custom"` is skipped with a warning
+4. A `type` with no registered handler is skipped and reported via `effect:unsupported`
 
 ---
 
@@ -176,16 +178,18 @@ resolveEffect(effect, context, gameState, extra);
 
 Some compiled DSL types are **nested** — they contain inner effect objects that themselves need handler resolution.
 
-### `spend_shinsu` (7 occurrences)
+### `spend_shinsu`
 
 ```json
 {
   "type": "spend_shinsu",
   "amount": 1,
   "effect": {
-    "type": "custom",
-    "raw": "give Rooted to 2 enemies",
-    "handler": null
+    "type": "give_condition",
+    "condition": "rooted",
+    "amount": 2,
+    "target": "enemy",
+    "raw": "give Rooted to 2 enemies"
   }
 }
 ```
@@ -200,8 +204,9 @@ Resolution flow:
 
 ```js
 function resolveEffect(effect, context, gameState, extra = {}) {
-  if (effect.type === "custom") {
-    // Skip unresolved raw text and emit an unsupported-effect event.
+  if (!registry.has(effect.type)) {
+    // Skip a valid structured type whose handler isn't implemented yet,
+    // and emit an unsupported-effect event.
     return { skipped: true };
   }
   // TargetResolver is called here, before the handler, when effect.target
@@ -257,8 +262,6 @@ Every handler receives the DSL object as its payload (plus `context` and `gameSt
 
 **⚠️ The `raw` field is always present** — it's the original card text. Handlers can use it for logging/error messages but should NOT parse it for logic. Use the structured fields only.
 
-**⚠️ The `handler` field is always `null` in compiled data.** It was a design artifact for custom handler names. It may be repurposed for named custom handler lookup later.
-
 ---
 
 ## Anti-patterns
@@ -266,4 +269,4 @@ Every handler receives the DSL object as its payload (plus `context` and `gameSt
 - **Don't parse `raw` text for logic** — use structured fields.
 - **Don't skip validation** — always call `handler.validate()` before `execute()`.
 - **Don't hold state in handler instances** — they're singletons.
-- **Don't swallow custom effects silently** — log a warning so they get handlers eventually.
+- **Don't swallow unregistered effects silently** — emit `effect:unsupported` so they get handlers eventually.

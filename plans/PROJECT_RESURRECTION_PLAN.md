@@ -69,11 +69,11 @@ The compiler assigns stable alphabetical `cardId` values and emits a sparse repr
 - Equipment may contain `igniteInto`/`ignitedFrom`; units may contain `evolveInto`/`evolvedFrom`.
 - `abilities`, `passives`, effects, and transformation triggers use DSL objects.
 - Recognized common patterns become structured objects such as `deal_damage`, `give_condition`, `heal`, `create_lighthouse`, `compress_shinsu`, and `spend_shinsu`.
-- Unsupported mechanics remain `{ type: "custom", raw, handler }` for a later custom handler.
+- Mechanics are authored as structured DSL nodes; unsupported structures fail compilation until modeled (no prose fallback).
 - Every DSL object preserves the source text in `raw`.
 - `Unreachable` also creates `{ type: "unreachable" }` in `deckConstraints`.
 
-The compiler is a finite pattern matcher, not an NLP system. It must not silently reinterpret non-canonical aliases. When a pattern is not supported, preserve it as custom text and add execution support in a later phase.
+The compiler validates and normalizes structured DSL nodes, not prose. It must not silently reinterpret non-canonical aliases. When a structure is not supported, fail compilation so it can be modeled explicitly.
 
 Phase 0 is complete when all three commands pass, generated data is current, and this document accurately describes the contracts above. The card total is reported by the commands and is not a contractual constant.
 
@@ -125,7 +125,7 @@ Actions validate actor, turn, cost, target, position, combat slot, and resulting
 
 ## Phase 4 — Effects and passives
 
-Build the generic DSL interpreter for structured effects and a registry for custom handlers. Support composition, targets, conditions, traits, costs, delayed triggers, and cleanup. Custom handlers are required for genuinely unique mechanics; they must not be hidden in compiler aliases. This phase also handles all `{ type: "custom" }` entries produced by the Phase 0 compiler that were not covered by the baseline simple-effect patterns.
+Build the generic DSL interpreter for structured effects and a registry for custom handlers. Support composition, targets, conditions, traits, costs, delayed triggers, and cleanup. Custom handlers are required for genuinely unique mechanics; they must not be hidden in compiler aliases. This phase implements the remaining structured DSL node types that the Phase 0 compiler had left unhandled.
 
 ## Phase 5 — Integration testing
 

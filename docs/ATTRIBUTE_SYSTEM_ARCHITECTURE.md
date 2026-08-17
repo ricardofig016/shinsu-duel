@@ -80,6 +80,8 @@ hwayeomsaEngine.generateFireCharge(username, gameState)
 
 Validates: Hwayeomsa unit on field, sufficient shinsu (1). Creates Fire Core card in hand if not already present.
 
+Fire Core's compiled `create_card` effect (card target `{ type: skill, name: Incinerate }`) is resolved by `CreateCardHandler`, which delegates the `fire_charge` resource to this engine's `getAvailableLevels`/`consumeCharges` — selecting the highest affordable Incinerate.
+
 ### Incinerate Consumption
 
 ```js

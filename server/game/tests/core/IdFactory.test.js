@@ -68,8 +68,9 @@ describe("IdFactory", () => {
 
   test("grantedAbilityCode formats source and ability type", () => {
     expect(idf.grantedAbilityCode("Equip#17", { type: "deal_damage" })).toBe("granted:Equip#17:deal_damage");
-    expect(idf.grantedAbilityCode("Equip#17", {})).toBe("granted:Equip#17:custom");
-    expect(idf.grantedAbilityCode("Equip#17", null)).toBe("granted:Equip#17:custom");
+    // `unknown` is a display-code fallback for a missing type.
+    expect(idf.grantedAbilityCode("Equip#17", {})).toBe("granted:Equip#17:unknown");
+    expect(idf.grantedAbilityCode("Equip#17", null)).toBe("granted:Equip#17:unknown");
   });
 
   test("getCounters and setCounters round-trip", () => {

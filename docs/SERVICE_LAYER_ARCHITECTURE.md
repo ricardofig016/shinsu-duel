@@ -73,6 +73,7 @@ UnitService.setHp(unit, value); // → currentHp (floored at 0)
 ## Integration
 
 - **Handlers** delegate shared-resource changes (see `HANDLER_SYSTEM_ARCHITECTURE.md`).
+- **PassiveManager** registers timed passives (`round_start`/`round_end`) as event subscriptions and resolves them through `EffectResolver`; it coordinates state change rather than owning a resource (see `PASSIVE_SYSTEM_ARCHITECTURE.md`).
 - **Actions** validate via the same services before mutating (see `ACTION_SYSTEM_ARCHITECTURE.md`).
 - **LifecycleEngine** composes them for deploy/destroy/equip, and owns position movement via `switchPosition`.
 - **Attribute engines** mutate only through `GameState` delegation (`CombatSlotService` for the Shinheuh slot, `_modifyFireCharges` for fire charges), never by writing resource fields directly.
