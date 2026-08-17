@@ -164,6 +164,31 @@ function filterByName(targets, name) {
   return targets.filter((u) => u.card?.name?.toLowerCase() === expected);
 }
 
+/**
+ * Apply every unit filter to a candidate list. Shared by `resolveTargets` and
+ * `resolveExistenceUnits` so the filter vocabulary has a single source of truth.
+ */
+function applyFilters(candidates, gameState, filters = {}) {
+  const {
+    condition = null,
+    conditionValue = undefined,
+    trait = null,
+    rank = null,
+    position = null,
+    affiliation = null,
+    attribute = null,
+    name = null,
+  } = filters;
+  candidates = filterByCondition(candidates, gameState, condition, conditionValue);
+  candidates = filterByTrait(candidates, gameState, trait);
+  candidates = filterByRank(candidates, rank);
+  candidates = filterByPosition(candidates, position);
+  candidates = filterByAffiliation(candidates, affiliation);
+  candidates = filterByAttribute(candidates, attribute);
+  candidates = filterByName(candidates, name);
+  return candidates;
+}
+
 // ─── Structured target translation ──────────────────────────────────────────
 
 /**
@@ -343,13 +368,16 @@ export function resolveTargets(gameState, options) {
   }
 
   // Apply filters
-  candidates = filterByCondition(candidates, gameState, condition, conditionValue);
-  candidates = filterByTrait(candidates, gameState, trait);
-  candidates = filterByRank(candidates, rank);
-  candidates = filterByPosition(candidates, position);
-  candidates = filterByAffiliation(candidates, affiliation);
-  candidates = filterByAttribute(candidates, attribute);
-  candidates = filterByName(candidates, name);
+  candidates = applyFilters(candidates, gameState, {
+    condition,
+    conditionValue,
+    trait,
+    rank,
+    position,
+    affiliation,
+    attribute,
+    name,
+  });
 
   // Blinded: randomize choice-descriptor targets (RULES.md).
   // Self, bearer, all_enemies/all_allies, and enemy_lighthouses are not randomized.
@@ -412,4 +440,50 @@ export function resolveCardTarget(playerState, selector) {
   return target?.id ?? null;
 }
 
-export default { resolveTargets, resolveCardTarget, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };
+/**
+ * Resolve every alive unit on a side for an existence predicate, ignoring
+ * offensive-targeting rules (frontline blocking, taunt, blinded). Predicates
+ * ask "does any matching unit exist?", not "who is a legal target?".
+ *
+ * @param {GameState} gameState
+ * @param {object} descriptor — { side: "ally"|"enemy"|"any", ...filters }
+ * @param {string} sourceOwner — owner used to derive the ally/enemy side
+ * @returns {Array<Unit>}
+ */
+export function resolveExistenceUnits(gameState, descriptor, sourceOwner) {
+  if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+    throw new Error("TargetResolver: existence descriptor must be an object");
+  }
+
+  const { side, ...filters } = descriptor;
+  let candidates = [];
+
+  if (side === "any") {
+    for (const username of gameState.usernames) {
+      const field = gameState.playerStates[username]?.field;
+      if (!field) continue;
+      candidates.push(
+        ...(field.frontline || []).filter((u) => u.isAlive()),
+        ...(field.backline || []).filter((u) => u.isAlive())
+      );
+    }
+  } else if (side === "ally" || side === "enemy") {
+    if (!sourceOwner) {
+      throw new Error(`TargetResolver: existence check for side "${side}" requires sourceOwner`);
+    }
+    const owner = side === "ally" ? sourceOwner : gameState.usernames.find((u) => u !== sourceOwner);
+    const field = gameState.playerStates[owner]?.field;
+    if (field) {
+      candidates.push(
+        ...(field.frontline || []).filter((u) => u.isAlive()),
+        ...(field.backline || []).filter((u) => u.isAlive())
+      );
+    }
+  } else {
+    throw new Error(`TargetResolver: existence check does not support side "${side}"`);
+  }
+
+  return applyFilters(candidates, gameState, filters);
+}
+
+export default { resolveTargets, resolveCardTarget, resolveExistenceUnits, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };

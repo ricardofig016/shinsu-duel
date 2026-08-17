@@ -15,10 +15,22 @@ export default class PassiveManager {
   registerUnit(unit, gameState) {
     const passives = unit.card.passiveAbilities || [];
     passives.forEach((passive, index) => {
-      const trigger = this._parseTrigger(passive);
-      if (!trigger) return;
-
       const sourceId = IdFactory.passiveSource(unit.id, index);
+
+      // A passive without a `trigger` is always-on: its effect must track the
+      // live board. Phase C wires `conditional` passives (the only always-on
+      // type resolvable now); always-on modifiers and trait grants land in
+      // later phases and remain skipped.
+      if (!passive?.trigger || typeof passive.trigger !== "object") {
+        if (passive?.type === "conditional") {
+          this._subscribeAlwaysOn(unit, passive, sourceId, gameState);
+        }
+        return;
+      }
+
+      const trigger = this._parseTrigger(passive);
+      if (!trigger) return; // unsupported trigger type — later phase
+
       const unsubscribe = this._bus.on(trigger.eventName, (payload, context) => {
         if (!this._matches(trigger, unit, payload, gameState)) return;
         resolveEffect(trigger.effect, context, gameState, {
@@ -35,6 +47,47 @@ export default class PassiveManager {
       entries.push(unsubscribe);
       this._unsubscribers.set(unit.id, entries);
     });
+  }
+
+  /**
+   * Subscribe an always-on `conditional` passive to board events so it
+   * re-evaluates whenever the state its predicate reads may have changed.
+   *
+   * On each relevant event, the passive's prior grants are revoked by source
+   * and re-resolved — a predicate that is no longer true stops applying
+   * ("while i am alone on the frontline"), and one that just became true
+   * starts applying. Re-apply is idempotent because every grant is tracked
+   * under the passive's source ID.
+   */
+  _subscribeAlwaysOn(unit, passive, sourceId, gameState) {
+    const events = [
+      EVT.ROUND_START,
+      EVT.UNIT_SUMMONED,
+      EVT.UNIT_DESTROYED,
+      EVT.UNIT_EVOLVED,
+      EVT.EQUIPMENT_ATTACHED,
+      EVT.EQUIPMENT_DETACHED,
+      EVT.EQUIPMENT_IGNITED,
+    ];
+
+    for (const eventName of events) {
+      const unsubscribe = this._bus.on(eventName, (payload, context) => {
+        if (!this._matches(passive, unit, payload, gameState)) return;
+        gameState.modifierStack.removeBySource(sourceId);
+        resolveEffect(passive, context, gameState, {
+          owner: unit.owner,
+          sourceId,
+          sourceType: "passive",
+          sourceUnit: unit,
+          sourceOwner: unit.owner,
+          targetOwner: gameState.usernames.find((username) => username !== unit.owner),
+        });
+      }, { phase: "execute", priority: -100 });
+
+      const entries = this._unsubscribers.get(unit.id) || [];
+      entries.push(unsubscribe);
+      this._unsubscribers.set(unit.id, entries);
+    }
   }
 
   unregisterUnit(unitId) {

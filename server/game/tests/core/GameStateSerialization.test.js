@@ -101,4 +101,18 @@ describe("GameState.toSerializedState", () => {
     expect(handCard.costReduction).toBe(2);
     expect(handCard.visible).toBe(true);
   });
+
+  test("captures the immutable starting deck composition", () => {
+    IdFactory.resetAll();
+    resetModifierCounter();
+    const game = makeGame();
+    const state = game.toSerializedState();
+
+    // The starting deck is captured before the initial hand draw, so it is
+    // larger than the remaining draw pile and never shrinks.
+    expect(state.players.Alice.startingDeck).toHaveLength(GameState.INIT_DECK_SIZE);
+    expect(state.players.Bob.startingDeck).toHaveLength(GameState.INIT_DECK_SIZE);
+    expect(state.players.Alice.deck).toHaveLength(GameState.INIT_DECK_SIZE - GameState.INIT_HAND_SIZE);
+    expect(game.startedWithCard("Alice", state.players.Alice.startingDeck[0])).toBe(true);
+  });
 });

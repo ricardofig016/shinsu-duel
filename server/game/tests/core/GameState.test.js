@@ -248,3 +248,20 @@ describe("deck behavior", () => {
     expect(handAfter).toEqual(handBefore); // no new cards since deck was empty
   });
 });
+
+describe("startedWithCard", () => {
+  test("reflects the immutable starting deck composition per player", () => {
+    const rachelId = getCardIdByName("Rachel");
+    const baangId = getCardIdByName("Baang");
+    const game = new GameState(ROOM_CODE, USERNAMES, {
+      Alice: createLegalDeck([rachelId]),
+      Bob: createLegalDeck([baangId]),
+    }, null, { rng: new SeededRng(1) });
+
+    expect(game.startedWithCard("Alice", "Rachel")).toBe(true);
+    expect(game.startedWithCard("Bob", "Rachel")).toBe(false);
+    expect(game.startedWithCard("Bob", "Baang")).toBe(true);
+    // Case-insensitive and unaffected by draws/plays.
+    expect(game.startedWithCard("Alice", "rachel")).toBe(true);
+  });
+});

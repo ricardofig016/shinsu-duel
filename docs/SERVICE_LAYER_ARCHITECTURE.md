@@ -68,12 +68,16 @@ UnitService.heal(unit, amount); // → { healed, currentHp }
 UnitService.setHp(unit, value); // → currentHp (floored at 0)
 ```
 
+## PredicateEvaluator
+
+Pure, read-only evaluator for the predicates that gate `conditional` nodes (and, later, always-on modifiers). `evaluate(predicate, gameState, extra)` dispatches on `predicate.type` — `has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_all_equipped`, `has_condition` — applies the optional `negate`, and returns a boolean. It owns no resource and mutates nothing: board existence checks delegate to `TargetResolver.resolveExistenceUnits`, equipment checks read `unit.equipmentAttachments`, and deck checks read the `GameState` starting-deck snapshot via `startedWithCard`.
+
 ---
 
 ## Integration
 
 - **Handlers** delegate shared-resource changes (see `HANDLER_SYSTEM_ARCHITECTURE.md`).
-- **PassiveManager** registers timed passives (`round_start`/`round_end`) as event subscriptions and resolves them through `EffectResolver`; it coordinates state change rather than owning a resource (see `PASSIVE_SYSTEM_ARCHITECTURE.md`).
+- **PassiveManager** registers timed (`round_start`/`round_end`) and always-on (`conditional`) passives as event subscriptions and resolves them through `EffectResolver`; it coordinates state change rather than owning a resource (see `PASSIVE_SYSTEM_ARCHITECTURE.md`).
 - **Actions** validate via the same services before mutating (see `ACTION_SYSTEM_ARCHITECTURE.md`).
 - **LifecycleEngine** composes them for deploy/destroy/equip, and owns position movement via `switchPosition`.
 - **Attribute engines** mutate only through `GameState` delegation (`CombatSlotService` for the Shinheuh slot, `_modifyFireCharges` for fire charges), never by writing resource fields directly.

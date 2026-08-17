@@ -98,6 +98,80 @@ describe("PassiveManager", () => {
     expect(result).toEqual({ resolved: true });
   });
 
+  test("always-on conditional passive applies on deploy and revokes when its predicate stops holding", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const urek = putInHand(game, "Alice", "Urek Mazino");
+    urek.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "alone_on_line", line: "frontline" },
+      then: {
+        type: "sequence",
+        steps: [
+          { type: "grant_trait", trait: "resilient", amount: 1, target: { side: "self" } },
+          { type: "grant_trait", trait: "strong", amount: 3, target: { side: "self" } },
+        ],
+      },
+      raw: "while i am alone on the ally frontline, i have Resilient 1 and Strong 3",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(urek);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+
+    // Alone on the frontline on deploy → applied.
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(1);
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(3);
+
+    // A second allied unit enters the frontline → no longer alone → revoked.
+    const ally = {
+      id: "Unit#ally",
+      owner: "Alice",
+      card: { name: "Ally", maxHp: 5 },
+      currentHp: 5,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.frontline.push(ally);
+    game.eventBus.emit(EVT.UNIT_SUMMONED, { username: "Alice", unit: ally, unitId: ally.id });
+
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(0);
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(0);
+  });
+
+  test("always-on conditional passive applies when its predicate becomes true mid-game", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const yuri = putInHand(game, "Alice", "Ha Yuri Zahard");
+    yuri.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "has_unit", target: { side: "ally", name: "Guide" } },
+      then: { type: "grant_trait", trait: "taunt", target: { side: "self" } },
+      raw: "if i have an allied Guide, i have Taunt",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(yuri);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+
+    // No allied Guide at deploy → no Taunt.
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
+
+    // An allied Guide enters play → Taunt applies.
+    const guide = {
+      id: "Unit#guide",
+      owner: "Alice",
+      card: { name: "Guide", maxHp: 5 },
+      currentHp: 5,
+      placedPositionCode: "scout",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.frontline.push(guide);
+    game.eventBus.emit(EVT.UNIT_SUMMONED, { username: "Alice", unit: guide, unitId: guide.id });
+
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(true);
+  });
+
   test("_parseTrigger maps structured round triggers and skips unknown ones", () => {
     const game = createGame();
     const manager = game._passiveManager;

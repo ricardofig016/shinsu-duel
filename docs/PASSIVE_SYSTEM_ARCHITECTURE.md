@@ -29,7 +29,7 @@ A timed passive is a structured DSL node with a structured `trigger` object:
 }
 ```
 
-The `trigger.type` selects the subscription. `PassiveManager` currently wires only `round_start` and `round_end`; other trigger types (and always-on modifiers with no `trigger`) are skipped until later phases.
+The `trigger.type` selects the subscription. `PassiveManager` currently wires `round_start` and `round_end`. Passives with no `trigger` at all are always-on and handled separately (see below).
 
 ---
 
@@ -58,6 +58,10 @@ A unit with the `Disabled` condition does not trigger any registered passive. Th
 ### Ordering
 
 Passive handlers run at `phase: "execute"` with a low priority, so they resolve **before** the round-end condition cleanup that removes conditions like Rooted or Burned. A passive that reads a condition (e.g. Karaka's "deal 3 to all Rooted enemies") sees it before it's cleared for the round.
+
+### Always-on passives
+
+A passive with **no `trigger`** is always-on: its effect tracks the live board rather than firing on a timer. `PassiveManager` subscribes these to the events that can change their predicate's truth — round start, unit summoned/destroyed/evolved, and equipment attached/detached/ignited. On each such event it revokes the passive's prior grants (by `Passive#<unitId>#<index>` source) and re-resolves the passive, so a predicate that is no longer true stops applying and one that just became true starts applying. Re-apply is idempotent because every grant is tracked under the passive's source ID.
 
 ---
 

@@ -251,10 +251,16 @@ export default class GameState {
       .filter((code) => !GameState.positions[code].special)
       .map((code) => code);
 
+    const builtDeck = this.#buildDeckFromCardIds(deck, username);
+
     return {
       combatSlotCodes: combatSlotCodes,
       combatSlots: Object.fromEntries(combatSlotCodes.map((code) => [code, { available: true }])),
-      deck: this.#buildDeckFromCardIds(deck, username),
+      deck: builtDeck,
+      // Immutable record of the starting deck composition, used by the
+      // `started_with_card` predicate. Card names suffice: deck construction
+      // already forbids repeated cards, so presence equals copy count.
+      startingDeck: builtDeck.map((card) => card.name),
       discard: [],
       lighthouses: { amount: GameState.INIT_LIGHTHOUSE_AMOUNT, max: 40 },
       field: { frontline: [], backline: [] },
@@ -656,6 +662,7 @@ export default class GameState {
         deck: (p.deck || []).map(serializeCard),
         hand: (p.hand || []).map(serializeCard),
         discard: (p.discard || []).map(serializeCard),
+        startingDeck: p.startingDeck || [],
         lighthouses: p.lighthouses ? { amount: p.lighthouses.amount, max: p.lighthouses.max } : null,
         shinsu: p.shinsu ? { normalSpent: p.shinsu.normalSpent, normalAvailable: p.shinsu.normalAvailable, recharged: p.shinsu.recharged } : null,
         combatSlots,
@@ -727,6 +734,17 @@ export default class GameState {
   recordCardPlayed(username) {
     const count = this._cardsPlayedThisRound.get(username) || 0;
     this._cardsPlayedThisRound.set(username, count + 1);
+  }
+
+  /**
+   * Whether a player's starting deck contained a card with the given name.
+   * Backs the `started_with_card` predicate. The starting deck is captured at
+   * construction (before the initial draw) and never changes.
+   */
+  startedWithCard(username, cardName) {
+    const startingDeck = this.playerStates[username]?.startingDeck || [];
+    const expected = String(cardName).toLowerCase();
+    return startingDeck.some((name) => String(name).toLowerCase() === expected);
   }
 
   /**

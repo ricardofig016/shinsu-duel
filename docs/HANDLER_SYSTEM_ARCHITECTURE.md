@@ -143,7 +143,7 @@ For a `type` with **no registered handler** (a valid structured type whose handl
 | `NoopHandler`           | `noop`            | No-op; resolves to `{ resolved: true }` (test placeholders)                                            |
 | `NoopHandler`           | `quick`           | Display-only Quick marker node; no-op                                                                  |
 
-Structured DSL types not listed above (e.g. `sequence`, `conditional`, `summon`, modifiers, global rules) have no handler yet; the runtime skips them and reports an unsupported-effect event.
+Structured DSL types not listed above (e.g. `summon`, modifiers, global rules) have no handler yet; the runtime skips them and reports an unsupported-effect event. The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 
@@ -167,10 +167,11 @@ The `EffectResolver` is the recursive resolution engine that maps DSL objects to
 resolveEffect(effect, context, gameState, extra);
 ```
 
-1. Reads `effect.type`, looks up handler via `HandlerRegistry`
-2. Handles nested effects: `spend_shinsu.effect` resolved recursively after deduction
-3. `grant_ability.ability` is stored by the GrantAbilityHandler, not resolved immediately
-4. A `type` with no registered handler is skipped and reported via `effect:unsupported`
+1. Resolves structural nodes directly: `sequence` runs its `steps` in order; `conditional` evaluates its `if` predicate via `PredicateEvaluator` and resolves the matching branch (`then`/`otherwise`).
+2. Otherwise reads `effect.type` and looks up the handler via `HandlerRegistry`
+3. Handles nested effects: `spend_shinsu.effect` resolved recursively after deduction
+4. `grant_ability.ability` is stored by the GrantAbilityHandler, not resolved immediately
+5. A `type` with no registered handler is skipped and reported via `effect:unsupported`
 
 ---
 
@@ -237,6 +238,20 @@ function resolveEffect(effect, context, gameState, extra = {}) {
 The inner `ability` is a full DSL object with its own `type`, `amount`, `target` etc. `GrantAbilityHandler` registers it in the `AbilityRegistry` (see the Ability Registry section) and records a `type: "ability"` `ModifierStack` marker keyed by the generated code.
 
 The bearer's player can then use it through `UseAbilityAction`, addressed as `granted:<sourceId>:<type>` instead of a numeric ability index. Unequipping the source revokes the modifier and the registry entry, which makes the ability unusable again — no separate cleanup path is needed. The same cleanup occurs when the bearer is destroyed.
+
+---
+
+## Structural Nodes
+
+`sequence` and `conditional` are compositional DSL nodes with **no handler class**. `EffectResolver` recognizes them before the registry lookup and resolves them recursively:
+
+```json
+{ "type": "sequence", "steps": [ /* effects */ ] }
+{ "type": "conditional", "if": { "type": "has_unit", "target": {} }, "then": {}, "otherwise": {} }
+```
+
+- `sequence` resolves `steps` in order through the same pending-decision continuation used by `resolveEffects`, so a target choice in an early step never runs ahead of later mutations.
+- `conditional` evaluates its `if` predicate via `PredicateEvaluator` (a pure, read-only service — see `SERVICE_LAYER_ARCHITECTURE.md`), then resolves `then` when true or `otherwise` when false. A missing branch is a legal no-op.
 
 ---
 

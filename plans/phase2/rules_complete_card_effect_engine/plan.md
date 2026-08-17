@@ -23,10 +23,10 @@ _Phase B — Compiler revamp + full DSL migration_ (source work done; artifact l
 >
 > **⚠️ Runtime landing caveat** — the regenerated `cards.json` is landed. Structured target objects (B5a) and Fire Core's `create_card`/Hwayeomsa path (B6) are runtime-supported. Remaining skips are the still-unimplemented migrated types (Phases C–I).
 
-_Phase C — Resolver structural nodes & predicates_
+_Phase C — Resolver structural nodes & predicates_ (done)
 
-7. `sequence` node in `EffectResolver.js` (recursive, reusing the pending-continuation deferral pattern). _depends on 4_
-8. Predicate evaluator service + `conditional` node (if/then/otherwise) for board/deck-state checks ("if i have an allied Shinheuh", "alone on the frontline", "started the game with X"). _depends on 4_
+7. `sequence` node in `EffectResolver.js` (recursive, reusing the pending-continuation deferral pattern). _depends on 4_ **Done.**
+8. Predicate evaluator service + `conditional` node (if/then/otherwise) for board/deck-state checks ("if i have an allied Shinheuh", "alone on the frontline", "started the game with X"). _depends on 4_ **Done.** All six predicates implemented in `PredicateEvaluator`; trigger-less `conditional` passives wired in `PassiveManager` with event-driven revoke-and-reapply re-evaluation.
 
 _Phase D — Targeting extensions_ _(parallel with C)_
 
@@ -94,6 +94,6 @@ _Phase J — Rules-completeness enforcement + cleanup + docs_ _depends on all_
 
 **Further Considerations**
 
-1. The "started the game with Ha Jinsung in your deck" predicate requires `GameState` to record starting deck composition — confirm fidelity (presence vs exact copy) during Phase C.
+1. The "started the game with Ha Jinsung in your deck" predicate requires `GameState` to record starting deck composition — **resolved in Phase C: presence (deck construction forbids duplicates, so presence == exact copy).** Note: "Ha Jinsung" has no card in the current set, so the predicate evaluates false until that card lands.
 2. Test placeholders `_test_Equipment`/`_test_Skill` — convert to structured no-op nodes in the allowlist, or remove from the production set.
 3. Cluster T's "next time you play Baang this turn, play it 4 more times" needs a delayed/queued trigger — confirm in scope now or defer as a documented follow-up.

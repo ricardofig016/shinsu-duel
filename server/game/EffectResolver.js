@@ -25,6 +25,7 @@ import CreateCardHandler from "./handlers/CreateCardHandler.js";
 import NoopHandler from "./handlers/NoopHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
+import PredicateEvaluator from "./services/PredicateEvaluator.js";
 import EVT from "./EventCatalog.js";
 
 // Singleton handler registry — populated at module load
@@ -63,6 +64,32 @@ export function initEffectResolver() {
 }
 
 /**
+ * Resolve a `sequence` node: run `steps` in order, deferring remaining steps
+ * through the pending-decision continuation so a target choice never runs
+ * ahead of later mutations.
+ */
+function resolveSequence(effect, context, gameState, extra) {
+  if (!Array.isArray(effect.steps)) {
+    throw new Error("EffectResolver: sequence requires a `steps` array");
+  }
+  const results = resolveEffects(effect.steps, context, gameState, extra);
+  const pending = results.some((result) => result?.pending);
+  return pending ? { resolved: true, pending: true, results } : { resolved: true, results };
+}
+
+/**
+ * Resolve a `conditional` node: evaluate the `if` predicate, then resolve the
+ * matching branch (`then` when true, `otherwise` when false). A missing branch
+ * is a legal no-op.
+ */
+function resolveConditional(effect, context, gameState, extra) {
+  if (!effect.if) throw new Error("EffectResolver: conditional requires an `if` predicate");
+  const branch = PredicateEvaluator.evaluate(effect.if, gameState, extra) ? effect.then : effect.otherwise;
+  if (!branch) return { resolved: true };
+  return resolveEffect(branch, context, gameState, extra);
+}
+
+/**
  * Resolve a compiled DSL effect object into its handler execution.
  *
  * Supports nested effects:
@@ -81,6 +108,12 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   }
 
   const type = effect.type;
+
+  // Structural nodes resolve recursively here, not through a handler class.
+  // `sequence` runs its `steps` in order; `conditional` picks a branch by
+  // evaluating its `if` predicate against the current board/deck state.
+  if (type === "sequence") return resolveSequence(effect, context, gameState, extra);
+  if (type === "conditional") return resolveConditional(effect, context, gameState, extra);
 
   const registry = getRegistry();
   if (!registry.has(type)) {
