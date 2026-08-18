@@ -19,9 +19,25 @@ export default class DrawCardHandler extends BaseHandler {
   }
 
   execute(payload, context, gameState) {
-    const { owner, amount } = payload;
+    const { owner, amount, targetCardId } = payload;
     const player = gameState.playerStates[owner];
     if (!player) throw new Error(`Player "${owner}" not found`);
+
+    // Filtered draw: a specific card was pre-resolved by EffectResolver from a
+    // structured `card` target. Search the deck, then draw that card.
+    if (targetCardId) {
+      const card = ZoneService.searchDeck(player, targetCardId, gameState._rng);
+      if (!card) throw new Error("DrawCardHandler: the target card is no longer in the owner's deck");
+      ZoneService.addToHand(player, card);
+      context.emitChild(EVT.CARD_DRAWN, {
+        owner,
+        cardId: card.cardId,
+        cardName: card.name,
+        handSize: player.hand.length,
+        deckSize: player.deck.length,
+      });
+      return { drawn: 1, cards: [card] };
+    }
 
     // Delegate to authoritative ZoneService
     const { drawn, cards } = ZoneService.draw(player, amount, gameState);

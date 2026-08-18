@@ -2,6 +2,7 @@ import BaseHandler from "./BaseHandler.js";
 import ZoneService from "../services/ZoneService.js";
 import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
+import shuffle from "../utils/shuffle.js";
 import { findCardsByName, findCardsByFamily } from "../utils/cardData.js";
 
 /**
@@ -17,8 +18,10 @@ import { findCardsByName, findCardsByFamily } from "../utils/cardData.js";
  *     delegates to the Hwayeomsa engine, which picks the highest affordable
  *     Incinerate and consumes charges (RULES.md Hwayeomsa mechanic).
  *
- * `card.choose`/`card.random` selection is not yet supported (Phase D); the
- * effect is skipped with an unsupported-effect event.
+ * `card.choose`/`card.random` select among the matched catalog cards (plain
+ * cards only — resource-gated families always route through the engine).
+ * `random` picks deterministically via the seeded RNG; `choose` defers to a
+ * `card_selection` pending decision.
  */
 export default class CreateCardHandler extends BaseHandler {
   validate(payload) {
@@ -34,20 +37,6 @@ export default class CreateCardHandler extends BaseHandler {
   execute(payload, context, gameState) {
     const { owner, card: target } = payload;
 
-    // Choice/random selection lands in Phase D.
-    if (target.choose === true || target.random === true) {
-      gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, {
-        skipped: true,
-        reason: "unsupported_effect",
-        type: "create_card",
-        raw: payload.raw,
-        owner,
-        sourceId: payload.sourceId || null,
-        detail: "card.choose/random selection is not yet supported",
-      });
-      return { skipped: true, reason: "unsupported_effect" };
-    }
-
     const cards = gameState.constructor.cards;
     let candidates = findCardsByName(cards, target.name, target.type);
     if (candidates.length === 0) {
@@ -62,7 +51,44 @@ export default class CreateCardHandler extends BaseHandler {
       return this._createByResource(generatedBy.resource, owner, payload, context, gameState);
     }
 
-    const card = new Card(candidates[0].cardId, candidates[0], owner, gameState.eventBus);
+    // Choice / random selection among the matched plain cards.
+    if (target.choose === true || target.random === true) {
+      return this._createSelected(candidates, target, owner, payload, context, gameState);
+    }
+
+    return this._createCard(candidates[0], owner, context, gameState);
+  }
+
+  _createSelected(candidates, target, owner, payload, context, gameState) {
+    let selected = null;
+
+    if (target.random === true) {
+      shuffle(candidates, gameState._rng);
+      selected = candidates[0];
+    } else if (target.choose === true) {
+      if (candidates.length === 1) {
+        selected = candidates[0];
+      } else {
+        gameState.createPendingDecision({
+          owner,
+          type: "card_selection",
+          candidates: candidates.map((c) => ({ id: String(c.cardId), name: c.name, cost: c.cost, type: c.type })),
+          minChoices: 1,
+          maxChoices: 1,
+          resolve: ([cardId]) => {
+            const chosen = candidates.find((c) => String(c.cardId) === cardId);
+            this._createCard(chosen, owner, context, gameState);
+          },
+        });
+        return { pending: true };
+      }
+    }
+
+    return this._createCard(selected, owner, context, gameState);
+  }
+
+  _createCard(cardData, owner, context, gameState) {
+    const card = new Card(cardData.cardId, cardData, owner, gameState.eventBus);
     ZoneService.addToHand(gameState.playerStates[owner], card);
     context.emitChild(EVT.CARD_CREATED, { owner, cardId: card.cardId, name: card.name });
     return { created: true, card, name: card.name };

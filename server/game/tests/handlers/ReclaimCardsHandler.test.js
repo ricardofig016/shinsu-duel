@@ -79,4 +79,35 @@ describe("ReclaimCardsHandler", () => {
     const ctx = context();
     expect(() => handler.execute({ owner: "Nobody", amount: 1 }, ctx, game)).toThrow('Player "Nobody" not found');
   });
+
+  test("filtered reclaim removes the pre-resolved target card from discard", () => {
+    const player = game.playerStates[game.usernames[0]];
+    const target = { id: "card#1", cardId: 1, name: "Card A" };
+    const other = { id: "card#2", cardId: 2, name: "Card B" };
+    player.hand = [];
+    player.discard = [other, target];
+    const ctx = context();
+
+    const result = handler.execute({ owner: game.usernames[0], amount: 1, targetCardId: "card#1" }, ctx, game);
+
+    expect(result.reclaimed).toBe(1);
+    expect(result.cards).toEqual([target]);
+    expect(player.hand).toEqual([target]);
+    expect(player.discard).toEqual([other]);
+    expect(ctx.emitChild).toHaveBeenCalledWith(EVT.CARD_RECLAIMED, {
+      owner: game.usernames[0],
+      cardId: 1,
+      cardName: "Card A",
+    });
+  });
+
+  test("filtered reclaim throws when the target card is no longer in the discard", () => {
+    const player = game.playerStates[game.usernames[0]];
+    player.hand = [];
+    player.discard = [{ id: "card#1", cardId: 1, name: "Card A" }];
+
+    expect(() =>
+      handler.execute({ owner: game.usernames[0], amount: 1, targetCardId: "card#missing" }, context(), game)
+    ).toThrow(/no longer in the owner's discard/);
+  });
 });

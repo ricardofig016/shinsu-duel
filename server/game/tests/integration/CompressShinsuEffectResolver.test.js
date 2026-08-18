@@ -1,7 +1,7 @@
 /**
  * Integration test: compress_shinsu targeting through EffectResolver.
  *
- * Verifies that EffectResolver pre-resolves targetCardSelector into
+ * Verifies that EffectResolver pre-resolves a structured `card` target into a
  * concrete targetCardId before the handler is invoked.
  */
 
@@ -31,7 +31,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     return card;
   }
 
-  test("EffectResolver resolves name selector to targetCardId before handler", () => {
+  test("EffectResolver resolves name card target to targetCardId before handler", () => {
     const target = addCardToHand("Alice", "Fiery Elephant");
     const context = {
       emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload),
@@ -41,7 +41,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
       {
         type: "compress_shinsu",
         amount: 1,
-        targetCardSelector: "Fiery Elephant",
+        card: { name: "Fiery Elephant" },
         raw: "Compress 1 from Fiery Elephant in your hand",
       },
       context,
@@ -53,7 +53,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     expect(target.costReduction).toBe(1);
   });
 
-  test("EffectResolver resolves attribute selector to targetCardId", () => {
+  test("EffectResolver resolves attribute card target to targetCardId", () => {
     const hwayeomsa = addCardToHand("Alice", "Yeon Yihwa");
     const other = addCardToHand("Alice", "Monkeyman");
     const context = {
@@ -64,7 +64,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
       {
         type: "compress_shinsu",
         amount: 2,
-        targetCardSelector: "a Hwayeomsa",
+        card: { attribute: "hwayeomsa" },
         raw: "Compress 2 from a Hwayeomsa in your hand",
       },
       context,
@@ -76,7 +76,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     expect(other.costReduction).toBe(0);
   });
 
-  test("EffectResolver resolves most-expensive selector", () => {
+  test("EffectResolver resolves most-expensive card target", () => {
     const cheap = addCardToHand("Alice", "Monkeyman");
     const expensive = addCardToHand("Alice", "The Workshop");
     const context = {
@@ -87,7 +87,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
       {
         type: "compress_shinsu",
         amount: 3,
-        targetCardSelector: "the most expensive card",
+        card: { cost: "most expensive" },
         raw: "Compress 3 from the most expensive card in your hand",
       },
       context,
@@ -99,7 +99,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     expect(expensive.costReduction).toBe(3);
   });
 
-  test("handler throws when no card matches the selector", () => {
+  test("handler throws when no card matches the target", () => {
     const context = {
       emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload),
     };
@@ -109,7 +109,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
         {
           type: "compress_shinsu",
           amount: 1,
-          targetCardSelector: "Nonexistent Card",
+          card: { name: "Nonexistent Card" },
           raw: "Compress 1 from Nonexistent Card in your hand",
         },
         context,

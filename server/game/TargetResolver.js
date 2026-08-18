@@ -134,6 +134,38 @@ function filterByTrait(targets, gameState, trait) {
   );
 }
 
+function filterByTraitNot(targets, gameState, traitNot) {
+  if (!traitNot) return targets;
+  return targets.filter((u) =>
+    !gameState.modifierStack.has(u.id, "trait", traitNot)
+  );
+}
+
+// Unit cost is either an exact filter (integer) or a min/max selection
+// ("cheapest"/"most expensive"). Units without a numeric cost never match.
+function filterByCost(targets, cost) {
+  if (cost === undefined) return targets;
+  const withCost = targets.filter((u) => typeof u.card?.cost === "number");
+  if (typeof cost === "number") {
+    return withCost.filter((u) => u.card.cost === cost);
+  }
+  if (cost === "cheapest" || cost === "most expensive") {
+    if (withCost.length === 0) return [];
+    const value = cost === "cheapest"
+      ? Math.min(...withCost.map((u) => u.card.cost))
+      : Math.max(...withCost.map((u) => u.card.cost));
+    return withCost.filter((u) => u.card.cost === value);
+  }
+  return targets;
+}
+
+// Keep only the unit(s) at the minimum current HP (stable field order on ties).
+function selectLowestHp(targets, lowestHp) {
+  if (!lowestHp || targets.length === 0) return targets;
+  const min = Math.min(...targets.map((u) => u.currentHp));
+  return targets.filter((u) => u.currentHp === min);
+}
+
 function filterByRank(targets, rank) {
   if (!rank) return targets;
   const ranks = Array.isArray(rank) ? rank : [rank];
@@ -191,21 +223,27 @@ function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
     condition = null,
     conditionValue = undefined,
     trait = null,
+    traitNot = null,
+    cost = undefined,
     rank = null,
     position = null,
     affiliation = null,
     attribute = null,
     name = null,
     sharedAffiliation = null,
+    lowestHp = false,
   } = filters;
   candidates = filterByCondition(candidates, gameState, condition, conditionValue);
   candidates = filterByTrait(candidates, gameState, trait);
+  candidates = filterByTraitNot(candidates, gameState, traitNot);
   candidates = filterByRank(candidates, rank);
   candidates = filterByPosition(candidates, position);
   candidates = filterByAffiliation(candidates, affiliation);
   candidates = filterByAttribute(candidates, attribute);
   candidates = filterByName(candidates, name);
+  candidates = filterByCost(candidates, cost);
   if (sharedAffiliation) candidates = filterBySharedAffiliation(candidates, gameState, sourceUnit);
+  candidates = selectLowestHp(candidates, lowestHp);
   return candidates;
 }
 
@@ -225,13 +263,7 @@ export function normalizeStructuredTarget(descriptor) {
     throw new Error("TargetResolver: structured target must be an object");
   }
 
-  const { side, scope, random, cost, choose, ...filters } = descriptor;
-
-  if (random !== undefined || cost !== undefined) {
-    throw new Error(
-      "TargetResolver: structured target `random`/`cost` selection is not supported yet."
-    );
-  }
+  const { side, scope, random, cost, choose, lowest_hp, ...filters } = descriptor;
 
   let target;
   switch (side) {
@@ -257,7 +289,14 @@ export function normalizeStructuredTarget(descriptor) {
       throw new Error(`TargetResolver: unknown structured target side "${side}"`);
   }
 
-  return { target, ...filters };
+  return {
+    target,
+    ...filters,
+    ...(random !== undefined ? { random } : {}),
+    ...(cost !== undefined ? { cost } : {}),
+    ...(choose !== undefined ? { choose } : {}),
+    ...(lowest_hp !== undefined ? { lowestHp: lowest_hp } : {}),
+  };
 }
 
 // ─── Main resolver ──────────────────────────────────────────────────────────
@@ -287,12 +326,15 @@ export function resolveTargets(gameState, options) {
     condition = null,
     conditionValue = undefined,
     trait = null,
+    traitNot = null,
+    cost = undefined,
     rank = null,
     position = null,
     affiliation = null,
     attribute = null,
     name = null,
     sharedAffiliation = null,
+    lowestHp = false,
     count = 1,
   } = options;
 
@@ -393,12 +435,15 @@ export function resolveTargets(gameState, options) {
     condition,
     conditionValue,
     trait,
+    traitNot,
+    cost,
     rank,
     position,
     affiliation,
     attribute,
     name,
     sharedAffiliation,
+    lowestHp,
   }, sourceUnit);
 
   // Blinded: randomize choice-descriptor targets (RULES.md).
@@ -421,45 +466,68 @@ export function resolveTargets(gameState, options) {
 }
 
 /**
- * Resolve a card-in-hand selector to a concrete card ID.
+ * Filter a list of card-target views against a structured card descriptor.
  *
- * Card-in-hand selectors are used by effects like `compress_shinsu` that
- * target cards still in the player's hand rather than units on the field.
- * Only concrete `targetCardId` should reach handlers — this function is
- * the single point where selectors are interpreted.
+ * The compiled `card` target (`{ name, type, cost, rank, position,
+ * affiliation, attribute, choose, random }`) is the sole card-target
+ * representation. `cards` is an array of `toCardTargetView()` results (see
+ * `utils/cardData.js`); the caller maps its zone source (hand/deck/discard/
+ * catalog) through that helper first, so this resolver never cares which zone
+ * the cards came from.
  *
- * Supported selectors:
- *   "the most expensive card" — highest-cost card in hand
- *   "a <attribute>"            — first card with the given attribute
- *   "<card name>"              — exact card name match
+ * Filtering only: `choose`/`random` selection is the caller's responsibility
+ * (EffectResolver), keeping this function a pure predicate over card views.
+ * `cost` accepts an exact integer or `"cheapest"` / `"most expensive"`.
  *
- * @param {object} playerState — player's hand, shinsu, etc.
- * @param {string} selector — compiled targetCardSelector
- * @returns {string|null} concrete card.id, or null if no match
+ * @param {Array<object>} cards — `toCardTargetView` results
+ * @param {object} descriptor — compiled structured card target
+ * @returns {Array<object>} matching card views, in input order
  */
-export function resolveCardTarget(playerState, selector) {
-  if (!playerState?.hand || !selector) return null;
+export function resolveCardTargets(cards, descriptor) {
+  if (!Array.isArray(cards) || !descriptor || typeof descriptor !== "object") return [];
 
-  const lowered = selector.toLowerCase();
+  const { name, type, cost, rank, position, affiliation, attribute } = descriptor;
 
-  if (lowered === "the most expensive card") {
-    const target = playerState.hand.reduce((best, card) =>
-      !best || card.cost > best.cost ? card : best, null);
-    return target?.id ?? null;
+  const matchAny = (values, test) => {
+    const list = Array.isArray(values) ? values : [values];
+    return list.some(test);
+  };
+
+  let candidates = cards.filter((c) => c && c.name !== undefined);
+
+  if (name) {
+    const expected = String(name).toLowerCase();
+    candidates = candidates.filter((c) => c.name.toLowerCase() === expected);
+  }
+  if (type) {
+    candidates = candidates.filter((c) => c.type === type);
+  }
+  if (rank !== undefined) {
+    candidates = candidates.filter((c) => matchAny(rank, (r) => c.rank === r));
+  }
+  if (position !== undefined) {
+    candidates = candidates.filter((c) => matchAny(position, (p) => c.positions.includes(p)));
+  }
+  if (affiliation !== undefined) {
+    candidates = candidates.filter((c) => matchAny(affiliation, (a) => c.affiliations.includes(a)));
+  }
+  if (attribute !== undefined) {
+    candidates = candidates.filter((c) => matchAny(attribute, (a) => c.attributes.includes(a)));
+  }
+  if (cost !== undefined) {
+    if (typeof cost === "number") {
+      candidates = candidates.filter((c) => c.cost === cost);
+    } else if (cost === "cheapest" || cost === "most expensive") {
+      if (candidates.length > 0) {
+        const value = cost === "cheapest"
+          ? Math.min(...candidates.map((c) => c.cost))
+          : Math.max(...candidates.map((c) => c.cost));
+        candidates = candidates.filter((c) => c.cost === value);
+      }
+    }
   }
 
-  if (lowered.startsWith("a ")) {
-    // "a Hwayeomsa" → match cards with attribute "hwayeomsa"
-    const attribute = lowered.slice(2).replaceAll(" ", "-");
-    const target = playerState.hand.find((card) =>
-      card.attributes?.includes(attribute));
-    return target?.id ?? null;
-  }
-
-  // Exact card name match (case-insensitive)
-  const target = playerState.hand.find((card) =>
-    card.name.toLowerCase() === lowered);
-  return target?.id ?? null;
+  return candidates;
 }
 
 /**
@@ -508,4 +576,4 @@ export function resolveExistenceUnits(gameState, descriptor, sourceOwner) {
   return applyFilters(candidates, gameState, filters, null);
 }
 
-export default { resolveTargets, resolveCardTarget, resolveExistenceUnits, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };
+export default { resolveTargets, resolveCardTargets, resolveExistenceUnits, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };

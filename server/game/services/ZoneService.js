@@ -66,6 +66,33 @@ export default class ZoneService {
   }
 
   /**
+   * Find and remove a specific card (by instance id) from a player's deck,
+   * then re-shuffle the remaining deck. Used by filtered `draw_card` effects
+   * that target a specific card type/name/attribute from the deck.
+   * @returns {Card|null}
+   */
+  static searchDeck(playerState, cardId, rng) {
+    if (!playerState.deck || !Array.isArray(playerState.deck)) return null;
+    const index = playerState.deck.findIndex((card) => card.id === cardId);
+    if (index === -1) return null;
+    const [card] = playerState.deck.splice(index, 1);
+    if (rng) ZoneService.shuffleDeck(playerState, rng);
+    return card;
+  }
+
+  /**
+   * Find and remove a specific card (by instance id) from a player's discard.
+   * Used by filtered `reclaim_cards` effects. Does not move the card to hand.
+   * @returns {Card|null}
+   */
+  static removeFromDiscard(playerState, cardId) {
+    if (!playerState.discard || !Array.isArray(playerState.discard)) return null;
+    const index = playerState.discard.findIndex((card) => card.id === cardId);
+    if (index === -1) return null;
+    return playerState.discard.splice(index, 1)[0];
+  }
+
+  /**
    * Find and remove a card from a player's hand by index.
    * @returns {Card|null}
    */

@@ -14,6 +14,7 @@ export default class Card {
     this.rarity = cardData.rarity;
     this.maxHp = cardData.hp ?? null;
     this.cost = cardData.cost;
+    this.rank = cardData.rank ?? null;
     this.costReduction = 0;
     this.visible = false; // whether the card is visible to the opponent
 

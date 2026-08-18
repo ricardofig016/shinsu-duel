@@ -94,19 +94,37 @@ describe("CreateCardHandler", () => {
     expect(game.playerStates.Alice.fireCharges).toBe(0);
   });
 
-  test("choice card target is skipped until Phase D", () => {
-    game.eventBus.emit = jest.fn();
+  test("choose card target defers to a card_selection decision and creates the chosen card", () => {
     const result = handler.execute(
       { owner: "Alice", card: { type: "equipment", name: "Thorn Fragment", choose: true } },
       context(),
       game
     );
 
-    expect(result.skipped).toBe(true);
-    expect(game.eventBus.emit).toHaveBeenCalledWith(
-      EVT.EFFECT_UNSUPPORTED,
-      expect.objectContaining({ type: "create_card", reason: "unsupported_effect" })
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.type).toBe("card_selection");
+    expect(game.pendingDecision.candidates).toHaveLength(4);
+
+    const chosen = game.pendingDecision.candidates[2];
+    game.resolveDecision({
+      decisionId: game.pendingDecision.decisionId,
+      choices: [chosen.id],
+      username: "Alice",
+    });
+
+    expect(game.playerStates.Alice.hand.some((card) => card.name === chosen.name)).toBe(true);
+  });
+
+  test("random card target deterministically picks one matching card", () => {
+    const result = handler.execute(
+      { owner: "Alice", card: { type: "equipment", name: "Thorn Fragment", random: true } },
+      context(),
+      game
     );
+
+    expect(result.created).toBe(true);
+    expect(["First Thorn Fragment", "Second Thorn Fragment", "Third Thorn Fragment", "Fourth Thorn Fragment"])
+      .toContain(result.card.name);
   });
 
   test("unknown generated_by resource is skipped", () => {

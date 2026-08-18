@@ -8,7 +8,7 @@ import CompressionService from "../services/CompressionService.js";
  *   { owner, amount, targetCardId }
  *
  * The `targetCardId` is always pre-resolved by EffectResolver/TargetResolver
- * from the compiled `targetCardSelector`. Handlers never interpret target
+ * from the compiled `card` target. Handlers never interpret target
  * descriptors themselves.
  *
  * Delegates to the authoritative CompressionService for mutation.

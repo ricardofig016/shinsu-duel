@@ -26,6 +26,8 @@ import NoopHandler from "./handlers/NoopHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
 import PredicateEvaluator from "./services/PredicateEvaluator.js";
+import shuffle from "./utils/shuffle.js";
+import { toCardTargetView } from "./utils/cardData.js";
 import EVT from "./EventCatalog.js";
 
 // Singleton handler registry — populated at module load
@@ -162,12 +164,15 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       condition: targetFilters.condition ?? (conditionIsFilter ? payload.condition : undefined),
       conditionValue: targetFilters.conditionValue ?? payload.conditionValue,
       trait: targetFilters.trait ?? (traitIsFilter ? payload.trait : undefined),
+      traitNot: targetFilters.traitNot ?? payload.traitNot,
+      cost: targetFilters.cost ?? payload.cost,
       rank: targetFilters.rank,
       position: targetFilters.position,
       affiliation: targetFilters.affiliation,
       attribute: targetFilters.attribute,
       name: targetFilters.name,
       sharedAffiliation: targetFilters.shared_affiliation,
+      lowestHp: targetFilters.lowestHp ?? payload.lowestHp,
       count: Number.MAX_SAFE_INTEGER,
     };
   };
@@ -179,6 +184,17 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   const immediateTargets = new Set(["self", "ally", "enemy", "enemies", "bearer", "enemy_frontline", "enemy_backline", "unit"]);
   if (!payload.targetId && immediateTargets.has(payload.target)) {
     const candidates = TargetResolver.resolveTargets(gameState, buildTargetOptions());
+
+    // Explicit random selection: shuffle with the seeded RNG and auto-pick
+    // the requested count — no player decision.
+    if (targetFilters.random && candidates.length > 0) {
+      shuffle(candidates, gameState._rng);
+      const take = payload.count && payload.count > 1 ? Math.min(payload.count, candidates.length) : 1;
+      return candidates.slice(0, take).map((unit) =>
+        resolveEffect(effect, context, gameState, { ...extra, targetId: unit.id })
+      );
+    }
+
     if (candidates.length > 1) {
       const maxChoices = payload.count && payload.count > 1 ? Math.min(payload.count, candidates.length) : 1;
       gameState.createPendingDecision({
@@ -216,19 +232,46 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     return targets.map((target) => resolveEffect(effect, context, gameState, { ...extra, targetId: target.id }));
   }
 
-  // Card-in-hand selectors (compress_shinsu): resolve before handler invocation.
-  // Handlers must never interpret target descriptors themselves — all
-  // selector resolution happens here or in TargetResolver.
-  if (payload.targetCardSelector && !payload.targetCardId) {
+  // Structured card targets ({ name, type, cost, ... }) select a card from the
+  // relevant zone for the card-consuming effects. The zone is derived from the
+  // effect type (not `card.zone`, which is not authored today). `create_card`
+  // resolves its own catalog candidates inside its handler.
+  if (payload.card && typeof payload.card === "object" && !Array.isArray(payload.card) && !payload.targetCardId) {
+    const cardTarget = payload.card;
     const owner = payload.owner || payload.sourceOwner || extra.owner;
     const player = owner ? gameState.playerStates[owner] : null;
-    if (player) {
-      const cardId = TargetResolver.resolveCardTarget(player, payload.targetCardSelector);
-      if (cardId) {
-        payload.targetCardId = cardId;
+    let zoneCards = null;
+    if (type === "compress_shinsu") zoneCards = player?.hand;
+    else if (type === "draw_card") zoneCards = player?.deck;
+    else if (type === "reclaim_cards") zoneCards = player?.discard;
+
+    if (zoneCards) {
+      const candidates = TargetResolver.resolveCardTargets(
+        zoneCards.map((card) => toCardTargetView(card)).filter(Boolean),
+        cardTarget
+      );
+
+      if (candidates.length > 0) {
+        if (cardTarget.random) {
+          shuffle(candidates, gameState._rng);
+          payload.targetCardId = candidates[0].id;
+        } else if (cardTarget.choose && candidates.length > 1) {
+          gameState.createPendingDecision({
+            owner,
+            type: "card_selection",
+            candidates: candidates.map((c) => ({ id: c.id, name: c.name, cost: c.cost, type: c.type })),
+            minChoices: 1,
+            maxChoices: 1,
+            resolve: ([targetCardId]) => {
+              resolveEffect(effect, context, gameState, { ...extra, targetCardId });
+            },
+          });
+          return { pending: true };
+        } else {
+          payload.targetCardId = candidates[0].id;
+        }
       }
-      // If no card matched, handlers validate for a required target
-      // and throw a descriptive error.
+      // No match: handlers validate a required target and throw a descriptive error.
     }
   }
 

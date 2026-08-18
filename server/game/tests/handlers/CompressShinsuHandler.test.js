@@ -2,7 +2,8 @@ import { jest } from "@jest/globals";
 import EVT from "../../EventCatalog.js";
 import Card from "../../Card.js";
 import CompressShinsuHandler from "../../handlers/CompressShinsuHandler.js";
-import { resolveCardTarget } from "../../TargetResolver.js";
+import { resolveCardTargets } from "../../TargetResolver.js";
+import { toCardTargetView } from "../../utils/cardData.js";
 import { createTestGame, getCardIdByName } from "../utils.js";
 
 function addCardToHand(game, username, name) {
@@ -46,10 +47,11 @@ describe("CompressShinsuHandler", () => {
     const namedTarget = addCardToHand(game, owner, "Fiery Elephant");
     const hwayeomsaTarget = addCardToHand(game, owner, "Yeon Yihwa");
 
-    // Selectors are resolved by TargetResolver.resolveCardTarget before
+    // Card targets are resolved by TargetResolver.resolveCardTargets before
     // the handler is invoked (this is what EffectResolver does).
-    const nameCardId = resolveCardTarget(game.playerStates[owner], "Fiery Elephant");
-    const attrCardId = resolveCardTarget(game.playerStates[owner], "a Hwayeomsa");
+    const handViews = game.playerStates[owner].hand.map((card) => toCardTargetView(card));
+    const nameCardId = resolveCardTargets(handViews, { name: "Fiery Elephant" })[0]?.id;
+    const attrCardId = resolveCardTargets(handViews, { attribute: "hwayeomsa" })[0]?.id;
 
     expect(nameCardId).toBe(namedTarget.id);
     expect(attrCardId).toBe(hwayeomsaTarget.id);
@@ -68,7 +70,8 @@ describe("CompressShinsuHandler", () => {
     const cheaper = addCardToHand(game, owner, "Fiery Elephant");
     const expensive = addCardToHand(game, owner, "The Workshop");
 
-    const cardId = resolveCardTarget(game.playerStates[owner], "the most expensive card");
+    const handViews = game.playerStates[owner].hand.map((card) => toCardTargetView(card));
+    const cardId = resolveCardTargets(handViews, { cost: "most expensive" })[0]?.id;
     expect(cardId).toBe(expensive.id);
 
     // Handler receives only concrete targetCardId.

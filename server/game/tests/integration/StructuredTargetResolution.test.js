@@ -21,13 +21,13 @@ function createGame() {
   }, null, { rng: new SeededRng(1) });
 }
 
-function unit(id, owner, position, { name = id, maxHp = 10, affiliations = {}, attributes = [], rank = "regular" } = {}) {
+function unit(id, owner, position, { name = id, maxHp = 10, affiliations = {}, attributes = [], rank = "regular", cost } = {}) {
   return {
     id,
     owner,
     placedPositionCode: position,
     currentHp: maxHp,
-    card: { name, maxHp, affiliations, attributes, rank },
+    card: { name, maxHp, affiliations, attributes, rank, cost },
     isAlive() { return this.currentHp > 0; },
   };
 }
@@ -153,5 +153,57 @@ describe("structured target resolution via EffectResolver", () => {
 
     expect(result).toEqual({ pending: true });
     expect(game.pendingDecision.maxChoices).toBe(2);
+  });
+
+  test("grant_trait with lowest_hp and traitNot selects the lowest-HP non-immune target", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout", { affiliations: { "team-rachel": {} } }));
+    const low = push(game, "Alice", unit("low", "Alice", "scout", { affiliations: { "team-rachel": {} } }));
+    const immuneLow = push(game, "Alice", unit("immuneLow", "Alice", "scout", { affiliations: { "team-rachel": {} } }));
+    low.currentHp = 5;
+    immuneLow.currentHp = 2;
+    game.modifierStack.apply({ sourceId: "system", sourceType: "system", targetId: "immuneLow", type: "trait", key: "immune", value: 1 });
+
+    resolveEffect(
+      { type: "grant_trait", trait: "immune", target: { side: "ally", affiliation: "team-rachel", lowest_hp: true, traitNot: "immune" } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(game.modifierStack.getEffective(low.id, "trait", "immune")).toBe(1);
+    expect(game.modifierStack.getEffective(immuneLow.id, "trait", "immune")).toBe(1);
+  });
+
+  test("deal_damage with a random structured target auto-selects without a decision", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    push(game, "Bob", unit("e1", "Bob", "scout"));
+    push(game, "Bob", unit("e2", "Bob", "scout"));
+
+    const result = resolveEffect(
+      { type: "deal_damage", amount: 1, target: { side: "enemy", random: true } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(game.pendingDecision).toBeNull();
+  });
+
+  test("deal_damage with a cost filter targets only units of that cost", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout", { cost: 2 }));
+    const cheap = push(game, "Bob", unit("cheap", "Bob", "scout", { cost: 1 }));
+    const pricey = push(game, "Bob", unit("pricey", "Bob", "scout", { cost: 3 }));
+
+    resolveEffect(
+      { type: "deal_damage", amount: 1, target: { side: "enemy", scope: "all", cost: 1 } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(cheap.currentHp).toBe(9);
+    expect(pricey.currentHp).toBe(10);
   });
 });

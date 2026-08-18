@@ -798,11 +798,13 @@ export default class GameState {
       decisionId: IdFactory.decisionId(),
       owner,
       type,
-      candidates: candidates.map(({ id, name, hp }) => {
+      candidates: candidates.map((candidate) => {
+        const { id, name, hp, ...extra } = candidate;
         // Track whether each candidate is a real game unit so we can
         // reject choices for units destroyed while the decision was pending.
+        // Non-unit candidates (e.g. card selections) carry `_isUnit: false`.
         const isUnit = Boolean(this._findUnit(id));
-        return { id, name, hp, _isUnit: isUnit };
+        return { id, name, hp, ...extra, _isUnit: isUnit };
       }),
       minChoices,
       maxChoices,

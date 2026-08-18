@@ -8,9 +8,9 @@ _Phase A — DSL language & contracts_ (done)
 _Phase B — Compiler revamp + full DSL migration_ (done) — artifact landed with zero `custom`/`handler`; structured target subset (B5a) and `create_card`/Hwayeomsa (B6) pulled forward.
 _Phase C — Resolver structural nodes & predicates_ (done) — `sequence`/`conditional` resolve in `EffectResolver`; `PredicateEvaluator` implements all six predicates; trigger-less `conditional` passives re-evaluate via `PassiveManager`; `startedWithCard` records starting deck composition ("Ha Jinsung" has no card yet, so that predicate evaluates false).
 
-_Phase D — Targeting extensions_
+_Phase D — Targeting extensions_ (done)
 
-1. `TargetResolver`: `random`/`choice`/`cost` selection, deck/hand/game sources, extended `resolveCardTarget` selectors. The structured `{side, scope, count, filters}` subset (affiliation/attribute/name filters, array-OR rank/position) already landed in Phase B5a.
+1. `TargetResolver`: `random`/`choose`/`cost` selection, deck/hand/game sources, extended card-target selectors. Landed: `random`/`choose`/`cost`/`lowest_hp`/`traitNot` unit selection; structured card targets (`resolveCardTargets` + `toCardTargetView`) wired through `EffectResolver` into `compress_shinsu`/`draw_card`/`reclaim_cards`/`create_card`; legacy `targetCardSelector` removed; `Card.rank` added; `findCardsByFamily` now matches trailing-numeral and leading-ordinal families (Thorn Fragments). The structured `{side, scope, count, filters}` subset (affiliation/attribute/name filters, array-OR rank/position) landed in Phase B5a.
 
 _Phase E — New effect primitives_ (each: handler + service integration + validate/execute tests) _depends on C+D_
 

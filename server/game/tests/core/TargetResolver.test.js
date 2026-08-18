@@ -1,4 +1,5 @@
 import TargetResolver from "../../TargetResolver.js";
+import { toCardTargetView } from "../../utils/cardData.js";
 import { createTestGame, getCardIdByName } from "../utils.js";
 
 describe("TargetResolver", () => {
@@ -82,36 +83,40 @@ describe("TargetResolver", () => {
   });
 });
 
-describe("TargetResolver.resolveCardTarget", () => {
-  test("returns null for empty hand", () => {
-    const state = { hand: [] };
-    expect(TargetResolver.resolveCardTarget(state, "anything")).toBeNull();
-    expect(TargetResolver.resolveCardTarget(null, "anything")).toBeNull();
-    expect(TargetResolver.resolveCardTarget({ hand: [] }, null)).toBeNull();
+describe("TargetResolver.resolveCardTargets", () => {
+  const cardView = ({ id, name, type = "unit", cost = 0, rank = null, positions = [], affiliations = [], attributes = [] }) =>
+    toCardTargetView({ id, cardId: id, name, type, cost, rank, positions, affiliations, attributes });
+
+  test("returns empty for empty/non-array input and null descriptor", () => {
+    expect(TargetResolver.resolveCardTargets([], { name: "anything" })).toEqual([]);
+    expect(TargetResolver.resolveCardTargets(null, { name: "anything" })).toEqual([]);
+    expect(TargetResolver.resolveCardTargets([cardView({ id: "c", name: "X" })], null)).toEqual([]);
   });
 
   test("resolves by exact card name (case-insensitive)", () => {
-    const card = { id: "card#1", name: "Fiery Elephant", cost: 2 };
-    const state = { hand: [card] };
-    expect(TargetResolver.resolveCardTarget(state, "Fiery Elephant")).toBe("card#1");
-    expect(TargetResolver.resolveCardTarget(state, "fiery elephant")).toBe("card#1");
-    expect(TargetResolver.resolveCardTarget(state, "Nonexistent")).toBeNull();
+    const candidates = [cardView({ id: "card#1", name: "Fiery Elephant", cost: 2 })];
+    expect(TargetResolver.resolveCardTargets(candidates, { name: "Fiery Elephant" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { name: "fiery elephant" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { name: "Nonexistent" })).toEqual([]);
   });
 
-  test("resolves 'the most expensive card'", () => {
-    const cheap = { id: "card#1", name: "A", cost: 1 };
-    const expensive = { id: "card#2", name: "B", cost: 5 };
-    const state = { hand: [cheap, expensive] };
-    expect(TargetResolver.resolveCardTarget(state, "the most expensive card")).toBe("card#2");
+  test("resolves exact, cheapest, and most-expensive cost selectors", () => {
+    const candidates = [cardView({ id: "card#1", name: "A", cost: 1 }), cardView({ id: "card#2", name: "B", cost: 5 })];
+    expect(TargetResolver.resolveCardTargets(candidates, { cost: 5 }).map((c) => c.id)).toEqual(["card#2"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { cost: "cheapest" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { cost: "most expensive" }).map((c) => c.id)).toEqual(["card#2"]);
   });
 
-  test("resolves 'a <attribute>' selector", () => {
-    const hwayeomsa = { id: "card#1", name: "Yeon Yihwa", cost: 2, attributes: ["hwayeomsa"] };
-    const other = { id: "card#2", name: "Monkeyman", cost: 1, attributes: [] };
-    const state = { hand: [other, hwayeomsa] };
-    expect(TargetResolver.resolveCardTarget(state, "a Hwayeomsa")).toBe("card#1");
-    expect(TargetResolver.resolveCardTarget(state, "a hwayeomsa")).toBe("card#1");
-    expect(TargetResolver.resolveCardTarget(state, "a Nonexistent")).toBeNull();
+  test("resolves attribute, type, rank, position, and affiliation filters", () => {
+    const hwayeomsa = cardView({ id: "card#1", name: "Yeon Yihwa", cost: 2, rank: "ranker", positions: ["wave-controller"], affiliations: ["fug"], attributes: ["hwayeomsa"] });
+    const other = cardView({ id: "card#2", name: "Monkeyman", type: "skill", cost: 1, rank: "regular" });
+    const candidates = [other, hwayeomsa];
+
+    expect(TargetResolver.resolveCardTargets(candidates, { attribute: "hwayeomsa" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { type: "unit" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { rank: "ranker" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { position: "wave-controller" }).map((c) => c.id)).toEqual(["card#1"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { affiliation: "fug" }).map((c) => c.id)).toEqual(["card#1"]);
   });
 });
 
@@ -339,11 +344,13 @@ describe("TargetResolver.normalizeStructuredTarget", () => {
     expect(result.affiliation).toBe("team-chang");
   });
 
-  test("throws on non-object, unknown side, and random/cost selection", () => {
+  test("throws on non-object and unknown side; passes random/cost/choose/lowest_hp through", () => {
     expect(() => TargetResolver.normalizeStructuredTarget(null)).toThrow("must be an object");
     expect(() => TargetResolver.normalizeStructuredTarget({ side: "bogus" })).toThrow("unknown structured target side");
-    expect(() => TargetResolver.normalizeStructuredTarget({ side: "enemy", random: true })).toThrow("not supported yet");
-    expect(() => TargetResolver.normalizeStructuredTarget({ side: "enemy", cost: 2 })).toThrow("not supported yet");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", random: true })).toMatchObject({ target: "enemy", random: true });
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", cost: 2 }).cost).toBe(2);
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", choose: true }).choose).toBe(true);
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", lowest_hp: true }).lowestHp).toBe(true);
   });
 });
 

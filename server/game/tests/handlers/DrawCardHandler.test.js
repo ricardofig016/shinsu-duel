@@ -87,4 +87,30 @@ describe("DrawCardHandler", () => {
     expect(gameState.playerStates.Alice.hand.length).toBe(0);
     expect(listener).toHaveBeenCalledTimes(1);
   });
+
+  test("filtered draw searches the deck and draws the pre-resolved target card", () => {
+    gameState.playerStates.Alice.deck = [
+      { id: "card#1", cardId: 1, name: "Card A" },
+      { id: "card#2", cardId: 2, name: "Card B" },
+    ];
+    gameState.playerStates.Alice.hand = [];
+
+    bus.on("Test", (p, ctx) => {
+      handler.execute({ owner: "Alice", amount: 1, targetCardId: "card#2" }, ctx, gameState);
+    }, { phase: "execute" });
+
+    bus.emit("Test");
+
+    expect(gameState.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Card B"]);
+    expect(gameState.playerStates.Alice.deck.map((c) => c.name)).toEqual(["Card A"]);
+  });
+
+  test("filtered draw throws when the target card is no longer in the deck", () => {
+    gameState.playerStates.Alice.deck = [{ id: "card#1", cardId: 1, name: "Card A" }];
+    gameState.playerStates.Alice.hand = [];
+
+    expect(() =>
+      handler.execute({ owner: "Alice", amount: 1, targetCardId: "card#missing" }, {}, gameState)
+    ).toThrow(/no longer in the owner's deck/);
+  });
 });
