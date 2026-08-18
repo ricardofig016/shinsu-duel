@@ -295,7 +295,8 @@
     ],
     "abilities": [
       {
-        "type": "cleanse",
+        "type": "remove_conditions",
+        "mode": "choose",
         "amount": 1,
         "target": {
           "side": "ally"
@@ -509,7 +510,7 @@
             }
           },
           {
-            "type": "cleanse",
+            "type": "remove_conditions",
             "target": {
               "side": "bearer"
             }
@@ -601,7 +602,7 @@
     "deckConstraints": [],
     "effects": [
       {
-        "type": "cleanse",
+        "type": "remove_conditions",
         "target": {
           "side": "ally"
         },
@@ -1314,7 +1315,7 @@
         "type": "sequence",
         "steps": [
           {
-            "type": "cleanse",
+            "type": "remove_conditions",
             "target": {
               "side": "ally",
               "scope": "all"

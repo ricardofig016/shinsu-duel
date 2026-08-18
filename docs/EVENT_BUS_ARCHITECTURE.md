@@ -273,7 +273,7 @@ Handlers use `context.emitChild()` for cascading effects and the `ModifierStack`
 | `HealHandler`             | Applies healing, capped at max HP                             |
 | `GrantTraitHandler`       | Creates ModifierStack modifier for trait                      |
 | `GiveConditionHandler`    | Creates ModifierStack modifier for condition; respects Immune |
-| `CleanseHandler`          | Removes all condition modifiers from target                   |
+| `RemoveConditionHandler`  | Removes condition modifiers from target                       |
 | `CreateLighthouseHandler` | Delegates to `GameState.modifyLighthouses` (cap 40)           |
 | `SpendShinsuHandler`      | Delegates to `ShinsuService.spend` (recharged first)          |
 | `DrawCardHandler`         | Delegates to `ZoneService.draw`; emits `game:deck:empty`      |

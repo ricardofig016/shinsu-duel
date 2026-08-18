@@ -108,24 +108,51 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 
 ### Units
 
-| `type`               | Fields                           | Meaning                                            |
-| -------------------- | -------------------------------- | -------------------------------------------------- |
-| `deal_damage`        | `amount`, `target`               | Deal `amount` damage.                              |
-| `heal`               | `amount`, `target`               | Heal `amount` HP.                                  |
-| `give_condition`     | `condition`, `amount?`, `target` | Apply a condition (optionally stacked).            |
-| `cleanse`            | `target`                         | Remove all conditions.                             |
-| `grant_trait`        | `trait`, `amount?`, `target`     | Grant a trait (optionally numeric).                |
-| `remove_traits`      | `target`, `trait?`               | Remove all traits, or one named `trait` (Silence). |
-| `copy_traits`        | `target`, `source`               | Copy traits from `source` onto `target`.           |
-| `grant_random_trait` | `target`, `numeric?`             | Grant a random trait.                              |
-| `slay`               | `target`                         | Kill units directly (ignores damage).              |
-| `transform`          | `cardName`                       | Replace the unit with another card (revert).       |
-| `grant_ability`      | `ability`, `target`              | Grant an ability (register, don't execute).        |
-| `copy_ability`       | `source`                         | Use a copy of an enemy `source`'s ability.         |
-| `peek_hand`          | `owner`                          | Reveal a card in `owner`'s hand (observer-only).   |
-| `play_jeonsul_baang` | `trigger?`                       | Play a random Jeonsul Baang on a random ally.      |
+| `type`               | Fields                                     | Meaning                                                                                                                                                                          |
+| -------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deal_damage`        | `amount`, `target`                         | Deal `amount` damage.                                                                                                                                                            |
+| `heal`               | `amount`, `target`                         | Heal `amount` HP.                                                                                                                                                                |
+| `give_condition`     | `condition`, `amount?`, `target`           | Apply a condition (optionally stacked).                                                                                                                                          |
+| `remove_conditions`  | `target`, `mode?`, `amount?`, `condition?` | Remove conditions from `target`. `mode`: `all` (default) \| `random` \| `choose`; `amount` = how many (required for `random`/`choose`); `condition` = restrict to one condition. |
+| `grant_trait`        | `trait`, `amount?`, `target`               | Grant a trait (optionally numeric).                                                                                                                                              |
+| `remove_traits`      | `target`, `trait?`                         | Remove all traits, or one named `trait` (Silence).                                                                                                                               |
+| `copy_traits`        | `target`, `source`                         | Copy traits from `source` onto `target`.                                                                                                                                         |
+| `grant_random_trait` | `target`, `numeric?`                       | Grant a random trait.                                                                                                                                                            |
+| `slay`               | `target`                                   | Kill units directly (ignores damage).                                                                                                                                            |
+| `transform`          | `cardName`                                 | Replace the unit with another card (revert).                                                                                                                                     |
+| `grant_ability`      | `ability`, `target`                        | Grant an ability (register, don't execute).                                                                                                                                      |
+| `copy_ability`       | `source`                                   | Use a copy of an enemy `source`'s ability.                                                                                                                                       |
+| `peek_hand`          | `owner`                                    | Reveal a card in `owner`'s hand (observer-only).                                                                                                                                 |
+| `play_jeonsul_baang` | `trigger?`                                 | Play a random Jeonsul Baang on a random ally.                                                                                                                                    |
 
 `grant_affiliation` (`target`, `source`, `random?`) grants `target` an affiliation taken from `source` (randomly chosen when `random` is set).
+
+### Remove conditions
+
+`remove_conditions` removes condition types (the distinct condition keys a unit carries — all stacked sources of a condition are removed together) from `target`. The `Cleanse` keyword (`remove all conditions`) is `mode: all`, the default. Three modes:
+
+```yaml
+- type: remove_conditions
+  target: { side: ally } # remove ALL conditions (classic Cleanse)
+- type: remove_conditions
+  mode: random
+  amount: 1
+  target: { side: ally } # remove 1 random condition
+- type: remove_conditions
+  mode: choose
+  amount: 2
+  target: { side: ally } # owner chooses 2 conditions to remove
+- type: remove_conditions
+  condition: burned
+  target: { side: enemy } # remove only Burned (all its stacks)
+```
+
+- `mode` defaults to `all` (a bare `remove_conditions` removes every condition).
+- `amount` is required and must be ≥ 1 when `mode` is `random` or `choose`; it is ignored for `all`. If `amount` exceeds the eligible conditions, every eligible condition is removed (clamp to "up to N").
+- `condition` (optional) restricts the eligible pool to a single named condition, and composes with any `mode`.
+- `random` selection is deterministic via the seeded RNG; `choose` creates a `remove_conditions` pending decision for the acting player.
+
+`condition` here is the remove selector (which condition to remove), distinct from `target.condition`, which filters which units are eligible targets.
 
 ### Structural
 

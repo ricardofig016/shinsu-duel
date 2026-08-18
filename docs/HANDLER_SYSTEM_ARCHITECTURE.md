@@ -123,7 +123,7 @@ For a `type` with **no registered handler** (a valid structured type whose handl
 | `HealHandler`              | `heal`               | Applies healing via `UnitService.heal`, capped at max HP                                |
 | `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                             |
 | `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                               |
-| `CleanseHandler`           | `cleanse`            | `stack.removeWhere(m => m.type === "condition")`                                        |
+| `RemoveConditionHandler`  | `remove_conditions` | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                    |
 | `CreateLighthouseHandler`  | `create_lighthouse`  | Delegates to `GameState.modifyLighthouses` (cap 40)                                     |
 | `DestroyLighthouseHandler` | `destroy_lighthouse` | Delegates to `GameState.modifyLighthouses` (floor 0); emits `game:lighthouses:depleted` |
 | `SpendShinsuHandler`       | `spend_shinsu`       | Delegates to `ShinsuService.spend`; recharged first, then normal                        |

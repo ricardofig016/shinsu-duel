@@ -285,4 +285,45 @@ passives:
 
     expect(cards).toHaveLength(1);
   });
+
+  test("rejects a remove_conditions with mode random/choose but no amount", async () => {
+    await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
+name: Test Cleanse
+cost: 1
+deckConstraints: []
+effects:
+  - type: remove_conditions
+    mode: random
+    target: { side: ally }
+    raw: "remove a random condition from an ally"
+`, "utf-8");
+
+    await expect(compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    })).rejects.toThrow("Compiled card data failed");
+  });
+
+  test("accepts a remove_conditions with a valid mode and amount", async () => {
+    await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
+name: Test Cleanse
+cost: 1
+deckConstraints: []
+effects:
+  - type: remove_conditions
+    mode: random
+    amount: 1
+    target: { side: ally }
+    raw: "remove a random condition from an ally"
+`, "utf-8");
+
+    const cards = await compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    });
+
+    expect(cards).toHaveLength(1);
+  });
 });

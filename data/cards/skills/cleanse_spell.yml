@@ -3,6 +3,6 @@ name: Cleanse Spell
 cost: 1
 requirements:
 effects:
-  - type: cleanse
+  - type: remove_conditions
     target: { side: ally }
     raw: "Cleanse an ally"

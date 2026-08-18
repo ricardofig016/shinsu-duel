@@ -30,7 +30,8 @@ passives:
     trigger: { type: ally_dies, rank: regular }
     raw: "when an ally Regular dies: Create 1"
 abilities:
-  - type: cleanse
+  - type: remove_conditions
+    mode: choose
     amount: 1
     target: { side: ally }
     raw: "remove a condition from an ally"

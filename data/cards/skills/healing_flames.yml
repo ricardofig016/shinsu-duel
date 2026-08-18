@@ -6,7 +6,7 @@ requirements:
 effects:
   - type: sequence
     steps:
-      - type: cleanse
+      - type: remove_conditions
         target: { side: ally, scope: all }
       - type: heal
         amount: 4

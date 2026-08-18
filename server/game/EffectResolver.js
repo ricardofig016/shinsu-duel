@@ -12,7 +12,7 @@ import DealDamageHandler from "./handlers/DealDamageHandler.js";
 import HealHandler from "./handlers/HealHandler.js";
 import GrantTraitHandler from "./handlers/GrantTraitHandler.js";
 import GiveConditionHandler from "./handlers/GiveConditionHandler.js";
-import CleanseHandler from "./handlers/CleanseHandler.js";
+import RemoveConditionHandler from "./handlers/RemoveConditionHandler.js";
 import CreateLighthouseHandler from "./handlers/CreateLighthouseHandler.js";
 import DestroyLighthouseHandler from "./handlers/DestroyLighthouseHandler.js";
 import SpendShinsuHandler from "./handlers/SpendShinsuHandler.js";
@@ -40,7 +40,7 @@ function getRegistry() {
     _registry.register("heal", HealHandler);
     _registry.register("grant_trait", GrantTraitHandler);
     _registry.register("give_condition", GiveConditionHandler);
-    _registry.register("cleanse", CleanseHandler);
+    _registry.register("remove_conditions", RemoveConditionHandler);
     _registry.register("create_lighthouse", CreateLighthouseHandler);
     _registry.register("destroy_lighthouse", DestroyLighthouseHandler);
     _registry.register("spend_shinsu", SpendShinsuHandler);
@@ -149,11 +149,11 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Build the filter options handed to TargetResolver. Structured-target
   // filters take precedence; effect-level filters apply otherwise. Two
   // effect-level fields are overloaded (they name the thing being applied,
-  // not a target filter): `condition` for give_condition/grant_trait/cleanse/
+  // not a target filter): `condition` for give_condition/grant_trait/remove_conditions/
   // heal, and `trait` for grant_trait. Effect-level `position` is the ability
   // position requirement, never a target filter.
   const buildTargetOptions = () => {
-    const conditionIsFilter = !["give_condition", "grant_trait", "cleanse", "heal"].includes(type);
+    const conditionIsFilter = !["give_condition", "grant_trait", "remove_conditions", "heal"].includes(type);
     const traitIsFilter = type !== "grant_trait";
     return {
       target: payload.target,

@@ -121,7 +121,7 @@
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "play_jeonsul_baang", "sequence", "conditional", "noop", "repeat_play", "quick", "choose_position", "grant_affiliation", "return_to_hand"] },
+        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "remove_conditions", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "play_jeonsul_baang", "sequence", "conditional", "noop", "repeat_play", "quick", "choose_position", "grant_affiliation", "return_to_hand"] },
         "raw": { "type": "string", "minLength": 1 },
         "quick": { "type": "boolean" },
         "free": { "type": "boolean" },
@@ -143,6 +143,7 @@
         "from": { "enum": ["deck", "hand", "deck_or_hand", "game"] },
         "onto": { "enum": ["self", "opponent", "both"] },
         "random": { "type": "boolean" },
+        "mode": { "enum": ["all", "random", "choose"] },
         "owner": { "enum": ["you", "opponent", "self", "enemy"] },
         "to": {
           "type": "object",
@@ -175,7 +176,9 @@
         { "if": { "properties": { "type": { "const": "deal_damage" } } }, "then": { "required": ["amount", "target"] } },
         { "if": { "properties": { "type": { "const": "heal" } } }, "then": { "required": ["amount", "target"] } },
         { "if": { "properties": { "type": { "const": "give_condition" } } }, "then": { "required": ["condition", "target"] } },
-        { "if": { "properties": { "type": { "const": "cleanse" } } }, "then": { "required": ["target"] } },
+        { "if": { "properties": { "type": { "const": "remove_conditions" } } }, "then": { "required": ["target"] } },
+        { "if": { "properties": { "type": { "const": "remove_conditions" }, "mode": { "enum": ["random", "choose"] } }, "required": ["mode"] }, "then": { "required": ["amount"] } },
+        { "if": { "properties": { "type": { "const": "remove_conditions" }, "mode": { "enum": ["random", "choose"] } }, "required": ["mode"] }, "then": { "properties": { "amount": { "minimum": 1 } } } },
         { "if": { "properties": { "type": { "const": "grant_trait" } } }, "then": { "required": ["trait", "target"] } },
         { "if": { "properties": { "type": { "const": "remove_traits" } } }, "then": { "required": ["target"] } },
         { "if": { "properties": { "type": { "const": "copy_traits" } } }, "then": { "required": ["target", "source"] } },

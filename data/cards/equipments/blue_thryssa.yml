@@ -8,7 +8,7 @@ effects:
       - type: heal
         amount: 2
         target: { side: bearer }
-      - type: cleanse
+      - type: remove_conditions
         target: { side: bearer }
     raw: "heal the bearer 2 HP and Cleanse the bearer"
 ignition:
