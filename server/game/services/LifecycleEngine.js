@@ -235,6 +235,12 @@ export default class LifecycleEngine {
 
     gameState._triggerManager?.unregisterAll(unit.id);
     gameState._passiveManager?.unregisterUnit(unit.id);
+    // Revoke any always-on grants this unit's passives still hold on other
+    // units (e.g. "while I'm on the field, allies have X"). unregisterUnit only
+    // drops subscriptions; revokeGrants clears the modifiers keyed to this
+    // unit's passive source IDs so they never outlive the source. Ordered after
+    // unregister so the revoke events can't re-trigger the outgoing handlers.
+    gameState._passiveManager?.revokeGrants(unit.id, unit.card?.passiveAbilities || [], gameState);
     gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
     // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
     // (triggered by the UNIT_DESTROYED → removeByTarget cascade below).
@@ -426,6 +432,13 @@ export default class LifecycleEngine {
     if (toDetach.length === 0) return;
 
     const player = gameState.playerStates[unit.owner];
+
+    // Detach from the canonical attachment list FIRST so always-on passives
+    // that gate on `has_equipped`/`has_all_equipped` read the post-detach
+    // state when they re-evaluate on the modifier-revoke and detach events
+    // emitted below.
+    LifecycleEngine._syncEquipment(unit, attachments.filter((entry) => !toDetach.includes(entry)));
+
     for (const equip of toDetach) {
       gameState.modifierStack.removeBySource(equip.id);
       gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
@@ -448,8 +461,6 @@ export default class LifecycleEngine {
         equipment: equip,
       });
     }
-
-    LifecycleEngine._syncEquipment(unit, attachments.filter((entry) => !toDetach.includes(entry)));
   }
 
   static _getEquipment(unit) {

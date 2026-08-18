@@ -2,6 +2,7 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import { createLegalDeck } from "../utils.js";
 import { resolveEffect } from "../../EffectResolver.js";
+import EVT from "../../EventCatalog.js";
 
 const players = ["Alice", "Bob"];
 
@@ -111,7 +112,7 @@ describe("EffectResolver structural nodes", () => {
     const game = createGame();
     push(game, "Alice", unit("miseng", "Alice", "scout", { name: "Yeo Miseng" }));
     const events = [];
-    game.eventBus.on("effect:unsupported", (payload) => events.push(payload));
+    game.eventBus.on(EVT.EFFECT_UNSUPPORTED, (payload) => events.push(payload));
 
     const result = resolveEffect({
       type: "conditional",

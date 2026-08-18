@@ -97,6 +97,21 @@ Some effects target cards still in the player's hand (e.g. `compress_shinsu`). T
 
 ---
 
+## Existence Checks (Predicates)
+
+Predicates (`conditional` nodes and always-on passive gates) ask "does a matching unit exist?" rather than "who is a legal target?". `TargetResolver.resolveExistenceUnits(gameState, descriptor, sourceOwner)` answers this for the `has_unit` and `has_condition` predicates: it collects every alive unit on the requested side and applies the same filter vocabulary as `resolveTargets` through the shared `applyFilters` helper.
+
+Key differences from offensive targeting:
+
+- Existence checks ignore line blocking, Taunt, Blinded, and Sharpshooter — they only test presence, not target legality.
+- `side` is restricted to `ally`, `enemy`, or `any` (`self`/`bearer` are not existence sides).
+- A matching source unit counts toward the check ("an allied Guide" on a Guide unit includes itself).
+- `scope`, `count`, `choose`, `random`, and `cost` are not valid on predicate targets — the `predicateTarget` schema rejects them.
+
+`applyFilters` is the single source of truth for the unit-filter vocabulary (`condition`, `conditionValue`, `trait`, `rank`, `position`, `affiliation`, `attribute`, `name`). Both `resolveTargets` and `resolveExistenceUnits` delegate to it, so targeting and existence filters never diverge.
+
+---
+
 ## Pending-Decision Protocol
 
 When an effect requires player choice (multi-target, overflow destruction choice, etc.), the engine emits a `pending-decision` event and pauses:

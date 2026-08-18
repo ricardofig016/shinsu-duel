@@ -71,7 +71,7 @@ describe("PassiveManager", () => {
   test("emits an observable event when an unregistered effect type is skipped", () => {
     const game = createGame();
     const events = [];
-    game.eventBus.on("effect:unsupported", (payload) => events.push(payload));
+    game.eventBus.on(EVT.EFFECT_UNSUPPORTED, (payload) => events.push(payload));
 
     const result = resolveEffect(
       { type: "slay", target: { side: "enemy" }, raw: "Slay an enemy" },
@@ -311,5 +311,68 @@ describe("PassiveManager", () => {
     expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(0);
     expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(0);
     expect(unit.card.name).toBe("Karaka");
+  });
+
+  test("destroyUnit revokes always-on grants the source holds on other units", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+
+    const source = putInHand(game, "Alice", "Urek Mazino");
+    source.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "has_unit", target: { side: "ally", name: "Urek Mazino" } },
+      then: { type: "grant_trait", trait: "strong", amount: 1, target: { side: "ally", scope: "all" } },
+      raw: "while I'm on the field, allies have Strong 1",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(source);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(1);
+
+    // A second ally enters play → the source re-grants Strong to both.
+    const ally = {
+      id: "Unit#ally",
+      owner: "Alice",
+      card: { name: "Ally", maxHp: 5 },
+      currentHp: 5,
+      placedPositionCode: "scout",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.frontline.push(ally);
+    game.eventBus.emit(EVT.UNIT_SUMMONED, { username: "Alice", unit: ally, unitId: ally.id });
+    expect(game.modifierStack.getEffective(ally.id, "trait", "strong")).toBe(1);
+
+    // Destroying the source must not leave its grant on the surviving ally.
+    LifecycleEngine.destroyUnit(game, unit);
+    expect(game.modifierStack.getEffective(ally.id, "trait", "strong")).toBe(0);
+  });
+
+  test("always-on has_equipped gate re-evaluates on detach against the post-detach state", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+
+    const unitCard = putInHand(game, "Alice", "Urek Mazino");
+    unitCard.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "has_equipped", cardName: "Blue Thryssa" },
+      then: { type: "grant_trait", trait: "taunt", target: { side: "self" } },
+      raw: "while I have Blue Thryssa equipped, I have Taunt",
+    }];
+    const equip = putInHand(game, "Alice", "Blue Thryssa");
+
+    const unitHandIndex = game.playerStates.Alice.hand.indexOf(unitCard);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", unitHandIndex, "fisherman");
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
+
+    // Attach → has_equipped becomes true → Taunt applied.
+    const equipIdx = game.playerStates.Alice.hand.indexOf(equip);
+    LifecycleEngine.attachEquipment(game, "Alice", equipIdx, unit);
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(true);
+
+    // Detach → always-on re-evaluation must read the post-detach state and revoke.
+    LifecycleEngine.detachEquipment(game, unit, equip);
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
   });
 });

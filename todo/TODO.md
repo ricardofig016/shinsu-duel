@@ -3,7 +3,6 @@
 ## Tasks
 
 - [ ] frontend: change board background to something from the webtoon
-- [ ] rules: add Contracts - set of ~15 game modifier effects
 - [ ] plan: audit phase 2 again
 - [ ] rules: revisit position switching (cost 1 shinsu / spend a combat slot)
 - [ ] public: plan how image artworks should be organized
@@ -12,7 +11,7 @@
 - [ ] new card: landmark - round start: give frontline units Blinded
 - [ ] data: add yml files for new cards in `todo\cards_to_add.md `
 - [ ] rules: add "steal" keyword
-- [ ] rules: add contracts in `todo\contracts.md`
+- [ ] rules: add contracts from `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 
 ## In Progress
