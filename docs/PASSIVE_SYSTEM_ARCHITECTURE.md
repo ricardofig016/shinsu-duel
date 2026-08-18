@@ -61,7 +61,9 @@ Passive handlers run at `phase: "execute"` with a low priority, so they resolve 
 
 ### Always-on passives
 
-A passive with **no `trigger`** is always-on: its effect tracks the live board rather than firing on a timer. `PassiveManager` subscribes these to the events that can change their predicate's truth — round start, unit summoned/destroyed/evolved, and equipment attached/detached/ignited. On each such event it revokes the passive's prior grants (by `Passive#<unitId>#<index>` source) and re-resolves the passive, so a predicate that is no longer true stops applying and one that just became true starts applying. Re-apply is idempotent because every grant is tracked under the passive's source ID.
+A passive with **no `trigger`** is always-on: its effect tracks the live board rather than firing on a timer. `PassiveManager` subscribes these to round start; unit summoned/destroyed/evolved/position-switched; equipment attached/detached/ignited; and trait/condition grant/revoke events. On each such event it revokes the passive's prior grants (by `Passive#<unitId>#<index>` source) and re-resolves the passive, so a predicate that is no longer true stops applying and one that just became true starts applying. Re-apply is idempotent because every grant is tracked under the passive's source ID. A per-source re-entrancy guard stops a re-evaluation's own grant/revoke events from re-triggering it.
+
+Always-on branches must be revoke-safe (modifier-backed: `grant_trait`, `give_condition`, modifiers, and their `sequence`/`conditional` compositions). The card schemas enforce this — a trigger-less passive whose branch has side effects fails validation.
 
 ---
 

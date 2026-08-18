@@ -196,10 +196,26 @@
         { "$ref": "#/definitions/modifierNode" }
       ]
     },
-    "passiveEntry": {
+    "alwaysOnNode": {
       "oneOf": [
-        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["raw"] }] },
-        { "$ref": "#/definitions/modifierNode" }
+        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "properties": { "type": { "enum": ["grant_trait", "give_condition", "noop", "quick"] } } }] },
+        { "$ref": "#/definitions/modifierNode" },
+        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "properties": { "type": { "const": "sequence" }, "steps": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/alwaysOnNode" } } } }] },
+        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "properties": { "type": { "const": "conditional" }, "then": { "$ref": "#/definitions/alwaysOnNode" }, "otherwise": { "$ref": "#/definitions/alwaysOnNode" } } }] }
+      ]
+    },
+    "passiveEntry": {
+      "allOf": [
+        {
+          "oneOf": [
+            { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["raw"] }] },
+            { "$ref": "#/definitions/modifierNode" }
+          ]
+        },
+        {
+          "if": { "not": { "required": ["trigger"] } },
+          "then": { "$ref": "#/definitions/alwaysOnNode" }
+        }
       ]
     },
     "trait": {

@@ -138,7 +138,7 @@ export default class ModifierStack {
     this._bySource.get(mod.sourceId).push(mod);
 
     // Emit event
-    this._bus.emit(`modifier:${mod.type}:granted`, {
+    this._bus.emit(EVT.MODIFIER_GRANTED(mod.type), {
       modifier: mod,
       targetId: mod.targetId,
       key: mod.key,
@@ -383,7 +383,7 @@ export default class ModifierStack {
     }
 
     // Emit revocation event
-    this._bus.emit(`modifier:${mod.type}:revoked`, {
+    this._bus.emit(EVT.MODIFIER_REVOKED(mod.type), {
       modifier: mod,
       targetId: mod.targetId,
       key: mod.key,

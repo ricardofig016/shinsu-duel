@@ -54,7 +54,7 @@ The grammar must cover these effects with **generic handlers**, never per-card h
 - **Primitives** (one handler each): `deal_damage`, `heal`, `give_condition`, `cleanse`, `grant_trait`, `remove_traits`, `slay`, `transform`, `copy_ability`, `copy_traits`, `grant_random_trait`, `peek_hand`, `charge_shinsu`, `create_lighthouse`, `destroy_lighthouse`, `draw_card`, `reclaim_cards`, `create_card`, `summon`, `discard`, `steal`, `disarm`, `switch_position`, `compress_shinsu`.
 - **Structural**: `sequence`, `conditional`, `spend_shinsu`, `grant_ability`.
 - **Modifiers** (always-on passives): `modify_stat`, `modify_keyword`, `modify_targeting`, `global_rule`.
-- **Predicates**: `has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_condition`.
+- **Predicates**: `has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_all_equipped`, `has_condition`.
 - **Triggers** (new): `attack`, `summon`, `draw`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`.
 
 ## Notes

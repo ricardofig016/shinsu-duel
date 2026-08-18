@@ -2716,7 +2716,10 @@
           "type": "has_unit",
           "target": {
             "side": "ally",
-            "position": "shinheuh"
+            "position": [
+              "frontline-shinheuh",
+              "backline-shinheuh"
+            ]
           }
         },
         "then": {

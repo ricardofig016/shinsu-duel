@@ -55,6 +55,27 @@ describe("card-compile normalization helpers", () => {
     expect(() => normalizeEffectObject("deal 3", "card.effects[0]"))
       .toThrow("card.effects[0]: expected an object");
   });
+
+  test("normalizeEffectObject expands the shinheuh position family in filters", () => {
+    const normalized = normalizeEffectObject(
+      {
+        type: "conditional",
+        if: { type: "has_unit", target: { side: "ally", position: "shinheuh" } },
+      },
+      "card.passives[0]"
+    );
+
+    expect(normalized.if.target.position).toEqual(["frontline-shinheuh", "backline-shinheuh"]);
+  });
+
+  test("normalizeEffectObject leaves a single concrete position filter unchanged", () => {
+    const normalized = normalizeEffectObject(
+      { type: "deal_damage", target: { side: "enemy", position: "wave controller" } },
+      "card.effects[0]"
+    );
+
+    expect(normalized.target.position).toBe("wave-controller");
+  });
 });
 
 describe("card-compile structured-node validation", () => {
@@ -174,5 +195,67 @@ effects:
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
     })).rejects.toThrow("expected a structured effect object");
+  });
+
+  test("rejects a trigger-less passive whose branch is not revoke-safe", async () => {
+    await fs.writeFile(path.join(tmpDir, "unit.yml"), `type: unit
+name: Test Unit
+cost: 2
+hp: 5
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives:
+  - type: deal_damage
+    amount: 1
+    target: { side: enemy }
+    raw: "always deal 1"
+`, "utf-8");
+
+    await expect(compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    })).rejects.toThrow("Compiled card data failed");
+  });
+
+  test("accepts a trigger-less conditional passive with revoke-safe branches", async () => {
+    await fs.writeFile(path.join(tmpDir, "unit.yml"), `type: unit
+name: Test Unit
+cost: 2
+hp: 5
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives:
+  - type: conditional
+    if:
+      type: alone_on_line
+      line: frontline
+    then:
+      type: sequence
+      steps:
+        - type: grant_trait
+          trait: strong
+          amount: 1
+          target: { side: self }
+    raw: "while alone, strong 1"
+`, "utf-8");
+
+    const cards = await compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    });
+
+    expect(cards).toHaveLength(1);
   });
 });

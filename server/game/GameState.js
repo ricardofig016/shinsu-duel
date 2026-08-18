@@ -541,11 +541,26 @@ export default class GameState {
       continuation();
       return;
     }
-    const previous = this.pendingDecision.onResolved;
-    this.pendingDecision.onResolved = () => {
-      previous?.();
-      continuation();
-    };
+    this.pendingDecision.continuations.push(continuation);
+  }
+
+  /**
+   * Run a decision's continuation queue in FIFO order. A continuation that
+   * creates a new pending decision (e.g. a deferred sequence step that itself
+   * needs a target choice) suspends the queue: the remaining continuations are
+   * moved onto the new decision and run only once it resolves, so an action's
+   * completion never runs ahead of a nested choice.
+   */
+  _runContinuations(decision) {
+    while (decision.continuations.length > 0) {
+      const next = decision.continuations.shift();
+      next();
+      if (this.pendingDecision && this.pendingDecision !== decision) {
+        this.pendingDecision.continuations.push(...decision.continuations);
+        decision.continuations.length = 0;
+        return;
+      }
+    }
   }
 
   /**
@@ -792,7 +807,7 @@ export default class GameState {
       minChoices,
       maxChoices,
       resolve,
-      onResolved: null,
+      continuations: [],
     };
 
     // If a decision is already pending, push current to stack (LIFO).
@@ -880,7 +895,7 @@ export default class GameState {
 
       // Run continuations while NOT in the execution guard so continuations
       // that produce new pending decisions (via createPendingDecision) work.
-      pending.onResolved?.();
+      this._runContinuations(pending);
 
       this.eventBus.emit(EVT.DECISION_RESOLVED, { decisionId, owner: pending.owner, type: pending.type, choices });
 

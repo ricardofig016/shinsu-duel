@@ -23,6 +23,7 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Read the relevant architecture documents in `docs/` before making any changes to the codebase.
 - For any card or rule work — adding/editing cards, or adding/editing rules — first read `docs/CARD_AUTHORING.md`.
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
+- Always use the canonical event-name constants from `server/game/EventCatalog.js` (`EVT`) when emitting or subscribing to events — never hardcode event-name strings.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
 - When a requirement or rule is ambiguous, never guess. Ask the user for clarification before implementation.
 - The only edits you are allowed to do to `todo\TODO.md` is change `[ ]` to `[x]`, nothing else

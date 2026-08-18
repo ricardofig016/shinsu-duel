@@ -164,7 +164,7 @@ target:
 
 `self`/`bearer` need only `side`. `any` + `scope: all` addresses both players' units (landmark rules).
 
-`rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh".
+`rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh". The bare `position: shinheuh` is shorthand for that Shinheuh pair.
 
 ### Card target
 
@@ -196,6 +196,8 @@ Predicates are the conditions a `conditional` node (or an always-on modifier) ev
 | `has_equipped`      | `cardName`, `negate?`                               | "if i have Purple Dementor equipped"      |
 | `has_all_equipped`  | `cardNames[]`, `negate?`                            | "all 4 Thorn Fragments equipped"          |
 | `has_condition`     | `condition`, `conditionValue?`, `target`, `negate?` | "units with Burned 3+"                    |
+
+`has_unit` and `has_condition` are existence checks: they read the whole board and ignore offensive-targeting rules (frontline blocking, Taunt, Blinded). A matching source unit counts toward the check — "an allied Guide" on a Guide unit includes itself.
 
 ---
 

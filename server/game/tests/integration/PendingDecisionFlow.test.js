@@ -122,4 +122,44 @@ describe("pending decision continuations", () => {
     expect(secondTarget.currentHp).toBe(secondTarget.card.maxHp);
     expect(continuationRan).toBe(true);
   });
+
+  test("a two-choice sequence defers action completion until both choices resolve", () => {
+    const game = createGame();
+    const e1 = addUnit(game, "Bob", "Akryung");
+    const e2 = addUnit(game, "Bob", "Akryung");
+    const context = { emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) };
+
+    resolveEffect({
+      type: "sequence",
+      steps: [
+        { type: "deal_damage", amount: 1, target: "enemy" },
+        { type: "deal_damage", amount: 1, target: "enemy" },
+      ],
+    }, context, game, { owner: "Alice", sourceOwner: "Alice" });
+
+    let completed = false;
+    game.completeActionAfterDecision(() => {
+      completed = true;
+      game.endTurn();
+    });
+
+    expect(game.currentTurn).toBe("Alice");
+    expect(completed).toBe(false);
+    expect(e1.currentHp).toBe(e1.card.maxHp);
+    expect(e2.currentHp).toBe(e2.card.maxHp);
+    expect(game.pendingDecision).not.toBeNull();
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [e1.id] });
+    expect(e1.currentHp).toBe(e1.card.maxHp - 1);
+    expect(e2.currentHp).toBe(e2.card.maxHp);
+    expect(completed).toBe(false);
+    expect(game.currentTurn).toBe("Alice");
+    expect(game.pendingDecision).not.toBeNull();
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [e2.id] });
+    expect(e2.currentHp).toBe(e2.card.maxHp - 1);
+    expect(completed).toBe(true);
+    expect(game.currentTurn).toBe("Bob");
+    expect(game.pendingDecision).toBeNull();
+  });
 });

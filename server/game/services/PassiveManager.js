@@ -10,6 +10,7 @@ export default class PassiveManager {
   constructor(eventBus) {
     this._bus = eventBus;
     this._unsubscribers = new Map();
+    this._reEvaluating = new Set();
   }
 
   registerUnit(unit, gameState) {
@@ -64,24 +65,38 @@ export default class PassiveManager {
       EVT.ROUND_START,
       EVT.UNIT_SUMMONED,
       EVT.UNIT_DESTROYED,
+      EVT.UNIT_POSITION_SWITCHED,
       EVT.UNIT_EVOLVED,
       EVT.EQUIPMENT_ATTACHED,
       EVT.EQUIPMENT_DETACHED,
       EVT.EQUIPMENT_IGNITED,
+      EVT.MODIFIER_GRANTED("trait"),
+      EVT.MODIFIER_REVOKED("trait"),
+      EVT.MODIFIER_GRANTED("condition"),
+      EVT.MODIFIER_REVOKED("condition"),
     ];
 
     for (const eventName of events) {
       const unsubscribe = this._bus.on(eventName, (payload, context) => {
+        // A re-evaluation revokes and re-applies its own grants, which emit
+        // the very modifier events subscribed above. Guard per source so that
+        // self (and synchronous mutual) re-triggering cannot recurse.
+        if (this._reEvaluating.has(sourceId)) return;
         if (!this._matches(passive, unit, payload, gameState)) return;
-        gameState.modifierStack.removeBySource(sourceId);
-        resolveEffect(passive, context, gameState, {
-          owner: unit.owner,
-          sourceId,
-          sourceType: "passive",
-          sourceUnit: unit,
-          sourceOwner: unit.owner,
-          targetOwner: gameState.usernames.find((username) => username !== unit.owner),
-        });
+        this._reEvaluating.add(sourceId);
+        try {
+          gameState.modifierStack.removeBySource(sourceId);
+          resolveEffect(passive, context, gameState, {
+            owner: unit.owner,
+            sourceId,
+            sourceType: "passive",
+            sourceUnit: unit,
+            sourceOwner: unit.owner,
+            targetOwner: gameState.usernames.find((username) => username !== unit.owner),
+          });
+        } finally {
+          this._reEvaluating.delete(sourceId);
+        }
       }, { phase: "execute", priority: -100 });
 
       const entries = this._unsubscribers.get(unit.id) || [];
@@ -93,6 +108,18 @@ export default class PassiveManager {
   unregisterUnit(unitId) {
     for (const unsubscribe of this._unsubscribers.get(unitId) || []) unsubscribe();
     this._unsubscribers.delete(unitId);
+  }
+
+  /**
+   * Revoke every always-on grant a card's passives hold on a unit (keyed
+   * `Passive#<unitId>#<index>`). Call after unsubscribing the outgoing card's
+   * handlers so the revoke events cannot re-trigger them, and before the
+   * incoming card re-registers.
+   */
+  revokeGrants(unitId, passives, gameState) {
+    for (let index = 0; index < passives.length; index++) {
+      gameState.modifierStack.removeBySource(IdFactory.passiveSource(unitId, index));
+    }
   }
 
   _parseTrigger(passive) {

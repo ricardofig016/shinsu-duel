@@ -94,6 +94,6 @@ _Phase J — Rules-completeness enforcement + cleanup + docs_ _depends on all_
 
 **Further Considerations**
 
-1. The "started the game with Ha Jinsung in your deck" predicate requires `GameState` to record starting deck composition — **resolved in Phase C: presence (deck construction forbids duplicates, so presence == exact copy).** Note: "Ha Jinsung" has no card in the current set, so the predicate evaluates false until that card lands.
+1. The "started the game with Ha Jinsung in your deck" predicate requires `GameState` to record starting deck composition — **resolved in Phase C: `startedWithCard` snapshots the starting deck names before the initial draw, so presence is sufficient.** Note: "Ha Jinsung" has no card in the current set, so the predicate evaluates false until that card lands.
 2. Test placeholders `_test_Equipment`/`_test_Skill` — convert to structured no-op nodes in the allowlist, or remove from the production set.
 3. Cluster T's "next time you play Baang this turn, play it 4 more times" needs a delayed/queued trigger — confirm in scope now or defer as a documented follow-up.

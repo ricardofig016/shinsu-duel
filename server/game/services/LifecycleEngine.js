@@ -298,8 +298,11 @@ export default class LifecycleEngine {
     }
 
     // Passives are tied to the card definition, so replacing it must replace
-    // its event subscriptions while preserving the unit identity.
+    // its event subscriptions while preserving the unit identity. Revoke the
+    // outgoing card's always-on grants after unsubscribing (so the revoke
+    // events can't re-trigger the outgoing handlers) and before re-registering.
     gameState._passiveManager?.unregisterUnit(unit.id);
+    gameState._passiveManager?.revokeGrants(unit.id, oldCard.passiveAbilities || [], gameState);
     gameState._passiveManager?.registerUnit(unit, gameState);
 
     // Re-evaluate attribute engines for the transformed unit.

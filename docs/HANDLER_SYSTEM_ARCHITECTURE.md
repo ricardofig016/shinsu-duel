@@ -206,9 +206,10 @@ Resolution flow:
 ```js
 function resolveEffect(effect, context, gameState, extra = {}) {
   if (!registry.has(effect.type)) {
-    // Skip a valid structured type whose handler isn't implemented yet,
-    // and emit an unsupported-effect event.
-    return { skipped: true };
+    // A valid structured type whose handler isn't implemented yet is skipped
+    // and surfaced through the `effect:unsupported` event.
+    gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, { type: effect.type, raw: effect.raw });
+    return { skipped: true, reason: "unsupported_effect" };
   }
   // TargetResolver is called here, before the handler, when effect.target
   // is a descriptor. The handler receives only concrete targetId values.

@@ -195,4 +195,121 @@ describe("PassiveManager", () => {
     })).toBeNull();
     expect(manager._parseTrigger({ type: "deal_damage", amount: 1 })).toBeNull();
   });
+
+  test("always-on conditional re-evaluates when an ally switches lines", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const urek = putInHand(game, "Alice", "Urek Mazino");
+    urek.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "alone_on_line", line: "frontline" },
+      then: {
+        type: "sequence",
+        steps: [
+          { type: "grant_trait", trait: "resilient", amount: 1, target: { side: "self" } },
+          { type: "grant_trait", trait: "strong", amount: 3, target: { side: "self" } },
+        ],
+      },
+      raw: "while i am alone on the ally frontline, i have Resilient 1 and Strong 3",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(urek);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(1);
+
+    const ally = {
+      id: "Unit#ally",
+      owner: "Alice",
+      card: { name: "Ally", maxHp: 5 },
+      currentHp: 5,
+      placedPositionCode: "light-bearer",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.backline.push(ally);
+
+    // Switch into the frontline → no longer alone → revoked.
+    game.playerStates.Alice.field.backline = game.playerStates.Alice.field.backline.filter((u) => u.id !== ally.id);
+    game.playerStates.Alice.field.frontline.push(ally);
+    game.eventBus.emit(EVT.UNIT_POSITION_SWITCHED, { username: "Alice", unit: ally, unitId: ally.id });
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(0);
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(0);
+
+    // Switch back out → alone again → re-applied.
+    game.playerStates.Alice.field.frontline = game.playerStates.Alice.field.frontline.filter((u) => u.id !== ally.id);
+    game.playerStates.Alice.field.backline.push(ally);
+    game.eventBus.emit(EVT.UNIT_POSITION_SWITCHED, { username: "Alice", unit: ally, unitId: ally.id });
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(1);
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(3);
+  });
+
+  test("always-on conditional with has_condition re-evaluates on condition changes", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const yuri = putInHand(game, "Alice", "Ha Yuri Zahard");
+    yuri.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "has_condition", condition: "burned", target: { side: "enemy" } },
+      then: { type: "grant_trait", trait: "taunt", target: { side: "self" } },
+      raw: "if an enemy is Burned, i have Taunt",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(yuri);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
+
+    const enemy = {
+      id: "Unit#enemy",
+      owner: "Bob",
+      card: { name: "Enemy", maxHp: 5 },
+      currentHp: 5,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(enemy);
+
+    game.modifierStack.apply({
+      sourceId: "System",
+      sourceType: "system",
+      targetId: enemy.id,
+      type: "condition",
+      key: "burned",
+      value: 1,
+    });
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(true);
+
+    game.modifierStack.removeWhere((m) => m.targetId === enemy.id && m.type === "condition");
+    expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
+  });
+
+  test("transformUnit revokes the outgoing card's always-on grants", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const urek = putInHand(game, "Alice", "Urek Mazino");
+    urek.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "alone_on_line", line: "frontline" },
+      then: {
+        type: "sequence",
+        steps: [
+          { type: "grant_trait", trait: "resilient", amount: 1, target: { side: "self" } },
+          { type: "grant_trait", trait: "strong", amount: 3, target: { side: "self" } },
+        ],
+      },
+      raw: "while i am alone on the ally frontline, i have Resilient 1 and Strong 3",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(urek);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(1);
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(3);
+
+    LifecycleEngine.transformUnit(game, unit, getCardIdByName("Karaka"));
+
+    expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(0);
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(0);
+    expect(unit.card.name).toBe("Karaka");
+  });
 });

@@ -101,6 +101,17 @@ function normalizePosition(value) {
   return positionCodeMap[str.toLowerCase()] || toCode(str);
 }
 
+// Position filters in target/predicate descriptors may use the generic
+// "shinheuh" family to mean either Shinheuh line. Expand it to the two
+// concrete codes so existence checks match real placed positions.
+function normalizePositionFilter(value) {
+  if (value === null || value === undefined) return value;
+  if (Array.isArray(value)) return value.flatMap((item) => normalizePositionFilter(item));
+  const str = String(value).toLowerCase();
+  if (str === "shinheuh") return ["frontline-shinheuh", "backline-shinheuh"];
+  return normalizePosition(value);
+}
+
 function normalizeAffiliation(value) {
   return toCode(value);
 }
@@ -131,7 +142,7 @@ export function normalizeEffectObject(obj, context) {
 
   if (obj.condition !== undefined) normalized.condition = normalizeCondition(obj.condition);
   if (obj.trait !== undefined) normalized.trait = normalizeTrait(obj.trait);
-  if (obj.position !== undefined) normalized.position = normalizeList(obj.position, normalizePosition);
+  if (obj.position !== undefined) normalized.position = normalizePositionFilter(obj.position);
   if (obj.affiliation !== undefined) normalized.affiliation = normalizeList(obj.affiliation, normalizeAffiliation);
   if (obj.attribute !== undefined) normalized.attribute = normalizeList(obj.attribute, normalizeAttribute);
   if (obj.rank !== undefined) normalized.rank = normalizeList(obj.rank, normalizeRank);
