@@ -87,6 +87,15 @@ describe("card-compile normalization helpers", () => {
     expect(normalized.target.traitNot).toBe("immune");
     expect(normalized.target.lowest_hp).toBe(true);
   });
+
+  test("normalizeEffectObject passes a structured disarm `to` object through unchanged", () => {
+    const normalized = normalizeEffectObject(
+      { type: "disarm", target: { side: "enemy" }, to: { zone: "discard", owner: "you" } },
+      "card.effects[0]"
+    );
+
+    expect(normalized.to).toEqual({ zone: "discard", owner: "you" });
+  });
 });
 
 describe("card-compile parseTrigger", () => {

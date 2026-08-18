@@ -402,4 +402,25 @@ describe("TargetResolver structured filters", () => {
     expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, rank: ["regular", "ranker"], count: 10 }).map((t) => t.id)).toEqual(["r", "k"]);
     expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, position: ["fisherman", "scout"], count: 10 }).map((t) => t.id)).toEqual(["r", "h"]);
   });
+
+  test("shared_affiliation filter matches native and granted affiliations", () => {
+    const source = unit("s", game.usernames[0], "scout", { name: "Source", affiliations: { "team-chang": {} }, attributes: [] });
+    const sharesNative = unit("c", game.usernames[1], "scout", { name: "Chang", affiliations: { "team-chang": {} }, attributes: [] });
+    const sharesGranted = unit("w", game.usernames[1], "scout", { name: "Wol", affiliations: {}, attributes: [] });
+    const noShare = unit("f", game.usernames[1], "scout", { name: "Fug", affiliations: { "fug": {} }, attributes: [] });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [sharesNative, sharesGranted, noShare];
+
+    game.modifierStack.apply({ sourceId: "sys", sourceType: "system", targetId: "s", type: "affiliation", key: "wolhaiksong", value: 1 });
+    game.modifierStack.apply({ sourceId: "sys", sourceType: "system", targetId: "w", type: "affiliation", key: "wolhaiksong", value: 1 });
+
+    expect(TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, sharedAffiliation: true, count: 10 }).map((t) => t.id)).toEqual(["c", "w"]);
+  });
+
+  test("shared_affiliation filter throws without a source unit", () => {
+    const c = unit("c", game.usernames[1], "scout", { name: "Chang", affiliations: { "team-chang": {} }, attributes: [] });
+    game.playerStates[game.usernames[1]].field.frontline = [c];
+    expect(() => TargetResolver.resolveTargets(game, { target: "all_enemies", sourceOwner: game.usernames[0], sharedAffiliation: true }))
+      .toThrow("shared_affiliation filter requires sourceUnit");
+  });
 });

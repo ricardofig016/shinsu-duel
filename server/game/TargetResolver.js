@@ -152,6 +152,24 @@ function filterByAffiliation(targets, affiliation) {
   return targets.filter((u) => codes.some((code) => u.card?.affiliations?.[code] !== undefined));
 }
 
+function filterBySharedAffiliation(targets, gameState, sourceUnit) {
+  if (!sourceUnit) {
+    throw new Error("TargetResolver: shared_affiliation filter requires sourceUnit");
+  }
+  const sourceAffiliations = new Set([
+    ...Object.keys(sourceUnit.card?.affiliations || {}),
+    ...gameState.modifierStack.getActiveKeys(sourceUnit.id, "affiliation"),
+  ]);
+  if (sourceAffiliations.size === 0) return [];
+  return targets.filter((u) => {
+    const unitAffiliations = new Set([
+      ...Object.keys(u.card?.affiliations || {}),
+      ...gameState.modifierStack.getActiveKeys(u.id, "affiliation"),
+    ]);
+    return [...sourceAffiliations].some((code) => unitAffiliations.has(code));
+  });
+}
+
 function filterByAttribute(targets, attribute) {
   if (!attribute) return targets;
   const codes = Array.isArray(attribute) ? attribute : [attribute];
@@ -168,7 +186,7 @@ function filterByName(targets, name) {
  * Apply every unit filter to a candidate list. Shared by `resolveTargets` and
  * `resolveExistenceUnits` so the filter vocabulary has a single source of truth.
  */
-function applyFilters(candidates, gameState, filters = {}) {
+function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
   const {
     condition = null,
     conditionValue = undefined,
@@ -178,6 +196,7 @@ function applyFilters(candidates, gameState, filters = {}) {
     affiliation = null,
     attribute = null,
     name = null,
+    sharedAffiliation = null,
   } = filters;
   candidates = filterByCondition(candidates, gameState, condition, conditionValue);
   candidates = filterByTrait(candidates, gameState, trait);
@@ -186,6 +205,7 @@ function applyFilters(candidates, gameState, filters = {}) {
   candidates = filterByAffiliation(candidates, affiliation);
   candidates = filterByAttribute(candidates, attribute);
   candidates = filterByName(candidates, name);
+  if (sharedAffiliation) candidates = filterBySharedAffiliation(candidates, gameState, sourceUnit);
   return candidates;
 }
 
@@ -272,6 +292,7 @@ export function resolveTargets(gameState, options) {
     affiliation = null,
     attribute = null,
     name = null,
+    sharedAffiliation = null,
     count = 1,
   } = options;
 
@@ -377,7 +398,8 @@ export function resolveTargets(gameState, options) {
     affiliation,
     attribute,
     name,
-  });
+    sharedAffiliation,
+  }, sourceUnit);
 
   // Blinded: randomize choice-descriptor targets (RULES.md).
   // Self, bearer, all_enemies/all_allies, and enemy_lighthouses are not randomized.
@@ -483,7 +505,7 @@ export function resolveExistenceUnits(gameState, descriptor, sourceOwner) {
     throw new Error(`TargetResolver: existence check does not support side "${side}"`);
   }
 
-  return applyFilters(candidates, gameState, filters);
+  return applyFilters(candidates, gameState, filters, null);
 }
 
 export default { resolveTargets, resolveCardTarget, resolveExistenceUnits, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };

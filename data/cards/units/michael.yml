@@ -15,7 +15,7 @@ passives:
     target:
       side: ally
       scope: all
-      affiliation: [fug, team rachel, khun's team]
+      shared_affiliation: true
     trigger: { type: round_start }
     raw: "round start: heal all ally members of my affiliations 1 HP"
 abilities:

@@ -15,7 +15,7 @@ passives:
 abilities:
   - type: disarm
     target: { side: enemy }
-    to: discard
+    to: { zone: discard, owner: you }
     raw: "Disarm an enemy and send the equipment to your discard pile"
   - type: give_condition
     condition: heavy

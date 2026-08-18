@@ -54,6 +54,7 @@
         "trait": { "type": "string", "minLength": 1 },
         "traitNot": { "type": "string", "minLength": 1 },
         "lowest_hp": { "type": "boolean" },
+        "shared_affiliation": { "type": "boolean" },
         "rank": { "$ref": "#/definitions/filterValue" },
         "position": { "$ref": "#/definitions/filterValue" },
         "affiliation": { "$ref": "#/definitions/filterValue" },
@@ -143,7 +144,15 @@
         "onto": { "enum": ["self", "opponent", "both"] },
         "random": { "type": "boolean" },
         "owner": { "enum": ["you", "opponent", "self", "enemy"] },
-        "to": { "enum": ["hand", "discard"] },
+        "to": {
+          "type": "object",
+          "required": ["zone", "owner"],
+          "properties": {
+            "zone": { "enum": ["hand", "discard"] },
+            "owner": { "enum": ["equipment_owner", "you"] }
+          },
+          "additionalProperties": false
+        },
         "cardName": { "type": "string", "minLength": 1 },
         "numeric": { "type": "boolean" },
         "cost": { "$ref": "#/definitions/resourceCost" }

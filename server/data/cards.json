@@ -273,7 +273,7 @@
     "cardId": 6,
     "type": "unit",
     "name": "Apple",
-    "cost": 2,
+    "cost": 3,
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
@@ -336,10 +336,10 @@
         "type": "create_lighthouse",
         "amount": 1,
         "trigger": {
-          "type": "enemy_dies",
+          "type": "ally_dies",
           "rank": "regular"
         },
-        "raw": "when an enemy Regular dies: Create 1"
+        "raw": "when an ally Regular dies: Create 1"
       }
     ]
   },
@@ -2272,7 +2272,10 @@
         "target": {
           "side": "enemy"
         },
-        "to": "discard",
+        "to": {
+          "zone": "discard",
+          "owner": "you"
+        },
         "raw": "Disarm an enemy and send the equipment to your discard pile"
       },
       {
@@ -2464,11 +2467,7 @@
         "target": {
           "side": "ally",
           "scope": "all",
-          "affiliation": [
-            "fug",
-            "team-rachel",
-            "khuns-team"
-          ]
+          "shared_affiliation": true
         },
         "trigger": {
           "type": "round_start"
@@ -2678,7 +2677,10 @@
         "target": {
           "side": "enemy"
         },
-        "to": "hand",
+        "to": {
+          "zone": "hand",
+          "owner": "equipment_owner"
+        },
         "trigger": {
           "type": "deal_damage"
         },

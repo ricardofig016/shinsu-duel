@@ -167,6 +167,7 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       affiliation: targetFilters.affiliation,
       attribute: targetFilters.attribute,
       name: targetFilters.name,
+      sharedAffiliation: targetFilters.shared_affiliation,
       count: Number.MAX_SAFE_INTEGER,
     };
   };

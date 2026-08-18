@@ -27,8 +27,8 @@ passives:
     raw: "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
   - type: create_lighthouse
     amount: 1
-    trigger: { type: enemy_dies, rank: regular }
-    raw: "when an enemy Regular dies: Create 1"
+    trigger: { type: ally_dies, rank: regular }
+    raw: "when an ally Regular dies: Create 1"
 abilities:
   - type: cleanse
     amount: 1

@@ -94,15 +94,15 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 
 ### Cards and zones
 
-| `type`            | Fields                            | Meaning                                                                                                    |
-| ----------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `draw_card`       | `amount`, `card?`                 | Draw `amount` cards (optionally filtered by `card`).                                                       |
-| `create_card`     | `card`                            | Create a card in hand. Exact `card.name` (optionally `card.type`) creates that card.                       |
-| `summon`          | `card`, `from`, `onto`, `random?` | Put a unit onto a battlefield (`from`: `deck`, `hand`, `deck_or_hand`, or `game` = all existing cards).    |
-| `discard`         | `card`, `owner`                   | Send a card from an owner's hand to their discard.                                                         |
-| `steal`           | `card`                            | Take a card from the opponent into your control.                                                           |
-| `disarm`          | `target`, `to`                    | Send a unit's equipment to `hand` (the equipment owner's hand) or `discard` (the acting player's discard). |
-| `switch_position` | `target`                          | Force a unit to switch positions.                                                                          |
+| `type`            | Fields                            | Meaning                                                                                                                                                                                                 |
+| ----------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draw_card`       | `amount`, `card?`                 | Draw `amount` cards (optionally filtered by `card`).                                                                                                                                                    |
+| `create_card`     | `card`                            | Create a card in hand. Exact `card.name` (optionally `card.type`) creates that card.                                                                                                                    |
+| `summon`          | `card`, `from`, `onto`, `random?` | Put a unit onto a battlefield (`from`: `deck`, `hand`, `deck_or_hand`, or `game` = all existing cards).                                                                                                 |
+| `discard`         | `card`, `owner`                   | Send a card from an owner's hand to their discard.                                                                                                                                                      |
+| `steal`           | `card`                            | Take a card from the opponent into your control.                                                                                                                                                        |
+| `disarm`          | `target`, `to`                    | Send a unit's equipment to a destination. `to` is an object: `{ zone, owner }` — `zone`: `hand` \| `discard`; `owner`: `equipment_owner` (the disarmed unit's controller) \| `you` (the acting player). |
+| `switch_position` | `target`                          | Force a unit to switch positions.                                                                                                                                                                       |
 
 `return_to_hand` (`target`) returns a unit from the battlefield to its owner's hand.
 
@@ -160,6 +160,7 @@ target:
   trait: taunt # filter
   traitNot: immune # filter: units WITHOUT this trait
   lowest_hp: true # select the unit with the lowest HP among matches
+  shared_affiliation: true # filter: units sharing >=1 affiliation with the source unit
   rank: high ranker # filter
   position: fisherman # filter (position code)
   affiliation: khun-family # filter (affiliation code)
@@ -169,6 +170,8 @@ target:
 ```
 
 `self`/`bearer` need only `side`. `any` + `scope: all` addresses both players' units (landmark rules).
+
+`shared_affiliation: true` keeps only units that share at least one affiliation with the source unit (its native `card.affiliations` plus any affiliation granted via the ModifierStack). The source unit itself counts. If the source has no affiliations, the filter matches nothing.
 
 `rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh". The bare `position: shinheuh` is shorthand for that Shinheuh pair.
 
@@ -236,7 +239,7 @@ Triggers drive triggered passives and transformations (`evolveInto` / `igniteInt
 
 `equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `enemy_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`, `dies`, `evolve`, `has_all_equipped`.
 
-`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death (unlike `ally_dies`, which excludes self). `enemy_dies` is an enemy unit's death (optionally filtered by `rank`); `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card.
+`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death (unlike `ally_dies`, which excludes self). `ally_dies` and `enemy_dies` are an ally's / enemy's death respectively (optionally filtered by `rank`); `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card.
 
 ---
 

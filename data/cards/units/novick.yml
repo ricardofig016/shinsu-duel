@@ -9,7 +9,7 @@ positions:
 passives:
   - type: disarm
     target: { side: enemy }
-    to: hand
+    to: { zone: hand, owner: equipment_owner }
     trigger: { type: deal_damage }
     raw: "when i deal damage to an enemy: Disarm them"
   - type: grant_trait

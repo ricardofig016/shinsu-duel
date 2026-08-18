@@ -105,6 +105,26 @@ describe("structured target resolution via EffectResolver", () => {
     expect(other.currentHp).toBe(3);
   });
 
+  test("heal with { shared_affiliation: true } heals only units sharing the source's affiliations (incl. self)", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout", { affiliations: { "team-chang": {} } }));
+    const target = push(game, "Alice", unit("tgt", "Alice", "scout", { affiliations: { "team-chang": {} } }));
+    const other = push(game, "Alice", unit("other", "Alice", "scout", { affiliations: { "fug": {} } }));
+    src.currentHp = 3;
+    target.currentHp = 3;
+    other.currentHp = 3;
+
+    resolveEffect(
+      { type: "heal", amount: 2, target: { side: "ally", scope: "all", shared_affiliation: true } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(src.currentHp).toBe(5);
+    expect(target.currentHp).toBe(5);
+    expect(other.currentHp).toBe(3);
+  });
+
   test("grant_trait with an affiliation array target does not throw and applies", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice", "scout"));
