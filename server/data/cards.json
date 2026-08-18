@@ -271,6 +271,80 @@
   },
   "6": {
     "cardId": 6,
+    "type": "unit",
+    "name": "Apple",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 3,
+    "rank": "regular",
+    "positions": [
+      "scout",
+      "light-bearer"
+    ],
+    "traits": [
+      {
+        "code": "dealer",
+        "value": 1
+      }
+    ],
+    "attributes": [],
+    "affiliations": [
+      "fug",
+      "team-rachel",
+      "khuns-team"
+    ],
+    "abilities": [
+      {
+        "type": "cleanse",
+        "amount": 1,
+        "target": {
+          "side": "ally"
+        },
+        "raw": "remove a condition from an ally"
+      }
+    ],
+    "passives": [
+      {
+        "type": "grant_trait",
+        "trait": "immune",
+        "target": {
+          "side": "ally",
+          "affiliation": "team-rachel",
+          "lowest_hp": true,
+          "traitNot": "immune"
+        },
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "when i am deployed: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+      },
+      {
+        "type": "grant_trait",
+        "trait": "immune",
+        "target": {
+          "side": "ally",
+          "affiliation": "team-rachel",
+          "lowest_hp": true,
+          "traitNot": "immune"
+        },
+        "trigger": {
+          "type": "dies"
+        },
+        "raw": "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+      },
+      {
+        "type": "create_lighthouse",
+        "amount": 1,
+        "trigger": {
+          "type": "enemy_dies",
+          "rank": "regular"
+        },
+        "raw": "when an enemy Regular dies: Create 1"
+      }
+    ]
+  },
+  "7": {
+    "cardId": 7,
     "type": "skill",
     "name": "Baang",
     "cost": 0,
@@ -303,8 +377,122 @@
       }
     ]
   },
-  "7": {
-    "cardId": 7,
+  "8": {
+    "cardId": 8,
+    "type": "unit",
+    "name": "Beta",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 3,
+    "rank": "regular",
+    "positions": [
+      "fisherman",
+      "scout",
+      "wave-controller"
+    ],
+    "traits": [],
+    "attributes": [
+      "living-ignition-weapon"
+    ],
+    "affiliations": [
+      "team-baam",
+      "team-novick"
+    ],
+    "abilities": [
+      {
+        "type": "return_to_hand",
+        "target": {
+          "side": "self"
+        },
+        "quick": true,
+        "raw": "quick: return me to hand"
+      }
+    ],
+    "passives": [
+      {
+        "type": "draw_card",
+        "amount": 1,
+        "card": {
+          "type": "equipment"
+        },
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "when i am deployed: draw an equipment"
+      },
+      {
+        "type": "retain_equipment",
+        "raw": "when i return to hand, i keep my equipments"
+      },
+      {
+        "type": "create_card",
+        "card": {
+          "name": "Phobos"
+        },
+        "trigger": {
+          "type": "evolve"
+        },
+        "raw": "when i evolve: create Phobos in hand"
+      }
+    ],
+    "evolveInto": {
+      "triggers": [
+        {
+          "type": "has_all_equipped",
+          "cardNames": [
+            "Dionysos: Arms",
+            "Dionysos: Legs",
+            "Dionysos: Wings"
+          ],
+          "raw": "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+        }
+      ],
+      "cardId": 9
+    }
+  },
+  "9": {
+    "cardId": 9,
+    "type": "unit",
+    "name": "Beta - Evolved",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 4,
+    "rank": "regular",
+    "positions": [
+      "fisherman",
+      "scout",
+      "wave-controller"
+    ],
+    "traits": [],
+    "attributes": [
+      "living-ignition-weapon"
+    ],
+    "affiliations": [
+      "team-baam",
+      "team-novick"
+    ],
+    "abilities": [
+      {
+        "type": "conditional",
+        "if": {
+          "type": "has_equipment_count",
+          "amount": 5
+        },
+        "then": {
+          "type": "grant_trait",
+          "trait": "lethal",
+          "target": {
+            "side": "self"
+          }
+        },
+        "raw": "if i have 5+ equipments, give me Lethal"
+      }
+    ],
+    "passives": [],
+    "evolvedFrom": 8
+  },
+  "10": {
+    "cardId": 10,
     "type": "equipment",
     "name": "Blue Thryssa",
     "cost": 2,
@@ -331,8 +519,8 @@
       }
     ]
   },
-  "8": {
-    "cardId": 8,
+  "11": {
+    "cardId": 11,
     "type": "unit",
     "name": "Bull",
     "cost": 3,
@@ -357,8 +545,8 @@
     ],
     "passives": []
   },
-  "9": {
-    "cardId": 9,
+  "12": {
+    "cardId": 12,
     "type": "unit",
     "name": "Chang Blarode",
     "cost": 4,
@@ -405,8 +593,8 @@
       }
     ]
   },
-  "10": {
-    "cardId": 10,
+  "13": {
+    "cardId": 13,
     "type": "skill",
     "name": "Cleanse Spell",
     "cost": 1,
@@ -421,8 +609,8 @@
       }
     ]
   },
-  "11": {
-    "cardId": 11,
+  "14": {
+    "cardId": 14,
     "type": "unit",
     "name": "Conduit",
     "cost": 0,
@@ -482,8 +670,127 @@
       }
     ]
   },
-  "12": {
-    "cardId": 12,
+  "15": {
+    "cardId": 15,
+    "type": "equipment",
+    "name": "Dionysos: Arms",
+    "cost": 1,
+    "deckConstraints": [],
+    "effects": [
+      {
+        "type": "grant_ability",
+        "target": {
+          "side": "bearer"
+        },
+        "ability": {
+          "type": "grant_trait",
+          "trait": "pierce",
+          "amount": 1,
+          "target": {
+            "side": "self"
+          }
+        },
+        "raw": "ability: give me Pierce"
+      }
+    ]
+  },
+  "16": {
+    "cardId": 16,
+    "type": "equipment",
+    "name": "Dionysos: Legs",
+    "cost": 1,
+    "deckConstraints": [],
+    "effects": [
+      {
+        "type": "grant_ability",
+        "target": {
+          "side": "bearer"
+        },
+        "ability": {
+          "type": "deal_damage",
+          "amount": 3,
+          "target": {
+            "side": "enemy"
+          },
+          "quick": true
+        },
+        "raw": "ability: quick: deal 3 to an enemy"
+      }
+    ]
+  },
+  "17": {
+    "cardId": 17,
+    "type": "equipment",
+    "name": "Dionysos: Wings",
+    "cost": 2,
+    "deckConstraints": [],
+    "effects": [
+      {
+        "type": "charge_shinsu",
+        "amount": 1,
+        "trigger": {
+          "type": "quick_ability_used"
+        },
+        "raw": "the bearer's Quick abilities Charge 1"
+      }
+    ]
+  },
+  "18": {
+    "cardId": 18,
+    "type": "unit",
+    "name": "Edin Dan",
+    "cost": 1,
+    "deckConstraints": [],
+    "hp": 2,
+    "rank": "regular",
+    "positions": [
+      "scout"
+    ],
+    "traits": [
+      {
+        "code": "sharpshooter"
+      }
+    ],
+    "attributes": [],
+    "affiliations": [
+      "team-novick",
+      "team-sweet-and-sour",
+      "khuns-team"
+    ],
+    "abilities": [
+      {
+        "type": "give_condition",
+        "condition": "blinded",
+        "target": {
+          "side": "enemy"
+        },
+        "quick": true,
+        "raw": "quick: give an enemy Blinded"
+      },
+      {
+        "type": "give_condition",
+        "condition": "ghost",
+        "target": {
+          "side": "enemy"
+        },
+        "quick": true,
+        "raw": "quick: give an enemy Ghost"
+      }
+    ],
+    "passives": [
+      {
+        "type": "modify_keyword",
+        "keyword": "free",
+        "first": true,
+        "target": {
+          "side": "self"
+        },
+        "raw": "the first ability i use each round has Free"
+      }
+    ]
+  },
+  "19": {
+    "cardId": 19,
     "type": "skill",
     "name": "Enna Core",
     "cost": 2,
@@ -503,8 +810,8 @@
       }
     ]
   },
-  "13": {
-    "cardId": 13,
+  "20": {
+    "cardId": 20,
     "type": "equipment",
     "name": "Enryu's Thorn",
     "cost": 0,
@@ -553,8 +860,8 @@
       }
     ]
   },
-  "14": {
-    "cardId": 14,
+  "21": {
+    "cardId": 21,
     "type": "unit",
     "name": "Evan Edrok",
     "cost": 6,
@@ -619,8 +926,8 @@
       }
     ]
   },
-  "15": {
-    "cardId": 15,
+  "22": {
+    "cardId": 22,
     "type": "unit",
     "name": "Evankhell",
     "cost": 9,
@@ -666,8 +973,8 @@
       }
     ]
   },
-  "16": {
-    "cardId": 16,
+  "23": {
+    "cardId": 23,
     "type": "skill",
     "name": "Fiery Elephant",
     "cost": 2,
@@ -692,8 +999,8 @@
       }
     ]
   },
-  "17": {
-    "cardId": 17,
+  "24": {
+    "cardId": 24,
     "type": "skill",
     "name": "Fire Core",
     "cost": 0,
@@ -718,8 +1025,8 @@
       }
     ]
   },
-  "18": {
-    "cardId": 18,
+  "25": {
+    "cardId": 25,
     "type": "equipment",
     "name": "First Thorn Fragment",
     "cost": 1,
@@ -777,8 +1084,8 @@
       }
     ]
   },
-  "19": {
-    "cardId": 19,
+  "26": {
+    "cardId": 26,
     "type": "unit",
     "name": "Floor of Death",
     "cost": 5,
@@ -799,8 +1106,8 @@
       }
     ]
   },
-  "20": {
-    "cardId": 20,
+  "27": {
+    "cardId": 27,
     "type": "skill",
     "name": "Flower of Zygaena",
     "cost": 4,
@@ -821,8 +1128,8 @@
       }
     ]
   },
-  "21": {
-    "cardId": 21,
+  "28": {
+    "cardId": 28,
     "type": "equipment",
     "name": "Fourth Thorn Fragment",
     "cost": 1,
@@ -880,8 +1187,8 @@
       }
     ]
   },
-  "22": {
-    "cardId": 22,
+  "29": {
+    "cardId": 29,
     "type": "equipment",
     "name": "Frog Fisher",
     "cost": 1,
@@ -897,8 +1204,36 @@
       }
     ]
   },
-  "23": {
-    "cardId": 23,
+  "30": {
+    "cardId": 30,
+    "type": "unit",
+    "name": "Gyetang",
+    "cost": 1,
+    "deckConstraints": [],
+    "hp": 4,
+    "rank": "regular",
+    "positions": [
+      "spear-bearer"
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [
+      "khuns-team"
+    ],
+    "abilities": [
+      {
+        "type": "deal_damage",
+        "amount": 5,
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "deal 5 to an enemy"
+      }
+    ],
+    "passives": []
+  },
+  "31": {
+    "cardId": 31,
     "type": "unit",
     "name": "Ha Yuri Zahard",
     "cost": 6,
@@ -965,8 +1300,8 @@
       }
     ]
   },
-  "24": {
-    "cardId": 24,
+  "32": {
+    "cardId": 32,
     "type": "skill",
     "name": "Healing Flames",
     "cost": 5,
@@ -998,8 +1333,8 @@
       }
     ]
   },
-  "25": {
-    "cardId": 25,
+  "33": {
+    "cardId": 33,
     "type": "skill",
     "name": "Healing Potion",
     "cost": 2,
@@ -1015,8 +1350,8 @@
       }
     ]
   },
-  "26": {
-    "cardId": 26,
+  "34": {
+    "cardId": 34,
     "type": "unit",
     "name": "Hell Express",
     "cost": 1,
@@ -1048,8 +1383,8 @@
       }
     ]
   },
-  "27": {
-    "cardId": 27,
+  "35": {
+    "cardId": 35,
     "type": "unit",
     "name": "Hon Akraptor",
     "cost": 2,
@@ -1096,8 +1431,8 @@
       }
     ]
   },
-  "28": {
-    "cardId": 28,
+  "36": {
+    "cardId": 36,
     "type": "unit",
     "name": "Hong Chunhwa",
     "cost": 1,
@@ -1131,8 +1466,8 @@
     ],
     "passives": []
   },
-  "29": {
-    "cardId": 29,
+  "37": {
+    "cardId": 37,
     "type": "unit",
     "name": "Hwa Ryun",
     "cost": 3,
@@ -1194,8 +1529,8 @@
       }
     ]
   },
-  "30": {
-    "cardId": 30,
+  "38": {
+    "cardId": 38,
     "type": "equipment",
     "name": "Ice Spear",
     "cost": 3,
@@ -1226,8 +1561,8 @@
       }
     ]
   },
-  "31": {
-    "cardId": 31,
+  "39": {
+    "cardId": 39,
     "type": "skill",
     "name": "Incinerate I",
     "cost": 0,
@@ -1254,8 +1589,8 @@
       }
     ]
   },
-  "32": {
-    "cardId": 32,
+  "40": {
+    "cardId": 40,
     "type": "skill",
     "name": "Incinerate II",
     "cost": 0,
@@ -1283,8 +1618,8 @@
       }
     ]
   },
-  "33": {
-    "cardId": 33,
+  "41": {
+    "cardId": 41,
     "type": "skill",
     "name": "Incinerate III",
     "cost": 0,
@@ -1325,8 +1660,8 @@
       }
     ]
   },
-  "34": {
-    "cardId": 34,
+  "42": {
+    "cardId": 42,
     "type": "skill",
     "name": "Incinerate IV",
     "cost": 0,
@@ -1368,8 +1703,8 @@
       }
     ]
   },
-  "35": {
-    "cardId": 35,
+  "43": {
+    "cardId": 43,
     "type": "unit",
     "name": "Ja Wangnan",
     "cost": 3,
@@ -1439,8 +1774,8 @@
       }
     ]
   },
-  "36": {
-    "cardId": 36,
+  "44": {
+    "cardId": 44,
     "type": "unit",
     "name": "Jyu Viole Grace",
     "cost": 4,
@@ -1482,8 +1817,8 @@
     ],
     "passives": []
   },
-  "37": {
-    "cardId": 37,
+  "45": {
+    "cardId": 45,
     "type": "unit",
     "name": "Karaka",
     "cost": 7,
@@ -1573,11 +1908,11 @@
           "raw": "Scout: equip with Purple Dementor"
         }
       ],
-      "cardId": 38
+      "cardId": 46
     }
   },
-  "38": {
-    "cardId": 38,
+  "46": {
+    "cardId": 46,
     "type": "unit",
     "name": "Karaka - Evolved",
     "cost": 7,
@@ -1659,10 +1994,10 @@
         "raw": "round end: deal 3 to all Rooted enemies"
       }
     ],
-    "evolvedFrom": 37
+    "evolvedFrom": 45
   },
-  "39": {
-    "cardId": 39,
+  "47": {
+    "cardId": 47,
     "type": "equipment",
     "name": "Karaka's Armor Suit",
     "cost": 4,
@@ -1690,8 +2025,8 @@
       }
     ]
   },
-  "40": {
-    "cardId": 40,
+  "48": {
+    "cardId": 48,
     "type": "unit",
     "name": "Khun Aguero Agnes",
     "cost": 0,
@@ -1730,11 +2065,11 @@
           "raw": "i am equipped with Ice Spear"
         }
       ],
-      "cardId": 41
+      "cardId": 49
     }
   },
-  "41": {
-    "cardId": 41,
+  "49": {
+    "cardId": 49,
     "type": "unit",
     "name": "Khun Aguero Agnes - Evolved",
     "cost": 0,
@@ -1785,10 +2120,10 @@
         "raw": "i ignore Taunt"
       }
     ],
-    "evolvedFrom": 40
+    "evolvedFrom": 48
   },
-  "42": {
-    "cardId": 42,
+  "50": {
+    "cardId": 50,
     "type": "unit",
     "name": "Khun Ran",
     "cost": 3,
@@ -1838,11 +2173,11 @@
           "raw": "Redan is played on me"
         }
       ],
-      "cardId": 43
+      "cardId": 51
     }
   },
-  "43": {
-    "cardId": 43,
+  "51": {
+    "cardId": 51,
     "type": "unit",
     "name": "Khun Ran - Evolved",
     "cost": 3,
@@ -1908,10 +2243,10 @@
         "raw": "round end: create Redan in your hand and revert me to Khun Ran"
       }
     ],
-    "evolvedFrom": 42
+    "evolvedFrom": 50
   },
-  "44": {
-    "cardId": 44,
+  "52": {
+    "cardId": 52,
     "type": "unit",
     "name": "Kurudan",
     "cost": 4,
@@ -1965,8 +2300,8 @@
       }
     ]
   },
-  "45": {
-    "cardId": 45,
+  "53": {
+    "cardId": 53,
     "type": "skill",
     "name": "Lightning Baang",
     "cost": 1,
@@ -1989,8 +2324,8 @@
       }
     ]
   },
-  "46": {
-    "cardId": 46,
+  "54": {
+    "cardId": 54,
     "type": "unit",
     "name": "Lo Po Bia Ren",
     "cost": 6,
@@ -2066,8 +2401,84 @@
       }
     ]
   },
-  "47": {
-    "cardId": 47,
+  "55": {
+    "cardId": 55,
+    "type": "unit",
+    "name": "Michael",
+    "cost": 4,
+    "deckConstraints": [],
+    "hp": 6,
+    "rank": "regular",
+    "positions": [
+      "wave-controller"
+    ],
+    "traits": [
+      {
+        "code": "regenerate",
+        "value": 3
+      }
+    ],
+    "attributes": [],
+    "affiliations": [
+      "fug",
+      "team-rachel",
+      "khuns-team"
+    ],
+    "abilities": [
+      {
+        "type": "grant_affiliation",
+        "target": {
+          "side": "self"
+        },
+        "source": {
+          "side": "ally"
+        },
+        "random": true,
+        "raw": "give me a random affiliation of another ally"
+      },
+      {
+        "type": "give_condition",
+        "condition": "poisoned",
+        "amount": 4,
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "give Poisoned 4 to an enemy"
+      }
+    ],
+    "passives": [
+      {
+        "type": "slay",
+        "target": {
+          "side": "ally",
+          "scope": "backline"
+        },
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "when i am deployed: kill an ally backliner"
+      },
+      {
+        "type": "heal",
+        "amount": 1,
+        "target": {
+          "side": "ally",
+          "scope": "all",
+          "affiliation": [
+            "fug",
+            "team-rachel",
+            "khuns-team"
+          ]
+        },
+        "trigger": {
+          "type": "round_start"
+        },
+        "raw": "round start: heal all ally members of my affiliations 1 HP"
+      }
+    ]
+  },
+  "56": {
+    "cardId": 56,
     "type": "unit",
     "name": "Monkeyman",
     "cost": 1,
@@ -2103,8 +2514,8 @@
     ],
     "passives": []
   },
-  "48": {
-    "cardId": 48,
+  "57": {
+    "cardId": 57,
     "type": "unit",
     "name": "Name Hunt Station",
     "cost": 4,
@@ -2146,8 +2557,8 @@
       }
     ]
   },
-  "49": {
-    "cardId": 49,
+  "58": {
+    "cardId": 58,
     "type": "equipment",
     "name": "Narumada",
     "cost": 2,
@@ -2171,11 +2582,11 @@
           "raw": "the bearer Slays a unit"
         }
       ],
-      "cardId": 50
+      "cardId": 59
     }
   },
-  "50": {
-    "cardId": 50,
+  "59": {
+    "cardId": 59,
     "type": "equipment",
     "name": "Narumada - Ignited",
     "cost": 2,
@@ -2203,10 +2614,91 @@
         "raw": "the bearer's damage-dealing abilities give Exhausted 1"
       }
     ],
-    "ignitedFrom": 49
+    "ignitedFrom": 58
   },
-  "51": {
-    "cardId": 51,
+  "60": {
+    "cardId": 60,
+    "type": "unit",
+    "name": "Novick",
+    "cost": 5,
+    "deckConstraints": [],
+    "hp": 6,
+    "rank": "regular",
+    "positions": [
+      "spear-bearer",
+      "fisherman"
+    ],
+    "traits": [
+      {
+        "code": "resilient",
+        "value": 3
+      }
+    ],
+    "attributes": [],
+    "affiliations": [
+      "team-novick",
+      "team-fug",
+      "khuns-team",
+      "ha-family"
+    ],
+    "abilities": [
+      {
+        "type": "deal_damage",
+        "amount": 7,
+        "target": {
+          "side": "enemy"
+        },
+        "position": "spear-bearer",
+        "raw": "spear bearer: deal 7 to an enemy"
+      },
+      {
+        "type": "sequence",
+        "steps": [
+          {
+            "type": "give_condition",
+            "condition": "stunned",
+            "target": {
+              "side": "enemy"
+            }
+          },
+          {
+            "type": "deal_damage",
+            "amount": 2,
+            "target": {
+              "side": "enemy"
+            }
+          }
+        ],
+        "raw": "give Stunned and deal 2 to an enemy"
+      }
+    ],
+    "passives": [
+      {
+        "type": "disarm",
+        "target": {
+          "side": "enemy"
+        },
+        "to": "hand",
+        "trigger": {
+          "type": "deal_damage"
+        },
+        "raw": "when i deal damage to an enemy: Disarm them"
+      },
+      {
+        "type": "grant_trait",
+        "trait": "barrier",
+        "target": {
+          "side": "ally"
+        },
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "when i am deployed: give Barrier to an ally"
+      }
+    ]
+  },
+  "61": {
+    "cardId": 61,
     "type": "unit",
     "name": "Pedro",
     "cost": 3,
@@ -2251,8 +2743,30 @@
       }
     ]
   },
-  "52": {
-    "cardId": 52,
+  "62": {
+    "cardId": 62,
+    "type": "equipment",
+    "name": "Phobos",
+    "cost": 0,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
+    "effects": [
+      {
+        "type": "modify_repeat",
+        "amount": 2,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's abilities trigger twice"
+      }
+    ]
+  },
+  "63": {
+    "cardId": 63,
     "type": "equipment",
     "name": "Purple Dementor",
     "cost": 3,
@@ -2287,8 +2801,8 @@
       }
     ]
   },
-  "53": {
-    "cardId": 53,
+  "64": {
+    "cardId": 64,
     "type": "unit",
     "name": "Quaetro Blitz",
     "cost": 2,
@@ -2340,8 +2854,8 @@
       }
     ]
   },
-  "54": {
-    "cardId": 54,
+  "65": {
+    "cardId": 65,
     "type": "unit",
     "name": "Rachel",
     "cost": 1,
@@ -2401,8 +2915,8 @@
     ],
     "passives": []
   },
-  "55": {
-    "cardId": 55,
+  "66": {
+    "cardId": 66,
     "type": "unit",
     "name": "Rak Wraithraiser",
     "cost": 2,
@@ -2436,8 +2950,8 @@
     ],
     "passives": []
   },
-  "56": {
-    "cardId": 56,
+  "67": {
+    "cardId": 67,
     "type": "equipment",
     "name": "Red Thryssa",
     "cost": 3,
@@ -2459,8 +2973,8 @@
       }
     ]
   },
-  "57": {
-    "cardId": 57,
+  "68": {
+    "cardId": 68,
     "type": "skill",
     "name": "Redan",
     "cost": 1,
@@ -2480,8 +2994,8 @@
       }
     ]
   },
-  "58": {
-    "cardId": 58,
+  "69": {
+    "cardId": 69,
     "type": "equipment",
     "name": "Second Thorn Fragment",
     "cost": 1,
@@ -2539,8 +3053,8 @@
       }
     ]
   },
-  "59": {
-    "cardId": 59,
+  "70": {
+    "cardId": 70,
     "type": "skill",
     "name": "Shinwonryu",
     "cost": 4,
@@ -2564,8 +3078,8 @@
       }
     ]
   },
-  "60": {
-    "cardId": 60,
+  "71": {
+    "cardId": 71,
     "type": "skill",
     "name": "Static Baang",
     "cost": 1,
@@ -2588,8 +3102,8 @@
       }
     ]
   },
-  "61": {
-    "cardId": 61,
+  "72": {
+    "cardId": 72,
     "type": "equipment",
     "name": "Steel Tree",
     "cost": 3,
@@ -2617,8 +3131,8 @@
       }
     ]
   },
-  "62": {
-    "cardId": 62,
+  "73": {
+    "cardId": 73,
     "type": "unit",
     "name": "Stone Doll",
     "cost": 0,
@@ -2669,8 +3183,8 @@
       }
     ]
   },
-  "63": {
-    "cardId": 63,
+  "74": {
+    "cardId": 74,
     "type": "skill",
     "name": "Submerged Fish",
     "cost": 4,
@@ -2689,8 +3203,8 @@
       }
     ]
   },
-  "64": {
-    "cardId": 64,
+  "75": {
+    "cardId": 75,
     "type": "unit",
     "name": "Sunwoo Nare",
     "cost": 2,
@@ -2745,8 +3259,8 @@
       }
     ]
   },
-  "65": {
-    "cardId": 65,
+  "76": {
+    "cardId": 76,
     "type": "unit",
     "name": "The Hand Of Arlen",
     "cost": 2,
@@ -2783,8 +3297,8 @@
       }
     ]
   },
-  "66": {
-    "cardId": 66,
+  "77": {
+    "cardId": 77,
     "type": "skill",
     "name": "The Workshop",
     "cost": 3,
@@ -2828,8 +3342,8 @@
       }
     ]
   },
-  "67": {
-    "cardId": 67,
+  "78": {
+    "cardId": 78,
     "type": "equipment",
     "name": "Third Thorn Fragment",
     "cost": 1,
@@ -2887,8 +3401,8 @@
       }
     ]
   },
-  "68": {
-    "cardId": 68,
+  "79": {
+    "cardId": 79,
     "type": "skill",
     "name": "Thunder Baang",
     "cost": 1,
@@ -2911,8 +3425,8 @@
       }
     ]
   },
-  "69": {
-    "cardId": 69,
+  "80": {
+    "cardId": 80,
     "type": "unit",
     "name": "Twenty-Fifth Baam",
     "cost": 5,
@@ -2952,11 +3466,11 @@
           "raw": "i am equipped with Enryu's Thorn"
         }
       ],
-      "cardId": 70
+      "cardId": 81
     }
   },
-  "70": {
-    "cardId": 70,
+  "81": {
+    "cardId": 81,
     "type": "unit",
     "name": "Twenty-Fifth Baam - Evolved",
     "cost": 5,
@@ -2994,10 +3508,10 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 69
+    "evolvedFrom": 80
   },
-  "71": {
-    "cardId": 71,
+  "82": {
+    "cardId": 82,
     "type": "unit",
     "name": "Urek Mazino",
     "cost": 8,
@@ -3077,8 +3591,8 @@
       }
     ]
   },
-  "72": {
-    "cardId": 72,
+  "83": {
+    "cardId": 83,
     "type": "unit",
     "name": "Water Stadium",
     "cost": 2,
@@ -3100,8 +3614,8 @@
       }
     ]
   },
-  "73": {
-    "cardId": 73,
+  "84": {
+    "cardId": 84,
     "type": "skill",
     "name": "Weights",
     "cost": 1,
@@ -3118,8 +3632,8 @@
       }
     ]
   },
-  "74": {
-    "cardId": 74,
+  "85": {
+    "cardId": 85,
     "type": "unit",
     "name": "Wooden Horse",
     "cost": 2,
@@ -3155,8 +3669,8 @@
       }
     ]
   },
-  "75": {
-    "cardId": 75,
+  "86": {
+    "cardId": 86,
     "type": "equipment",
     "name": "Woon's Hammer",
     "cost": 2,
@@ -3176,8 +3690,8 @@
       }
     ]
   },
-  "76": {
-    "cardId": 76,
+  "87": {
+    "cardId": 87,
     "type": "unit",
     "name": "Yeo Goseng",
     "cost": 1,
@@ -3220,8 +3734,8 @@
       }
     ]
   },
-  "77": {
-    "cardId": 77,
+  "88": {
+    "cardId": 88,
     "type": "unit",
     "name": "Yeo Miseng",
     "cost": 2,
@@ -3275,8 +3789,8 @@
       }
     ]
   },
-  "78": {
-    "cardId": 78,
+  "89": {
+    "cardId": 89,
     "type": "unit",
     "name": "Yeon Woon",
     "cost": 5,
@@ -3327,8 +3841,8 @@
       }
     ]
   },
-  "79": {
-    "cardId": 79,
+  "90": {
+    "cardId": 90,
     "type": "unit",
     "name": "Yeon Yihwa",
     "cost": 5,
@@ -3372,8 +3886,8 @@
       }
     ]
   },
-  "80": {
-    "cardId": 80,
+  "91": {
+    "cardId": 91,
     "type": "unit",
     "name": "Yu Han Sung",
     "cost": 6,
@@ -3441,8 +3955,8 @@
       }
     ]
   },
-  "81": {
-    "cardId": 81,
+  "92": {
+    "cardId": 92,
     "type": "unit",
     "name": "Yuga",
     "cost": 4,

@@ -104,6 +104,8 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 | `disarm`          | `target`, `to`                    | Send a unit's equipment to `hand` (the equipment owner's hand) or `discard` (the acting player's discard). |
 | `switch_position` | `target`                          | Force a unit to switch positions.                                                                          |
 
+`return_to_hand` (`target`) returns a unit from the battlefield to its owner's hand.
+
 ### Units
 
 | `type`               | Fields                           | Meaning                                            |
@@ -122,6 +124,8 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 | `copy_ability`       | `source`                         | Use a copy of an enemy `source`'s ability.         |
 | `peek_hand`          | `owner`                          | Reveal a card in `owner`'s hand (observer-only).   |
 | `play_jeonsul_baang` | `trigger?`                       | Play a random Jeonsul Baang on a random ally.      |
+
+`grant_affiliation` (`target`, `source`, `random?`) grants `target` an affiliation taken from `source` (randomly chosen when `random` is set).
 
 ### Structural
 
@@ -154,6 +158,8 @@ target:
   condition: burned # filter: units with this condition
   conditionValue: 2 # filter: condition value threshold
   trait: taunt # filter
+  traitNot: immune # filter: units WITHOUT this trait
+  lowest_hp: true # select the unit with the lowest HP among matches
   rank: high ranker # filter
   position: fisherman # filter (position code)
   affiliation: khun-family # filter (affiliation code)
@@ -199,6 +205,8 @@ Predicates are the conditions a `conditional` node (or an always-on modifier) ev
 
 `has_unit` and `has_condition` are existence checks: they read the whole board and ignore offensive-targeting rules (frontline blocking, Taunt, Blinded). A matching source unit counts toward the check — "an allied Guide" on a Guide unit includes itself.
 
+`has_equipment_count` (`amount`, `negate?`) is true when the source unit has at least `amount` equipments attached.
+
 ---
 
 ## Modifier grammar (always-on passives)
@@ -210,11 +218,13 @@ Always-on passives and equipment-granted stat amplifiers are **modifiers**, not 
 | `modify_stat`      | `stat`, `amount`, `target`, `when?`, `source?`                 | `stat`: `damage` \| `heal` \| `hp` \| `cost` \| `damage_taken`. `when` filters the affected targets (outgoing `damage`/`heal`); `source` filters the attackers (incoming `damage_taken`). |
 | `modify_cost`      | `amount`, `if?`                                                | Reduces the card's own cost by `amount`.                                                                                                                                                  |
 | `modify_condition` | `condition`, `amount`, `target`, `if?`                         | My abilities apply +`amount` of `condition` to matching `target`s.                                                                                                                        |
-| `modify_keyword`   | `keyword`, `target`                                            | `keyword`: `quick` (abilities gain Quick).                                                                                                                                                |
+| `modify_keyword`   | `keyword`, `target`, `first?`                                  | `keyword`: `quick` \| `free` (abilities gain that keyword). `first: true` limits it to the first ability used each round.                                                                 |
 | `modify_targeting` | `rule`, `target`                                               | `rule`: `ignore_taunt` \| `untargetable_by`.                                                                                                                                              |
 | `global_rule`      | `rule`, `target?`, `trait?`, `condition?`, `position?`, `cap?` | Landmark-wide rule (see below).                                                                                                                                                           |
 
 `global_rule` `rule` values: `disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, `prevent_equip`. `position` scopes a rule to a position (`chosen` = the deploy-chosen position sentinel).
+
+Two additional modifier types exist: `modify_repeat` (`amount`, `target`) — the target's abilities trigger `amount` times — and `retain_equipment` (no fields) — the unit keeps its equipment when it returns to hand.
 
 Modifiers carry their own `predicate` (via a `conditional`-style `if`) when gated — see the migration map for the exact modeling of each card.
 
@@ -224,9 +234,9 @@ Modifiers carry their own `predicate` (via a `conditional`-style `if`) when gate
 
 Triggers drive triggered passives and transformations (`evolveInto` / `igniteInto`). Trigger `type` values:
 
-`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`, `dies`.
+`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `enemy_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `attack`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`, `dies`, `evolve`, `has_all_equipped`.
 
-`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death (unlike `ally_dies`, which excludes self).
+`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death (unlike `ally_dies`, which excludes self). `enemy_dies` is an enemy unit's death (optionally filtered by `rank`); `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card.
 
 ---
 

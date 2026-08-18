@@ -1,0 +1,10 @@
+type: equipment
+name: "Dionysos: Wings"
+cost: 2
+requirements:
+effects:
+  - type: charge_shinsu
+    amount: 1
+    trigger: { type: quick_ability_used }
+    raw: "the bearer's Quick abilities Charge 1"
+ignition:

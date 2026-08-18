@@ -1,0 +1,14 @@
+type: equipment
+name: "Dionysos: Arms"
+cost: 1
+requirements:
+effects:
+  - type: grant_ability
+    target: { side: bearer }
+    ability:
+      type: grant_trait
+      trait: pierce
+      amount: 1
+      target: { side: self }
+    raw: "ability: give me Pierce"
+ignition:

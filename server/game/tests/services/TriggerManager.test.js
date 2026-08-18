@@ -146,6 +146,22 @@ describe("TriggerManager trigger subscriptions", () => {
     expect(LifecycleEngine.transformEquipment).toHaveBeenCalledWith(gameState, unit, 50, null);
   });
 
+  test("has_all_equipped trigger fires only when every listed equipment is attached", () => {
+    register([{ type: "has_all_equipped", cardNames: ["Dionysos: Arms", "Dionysos: Legs", "Dionysos: Wings"] }]);
+    unit.equipmentAttachments = [
+      { name: "Dionysos: Arms" },
+      { name: "Dionysos: Legs" },
+      { name: "Dionysos: Wings" },
+    ];
+    bus.emit(EVT.EQUIPMENT_ATTACHED, { unitId: "Unit#1", equipment: { name: "Dionysos: Wings" } });
+    expect(LifecycleEngine.transformUnit).toHaveBeenCalledWith(gameState, unit, 99);
+
+    jest.clearAllMocks();
+    unit.equipmentAttachments = [{ name: "Dionysos: Arms" }];
+    bus.emit(EVT.EQUIPMENT_ATTACHED, { unitId: "Unit#1", equipment: { name: "Dionysos: Arms" } });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
   test("unsupported trigger type throws", () => {
     expect(() => register([{ type: "bogus" }])).toThrow("Unsupported compiled trigger type");
   });

@@ -132,6 +132,9 @@ export default class TriggerManager {
         this._subscribeEvent(unitId, EVT.UNIT_ABILITY_USED, targetCardId, transformType, gameState,
           (payload) => payload.unitId === unitId);
         break;
+      case "has_all_equipped":
+        this._onHasAllEquipped(unitId, trigger, targetCardId, transformType, gameState, equipmentId);
+        break;
       default:
         throw new Error(`Unsupported compiled trigger type: ${trigger.type}`);
     }
@@ -167,6 +170,23 @@ export default class TriggerManager {
 
     const unsub = this._bus.on(EVT.EQUIPMENT_ATTACHED, handler, { phase: "post" });
     this._trackUnsubscriber(unitId, transformType, unsub, equipmentId);
+  }
+
+  _onHasAllEquipped(unitId, trigger, targetCardId, transformType, gameState, equipmentId = null) {
+    const check = (payload) => {
+      if (payload.unitId !== unitId) return;
+      const unit = gameState._findUnit(unitId);
+      if (!unit || !unit.isAlive()) return;
+      const equipped = new Set((unit.equipmentAttachments || []).map((c) => c.name.toLowerCase()));
+      const hasAll = (trigger.cardNames || []).every((name) => equipped.has(name.toLowerCase()));
+      if (hasAll) {
+        this._executeTransform(unitId, targetCardId, transformType, gameState, equipmentId);
+      }
+    };
+    const unsubAttach = this._bus.on(EVT.EQUIPMENT_ATTACHED, check, { phase: "post" });
+    const unsubDetach = this._bus.on(EVT.EQUIPMENT_DETACHED, check, { phase: "post" });
+    this._trackUnsubscriber(unitId, transformType, unsubAttach, equipmentId);
+    this._trackUnsubscriber(unitId, transformType, unsubDetach, equipmentId);
   }
 
   _onSlay(unitId, trigger, targetCardId, transformType, gameState, equipmentId = null) {

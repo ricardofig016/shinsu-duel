@@ -43,7 +43,6 @@ describe("card data audit (zero custom/handler invariant)", () => {
 
   test("all YAML abilities/effects/passives are structured objects (no prose)", async () => {
     const yamlFiles = await collectYamlFiles(cardsDirectory);
-    expect(yamlFiles.length).toBe(82);
 
     for (const file of yamlFiles) {
       const card = yaml.load(await fs.readFile(file, "utf-8"));

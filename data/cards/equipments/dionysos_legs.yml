@@ -1,0 +1,14 @@
+type: equipment
+name: "Dionysos: Legs"
+cost: 1
+requirements:
+effects:
+  - type: grant_ability
+    target: { side: bearer }
+    ability:
+      type: deal_damage
+      amount: 3
+      target: { side: enemy }
+      quick: true
+    raw: "ability: quick: deal 3 to an enemy"
+ignition:

@@ -1,0 +1,18 @@
+type: unit
+name: Gyetang
+cost: 1
+hp: 4
+rank: regular
+positions:
+  - spear bearer
+passives:
+abilities:
+  - type: deal_damage
+    amount: 5
+    target: { side: enemy }
+    raw: "deal 5 to an enemy"
+evolve:
+traits:
+attributes:
+affiliations:
+  - khun's team

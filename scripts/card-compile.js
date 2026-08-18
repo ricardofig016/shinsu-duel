@@ -142,6 +142,7 @@ export function normalizeEffectObject(obj, context) {
 
   if (obj.condition !== undefined) normalized.condition = normalizeCondition(obj.condition);
   if (obj.trait !== undefined) normalized.trait = normalizeTrait(obj.trait);
+  if (obj.traitNot !== undefined) normalized.traitNot = normalizeTrait(obj.traitNot);
   if (obj.position !== undefined) normalized.position = normalizePositionFilter(obj.position);
   if (obj.affiliation !== undefined) normalized.affiliation = normalizeList(obj.affiliation, normalizeAffiliation);
   if (obj.attribute !== undefined) normalized.attribute = normalizeList(obj.attribute, normalizeAttribute);
@@ -199,6 +200,16 @@ export function parseTrigger(raw) {
   const equipMatch = /^i am equipped with (.+)$/i.exec(text);
   if (equipMatch) {
     return { type: "equip", cardName: equipMatch[1].trim() };
+  }
+
+  // "i have X, Y and Z equipped" (all-equipped evolution/ignition trigger)
+  const allEquipMatch = /^i have (.+?) equipped$/i.exec(text);
+  if (allEquipMatch) {
+    const cardNames = allEquipMatch[1]
+      .split(/\s+and\s+|\s*,\s*/i)
+      .map((name) => name.trim())
+      .filter(Boolean);
+    return { type: "has_all_equipped", cardNames };
   }
 
   // "the bearer Slays a unit"

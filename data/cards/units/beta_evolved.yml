@@ -1,0 +1,27 @@
+type: unit
+name: Beta - Evolved
+cost: 2
+hp: 4
+rank: regular
+positions:
+  - fisherman
+  - scout
+  - wave controller
+passives:
+abilities:
+  - type: conditional
+    if:
+      type: has_equipment_count
+      amount: 5
+    then:
+      type: grant_trait
+      trait: lethal
+      target: { side: self }
+    raw: "if i have 5+ equipments, give me Lethal"
+evolve:
+traits:
+attributes:
+  - living ignition weapon
+affiliations:
+  - team baam
+  - team novick

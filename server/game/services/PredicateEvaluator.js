@@ -67,6 +67,14 @@ export default class PredicateEvaluator {
         return predicate.cardNames.every((name) => equipped.has(name.toLowerCase()));
       }
 
+      case "has_equipment_count": {
+        if (!Number.isInteger(predicate.amount) || predicate.amount < 1) {
+          throw new Error("PredicateEvaluator: has_equipment_count requires a positive integer `amount`");
+        }
+        const unit = extra.sourceUnit || gameState._findUnit(extra.sourceId);
+        return (unit?.equipmentAttachments || []).length >= predicate.amount;
+      }
+
       case "has_condition": {
         if (!predicate.condition) throw new Error("PredicateEvaluator: has_condition requires `condition`");
         const descriptor = { ...(predicate.target || { side: "any" }), condition: predicate.condition };

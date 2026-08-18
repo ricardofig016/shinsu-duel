@@ -1,0 +1,39 @@
+type: unit
+name: Michael
+cost: 4
+hp: 6
+rank: regular
+positions:
+  - wave controller
+passives:
+  - type: slay
+    target: { side: ally, scope: backline }
+    trigger: { type: deploy }
+    raw: "when i am deployed: kill an ally backliner"
+  - type: heal
+    amount: 1
+    target:
+      side: ally
+      scope: all
+      affiliation: [fug, team rachel, khun's team]
+    trigger: { type: round_start }
+    raw: "round start: heal all ally members of my affiliations 1 HP"
+abilities:
+  - type: grant_affiliation
+    target: { side: self }
+    source: { side: ally }
+    random: true
+    raw: "give me a random affiliation of another ally"
+  - type: give_condition
+    condition: poisoned
+    amount: 4
+    target: { side: enemy }
+    raw: "give Poisoned 4 to an enemy"
+evolve:
+traits:
+  - regenerate 3
+attributes:
+affiliations:
+  - fug
+  - team rachel
+  - khun's team

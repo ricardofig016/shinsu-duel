@@ -9,6 +9,7 @@ import {
   normalizeEffectObject,
   normalizeKeyword,
   normalizeList,
+  parseTrigger,
 } from "./card-compile.js";
 
 describe("card-compile normalization helpers", () => {
@@ -75,6 +76,23 @@ describe("card-compile normalization helpers", () => {
     );
 
     expect(normalized.target.position).toBe("wave-controller");
+  });
+
+  test("normalizeEffectObject normalizes traitNot and preserves lowest_hp", () => {
+    const normalized = normalizeEffectObject(
+      { type: "grant_trait", trait: "immune", target: { side: "ally", traitNot: "Immune", lowest_hp: true } },
+      "card.passives[0]"
+    );
+
+    expect(normalized.target.traitNot).toBe("immune");
+    expect(normalized.target.lowest_hp).toBe(true);
+  });
+});
+
+describe("card-compile parseTrigger", () => {
+  test("parses an all-equipped evolution trigger", () => {
+    expect(parseTrigger("i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"))
+      .toEqual({ type: "has_all_equipped", cardNames: ["Dionysos: Arms", "Dionysos: Legs", "Dionysos: Wings"] });
   });
 });
 

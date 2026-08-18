@@ -167,6 +167,29 @@ describe("PredicateEvaluator", () => {
         game, { owner: "Alice", sourceUnit: u }
       )).toBe(false);
     });
+
+    test("counts equipment attachments", () => {
+      const game = createGame();
+      const u = push(game, "Alice", unit("bearer", "Alice"));
+
+      u.equipmentAttachments = [
+        { name: "Dionysos: Arms" },
+        { name: "Dionysos: Legs" },
+        { name: "Dionysos: Wings" },
+        { name: "First Thorn Fragment" },
+        { name: "Second Thorn Fragment" },
+      ];
+      expect(PredicateEvaluator.evaluate(
+        { type: "has_equipment_count", amount: 5 },
+        game, { owner: "Alice", sourceUnit: u }
+      )).toBe(true);
+
+      u.equipmentAttachments.pop();
+      expect(PredicateEvaluator.evaluate(
+        { type: "has_equipment_count", amount: 5 },
+        game, { owner: "Alice", sourceUnit: u }
+      )).toBe(false);
+    });
   });
 
   describe("has_condition", () => {

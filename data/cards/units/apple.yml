@@ -1,0 +1,44 @@
+type: unit
+name: Apple
+cost: 3
+hp: 3
+rank: regular
+positions:
+  - scout
+  - light bearer
+passives:
+  - type: grant_trait
+    trait: immune
+    target:
+      side: ally
+      affiliation: team rachel
+      lowest_hp: true
+      traitNot: immune
+    trigger: { type: deploy }
+    raw: "when i am deployed: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+  - type: grant_trait
+    trait: immune
+    target:
+      side: ally
+      affiliation: team rachel
+      lowest_hp: true
+      traitNot: immune
+    trigger: { type: dies }
+    raw: "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+  - type: create_lighthouse
+    amount: 1
+    trigger: { type: enemy_dies, rank: regular }
+    raw: "when an enemy Regular dies: Create 1"
+abilities:
+  - type: cleanse
+    amount: 1
+    target: { side: ally }
+    raw: "remove a condition from an ally"
+evolve:
+traits:
+  - dealer 1
+attributes:
+affiliations:
+  - fug
+  - team rachel
+  - khun's team

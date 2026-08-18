@@ -1,0 +1,43 @@
+type: unit
+name: Novick
+cost: 5
+hp: 6
+rank: regular
+positions:
+  - spear bearer
+  - fisherman
+passives:
+  - type: disarm
+    target: { side: enemy }
+    to: hand
+    trigger: { type: deal_damage }
+    raw: "when i deal damage to an enemy: Disarm them"
+  - type: grant_trait
+    trait: barrier
+    target: { side: ally }
+    trigger: { type: deploy }
+    raw: "when i am deployed: give Barrier to an ally"
+abilities:
+  - type: deal_damage
+    amount: 7
+    target: { side: enemy }
+    position: spear bearer
+    raw: "spear bearer: deal 7 to an enemy"
+  - type: sequence
+    steps:
+      - type: give_condition
+        condition: stunned
+        target: { side: enemy }
+      - type: deal_damage
+        amount: 2
+        target: { side: enemy }
+    raw: "give Stunned and deal 2 to an enemy"
+evolve:
+traits:
+  - resilient 3
+attributes:
+affiliations:
+  - team novick
+  - team fug
+  - khun's team
+  - ha family

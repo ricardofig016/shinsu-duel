@@ -1,0 +1,36 @@
+type: unit
+name: Beta
+cost: 2
+hp: 3
+rank: regular
+positions:
+  - fisherman
+  - scout
+  - wave controller
+passives:
+  - type: draw_card
+    amount: 1
+    card:
+      type: equipment
+    trigger: { type: deploy }
+    raw: "when i am deployed: draw an equipment"
+  - type: retain_equipment
+    raw: "when i return to hand, i keep my equipments"
+  - type: create_card
+    card:
+      name: Phobos
+    trigger: { type: evolve }
+    raw: "when i evolve: create Phobos in hand"
+abilities:
+  - type: return_to_hand
+    target: { side: self }
+    quick: true
+    raw: "quick: return me to hand"
+evolve:
+  - "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+traits:
+attributes:
+  - living ignition weapon
+affiliations:
+  - team baam
+  - team novick

@@ -1,0 +1,32 @@
+type: unit
+name: Edin Dan
+cost: 1
+hp: 2
+rank: regular
+positions:
+  - scout
+passives:
+  - type: modify_keyword
+    keyword: free
+    first: true
+    target: { side: self }
+    raw: "the first ability i use each round has Free"
+abilities:
+  - type: give_condition
+    condition: blinded
+    target: { side: enemy }
+    quick: true
+    raw: "quick: give an enemy Blinded"
+  - type: give_condition
+    condition: ghost
+    target: { side: enemy }
+    quick: true
+    raw: "quick: give an enemy Ghost"
+evolve:
+traits:
+  - sharpshooter
+attributes:
+affiliations:
+  - team novick
+  - team sweet and sour
+  - khun's team

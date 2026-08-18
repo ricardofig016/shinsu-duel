@@ -52,6 +52,8 @@
         "condition": { "type": "string", "minLength": 1 },
         "conditionValue": { "type": "integer", "minimum": 0 },
         "trait": { "type": "string", "minLength": 1 },
+        "traitNot": { "type": "string", "minLength": 1 },
+        "lowest_hp": { "type": "boolean" },
         "rank": { "$ref": "#/definitions/filterValue" },
         "position": { "$ref": "#/definitions/filterValue" },
         "affiliation": { "$ref": "#/definitions/filterValue" },
@@ -93,16 +95,18 @@
         { "type": "object", "required": ["type", "cardName"], "properties": { "type": { "const": "started_with_card" }, "cardName": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "cardName"], "properties": { "type": { "const": "has_equipped" }, "cardName": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "condition"], "properties": { "type": { "const": "has_condition" }, "condition": { "type": "string", "minLength": 1 }, "conditionValue": { "type": "integer", "minimum": 0 }, "target": { "$ref": "#/definitions/predicateTarget" }, "negate": { "type": "boolean" } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "cardNames"], "properties": { "type": { "const": "has_all_equipped" }, "cardNames": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "negate": { "type": "boolean" } }, "additionalProperties": false }
+        { "type": "object", "required": ["type", "cardNames"], "properties": { "type": { "const": "has_all_equipped" }, "cardNames": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "negate": { "type": "boolean" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "amount"], "properties": { "type": { "const": "has_equipment_count" }, "amount": { "type": "integer", "minimum": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false }
       ]
     },
     "trigger": {
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "attack", "summon", "draw", "free_ability_played", "quick_ability_used", "round_start_or_activation", "skill_played", "reclaim", "dies"] },
+        "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "attack", "summon", "draw", "free_ability_played", "quick_ability_used", "round_start_or_activation", "skill_played", "reclaim", "dies", "enemy_dies", "evolve", "has_all_equipped"] },
         "raw": { "type": "string", "minLength": 1 },
         "cardName": { "type": "string", "minLength": 1 },
+        "cardNames": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
         "target": { "type": "string", "minLength": 1 },
         "rank": { "type": "string", "minLength": 1 },
         "source": { "type": "string", "minLength": 1 },
@@ -116,7 +120,7 @@
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "play_jeonsul_baang", "sequence", "conditional", "noop", "repeat_play", "quick", "choose_position"] },
+        "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "create_lighthouse", "destroy_lighthouse", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "cleanse", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "play_jeonsul_baang", "sequence", "conditional", "noop", "repeat_play", "quick", "choose_position", "grant_affiliation", "return_to_hand"] },
         "raw": { "type": "string", "minLength": 1 },
         "quick": { "type": "boolean" },
         "free": { "type": "boolean" },
@@ -174,19 +178,22 @@
         { "if": { "properties": { "type": { "const": "peek_hand" } } }, "then": { "required": ["owner"] } },
         { "if": { "properties": { "type": { "const": "sequence" } } }, "then": { "required": ["steps"] } },
         { "if": { "properties": { "type": { "const": "conditional" } } }, "then": { "required": ["if", "then"] } },
-        { "if": { "properties": { "type": { "const": "repeat_play" } } }, "then": { "required": ["amount"] } }
+        { "if": { "properties": { "type": { "const": "repeat_play" } } }, "then": { "required": ["amount"] } },
+        { "if": { "properties": { "type": { "const": "grant_affiliation" } } }, "then": { "required": ["target", "source"] } },
+        { "if": { "properties": { "type": { "const": "return_to_hand" } } }, "then": { "required": ["target"] } }
       ]
     },
     "modifierNode": {
       "type": "object",
       "required": ["type", "raw"],
       "properties": {
-        "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "modify_cost", "modify_condition", "global_rule"] },
+        "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "modify_cost", "modify_condition", "global_rule", "retain_equipment", "modify_repeat"] },
         "raw": { "type": "string", "minLength": 1 },
         "target": { "$ref": "#/definitions/unitTarget" },
         "stat": { "enum": ["damage", "heal", "hp", "cost", "damage_taken"] },
         "amount": { "type": "integer" },
-        "keyword": { "enum": ["quick"] },
+        "keyword": { "enum": ["quick", "free"] },
+        "first": { "type": "boolean" },
         "rule": { "enum": ["ignore_taunt", "untargetable_by", "disable_passives", "grant_global_trait", "condition_stack_cap", "prevent_evolve", "prevent_equip", "grant_global_condition"] },
         "trait": { "type": "string", "minLength": 1 },
         "condition": { "type": "string", "minLength": 1 },
@@ -203,7 +210,8 @@
         { "if": { "properties": { "type": { "const": "modify_targeting" } } }, "then": { "required": ["rule", "target"] } },
         { "if": { "properties": { "type": { "const": "modify_cost" } } }, "then": { "required": ["amount"] } },
         { "if": { "properties": { "type": { "const": "modify_condition" } } }, "then": { "required": ["condition", "amount", "target"] } },
-        { "if": { "properties": { "type": { "const": "global_rule" } } }, "then": { "required": ["rule"] } }
+        { "if": { "properties": { "type": { "const": "global_rule" } } }, "then": { "required": ["rule"] } },
+        { "if": { "properties": { "type": { "const": "modify_repeat" } } }, "then": { "required": ["amount", "target"] } }
       ]
     },
     "effectEntry": {

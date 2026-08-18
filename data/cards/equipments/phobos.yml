@@ -1,0 +1,13 @@
+type: equipment
+name: Phobos
+cost: 0
+requirements:
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+effects:
+  - type: modify_repeat
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer's abilities trigger twice"
+ignition:
