@@ -52,69 +52,19 @@ A unit with the `Blinded` condition cannot choose targeted units. For choice des
 
 ---
 
-## Optional Filters
-
-| Filter               | Example                                                            |
-| -------------------- | ------------------------------------------------------------------ |
-| `condition`          | Only units with this condition: `"rooted"`                         |
-| `conditionValue`     | Threshold: `condition: "burned", conditionValue: 2`                |
-| `trait`              | Only units with this trait: `"taunt"`                              |
-| `traitNot`           | Only units WITHOUT this trait: `"immune"`                          |
-| `rank`               | Only units of this rank: `"ranker"` (array = OR)                   |
-| `position`           | Only units at this position: `"fisherman"` (array = OR)            |
-| `affiliation`        | Only units with this affiliation: `"team-chang"` (array = OR)      |
-| `attribute`          | Only units with this attribute: `"hwayeomsa"` (array = OR)         |
-| `name`               | Only units with this exact name: `"Conduit"`                       |
-| `cost`               | Exact printed cost, or `"cheapest"` / `"most expensive"` selection |
-| `lowest_hp`          | Keep only the lowest-HP match (ties → first in field order)        |
-| `shared_affiliation` | Only units sharing ≥1 affiliation with the source unit             |
-| `count`              | Max targets: `count: 2` for "2 enemies"                            |
-
----
-
 ## Structured Target Descriptors
 
-Compiled cards author unit targets as structured objects — `{ side, scope, count, ...filters }` — rather than string descriptors. `EffectResolver` translates them through `TargetResolver.normalizeStructuredTarget()` into the canonical string target plus filter fields before resolution, so handlers never receive an object target.
-
-| Field       | Values                                                                                         |
-| ----------- | ---------------------------------------------------------------------------------------------- |
-| `side`      | `self`, `bearer`, `ally`, `enemy`, `any` (`any` = `unit`)                                      |
-| `scope`     | `single`, `all`, `frontline`, `backline` (default `single`)                                    |
-| `count`     | Max targets (e.g. `count: 2`)                                                                  |
-| `choose`    | `true` — the acting player selects among the matches (pending decision)                        |
-| `random`    | `true` — select deterministically via the seeded RNG (no decision)                             |
-| `cost`      | Exact cost filter, or `"cheapest"` / `"most expensive"` selection                              |
-| `lowest_hp` | `true` — keep only the lowest-HP match (ties → first in field order)                           |
-| `traitNot`  | Exclude units with this trait (inverse of `trait`)                                             |
-| filters     | `condition`, `conditionValue`, `trait`, `rank`, `position`, `affiliation`, `attribute`, `name` |
+Compiled cards author unit targets as structured objects — `{ side, scope, count, ...filters }` — rather than string descriptors. The field grammar (`side`, `scope`, `count`, `choose`, `random`, the filter vocabulary, and `sequence` link targets) is defined in the [Target grammar](COMPILED_CARD_DSL.md#target-grammar) section of `COMPILED_CARD_DSL.md`. `EffectResolver` translates them through `TargetResolver.normalizeStructuredTarget()` into the canonical string target plus filter fields before resolution, so handlers never receive an object target.
 
 `scope` maps `enemy`+`all` → `all_enemies`, `frontline` → `enemy_frontline`, `backline` → `enemy_backline`, `ally`+`all` → `all_allies`. `choose` and `random` are selection strategies applied after filtering; `random` uses the game's seeded RNG so it is deterministic in tests and replays. Card targets resolve through `resolveCardTargets` (see [Card Target Resolution](#card-target-resolution)).
-
-A `sequence` may declare a shared `targets` descriptor (a side-based unit target) that is resolved once. Its steps reference the resolved set via `target: { link: sequence }` (all) or `{ link: sequence, count: N }` (a chosen subset), so multi-step effects act on the same units.
 
 ---
 
 ## Card Target Resolution
 
-Some effects target cards rather than units on the field (e.g. `compress_shinsu`, filtered `draw_card`/`reclaim_cards`, and `create_card`). These use `TargetResolver.resolveCardTargets(cards, descriptor)` — the same architectural boundary as unit targeting. `cards` is a list of normalized card views produced by `toCardTargetView` (in `utils/cardData.js`), which collapses the `Card` instance's code→entry dictionaries and the compiled catalog's code arrays into one filter shape.
+Some effects target cards rather than units on the field (e.g. `compress_shinsu`, filtered `draw_card`/`reclaim_cards`, and `create_card`). These use `TargetResolver.resolveCardTargets(cards, descriptor)` — the same architectural boundary as unit targeting. `cards` is a list of normalized card views produced by `toCardTargetView` (in `utils/cardData.js`), which collapses the `Card` instance's code→entry dictionaries and the compiled catalog's code arrays into one filter shape. The `card` target field grammar is in the [Target grammar](COMPILED_CARD_DSL.md#target-grammar) section of `COMPILED_CARD_DSL.md`.
 
-| Field         | Behavior                                                      |
-| ------------- | ------------------------------------------------------------- |
-| `name`        | Exact card name (case-insensitive)                            |
-| `series`      | Exact series code (cards declare `series` at card level)      |
-| `type`        | `unit` \| `skill` \| `equipment`                              |
-| `zone`        | `hand` \| `deck` \| `discard` — explicit source-zone override |
-| `cost`        | Exact printed cost, or `"cheapest"` / `"most expensive"`      |
-| `rank`        | Card rank (array = OR)                                        |
-| `position`    | Card position code (array = OR)                               |
-| `affiliation` | Card affiliation code (array = OR)                            |
-| `attribute`   | Card attribute code (array = OR)                              |
-| `choose`      | `true` — defer to a `card_selection` pending decision         |
-| `random`      | `true` — select deterministically via the seeded RNG          |
-
-`name` is an exact-name match; `series` is an exact series-code match — a card target uses one or the other, never both. A `series` is an explicit, schema-validated card-level field (like `affiliations`), never inferred from display names.
-
-`EffectResolver` resolves the source zone from `card.zone` when present, else derives it from the effect type (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard; `create_card` resolves the card catalog in its handler). It pre-resolves the structured `card` target to a concrete `targetCardId` (or a `card_selection` decision for `choose`) before invoking any handler. Handlers only receive `targetCardId` — they never interpret the card target themselves.
+`EffectResolver` resolves the source zone from `card.zone` when present, else derives it from the effect type (`create_card` resolves the card catalog in its handler). It pre-resolves the structured `card` target to a concrete `targetCardId` (or a `card_selection` decision for `choose`) before invoking any handler. Handlers only receive `targetCardId` — they never interpret the card target themselves.
 
 ---
 

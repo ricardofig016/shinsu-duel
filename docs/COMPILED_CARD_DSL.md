@@ -190,7 +190,7 @@ target:
   conditionValue: 2 # filter: condition value threshold
   trait: taunt # filter
   traitNot: immune # filter: units WITHOUT this trait
-  lowest_hp: true # select the unit with the lowest HP among matches
+  lowest_hp: true # keep only the lowest-HP match (ties → first in field order)
   shared_affiliation: true # filter: units sharing >=1 affiliation with the source unit
   rank: high ranker # filter
   position: fisherman # filter (position code)

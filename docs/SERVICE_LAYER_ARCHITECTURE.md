@@ -40,7 +40,7 @@ CompressionService.clearReduction(card);
 
 ## CombatSlotService
 
-Owns **all** combat slots: the five position slots plus the Shinheuh slot. Position slots reset each round and are consumed by non-Free ability use. The Shinheuh slot (Anima attribute) is granted at round start, consumed by Shinheuh ability use, and reset at round end — all through this service; `AnimaEngine` only decides _when_ to grant, never touches the slot directly.
+Owns **all** combat slots: the five position slots plus the Shinheuh slot. Position slots reset each round and are consumed by non-Free ability use. The Shinheuh slot operations (grant/consume/reset) are driven by the Anima engine, which only decides when they happen — see `ATTRIBUTE_SYSTEM_ARCHITECTURE.md`.
 
 ```js
 CombatSlotService.isAvailable(playerState, "fisherman");

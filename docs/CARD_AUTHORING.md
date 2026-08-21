@@ -58,8 +58,6 @@ Structural patterns live in the existing cards — read the closest match before
 
 The definitive list of implemented node types is **not in this file and not in the schema** — it is the registry in [`server/game/EffectResolver.js`](../server/game/EffectResolver.js) (for effects), [`server/game/services/PassiveManager.js`](../server/game/services/PassiveManager.js) (for passive triggers), and [`server/game/ModifierStack.js`](../server/game/ModifierStack.js) (for always-on modifiers). Before authoring an effect, confirm its `type` is registered; unregistered types currently emit `EFFECT_UNSUPPORTED` and do nothing. See the "Transitional behavior" note in [`COMPILED_CARD_DSL.md`](./COMPILED_CARD_DSL.md).
 
-Corollary: `server/data/cards.json` is a **build artifact** — never hand-edit it. Regenerate with `npm run compile:cards`.
-
 ---
 
 ## Raw text conventions

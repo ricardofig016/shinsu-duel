@@ -87,15 +87,7 @@ Non-Free abilities mark the position's combat slot spent; Shinheuh abilities con
 
 ## Decision Continuations
 
-Actions that produce a player choice (line overflow, target selection) must not advance the turn before that choice has mutated state. They register the rest of their work as a continuation:
-
-```js
-gameState.completeActionAfterDecision(() => {
-  gameState.endTurn();
-});
-```
-
-This runs immediately when no decision is pending, or after the current decision resolves. Multiple continuations queue in FIFO order, so a card's remaining effects and the turn end always run in the correct sequence.
+Actions that produce a player choice (line overflow, target selection) must not advance the turn before that choice has mutated state. They register the rest of their work as a continuation via `gameState.completeActionAfterDecision()` — the mechanism (immediate run when idle, FIFO queueing) is documented in the [Pending Decisions](GAMESTATE_ARCHITECTURE.md#pending-decisions) section of `GAMESTATE_ARCHITECTURE.md`.
 
 ---
 

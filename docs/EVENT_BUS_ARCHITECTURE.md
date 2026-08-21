@@ -143,140 +143,11 @@ The `maxDepth` parameter (default 50) prevents infinite event loops. If a handle
 
 ---
 
-## ModifierStack
+## Related Systems
 
-### Why provenance tracking?
-
-The `ModifierStack` solves the class of problems where effects need to be **reversible** based on their source. The canonical example:
-
-**Equipment grants trait → Silence disables it → Unequip removes source → Unsilence should NOT restore the trait.**
-
-Without source tracking, you'd need to manually track "who gave what to whom" and risk creating negative stats (e.g., removing Barrier when it was already removed by Silence).
-
-### Modifier structure
-
-```js
-{
-  id:         "mod_42",        // unique
-  sourceId:   "Equip#17",      // who created this modifier
-  sourceType: "equipment",     // equipment | unit | skill | passive | landmark | system
-  targetId:   "Unit#8",        // who receives this modifier
-  type:       "trait",         // trait | condition | stat | ability | keyword
-  key:        "barrier",       // what is being modified
-  value:      1,               // how much
-  operation:  "add",           // add | set | override
-  enabled:    true,            // Silence flips to false
-  createdAt:  42,              // clock tick for tiebreaking
-}
-```
-
-### Key operations
-
-```js
-stack.apply(spec); // Add a modifier, emits grant event
-stack.removeBySource(sourceId); // Unequip, unit death — removes all from source
-stack.removeByTarget(targetId); // Unit destroyed — removes all on target
-stack.removeWhere(predicate); // Cleanse — removes conditions only
-stack.disableByTarget(id, type); // Silence — flips enabled=false
-stack.enableByTarget(id, type); // Unsilence — flips enabled=true
-stack.getEffective(id, type, key); // Net value considering only enabled modifiers
-stack.getActiveKeys(id, type); // Set of currently active keys
-stack.has(id, type, key); // Quick existence check
-stack.getSources(id); // All source IDs affecting a target
-```
-
-### Silence / Equipment interaction
-
-```
-1. Equip Frog Fisher:     apply({ type:"trait", key:"barrier", sourceId:"Equip#17" })
-                          → getEffective("barrier") = 1  ✓
-
-2. Silence bearer:        disableByTarget("Unit#8", "trait")
-                          → getEffective("barrier") = 0  ✓ (modifier still exists)
-
-3. Unequip while silenced: removeBySource("Equip#17")
-                          → modifier deleted
-                          → getSources() = []  ✓
-
-4. Unsilence:             enableByTarget("Unit#8", "trait")
-                          → nothing to enable
-                          → getEffective("barrier") = 0  ✓ (no negative!)
-```
-
----
-
-## Logger
-
-### Design
-
-The Logger captures **state diffs** before/after each root event and records **causation trees** from DFS event resolution.
-
-### Log entry structure
-
-```js
-{
-  id: 1,
-  timestamp: "2026-08-01T22:00:00.000Z",
-  rootEvent: "unit:damage:intent",
-  cancelled: false,
-  cancelReason: null,
-  causationTree: {
-    eventName: "unit:damage:intent",
-    cancelled: false,
-    children: [
-      {
-        eventName: "unit:killed",
-        cancelled: false,
-        children: [
-          { eventName: "unit:destroyed", cancelled: false, children: [] },
-          { eventName: "card:drawn", cancelled: false, children: [] }
-        ]
-      }
-    ]
-  },
-  stateBefore: { /* snapshot */ },
-  stateAfter:  { /* snapshot */ },
-  diff: {
-    added:   [{ key: "handSize", value: 6 }],
-    removed: [{ key: "frontline.Unit#3" }],
-    changed: [{ key: "frontline.Unit#1.hp", old: 5, new: 2 }]
-  }
-}
-```
-
-### Backends
-
-The Logger supports **pluggable backends**:
-
-- `MemoryBackend` (default): stores logs in memory, accessible via `getLogs()`.
-- `ConsoleBackend`: prints to console in debug mode.
-- Custom backends can be added via `addBackend(backend)`.
-
----
-
-## Handler Registry
-
-### Pattern
-
-Each handler extends `BaseHandler` and implements:
-
-- `validate(payload, context)` — throws on invalid input
-- `execute(payload, context, gameState)` — performs the effect
-
-Handlers use `context.emitChild()` for cascading effects and the `ModifierStack` for state changes — never mutate state directly.
-
-### Baseline handlers
-
-| Handler                   | What it does                                                  |
-| ------------------------- | ------------------------------------------------------------- |
-| `DealDamageHandler`       | Barrier → Resilient → Weak → apply damage → kill check → Slay |
-| `HealHandler`             | Applies healing, capped at max HP                             |
-| `GrantTraitHandler`       | Creates ModifierStack modifier for trait                      |
-| `GiveConditionHandler`    | Creates ModifierStack modifier for condition; respects Immune |
-| `RemoveConditionHandler`  | Removes condition modifiers from target                       |
-| `CreateLighthouseHandler` | Delegates to `GameState.modifyLighthouses` (cap 40)           |
-| `SpendShinsuHandler`      | Delegates to `ShinsuService.spend` (recharged first)          |
-| `DrawCardHandler`         | Delegates to `ZoneService.draw`; emits `game:deck:empty`      |
+- The **ModifierStack** (provenance-tracked state modifier storage) — see `MODIFIER_STACK_ARCHITECTURE.md`.
+- The **Logger** (full-state-diff event logger) — see `LOGGER_ARCHITECTURE.md`.
+- The **handler registry** that maps DSL node types to handler classes — see `HANDLER_SYSTEM_ARCHITECTURE.md`.
 
 ---
 
@@ -337,10 +208,9 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 - `equipment:detached` — equipment removed from unit
 - `equipment:ignited` — attached equipment ignited
 
-### Modifier Events (emitted by ModifierStack)
+### Modifier Events
 
-- `modifier:<type>:granted` / `modifier:<type>:revoked`
-- `modifier:disabled` / `modifier:enabled`
+Emitted by the `ModifierStack` — see `MODIFIER_STACK_ARCHITECTURE.md`.
 
 ### State Changes
 
@@ -383,27 +253,21 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 
 ### Adding a new handler
 
-1. Create a class extending `BaseHandler`
-2. Implement `validate(payload, context)` — throw on invalid
-3. Implement `execute(payload, context, gameState)` — use ModifierStack
-4. Register with `HandlerRegistry`
+Create a class extending `BaseHandler` implementing `validate`/`execute`, then register it with the `HandlerRegistry` — see `HANDLER_SYSTEM_ARCHITECTURE.md`.
 
 ### Adding a new modifier type
 
-1. Use an appropriate `type` value: `"trait"`, `"condition"`, `"stat"`, `"ability"`, `"keyword"`
-2. `ModifierStack.apply()` will automatically emit `modifier:<type>:granted`
-3. For removal, call `removeBySource()` or `removeWhere()` with a predicate
+Use an appropriate `type` value (`trait`, `condition`, `stat`, `ability`, `keyword`) and the `apply`/`removeBySource`/`removeWhere` APIs — see `MODIFIER_STACK_ARCHITECTURE.md`.
 
 ---
 
 ## Anti-patterns
 
-1. **Don't mutate state directly** — always go through ModifierStack.
-2. **Don't assume BFS ordering** — handlers after yours may not have run yet.
-3. **Don't use `publish`/`subscribe`** — these were removed. Use `on`/`emit`.
-4. **Don't cancel events lightly** — cancellation in `pre` prevents ALL later phases.
-5. **Don't create infinite event loops** — use `maxDepth` protection as a safety net.
-6. **Don't store mutable references from context** — `ctx.phase` changes during emission.
+1. **Don't assume BFS ordering** — handlers after yours may not have run yet.
+2. **Don't use `publish`/`subscribe`** — these were removed. Use `on`/`emit`.
+3. **Don't cancel events lightly** — cancellation in `pre` prevents ALL later phases.
+4. **Don't create infinite event loops** — use `maxDepth` protection as a safety net.
+5. **Don't store mutable references from context** — `ctx.phase` changes during emission.
 
 ---
 

@@ -169,8 +169,6 @@ The flat `GameState._createSnapshot()` returns:
 }
 ```
 
-The complete `GameState.toSerializedState()` captures ordered zone contents (deck/hand/discard card ids + runtime fields), full `ModifierStack` and `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters, and round-tracking sets — all deterministically sorted.
-
 ---
 
 ## Diff Algorithm
