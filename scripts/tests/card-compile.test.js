@@ -10,7 +10,7 @@ import {
   normalizeKeyword,
   normalizeList,
   parseTrigger,
-} from "./card-compile.js";
+} from "../card-compile.js";
 
 describe("card-compile normalization helpers", () => {
   test("normalizeKeyword maps strings and { code, raw } objects to code form", () => {
