@@ -43,10 +43,10 @@ describe("CreateCardHandler", () => {
     expect(result.card.type).toBe("skill");
   });
 
-  test("generated_by fire_charge family creates the highest affordable Incinerate and consumes charges", () => {
+  test("generated_by fire_charge series creates the highest affordable Incinerate and consumes charges", () => {
     game.playerStates.Alice.fireCharges = 5;
     const result = handler.execute(
-      { owner: "Alice", card: { type: "skill", name: "Incinerate" } },
+      { owner: "Alice", card: { type: "skill", series: "incinerate" } },
       context(),
       game
     );
@@ -63,7 +63,7 @@ describe("CreateCardHandler", () => {
     game.playerStates.Alice.fireCharges = 0;
     const ctx = context();
     const result = handler.execute(
-      { owner: "Alice", card: { type: "skill", name: "Incinerate" } },
+      { owner: "Alice", card: { type: "skill", series: "incinerate" } },
       ctx,
       game
     );
@@ -83,7 +83,7 @@ describe("CreateCardHandler", () => {
   test("generated_by with one charge creates Incinerate I", () => {
     game.playerStates.Alice.fireCharges = 1;
     const result = handler.execute(
-      { owner: "Alice", card: { type: "skill", name: "Incinerate" } },
+      { owner: "Alice", card: { type: "skill", series: "incinerate" } },
       context(),
       game
     );
@@ -96,7 +96,7 @@ describe("CreateCardHandler", () => {
 
   test("choose card target defers to a card_selection decision and creates the chosen card", () => {
     const result = handler.execute(
-      { owner: "Alice", card: { type: "equipment", name: "Thorn Fragment", choose: true } },
+      { owner: "Alice", card: { type: "equipment", series: "thorn-fragment", choose: true } },
       context(),
       game
     );
@@ -117,7 +117,7 @@ describe("CreateCardHandler", () => {
 
   test("random card target deterministically picks one matching card", () => {
     const result = handler.execute(
-      { owner: "Alice", card: { type: "equipment", name: "Thorn Fragment", random: true } },
+      { owner: "Alice", card: { type: "equipment", series: "thorn-fragment", random: true } },
       context(),
       game
     );
@@ -125,6 +125,24 @@ describe("CreateCardHandler", () => {
     expect(result.created).toBe(true);
     expect(["First Thorn Fragment", "Second Thorn Fragment", "Third Thorn Fragment", "Fourth Thorn Fragment"])
       .toContain(result.card.name);
+  });
+
+  test("series target resolves all cards carrying the series code", () => {
+    const result = handler.execute(
+      { owner: "Alice", card: { type: "skill", series: "incinerate" } },
+      context(),
+      game
+    );
+
+    // Incinerate cards carry generated_by, so they route through the engine.
+    expect(result.created).toBe(false);
+    expect(result.reason).toContain("Not enough Fire Charges");
+  });
+
+  test("validate requires name or series", () => {
+    expect(() => handler.validate({ owner: "Alice", card: { type: "skill" } })).toThrow(/payload.card.name or payload.card.series is required/i);
+    expect(() => handler.validate({ owner: "Alice", card: { series: "thorn-fragment" } })).not.toThrow();
+    expect(() => handler.validate({ owner: "Alice", card: { name: "Shinwonryu" } })).not.toThrow();
   });
 
   test("unknown generated_by resource is skipped", () => {
@@ -162,9 +180,9 @@ describe("CreateCardHandler", () => {
     expect(result.reason).toContain("No card matches");
   });
 
-  test("validate requires owner and card name", () => {
+  test("validate requires owner and a card name or series", () => {
     expect(() => handler.validate({ card: { name: "Baang" } })).toThrow("payload.owner is required");
     expect(() => handler.validate({ owner: "Alice" })).toThrow("payload.card is required");
-    expect(() => handler.validate({ owner: "Alice", card: {} })).toThrow("payload.card.name is required");
+    expect(() => handler.validate({ owner: "Alice", card: {} })).toThrow("payload.card.name or payload.card.series is required");
   });
 });

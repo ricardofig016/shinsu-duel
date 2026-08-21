@@ -1020,7 +1020,7 @@
         "type": "create_card",
         "card": {
           "type": "skill",
-          "name": "Incinerate"
+          "series": "incinerate"
         },
         "raw": "Spend Fire Charges to create the highest affordable Incinerate in your hand"
       }
@@ -1030,6 +1030,7 @@
     "cardId": 25,
     "type": "equipment",
     "name": "First Thorn Fragment",
+    "series": "thorn-fragment",
     "cost": 1,
     "deckConstraints": [
       {
@@ -1060,7 +1061,7 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "name": "Thorn Fragment"
+                "series": "thorn-fragment"
               },
               "owner": "you"
             },
@@ -1133,6 +1134,7 @@
     "cardId": 28,
     "type": "equipment",
     "name": "Fourth Thorn Fragment",
+    "series": "thorn-fragment",
     "cost": 1,
     "deckConstraints": [
       {
@@ -1163,7 +1165,7 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "name": "Thorn Fragment"
+                "series": "thorn-fragment"
               },
               "owner": "you"
             },
@@ -1566,6 +1568,7 @@
     "cardId": 39,
     "type": "skill",
     "name": "Incinerate I",
+    "series": "incinerate",
     "cost": 0,
     "deckConstraints": [
       {
@@ -1594,6 +1597,7 @@
     "cardId": 40,
     "type": "skill",
     "name": "Incinerate II",
+    "series": "incinerate",
     "cost": 0,
     "deckConstraints": [
       {
@@ -1623,6 +1627,7 @@
     "cardId": 41,
     "type": "skill",
     "name": "Incinerate III",
+    "series": "incinerate",
     "cost": 0,
     "deckConstraints": [
       {
@@ -1665,6 +1670,7 @@
     "cardId": 42,
     "type": "skill",
     "name": "Incinerate IV",
+    "series": "incinerate",
     "cost": 0,
     "deckConstraints": [
       {
@@ -3001,6 +3007,7 @@
     "cardId": 69,
     "type": "equipment",
     "name": "Second Thorn Fragment",
+    "series": "thorn-fragment",
     "cost": 1,
     "deckConstraints": [
       {
@@ -3031,7 +3038,7 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "name": "Thorn Fragment"
+                "series": "thorn-fragment"
               },
               "owner": "you"
             },
@@ -3349,6 +3356,7 @@
     "cardId": 78,
     "type": "equipment",
     "name": "Third Thorn Fragment",
+    "series": "thorn-fragment",
     "cost": 1,
     "deckConstraints": [
       {
@@ -3379,7 +3387,7 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "name": "Thorn Fragment"
+                "series": "thorn-fragment"
               },
               "owner": "you"
             },
@@ -3454,7 +3462,7 @@
         "type": "create_card",
         "card": {
           "type": "equipment",
-          "name": "Thorn Fragment",
+          "series": "thorn-fragment",
           "choose": true
         },
         "raw": "create a Thorn Fragment of your choice in hand"

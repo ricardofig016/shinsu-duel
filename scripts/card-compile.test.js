@@ -96,6 +96,15 @@ describe("card-compile normalization helpers", () => {
 
     expect(normalized.to).toEqual({ zone: "discard", owner: "you" });
   });
+
+  test("normalizeEffectObject normalizes a card target series code", () => {
+    const normalized = normalizeEffectObject(
+      { type: "create_card", card: { type: "equipment", series: "Thorn Fragment" } },
+      "card.abilities[0]"
+    );
+
+    expect(normalized.card.series).toBe("thorn-fragment");
+  });
 });
 
 describe("card-compile parseTrigger", () => {
@@ -125,6 +134,7 @@ describe("card-compile compileCard", () => {
     const card = compileCard({
       type: "unit",
       name: "Test Unit",
+      series: "Thorn Fragment",
       cost: 2,
       hp: 5,
       rank: "regular",
@@ -139,6 +149,7 @@ describe("card-compile compileCard", () => {
     }, []);
 
     expect(card.type).toBe("unit");
+    expect(card.series).toBe("thorn-fragment");
     expect(card.keywords).toEqual([{ code: "jeonsul-baang" }]);
     expect(card.deckConstraints).toEqual([{ type: "unreachable", raw: "i am Unreachable" }]);
     expect(card.positions).toEqual(["wave-controller"]);

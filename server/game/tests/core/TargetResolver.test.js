@@ -84,13 +84,24 @@ describe("TargetResolver", () => {
 });
 
 describe("TargetResolver.resolveCardTargets", () => {
-  const cardView = ({ id, name, type = "unit", cost = 0, rank = null, positions = [], affiliations = [], attributes = [] }) =>
-    toCardTargetView({ id, cardId: id, name, type, cost, rank, positions, affiliations, attributes });
+  const cardView = ({ id, name, series = null, type = "unit", cost = 0, rank = null, positions = [], affiliations = [], attributes = [] }) =>
+    toCardTargetView({ id, cardId: id, name, series, type, cost, rank, positions, affiliations, attributes });
 
   test("returns empty for empty/non-array input and null descriptor", () => {
     expect(TargetResolver.resolveCardTargets([], { name: "anything" })).toEqual([]);
     expect(TargetResolver.resolveCardTargets(null, { name: "anything" })).toEqual([]);
     expect(TargetResolver.resolveCardTargets([cardView({ id: "c", name: "X" })], null)).toEqual([]);
+  });
+
+  test("resolves by exact series code (case-insensitive)", () => {
+    const candidates = [
+      cardView({ id: "card#1", name: "Incinerate I", series: "incinerate", type: "skill" }),
+      cardView({ id: "card#2", name: "Incinerate II", series: "incinerate", type: "skill" }),
+      cardView({ id: "card#3", name: "Fire Core", type: "skill" }),
+    ];
+    expect(TargetResolver.resolveCardTargets(candidates, { series: "incinerate" }).map((c) => c.id)).toEqual(["card#1", "card#2"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { series: "INCINERATE" }).map((c) => c.id)).toEqual(["card#1", "card#2"]);
+    expect(TargetResolver.resolveCardTargets(candidates, { series: "incin" })).toEqual([]);
   });
 
   test("resolves by exact card name (case-insensitive)", () => {

@@ -3,7 +3,7 @@ import ZoneService from "../services/ZoneService.js";
 import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
 import shuffle from "../utils/shuffle.js";
-import { findCardsByName, findCardsByFamily } from "../utils/cardData.js";
+import { findCardsByName, findCardsBySeries } from "../utils/cardData.js";
 
 /**
  * Creates a card in the owner's hand from a compiled card-target descriptor.
@@ -11,15 +11,16 @@ import { findCardsByName, findCardsByFamily } from "../utils/cardData.js";
  * DSL type: create_card
  *
  * Two creation paths:
- *   - Plain — an exact card name (optionally filtered by `card.type`) creates
- *     that card and emits `card:created` (e.g. "create Shinwonryu in hand").
- *   - Resource-gated — a family whose cards carry a `generated_by` deck
+ *   - Plain — an exact card name or a card `series` (optionally filtered by
+ *     `card.type`) creates that card and emits `card:created` (e.g. "create
+ *     Shinwonryu in hand", "create a Thorn Fragment of your choice").
+ *   - Resource-gated — a card whose definition carries a `generated_by` deck
  *     constraint is created by spending the named resource. `fire_charge`
  *     delegates to the Hwayeomsa engine, which picks the highest affordable
  *     Incinerate and consumes charges (RULES.md Hwayeomsa mechanic).
  *
  * `card.choose`/`card.random` select among the matched catalog cards (plain
- * cards only — resource-gated families always route through the engine).
+ * cards only — resource-gated cards always route through the engine).
  * `random` picks deterministically via the seeded RNG; `choose` defers to a
  * `card_selection` pending decision.
  */
@@ -29,8 +30,10 @@ export default class CreateCardHandler extends BaseHandler {
     if (!payload.card || typeof payload.card !== "object") {
       throw new Error("CreateCardHandler: payload.card is required");
     }
-    if (typeof payload.card.name !== "string" || payload.card.name.trim() === "") {
-      throw new Error("CreateCardHandler: payload.card.name is required");
+    const hasName = typeof payload.card.name === "string" && payload.card.name.trim() !== "";
+    const hasSeries = typeof payload.card.series === "string" && payload.card.series.trim() !== "";
+    if (!hasName && !hasSeries) {
+      throw new Error("CreateCardHandler: payload.card.name or payload.card.series is required");
     }
   }
 
@@ -38,12 +41,12 @@ export default class CreateCardHandler extends BaseHandler {
     const { owner, card: target } = payload;
 
     const cards = gameState.constructor.cards;
-    let candidates = findCardsByName(cards, target.name, target.type);
+    let candidates = target.series
+      ? findCardsBySeries(cards, target.series, target.type)
+      : findCardsByName(cards, target.name, target.type);
     if (candidates.length === 0) {
-      candidates = findCardsByFamily(cards, target.name, target.type);
-    }
-    if (candidates.length === 0) {
-      return { created: false, reason: `No card matches "${target.name}"` };
+      const ref = target.series || target.name;
+      return { created: false, reason: `No card matches "${ref}"` };
     }
 
     const generatedBy = candidates[0].deckConstraints?.find((c) => c.type === "generated_by");

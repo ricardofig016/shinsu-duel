@@ -10,7 +10,7 @@ abilities:
   - type: create_card
     card:
       type: equipment
-      name: Thorn Fragment
+      series: thorn-fragment
       choose: true
     raw: "create a Thorn Fragment of your choice in hand"
 evolve:

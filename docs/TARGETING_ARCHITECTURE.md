@@ -99,6 +99,7 @@ Some effects target cards rather than units on the field (e.g. `compress_shinsu`
 | Field         | Behavior                                                 |
 | ------------- | -------------------------------------------------------- |
 | `name`        | Exact card name (case-insensitive)                       |
+| `series`      | Exact series code (cards declare `series` at card level) |
 | `type`        | `unit` \| `skill` \| `equipment`                         |
 | `cost`        | Exact printed cost, or `"cheapest"` / `"most expensive"` |
 | `rank`        | Card rank (array = OR)                                   |
@@ -107,6 +108,8 @@ Some effects target cards rather than units on the field (e.g. `compress_shinsu`
 | `attribute`   | Card attribute code (array = OR)                         |
 | `choose`      | `true` — defer to a `card_selection` pending decision    |
 | `random`      | `true` — select deterministically via the seeded RNG     |
+
+`name` is an exact-name match; `series` is an exact series-code match — a card target uses one or the other, never both. A `series` is an explicit, schema-validated card-level field (like `affiliations`), never inferred from display names.
 
 `EffectResolver` derives the zone from the effect type (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard; `create_card` resolves the card catalog in its handler). It pre-resolves the structured `card` target to a concrete `targetCardId` (or a `card_selection` decision for `choose`) before invoking any handler. Handlers only receive `targetCardId` — they never interpret the card target themselves.
 

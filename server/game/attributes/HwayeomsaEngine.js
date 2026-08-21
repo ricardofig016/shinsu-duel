@@ -12,18 +12,32 @@ import ZoneService from "../services/ZoneService.js";
 import ShinsuService from "../services/ShinsuService.js";
 import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
-import { findCardsByName } from "../utils/cardData.js";
+import { findCardsByName, findCardsBySeries } from "../utils/cardData.js";
 
 export default class HwayeomsaEngine {
   constructor(eventBus, cards) {
     this._bus = eventBus;
     this._cards = cards;
-    this._incinerateLevels = {
-      1: { name: "Incinerate I", chargesNeeded: 1 },
-      2: { name: "Incinerate II", chargesNeeded: 3 },
-      3: { name: "Incinerate III", chargesNeeded: 5 },
-      4: { name: "Incinerate IV", chargesNeeded: 7 },
-    };
+    // Incinerate levels are derived from card data (series: incinerate +
+    // generated_by.amount), not hardcoded — the card definitions are the
+    // single source of truth for the charge cost of each level.
+    this._incinerateLevels = this._deriveIncinerateLevels();
+  }
+
+  _deriveIncinerateLevels() {
+    return findCardsBySeries(this._cards, "incinerate", "skill")
+      .map((card) => {
+        const generatedBy = card.deckConstraints?.find((c) => c.type === "generated_by");
+        return { card, name: card.name, chargesNeeded: generatedBy?.amount ?? 0 };
+      })
+      .filter((entry) => entry.chargesNeeded > 0)
+      .sort((a, b) => a.chargesNeeded - b.chargesNeeded)
+      .map((entry, index) => ({
+        level: index + 1,
+        name: entry.name,
+        chargesNeeded: entry.chargesNeeded,
+        card: entry.card,
+      }));
   }
 
   /**
@@ -93,7 +107,7 @@ export default class HwayeomsaEngine {
     const player = gameState.playerStates[username];
     if (!player) return null;
 
-    const config = this._incinerateLevels[level];
+    const config = this._incinerateLevels.find((l) => l.level === level);
     if (!config) return null;
 
     if ((player.fireCharges || 0) < config.chargesNeeded) {
@@ -103,11 +117,8 @@ export default class HwayeomsaEngine {
     // Consume charges
     gameState._modifyFireCharges(username, -config.chargesNeeded);
 
-    // Find the Incinerate card data
-    const cardData = this._findCardByName(config.name);
-    if (!cardData) return null;
-
-    // Create card instance in hand
+    // Create the Incinerate card instance in hand
+    const cardData = config.card;
     const incinerate = new Card(
       cardData.cardId,
       cardData,
@@ -133,9 +144,9 @@ export default class HwayeomsaEngine {
     const player = gameState.playerStates[username];
     const charges = player?.fireCharges || 0;
 
-    return Object.entries(this._incinerateLevels)
-      .filter(([, config]) => charges >= config.chargesNeeded)
-      .map(([level, config]) => ({ level: parseInt(level), ...config }));
+    return this._incinerateLevels
+      .filter((config) => charges >= config.chargesNeeded)
+      .map(({ level, name }) => ({ level, name }));
   }
 
   _hasHwayeomsaOnField(username, gameState) {

@@ -11,5 +11,5 @@ effects:
   - type: create_card
     card:
       type: skill
-      name: Incinerate
+      series: incinerate
     raw: "Spend Fire Charges to create the highest affordable Incinerate in your hand"

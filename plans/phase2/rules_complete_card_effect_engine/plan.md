@@ -10,7 +10,7 @@ _Phase C — Resolver structural nodes & predicates_ (done) — `sequence`/`cond
 
 _Phase D — Targeting extensions_ (done)
 
-1. `TargetResolver`: `random`/`choose`/`cost` selection, deck/hand/game sources, extended card-target selectors. Landed: `random`/`choose`/`cost`/`lowest_hp`/`traitNot` unit selection; structured card targets (`resolveCardTargets` + `toCardTargetView`) wired through `EffectResolver` into `compress_shinsu`/`draw_card`/`reclaim_cards`/`create_card`; legacy `targetCardSelector` removed; `Card.rank` added; `findCardsByFamily` now matches trailing-numeral and leading-ordinal families (Thorn Fragments). The structured `{side, scope, count, filters}` subset (affiliation/attribute/name filters, array-OR rank/position) landed in Phase B5a.
+1. `TargetResolver`: `random`/`choose`/`cost` selection, deck/hand/game sources, extended card-target selectors. Landed: `random`/`choose`/`cost`/`lowest_hp`/`traitNot` unit selection; structured card targets (`resolveCardTargets` + `toCardTargetView`) wired through `EffectResolver` into `compress_shinsu`/`draw_card`/`reclaim_cards`/`create_card`; legacy `targetCardSelector` removed; `Card.rank` added. Card grouping is the explicit, schema-validated `series` field (`findCardsBySeries`), not a name heuristic. The structured `{side, scope, count, filters}` subset (affiliation/attribute/name filters, array-OR rank/position) landed in Phase B5a.
 
 _Phase E — New effect primitives_ (each: handler + service integration + validate/execute tests) _depends on C+D_
 

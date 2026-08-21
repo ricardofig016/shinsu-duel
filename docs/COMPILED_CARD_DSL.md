@@ -60,7 +60,9 @@ Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) requi
 
 ### Card metadata
 
-Two card-level fields sit alongside node entries:
+Three card-level fields sit alongside node entries:
+
+- `series` — an explicit grouping key for related cards (e.g. `incinerate` for Incinerate I–IV, `thorn-fragment` for First–Fourth Thorn Fragment). It is a first-class data contract, not a name convention: cards in the same series declare the same `series` code explicitly, and card targets reference a series via `card.series`. Normalized like `affiliations` (dash-cased code).
 
 - `keywords` — identity markers, independent of `type`/`attributes`. Each item is either a bare string or an object carrying the player-visible identity text:
 
@@ -97,7 +99,7 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 | `type`            | Fields                            | Meaning                                                                                                                                                                                                 |
 | ----------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `draw_card`       | `amount`, `card?`                 | Draw `amount` cards (optionally filtered by `card`).                                                                                                                                                    |
-| `create_card`     | `card`                            | Create a card in hand. Exact `card.name` (optionally `card.type`) creates that card.                                                                                                                    |
+| `create_card`     | `card`                            | Create a card in hand. Exact `card.name` (optionally `card.type`) creates that card; `card.series` creates any card in that series (optionally `choose`/`random`).                                      |
 | `summon`          | `card`, `from`, `onto`, `random?` | Put a unit onto a battlefield (`from`: `deck`, `hand`, `deck_or_hand`, or `game` = all existing cards).                                                                                                 |
 | `discard`         | `card`, `owner`                   | Send a card from an owner's hand to their discard.                                                                                                                                                      |
 | `steal`           | `card`                            | Take a card from the opponent into your control.                                                                                                                                                        |
@@ -207,7 +209,8 @@ target:
 ```yaml
 card:
   zone: hand # hand | deck | discard   (default hand)
-  name: Shinwonryu # exact card name
+  name: Shinwonryu # exact card name (exclusive with `series`)
+  series: thorn-fragment # exact series code (exclusive with `name`)
   type: unit # unit | skill | equipment
   cost: 2 # or "cheapest" | "most expensive"
   rank: high ranker
@@ -217,6 +220,8 @@ card:
   choose: true
   random: true
 ```
+
+`name` is an exact card-name match; `series` is an exact series-code match (cards declare `series` at the card level). A card target uses one or the other, never both.
 
 ---
 

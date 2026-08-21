@@ -10,6 +10,7 @@ export default class Card {
     this.cardId = cardId;
     this.type = cardData.type;
     this.name = cardData.name;
+    this.series = cardData.series ?? null;
     this.sobriquet = cardData.sobriquet || null;
     this.rarity = cardData.rarity;
     this.maxHp = cardData.hp ?? null;

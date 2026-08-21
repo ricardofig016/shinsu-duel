@@ -147,6 +147,7 @@ export function normalizeEffectObject(obj, context) {
   if (obj.affiliation !== undefined) normalized.affiliation = normalizeList(obj.affiliation, normalizeAffiliation);
   if (obj.attribute !== undefined) normalized.attribute = normalizeList(obj.attribute, normalizeAttribute);
   if (obj.rank !== undefined) normalized.rank = normalizeList(obj.rank, normalizeRank);
+  if (obj.series !== undefined) normalized.series = toCode(obj.series);
 
   // Nested effect nodes: sequence.steps is an array; the rest are single.
   if (obj.steps !== undefined) {
@@ -382,6 +383,7 @@ export function compileCard(rawCard, allCards) {
     cardId: null, // assigned after sorting
     type: type,
     name: rawCard.name || "",
+    series: rawCard.series ? toCode(rawCard.series) : null,
     sobriquet: rawCard.sobriquet || null,
     cost: rawCard.cost ?? 0,
     keywords: (rawCard.keywords || []).map(normalizeKeyword),
@@ -482,6 +484,7 @@ function cleanCompiled(card) {
 
   // Delete optional single-value fields when null (sparse schema per plan)
   if (card.sobriquet === null) delete card.sobriquet;
+  if (card.series === null) delete card.series;
   if (card.rank === null) delete card.rank;
   if (card.hp === null) delete card.hp;
   if (card.evolveInto === null) delete card.evolveInto;

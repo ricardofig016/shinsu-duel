@@ -5,12 +5,11 @@
  * `{ "0": {...}, "1": {...} }` — the single source of truth shared by the
  * runtime engine and the attribute engines.
  *
- * A "family" is a group of cards whose names share a common base name and
- * differ by a numeral or ordinal — e.g. "Incinerate I" … "Incinerate IV"
- * (trailing Roman-numeral) or "First Thorn Fragment" … "Fourth Thorn Fragment"
- * (leading ordinal). These helpers let handlers resolve both an exact name and
- * a family by the same data-driven rules, avoiding duplicated name-matching
- * logic.
+ * A "series" is an explicit, schema-validated card-level field that groups
+ * related cards (e.g. "Incinerate I" … "Incinerate IV", "First Thorn Fragment"
+ * … "Fourth Thorn Fragment"). It is a first-class data contract, not a name
+ * convention — never inferred from display names. These helpers resolve an
+ * exact name or an exact series code against the catalog.
  */
 
 /**
@@ -34,31 +33,26 @@ export function findCardsByName(cards, name, type) {
 }
 
 /**
- * Find all cards whose name contains `name` (case-insensitive) as a base
- * name, optionally filtered to a card `type`.
+ * Find all cards whose `series` code exactly matches `series` (case-insensitive),
+ * optionally filtered to a card `type`.
  *
- * A family match includes any card whose name embeds the family base name as a
- * contiguous token sequence, so it handles both trailing numerals
- * ("Incinerate I" … "Incinerate IV") and leading ordinals ("First Thorn
- * Fragment" … "Fourth Thorn Fragment"). Exact-name matches are resolved first
- * by `findCardsByName`; this is the fallback for multi-card families.
+ * A series is authored explicitly on each card; there is no name-based
+ * inference. This returns every card carrying the matching series code.
  *
  * @param {object} cards keyed compiled card object
- * @param {string} name
+ * @param {string} series
  * @param {string} [type]
  * @returns {Array<object>}
  */
-export function findCardsByFamily(cards, name, type) {
+export function findCardsBySeries(cards, series, type) {
   if (!cards || typeof cards !== "object") return [];
-  const family = String(name).toLowerCase();
-  return Object.values(cards)
-    .filter(
-      (card) =>
-        card &&
-        card.name?.toLowerCase().includes(family) &&
-        (type === undefined || card.type === type)
-    )
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  const expected = String(series).toLowerCase();
+  return Object.values(cards).filter(
+    (card) =>
+      card &&
+      card.series?.toLowerCase() === expected &&
+      (type === undefined || card.type === type)
+  );
 }
 
 /**
@@ -70,8 +64,8 @@ export function findCardsByFamily(cards, name, type) {
  * both to string arrays so card-target filters have a single representation.
  *
  * @param {object} card a Card instance or a compiled card definition
- * @returns {{ id: string, cardId: number, name: string, type: string,
- *             cost: number, rank: string|null, positions: string[],
+ * @returns {{ id: string, cardId: number, name: string, series: string|null,
+ *             type: string, cost: number, rank: string|null, positions: string[],
  *             affiliations: string[], attributes: string[] } | null}
  */
 export function toCardTargetView(card) {
@@ -89,6 +83,7 @@ export function toCardTargetView(card) {
     id: card.id ?? String(card.cardId),
     cardId: card.cardId,
     name: card.name,
+    series: card.series ?? null,
     type: card.type,
     cost: card.cost,
     rank: card.rank ?? null,
@@ -98,4 +93,4 @@ export function toCardTargetView(card) {
   };
 }
 
-export default { findCardsByName, findCardsByFamily, toCardTargetView };
+export default { findCardsByName, findCardsBySeries, toCardTargetView };

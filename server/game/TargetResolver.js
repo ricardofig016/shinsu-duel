@@ -468,7 +468,7 @@ export function resolveTargets(gameState, options) {
 /**
  * Filter a list of card-target views against a structured card descriptor.
  *
- * The compiled `card` target (`{ name, type, cost, rank, position,
+ * The compiled `card` target (`{ name, series, type, cost, rank, position,
  * affiliation, attribute, choose, random }`) is the sole card-target
  * representation. `cards` is an array of `toCardTargetView()` results (see
  * `utils/cardData.js`); the caller maps its zone source (hand/deck/discard/
@@ -478,6 +478,7 @@ export function resolveTargets(gameState, options) {
  * Filtering only: `choose`/`random` selection is the caller's responsibility
  * (EffectResolver), keeping this function a pure predicate over card views.
  * `cost` accepts an exact integer or `"cheapest"` / `"most expensive"`.
+ * `name` is an exact name match; `series` is an exact series-code match.
  *
  * @param {Array<object>} cards — `toCardTargetView` results
  * @param {object} descriptor — compiled structured card target
@@ -486,7 +487,7 @@ export function resolveTargets(gameState, options) {
 export function resolveCardTargets(cards, descriptor) {
   if (!Array.isArray(cards) || !descriptor || typeof descriptor !== "object") return [];
 
-  const { name, type, cost, rank, position, affiliation, attribute } = descriptor;
+  const { name, series, type, cost, rank, position, affiliation, attribute } = descriptor;
 
   const matchAny = (values, test) => {
     const list = Array.isArray(values) ? values : [values];
@@ -498,6 +499,10 @@ export function resolveCardTargets(cards, descriptor) {
   if (name) {
     const expected = String(name).toLowerCase();
     candidates = candidates.filter((c) => c.name.toLowerCase() === expected);
+  }
+  if (series) {
+    const expected = String(series).toLowerCase();
+    candidates = candidates.filter((c) => c.series?.toLowerCase() === expected);
   }
   if (type) {
     candidates = candidates.filter((c) => c.type === type);

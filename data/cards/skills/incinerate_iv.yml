@@ -1,5 +1,6 @@
 type: skill
 name: Incinerate IV
+series: incinerate
 cost: 0
 requirements:
 deckConstraints:

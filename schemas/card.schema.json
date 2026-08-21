@@ -71,6 +71,7 @@
       "properties": {
         "zone": { "enum": ["hand", "deck", "discard"] },
         "name": { "type": "string", "minLength": 1 },
+        "series": { "type": "string", "minLength": 1 },
         "type": { "enum": ["unit", "skill", "equipment"] },
         "cost": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["cheapest", "most expensive"] }] },
         "rank": { "$ref": "#/definitions/filterValue" },
@@ -288,6 +289,7 @@
   "properties": {
     "type": { "enum": ["unit", "skill", "equipment"] },
     "name": { "type": "string", "minLength": 1 },
+    "series": { "type": "string", "minLength": 1 },
     "sobriquet": { "type": "string", "minLength": 1 },
     "cost": { "type": "integer", "minimum": 0 },
     "hp": { "type": "integer", "minimum": 1 },

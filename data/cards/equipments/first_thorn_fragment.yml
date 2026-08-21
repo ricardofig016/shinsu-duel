@@ -1,5 +1,6 @@
 type: equipment
 name: First Thorn Fragment
+series: thorn-fragment
 cost: 1
 requirements:
 deckConstraints:
@@ -22,7 +23,7 @@ effects:
         - type: discard
           card:
             type: equipment
-            name: "Thorn Fragment"
+            series: thorn-fragment
           owner: you
         - type: create_card
           card:
