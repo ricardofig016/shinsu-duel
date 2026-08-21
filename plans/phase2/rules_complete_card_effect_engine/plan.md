@@ -1,6 +1,6 @@
 ## Plan: Rules-complete card effect engine
 
-**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–C are complete: all 82 YAML cards are structured DSL, the zero-`custom`/zero-`handler` artifact is landed, structured target resolution and the `create_card`/Hwayeomsa path are runtime-supported, and `sequence`/`conditional` plus all six predicates are wired. The remaining work is runtime integration (Phases D–J): targeting extensions, the remaining effect handlers, modifiers/global rules, Jeonsulsa mechanics, and richer passives/triggers.
+**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–D are complete: all YAML cards are structured DSL (zero-`custom`/zero-`handler`), structured unit and card target resolution (including `random`/`choose`/`cost`/`lowest_hp` selection and the explicit `series` grouping) is runtime-supported, `sequence`/`conditional` plus all six predicates are wired, and shared-target sequences (`targets` + `target: { link: sequence }`) resolve one target set across steps. The remaining work is runtime integration (Phases E–J): the remaining effect handlers, modifiers/global rules, Jeonsulsa mechanics, and richer passives/triggers.
 
 **Steps**
 

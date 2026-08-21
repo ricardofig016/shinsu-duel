@@ -158,16 +158,18 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 
 ### Structural
 
-| `type`            | Fields                     | Meaning                                                          |
-| ----------------- | -------------------------- | ---------------------------------------------------------------- |
-| `sequence`        | `steps`                    | Resolve `steps` in order.                                        |
-| `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                |
-| `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played. |
-| `quick`           | —                          | Card-level Quick marker (display-only).                          |
-| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position (cluster R).             |
-| `noop`            | —                          | Explicit no-op (test placeholders).                              |
+| `type`            | Fields                     | Meaning                                                                            |
+| ----------------- | -------------------------- | ---------------------------------------------------------------------------------- |
+| `sequence`        | `steps`, `targets?`        | Resolve `steps` in order; `targets` resolves one shared target set for link steps. |
+| `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                                  |
+| `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played.                   |
+| `quick`           | —                          | Card-level Quick marker (display-only).                                            |
+| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position (cluster R).                               |
+| `noop`            | —                          | Explicit no-op (test placeholders).                                                |
 
 `spend_shinsu` and `grant_ability` are also structural: they wrap a nested `effect` / `ability` that is resolved (or registered) after their own step.
+
+A `sequence` may declare a shared `targets` descriptor (a side-based unit target). The target set is resolved once — filters, line blocking, Taunt, Blinded, and the choice/random selection — and steps reference it with a **link** target: `target: { link: sequence }` acts on every shared target, while `target: { link: sequence, count: N }` acts on a player-chosen subset (e.g. "give Burned 1 to one of them").
 
 ---
 
@@ -204,11 +206,13 @@ target:
 
 `rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh". The bare `position: shinheuh` is shorthand for that Shinheuh pair.
 
+A step inside a shared-target `sequence` uses a **link** target instead of a side descriptor: `target: { link: sequence }` (all shared targets) or `target: { link: sequence, count: N }` (a subset). Link targets are only valid on steps of a `sequence` that declares `targets`.
+
 ### Card target
 
 ```yaml
 card:
-  zone: hand # hand | deck | discard   (default hand)
+  zone: hand # hand | deck | discard (explicit source-zone override; defaults to the effect's natural zone)
   name: Shinwonryu # exact card name (exclusive with `series`)
   series: thorn-fragment # exact series code (exclusive with `name`)
   type: unit # unit | skill | equipment
@@ -221,7 +225,7 @@ card:
   random: true
 ```
 
-`name` is an exact card-name match; `series` is an exact series-code match (cards declare `series` at the card level). A card target uses one or the other, never both.
+`name` is an exact card-name match; `series` is an exact series-code match (cards declare `series` at the card level). A card target uses one or the other, never both. `zone` selects the source zone to search; when omitted it defaults to the effect's natural zone (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard).
 
 ---
 

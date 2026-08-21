@@ -67,7 +67,7 @@ function parseTrait(raw) {
 // normalized to internal codes before the compiled-schema check.
 
 const NESTED_NODE_KEYS = ["effect", "ability", "then", "otherwise"];
-const NESTED_DESCRIPTOR_KEYS = ["target", "card", "source", "if", "trigger", "when"];
+const NESTED_DESCRIPTOR_KEYS = ["target", "targets", "card", "source", "if", "trigger", "when"];
 
 function normalizeCondition(value) {
   return String(value).trim().toLowerCase();

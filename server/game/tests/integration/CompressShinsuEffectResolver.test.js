@@ -99,23 +99,24 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     expect(expensive.costReduction).toBe(3);
   });
 
-  test("handler throws when no card matches the target", () => {
+  test("no card matches the target: legal no-op, no throw, no compression", () => {
     const context = {
       emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload),
     };
 
-    expect(() =>
-      resolveEffect(
-        {
-          type: "compress_shinsu",
-          amount: 1,
-          card: { name: "Nonexistent Card" },
-          raw: "Compress 1 from Nonexistent Card in your hand",
-        },
-        context,
-        game,
-        { owner: "Alice" }
-      )
-    ).toThrow(/targetCardId/);
+    const result = resolveEffect(
+      {
+        type: "compress_shinsu",
+        amount: 1,
+        card: { name: "Nonexistent Card" },
+        raw: "Compress 1 from Nonexistent Card in your hand",
+      },
+      context,
+      game,
+      { owner: "Alice" }
+    );
+
+    expect(result).toEqual({ skipped: true, reason: "no valid targets" });
+    expect(game.playerStates.Alice.hand.every((card) => !card.costReduction)).toBe(true);
   });
 });

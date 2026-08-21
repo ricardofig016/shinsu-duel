@@ -90,28 +90,31 @@ Compiled cards author unit targets as structured objects — `{ side, scope, cou
 
 `scope` maps `enemy`+`all` → `all_enemies`, `frontline` → `enemy_frontline`, `backline` → `enemy_backline`, `ally`+`all` → `all_allies`. `choose` and `random` are selection strategies applied after filtering; `random` uses the game's seeded RNG so it is deterministic in tests and replays. Card targets resolve through `resolveCardTargets` (see [Card Target Resolution](#card-target-resolution)).
 
+A `sequence` may declare a shared `targets` descriptor (a side-based unit target) that is resolved once. Its steps reference the resolved set via `target: { link: sequence }` (all) or `{ link: sequence, count: N }` (a chosen subset), so multi-step effects act on the same units.
+
 ---
 
 ## Card Target Resolution
 
 Some effects target cards rather than units on the field (e.g. `compress_shinsu`, filtered `draw_card`/`reclaim_cards`, and `create_card`). These use `TargetResolver.resolveCardTargets(cards, descriptor)` — the same architectural boundary as unit targeting. `cards` is a list of normalized card views produced by `toCardTargetView` (in `utils/cardData.js`), which collapses the `Card` instance's code→entry dictionaries and the compiled catalog's code arrays into one filter shape.
 
-| Field         | Behavior                                                 |
-| ------------- | -------------------------------------------------------- |
-| `name`        | Exact card name (case-insensitive)                       |
-| `series`      | Exact series code (cards declare `series` at card level) |
-| `type`        | `unit` \| `skill` \| `equipment`                         |
-| `cost`        | Exact printed cost, or `"cheapest"` / `"most expensive"` |
-| `rank`        | Card rank (array = OR)                                   |
-| `position`    | Card position code (array = OR)                          |
-| `affiliation` | Card affiliation code (array = OR)                       |
-| `attribute`   | Card attribute code (array = OR)                         |
-| `choose`      | `true` — defer to a `card_selection` pending decision    |
-| `random`      | `true` — select deterministically via the seeded RNG     |
+| Field         | Behavior                                                      |
+| ------------- | ------------------------------------------------------------- |
+| `name`        | Exact card name (case-insensitive)                            |
+| `series`      | Exact series code (cards declare `series` at card level)      |
+| `type`        | `unit` \| `skill` \| `equipment`                              |
+| `zone`        | `hand` \| `deck` \| `discard` — explicit source-zone override |
+| `cost`        | Exact printed cost, or `"cheapest"` / `"most expensive"`      |
+| `rank`        | Card rank (array = OR)                                        |
+| `position`    | Card position code (array = OR)                               |
+| `affiliation` | Card affiliation code (array = OR)                            |
+| `attribute`   | Card attribute code (array = OR)                              |
+| `choose`      | `true` — defer to a `card_selection` pending decision         |
+| `random`      | `true` — select deterministically via the seeded RNG          |
 
 `name` is an exact-name match; `series` is an exact series-code match — a card target uses one or the other, never both. A `series` is an explicit, schema-validated card-level field (like `affiliations`), never inferred from display names.
 
-`EffectResolver` derives the zone from the effect type (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard; `create_card` resolves the card catalog in its handler). It pre-resolves the structured `card` target to a concrete `targetCardId` (or a `card_selection` decision for `choose`) before invoking any handler. Handlers only receive `targetCardId` — they never interpret the card target themselves.
+`EffectResolver` resolves the source zone from `card.zone` when present, else derives it from the effect type (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard; `create_card` resolves the card catalog in its handler). It pre-resolves the structured `card` target to a concrete `targetCardId` (or a `card_selection` decision for `choose`) before invoking any handler. Handlers only receive `targetCardId` — they never interpret the card target themselves.
 
 ---
 

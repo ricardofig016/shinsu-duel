@@ -19,14 +19,15 @@ abilities:
     amount: 1
     effect:
       type: sequence
+      targets: { side: enemy, count: 2 }
       steps:
         - type: deal_damage
           amount: 1
-          target: { side: enemy, count: 2 }
+          target: { link: sequence }
         - type: give_condition
           condition: burned
           amount: 1
-          target: { side: enemy }
+          target: { link: sequence, count: 1 }
     raw: "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
   - type: heal
     amount: 2

@@ -101,7 +101,7 @@ export default class UseAbilityAction extends ActionHandler {
       gameState.eventBus.emit(EVT.UNIT_ABILITY_USED, { username, unitId, abilityCode });
       if (poison > 0 && unit.isAlive()) {
         const poisonContext = { emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload) };
-        resolveEffect({ type: "deal_damage", amount: poison, targetId: unit.id, raw: "Poisoned", handler: null }, poisonContext, gameState, {
+        resolveEffect({ type: "deal_damage", amount: poison, targetId: unit.id, raw: "Poisoned" }, poisonContext, gameState, {
           sourceId: unit.id,
           sourceUnit: unit,
           sourceOwner: username,

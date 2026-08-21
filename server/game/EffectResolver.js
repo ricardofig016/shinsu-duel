@@ -74,9 +74,152 @@ function resolveSequence(effect, context, gameState, extra) {
   if (!Array.isArray(effect.steps)) {
     throw new Error("EffectResolver: sequence requires a `steps` array");
   }
+  if (effect.targets) {
+    return resolveSharedSequence(effect, context, gameState, extra);
+  }
+  const linksShared = effect.steps.some(
+    (step) =>
+      step?.target &&
+      typeof step.target === "object" &&
+      !Array.isArray(step.target) &&
+      step.target.link === "sequence"
+  );
+  if (linksShared) {
+    throw new Error(
+      "EffectResolver: a step with `target: { link: sequence }` requires the sequence to declare `targets`"
+    );
+  }
   const results = resolveEffects(effect.steps, context, gameState, extra);
   const pending = results.some((result) => result?.pending);
   return pending ? { resolved: true, pending: true, results } : { resolved: true, results };
+}
+
+/**
+ * Resolve a `sequence` that declares a shared `targets` descriptor.
+ *
+ * The shared target set is resolved ONCE (filters, line blocking, taunt,
+ * blinded, and the choice/random selection) and every step that references it
+ * via `target: { link: sequence }` acts on that same set — optionally a
+ * `count: N` subset of it (e.g. "give Burned 1 to one of them").
+ *
+ * Steps run through a pending-decision continuation rather than inline in the
+ * decision's resolve callback, so a nested subset choice is created in
+ * continuation context and GameState's `_runContinuations` re-targets the
+ * action's completion (end-turn) onto that nested choice.
+ */
+function resolveSharedSequence(effect, context, gameState, extra) {
+  const descriptor = effect.targets;
+  const structured = TargetResolver.normalizeStructuredTarget(descriptor);
+  const count = structured.count ?? 1;
+
+  const sourceUnit = extra.sourceUnit || gameState._findUnit(extra.sourceId);
+  const candidates = TargetResolver.resolveTargets(gameState, {
+    target: structured.target,
+    sourceUnit,
+    sourceOwner: extra.sourceOwner || extra.owner,
+    condition: structured.condition,
+    conditionValue: structured.conditionValue,
+    trait: structured.trait,
+    traitNot: structured.traitNot,
+    cost: structured.cost,
+    rank: structured.rank,
+    position: structured.position,
+    affiliation: structured.affiliation,
+    attribute: structured.attribute,
+    name: structured.name,
+    sharedAffiliation: structured.shared_affiliation,
+    lowestHp: structured.lowestHp,
+    count: Number.MAX_SAFE_INTEGER,
+  });
+
+  if (candidates.length === 0) {
+    return { resolved: true, skipped: true, reason: "no valid targets" };
+  }
+
+  // Random selection: deterministic seeded shuffle, no player decision.
+  if (structured.random) {
+    shuffle(candidates, gameState._rng);
+    return resolveSharedSteps(
+      effect.steps, context, gameState, extra,
+      candidates.slice(0, count).map((unit) => unit.id)
+    );
+  }
+
+  // A single candidate needs no decision.
+  if (candidates.length === 1) {
+    return resolveSharedSteps(effect.steps, context, gameState, extra, candidates.map((unit) => unit.id));
+  }
+
+  const take = count && count > 1 ? Math.min(count, candidates.length) : 1;
+  let chosenIds = null;
+  gameState.createPendingDecision({
+    owner: extra.owner || extra.sourceOwner,
+    type: "target_selection",
+    candidates: candidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+    minChoices: take,
+    maxChoices: take,
+    resolve: (targetIds) => {
+      TargetResolver.validateTauntSelection(candidates, targetIds, gameState, sourceUnit);
+      chosenIds = targetIds;
+    },
+  });
+  // Queue the step runner as the first continuation (before the action's own
+  // completion) so any nested subset decision defers the end-turn correctly.
+  gameState.appendPendingDecisionContinuation(() => {
+    resolveSharedSteps(effect.steps, context, gameState, extra, chosenIds);
+  });
+  return { resolved: true, pending: true };
+}
+
+/**
+ * Resolve the steps of a shared-target sequence against a concrete target set.
+ * Link steps resolve once per shared target (or per a chosen `count` subset);
+ * non-link steps resolve normally. A pending subset choice defers the
+ * remaining steps via a continuation.
+ */
+function resolveSharedSteps(steps, context, gameState, extra, sharedTargetIds) {
+  const results = [];
+  for (let index = 0; index < steps.length; index++) {
+    const step = steps[index];
+    const target = step?.target;
+    const isLink =
+      target && typeof target === "object" && !Array.isArray(target) && target.link === "sequence";
+
+    if (!isLink) {
+      results.push(resolveEffect(step, context, gameState, { ...extra, sharedTargetIds }));
+      continue;
+    }
+
+    const subset = target.count;
+    if (subset === undefined || subset >= sharedTargetIds.length) {
+      for (const id of sharedTargetIds) {
+        results.push(resolveEffect(step, context, gameState, { ...extra, sharedTargetIds, targetId: id }));
+      }
+      continue;
+    }
+
+    // Subset selection: the player picks `subset` of the already-chosen set.
+    gameState.createPendingDecision({
+      owner: extra.owner || extra.sourceOwner,
+      type: "target_selection",
+      candidates: sharedTargetIds.map((id) => {
+        const unit = gameState._findUnit(id);
+        return { id, name: unit?.card?.name, hp: unit?.currentHp };
+      }),
+      minChoices: subset,
+      maxChoices: subset,
+      resolve: (targetIds) => {
+        for (const id of targetIds) {
+          resolveEffect(step, context, gameState, { ...extra, sharedTargetIds, targetId: id });
+        }
+      },
+    });
+    gameState.appendPendingDecisionContinuation(() => {
+      resolveSharedSteps(steps.slice(index + 1), context, gameState, extra, sharedTargetIds);
+    });
+    return { resolved: true, pending: true, results };
+  }
+  return { resolved: true, results };
 }
 
 /**
@@ -135,6 +278,25 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
 
   // Build payload from DSL + extra context
   const payload = { ...effect, ...extra };
+
+  // Shared-target link steps are resolved by resolveSharedSequence, which
+  // supplies `sharedTargetIds` plus a concrete `targetId`. A link target
+  // reached any other way is an authoring/runtime error.
+  if (
+    payload.target &&
+    typeof payload.target === "object" &&
+    !Array.isArray(payload.target) &&
+    payload.target.link === "sequence"
+  ) {
+    if (!extra.sharedTargetIds) {
+      throw new Error(
+        "EffectResolver: a `target: { link: sequence }` step requires an enclosing sequence with `targets`"
+      );
+    }
+    if (!payload.targetId) {
+      throw new Error("EffectResolver: a link step must resolve to a concrete targetId");
+    }
+  }
 
   // Structured unit-target descriptors ({ side, scope, count, ... }) are
   // translated into the canonical string target + filter fields. Handlers
@@ -240,10 +402,14 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     const cardTarget = payload.card;
     const owner = payload.owner || payload.sourceOwner || extra.owner;
     const player = owner ? gameState.playerStates[owner] : null;
-    let zoneCards = null;
-    if (type === "compress_shinsu") zoneCards = player?.hand;
-    else if (type === "draw_card") zoneCards = player?.deck;
-    else if (type === "reclaim_cards") zoneCards = player?.discard;
+    // An explicit `card.zone` wins; otherwise the zone is derived from the
+    // effect type (compress → hand, draw → deck, reclaim → discard).
+    const zone = cardTarget.zone ??
+      (type === "compress_shinsu" ? "hand"
+        : type === "draw_card" ? "deck"
+        : type === "reclaim_cards" ? "discard"
+        : null);
+    const zoneCards = zone ? player?.[zone] : null;
 
     if (zoneCards) {
       const candidates = TargetResolver.resolveCardTargets(
@@ -270,8 +436,12 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
         } else {
           payload.targetCardId = candidates[0].id;
         }
+      } else {
+        // A structured card target that matches nothing is a legal no-op,
+        // mirroring the unit-target path above — handlers never run without a
+        // concrete target, so a filtered draw/reclaim/compress does nothing.
+        return { skipped: true, reason: "no valid targets" };
       }
-      // No match: handlers validate a required target and throw a descriptive error.
     }
   }
 

@@ -105,6 +105,24 @@ describe("card-compile normalization helpers", () => {
 
     expect(normalized.card.series).toBe("thorn-fragment");
   });
+
+  test("normalizeEffectObject recurses into sequence `targets` and passes link/count through", () => {
+    const normalized = normalizeEffectObject(
+      {
+        type: "sequence",
+        targets: { side: "enemy", count: 3, rank: ["Regular", "Ranker"] },
+        steps: [
+          { type: "deal_damage", amount: 2, target: { link: "sequence" } },
+          { type: "give_condition", condition: "burned", target: { link: "sequence", count: 1 } },
+        ],
+      },
+      "card.effects[0]"
+    );
+
+    expect(normalized.targets).toEqual({ side: "enemy", count: 3, rank: ["regular", "ranker"] });
+    expect(normalized.steps[0].target).toEqual({ link: "sequence" });
+    expect(normalized.steps[1].target).toEqual({ link: "sequence", count: 1 });
+  });
 });
 
 describe("card-compile parseTrigger", () => {
@@ -336,5 +354,77 @@ effects:
     });
 
     expect(cards).toHaveLength(1);
+  });
+
+  test("accepts a shared-target sequence with link steps", async () => {
+    await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
+name: Test Shared
+cost: 1
+deckConstraints: []
+effects:
+  - type: sequence
+    targets: { side: enemy, count: 3 }
+    steps:
+      - type: deal_damage
+        amount: 2
+        target: { link: sequence }
+      - type: give_condition
+        condition: burned
+        target: { link: sequence }
+    raw: "deal 2 to 3 enemies and give them Burn"
+`, "utf-8");
+
+    const cards = await compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    });
+
+    expect(cards).toHaveLength(1);
+    const effect = cards[0].effects[0];
+    expect(effect.targets).toEqual({ side: "enemy", count: 3 });
+    expect(effect.steps[0].target).toEqual({ link: "sequence" });
+    expect(effect.steps[1].target).toEqual({ link: "sequence" });
+  });
+
+  test("rejects a link target with a non-sequence link value", async () => {
+    await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
+name: Test Bad Link Value
+cost: 1
+deckConstraints: []
+effects:
+  - type: sequence
+    targets: { side: enemy }
+    steps:
+      - type: deal_damage
+        amount: 2
+        target: { link: banana }
+    raw: "deal 2 to a shared target"
+`, "utf-8");
+
+    await expect(compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    })).rejects.toThrow("Compiled card data failed");
+  });
+
+  test("rejects `targets` on a non-sequence node", async () => {
+    await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
+name: Test Bad Targets
+cost: 1
+deckConstraints: []
+effects:
+  - type: deal_damage
+    amount: 2
+    targets: { side: enemy }
+    raw: "deal 2 to a shared target"
+`, "utf-8");
+
+    await expect(compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    })).rejects.toThrow("Compiled card data failed");
   });
 });

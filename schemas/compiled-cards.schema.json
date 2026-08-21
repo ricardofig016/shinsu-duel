@@ -41,28 +41,41 @@
       "additionalProperties": false
     },
     "unitTarget": {
-      "type": "object",
-      "required": ["side"],
-      "properties": {
-        "side": { "enum": ["self", "bearer", "ally", "enemy", "any"] },
-        "scope": { "enum": ["single", "all", "frontline", "backline"] },
-        "count": { "type": "integer", "minimum": 1 },
-        "choose": { "type": "boolean" },
-        "random": { "type": "boolean" },
-        "condition": { "type": "string", "minLength": 1 },
-        "conditionValue": { "type": "integer", "minimum": 0 },
-        "trait": { "type": "string", "minLength": 1 },
-        "traitNot": { "type": "string", "minLength": 1 },
-        "lowest_hp": { "type": "boolean" },
-        "shared_affiliation": { "type": "boolean" },
-        "rank": { "$ref": "#/definitions/filterValue" },
-        "position": { "$ref": "#/definitions/filterValue" },
-        "affiliation": { "$ref": "#/definitions/filterValue" },
-        "attribute": { "$ref": "#/definitions/filterValue" },
-        "name": { "type": "string", "minLength": 1 },
-        "cost": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["cheapest", "most expensive"] }] }
-      },
-      "additionalProperties": false
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["side"],
+          "properties": {
+            "side": { "enum": ["self", "bearer", "ally", "enemy", "any"] },
+            "scope": { "enum": ["single", "all", "frontline", "backline"] },
+            "count": { "type": "integer", "minimum": 1 },
+            "choose": { "type": "boolean" },
+            "random": { "type": "boolean" },
+            "condition": { "type": "string", "minLength": 1 },
+            "conditionValue": { "type": "integer", "minimum": 0 },
+            "trait": { "type": "string", "minLength": 1 },
+            "traitNot": { "type": "string", "minLength": 1 },
+            "lowest_hp": { "type": "boolean" },
+            "shared_affiliation": { "type": "boolean" },
+            "rank": { "$ref": "#/definitions/filterValue" },
+            "position": { "$ref": "#/definitions/filterValue" },
+            "affiliation": { "$ref": "#/definitions/filterValue" },
+            "attribute": { "$ref": "#/definitions/filterValue" },
+            "name": { "type": "string", "minLength": 1 },
+            "cost": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["cheapest", "most expensive"] }] }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["link"],
+          "properties": {
+            "link": { "enum": ["sequence"] },
+            "count": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
     },
     "cardTarget": {
       "type": "object",
@@ -139,6 +152,7 @@
         "conditionValue": { "type": "integer", "minimum": 0 },
         "trait": { "type": "string", "minLength": 1 },
         "target": { "$ref": "#/definitions/unitTarget" },
+        "targets": { "$ref": "#/definitions/unitTarget" },
         "card": { "$ref": "#/definitions/cardTarget" },
         "source": { "$ref": "#/definitions/unitTarget" },
         "from": { "enum": ["deck", "hand", "deck_or_hand", "game"] },
@@ -193,7 +207,8 @@
         { "if": { "properties": { "type": { "const": "conditional" } } }, "then": { "required": ["if", "then"] } },
         { "if": { "properties": { "type": { "const": "repeat_play" } } }, "then": { "required": ["amount"] } },
         { "if": { "properties": { "type": { "const": "grant_affiliation" } } }, "then": { "required": ["target", "source"] } },
-        { "if": { "properties": { "type": { "const": "return_to_hand" } } }, "then": { "required": ["target"] } }
+        { "if": { "properties": { "type": { "const": "return_to_hand" } } }, "then": { "required": ["target"] } },
+        { "if": { "required": ["targets"] }, "then": { "properties": { "type": { "const": "sequence" } } } }
       ]
     },
     "modifierNode": {

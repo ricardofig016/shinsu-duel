@@ -1644,21 +1644,23 @@
     "effects": [
       {
         "type": "sequence",
+        "targets": {
+          "side": "enemy",
+          "count": 3
+        },
         "steps": [
           {
             "type": "deal_damage",
             "amount": 2,
             "target": {
-              "side": "enemy",
-              "count": 3
+              "link": "sequence"
             }
           },
           {
             "type": "give_condition",
             "condition": "burned",
             "target": {
-              "side": "enemy",
-              "count": 3
+              "link": "sequence"
             }
           }
         ],
@@ -1735,13 +1737,16 @@
         "amount": 1,
         "effect": {
           "type": "sequence",
+          "targets": {
+            "side": "enemy",
+            "count": 2
+          },
           "steps": [
             {
               "type": "deal_damage",
               "amount": 1,
               "target": {
-                "side": "enemy",
-                "count": 2
+                "link": "sequence"
               }
             },
             {
@@ -1749,7 +1754,8 @@
               "condition": "burned",
               "amount": 1,
               "target": {
-                "side": "enemy"
+                "link": "sequence",
+                "count": 1
               }
             }
           ]

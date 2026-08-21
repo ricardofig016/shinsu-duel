@@ -9,16 +9,18 @@
 - [ ] new card: equipment - my bearer can assume any position
 - [ ] new card: passive - allies in my position have +x HP
 - [ ] new card: landmark - round start: give frontline units Blinded
-- [ ] data: add yml files for new cards in `todo\cards_to_add.md `
 - [ ] rules: add "steal" keyword
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
+- [ ] rules: rename `create` keyword to `light up` - "create" is overloaded with 2 meanings
+- [ ] game: add support for `any` position which represents all main positions
 
 ## In Progress
 
 
 ## Completed
 
+- [x] data: add yml files for new cards in `todo\cards_to_add.md`
 - [x] scripts: fix lookup after yml structure changes
 - [x] tests: add more to increase coverage
 - [x] tests: organize server\game\tests better - there's too many tests directly in tests\

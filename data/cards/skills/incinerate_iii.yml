@@ -12,11 +12,12 @@ deckConstraints:
     raw: "create me by spending 5 Fire Charges"
 effects:
   - type: sequence
+    targets: { side: enemy, count: 3 }
     steps:
       - type: deal_damage
         amount: 2
-        target: { side: enemy, count: 3 }
+        target: { link: sequence }
       - type: give_condition
         condition: burned
-        target: { side: enemy, count: 3 }
+        target: { link: sequence }
     raw: "deal 2 to 3 enemies and give them Burn"
