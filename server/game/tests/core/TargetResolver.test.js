@@ -266,6 +266,46 @@ describe("TargetResolver.resolveTargets — remaining descriptors", () => {
     expect(targets.map((t) => t.id)).toEqual(["t"]);
   });
 
+  test("applies has_passive filter", () => {
+    const source = unit("s", game.usernames[0]);
+    const withPassive = unit("wp", game.usernames[1], "scout", { passiveAbilities: [{}] });
+    const withoutPassive = unit("np", game.usernames[1], "scout");
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [withPassive, withoutPassive];
+
+    const targets = TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, hasPassive: true });
+    expect(targets.map((t) => t.id)).toEqual(["wp"]);
+  });
+
+  test("applies can_switch filter (only units with a legal other position pass)", () => {
+    const source = unit("s", game.usernames[0]);
+    const canSwitch = unit("sw", game.usernames[1], "fisherman", { positions: { fisherman: {}, "spear-bearer": {} } });
+    const cannotSwitch = unit("ns", game.usernames[1], "fisherman", { positions: { fisherman: {} } });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [canSwitch, cannotSwitch];
+
+    const targets = TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, canSwitch: true });
+    expect(targets.map((t) => t.id)).toEqual(["sw"]);
+  });
+
+  test("can_switch filter excludes a unit whose destination line is full", () => {
+    const source = unit("s", game.usernames[0]);
+    const fullBackline = unit("sw", game.usernames[1], "fisherman", { positions: { fisherman: {}, "spear-bearer": {} } });
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [fullBackline];
+    // Fill Bob's backline to capacity (5), so spear-bearer has no room.
+    game.playerStates[game.usernames[1]].field.backline = [
+      unit("b1", game.usernames[1], "spear-bearer"),
+      unit("b2", game.usernames[1], "spear-bearer"),
+      unit("b3", game.usernames[1], "spear-bearer"),
+      unit("b4", game.usernames[1], "spear-bearer"),
+      unit("b5", game.usernames[1], "spear-bearer"),
+    ];
+
+    const targets = TargetResolver.resolveTargets(game, { target: "all_enemies", sourceUnit: source, canSwitch: true });
+    expect(targets).toEqual([]);
+  });
+
   test("applies rank filter", () => {
     const source = unit("s", game.usernames[0]);
     const ranker = unit("r", game.usernames[1], "scout", { card: { rank: "ranker" } });

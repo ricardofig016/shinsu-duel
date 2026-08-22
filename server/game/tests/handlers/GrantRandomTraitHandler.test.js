@@ -50,6 +50,21 @@ describe("GrantRandomTraitHandler", () => {
     expect(game.modifierStack.has(unit.id, "trait", result.trait)).toBe(true);
   });
 
+  test("deterministically grants the same random trait for the same seed", () => {
+    const run = () => {
+      const game = setupGameWithCardsInHand(["Bull", "Bull"]);
+      const unit = deploy(game, "Alice", "Bull", "frontline-shinheuh");
+      const result = handler.execute(
+        { targetId: unit.id, sourceId: "Ability#1" },
+        context(game),
+        game
+      );
+      return result.trait;
+    };
+
+    expect(run()).toBe(run());
+  });
+
   test("validate throws without targetId", () => {
     expect(() => handler.validate({})).toThrow("targetId");
   });

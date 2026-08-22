@@ -206,4 +206,48 @@ describe("structured target resolution via EffectResolver", () => {
     expect(cheap.currentHp).toBe(9);
     expect(pricey.currentHp).toBe(10);
   });
+
+  test("copy_traits with a single source auto-resolves without a decision", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    push(game, "Bob", unit("enemy", "Bob", "scout"));
+
+    const result = resolveEffect(
+      { type: "copy_traits", targetId: src.id, source: { side: "enemy" }, raw: "copy traits" },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(game.pendingDecision).toBeNull();
+    expect(result).toEqual({ copied: 0, traits: [] });
+  });
+
+  test("copy_traits with multiple sources defers to a target_selection decision", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    push(game, "Bob", unit("e1", "Bob", "scout"));
+    push(game, "Bob", unit("e2", "Bob", "scout"));
+
+    const result = resolveEffect(
+      { type: "copy_traits", targetId: src.id, source: { side: "enemy" }, raw: "copy traits" },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.type).toBe("target_selection");
+  });
+
+  test("copy_traits with no matching source skips", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+
+    const result = resolveEffect(
+      { type: "copy_traits", targetId: src.id, source: { side: "enemy" }, raw: "copy traits" },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(result).toEqual({ skipped: true, reason: "no valid source" });
+  });
 });

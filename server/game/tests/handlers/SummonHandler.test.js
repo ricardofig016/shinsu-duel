@@ -16,6 +16,13 @@ function addCardToHand(game, username, cardName) {
   return card;
 }
 
+function addCardToDeck(game, username, cardName) {
+  const cardId = getCardIdByName(cardName);
+  const card = new Card(cardId, game.constructor.cards[cardId], username, game.eventBus);
+  game.playerStates[username].deck.push(card);
+  return card;
+}
+
 describe("SummonHandler", () => {
   let handler;
 
@@ -48,6 +55,20 @@ describe("SummonHandler", () => {
     expect(onField(game, "Alice").some((u) => u.card.name === "Bull")).toBe(true);
   });
 
+  test("random summon is deterministic for the same seed", () => {
+    const run = () => {
+      const game = setupGameWithHands({ Alice: [] });
+      handler.execute(
+        { owner: "Alice", card: { position: ["frontline-shinheuh", "backline-shinheuh"], random: true }, from: "game", onto: "self" },
+        context(game),
+        game
+      );
+      return onField(game, "Alice").map((u) => u.card.name);
+    };
+
+    expect(run()).toEqual(run());
+  });
+
   test("a summoned duplicate of an existing unit is discarded", () => {
     const game = setupGameWithHands({ Alice: ["Bull"] });
     deployUnit(game, "Alice", "Bull", "frontline-shinheuh");
@@ -72,6 +93,71 @@ describe("SummonHandler", () => {
       game
     );
     expect(result.summoned).toBe(false);
+  });
+
+  test("summons a named unit from the deck", () => {
+    const game = setupGameWithHands({ Alice: [] });
+    game.playerStates.Alice.deck = [];
+    addCardToDeck(game, "Alice", "Bull");
+
+    const result = handler.execute(
+      { owner: "Alice", card: { name: "Bull" }, from: "deck", onto: "self", sourceId: "Unit#Src" },
+      context(game),
+      game
+    );
+
+    expect(result.summoned).toBe(true);
+    expect(onField(game, "Alice").some((u) => u.card.name === "Bull")).toBe(true);
+    expect(game.playerStates.Alice.deck.some((c) => c.name === "Bull")).toBe(false);
+  });
+
+  test("summons a named unit onto the opponent", () => {
+    const game = setupGameWithHands({ Alice: ["Bull"] });
+
+    const result = handler.execute(
+      { owner: "Alice", card: { name: "Bull" }, from: "hand", onto: "opponent", sourceId: "Unit#Src" },
+      context(game),
+      game
+    );
+
+    expect(result.summoned).toBe(true);
+    const summoned = onField(game, "Bob").find((u) => u.card.name === "Bull");
+    expect(summoned).toBeDefined();
+    expect(summoned.owner).toBe("Bob");
+  });
+
+  test("summons onto both players from deck_or_hand", () => {
+    const game = setupGameWithHands({ Alice: ["Bull"] });
+    addCardToDeck(game, "Alice", "Bull");
+
+    const result = handler.execute(
+      { owner: "Alice", card: { name: "Bull" }, from: "deck_or_hand", onto: "both", sourceId: "Unit#Src" },
+      context(game),
+      game
+    );
+
+    expect(result.summoned).toBe(true);
+    expect(onField(game, "Alice").some((u) => u.card.name === "Bull")).toBe(true);
+    expect(onField(game, "Bob").some((u) => u.card.name === "Bull")).toBe(true);
+  });
+
+  test("summon into a full line defers to a line_overflow decision", () => {
+    const game = setupGameWithHands({ Alice: ["Bull"] });
+    game.playerStates.Alice.field.frontline = [
+      { id: "U1", card: { name: "A", maxHp: 1 }, currentHp: 1 },
+      { id: "U2", card: { name: "B", maxHp: 1 }, currentHp: 1 },
+      { id: "U3", card: { name: "C", maxHp: 1 }, currentHp: 1 },
+      { id: "U4", card: { name: "D", maxHp: 1 }, currentHp: 1 },
+      { id: "U5", card: { name: "E", maxHp: 1 }, currentHp: 1 },
+    ];
+
+    handler.execute(
+      { owner: "Alice", card: { name: "Bull" }, from: "hand", onto: "self", sourceId: "Unit#Src" },
+      context(game),
+      game
+    );
+
+    expect(game.pendingDecision?.type).toBe("line_overflow");
   });
 
   test("validate throws without required fields", () => {

@@ -160,14 +160,14 @@ The `summon`/`discard`/`steal`/`disarm`/`switch_position` primitives route throu
 
 ### Structural
 
-| `type`            | Fields                     | Meaning                                                                            |
-| ----------------- | -------------------------- | ---------------------------------------------------------------------------------- |
-| `sequence`        | `steps`, `targets?`        | Resolve `steps` in order; `targets` resolves one shared target set for link steps. |
-| `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                                  |
-| `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played.                   |
-| `quick`           | —                          | Card-level Quick marker (display-only).                                            |
-| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position (cluster R).                               |
-| `noop`            | —                          | Explicit no-op (test placeholders).                                                |
+| `type`            | Fields                     | Meaning                                                                                                                |
+| ----------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `sequence`        | `steps`, `targets?`        | Resolve `steps` in order; `targets` resolves one shared target set for link steps.                                     |
+| `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                                                                      |
+| `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played; without `cardName`, the next card played is replayed. |
+| `quick`           | —                          | Card-level Quick marker (display-only).                                                                                |
+| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position (cluster R).                                                                   |
+| `noop`            | —                          | Explicit no-op (test placeholders).                                                                                    |
 
 `spend_shinsu` and `grant_ability` are also structural: they wrap a nested `effect` / `ability` that is resolved (or registered) after their own step.
 

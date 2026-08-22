@@ -159,12 +159,12 @@ Handlers are grouped by the domain they mutate.
 
 ### Abilities & observation
 
-| Handler               | DSL `type`      | Key behavior                                                                     |
-| --------------------- | --------------- | -------------------------------------------------------------------------------- |
-| `GrantAbilityHandler` | `grant_ability` | Registers inner ability via `AbilityRegistry`; revoked on source removal         |
-| `CopyAbilityHandler`  | `copy_ability`  | Resolves one of an enemy's abilities (`ability_selection` decision when several) |
-| `RepeatPlayHandler`   | `repeat_play`   | Queues extra plays of a card on `GameState` (consumed by `PlaySkillAction`)      |
-| `PeekHandHandler`     | `peek_hand`     | Reveals hand cards (observer-only); `card` filter + `mode`/`amount`/`random`     |
+| Handler               | DSL `type`      | Key behavior                                                                                                                  |
+| --------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `GrantAbilityHandler` | `grant_ability` | Registers inner ability via `AbilityRegistry`; revoked on source removal                                                      |
+| `CopyAbilityHandler`  | `copy_ability`  | Resolves one of an enemy's abilities (`ability_selection` decision when several)                                              |
+| `RepeatPlayHandler`   | `repeat_play`   | Queues extra plays of a card on `GameState` (consumed by `PlaySkillAction`); wildcard (any next card) when `cardName` omitted |
+| `PeekHandHandler`     | `peek_hand`     | Reveals hand cards (observer-only); `card` filter + `mode`/`amount`/`random`                                                  |
 
 ### Markers
 

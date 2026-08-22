@@ -1,5 +1,6 @@
 import { setupGameWithCardsInHand } from "../utils.js";
 import DiscardHandler from "../../handlers/DiscardHandler.js";
+import EVT from "../../EventCatalog.js";
 
 const context = (game) => ({ emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) });
 
@@ -59,6 +60,22 @@ describe("DiscardHandler", () => {
       game
     );
     expect(result.discarded).toBe(0);
+  });
+
+  test("emits CARD_DISCARDED when a hand card is discarded", () => {
+    const game = setupGameWithCardsInHand(["Baang", "Baang", "Baang"]);
+    const card = game.playerStates.Alice.hand[0];
+    const discarded = [];
+    game.eventBus.on(EVT.CARD_DISCARDED, (p) => discarded.push(p), { phase: "post" });
+
+    handler.execute(
+      { owner: "Alice", card: { zone: "hand" }, targetCardId: card.id },
+      context(game),
+      game
+    );
+
+    expect(discarded).toHaveLength(1);
+    expect(discarded[0].cardId).toBe(card.cardId);
   });
 
   test("validate throws without owner or card", () => {

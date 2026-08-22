@@ -33,10 +33,36 @@ describe("RepeatPlayHandler", () => {
     expect(game.consumeRepeatPlays("Alice", "Baang")).toBe(0);
   });
 
-  test("validate throws without owner, cardName, or amount", () => {
+  test("queues a wildcard repeat when cardName is omitted", () => {
+    const game = setupGameWithCardsInHand(["Baang"]);
+
+    handler.execute({ owner: "Alice", amount: 1 }, context(game), game);
+
+    expect(game.consumeRepeatPlays("Alice", "Baang")).toBe(1);
+    expect(game.consumeRepeatPlays("Alice", "Baang")).toBe(0);
+  });
+
+  test("a wildcard repeat applies to any next card", () => {
+    const game = setupGameWithCardsInHand(["Baang"]);
+
+    handler.execute({ owner: "Alice", amount: 2 }, context(game), game);
+
+    expect(game.consumeRepeatPlays("Alice", "Bull")).toBe(2);
+  });
+
+  test("a named repeat and a wildcard repeat stack for the same card", () => {
+    const game = setupGameWithCardsInHand(["Baang"]);
+
+    handler.execute({ owner: "Alice", cardName: "Baang", amount: 2 }, context(game), game);
+    handler.execute({ owner: "Alice", amount: 3 }, context(game), game);
+
+    expect(game.consumeRepeatPlays("Alice", "Baang")).toBe(5);
+    expect(game.consumeRepeatPlays("Alice", "Baang")).toBe(0);
+  });
+
+  test("validate throws without owner or amount", () => {
     expect(() => handler.validate({})).toThrow("owner");
-    expect(() => handler.validate({ owner: "Alice" })).toThrow("cardName");
-    expect(() => handler.validate({ owner: "Alice", cardName: "Baang" })).toThrow("amount");
+    expect(() => handler.validate({ owner: "Alice" })).toThrow("amount");
     expect(() => handler.validate({ owner: "Alice", cardName: "Baang", amount: 0 })).toThrow("amount");
   });
 });

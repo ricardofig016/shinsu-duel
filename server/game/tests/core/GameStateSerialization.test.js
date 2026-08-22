@@ -115,4 +115,19 @@ describe("GameState.toSerializedState", () => {
     expect(state.players.Alice.deck).toHaveLength(GameState.INIT_DECK_SIZE - GameState.INIT_HAND_SIZE);
     expect(game.startedWithCard("Alice", state.players.Alice.startingDeck[0])).toBe(true);
   });
+
+  test("captures pending repeat_play queues (named and wildcard)", () => {
+    IdFactory.resetAll();
+    resetModifierCounter();
+    const game = makeGame();
+
+    game.queueRepeatPlay("Alice", "Baang", 2);
+    game.queueRepeatPlay("Alice", null, 1);
+
+    const state = game.toSerializedState();
+
+    expect(state.repeatPlays).toEqual({
+      Alice: { "*": 1, baang: 2 },
+    });
+  });
 });

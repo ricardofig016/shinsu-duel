@@ -1,5 +1,6 @@
 import { setupGameWithHands, deployUnit } from "../utils.js";
 import RemoveTraitsHandler from "../../handlers/RemoveTraitsHandler.js";
+import EVT from "../../EventCatalog.js";
 
 const context = (game) => ({ emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) });
 
@@ -33,6 +34,19 @@ describe("RemoveTraitsHandler", () => {
     expect(game.modifierStack.has(unit.id, "trait", "barrier")).toBe(false);
     // Other traits remain.
     expect(game.modifierStack.getActiveKeys(unit.id, "trait").size).toBeGreaterThan(0);
+  });
+
+  test("emits UNIT_SILENCED with the removed traits", () => {
+    const game = setupGameWithHands({ Bob: ["_Test Unit"] });
+    const unit = deployUnit(game, "Bob", "_Test Unit", "fisherman");
+    const silenced = [];
+    game.eventBus.on(EVT.UNIT_SILENCED, (p) => silenced.push(p), { phase: "post" });
+
+    const result = handler.execute({ targetId: unit.id }, context(game), game);
+
+    expect(silenced).toHaveLength(1);
+    expect(silenced[0].targetId).toBe(unit.id);
+    expect(silenced[0].removed.length).toBe(result.removed.length);
   });
 
   test("validate throws without targetId", () => {

@@ -39,6 +39,10 @@ export const ResolutionState = Object.freeze({
  *  re-entrancy as a probable infinite loop. */
 const MAX_RESOLUTION_DEPTH = 16;
 
+/** Sentinel key for a repeat_play with no card name — "the next card you
+ *  play" applies to any card. Card names are never `*`. */
+const WILDCARD_REPEAT_KEY = "*";
+
 export default class GameState {
   // game settings
   static INIT_HAND_SIZE = 5;
@@ -772,26 +776,32 @@ export default class GameState {
 
   /**
    * Queue `amount` extra plays of `cardName` for `username` ("the next time
-   * you play X, play it N more times"). Turn-scoped; cleared on turn end.
+   * you play X, play it N more times"). When `cardName` is omitted the
+   * repeat is a wildcard — the next card the player plays is replayed.
+   * Turn-scoped; cleared on turn end.
    */
   queueRepeatPlay(username, cardName, amount) {
     if (!this._repeatPlays.has(username)) this._repeatPlays.set(username, new Map());
     const byName = this._repeatPlays.get(username);
-    const key = String(cardName).toLowerCase();
+    const key = cardName ? String(cardName).toLowerCase() : WILDCARD_REPEAT_KEY;
     byName.set(key, (byName.get(key) || 0) + amount);
   }
 
   /**
    * Consume and clear the pending repeat count for `cardName` for `username`.
+   * A wildcard repeat ("the next card you play") also applies, so the total
+   * is the named count plus any wildcard count.
    * @returns {number} the number of extra plays queued (0 if none).
    */
   consumeRepeatPlays(username, cardName) {
     const byName = this._repeatPlays.get(username);
     if (!byName) return 0;
     const key = String(cardName).toLowerCase();
-    const count = byName.get(key) || 0;
+    const named = byName.get(key) || 0;
+    const wildcard = byName.get(WILDCARD_REPEAT_KEY) || 0;
     byName.delete(key);
-    return count;
+    byName.delete(WILDCARD_REPEAT_KEY);
+    return named + wildcard;
   }
 
   /**

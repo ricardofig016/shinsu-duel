@@ -53,6 +53,24 @@ describe("SwitchPositionHandler", () => {
     expect(unit.placedPositionCode).toBe("fisherman");
   });
 
+  test("no-op when the destination line is full", () => {
+    const game = setupGameWithHands({ Bob: ["Khun Ran - Evolved"] });
+    const unit = deployUnit(game, "Bob", "Khun Ran - Evolved", "fisherman");
+    // Fill Bob's backline (spear-bearer) to capacity so there is no room to switch.
+    game.playerStates.Bob.field.backline = [
+      { id: "B1", card: { name: "A" }, currentHp: 1 },
+      { id: "B2", card: { name: "B" }, currentHp: 1 },
+      { id: "B3", card: { name: "C" }, currentHp: 1 },
+      { id: "B4", card: { name: "D" }, currentHp: 1 },
+      { id: "B5", card: { name: "E" }, currentHp: 1 },
+    ];
+
+    const result = handler.execute({ targetId: unit.id, sourceOwner: "Alice" }, context(game), game);
+
+    expect(result).toEqual({ switched: false, reason: "no legal position" });
+    expect(unit.placedPositionCode).toBe("fisherman");
+  });
+
   test("validate throws without targetId", () => {
     expect(() => handler.validate({})).toThrow("targetId");
   });
