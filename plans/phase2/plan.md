@@ -2,32 +2,34 @@
 
 **TL;DR:** Rewrite GameState.js into a rules-complete engine that handles all game state, lifecycle, transformations, attribute mechanics, and event-driven interactions. Build outward from compiler contracts → runtime subscriptions → authoritative zone/lifecycle services → attribute engines → integrated GameState. 10 phases, ~25 new files, ~120+ new tests.
 
+**Status:** Phases 0–5, 7–10 are complete. The remaining runtime work (modifiers/global rules, Jeonsulsa, extended passive triggers, rules-completeness enforcement) is executed under the dedicated subplan at `plans/phase2/rules_complete_card_effect_engine/plan.md` (phases F–J), which is the authoritative plan for that scope.
+
 ---
 
-### Phase 0: Compiler-Time Trigger Contracts
+### Phase 0: Compiler-Time Trigger Contracts _(done)_
 
 - Define typed trigger ASTs (`equip`, `slay`, `deploy`, `damage`, `kill`) in compiler
 - Parse all raw trigger text at compile time — unsupported triggers **fail compilation** until modeled
 - Update `compiled-cards.schema.json` with trigger shapes
 - Create 5 new YAML cards: `fire_core.yml`, `incinerate_i.yml` through `incinerate_iv.yml` (unreachable)
 - Recompile all cards
-- **Note:** Unresolved effects compile as `type: "custom"` and are silently skipped at runtime with a logged warning. This is intentional for forward compatibility — new structured types are added to the compiler as their handlers are implemented.
+- **Note:** Superseded by the DSL migration — all cards now compile to structured nodes with zero `custom`/`handler` (see subplan phases A–B). The transitional `custom`-skip path in `EffectResolver` is removed once the full catalog is implemented (subplan phase J).
 
-### Phase 1: Foundational Services _(parallel sub-steps)_
+### Phase 1: Foundational Services _(done)_ _(parallel sub-steps)_
 
 - **IdFactory** — deterministic `Unit#<cardId>`, `Equip#<cardId>`, etc. (replaces `Math.random()`)
 - **TargetResolver** — canonical targeting with frontline blocking, taunt, condition filters
 - **EffectResolver** — recursive DSL resolution for nested `spend_shinsu`/`grant_ability`
 - **Unit.js & Card.js** — switch to IdFactory instance IDs
 
-### Phase 2: Missing Handler Implementations _(parallel)_
+### Phase 2: Missing Handler Implementations _(done)_ _(parallel)_
 
 - `ChargeShinsuHandler` — add shinsu to normal pool (capped at round max)
 - `CompressShinsuHandler` — reduce card cost
 - `ReclaimCardsHandler` — move cards from discard to hand
 - `GrantAbilityHandler` — register inner ability as active on bearer, cleanup on source removal
 
-### Phase 3: Authoritative GameState Rewrite _(core, sequential)_
+### Phase 3: Authoritative GameState Rewrite _(done)_ _(core, sequential)_
 
 - **Zone data structures** — typed `deck`, `hand`, `discard`, `field`, `lighthouses`, `shinsu`, `combatSlots`, `shinheuhSlot`, `compressAmount`, `fireCharges`
 - **ShinsuService** — extract shinsu logic with round cap and recharged pool rules
@@ -36,20 +38,20 @@
 - **Standardize event names** — `OnTurnEnd` → `turn:ended`, create `EventCatalog.js` with constants
 - Rewrite GameState.js as thin orchestrator over services
 
-### Phase 4: Trigger Manager & Evolution/Ignition _(depends on Phase 0+3)_
+### Phase 4: Trigger Manager & Evolution/Ignition _(done)_ _(depends on Phase 0+3)_
 
 - **TriggerManager** — maps typed ASTs to event subscriptions, calls `LifecycleEngine.transformUnit`
 - Wired into `deployUnit` (evolution) and `attachEquipment` (ignition)
 - Mandatory immediate transform after triggering event's post phase
 - Equipment de-ignition on bearer death/unequip
 
-### Phase 5: Attribute Engines — Anima & Hwayeomsa _(depends on Phase 3+4)_
+### Phase 5: Attribute Engines — Anima & Hwayeomsa _(done)_ _(depends on Phase 3+4)_
 
 - **AnimaEngine** — round start Shinheuh slot creation, slot lifecycle tracking
 - **HwayeomsaEngine** — Fire Charge accumulation, Fire Core/Incinerate generation
 - **AttributeRegistry** — pluggable pattern for future attributes (Jeonsulsa, Irregular, etc.)
 
-### Phase 6: Rules, Conditions & Traits Enforcement
+### Phase 6: Rules, Conditions & Traits Enforcement _(partial — remaining items in subplan phases F/G)_
 
 - Condition cleanup on round end (`modifierStack.removeWhere`)
 - Barrier reset on round start
@@ -59,13 +61,13 @@
 - Game-over detection (0 lighthouses, empty deck draw)
 - Line overflow (5 max, overflow destroy)
 
-### Phase 7: Targeting & Combat Rules
+### Phase 7: Targeting & Combat Rules _(done)_
 
 - Integrate TargetResolver into all 8+ handlers
 - Enforce line targeting (frontline blocks backline, taunt, ghost, sharpshooter)
 - Pending-decision protocol for multi-target choices
 
-### Phase 8: Project Integration & Cohesion
+### Phase 8: Project Integration & Cohesion _(done)_
 
 - Update websocket.js — pending-decision protocol, new state shape
 - Update `Logger` — extended snapshot, deeper causation trees
@@ -73,12 +75,12 @@
 - Consistent event naming audit — zero PascalCase `On*` names remain
 - Delete empty legacy directories (`abilities/`, `passive_abilities/`, `effects/`)
 
-### Phase 9: Documentation _(parallel with Phase 8)_
+### Phase 9: Documentation _(done)_ _(parallel with Phase 8)_
 
 - 4 new docs: `TRIGGER_SYSTEM_ARCHITECTURE.md`, `GAMESTATE_ARCHITECTURE.md`, `ATTRIBUTE_SYSTEM_ARCHITECTURE.md`, `TARGETING_ARCHITECTURE.md`
 - Update 3 existing docs: COMPILED_CARD_DSL.md, HANDLER_SYSTEM_ARCHITECTURE.md, MODIFIER_STACK_ARCHITECTURE.md
 
-### Phase 10: Testing & Validation
+### Phase 10: Testing & Validation _(done)_
 
 - ~120+ new unit tests across all new components
 - ~20 integration tests (full round cycle, evolution chains, loss conditions, targeting)
@@ -93,7 +95,7 @@
 - **Mandatory immediate transform** — evolution/ignition auto-fires, no opt-out
 - **Pending-decision protocol** — typed `{ decisionId, type, candidates }` for choices
 - **Service layer for all mutations** — GameState delegates, handlers never mutate directly
-- **Anima + Hwayeomsa only** — Silver Dwarf, Red Witch, Jeonsulsa, Irregular, LIW deferred to Phase 4
+- **Attribute engines** — Anima + Hwayeomsa implemented; Jeonsulsa is subplan phase H (Silver Dwarf, Red Witch, Irregular deferred)
 - **EventCatalog constants** — no magic event strings anywhere
 
 ### Stress-Tested Against Absurd Future Interactions
