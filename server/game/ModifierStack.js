@@ -237,7 +237,7 @@ export default class ModifierStack {
   // Query
   // -----------------------------------------------------------------------
 
-  // ── Priority-based getEffective (Phase 2) ──────────────────────────────
+  // ── Priority-based getEffective ─────────────────────────────────────────
   //
   // Override > Set > Add precedence:
   //   If any enabled `override` exists for a key, choose the highest-

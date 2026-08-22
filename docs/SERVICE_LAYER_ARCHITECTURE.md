@@ -79,7 +79,7 @@ Pure, read-only evaluator for the predicates that gate `conditional` nodes (and,
 - **Handlers** delegate shared-resource changes (see `HANDLER_SYSTEM_ARCHITECTURE.md`).
 - **PassiveManager** registers timed (`round_start`/`round_end`) and always-on (`conditional`) passives as event subscriptions and resolves them through `EffectResolver`; it coordinates state change rather than owning a resource (see `PASSIVE_SYSTEM_ARCHITECTURE.md`).
 - **Actions** validate via the same services before mutating (see `ACTION_SYSTEM_ARCHITECTURE.md`).
-- **LifecycleEngine** composes them for deploy/destroy/equip, owns position movement via `switchPosition`, and adds the Phase E primitives `killUnit` (shared lethal pipeline for `slay` and lethal damage), `summonUnit`, `stealUnit`, `discardEquipment`, and `_detachOne` (single equipment detach/routing).
+- **LifecycleEngine** composes them for deploy/destroy/equip, owns position movement via `switchPosition`, and adds the lifecycle primitives `killUnit` (shared lethal pipeline for `slay` and lethal damage), `summonUnit`, `stealUnit`, `discardEquipment`, and `_detachOne` (single equipment detach/routing).
 - **Attribute engines** mutate only through `GameState` delegation (`CombatSlotService` for the Shinheuh slot, `_modifyFireCharges` for fire charges), never by writing resource fields directly.
 
 ## Adding a New Service

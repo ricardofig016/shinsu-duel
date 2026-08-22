@@ -81,4 +81,4 @@ passives:
     raw: "round end: create Redan in your hand and revert me to Khun Ran"
 ```
 
-`PassiveManager` wires the `round_end` trigger, but `create_card`/`transform` have no handler yet, so the effect is skipped via `effect:unsupported` until Phase E implements those primitives. `PassiveManager` requires no further changes.
+`PassiveManager` wires the `round_end` trigger, which resolves the `sequence` through the `create_card` and `transform` handlers: the card `Redan` is created in hand, then the unit's definition is swapped back to `Khun Ran` via `LifecycleEngine.transformUnit`.

@@ -25,6 +25,8 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
 - Always use the canonical event-name constants from `server/game/EventCatalog.js` (`EVT`) when emitting or subscribing to events — never hardcode event-name strings.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
+- Never reference implementation history in code, tests, or docs: no "Phase X", "phase 1/2", "later phase", or similar wording tied to how the work was sequenced.
+- Names and organization must reflect the current architecture, not the order work was completed.
 - When a requirement or rule is ambiguous, never guess. Ask the user for clarification before implementation.
 - The only edits you are allowed to do to `todo\TODO.md` is change `[ ]` to `[x]`, nothing else
 

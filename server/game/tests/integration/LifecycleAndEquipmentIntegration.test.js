@@ -18,7 +18,7 @@ function equipFromHand(game, unit, cardName) {
   game.processAction({ type: "equip-equipment-action", data: { source: "player", username: unit.owner, handId, targetUnitId: unit.id } });
 }
 
-describe("Phase E integration", () => {
+describe("lifecycle and equipment integration", () => {
   test("Khun Ran - Evolved reverts at round end, creating Redan and reverting to Khun Ran", () => {
     const game = setupGameWithHands({ Alice: ["Khun Ran - Evolved"] });
     const unit = deployUnit(game, "Alice", "Khun Ran - Evolved", "fisherman");

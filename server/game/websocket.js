@@ -73,7 +73,7 @@ export function initializeGameWebSocket(io) {
       }
     });
 
-    // Phase 2: pending-decision protocol
+    // Pending-decision protocol
     socket.on("game-decision", (decision) => {
       const game = activeGames.get(roomCode);
       if (!game) return;

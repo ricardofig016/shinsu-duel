@@ -111,55 +111,67 @@ At runtime, the resolution engine:
 4. Calls `handler.validate(payload)` with concrete `targetId` values
 5. Calls `handler.execute(payload, context, gameState)`
 
-For a `type` with **no registered handler** (a valid structured type whose handler lands in a later phase), there is **no handler registered**. The resolution engine skips the effect and reports it through the unsupported-effect event; it never parses prose.
+For a `type` with **no registered handler** (a valid structured type whose handler is not yet implemented), there is **no handler registered**. The resolution engine skips the effect and reports it through the unsupported-effect event; it never parses prose.
 
 ---
 
-## Baseline Handlers
+## Handler Catalog
+
+Handlers are grouped by the domain they mutate.
+
+### Resource & card economy
 
 | Handler                    | DSL `type`           | Key behavior                                                                            |
 | -------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| `DealDamageHandler`        | `deal_damage`        | Barrier → Resilient → Weak → `UnitService.damage` → kill check → emitChildren           |
-| `HealHandler`              | `heal`               | Applies healing via `UnitService.heal`, capped at max HP                                |
-| `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                             |
-| `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                               |
-| `RemoveConditionHandler`   | `remove_conditions`  | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                   |
+| `ChargeShinsuHandler`      | `charge_shinsu`      | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`          |
+| `SpendShinsuHandler`       | `spend_shinsu`       | Delegates to `ShinsuService.spend`; recharged first, then normal                        |
+| `CompressShinsuHandler`    | `compress_shinsu`    | Delegates to `CompressionService.compress`; receives `targetCardId` from EffectResolver |
+| `ReclaimCardsHandler`      | `reclaim_cards`      | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                           |
 | `CreateLighthouseHandler`  | `create_lighthouse`  | Delegates to `GameState.modifyLighthouses` (cap 40)                                     |
 | `DestroyLighthouseHandler` | `destroy_lighthouse` | Delegates to `GameState.modifyLighthouses` (floor 0); emits `game:lighthouses:depleted` |
-| `SpendShinsuHandler`       | `spend_shinsu`       | Delegates to `ShinsuService.spend`; recharged first, then normal                        |
 | `DrawCardHandler`          | `draw_card`          | Delegates to `ZoneService.draw`; emits `game:deck:empty` on exhaustion                  |
+| `CreateCardHandler`        | `create_card`        | Creates a card in hand (`card:created`); `generated_by` families delegate to the engine |
 
----
+### Combat & unit state
 
-## Additional Handlers
+| Handler                   | DSL `type`           | Key behavior                                                                                  |
+| ------------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
+| `DealDamageHandler`       | `deal_damage`        | Barrier → Resilient → Weak → `UnitService.damage` → kill check via `LifecycleEngine.killUnit` |
+| `HealHandler`             | `heal`               | Applies healing via `UnitService.heal`, capped at max HP                                      |
+| `GrantTraitHandler`       | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                                   |
+| `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                             |
+| `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                 |
+| `GrantRandomTraitHandler` | `grant_random_trait` | Grants a seeded-random trait (optional `numeric` pool filter)                                 |
+| `GiveConditionHandler`    | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                                     |
+| `RemoveConditionHandler`  | `remove_conditions`  | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                         |
 
-| Handler                 | DSL `type`        | Key behavior                                                                                           |
-| ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------ |
-| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`                         |
-| `CompressShinsuHandler` | `compress_shinsu` | Delegates to `CompressionService.compress`; receives `targetCardId` from EffectResolver/TargetResolver |
-| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                                          |
-| `GrantAbilityHandler`   | `grant_ability`   | Registers inner ability via `AbilityRegistry`; revoked on source removal                               |
-| `CreateCardHandler`     | `create_card`     | Creates a card in hand (`card:created`); `generated_by` families delegate to the Hwayeomsa engine      |
-| `NoopHandler`           | `noop`            | No-op; resolves to `{ resolved: true }` (test placeholders)                                            |
-| `NoopHandler`           | `quick`           | Display-only Quick marker node; no-op                                                                  |
+### Zone movement & lifecycle
 
-## Phase E Handlers
+| Handler                 | DSL `type`        | Key behavior                                                                                                  |
+| ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------- |
+| `SummonHandler`         | `summon`          | Resolves `from` (deck/hand/deck_or_hand/game) + `onto`; places via `LifecycleEngine.summonUnit`               |
+| `StealHandler`          | `steal`           | Moves a matching enemy unit onto the acting player's field via `LifecycleEngine.stealUnit`                    |
+| `DiscardHandler`        | `discard`         | Discards a hand card (`targetCardId`) or bearer attachments (`zone: attachments`)                             |
+| `DisarmHandler`         | `disarm`          | Detaches a unit's equipment and routes it by `to` (`{ zone, owner }`)                                         |
+| `SwitchPositionHandler` | `switch_position` | Forces a unit to a legal other printed position; Rooted blocked; full lines excluded                          |
+| `SlayHandler`           | `slay`            | Kills via `LifecycleEngine.killUnit` (death-intent → `unit:killed` → destroy); Undying can intercept          |
+| `TransformHandler`      | `transform`       | Replaces the source unit's card via `LifecycleEngine.transformUnit` (preserves HP delta/conditions/equipment) |
 
-| Handler                   | DSL `type`           | Key behavior                                                                                                  |
-| ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `SlayHandler`             | `slay`               | Kills via `LifecycleEngine.killUnit` (death-intent → `unit:killed` → destroy); Undying can intercept          |
-| `TransformHandler`        | `transform`          | Replaces the source unit's card via `LifecycleEngine.transformUnit` (preserves HP delta/conditions/equipment) |
-| `SummonHandler`           | `summon`             | Resolves `from` (deck/hand/deck_or_hand/game) + `onto`; places via `LifecycleEngine.summonUnit`               |
-| `StealHandler`            | `steal`              | Moves a matching enemy unit onto the acting player's field via `LifecycleEngine.stealUnit`                    |
-| `DiscardHandler`          | `discard`            | Discards a hand card (`targetCardId`) or bearer attachments (`zone: attachments`)                             |
-| `DisarmHandler`           | `disarm`             | Detaches a unit's equipment and routes it by `to` (`{ zone, owner }`)                                         |
-| `SwitchPositionHandler`   | `switch_position`    | Forces a unit to a legal other printed position; Rooted blocked; full lines excluded                          |
-| `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                                             |
-| `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                                 |
-| `GrantRandomTraitHandler` | `grant_random_trait` | Grants a seeded-random trait (optional `numeric` pool filter)                                                 |
-| `PeekHandHandler`         | `peek_hand`          | Reveals hand cards (observer-only); `card` filter + `mode`/`amount`/`random`                                  |
-| `CopyAbilityHandler`      | `copy_ability`       | Resolves one of an enemy's abilities (`ability_selection` decision when several)                              |
-| `RepeatPlayHandler`       | `repeat_play`        | Queues extra plays of a card on `GameState` (consumed by `PlaySkillAction`)                                   |
+### Abilities & observation
+
+| Handler               | DSL `type`      | Key behavior                                                                     |
+| --------------------- | --------------- | -------------------------------------------------------------------------------- |
+| `GrantAbilityHandler` | `grant_ability` | Registers inner ability via `AbilityRegistry`; revoked on source removal         |
+| `CopyAbilityHandler`  | `copy_ability`  | Resolves one of an enemy's abilities (`ability_selection` decision when several) |
+| `RepeatPlayHandler`   | `repeat_play`   | Queues extra plays of a card on `GameState` (consumed by `PlaySkillAction`)      |
+| `PeekHandHandler`     | `peek_hand`     | Reveals hand cards (observer-only); `card` filter + `mode`/`amount`/`random`     |
+
+### Markers
+
+| Handler       | DSL `type` | Key behavior                                                |
+| ------------- | ---------- | ----------------------------------------------------------- |
+| `NoopHandler` | `noop`     | No-op; resolves to `{ resolved: true }` (test placeholders) |
+| `NoopHandler` | `quick`    | Display-only Quick marker node; no-op                       |
 
 Structured DSL types not listed above (e.g. modifiers, global rules, `grant_affiliation`, `return_to_hand`, `play_jeonsul_baang`) have no handler yet; the runtime skips them and reports an unsupported-effect event. The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 

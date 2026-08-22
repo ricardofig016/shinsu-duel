@@ -19,9 +19,9 @@ export default class PassiveManager {
       const sourceId = IdFactory.passiveSource(unit.id, index);
 
       // A passive without a `trigger` is always-on: its effect must track the
-      // live board. Phase C wires `conditional` passives (the only always-on
-      // type resolvable now); always-on modifiers and trait grants land in
-      // later phases and remain skipped.
+      // live board. `conditional` passives re-evaluate on board events; other
+      // always-on branches (modifiers, trait grants) are not yet wired and
+      // remain skipped.
       if (!passive?.trigger || typeof passive.trigger !== "object") {
         if (passive?.type === "conditional") {
           this._subscribeAlwaysOn(unit, passive, sourceId, gameState);
@@ -30,7 +30,7 @@ export default class PassiveManager {
       }
 
       const trigger = this._parseTrigger(passive);
-      if (!trigger) return; // unsupported trigger type — later phase
+      if (!trigger) return; // unsupported trigger type — not yet wired
 
       const unsubscribe = this._bus.on(trigger.eventName, (payload, context) => {
         if (!this._matches(trigger, unit, payload, gameState)) return;
@@ -133,8 +133,8 @@ export default class PassiveManager {
       return { eventName: EVT.ROUND_END, effect: passive };
     }
 
-    // Other trigger types and always-on modifiers are not yet wired here —
-    // they land in later phases. Skip registration.
+    // Other trigger types and always-on modifiers are not yet wired here.
+    // Skip registration.
     return null;
   }
 

@@ -50,40 +50,46 @@ function getRegistry() {
   if (!_registry) {
     _registry = new HandlerRegistry();
 
-    // Phase 1 baseline handlers
+    // ── Resource & card economy ───────────────────────────────────────────
+    _registry.register("charge_shinsu", ChargeShinsuHandler);
+    _registry.register("spend_shinsu", SpendShinsuHandler);
+    _registry.register("compress_shinsu", CompressShinsuHandler);
+    _registry.register("reclaim_cards", ReclaimCardsHandler);
+    _registry.register("create_lighthouse", CreateLighthouseHandler);
+    _registry.register("destroy_lighthouse", DestroyLighthouseHandler);
+    _registry.register("draw_card", DrawCardHandler);
+    _registry.register("create_card", CreateCardHandler);
+
+    // ── Combat & unit state ───────────────────────────────────────────────
     _registry.register("deal_damage", DealDamageHandler);
     _registry.register("heal", HealHandler);
     _registry.register("grant_trait", GrantTraitHandler);
+    _registry.register("remove_traits", RemoveTraitsHandler);
+    _registry.register("copy_traits", CopyTraitsHandler);
+    _registry.register("grant_random_trait", GrantRandomTraitHandler);
     _registry.register("give_condition", GiveConditionHandler);
     _registry.register("remove_conditions", RemoveConditionHandler);
-    _registry.register("create_lighthouse", CreateLighthouseHandler);
-    _registry.register("destroy_lighthouse", DestroyLighthouseHandler);
-    _registry.register("spend_shinsu", SpendShinsuHandler);
-    _registry.register("draw_card", DrawCardHandler);
 
-    // Phase 2 handlers
-    _registry.register("charge_shinsu", ChargeShinsuHandler);
-    _registry.register("compress_shinsu", CompressShinsuHandler);
-    _registry.register("reclaim_cards", ReclaimCardsHandler);
-    _registry.register("grant_ability", GrantAbilityHandler);
-    _registry.register("create_card", CreateCardHandler);
-    _registry.register("noop", NoopHandler);
-    _registry.register("quick", NoopHandler); // skill-level Quick marker (display-only)
-
-    // Phase E handlers — lifecycle, zone movement, unit state, abilities
-    _registry.register("slay", SlayHandler);
-    _registry.register("transform", TransformHandler);
+    // ── Zone movement & lifecycle ─────────────────────────────────────────
     _registry.register("summon", SummonHandler);
     _registry.register("steal", StealHandler);
     _registry.register("discard", DiscardHandler);
     _registry.register("disarm", DisarmHandler);
     _registry.register("switch_position", SwitchPositionHandler);
-    _registry.register("remove_traits", RemoveTraitsHandler);
-    _registry.register("copy_traits", CopyTraitsHandler);
-    _registry.register("grant_random_trait", GrantRandomTraitHandler);
-    _registry.register("peek_hand", PeekHandHandler);
+    _registry.register("slay", SlayHandler);
+    _registry.register("transform", TransformHandler);
+
+    // ── Abilities ─────────────────────────────────────────────────────────
+    _registry.register("grant_ability", GrantAbilityHandler);
     _registry.register("copy_ability", CopyAbilityHandler);
     _registry.register("repeat_play", RepeatPlayHandler);
+
+    // ── Observation ───────────────────────────────────────────────────────
+    _registry.register("peek_hand", PeekHandHandler);
+
+    // ── Markers (display-only, no mutation) ───────────────────────────────
+    _registry.register("noop", NoopHandler);
+    _registry.register("quick", NoopHandler); // skill-level Quick marker
   }
   return _registry;
 }

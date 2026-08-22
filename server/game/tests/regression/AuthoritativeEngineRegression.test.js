@@ -6,7 +6,7 @@ import { createLegalDeck, setupGameWithCardsInHand } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
-describe("Phase 2 authoritative-engine regressions", () => {
+describe("authoritative-engine regressions", () => {
   test("drawing from an empty deck ends the game", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),

@@ -189,7 +189,7 @@ export function compileEntries(entries, context) {
   return (entries || []).map((entry, i) => compileNode(entry, `${context}[${i}]`));
 }
 
-// ── Trigger parsing (Phase 2) ───────────────────────────────────────────────
+// ── Trigger parsing ─────────────────────────────────────────────────────────
 // Converts raw trigger text into typed ASTs so the runtime never parses raw.
 // Unsupported triggers fail compilation until the pattern is modeled here.
 
