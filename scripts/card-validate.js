@@ -36,7 +36,7 @@ const positionsRequiringNullRank = new Set([
 ]);
 
 const traitNames = new Set([
-  "barrier", "bloodthirsty", "creator", "dealer", "immune",
+  "barrier", "beacon", "bloodthirsty", "dealer", "immune",
   "last one standing", "lethal", "pierce", "reflect", "regenerate",
   "resilient", "ruthless", "sharpshooter", "strong", "taunt", "undying", "vengeful",
 ]);

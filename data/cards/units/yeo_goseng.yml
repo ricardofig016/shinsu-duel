@@ -22,7 +22,7 @@ abilities:
     raw: "heal a team sweet and sour member 1 HP"
 evolve:
 traits:
-  - creator
+  - beacon
 attributes:
 affiliations:
   - team sweet and sour

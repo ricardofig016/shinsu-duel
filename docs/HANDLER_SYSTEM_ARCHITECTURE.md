@@ -121,16 +121,16 @@ Handlers are grouped by the domain they mutate.
 
 ### Resource & card economy
 
-| Handler                    | DSL `type`           | Key behavior                                                                            |
-| -------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| `ChargeShinsuHandler`      | `charge_shinsu`      | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`          |
-| `SpendShinsuHandler`       | `spend_shinsu`       | Delegates to `ShinsuService.spend`; recharged first, then normal                        |
-| `CompressShinsuHandler`    | `compress_shinsu`    | Delegates to `CompressionService.compress`; receives `targetCardId` from EffectResolver |
-| `ReclaimCardsHandler`      | `reclaim_cards`      | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                           |
-| `CreateLighthouseHandler`  | `create_lighthouse`  | Delegates to `GameState.modifyLighthouses` (cap 40)                                     |
-| `DestroyLighthouseHandler` | `destroy_lighthouse` | Delegates to `GameState.modifyLighthouses` (floor 0); emits `game:lighthouses:depleted` |
-| `DrawCardHandler`          | `draw_card`          | Delegates to `ZoneService.draw`; emits `game:deck:empty` on exhaustion                  |
-| `CreateCardHandler`        | `create_card`        | Creates a card in hand (`card:created`); `generated_by` families delegate to the engine |
+| Handler                 | DSL `type`        | Key behavior                                                                            |
+| ----------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| `ChargeShinsuHandler`   | `charge_shinsu`   | Delegates to `ShinsuService.gain`; capped at round max; emits `shinsu:charged`          |
+| `SpendShinsuHandler`    | `spend_shinsu`    | Delegates to `ShinsuService.spend`; recharged first, then normal                        |
+| `CompressShinsuHandler` | `compress_shinsu` | Delegates to `CompressionService.compress`; receives `targetCardId` from EffectResolver |
+| `ReclaimCardsHandler`   | `reclaim_cards`   | Delegates to `ZoneService.reclaimTop`; emits `card:reclaimed`                           |
+| `LightUpHandler`        | `light_up`        | Delegates to `GameState.modifyLighthouses` (cap 40)                                     |
+| `ExtinguishHandler`     | `extinguish`      | Delegates to `GameState.modifyLighthouses` (floor 0); emits `game:lighthouses:depleted` |
+| `DrawCardHandler`       | `draw_card`       | Delegates to `ZoneService.draw`; emits `game:deck:empty` on exhaustion                  |
+| `CreateCardHandler`     | `create_card`     | Creates a card in hand (`card:created`); `generated_by` families delegate to the engine |
 
 ### Combat & unit state
 

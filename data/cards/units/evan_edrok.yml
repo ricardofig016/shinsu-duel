@@ -29,7 +29,7 @@ abilities:
     raw: "force an enemy to switch positions"
 evolve:
 traits:
-  - creator 3
+  - beacon 3
 attributes:
   - silver dwarf
 affiliations:

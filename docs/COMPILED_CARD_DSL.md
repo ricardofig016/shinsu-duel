@@ -85,14 +85,14 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 
 ### Resource
 
-| `type`               | Fields             | Meaning                                       |
-| -------------------- | ------------------ | --------------------------------------------- |
-| `charge_shinsu`      | `amount`           | Regain `amount` normal shinsu.                |
-| `spend_shinsu`       | `amount`, `effect` | Spend `amount` shinsu, then resolve `effect`. |
-| `compress_shinsu`    | `amount`, `card`   | Reduce a card's cost by `amount`.             |
-| `reclaim_cards`      | `amount`, `card?`  | Put `amount` cards from discard into hand.    |
-| `create_lighthouse`  | `amount`           | Regain `amount` lighthouses.                  |
-| `destroy_lighthouse` | `amount`, `owner?` | Destroy `amount` lighthouses.                 |
+| `type`            | Fields             | Meaning                                       |
+| ----------------- | ------------------ | --------------------------------------------- |
+| `charge_shinsu`   | `amount`           | Regain `amount` normal shinsu.                |
+| `spend_shinsu`    | `amount`, `effect` | Spend `amount` shinsu, then resolve `effect`. |
+| `compress_shinsu` | `amount`, `card`   | Reduce a card's cost by `amount`.             |
+| `reclaim_cards`   | `amount`, `card?`  | Put `amount` cards from discard into hand.    |
+| `light_up`        | `amount`           | Heal `amount` HP from ally lighthouses.       |
+| `extinguish`      | `amount`, `owner?` | Deal `amount` damage to enemy lighthouses.    |
 
 ### Cards and zones
 

@@ -7,13 +7,13 @@ positions:
   - light bearer
 passives:
 abilities:
-  - type: create_lighthouse
+  - type: light_up
     amount: 1
-    raw: "Create 1"
+    raw: "Light Up 1"
 evolve:
   - i am equipped with Ice Spear
 traits:
-  - creator 1
+  - beacon 1
 attributes:
 affiliations:
   - team baam

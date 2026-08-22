@@ -1,6 +1,6 @@
 # Shinsu Duel: A Tower of God CCG - Rules
 
-Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of God](https://www.webtoons.com/en/fantasy/tower-of-god/list?title_no=95)_. Players build decks, deploy units, and use abilities to destroy their opponent's lighthouses while protecting their own.
+Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of God](https://www.webtoons.com/en/fantasy/tower-of-god/list?title_no=95)_. Players build decks, deploy units, and use abilities to Extinguish their opponent's lighthouses while protecting their own.
 
 - [Shinsu Duel: A Tower of God CCG - Rules](#shinsu-duel-a-tower-of-god-ccg---rules)
   - [Objective](#objective)
@@ -50,7 +50,7 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
 
 ## Objective
 
-Destroy your opponent's lighthouses. Each lighthouse represents one point of HP. You lose when you have **0 lighthouses**.
+Extinguish your opponent's lighthouses. Each lighthouse represents one point of HP. You lose when you have **0 lighthouses**.
 
 ## Resources
 
@@ -70,7 +70,7 @@ Destroy your opponent's lighthouses. Each lighthouse represents one point of HP.
 ### Lighthouses
 
 1. Start with 20 lighthouses
-2. Can gain additional lighthouses (to a maximum of 40); Create beyond 40 is wasted
+2. Can gain additional lighthouses (to a maximum of 40); Light Up beyond 40 is wasted
 3. Losing all lighthouses loses you the game
 
 ### Combat Slots
@@ -206,11 +206,11 @@ Keywords are special terms that provide additional context to cards and abilitie
 1. **Charge `x`**: Regain `x` normal shinsu (up to the round cap)
 2. **Cleanse**: Remove all conditions
 3. **Compress `x`**: Reduce a card's shinsu cost by `x` (minimum 0)
-4. **Create `x`**: Regain `x` lighthouses
-5. **Destroy `x`**: Directly destroy `x` enemy lighthouses (ignores targeting restrictions)
-6. **Disarm**: Send a unit's equipment back to it's owners hand
-7. **Discard**: Send a card directly to the discard pile without triggering on death effects
-8. **Free**: The ability doesn't expend a combat slot.
+4. **Disarm**: Send a unit's equipment back to it's owners hand
+5. **Discard**: Send a card directly to the discard pile without triggering on death effects
+6. **Extinguish `x`**: Deal `x` damage to enemy lighthouses (ignores targeting restrictions)
+7. **Free**: The ability doesn't expend a combat slot.
+8. **Light Up `x`**: Heal `x` HP from ally lighthouses
 9. **Quick**: Playing a Quick card or using a Quick ability doesn't end your turn
 10. **Reclaim `x`**: Put `x` cards from your discard pile into your hand (Unreachable and Shinheuh cards can be reclaimed)
 11. **Silence**: Remove all traits at the moment it's applied (traits gained later are unaffected)
@@ -272,13 +272,13 @@ Traits are positive permanent effects native to cards. They are color coded as s
 **List of Traits:**
 
 1. **Barrier**: Negate all damage the first time I take damage each round
-2. **Bloodthirsty `x`**: When I kill a unit, restore `x` HP
-3. **Creator `x`**: Round start: Create `x`
+2. **Beacon `x`**: Round start: Light Up `x`
+3. **Bloodthirsty `x`**: When I kill a unit, restore `x` HP
 4. **Dealer `x`**: Round start: draw `x` cards
 5. **Immune**: I am immune to conditions
 6. **Last One Standing `x`**: If I am the only ally unit, I have +`x` HP
 7. **Lethal**: When I damage another unit, kill it
-8. **Pierce `x`**: When I kill a unit, Destroy `x`
+8. **Pierce `x`**: When I kill a unit, Extinguish `x`
 9. **Reflect `x`**: When I take damage from a unit, deal `x` damage back
 10. **Regenerate `x`**: Round end: heal me `x` HP
 11. **Resilient `x`**: I take -`x` damage from all sources
@@ -568,8 +568,8 @@ If the tables can't satisfy your specific need, decide with your opponent how to
 Roll a d20:
 
 - 1 Barrier
-- 2 Bloodthirsty
-- 3 Creator
+- 2 Beacon
+- 3 Bloodthirsty
 - 4 Dealer
 - 5 Immune
 - 6 Last One Standing

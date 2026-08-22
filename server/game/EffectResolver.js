@@ -13,8 +13,8 @@ import HealHandler from "./handlers/HealHandler.js";
 import GrantTraitHandler from "./handlers/GrantTraitHandler.js";
 import GiveConditionHandler from "./handlers/GiveConditionHandler.js";
 import RemoveConditionHandler from "./handlers/RemoveConditionHandler.js";
-import CreateLighthouseHandler from "./handlers/CreateLighthouseHandler.js";
-import DestroyLighthouseHandler from "./handlers/DestroyLighthouseHandler.js";
+import LightUpHandler from "./handlers/LightUpHandler.js";
+import ExtinguishHandler from "./handlers/ExtinguishHandler.js";
 import SpendShinsuHandler from "./handlers/SpendShinsuHandler.js";
 import DrawCardHandler from "./handlers/DrawCardHandler.js";
 import ChargeShinsuHandler from "./handlers/ChargeShinsuHandler.js";
@@ -55,8 +55,8 @@ function getRegistry() {
     _registry.register("spend_shinsu", SpendShinsuHandler);
     _registry.register("compress_shinsu", CompressShinsuHandler);
     _registry.register("reclaim_cards", ReclaimCardsHandler);
-    _registry.register("create_lighthouse", CreateLighthouseHandler);
-    _registry.register("destroy_lighthouse", DestroyLighthouseHandler);
+    _registry.register("light_up", LightUpHandler);
+    _registry.register("extinguish", ExtinguishHandler);
     _registry.register("draw_card", DrawCardHandler);
     _registry.register("create_card", CreateCardHandler);
 

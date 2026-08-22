@@ -2,16 +2,16 @@ import BaseHandler from "./BaseHandler.js";
 import EVT from "../EventCatalog.js";
 
 /**
- * Destroys enemy lighthouses.
+ * Extinguishes enemy lighthouses.
  *
  * Payload:
  *   { owner, amount }
  */
-export default class DestroyLighthouseHandler extends BaseHandler {
+export default class ExtinguishHandler extends BaseHandler {
   validate(payload) {
     BaseHandler.requirePositiveInt(payload.amount, "amount");
     if (!payload.owner) {
-      throw new Error("DestroyLighthouseHandler: payload.owner is required");
+      throw new Error("ExtinguishHandler: payload.owner is required");
     }
   }
 
@@ -36,6 +36,6 @@ export default class DestroyLighthouseHandler extends BaseHandler {
       });
     }
 
-    return { destroyed: oldAmount - gameState.playerStates[owner].lighthouses.amount, current: gameState.playerStates[owner].lighthouses.amount, depleted: gameState.playerStates[owner].lighthouses.amount <= 0 };
+    return { extinguished: oldAmount - gameState.playerStates[owner].lighthouses.amount, current: gameState.playerStates[owner].lighthouses.amount, depleted: gameState.playerStates[owner].lighthouses.amount <= 0 };
   }
 }

@@ -6,11 +6,11 @@ rank:
 positions:
   - landmark
 passives:
-  - type: destroy_lighthouse
+  - type: extinguish
     amount: 5
     owner: self
     trigger: { type: free_ability_played }
-    raw: "when an ability with Free is played, the unit destroys 5 of their own lighthouses"
+    raw: "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
   - type: summon
     card:
       name: Stone Doll

@@ -2,16 +2,16 @@ import BaseHandler from "./BaseHandler.js";
 import EVT from "../EventCatalog.js";
 
 /**
- * Creates (regains) lighthouses for a player.
+ * Lights up (regains) lighthouses for a player.
  *
  * Payload:
  *   { owner, amount }
  */
-export default class CreateLighthouseHandler extends BaseHandler {
+export default class LightUpHandler extends BaseHandler {
   validate(payload) {
     BaseHandler.requirePositiveInt(payload.amount, "amount");
     if (!payload.owner) {
-      throw new Error("CreateLighthouseHandler: payload.owner is required");
+      throw new Error("LightUpHandler: payload.owner is required");
     }
   }
 
@@ -28,6 +28,6 @@ export default class CreateLighthouseHandler extends BaseHandler {
       delta: gameState.playerStates[owner].lighthouses.amount - oldAmount,
     });
 
-    return { created: gameState.playerStates[owner].lighthouses.amount - oldAmount, current: gameState.playerStates[owner].lighthouses.amount };
+    return { litUp: gameState.playerStates[owner].lighthouses.amount - oldAmount, current: gameState.playerStates[owner].lighthouses.amount };
   }
 }

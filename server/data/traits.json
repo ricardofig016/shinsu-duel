@@ -7,6 +7,14 @@
     "numeric": false,
     "iconPath": "traits/barrier.png"
   },
+  "beacon": {
+    "name": "Beacon",
+    "description": "Round start: Light Up x",
+    "color": "blue",
+    "colorName": "Utility Buff",
+    "numeric": true,
+    "iconPath": "traits/beacon.png"
+  },
   "bloodthirsty": {
     "name": "Bloodthirsty",
     "description": "When I kill a unit, restore x HP",
@@ -14,14 +22,6 @@
     "colorName": "Utility Buff",
     "numeric": true,
     "iconPath": "traits/bloodthirsty.png"
-  },
-  "creator": {
-    "name": "Creator",
-    "description": "Round start: Create x",
-    "color": "blue",
-    "colorName": "Utility Buff",
-    "numeric": true,
-    "iconPath": "traits/creator.png"
   },
   "dealer": {
     "name": "Dealer",

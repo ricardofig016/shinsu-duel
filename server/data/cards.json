@@ -104,7 +104,7 @@
         "code": "bloodthirsty"
       },
       {
-        "code": "creator"
+        "code": "beacon"
       },
       {
         "code": "dealer",
@@ -334,13 +334,13 @@
         "raw": "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
       },
       {
-        "type": "create_lighthouse",
+        "type": "light_up",
         "amount": 1,
         "trigger": {
           "type": "ally_dies",
           "rank": "regular"
         },
-        "raw": "when an ally Regular dies: Create 1"
+        "raw": "when an ally Regular dies: Light Up 1"
       }
     ]
   },
@@ -875,7 +875,7 @@
     ],
     "traits": [
       {
-        "code": "creator",
+        "code": "beacon",
         "value": 3
       }
     ],
@@ -2045,7 +2045,7 @@
     ],
     "traits": [
       {
-        "code": "creator",
+        "code": "beacon",
         "value": 1
       }
     ],
@@ -2058,9 +2058,9 @@
     ],
     "abilities": [
       {
-        "type": "create_lighthouse",
+        "type": "light_up",
         "amount": 1,
-        "raw": "Create 1"
+        "raw": "Light Up 1"
       }
     ],
     "passives": [],
@@ -2089,7 +2089,7 @@
     ],
     "traits": [
       {
-        "code": "creator",
+        "code": "beacon",
         "value": 1
       }
     ],
@@ -2102,10 +2102,10 @@
     ],
     "abilities": [
       {
-        "type": "create_lighthouse",
+        "type": "light_up",
         "amount": 1,
         "position": "light-bearer",
-        "raw": "light bearer: create 1"
+        "raw": "light bearer: Light Up 1"
       },
       {
         "type": "deal_damage",
@@ -2895,7 +2895,7 @@
             }
           },
           {
-            "type": "create_lighthouse",
+            "type": "light_up",
             "amount": 3
           },
           {
@@ -2906,7 +2906,7 @@
             "numeric": true
           }
         ],
-        "raw": "kill an ally to Create 3 and give me a random numeric trait"
+        "raw": "kill an ally to Light Up 3 and give me a random numeric trait"
       },
       {
         "type": "spend_shinsu",
@@ -3281,13 +3281,13 @@
     "abilities": [],
     "passives": [
       {
-        "type": "destroy_lighthouse",
+        "type": "extinguish",
         "amount": 5,
         "owner": "self",
         "trigger": {
           "type": "free_ability_played"
         },
-        "raw": "when an ability with Free is played, the unit destroys 5 of their own lighthouses"
+        "raw": "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
       },
       {
         "type": "summon",
@@ -3314,9 +3314,9 @@
     ],
     "effects": [
       {
-        "type": "destroy_lighthouse",
+        "type": "extinguish",
         "amount": 1,
-        "raw": "Destroy 1"
+        "raw": "Extinguish 1"
       },
       {
         "type": "heal",
@@ -3706,7 +3706,7 @@
     ],
     "traits": [
       {
-        "code": "creator"
+        "code": "beacon"
       }
     ],
     "attributes": [],

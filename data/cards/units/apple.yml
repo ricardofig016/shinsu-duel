@@ -25,10 +25,10 @@ passives:
       traitNot: immune
     trigger: { type: dies }
     raw: "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
-  - type: create_lighthouse
+  - type: light_up
     amount: 1
     trigger: { type: ally_dies, rank: regular }
-    raw: "when an ally Regular dies: Create 1"
+    raw: "when an ally Regular dies: Light Up 1"
 abilities:
   - type: remove_conditions
     mode: choose

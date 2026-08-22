@@ -69,7 +69,7 @@ The definitive list of implemented node types is **not in this file and not in t
 - **First person for the card itself**: `i` / `me` / `my` — "heal me 3 HP", "i deal +1 damage", "give me Ghost".
 - **Second person for the controlling player**: `you` / `your` — "in your hand", "from your deck".
 - **Third person for the bearer** (equipment): `the bearer` — "the bearer has Pierce 1".
-- **Keywords are capitalized**; effect verbs are lowercase: `deal`, `heal`, `give`, `draw`, `summon`, `create`, `steal`, `spend`, `force`. Capitalized keywords: `Create`/`Destroy` (lighthouses), `Reclaim`, `Compress`, `Charge`, `Slay`, `Disarm`, `Silence`, `Cleanse`, `Quick`, `Free`, plus all condition and trait names (`Burned`, `Rooted`, `Taunt`, …).
+- **Keywords are capitalized**; effect verbs are lowercase: `deal`, `heal`, `give`, `draw`, `summon`, `create`, `steal`, `spend`, `force`. Capitalized keywords: `Light Up`/`Extinguish` (lighthouses), `Reclaim`, `Compress`, `Charge`, `Slay`, `Disarm`, `Silence`, `Cleanse`, `Quick`, `Free`, plus all condition and trait names (`Burned`, `Rooted`, `Taunt`, …).
 - **Amounts are digits**, never words — `deal 4`, `heal 2 HP`, `Burned 3+`.
 
 ### Canonical phrasings by effect
@@ -83,8 +83,8 @@ The definitive list of implemented node types is **not in this file and not in t
 | Grant a trait                  | `give {target} {Trait} {n}` / `the bearer has {Trait} {n}` / `i have {Trait} {n}` | `give ally Bull Strong 2`, `the bearer has Pierce 1`, `i have Strong 3`, `give me Ruthless 1`                                                                            |
 | Cleanse                        | `Cleanse {target}`                                                                | `Cleanse an ally`, `Cleanse all allies`, `Cleanse the bearer`                                                                                                            |
 | Remove condition(s)            | `remove {n} condition(s) from {target}` / `remove {Condition} from {target}`      | `remove a condition from an ally`, `remove Burned from an enemy`, `remove 2 random conditions from an ally`                                                              |
-| Create lighthouses             | `Create {n}`                                                                      | `Create 1`, `Create 3`                                                                                                                                                   |
-| Destroy lighthouses            | `Destroy {n}`                                                                     | `Destroy 1`                                                                                                                                                              |
+| Light Up lighthouses           | `Light Up {n}`                                                                    | `Light Up 1`, `Light Up 3`                                                                                                                                               |
+| Extinguish lighthouses         | `Extinguish {n}`                                                                  | `Extinguish 1`                                                                                                                                                           |
 | Reclaim                        | `Reclaim {n} [filter]`                                                            | `Reclaim 2 equipments`, `Reclaim 1 Equipment card`, `Reclaim 1`                                                                                                          |
 | Compress cost                  | `Compress {n} from {card}`                                                        | `Compress 1 from a Hwayeomsa in your hand`, `Compress 1 from the most expensive card in your hand`                                                                       |
 | Charge shinsu                  | `Charge {n}`                                                                      | `Charge 1`                                                                                                                                                               |
@@ -108,7 +108,7 @@ The definitive list of implemented node types is **not in this file and not in t
 ### Prefixes and scope
 
 - **Spend**: `spend {n}: {effect}` — `spend 1: deal 6 to an enemy`.
-- **Position scope**: `{position}: {effect}` — `fisherman: deal 1 to an enemy`, `light bearer: create 1`.
+- **Position scope**: `{position}: {effect}` — `fisherman: deal 1 to an enemy`, `light bearer: Light Up 1`.
 - **Quick / Free**: as an ability prefix `quick: {effect}`, or as a standalone marker `i am Quick` / `Free: Spend 1: deal 1 to an enemy`.
 - **Triggered passives** lead with the trigger, then a colon: `round start: …`, `round end: …`, `when {event}`, `whenever {event}`, `when i die`, `when i'm equipped with X`, `when you summon a Shinheuh`.
 - **Conditionals**: `if {condition}, {effect}`, or with an `otherwise` branch: `if you have an ally Wave Controller deal 2 to an enemy, otherwise deal 1`. Always-on gates use `while`: `while i am alone on the ally frontline, i have Resilient 1 and Strong 3`.

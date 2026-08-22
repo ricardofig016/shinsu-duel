@@ -4,9 +4,9 @@ cost: 3
 requirements:
   - I'm the first card you play this round
 effects:
-  - type: destroy_lighthouse
+  - type: extinguish
     amount: 1
-    raw: "Destroy 1"
+    raw: "Extinguish 1"
   - type: heal
     amount: 1
     target: { side: ally }

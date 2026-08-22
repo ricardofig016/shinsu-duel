@@ -2,17 +2,17 @@ import { jest } from "@jest/globals";
 import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
-import DestroyLighthouseHandler from "../../handlers/DestroyLighthouseHandler.js";
+import ExtinguishHandler from "../../handlers/ExtinguishHandler.js";
 import EVT from "../../EventCatalog.js";
 
-describe("DestroyLighthouseHandler", () => {
+describe("ExtinguishHandler", () => {
   let clock, bus, stack, gameState, handler;
 
   beforeEach(() => {
     clock = new GameClock();
     bus = new EventBus(clock);
     stack = new ModifierStack(bus, clock);
-    handler = new DestroyLighthouseHandler();
+    handler = new ExtinguishHandler();
     gameState = {
       modifierStack: stack,
       usernames: ["Alice", "Bob"],
@@ -28,7 +28,7 @@ describe("DestroyLighthouseHandler", () => {
     };
   });
 
-  test("destroys lighthouses for a player", () => {
+  test("extinguishes lighthouses for a player", () => {
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 3 }, ctx, gameState);
     }, { phase: "execute" });
@@ -102,7 +102,7 @@ describe("DestroyLighthouseHandler", () => {
 
     bus.emit("Test");
 
-    expect(result.destroyed).toBe(4);
+    expect(result.extinguished).toBe(4);
     expect(result.current).toBe(16);
     expect(result.depleted).toBe(false);
   });

@@ -42,7 +42,7 @@ Historical inventory and classification of the legacy `type: "custom"` effects i
 | T   | Ability copy / repeat-play (2)      | Jyu Viole Grace 36, Twenty-Fifth Baam - Evolved 70 | `copy_ability`, delayed repeat-play trigger                                                  |
 | U   | Hand peek (1)                       | Monkeyman 47                                       | `peek_hand` (observer-only)                                                                  |
 | V   | Quick-grant / quick-trigger (3)     | Karaka 37/38, Wooden Horse 74                      | `modify_keyword { quick }`, passive on `quick_ability_used`                                  |
-| W   | Self-harming / Free+Spend (2)       | The Hand of Arlen 65, Stone Doll 62                | `sequence` of `destroy_lighthouse`/`spend_shinsu`/`deal_damage`; `free`/`quick` flags        |
+| W   | Self-harming / Free+Spend (2)       | The Hand of Arlen 65, Stone Doll 62                | `sequence` of `extinguish`/`spend_shinsu`/`deal_damage`; `free`/`quick` flags              |
 | X   | Charge-on-summon synergy (1)        | Sunwoo Nare 64                                     | passive `trigger: summon` → `charge_shinsu`                                                  |
 | Y   | Equipment assembly (4)              | Thorn Fragments 18/58/67/21                        | passive `trigger: equip` + `conditional` (all 4 unique equipped) → `discard` + `create_card` |
 | Z   | Revert/transform (1)                | Khun Ran - Evolved 43                              | passive `trigger: round_end` → `sequence` (`create_card`, `transform`)                       |
@@ -51,7 +51,7 @@ Historical inventory and classification of the legacy `type: "custom"` effects i
 
 The grammar must cover these effects with **generic handlers**, never per-card handlers:
 
-- **Primitives** (one handler each): `deal_damage`, `heal`, `give_condition`, `cleanse`, `grant_trait`, `remove_traits`, `slay`, `transform`, `copy_ability`, `copy_traits`, `grant_random_trait`, `peek_hand`, `charge_shinsu`, `create_lighthouse`, `destroy_lighthouse`, `draw_card`, `reclaim_cards`, `create_card`, `summon`, `discard`, `steal`, `disarm`, `switch_position`, `compress_shinsu`.
+- **Primitives** (one handler each): `deal_damage`, `heal`, `give_condition`, `cleanse`, `grant_trait`, `remove_traits`, `slay`, `transform`, `copy_ability`, `copy_traits`, `grant_random_trait`, `peek_hand`, `charge_shinsu`, `light_up`, `extinguish`, `draw_card`, `reclaim_cards`, `create_card`, `summon`, `discard`, `steal`, `disarm`, `switch_position`, `compress_shinsu`.
 - **Structural**: `sequence`, `conditional`, `spend_shinsu`, `grant_ability`.
 - **Modifiers** (always-on passives): `modify_stat`, `modify_keyword`, `modify_targeting`, `global_rule`.
 - **Predicates**: `has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_all_equipped`, `has_condition`.

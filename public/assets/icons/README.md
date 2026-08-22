@@ -14,8 +14,8 @@ Traits are color coded per RULES.md:
 - **Utility Buffs (Blue #00FFFF)**
 
 - barrier (yellow)
+- beacon (blue)
 - bloodthirsty (blue)
-- creator (blue)
 - dealer (blue)
 - immune (yellow)
 - last-one-standing (yellow)

@@ -2,17 +2,17 @@ import { jest } from "@jest/globals";
 import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
-import CreateLighthouseHandler from "../../handlers/CreateLighthouseHandler.js";
+import LightUpHandler from "../../handlers/LightUpHandler.js";
 import EVT from "../../EventCatalog.js";
 
-describe("CreateLighthouseHandler", () => {
+describe("LightUpHandler", () => {
   let clock, bus, stack, gameState, handler;
 
   beforeEach(() => {
     clock = new GameClock();
     bus = new EventBus(clock);
     stack = new ModifierStack(bus, clock);
-    handler = new CreateLighthouseHandler();
+    handler = new LightUpHandler();
     gameState = {
       modifierStack: stack,
       modifyLighthouses: (username, amount) => {
@@ -27,7 +27,7 @@ describe("CreateLighthouseHandler", () => {
     };
   });
 
-  test("creates lighthouses for a player", () => {
+  test("lights up lighthouses for a player", () => {
     bus.on("Test", (p, ctx) => {
       handler.execute({ owner: "Alice", amount: 3 }, ctx, gameState);
     }, { phase: "execute" });

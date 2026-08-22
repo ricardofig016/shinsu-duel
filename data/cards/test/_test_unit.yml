@@ -14,8 +14,8 @@ abilities:
 evolve:
 traits:
   - barrier
+  - beacon
   - bloodthirsty
-  - creator
   - dealer 10
   - immune
   - last one standing 10
