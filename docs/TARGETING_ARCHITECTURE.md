@@ -50,6 +50,10 @@ Taunt applies only to effects originating from an **enemy unit**. It does not co
 
 A unit with the `Blinded` condition cannot choose targeted units. For choice descriptors such as `enemy`, `ally`, and `unit`, `TargetResolver` shuffles the already-filtered valid candidates and selects from that order. Line blocking, Ghost, Sharpshooter, Taunt, and other filters are applied before randomization. Self, bearer, all-target descriptors, and lighthouse targeting are not randomized. The resolver uses the game's seeded RNG so random targeting is deterministic in tests and replays.
 
+### Modifier targeting rules
+
+Always-on `modify_targeting` entries (read through `ModifierStack.getTargetingRules`) shape legality: `ignore_taunt` lets the source unit bypass Taunt entirely (checked before the Taunt filter is applied), and `untargetable_by` removes candidates whose stored blocked-actor filter matches the source unit (e.g. "units with Burned 3+ can't target me"). Both are keyword overrides applied by `ModifierService`, so they revoke with their source and are evaluated with the same filter vocabulary as every other target filter.
+
 ---
 
 ## Structured Target Descriptors

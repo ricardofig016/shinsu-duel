@@ -190,10 +190,17 @@ describe("PassiveManager", () => {
     expect(manager._parseTrigger({
       type: "modify_stat", stat: "damage", amount: 1, target: { side: "self" },
     })).toBeNull();
-    expect(manager._parseTrigger({
-      type: "deal_damage", amount: 1, trigger: { type: "attack" },
-    })).toBeNull();
     expect(manager._parseTrigger({ type: "deal_damage", amount: 1 })).toBeNull();
+
+    const skillPlayed = manager._parseTrigger({ trigger: { type: "skill_played", cardName: "Baang" } });
+    expect(skillPlayed.eventName).toBe(EVT.SKILL_APPLIED);
+    expect(skillPlayed.cardName).toBe("Baang");
+
+    const dealDamage = manager._parseTrigger({ trigger: { type: "deal_damage" } });
+    expect(dealDamage.eventName).toBe(EVT.DAMAGE_APPLIED);
+
+    const quickAbility = manager._parseTrigger({ trigger: { type: "quick_ability_used" } });
+    expect(quickAbility.eventName).toBe(EVT.UNIT_ABILITY_USED);
   });
 
   test("always-on conditional re-evaluates when an ally switches lines", () => {

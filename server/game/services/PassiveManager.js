@@ -35,14 +35,7 @@ export default class PassiveManager {
 
       const unsubscribe = this._bus.on(trigger.eventName, (payload, context) => {
         if (!this._matches(trigger, unit, payload, gameState)) return;
-        resolveEffect(trigger.effect, context, gameState, {
-          owner: unit.owner,
-          sourceId,
-          sourceType: "passive",
-          sourceUnit: unit,
-          sourceOwner: unit.owner,
-          targetOwner: gameState.usernames.find((username) => username !== unit.owner),
-        });
+        resolveEffect(trigger.effect, context, gameState, this._triggerExtra(trigger, unit, payload, sourceId, gameState));
       }, { phase: "execute", priority: -100 });
 
       const entries = this._unsubscribers.get(unit.id) || [];
@@ -179,9 +172,38 @@ export default class PassiveManager {
     if (!(gameState._findUnit(unit.id) === unit && unit.isAlive())) return false;
 
     // Trigger-specific filters.
-    if (trigger.type === "skill_played" && payload?.cardName !== trigger.cardName) return false;
+    if (trigger.type === "skill_played") {
+      if (payload?.cardName !== trigger.cardName) return false;
+      // "Baang gives Burned 1" — only the passive owner's own skill play.
+      if (payload?.owner !== unit.owner) return false;
+    }
     if (trigger.type === "deal_damage" && payload?.sourceId !== unit.id) return false;
     if (trigger.type === "quick_ability_used" && payload?.quick !== true) return false;
     return true;
+  }
+
+  /**
+   * Build the resolution context for a triggered passive effect, threading
+   * the triggering event's payload where the effect's text is relative to
+   * the actor rather than the passive source.
+   *
+   * - `deal_damage`: "Disarm them" → target the damaged unit.
+   * - `quick_ability_used`: "they Charge 1" → the unit that used the ability.
+   */
+  _triggerExtra(trigger, unit, payload, sourceId, gameState) {
+    const extra = {
+      owner: unit.owner,
+      sourceId,
+      sourceType: "passive",
+      sourceUnit: unit,
+      sourceOwner: unit.owner,
+      targetOwner: gameState.usernames.find((username) => username !== unit.owner),
+    };
+    if (trigger.type === "deal_damage") {
+      extra.targetId = payload.targetId;
+    } else if (trigger.type === "quick_ability_used") {
+      extra.owner = payload.username;
+    }
+    return extra;
   }
 }

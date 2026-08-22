@@ -748,6 +748,15 @@ export default class LifecycleEngine {
         equipment.id,
         EVT.DAMAGE_APPLIED,
         (payload) => payload.sourceId === unit.id,
+        (payload) => resolveEffect(effect, context, gameState, { ...extra, targetId: payload.targetId })
+      );
+      return;
+    }
+    if (trigger.type === "quick_ability_used") {
+      gameState.registerEquipmentTriggeredEffect(
+        equipment.id,
+        EVT.UNIT_ABILITY_USED,
+        (payload) => payload.unitId === unit.id && payload.quick === true,
         () => resolveEffect(effect, context, gameState, extra)
       );
       return;

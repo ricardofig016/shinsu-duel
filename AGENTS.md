@@ -66,6 +66,7 @@ During implementation:
 - Test successful behavior, invalid input, boundary conditions, lifecycle cleanup, repeated operations, failure paths, event ordering, and interactions with related systems.
 - Run the relevant focused tests during development and the full test suite before finishing.
 - Run tests via `npm run test`. Do NOT use bare `npx jest`. The `test` script already wraps Jest with the required Node flags (`node --experimental-vm-modules node_modules/jest/bin/jest.js`).
+- Tests must never depend on shipped card data. Resolve cards against the test-owned fixture catalog (`server/game/tests/fixtures/cards.js`) and inject it via `GameState`'s `options.cards` (or the `tests/utils.js` helpers). You are free to create new fixtures.
 
 ## Acceptance Criteria
 

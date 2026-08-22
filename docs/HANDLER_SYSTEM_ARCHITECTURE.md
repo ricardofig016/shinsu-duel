@@ -134,16 +134,16 @@ Handlers are grouped by the domain they mutate.
 
 ### Combat & unit state
 
-| Handler                   | DSL `type`           | Key behavior                                                                                  |
-| ------------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
-| `DealDamageHandler`       | `deal_damage`        | Barrier → Resilient → Weak → `UnitService.damage` → kill check via `LifecycleEngine.killUnit` |
-| `HealHandler`             | `heal`               | Applies healing via `UnitService.heal`, capped at max HP                                      |
-| `GrantTraitHandler`       | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                                   |
-| `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                             |
-| `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                 |
-| `GrantRandomTraitHandler` | `grant_random_trait` | Grants a seeded-random trait (optional `numeric` pool filter)                                 |
-| `GiveConditionHandler`    | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                                     |
-| `RemoveConditionHandler`  | `remove_conditions`  | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                         |
+| Handler                   | DSL `type`           | Key behavior                                                                                                                                    |
+| ------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DealDamageHandler`       | `deal_damage`        | Barrier → Resilient → Weak → `UnitService.damage` → kill check via `LifecycleEngine.killUnit`; applies `stat: damage`/`damage_taken` amplifiers |
+| `HealHandler`             | `heal`               | Applies healing via `UnitService.heal`, capped at max HP; applies `stat: heal` amplifier                                                        |
+| `GrantTraitHandler`       | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                                                                                     |
+| `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                                                                               |
+| `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                                                                   |
+| `GrantRandomTraitHandler` | `grant_random_trait` | Grants a seeded-random trait (optional `numeric` pool filter)                                                                                   |
+| `GiveConditionHandler`    | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`; applies `modify_condition` amplifier                                                 |
+| `RemoveConditionHandler`  | `remove_conditions`  | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                                                                           |
 
 ### Zone movement & lifecycle
 
@@ -173,7 +173,7 @@ Handlers are grouped by the domain they mutate.
 | `NoopHandler` | `noop`     | No-op; resolves to `{ resolved: true }` (test placeholders) |
 | `NoopHandler` | `quick`    | Display-only Quick marker node; no-op                       |
 
-Structured DSL types not listed above (e.g. modifiers, global rules, `grant_affiliation`, `return_to_hand`, `play_jeonsul_baang`) have no handler yet; the runtime skips them and reports an unsupported-effect event. The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
+Structured DSL types not listed above (e.g. global rules, `grant_affiliation`, `return_to_hand`, `play_jeonsul_baang`) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 

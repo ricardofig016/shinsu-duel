@@ -45,3 +45,15 @@ destroy all landmarks from decks
 ### Darkness
 
 if you dont have a lightbearer, all allies have Blinded
+
+### Sabotage
+
+numeric conditions given to enemeis by scouts are doubled
+
+### Team Leader
+
+fishermen gain 3 random traits on summon
+
+### Shooting Range
+
+players have 2 spear bearer combat slots

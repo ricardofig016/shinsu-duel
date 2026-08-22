@@ -51,7 +51,7 @@
 - **HwayeomsaEngine** — Fire Charge accumulation, Fire Core/Incinerate generation
 - **AttributeRegistry** — pluggable pattern for future attributes (Jeonsulsa, Irregular, etc.)
 
-### Phase 6: Rules, Conditions & Traits Enforcement _(partial — remaining items in subplan phases F/G)_
+### Phase 6: Rules, Conditions & Traits Enforcement _(partial — remaining items in subplan phase G)_
 
 - Condition cleanup on round end (`modifierStack.removeWhere`)
 - Barrier reset on round start

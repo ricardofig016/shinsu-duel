@@ -1,5 +1,8 @@
 import Card from "../../Card.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
+import ModifierService from "../../services/ModifierService.js";
+import * as IdFactory from "../../IdFactory.js";
+import { resetModifierCounter } from "../../ModifierStack.js";
 import EVT from "../../EventCatalog.js";
 import { resolveTargets } from "../../TargetResolver.js";
 import { setupGameWithHands, deployUnit, getCardIdByName } from "../utils.js";
@@ -156,5 +159,115 @@ describe("Modifier runtime integration", () => {
     game.eventBus.emit(EVT.DAMAGE_APPLIED, { sourceId: monkey.id, targetId: enemy.id, amount: 1 });
 
     expect(game.modifierStack.has(enemy.id, "condition", "exhausted")).toBe(true);
+  });
+
+  test("Stone Doll takes +4 damage from Spear Bearers (damage_taken source filter)", () => {
+    const game = setupGameWithHands({ Alice: ["Test Spear Bearer"], Bob: ["Test Stone Doll"] });
+    const spear = deployUnit(game, "Alice", "Test Spear Bearer", "spear-bearer");
+    const stoneDoll = deployUnit(game, "Bob", "Test Stone Doll", "fisherman");
+
+    useAbility(game, "Alice", spear, "0"); // deal 4 to an enemy
+
+    expect(stoneDoll.currentHp).toBe(20 - 8); // 4 base + 4 damage_taken
+  });
+
+  test("Pedro gives Poisoned +2 to High Ranker units while equipped", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout Ranker"], Bob: ["Test Backline High Ranker"] });
+    const pedro = deployUnit(game, "Alice", "Test Scout Ranker", "scout");
+    equip(game, "Alice", "Test Grant Ability Equip", pedro);
+    const highRanker = deployUnit(game, "Bob", "Test Backline High Ranker", "spear-bearer");
+
+    useAbility(game, "Alice", pedro, "0"); // give Poisoned 1 to a backline enemy
+
+    expect(game.modifierStack.getEffective(highRanker.id, "condition", "poisoned")).toBe(3);
+  });
+
+  test("Hwa Ryun raises enemy skill costs and Yeo Goseng lowers ally team-sweet-and-sour costs", () => {
+    const game = setupGameWithHands({ Alice: ["Test Yeo Goseng"], Bob: ["Test Hwa Ryun"] });
+    deployUnit(game, "Alice", "Test Yeo Goseng", "light-bearer");
+    deployUnit(game, "Bob", "Test Hwa Ryun", "scout");
+
+    // Yeo Goseng (Alice): team-sweet-and-sour allies cost 1 less.
+    const yeoCard = new Card(getCardIdByName("Test Yeo Goseng"), game.cards[getCardIdByName("Test Yeo Goseng")], "Alice", game.eventBus);
+    expect(ModifierService.getEffectiveCost(yeoCard, "Alice", game)).toBe(0);
+
+    // Hwa Ryun (Bob): Alice's skills cost 1 more (ally team-baam/team-fug = Hwa Ryun itself).
+    const skillCard = new Card(getCardIdByName("Test Poison Skill"), game.cards[getCardIdByName("Test Poison Skill")], "Alice", game.eventBus);
+    expect(ModifierService.getEffectiveCost(skillCard, "Alice", game)).toBe(skillCard.cost + 1);
+  });
+
+  test("Novick disarms the specific enemy it damaged", () => {
+    const game = setupGameWithHands({ Alice: ["Test Novick"], Bob: ["Test Princess Unit"] });
+    const novick = deployUnit(game, "Alice", "Test Novick", "spear-bearer");
+    const princess = deployUnit(game, "Bob", "Test Princess Unit", "fisherman");
+    equip(game, "Bob", "Test Blue Thryssa", princess);
+    expect(princess.equipmentAttachments).toHaveLength(1);
+
+    useAbility(game, "Alice", novick, "0"); // spear bearer: deal 7 to an enemy
+
+    expect(princess.equipmentAttachments).toHaveLength(0); // disarmed
+    expect(princess.isAlive()).toBe(true); // survived (8 hp, Resilient 3)
+  });
+
+  test("Wooden Horse charges the ability user (even an enemy) and still loses 1 HP", () => {
+    const game = setupGameWithHands({ Alice: ["Test Landmark Unit"], Bob: ["Test Scout"] });
+    const horse = deployUnit(game, "Alice", "Test Landmark Unit", "landmark");
+    const monkey = deployUnit(game, "Bob", "Test Scout", "scout");
+    const beforeHp = horse.currentHp;
+    game.currentTurn = "Bob";
+    game.playerStates.Bob.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+
+    game.processAction({ type: "use-ability-action", data: { source: "player", username: "Bob", unitId: monkey.id, abilityCode: "0" } });
+
+    expect(game.playerStates.Bob.shinsu.normalAvailable).toBe(6); // the ability user Charges 1
+    expect(game.playerStates.Alice.shinsu.normalAvailable).toBe(5); // the landmark owner does not Charge
+    expect(horse.currentHp).toBe(beforeHp - 1); // Wooden Horse loses 1 HP
+  });
+
+  test("Quaetro Blitz does not trigger on an enemy's skill play", () => {
+    const game = setupGameWithHands({ Alice: ["Test Burn Passive Unit"], Bob: ["Test Damage Skill"] });
+    deployUnit(game, "Alice", "Test Burn Passive Unit", "wave-controller");
+    const ally = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
+
+    game.currentTurn = "Bob";
+    game.playerStates.Bob.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const handId = game.playerStates.Bob.hand.findIndex((c) => c.name === "Test Damage Skill");
+    game.processAction({ type: "play-skill-action", data: { source: "player", username: "Bob", handId } });
+
+    expect(game.modifierStack.has(ally.id, "condition", "burned")).toBe(false);
+  });
+
+  test("equipping a quick_ability_used trigger equipment does not throw and charges the bearer's owner", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"], Bob: [] });
+    const monkey = deployUnit(game, "Alice", "Test Scout", "scout");
+
+    expect(() => equip(game, "Alice", "Test Dionysos Wings", monkey)).not.toThrow();
+    game.currentTurn = "Alice";
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+
+    game.processAction({ type: "use-ability-action", data: { source: "player", username: "Alice", unitId: monkey.id, abilityCode: "0" } });
+
+    expect(game.playerStates.Alice.shinsu.normalAvailable).toBe(6); // the bearer's Quick ability Charged 1
+  });
+
+  test("modify_repeat + random targeting is deterministic under a fixed seed", () => {
+    const run = () => {
+      IdFactory.resetAll();
+      resetModifierCounter();
+      const game = setupGameWithHands({
+        Alice: ["Test Random Target Unit"],
+        Bob: ["Test Filler 1", "Test Filler 2", "Test Filler 3"],
+      });
+      const unit = deployUnit(game, "Alice", "Test Random Target Unit", "fisherman");
+      deployUnit(game, "Bob", "Test Filler 1", "fisherman");
+      deployUnit(game, "Bob", "Test Filler 2", "fisherman");
+      deployUnit(game, "Bob", "Test Filler 3", "fisherman");
+      equip(game, "Alice", "Test Repeat Equip", unit);
+      useAbility(game, "Alice", unit, "0"); // deal 1 to a random enemy (x2 via repeat)
+      return game.toSerializedState();
+    };
+
+    expect(JSON.stringify(run())).toBe(JSON.stringify(run()));
   });
 });

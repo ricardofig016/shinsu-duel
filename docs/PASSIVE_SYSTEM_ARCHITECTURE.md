@@ -29,13 +29,13 @@ A timed passive is a structured DSL node with a structured `trigger` object:
 }
 ```
 
-The `trigger.type` selects the subscription. `PassiveManager` currently wires `round_start` and `round_end`. Passives with no `trigger` at all are always-on and handled separately (see below).
+The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, and `quick_ability_used`. Passives with no `trigger` at all are always-on and handled separately (see below).
 
 ---
 
 ## Runtime Behavior
 
-`PassiveManager.registerUnit(unit, gameState)` is called by `LifecycleEngine` whenever a unit enters play (deploy or transformation). It scans `unit.card.passiveAbilities`, and for each entry with a `trigger.type` of `round_start` or `round_end`, subscribes to the matching round event and resolves the effect through the normal `EffectResolver` when it fires:
+`PassiveManager.registerUnit(unit, gameState)` is called by `LifecycleEngine` whenever a unit enters play (deploy or transformation). It scans `unit.card.passiveAbilities`, and for each entry with a supported `trigger.type`, subscribes to the matching event and resolves the effect through the normal `EffectResolver` when it fires:
 
 ```js
 passiveManager.registerUnit(unit, gameState);
@@ -43,6 +43,8 @@ passiveManager.unregisterUnit(unit.id);
 ```
 
 The source ID is `Passive#<unitId>#<index>` (`IdFactory.passiveSource`), so any modifiers the passive applies (e.g. via `give_condition`) are provenance tracked like any other effect.
+
+Trigger context is threaded into the resolution: a `deal_damage` passive resolves against the damaged unit (`payload.targetId`), and a `quick_ability_used` passive resolves `owner`-relative steps such as `charge_shinsu` against the unit that used the ability (`payload.username`). A `skill_played` passive only fires for the passive owner's own skill play.
 
 ### Lifecycle
 

@@ -171,7 +171,7 @@ The `maxDepth` parameter (default 50) prevents infinite event loops. If a handle
 - `unit:evolved` — unit transformed (evolution)
 - `unit:killed` — unit HP reached 0
 - `unit:position:switched` — unit moved to another position
-- `unit:ability:used` — ability resolved
+- `unit:ability:used` — ability resolved; payload `{ username, unitId, abilityCode, quick }` (the `quick` flag gates `quick_ability_used` passives/equipment triggers and `quick` keyword consumption)
 - `unit:ability:granted` — ability granted to a unit
 
 #### Distinguishing overlapping unit events
@@ -207,6 +207,8 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 - `equipment:attached` — equipment attached to unit
 - `equipment:detached` — equipment removed from unit
 - `equipment:ignited` — attached equipment ignited
+
+Equipment effects with a non-`equip` trigger (e.g. `deal_damage`, `quick_ability_used`) subscribe to their canonical event through `GameState.registerEquipmentTriggeredEffect` for the equipment's lifetime and are removed on detach.
 
 ### Lifecycle & Zone Movement
 

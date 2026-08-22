@@ -75,6 +75,14 @@ const ID = {
   INCINERATE_III: 1058,
   INCINERATE_IV: 1059,
   FIRE_CORE: 1060,
+
+  STONE_DOLL: 1061,
+  HWA_RYUN: 1062,
+  YEO_GOSENG: 1063,
+  NOVICK: 1064,
+  BACKLINE_HIGH_RANKER: 1065,
+  DIONYSOS_WINGS: 1066,
+  RANDOM_TARGET_UNIT: 1067,
 };
 
 const ALL_POSITIONS = ["fisherman", "spear-bearer", "scout", "light-bearer", "wave-controller"];
@@ -432,6 +440,47 @@ const named = [
       { type: "quick", raw: "i am Quick" },
       { type: "create_card", card: { type: "skill", series: "incinerate" }, raw: "Spend Fire Charges to create the highest affordable Incinerate in your hand" },
     ],
+  },
+
+  // ── modifier/trigger runtime fixtures ─────────────────────────
+  {
+    cardId: ID.STONE_DOLL, type: "unit", name: "Test Stone Doll", cost: 0, deckConstraints: [], hp: 20,
+    rank: "regular", positions: ["fisherman"], traits: [{ code: "taunt" }], attributes: [], affiliations: [],
+    abilities: [{ type: "spend_shinsu", amount: 1, free: true, effect: { type: "deal_damage", amount: 1, target: { side: "enemy" } }, raw: "Free: Spend 1: deal 1 to an enemy" }],
+    passives: [{ type: "modify_stat", stat: "damage_taken", amount: 4, target: { side: "self" }, source: { position: "spear-bearer" }, raw: "Spear bearers deal +4 damage to me" }],
+  },
+  {
+    cardId: ID.HWA_RYUN, type: "unit", name: "Test Hwa Ryun", cost: 3, deckConstraints: [], hp: 2, rank: "regular",
+    positions: ["scout"], traits: [], attributes: ["red-witch"], affiliations: ["fug", "team-baam", "team-fug"],
+    abilities: [{ type: "give_condition", condition: "heavy", amount: 1, target: { side: "enemy", scope: "backline" }, raw: "give Heavy 1 to a backline enemy" }],
+    passives: [{ type: "modify_stat", stat: "cost", amount: 1, target: { side: "enemy" }, cardType: "skill",
+      if: { type: "has_unit", target: { side: "ally", affiliation: ["team-baam", "team-fug"] } }, raw: "while i have an ally team baam or team fug member, opponents' skills cost 1 more" }],
+  },
+  {
+    cardId: ID.YEO_GOSENG, type: "unit", name: "Test Yeo Goseng", cost: 1, deckConstraints: [], hp: 1, rank: "regular",
+    positions: ["light-bearer"], traits: [{ code: "beacon", value: 1 }], attributes: [], affiliations: ["team-sweet-and-sour"],
+    abilities: [{ type: "heal", amount: 1, target: { side: "ally", affiliation: "team-sweet-and-sour" }, raw: "heal a team sweet and sour member 1 HP" }],
+    passives: [{ type: "modify_stat", stat: "cost", amount: -1, target: { side: "ally", affiliation: "team-sweet-and-sour" }, raw: "team sweet and sour members cost 1 less" }],
+  },
+  {
+    cardId: ID.NOVICK, type: "unit", name: "Test Novick", cost: 5, deckConstraints: [], hp: 6, rank: "regular",
+    positions: ["spear-bearer", "fisherman"], traits: [], attributes: [], affiliations: ["team-novick"],
+    abilities: [{ type: "deal_damage", amount: 7, target: { side: "enemy" }, position: "spear-bearer", raw: "spear bearer: deal 7 to an enemy" }],
+    passives: [{ type: "disarm", target: { side: "enemy" }, to: { zone: "hand", owner: "equipment_owner" }, trigger: { type: "deal_damage" }, raw: "when i deal damage to an enemy: Disarm them" }],
+  },
+  {
+    cardId: ID.BACKLINE_HIGH_RANKER, type: "unit", name: "Test Backline High Ranker", cost: 4, deckConstraints: [], hp: 6, rank: "high ranker",
+    positions: ["spear-bearer"], traits: [], attributes: [], affiliations: ["fug"], abilities: [], passives: [],
+  },
+  {
+    cardId: ID.DIONYSOS_WINGS, type: "equipment", name: "Test Dionysos Wings", cost: 2, deckConstraints: [],
+    effects: [{ type: "charge_shinsu", amount: 1, trigger: { type: "quick_ability_used" }, raw: "the bearer's Quick abilities Charge 1" }],
+  },
+  {
+    cardId: ID.RANDOM_TARGET_UNIT, type: "unit", name: "Test Random Target Unit", cost: 2, deckConstraints: [], hp: 4, rank: "regular",
+    positions: ["fisherman"], traits: [], attributes: [], affiliations: [],
+    abilities: [{ type: "deal_damage", amount: 1, target: { side: "enemy", random: true }, raw: "deal 1 to a random enemy" }],
+    passives: [],
   },
 ];
 

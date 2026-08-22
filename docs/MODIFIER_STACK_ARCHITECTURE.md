@@ -194,18 +194,18 @@ These are informational — the ModifierStack does its own state management. Ext
 
 Always-on modifier passives and equipment effects (`modify_stat`/`modify_keyword`/`modify_targeting`/`modify_condition`/`modify_repeat`/`retain_equipment`/`modify_ability`) are applied by `ModifierService` as `stat`, `keyword`, or `ability-augment` entries. The systems that consume them query the stack through filter-aware helpers that read the modifier's stored `meta` (the `when`/`source`/`victimFilter`/`blockedFilter`/`first`/`effect` metadata) against passed unit references:
 
-| Helper                                | Consumed by                | Reads                                                       |
-| ------------------------------------- | -------------------------- | ----------------------------------------------------------- |
-| `getDamageDealt(src,dst)`             | `DealDamageHandler`        | `stat: damage` with `when` target filter                    |
-| `getHealModifier(src,dst)`            | `HealHandler`              | `stat: heal` with `when` target filter                      |
-| `getDamageTaken(dst,src)`             | `DealDamageHandler`        | `stat: damage_taken` with `source` attacker filter          |
-| `getConditionAmplifier(src,dst,cond)` | `GiveConditionHandler`     | `stat: condition` with victim filter                        |
-| `getKeywords(unit, isFirst)`          | `UseAbilityAction`         | `keyword` (quick/free), `first`-scoped per round            |
-| `getTargetingRules(unit)`             | `TargetResolver`           | `keyword` ignore_taunt / untargetable_by (+ blocked filter) |
-| `getRepeat(unit)`                     | `UseAbilityAction`         | `stat: repeat`                                              |
-| `hasRetainEquipment(unit)`            | (Phase J `return_to_hand`) | `keyword` retain_equipment                                  |
-| `getAbilityAugments(unit)`            | `EffectResolver`           | `ability-augment` effect nodes                              |
-| `matchesUnitFilter(unit, filter)`     | `TargetResolver`           | shared `unitFilter` evaluation                              |
+| Helper                                | Consumed by            | Reads                                                       |
+| ------------------------------------- | ---------------------- | ----------------------------------------------------------- |
+| `getDamageDealt(src,dst)`             | `DealDamageHandler`    | `stat: damage` with `when` target filter                    |
+| `getHealModifier(src,dst)`            | `HealHandler`          | `stat: heal` with `when` target filter                      |
+| `getDamageTaken(dst,src)`             | `DealDamageHandler`    | `stat: damage_taken` with `source` attacker filter          |
+| `getConditionAmplifier(src,dst,cond)` | `GiveConditionHandler` | `stat: condition` with victim filter                        |
+| `getKeywords(unit, isFirst)`          | `UseAbilityAction`     | `keyword` (quick/free), `first`-scoped per round            |
+| `getTargetingRules(unit)`             | `TargetResolver`       | `keyword` ignore_taunt / untargetable_by (+ blocked filter) |
+| `getRepeat(unit)`                     | `UseAbilityAction`     | `stat: repeat`                                              |
+| `hasRetainEquipment(unit)`            | `return_to_hand`       | `keyword` retain_equipment                                  |
+| `getAbilityAugments(unit)`            | `EffectResolver`       | `ability-augment` effect nodes                              |
+| `matchesUnitFilter(unit, filter)`     | `TargetResolver`       | shared `unitFilter` evaluation                              |
 
 All helpers are pure queries — they never mutate state and take unit references rather than `GameState`, so the stack stays decoupled from the board. Card cost (`stat: cost` keyed to a player, plus a card's own `modify_cost`) is consulted through `ModifierService.getEffectiveCost`, which is the single cost authority for play/deploy/equip.
 

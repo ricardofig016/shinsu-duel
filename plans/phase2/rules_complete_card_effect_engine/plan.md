@@ -1,6 +1,6 @@
 ## Plan: Rules-complete card effect engine
 
-**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–E are complete: all 93 YAML cards are structured DSL (zero `custom`/`handler`, enforced by the landed `CardDataAudit` test), structured unit and card target resolution (including `random`/`choose`/`cost`/`lowest_hp` selection and the explicit `series` grouping) is runtime-supported, `sequence`/`conditional` plus all seven predicates are wired, shared-target sequences (`targets` + `target: { link: sequence }`) resolve one target set across steps, and the full effect-primitive catalog has handlers with tests. The remaining work is runtime integration of grammar that already landed in the schemas/compiler (Phases F–J): modifier/global-rule runtime, Jeonsulsa mechanics, extended passive triggers, and rules-completeness enforcement. Full suite baseline: 81 suites / 730 tests green.
+**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–F are complete: all 93 YAML cards are structured DSL (zero `custom`/`handler`, enforced by the landed `CardDataAudit` test), structured unit and card target resolution (including `random`/`choose`/`cost`/`lowest_hp` selection and the explicit `series` grouping) is runtime-supported, `sequence`/`conditional` plus all seven predicates are wired, shared-target sequences (`targets` + `target: { link: sequence }`) resolve one target set across steps, the full effect-primitive catalog has handlers with tests, and the modifier system runtime (`modify_*`/`retain_equipment`/`modify_ability`) is wired end-to-end. The remaining work is runtime integration of grammar that already landed in the schemas/compiler (Phases G–J): global-rule runtime, Jeonsulsa mechanics, extended passive triggers, and rules-completeness enforcement. Full suite baseline: 81 suites / 730 tests green.
 
 **Steps**
 
@@ -28,7 +28,7 @@ _Phase E — New effect primitives_ (each: handler + service integration + valid
 5. Abilities: `copy_ability` ("use an enemy ability"), `repeat_play` (delayed repeat + wildcard when `cardName` omitted).
 6. Events: `card:discarded`, `unit:stolen`, `unit:silenced`, `hand:peeked`; audit points closed with `PhaseEHandlersIntegration.test.js`.
 
-_Phase F — Modifier system runtime (always-on passives)_ _depends on C+D_
+_Phase F — Modifier system runtime (always-on passives)_ _depends on C+D_ (done)
 
 The modifier grammar is fully landed (`modify_stat` damage/heal/hp/cost/damage_taken with `when`/`source` filters, `modify_cost` with `if`, `modify_condition` with `if`, `modify_keyword` quick/free/first, `modify_targeting` ignore_taunt/untargetable_by, `modify_repeat`, `retain_equipment`); the remaining work is **runtime**:
 
