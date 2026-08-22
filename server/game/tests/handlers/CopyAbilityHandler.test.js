@@ -40,6 +40,24 @@ describe("CopyAbilityHandler", () => {
     expect(result.used).toBe(false);
   });
 
+  test("defers to an ability_selection decision when the enemy has multiple abilities", () => {
+    const game = setupGameWithHands({ Bob: ["Khun Ran"], Alice: ["Bull"] });
+    // Khun Ran has two abilities (deal 3 to a frontline enemy, heal enemy Conduit).
+    const source = deployUnit(game, "Bob", "Khun Ran", "fisherman");
+    const caster = deployUnit(game, "Alice", "Bull", "frontline-shinheuh");
+
+    const result = handler.execute(
+      { sourceUnitId: source.id, sourceId: caster.id, sourceUnit: caster, sourceOwner: "Alice" },
+      context(game),
+      game
+    );
+
+    expect(result.used).toBe(true);
+    expect(result.pending).toBe(true);
+    expect(game.pendingDecision.type).toBe("ability_selection");
+    expect(game.pendingDecision.candidates).toHaveLength(2);
+  });
+
   test("validate throws without sourceUnitId", () => {
     expect(() => handler.validate({})).toThrow("sourceUnitId");
   });

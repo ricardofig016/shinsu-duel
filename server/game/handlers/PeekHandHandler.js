@@ -13,14 +13,14 @@ import { toCardTargetView } from "../utils/cardData.js";
  * EffectResolver). An optional `card` filter narrows the eligible cards.
  * `mode` (`all` | `random` | `choose`) and `amount` select how many to reveal:
  *   - `all` (or bare): reveal every matching card.
- *   - `random` / `random: true` (default for a bare peek): reveal `amount`
+ *   - `random` (default for a bare peek): reveal `amount`
  *     (default 1) seeded-random matching cards.
  *   - `choose`: the observer picks `amount` matching cards.
  *
  * The revealed cards are emitted via `hand:peeked` with no mutation.
  *
  * Payload:
- *   { owner, card?, mode?, amount?, random?, sourceOwner }
+ *   { owner, card?, mode?, amount?, sourceOwner }
  */
 export default class PeekHandHandler extends BaseHandler {
   validate(payload) {
@@ -28,7 +28,7 @@ export default class PeekHandHandler extends BaseHandler {
   }
 
   execute(payload, context, gameState) {
-    const { owner, card, mode, amount = 1, random, sourceOwner } = payload;
+    const { owner, card, mode, amount = 1, sourceOwner } = payload;
     const player = gameState.playerStates[owner];
     if (!player) return { revealed: [] };
 

@@ -8,8 +8,8 @@ import BaseHandler from "./BaseHandler.js";
  *
  * Registers a turn-scoped pending repeat on GameState. When the player next
  * plays a card named `cardName`, its effects resolve `amount` additional
- * times (consumed by PlaySkillAction / DeployUnitAction). When `cardName` is
- * omitted, the repeat is a wildcard — the next card the player plays is
+ * times (consumed by PlaySkillAction). When `cardName` is omitted,
+ * the repeat is a wildcard — the next card the player plays is
  * replayed (e.g. "the next card you play, play it again").
  *
  * Payload:

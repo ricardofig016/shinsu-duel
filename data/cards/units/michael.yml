@@ -21,8 +21,7 @@ passives:
 abilities:
   - type: grant_affiliation
     target: { side: self }
-    source: { side: ally }
-    random: true
+    source: { side: ally, random: true }
     raw: "give me a random affiliation of another ally"
   - type: give_condition
     condition: poisoned

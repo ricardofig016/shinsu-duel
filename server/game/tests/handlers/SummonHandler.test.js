@@ -160,6 +160,22 @@ describe("SummonHandler", () => {
     expect(game.pendingDecision?.type).toBe("line_overflow");
   });
 
+  test("summon of a multi-position card defers to a position_selection decision", () => {
+    const game = setupGameWithHands({ Alice: ["Khun Ran"] });
+
+    const result = handler.execute(
+      { owner: "Alice", card: { name: "Khun Ran" }, from: "hand", onto: "self", sourceId: "Unit#Src" },
+      context(game),
+      game
+    );
+
+    expect(result.summoned).toBe(true);
+    expect(result.results[0].pending).toBe(true);
+    expect(game.pendingDecision.type).toBe("position_selection");
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort())
+      .toEqual(["fisherman", "spear-bearer"]);
+  });
+
   test("validate throws without required fields", () => {
     expect(() => handler.validate({})).toThrow("owner");
     expect(() => handler.validate({ owner: "Alice" })).toThrow("card");

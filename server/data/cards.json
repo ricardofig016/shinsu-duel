@@ -2441,9 +2441,9 @@
           "side": "self"
         },
         "source": {
-          "side": "ally"
+          "side": "ally",
+          "random": true
         },
-        "random": true,
         "raw": "give me a random affiliation of another ally"
       },
       {

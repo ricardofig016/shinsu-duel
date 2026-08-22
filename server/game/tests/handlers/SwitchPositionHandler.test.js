@@ -71,6 +71,24 @@ describe("SwitchPositionHandler", () => {
     expect(unit.placedPositionCode).toBe("fisherman");
   });
 
+  test("defers to a position_selection decision when multiple legal destinations exist", () => {
+    const game = setupGameWithHands({ Bob: ["Karaka"] });
+    // Karaka has three printed positions (fisherman, scout, wave controller).
+    const unit = deployUnit(game, "Bob", "Karaka", "fisherman");
+
+    const result = handler.execute(
+      { targetId: unit.id, sourceOwner: "Alice" },
+      context(game),
+      game
+    );
+
+    expect(result.switched).toBe(true);
+    expect(result.pending).toBe(true);
+    expect(game.pendingDecision.type).toBe("position_selection");
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort())
+      .toEqual(["scout", "wave-controller"]);
+  });
+
   test("validate throws without targetId", () => {
     expect(() => handler.validate({})).toThrow("targetId");
   });

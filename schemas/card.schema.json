@@ -175,7 +175,6 @@
         "source": { "$ref": "#/definitions/unitTarget" },
         "from": { "enum": ["deck", "hand", "deck_or_hand", "game"] },
         "onto": { "enum": ["self", "opponent", "both"] },
-        "random": { "type": "boolean" },
         "mode": { "enum": ["all", "random", "choose"] },
         "owner": { "enum": ["you", "opponent", "self", "enemy"] },
         "to": {
