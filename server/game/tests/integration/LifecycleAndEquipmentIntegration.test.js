@@ -33,7 +33,7 @@ describe("lifecycle and equipment integration", () => {
     const game = setupGameWithHands({ Alice: ["_Test Unit"] });
     const bearer = deployUnit(game, "Alice", "_Test Unit", "fisherman");
     // Living Ignition Weapon: retain multiple distinct equipment (see FinalActions).
-    bearer.card.attributes = ["living ignition weapon"];
+    bearer.card.attributes = ["living-ignition-weapon"];
 
     const fragments = [
       "First Thorn Fragment",

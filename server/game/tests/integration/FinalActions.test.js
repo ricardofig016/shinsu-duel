@@ -41,7 +41,7 @@ describe("final action integration", () => {
       data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "wave-controller" },
     });
     const unit = game.playerStates.Alice.field.frontline[0];
-    setUnitAttributes(unit, ["living ignition weapon"]);
+    setUnitAttributes(unit, ["living-ignition-weapon"]);
 
     for (const equipmentName of ["Narumada", "Blue Thryssa"]) {
       game.currentTurn = "Alice";
@@ -52,7 +52,37 @@ describe("final action integration", () => {
       });
     }
 
-    expect(unit.card.attributes).toContain("living ignition weapon");
+    expect(unit.card.attributes).toContain("living-ignition-weapon");
+    expect(unit.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada", "Blue Thryssa"]);
+  });
+
+  test("regression: native compiled living-ignition-weapon attribute retains multiple equipment", () => {
+    // No manual attribute injection: `_Test Unit` natively declares the dashed
+    // compiled code, so the engine must honor the compiled card contract.
+    const game = setupGameWithCardsInHand([
+      "_Test Unit",
+      "Narumada",
+      "Blue Thryssa",
+      "Monkeyman",
+    ]);
+    advanceToRound(game, 3);
+
+    game.processAction({
+      type: "deploy-unit-action",
+      data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "wave-controller" },
+    });
+    const unit = game.playerStates.Alice.field.frontline[0];
+    expect(unit.card.attributes).toContain("living-ignition-weapon");
+
+    for (const equipmentName of ["Narumada", "Blue Thryssa"]) {
+      game.currentTurn = "Alice";
+      const handId = game.playerStates.Alice.hand.findIndex((card) => card.name === equipmentName);
+      game.processAction({
+        type: "equip-equipment-action",
+        data: { source: "player", username: "Alice", handId, targetUnitId: unit.id },
+      });
+    }
+
     expect(unit.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada", "Blue Thryssa"]);
   });
 
@@ -100,7 +130,7 @@ describe("final action integration", () => {
       data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "wave-controller" },
     });
     const unit = game.playerStates.Alice.field.frontline[0];
-    setUnitAttributes(unit, ["living ignition weapon"]);
+    setUnitAttributes(unit, ["living-ignition-weapon"]);
     const narumadaId = getCardIdByName("Narumada");
     game.playerStates.Alice.hand.push(new Card(
       narumadaId,

@@ -580,8 +580,8 @@ export default class LifecycleEngine {
     const isLivingIgnitionWeapon = gameState.modifierStack.has(
       targetUnit.id,
       "attribute",
-      "living ignition weapon"
-    ) || (targetUnit.card?.attributes || []).includes("living ignition weapon");
+      "living-ignition-weapon"
+    ) || (targetUnit.card?.attributes || []).includes("living-ignition-weapon");
     const attachments = LifecycleEngine._getEquipment(targetUnit);
 
     if (isLivingIgnitionWeapon && attachments.some((attached) => attached.cardId === card.cardId)) {

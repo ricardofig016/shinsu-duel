@@ -11,13 +11,13 @@
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 - [ ] rules: rename `create` keyword to `light up` - "create" is overloaded with 2 meanings
 - [ ] game: add support for `any` position which represents all main positions
-- [ ] LifecycleEngine: the LIW check in `attachEquipment` compares against the spaced string "living ignition weapon" while compiled card attributes are the dashed "living-ignition-weapon"
 
 ## In Progress
 
 
 ## Completed
 
+- [x] LifecycleEngine: the LIW check in `attachEquipment` compares against the spaced string "living ignition weapon" while compiled card attributes are the dashed "living-ignition-weapon"
 - [x] data: add yml files for new cards in `todo\cards_to_add.md`
 - [x] scripts: fix lookup after yml structure changes
 - [x] tests: add more to increase coverage
