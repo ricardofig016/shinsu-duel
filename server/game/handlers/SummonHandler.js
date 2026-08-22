@@ -55,11 +55,11 @@ export default class SummonHandler extends BaseHandler {
     const acting = payload.owner;
 
     if (from === "game") {
-      const view = Object.values(gameState.constructor.cards).map(toCardTargetView).filter(Boolean);
+      const view = Object.values(gameState.cards).map(toCardTargetView).filter(Boolean);
       const matches = TargetResolver.resolveCardTargets(view, descriptor);
       if (matches.length === 0) return null;
       const chosen = descriptor.random ? shuffle(matches, gameState._rng)[0] : matches[0];
-      const data = gameState.constructor.cards[chosen.cardId];
+      const data = gameState.cards[chosen.cardId];
       return new Card(chosen.cardId, data, owner, gameState.eventBus);
     }
 

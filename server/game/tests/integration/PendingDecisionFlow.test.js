@@ -1,6 +1,6 @@
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck, getCardIdByName } from "../utils.js";
+import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 import Card from "../../Card.js";
 import { resolveEffect } from "../../EffectResolver.js";
 
@@ -10,12 +10,12 @@ function createGame() {
   return new GameState("TEST", players, {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  }, null, { rng: new SeededRng(1) });
+  }, null, { rng: new SeededRng(1), cards });
 }
 
 function addUnit(game, owner, name, position = "fisherman") {
   const cardId = getCardIdByName(name);
-  const card = new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+  const card = new Card(cardId, game.cards[cardId], owner, game.eventBus);
   const unit = {
     id: `Unit#${owner}#${name}#${Math.random()}`,
     owner,
@@ -35,11 +35,11 @@ describe("pending decision continuations", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const unitId = getCardIdByName("Monkeyman");
-    const pendingCard = new Card(unitId, game.constructor.cards[unitId], "Alice", game.eventBus);
+    const unitId = getCardIdByName("Test Scout");
+    const pendingCard = new Card(unitId, game.cards[unitId], "Alice", game.eventBus);
     game.playerStates.Alice.hand = [pendingCard];
 
-    for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Rachel");
+    for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Test Light Bearer");
 
     game.processAction({
       type: "deploy-unit-action",
@@ -56,7 +56,7 @@ describe("pending decision continuations", () => {
     game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [chosen.id] });
 
     expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
-    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Monkeyman")).toBe(true);
+    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Test Scout")).toBe(true);
     expect(game.playerStates.Alice.hand).toHaveLength(0);
     expect(game.getTotalShinsu("Alice")).toBe(9);
     expect(game.currentTurn).toBe("Bob");
@@ -66,18 +66,18 @@ describe("pending decision continuations", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const unitId = getCardIdByName("Monkeyman");
-    const pendingCard = new Card(unitId, game.constructor.cards[unitId], "Alice", game.eventBus);
+    const unitId = getCardIdByName("Test Scout");
+    const pendingCard = new Card(unitId, game.cards[unitId], "Alice", game.eventBus);
     game.playerStates.Alice.hand = [pendingCard];
 
-    for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Rachel");
+    for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Test Light Bearer");
 
     game.processAction({
       type: "deploy-unit-action",
       data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" },
     });
 
-    const pendingCandidate = game.pendingDecision.candidates.find((candidate) => candidate.name === "Monkeyman");
+    const pendingCandidate = game.pendingDecision.candidates.find((candidate) => candidate.name === "Test Scout");
     game.resolveDecision({
       decisionId: game.pendingDecision.decisionId,
       username: "Alice",
@@ -85,7 +85,7 @@ describe("pending decision continuations", () => {
     });
 
     expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
-    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Monkeyman")).toBe(false);
+    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Test Scout")).toBe(false);
     expect(game.playerStates.Alice.hand).toHaveLength(0);
     expect(game.playerStates.Alice.discard).toContain(pendingCard);
     expect(game.getTotalShinsu("Alice")).toBe(9);
@@ -94,8 +94,8 @@ describe("pending decision continuations", () => {
 
   test("a target choice resolves before the next effect in its sequence", () => {
     const game = createGame();
-    const firstTarget = addUnit(game, "Bob", "Rachel");
-    const secondTarget = addUnit(game, "Bob", "Rachel");
+    const firstTarget = addUnit(game, "Bob", "Test Light Bearer");
+    const secondTarget = addUnit(game, "Bob", "Test Light Bearer");
     const context = { emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) };
 
     resolveEffect({ type: "deal_damage", amount: 1, target: "enemy", raw: "deal 1 to an enemy" }, context, game, {
@@ -125,8 +125,8 @@ describe("pending decision continuations", () => {
 
   test("a two-choice sequence defers action completion until both choices resolve", () => {
     const game = createGame();
-    const e1 = addUnit(game, "Bob", "Akryung");
-    const e2 = addUnit(game, "Bob", "Akryung");
+    const e1 = addUnit(game, "Bob", "Test Filler Unit");
+    const e2 = addUnit(game, "Bob", "Test Filler Unit");
     const context = { emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) };
 
     resolveEffect({

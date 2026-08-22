@@ -11,23 +11,23 @@ describe("TransformHandler", () => {
   });
 
   test("reverts a unit, preserving position", () => {
-    const game = setupGameWithHands({ Alice: ["Khun Ran - Evolved"] });
-    const unit = deployUnit(game, "Alice", "Khun Ran - Evolved", "fisherman");
+    const game = setupGameWithHands({ Alice: ["Test Multi Position - Evolved"] });
+    const unit = deployUnit(game, "Alice", "Test Multi Position - Evolved", "fisherman");
 
     const result = handler.execute(
-      { sourceUnit: unit, sourceId: unit.id, cardName: "Khun Ran" },
+      { sourceUnit: unit, sourceId: unit.id, cardName: "Test Multi Position" },
       context(game),
       game
     );
 
     expect(result.transformed).toBe(true);
-    expect(unit.card.name).toBe("Khun Ran");
+    expect(unit.card.name).toBe("Test Multi Position");
     expect(unit.placedPositionCode).toBe("fisherman");
   });
 
   test("throws when the target card name does not exist", () => {
-    const game = setupGameWithHands({ Alice: ["Bull"] });
-    const unit = deployUnit(game, "Alice", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
+    const unit = deployUnit(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
 
     expect(() => handler.execute(
       { sourceUnit: unit, sourceId: unit.id, cardName: "Does Not Exist" },
@@ -37,8 +37,8 @@ describe("TransformHandler", () => {
   });
 
   test("no-op when the source unit is missing", () => {
-    const game = setupGameWithHands({ Alice: ["Bull"] });
-    expect(handler.execute({ sourceId: "Unit#Missing", cardName: "Khun Ran" }, context(game), game))
+    const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
+    expect(handler.execute({ sourceId: "Unit#Missing", cardName: "Test Multi Position" }, context(game), game))
       .toEqual({ transformed: false });
   });
 

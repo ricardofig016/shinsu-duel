@@ -4,7 +4,7 @@ import { setupGameWithCardsInHand, advanceToRound, getCardIdByName } from "../ut
 
 describe("granted abilities can be used by their bearer", () => {
   test("Purple Dementor grants a usable poison ability that disappears when unequipped", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Purple Dementor", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Grant Ability Equip", "Test Scout", "Test Scout"]);
     advanceToRound(game, 3);
     game.currentTurn = "Alice";
 
@@ -15,7 +15,7 @@ describe("granted abilities can be used by their bearer", () => {
     game.currentTurn = "Alice";
     const bearer = game.playerStates.Alice.field.frontline[0];
 
-    const equipmentHandId = game.playerStates.Alice.hand.findIndex((card) => card.name === "Purple Dementor");
+    const equipmentHandId = game.playerStates.Alice.hand.findIndex((card) => card.name === "Test Grant Ability Equip");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipmentHandId, targetUnitId: bearer.id },
@@ -29,8 +29,8 @@ describe("granted abilities can be used by their bearer", () => {
     expect(game.getClientState("Alice").you.field.frontline[0].grantedAbilities)
       .toEqual(expect.arrayContaining([expect.objectContaining({ abilityCode })]));
 
-    const victimCardId = getCardIdByName("Monkeyman");
-    const victimCard = new Card(victimCardId, game.constructor.cards[victimCardId], "Bob", game.eventBus);
+    const victimCardId = getCardIdByName("Test Scout");
+    const victimCard = new Card(victimCardId, game.cards[victimCardId], "Bob", game.eventBus);
     const victim = {
       id: "Unit#granted-ability-victim",
       owner: "Bob",

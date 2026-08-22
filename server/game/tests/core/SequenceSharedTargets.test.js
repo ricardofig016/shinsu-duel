@@ -11,7 +11,7 @@
 
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck } from "../utils.js";
+import { createLegalDeck, cards } from "../utils.js";
 import { resolveEffect } from "../../EffectResolver.js";
 
 const players = ["Alice", "Bob"];
@@ -20,7 +20,7 @@ function createGame() {
   return new GameState("TEST", players, {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  }, null, { rng: new SeededRng(1) });
+  }, null, { rng: new SeededRng(1), cards });
 }
 
 function unit(id, owner, position = "scout", { maxHp = 10 } = {}) {

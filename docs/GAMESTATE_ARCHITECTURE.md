@@ -23,6 +23,8 @@ This document describes the GameState architecture: zone model, service layer, l
 
 Each service owns one resource; nothing outside the service mutates it. See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.
 
+**Card catalog injection.** `GameState` resolves every card lookup (deck construction, `create_card`/`summon`/`transform` handlers, and the Hwayeomsa attribute engine) through an injectable catalog. The constructor accepts `options.cards`; when omitted it falls back to the compiled `server/data/cards.json`. Tests inject a stable fixture catalog (`server/game/tests/fixtures/cards.js`) so balance changes to shipped cards never affect implementation tests — only the catalog _contract_ (`schemas/compiled-cards.schema.json`) is shared.
+
 ---
 
 ## Zone Model

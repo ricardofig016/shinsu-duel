@@ -2,7 +2,7 @@ import { setupGameWithCardsInHand, advanceToRound } from "../utils.js";
 
 describe("Disabled condition", () => {
   test("condition persists and is cleaned at round end", () => {
-    const game = setupGameWithCardsInHand(["_Test Unit"]);
+    const game = setupGameWithCardsInHand(["Test Trait Unit"]);
     advanceToRound(game, 2);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
@@ -18,7 +18,7 @@ describe("Disabled condition", () => {
   });
 
   test("Disabled does not remove traits", () => {
-    const game = setupGameWithCardsInHand(["_Test Unit"]);
+    const game = setupGameWithCardsInHand(["Test Trait Unit"]);
     advanceToRound(game, 2);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });

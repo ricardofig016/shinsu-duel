@@ -8,7 +8,7 @@ import { createTestGame, getCardIdByName } from "../utils.js";
 
 function addCardToHand(game, username, name) {
   const cardId = getCardIdByName(name);
-  const card = new Card(cardId, game.constructor.cards[cardId], username, game.eventBus);
+  const card = new Card(cardId, game.cards[cardId], username, game.eventBus);
   game.playerStates[username].hand.push(card);
   return card;
 }
@@ -27,8 +27,8 @@ describe("CompressShinsuHandler", () => {
   test("reduces only the selected card instance's cost", () => {
     const [owner] = game.usernames;
     game.playerStates[owner].hand = [];
-    const target = addCardToHand(game, owner, "Fiery Elephant");
-    const untouched = addCardToHand(game, owner, "The Workshop");
+    const target = addCardToHand(game, owner, "Test Compress Skill");
+    const untouched = addCardToHand(game, owner, "Test Expensive Skill");
 
     const result = handler.execute({ owner, amount: 2, targetCardId: target.id }, context, game);
 
@@ -44,13 +44,13 @@ describe("CompressShinsuHandler", () => {
   test("selector resolution is done by TargetResolver, handler receives concrete targetCardId", () => {
     const [owner] = game.usernames;
     game.playerStates[owner].hand = [];
-    const namedTarget = addCardToHand(game, owner, "Fiery Elephant");
-    const hwayeomsaTarget = addCardToHand(game, owner, "Yeon Yihwa");
+    const namedTarget = addCardToHand(game, owner, "Test Compress Skill");
+    const hwayeomsaTarget = addCardToHand(game, owner, "Test Hwayeomsa");
 
     // Card targets are resolved by TargetResolver.resolveCardTargets before
     // the handler is invoked (this is what EffectResolver does).
     const handViews = game.playerStates[owner].hand.map((card) => toCardTargetView(card));
-    const nameCardId = resolveCardTargets(handViews, { name: "Fiery Elephant" })[0]?.id;
+    const nameCardId = resolveCardTargets(handViews, { name: "Test Compress Skill" })[0]?.id;
     const attrCardId = resolveCardTargets(handViews, { attribute: "hwayeomsa" })[0]?.id;
 
     expect(nameCardId).toBe(namedTarget.id);
@@ -67,8 +67,8 @@ describe("CompressShinsuHandler", () => {
   test("TargetResolver resolves the most-expensive selector", () => {
     const [owner] = game.usernames;
     game.playerStates[owner].hand = [];
-    const cheaper = addCardToHand(game, owner, "Fiery Elephant");
-    const expensive = addCardToHand(game, owner, "The Workshop");
+    const cheaper = addCardToHand(game, owner, "Test Compress Skill");
+    const expensive = addCardToHand(game, owner, "Test Expensive Skill");
 
     const handViews = game.playerStates[owner].hand.map((card) => toCardTargetView(card));
     const cardId = resolveCardTargets(handViews, { cost: "most expensive" })[0]?.id;
@@ -89,7 +89,7 @@ describe("CompressShinsuHandler", () => {
   test("execute rejects when the pre-resolved card is no longer in hand", () => {
     const [owner] = game.usernames;
     game.playerStates[owner].hand = [];
-    const target = addCardToHand(game, owner, "Fiery Elephant");
+    const target = addCardToHand(game, owner, "Test Compress Skill");
     const cardId = target.id;
 
     // Remove the card from hand (simulates a race condition)

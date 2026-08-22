@@ -2,7 +2,7 @@ import { createSeededGame } from "../../gameFactory.js";
 import GameState from "../../GameState.js";
 import * as IdFactory from "../../IdFactory.js";
 import { resetModifierCounter } from "../../ModifierStack.js";
-import { createLegalDeck } from "../utils.js";
+import { createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
@@ -19,7 +19,7 @@ describe("createSeededGame", () => {
   });
 
   test("builds a game whose RNG carries the given seed", () => {
-    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42 });
+    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, cards });
     expect(game._rng.getState().seed).toBe(42);
   });
 
@@ -28,33 +28,33 @@ describe("createSeededGame", () => {
     for (let i = 0; i < 5; i++) {
       IdFactory.resetAll();
       resetModifierCounter();
-      const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42 });
+      const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, cards });
       snapshots.push(JSON.stringify(game.toSerializedState()));
     }
     expect(snapshots.every((s) => s === snapshots[0])).toBe(true);
   });
 
   test("honors an explicit firstPlayer", () => {
-    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, firstPlayer: "Bob" });
+    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, firstPlayer: "Bob", cards });
     expect(game.currentTurn).toBe("Bob");
   });
 
   test("rolls a valid first player when none is given", () => {
-    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42 });
+    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, cards });
     expect(players).toContain(game.currentTurn);
   });
 
   test("honors explicit decks without reordering", () => {
     const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, decks });
+    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, decks, cards });
     for (const username of players) {
       expect(fullDeck(game.playerStates[username])).toEqual(decks[username]);
     }
   });
 
   test("generates a legal 30-card default deck for each player", () => {
-    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42 });
-    const eligible = new Set(GameState.getEligibleCardIds());
+    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, cards });
+    const eligible = new Set(GameState.getEligibleCardIds(cards));
     for (const username of players) {
       const deck = fullDeck(game.playerStates[username]);
       expect(deck).toHaveLength(30);

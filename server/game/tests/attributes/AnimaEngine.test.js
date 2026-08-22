@@ -3,7 +3,7 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import AnimaEngine from "../../attributes/AnimaEngine.js";
 import EVT from "../../EventCatalog.js";
-import { createLegalDeck, getCardIdByName } from "../utils.js";
+import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 
 describe("AnimaEngine", () => {
   let game;
@@ -12,7 +12,7 @@ describe("AnimaEngine", () => {
     game = new GameState("ANIMA", ["Alice", "Bob"], {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
   });
 
   test("initial state has no shinheuh slot available", () => {

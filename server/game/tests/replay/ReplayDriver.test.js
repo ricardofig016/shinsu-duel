@@ -1,13 +1,13 @@
 import GameState from "../../GameState.js";
 import ReplayDriver from "../../replay/ReplayDriver.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck } from "../utils.js";
+import { createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
 function makeSeededGame(seed = 1234) {
   const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-  return new GameState("REP", players, decks, "Alice", { rng: new SeededRng(seed) });
+  return new GameState("REP", players, decks, "Alice", { rng: new SeededRng(seed), cards });
 }
 
 describe("ReplayDriver", () => {
@@ -23,7 +23,7 @@ describe("ReplayDriver", () => {
     const finalState = game.toSerializedState();
     const replayLog = game.logger.getReplayLog();
 
-    const replayed = ReplayDriver.replay(replayLog);
+    const replayed = ReplayDriver.replay(replayLog, { cards });
     expect(replayed.toSerializedState()).toEqual(finalState);
   });
 
@@ -40,7 +40,7 @@ describe("ReplayDriver", () => {
     expect(failedAction).toBeDefined();
     expect(failedAction.error.message).toContain("not your turn");
 
-    const replayed = ReplayDriver.replay(replayLog);
+    const replayed = ReplayDriver.replay(replayLog, { cards });
     expect(replayed.toSerializedState()).toEqual(game.toSerializedState());
   });
 
@@ -77,7 +77,7 @@ describe("ReplayDriver", () => {
     const replayLog = game.logger.getReplayLog();
     replayLog.actions.push({ type: "BogusEntry", ok: true, stateAfter: game.toSerializedState() });
 
-    expect(() => ReplayDriver.replay(replayLog)).toThrow("Unknown replay entry type");
+    expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow("Unknown replay entry type");
   });
 
   test("throws when an entry expected to fail succeeds", () => {
@@ -91,7 +91,7 @@ describe("ReplayDriver", () => {
       stateAfter: game.toSerializedState(),
     });
 
-    expect(() => ReplayDriver.replay(replayLog)).toThrow("Expected replay step");
+    expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow("Expected replay step");
   });
 
   test("throws when the replay diverges from the recorded state", () => {
@@ -101,7 +101,7 @@ describe("ReplayDriver", () => {
     // Tamper with the recorded post-action state to force a divergence.
     replayLog.actions[0].stateAfter = { tampered: true };
 
-    expect(() => ReplayDriver.replay(replayLog)).toThrow("Replay divergence");
+    expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow("Replay divergence");
   });
 
   test("replay is deterministic across 20 runs of the same log", () => {
@@ -110,9 +110,9 @@ describe("ReplayDriver", () => {
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
     const replayLog = game.logger.getReplayLog();
 
-    const first = JSON.stringify(ReplayDriver.replay(replayLog).toSerializedState());
+    const first = JSON.stringify(ReplayDriver.replay(replayLog, { cards }).toSerializedState());
     for (let i = 0; i < 20; i++) {
-      expect(JSON.stringify(ReplayDriver.replay(replayLog).toSerializedState())).toBe(first);
+      expect(JSON.stringify(ReplayDriver.replay(replayLog, { cards }).toSerializedState())).toBe(first);
     }
   });
 });

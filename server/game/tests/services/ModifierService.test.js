@@ -2,18 +2,18 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import Card from "../../Card.js";
 import ModifierService from "../../services/ModifierService.js";
-import { getCardIdByName } from "../utils.js";
+import { getCardIdByName, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 let _unitSeq = 0;
 
 function createGame() {
-  return new GameState("TEST", players, {}, null, { rng: new SeededRng(1) });
+  return new GameState("TEST", players, {}, null, { rng: new SeededRng(1), cards });
 }
 
 function putUnit(game, username, name, position = "fisherman") {
   const cardId = getCardIdByName(name);
-  const card = new Card(cardId, game.constructor.cards[cardId], username, game.eventBus);
+  const card = new Card(cardId, game.cards[cardId], username, game.eventBus);
   const unit = {
     id: `Unit#${name}#${++_unitSeq}`,
     owner: username,
@@ -39,8 +39,8 @@ describe("ModifierService", () => {
 
   test("modify_stat damage applies a stat entry and is read by getDamageDealt", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
-    const enemy = putUnit(game, "Bob", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
+    const enemy = putUnit(game, "Bob", "Test Shinheuh", "fisherman");
 
     ModifierService.applyModifier(
       { type: "modify_stat", stat: "damage", amount: 2, target: { side: "self" } },
@@ -56,9 +56,9 @@ describe("ModifierService", () => {
 
   test("modify_stat damage_taken honors the `source` filter", () => {
     const game = createGame();
-    const target = putUnit(game, "Bob", "Bull", "fisherman");
-    const spear = putUnit(game, "Alice", "Bull", "spear-bearer");
-    const sword = putUnit(game, "Alice", "Bull", "fisherman");
+    const target = putUnit(game, "Bob", "Test Shinheuh", "fisherman");
+    const spear = putUnit(game, "Alice", "Test Shinheuh", "spear-bearer");
+    const sword = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
 
     ModifierService.applyModifier(
       { type: "modify_stat", stat: "damage_taken", amount: 4, target: { side: "self" }, source: { position: "spear-bearer" } },
@@ -72,7 +72,7 @@ describe("ModifierService", () => {
 
   test("modify_stat hp raises current and max HP, and revokes on removeBySource", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
     const beforeMax = unit.card.maxHp;
     const beforeCurrent = unit.currentHp;
 
@@ -93,10 +93,10 @@ describe("ModifierService", () => {
 
   test("modify_condition stores a victim-filtered amplifier", () => {
     const game = createGame();
-    const source = putUnit(game, "Alice", "Bull", "scout");
-    const highRanker = putUnit(game, "Bob", "Bull", "fisherman");
+    const source = putUnit(game, "Alice", "Test Shinheuh", "scout");
+    const highRanker = putUnit(game, "Bob", "Test Shinheuh", "fisherman");
     highRanker.card.rank = "high ranker";
-    const regular = putUnit(game, "Bob", "Bull", "scout");
+    const regular = putUnit(game, "Bob", "Test Shinheuh", "scout");
     regular.card.rank = "regular";
 
     ModifierService.applyModifier(
@@ -111,7 +111,7 @@ describe("ModifierService", () => {
 
   test("modify_keyword grants a keyword and respects the `first` gate", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "scout");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "scout");
 
     ModifierService.applyModifier(
       { type: "modify_keyword", keyword: "free", first: true, target: { side: "self" } },
@@ -125,7 +125,7 @@ describe("ModifierService", () => {
 
   test("modify_targeting untargetable_by records a blocked filter", () => {
     const game = createGame();
-    const protectedUnit = putUnit(game, "Alice", "Bull", "fisherman");
+    const protectedUnit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
 
     ModifierService.applyModifier(
       { type: "modify_targeting", rule: "untargetable_by", target: { side: "any", condition: "burned", conditionValue: 3 } },
@@ -139,7 +139,7 @@ describe("ModifierService", () => {
 
   test("modify_stat cost keyed to a player consults through getEffectiveCost", () => {
     const game = createGame();
-    const source = putUnit(game, "Alice", "Bull", "scout");
+    const source = putUnit(game, "Alice", "Test Shinheuh", "scout");
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
     ModifierService.applyModifier(
@@ -148,17 +148,17 @@ describe("ModifierService", () => {
       { sourceId: "Passive#c#0", sourceUnit: source, sourceOwner: "Alice" }
     );
 
-    const skillCard = new Card(getCardIdByName("Redan"), game.constructor.cards[getCardIdByName("Redan")], "Bob", game.eventBus);
+    const skillCard = new Card(getCardIdByName("Test Poison Skill"), game.cards[getCardIdByName("Test Poison Skill")], "Bob", game.eventBus);
     expect(ModifierService.getEffectiveCost(skillCard, "Bob", game)).toBe(skillCard.cost + 1);
 
     // Non-skill cards are unaffected by the cardType filter.
-    const unitCard = new Card(getCardIdByName("Bull"), game.constructor.cards[getCardIdByName("Bull")], "Bob", game.eventBus);
+    const unitCard = new Card(getCardIdByName("Test Shinheuh"), game.cards[getCardIdByName("Test Shinheuh")], "Bob", game.eventBus);
     expect(ModifierService.getEffectiveCost(unitCard, "Bob", game)).toBe(unitCard.cost);
   });
 
   test("modify_ability attaches an ability-augment entry", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "scout");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "scout");
 
     ModifierService.applyModifier(
       { type: "modify_ability", target: { side: "self" }, effect: { type: "give_condition", condition: "frozen", target: { side: "enemy" } } },
@@ -174,7 +174,7 @@ describe("ModifierService", () => {
 
   test("modify_cost is consulted at play time via getEffectiveCost", () => {
     const game = createGame();
-    const card = new Card(getCardIdByName("Karaka's Armor Suit"), game.constructor.cards[getCardIdByName("Karaka's Armor Suit")], "Alice", game.eventBus);
+    const card = new Card(getCardIdByName("Test Armor"), game.cards[getCardIdByName("Test Armor")], "Alice", game.eventBus);
 
     // Without Ha Jinsung in Alice's starting deck, no discount.
     expect(ModifierService.getEffectiveCost(card, "Alice", game)).toBe(card.cost);
@@ -186,7 +186,7 @@ describe("ModifierService", () => {
 
   test("a modifier with a false `if` gate applies nothing", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
 
     const result = ModifierService.applyModifier(
       { type: "modify_stat", stat: "damage", amount: 2, target: { side: "self" }, if: { type: "has_unit", target: { side: "ally", name: "Nobody" } } },
@@ -200,7 +200,7 @@ describe("ModifierService", () => {
 
   test("modify_targeting ignore_taunt marks the source unit", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
 
     ModifierService.applyModifier(
       { type: "modify_targeting", rule: "ignore_taunt", target: { side: "self" } },
@@ -213,7 +213,7 @@ describe("ModifierService", () => {
 
   test("modify_repeat records the repeat count", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
 
     ModifierService.applyModifier(
       { type: "modify_repeat", amount: 2, target: { side: "self" } },
@@ -226,7 +226,7 @@ describe("ModifierService", () => {
 
   test("retain_equipment marks the source unit", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
 
     ModifierService.applyModifier(
       { type: "retain_equipment" },
@@ -239,7 +239,7 @@ describe("ModifierService", () => {
 
   test("matchesUnitFilter evaluates trait, rank, position, and name", () => {
     const game = createGame();
-    const unit = putUnit(game, "Alice", "Bull", "fisherman");
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
     unit.card.rank = "regular";
     game.modifierStack.apply({ sourceId: "System", sourceType: "system", targetId: unit.id, type: "trait", key: "taunt", value: 1 });
 
@@ -247,7 +247,7 @@ describe("ModifierService", () => {
     expect(game.modifierStack.matchesUnitFilter(unit, { trait: "barrier" })).toBe(false);
     expect(game.modifierStack.matchesUnitFilter(unit, { rank: "regular" })).toBe(true);
     expect(game.modifierStack.matchesUnitFilter(unit, { position: "fisherman" })).toBe(true);
-    expect(game.modifierStack.matchesUnitFilter(unit, { name: "Bull" })).toBe(true);
+    expect(game.modifierStack.matchesUnitFilter(unit, { name: "Test Shinheuh" })).toBe(true);
     expect(game.modifierStack.matchesUnitFilter(unit, { name: "Other" })).toBe(false);
     expect(game.modifierStack.matchesUnitFilter(unit, null)).toBe(true);
   });

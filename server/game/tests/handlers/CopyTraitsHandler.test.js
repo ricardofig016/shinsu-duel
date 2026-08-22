@@ -21,9 +21,9 @@ describe("CopyTraitsHandler", () => {
   });
 
   test("copies every active trait from the source onto the target", () => {
-    const game = setupGameWithCardsInHand(["_Test Unit", "Bull", "_Test Unit", "Bull"]);
-    const source = deploy(game, "Alice", "_Test Unit", "fisherman");
-    const target = deploy(game, "Alice", "Bull", "frontline-shinheuh");
+    const game = setupGameWithCardsInHand(["Test Trait Unit", "Test Shinheuh", "Test Trait Unit", "Test Shinheuh"]);
+    const source = deploy(game, "Alice", "Test Trait Unit", "fisherman");
+    const target = deploy(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
 
     expect(game.modifierStack.getActiveKeys(target.id, "trait").size).toBe(0);
 
@@ -41,7 +41,7 @@ describe("CopyTraitsHandler", () => {
   });
 
   test("no-op when source or target is missing", () => {
-    const game = setupGameWithCardsInHand(["Bull"]);
+    const game = setupGameWithCardsInHand(["Test Shinheuh"]);
     expect(handler.execute({ targetId: "Unit#T", sourceUnitId: "Unit#S", sourceId: "P" }, context(game), game))
       .toEqual({ copied: 0 });
   });

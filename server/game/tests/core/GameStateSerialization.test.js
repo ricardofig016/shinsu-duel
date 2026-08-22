@@ -2,13 +2,13 @@ import GameState from "../../GameState.js";
 import * as IdFactory from "../../IdFactory.js";
 import { resetModifierCounter } from "../../ModifierStack.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck } from "../utils.js";
+import { createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
 function makeGame() {
   const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-  return new GameState("SER", players, decks, "Alice", { rng: new SeededRng(99) });
+  return new GameState("SER", players, decks, "Alice", { rng: new SeededRng(99), cards });
 }
 
 describe("GameState.toSerializedState", () => {

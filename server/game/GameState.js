@@ -82,6 +82,10 @@ export default class GameState {
     this.eventBus = new EventBus(this._clock);
     this.modifierStack = new ModifierStack(this.eventBus, this._clock);
 
+    // Injectable card catalog: tests supply a stable fixture set; production
+    // falls back to the compiled static catalog.
+    this.cards = options.cards ?? GameState.cards;
+
     // Cross-system cleanup: when an ability modifier is revoked,
     // remove the corresponding AbilityRegistry entry; when an HP stat
     // modifier is revoked (equipment detach), restore the raised max/current HP.
@@ -114,7 +118,7 @@ export default class GameState {
     // Attribute Registry
     this._attributeRegistry = new AttributeRegistry();
     this._attributeRegistry.register("anima", new AnimaEngine(this.eventBus));
-    this._attributeRegistry.register("hwayeomsa", new HwayeomsaEngine(this.eventBus, GameState.cards));
+    this._attributeRegistry.register("hwayeomsa", new HwayeomsaEngine(this.eventBus, this.cards));
 
     // Barrier tracking (reset on round start)
     this._barrierUsedThisRound = new Set();
@@ -316,7 +320,7 @@ export default class GameState {
         throw new Error(`Card with cardId ${cardId} appears more than once; decks cannot contain repeated cards.`);
       }
       seenCardIds.add(cardId);
-      const cardData = GameState.cards[cardId];
+      const cardData = this.cards[cardId];
       if (cardData === undefined) throw new Error(`Card with cardId ${cardId} does not exist`);
       if ((cardData.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) {
         throw new Error(`Card "${cardData.name}" is unreachable and cannot be included in a deck.`);
@@ -331,8 +335,8 @@ export default class GameState {
    * Single source of truth shared by the default-deck fallback and gameFactory.
    * @returns {Array<number>}
    */
-  static getEligibleCardIds() {
-    return Object.values(GameState.cards)
+  static getEligibleCardIds(cards = GameState.cards) {
+    return Object.values(cards)
       .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
       .map((card) => card.cardId);
   }
@@ -345,7 +349,7 @@ export default class GameState {
    * @returns {Array<number>} Array of cardIds
    */
   #defaultDeckOfCardIds() {
-    const eligible = GameState.getEligibleCardIds();
+    const eligible = GameState.getEligibleCardIds(this.cards);
     if (eligible.length < GameState.INIT_DECK_SIZE) {
       throw new Error("Not enough eligible cards to generate a legal deck.");
     }

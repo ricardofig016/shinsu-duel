@@ -15,13 +15,13 @@ import { resolveEffect } from "../../EffectResolver.js";
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import Card from "../../Card.js";
-import { getCardIdByName, createLegalDeck } from "../utils.js";
+import { getCardIdByName, createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
 function makeUnit(name, owner) {
   const cid = getCardIdByName(name);
-  const data = GameState.cards[cid];
+  const data = cards[cid];
   return {
     id: name + "#" + owner,
     owner,
@@ -37,10 +37,10 @@ describe("condition-field regression (EffectResolver)", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
 
-    const src = makeUnit("Monkeyman", "Alice");
-    const victim = makeUnit("Monkeyman", "Bob");
+    const src = makeUnit("Test Scout", "Alice");
+    const victim = makeUnit("Test Scout", "Bob");
     game.playerStates.Alice.field.frontline.push(src);
     game.playerStates.Bob.field.frontline.push(victim);
 
@@ -65,10 +65,10 @@ describe("condition-field regression (EffectResolver)", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
 
-    const src = makeUnit("Monkeyman", "Alice");
-    const victim = makeUnit("Monkeyman", "Bob");
+    const src = makeUnit("Test Scout", "Alice");
+    const victim = makeUnit("Test Scout", "Bob");
     game.playerStates.Alice.field.frontline.push(src);
     game.playerStates.Bob.field.frontline.push(victim);
 
@@ -89,10 +89,10 @@ describe("condition-field regression (EffectResolver)", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
 
-    const src = makeUnit("Monkeyman", "Alice");
-    const victim = makeUnit("Monkeyman", "Bob");
+    const src = makeUnit("Test Scout", "Alice");
+    const victim = makeUnit("Test Scout", "Bob");
     game.playerStates.Alice.field.frontline.push(src);
     game.playerStates.Bob.field.frontline.push(victim);
 

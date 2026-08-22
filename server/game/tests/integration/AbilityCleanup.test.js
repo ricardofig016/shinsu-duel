@@ -24,7 +24,7 @@ describe("Ability cleanup ownership (onRevoke bridge)", () => {
 
   beforeEach(() => {
     // Use a game with known unit cards then manually deploy one to the field.
-    game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman"]);
+    game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
 

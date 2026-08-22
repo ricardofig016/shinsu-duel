@@ -38,7 +38,7 @@ export default class ReplayDriver {
    * @param {{ initial: object|null, actions: Array<object> }} replayLog
    * @returns {GameState}
    */
-  static replay(replayLog) {
+  static replay(replayLog, { cards = null } = {}) {
     const { initial, actions } = replayLog || {};
     if (!initial) throw new Error("Replay log is missing its initial state.");
 
@@ -54,6 +54,7 @@ export default class ReplayDriver {
 
     const game = new GameState(roomCode, usernames, decks, firstPlayer, {
       rng: new SeededRng(rngSeed),
+      cards,
     });
 
     assertEqual(game.toSerializedState(), initial.state, "initial state");

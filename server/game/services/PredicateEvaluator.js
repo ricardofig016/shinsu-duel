@@ -65,7 +65,7 @@ export default class PredicateEvaluator {
         }
         const unit = extra.sourceUnit || gameState._findUnit(extra.sourceId);
         const seriesCards = findCardsBySeries(
-          gameState.constructor.cards,
+          gameState.cards,
           predicate.series,
           "equipment"
         );

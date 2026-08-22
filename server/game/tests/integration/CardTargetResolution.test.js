@@ -11,18 +11,18 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import Card from "../../Card.js";
 import { resolveEffect } from "../../EffectResolver.js";
-import { createLegalDeck, getCardIdByName } from "../utils.js";
+import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 
 function createGame() {
   return new GameState("TEST", ["Alice", "Bob"], {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  }, null, { rng: new SeededRng(1) });
+  }, null, { rng: new SeededRng(1), cards });
 }
 
 function cardInstance(game, owner, name) {
   const cardId = getCardIdByName(name);
-  return new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+  return new Card(cardId, game.cards[cardId], owner, game.eventBus);
 }
 
 function context(game) {
@@ -32,8 +32,8 @@ function context(game) {
 describe("structured card target resolution via EffectResolver", () => {
   test("compress_shinsu with a type filter compresses the matching hand card", () => {
     const game = createGame();
-    const equipment = cardInstance(game, "Alice", "Frog Fisher");
-    const skill = cardInstance(game, "Alice", "Baang");
+    const equipment = cardInstance(game, "Alice", "Test Equipment Filler");
+    const skill = cardInstance(game, "Alice", "Test Damage Skill");
     game.playerStates.Alice.hand = [skill, equipment];
 
     resolveEffect(
@@ -48,9 +48,9 @@ describe("structured card target resolution via EffectResolver", () => {
 
   test("draw_card with a type filter + choose defers to a card_selection decision", () => {
     const game = createGame();
-    const equipmentA = cardInstance(game, "Alice", "Frog Fisher");
-    const equipmentB = cardInstance(game, "Alice", "First Thorn Fragment");
-    const skill = cardInstance(game, "Alice", "Baang");
+    const equipmentA = cardInstance(game, "Alice", "Test Equipment Filler");
+    const equipmentB = cardInstance(game, "Alice", "Test Thorn Fragment I");
+    const skill = cardInstance(game, "Alice", "Test Damage Skill");
     game.playerStates.Alice.deck = [skill, equipmentA, equipmentB];
     game.playerStates.Alice.hand = [];
 
@@ -76,8 +76,8 @@ describe("structured card target resolution via EffectResolver", () => {
 
   test("reclaim_cards with a type filter reclaims the matching discard card", () => {
     const game = createGame();
-    const equipment = cardInstance(game, "Alice", "Frog Fisher");
-    const skill = cardInstance(game, "Alice", "Baang");
+    const equipment = cardInstance(game, "Alice", "Test Equipment Filler");
+    const skill = cardInstance(game, "Alice", "Test Damage Skill");
     game.playerStates.Alice.discard = [skill, equipment];
     game.playerStates.Alice.hand = [];
 
@@ -87,15 +87,15 @@ describe("structured card target resolution via EffectResolver", () => {
       { owner: "Alice" }
     );
 
-    expect(game.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Frog Fisher"]);
-    expect(game.playerStates.Alice.discard.map((c) => c.name)).toEqual(["Baang"]);
+    expect(game.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Test Equipment Filler"]);
+    expect(game.playerStates.Alice.discard.map((c) => c.name)).toEqual(["Test Damage Skill"]);
   });
 
   test("draw_card with a random card target is deterministic for the same seed", () => {
     const run = () => {
       const game = createGame();
-      const equipmentA = cardInstance(game, "Alice", "Frog Fisher");
-      const equipmentB = cardInstance(game, "Alice", "First Thorn Fragment");
+      const equipmentA = cardInstance(game, "Alice", "Test Equipment Filler");
+      const equipmentB = cardInstance(game, "Alice", "Test Thorn Fragment I");
       game.playerStates.Alice.deck = [equipmentA, equipmentB];
       game.playerStates.Alice.hand = [];
 
@@ -117,7 +117,7 @@ describe("structured card target resolution via EffectResolver", () => {
 
   test("draw_card with a type filter and no match draws nothing (legal no-op)", () => {
     const game = createGame();
-    const skill = cardInstance(game, "Alice", "Baang");
+    const skill = cardInstance(game, "Alice", "Test Damage Skill");
     game.playerStates.Alice.deck = [skill];
     game.playerStates.Alice.hand = [];
     const drawn = [];
@@ -137,7 +137,7 @@ describe("structured card target resolution via EffectResolver", () => {
 
   test("reclaim_cards with a type filter and no match reclaims nothing (legal no-op)", () => {
     const game = createGame();
-    const skill = cardInstance(game, "Alice", "Baang");
+    const skill = cardInstance(game, "Alice", "Test Damage Skill");
     game.playerStates.Alice.discard = [skill];
     game.playerStates.Alice.hand = [];
     const reclaimed = [];
@@ -157,7 +157,7 @@ describe("structured card target resolution via EffectResolver", () => {
 
   test("compress_shinsu honors an explicit card zone (hand)", () => {
     const game = createGame();
-    const equipment = cardInstance(game, "Alice", "Frog Fisher");
+    const equipment = cardInstance(game, "Alice", "Test Equipment Filler");
     game.playerStates.Alice.hand = [equipment];
 
     resolveEffect(
@@ -171,7 +171,7 @@ describe("structured card target resolution via EffectResolver", () => {
 
   test("draw_card honors an explicit card zone (deck)", () => {
     const game = createGame();
-    const equipment = cardInstance(game, "Alice", "Frog Fisher");
+    const equipment = cardInstance(game, "Alice", "Test Equipment Filler");
     game.playerStates.Alice.deck = [equipment];
     game.playerStates.Alice.hand = [];
 
@@ -181,13 +181,13 @@ describe("structured card target resolution via EffectResolver", () => {
       { owner: "Alice" }
     );
 
-    expect(game.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Frog Fisher"]);
+    expect(game.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Test Equipment Filler"]);
     expect(game.playerStates.Alice.deck).toHaveLength(0);
   });
 
   test("reclaim_cards honors an explicit card zone (discard)", () => {
     const game = createGame();
-    const equipment = cardInstance(game, "Alice", "Frog Fisher");
+    const equipment = cardInstance(game, "Alice", "Test Equipment Filler");
     game.playerStates.Alice.discard = [equipment];
     game.playerStates.Alice.hand = [];
 
@@ -197,7 +197,7 @@ describe("structured card target resolution via EffectResolver", () => {
       { owner: "Alice" }
     );
 
-    expect(game.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Frog Fisher"]);
+    expect(game.playerStates.Alice.hand.map((c) => c.name)).toEqual(["Test Equipment Filler"]);
     expect(game.playerStates.Alice.discard).toHaveLength(0);
   });
 });

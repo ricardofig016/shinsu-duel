@@ -5,7 +5,7 @@ describe("RequirementValidator", () => {
   let game;
 
   beforeEach(() => {
-    game = setupGameWithCardsInHand(["Yeon Yihwa", "Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes"]);
+    game = setupGameWithCardsInHand(["Test Hwayeomsa", "Test Light Bearer Only", "Test Light Bearer Only", "Test Light Bearer Only"]);
   });
 
   // ── Already handled patterns ──────────────────────────────────────────────
@@ -52,7 +52,7 @@ describe("RequirementValidator", () => {
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
 
     expect(() =>
-      RequirementValidator.validate(["Yeon Yihwa is in your board"], { gameState: game, username: "Alice" })
+      RequirementValidator.validate(["Test Hwayeomsa is in your board"], { gameState: game, username: "Alice" })
     ).not.toThrow();
   });
 
@@ -65,8 +65,8 @@ describe("RequirementValidator", () => {
   test("bare affiliation — passes when present", () => {
     game.round = 3;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 3, recharged: 0 };
-    // Deploy Khun Aguero Agnes (has khun-family affiliation)
-    const khunIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Khun Aguero Agnes");
+    // Deploy Test Light Bearer Only (has khun-family affiliation)
+    const khunIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Light Bearer Only");
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: khunIdx, placedPositionCode: "light-bearer" } });
 
     expect(() =>
@@ -124,8 +124,8 @@ describe("RequirementValidator", () => {
   test("ally with attribute — passes when the attribute is modifier-granted, not on the card", () => {
     game.round = 5;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
-    // Khun Aguero Agnes has no "hwayeomsa" attribute on her compiled card.
-    const khunIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Khun Aguero Agnes");
+    // Test Light Bearer Only has no "hwayeomsa" attribute on her compiled card.
+    const khunIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Light Bearer Only");
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: khunIdx, placedPositionCode: "light-bearer" } });
     const unit = game.playerStates.Alice.field.backline[0];
     expect(unit.card.attributes || []).not.toContain("hwayeomsa");
@@ -147,7 +147,7 @@ describe("RequirementValidator", () => {
   test("affiliation or attribute — passes when the attribute branch is satisfied only via ModifierStack", () => {
     game.round = 5;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
-    const khunIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Khun Aguero Agnes");
+    const khunIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Light Bearer Only");
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: khunIdx, placedPositionCode: "light-bearer" } });
     const unit = game.playerStates.Alice.field.backline[0];
 

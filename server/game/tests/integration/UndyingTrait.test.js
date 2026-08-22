@@ -9,7 +9,7 @@ function swing(game, targetId) {
 
 describe("Undying trait", () => {
   test("Undying absorbed by Barrier first, second hit saves at 1 HP", () => {
-    const game = setupGameWithCardsInHand(["_Test Unit"]);
+    const game = setupGameWithCardsInHand(["Test Trait Unit"]);
     advanceToRound(game, 2);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
@@ -29,7 +29,7 @@ describe("Undying trait", () => {
   });
 
   test("no-undying unit dies normally", () => {
-    const game = setupGameWithCardsInHand(["Hong Chunhwa"]);
+    const game = setupGameWithCardsInHand(["Test No Undying Unit"]);
     advanceToRound(game, 3);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
@@ -38,7 +38,7 @@ describe("Undying trait", () => {
   });
 
   test("undying:saved event fires", () => {
-    const game = setupGameWithCardsInHand(["_Test Unit"]);
+    const game = setupGameWithCardsInHand(["Test Trait Unit"]);
     advanceToRound(game, 2);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
@@ -53,7 +53,7 @@ describe("Undying trait", () => {
   });
 
   test("killed event does NOT fire on undying save", () => {
-    const game = setupGameWithCardsInHand(["_Test Unit"]);
+    const game = setupGameWithCardsInHand(["Test Trait Unit"]);
     advanceToRound(game, 2);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
@@ -68,7 +68,7 @@ describe("Undying trait", () => {
   });
 
   test("granted undying consumed", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout"]);
     advanceToRound(game, 3);
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });

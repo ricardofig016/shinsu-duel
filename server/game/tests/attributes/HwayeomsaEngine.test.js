@@ -1,4 +1,3 @@
-import GameState from "../../GameState.js";
 import HwayeomsaEngine from "../../attributes/HwayeomsaEngine.js";
 import { setupGameWithCardsInHand } from "../utils.js";
 
@@ -6,8 +5,8 @@ describe("HwayeomsaEngine", () => {
   let game, engine;
 
   beforeEach(() => {
-    game = setupGameWithCardsInHand(["Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa"]);
-    game._attributeRegistry.register("hwayeomsa", new HwayeomsaEngine(game.eventBus, GameState.cards));
+    game = setupGameWithCardsInHand(["Test Hwayeomsa", "Test Hwayeomsa", "Test Hwayeomsa", "Test Hwayeomsa"]);
+    game._attributeRegistry.register("hwayeomsa", new HwayeomsaEngine(game.eventBus, game.cards));
     engine = game._attributeRegistry.get("hwayeomsa");
   });
 
@@ -29,7 +28,7 @@ describe("HwayeomsaEngine", () => {
   });
 
   test("generateFireCharge spends shinsu, gains charge", () => {
-    // Deploy Yeon Yihwa (Hwayeomsa)
+    // Deploy Test Hwayeomsa (Hwayeomsa)
     game.round = 6;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 6, recharged: 0 };
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
@@ -91,10 +90,10 @@ describe("HwayeomsaEngine", () => {
     const result = engine.consumeCharges("Alice", 3, game);
 
     expect(result).not.toBeNull();
-    expect(result.name).toBe("Incinerate III");
+    expect(result.name).toBe("Test Incinerate III");
     expect(game.playerStates.Alice.fireCharges).toBe(0);
     expect(game.playerStates.Alice.hand.length).toBe(1);
-    expect(game.playerStates.Alice.hand[0].name).toBe("Incinerate III");
+    expect(game.playerStates.Alice.hand[0].name).toBe("Test Incinerate III");
   });
 
   test("consumeCharges returns null for insufficient charges", () => {

@@ -1,6 +1,6 @@
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck } from "../utils.js";
+import { createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
@@ -36,7 +36,7 @@ describe("GameState seeded RNG enforcement", () => {
       players,
       { Alice: createLegalDeck(), Bob: createLegalDeck() },
       null,
-      { rng: new SeededRng(1) }
+      { rng: new SeededRng(1), cards }
     );
     expect(game._rng.getState().seed).toBe(1);
   });
@@ -47,7 +47,7 @@ describe("GameState seeded RNG enforcement", () => {
       players,
       { Alice: createLegalDeck(), Bob: createLegalDeck() },
       "Bob",
-      { rng: new SeededRng(1) }
+      { rng: new SeededRng(1), cards }
     );
     expect(game.currentTurn).toBe("Bob");
   });
@@ -58,15 +58,15 @@ describe("GameState seeded RNG enforcement", () => {
       players,
       { Alice: createLegalDeck(), Bob: createLegalDeck() },
       null,
-      { rng: new SeededRng(1) }
+      { rng: new SeededRng(1), cards }
     );
     expect(game.currentTurn).toBe(players[0]);
   });
 
   test("generates a deterministic default deck of 30 unique eligible cards", () => {
-    const a = new GameState("S", players, {}, null, { rng: new SeededRng(1) });
-    const b = new GameState("S", players, {}, null, { rng: new SeededRng(1) });
-    const eligible = new Set(GameState.getEligibleCardIds());
+    const a = new GameState("S", players, {}, null, { rng: new SeededRng(1), cards });
+    const b = new GameState("S", players, {}, null, { rng: new SeededRng(1), cards });
+    const eligible = new Set(GameState.getEligibleCardIds(cards));
 
     for (const game of [a, b]) {
       const deck = fullDeck(game.playerStates.Alice);

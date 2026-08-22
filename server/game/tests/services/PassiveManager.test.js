@@ -4,7 +4,7 @@ import Card from "../../Card.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
 import EVT from "../../EventCatalog.js";
 import { resolveEffect } from "../../EffectResolver.js";
-import { createLegalDeck, getCardIdByName } from "../utils.js";
+import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
@@ -12,12 +12,12 @@ function createGame() {
   return new GameState("TEST", players, {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  }, null, { rng: new SeededRng(1) });
+  }, null, { rng: new SeededRng(1), cards });
 }
 
 function putInHand(game, username, name) {
   const cardId = getCardIdByName(name);
-  const card = new Card(cardId, game.constructor.cards[cardId], username, game.eventBus);
+  const card = new Card(cardId, game.cards[cardId], username, game.eventBus);
   game.playerStates[username].hand.push(card);
   return card;
 }
@@ -27,7 +27,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const karaka = putInHand(game, "Alice", "Karaka - Evolved");
+    const karaka = putInHand(game, "Alice", "Test Evolve Unit - Evolved");
     karaka.passiveAbilities = [{
       type: "deal_damage",
       amount: 3,
@@ -39,8 +39,8 @@ describe("PassiveManager", () => {
 
     const handIndex = game.playerStates.Alice.hand.indexOf(karaka);
     const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "wave-controller");
-    const targetCardId = getCardIdByName("Yeon Yihwa");
-    const targetCard = new Card(targetCardId, game.constructor.cards[targetCardId], "Bob", game.eventBus);
+    const targetCardId = getCardIdByName("Test Hwayeomsa");
+    const targetCard = new Card(targetCardId, game.cards[targetCardId], "Bob", game.eventBus);
     const target = {
       id: "Unit#rooted-target",
       owner: "Bob",
@@ -102,7 +102,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const urek = putInHand(game, "Alice", "Urek Mazino");
+    const urek = putInHand(game, "Alice", "Test Bearer Unit");
     urek.passiveAbilities = [{
       type: "conditional",
       if: { type: "alone_on_line", line: "frontline" },
@@ -143,7 +143,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const yuri = putInHand(game, "Alice", "Ha Yuri Zahard");
+    const yuri = putInHand(game, "Alice", "Test Princess Unit");
     yuri.passiveAbilities = [{
       type: "conditional",
       if: { type: "has_unit", target: { side: "ally", name: "Guide" } },
@@ -200,7 +200,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const urek = putInHand(game, "Alice", "Urek Mazino");
+    const urek = putInHand(game, "Alice", "Test Bearer Unit");
     urek.passiveAbilities = [{
       type: "conditional",
       if: { type: "alone_on_line", line: "frontline" },
@@ -247,7 +247,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const yuri = putInHand(game, "Alice", "Ha Yuri Zahard");
+    const yuri = putInHand(game, "Alice", "Test Princess Unit");
     yuri.passiveAbilities = [{
       type: "conditional",
       if: { type: "has_condition", condition: "burned", target: { side: "enemy" } },
@@ -287,7 +287,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const urek = putInHand(game, "Alice", "Urek Mazino");
+    const urek = putInHand(game, "Alice", "Test Bearer Unit");
     urek.passiveAbilities = [{
       type: "conditional",
       if: { type: "alone_on_line", line: "frontline" },
@@ -306,11 +306,11 @@ describe("PassiveManager", () => {
     expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(1);
     expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(3);
 
-    LifecycleEngine.transformUnit(game, unit, getCardIdByName("Karaka"));
+    LifecycleEngine.transformUnit(game, unit, getCardIdByName("Test Evolve Unit"));
 
     expect(game.modifierStack.getEffective(unit.id, "trait", "resilient")).toBe(0);
     expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(0);
-    expect(unit.card.name).toBe("Karaka");
+    expect(unit.card.name).toBe("Test Evolve Unit");
   });
 
   test("destroyUnit revokes always-on grants the source holds on other units", () => {
@@ -318,10 +318,10 @@ describe("PassiveManager", () => {
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
-    const source = putInHand(game, "Alice", "Urek Mazino");
+    const source = putInHand(game, "Alice", "Test Bearer Unit");
     source.passiveAbilities = [{
       type: "conditional",
-      if: { type: "has_unit", target: { side: "ally", name: "Urek Mazino" } },
+      if: { type: "has_unit", target: { side: "ally", name: "Test Bearer Unit" } },
       then: { type: "grant_trait", trait: "strong", amount: 1, target: { side: "ally", scope: "all" } },
       raw: "while I'm on the field, allies have Strong 1",
     }];
@@ -353,14 +353,14 @@ describe("PassiveManager", () => {
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
-    const unitCard = putInHand(game, "Alice", "Urek Mazino");
+    const unitCard = putInHand(game, "Alice", "Test Bearer Unit");
     unitCard.passiveAbilities = [{
       type: "conditional",
-      if: { type: "has_equipped", cardName: "Blue Thryssa" },
+      if: { type: "has_equipped", cardName: "Test Blue Thryssa" },
       then: { type: "grant_trait", trait: "taunt", target: { side: "self" } },
       raw: "while I have Blue Thryssa equipped, I have Taunt",
     }];
-    const equip = putInHand(game, "Alice", "Blue Thryssa");
+    const equip = putInHand(game, "Alice", "Test Blue Thryssa");
 
     const unitHandIndex = game.playerStates.Alice.hand.indexOf(unitCard);
     const { unit } = LifecycleEngine.deployUnit(game, "Alice", unitHandIndex, "fisherman");

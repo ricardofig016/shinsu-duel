@@ -11,10 +11,10 @@ describe("CopyAbilityHandler", () => {
   });
 
   test("resolves the single ability of an enemy with one ability", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"], Alice: ["Bull"] });
-    // Bull has one ability: deal 3 to an enemy (quick).
-    const source = deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
-    const caster = deployUnit(game, "Alice", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"], Alice: ["Test Shinheuh"] });
+    // Test Shinheuh has one ability: deal 3 to an enemy (quick).
+    const source = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    const caster = deployUnit(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
 
     const result = handler.execute(
       { sourceUnitId: source.id, sourceId: caster.id, sourceUnit: caster, sourceOwner: "Alice" },
@@ -28,8 +28,8 @@ describe("CopyAbilityHandler", () => {
   });
 
   test("no-op when the enemy has no abilities", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
-    const source = deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
+    const source = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
     source.card.abilities = [];
 
     const result = handler.execute(
@@ -41,10 +41,10 @@ describe("CopyAbilityHandler", () => {
   });
 
   test("defers to an ability_selection decision when the enemy has multiple abilities", () => {
-    const game = setupGameWithHands({ Bob: ["Khun Ran"], Alice: ["Bull"] });
-    // Khun Ran has two abilities (deal 3 to a frontline enemy, heal enemy Conduit).
-    const source = deployUnit(game, "Bob", "Khun Ran", "fisherman");
-    const caster = deployUnit(game, "Alice", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Multi Position"], Alice: ["Test Shinheuh"] });
+    // Test Multi Position has two abilities (deal 3 to a frontline enemy, heal enemy Conduit).
+    const source = deployUnit(game, "Bob", "Test Multi Position", "fisherman");
+    const caster = deployUnit(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
 
     const result = handler.execute(
       { sourceUnitId: source.id, sourceId: caster.id, sourceUnit: caster, sourceOwner: "Alice" },

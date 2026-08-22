@@ -13,8 +13,8 @@ describe("CompressionService", () => {
 
   test("compress reduces card cost and emits shinsu:compressed", () => {
     const [owner] = game.usernames;
-    const cardId = getCardIdByName("Fiery Elephant");
-    const card = new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+    const cardId = getCardIdByName("Test Compress Skill");
+    const card = new Card(cardId, game.cards[cardId], owner, game.eventBus);
 
     expect(card.costReduction).toBe(0);
 
@@ -31,8 +31,8 @@ describe("CompressionService", () => {
 
   test("compress stacks additively on same card", () => {
     const [owner] = game.usernames;
-    const cardId = getCardIdByName("Fiery Elephant");
-    const card = new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+    const cardId = getCardIdByName("Test Compress Skill");
+    const card = new Card(cardId, game.cards[cardId], owner, game.eventBus);
 
     const ctx = { emitChild: jest.fn() };
     CompressionService.compress(card, 2, ctx);
@@ -43,8 +43,8 @@ describe("CompressionService", () => {
 
   test("clearReduction resets to 0", () => {
     const [owner] = game.usernames;
-    const cardId = getCardIdByName("Fiery Elephant");
-    const card = new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+    const cardId = getCardIdByName("Test Compress Skill");
+    const card = new Card(cardId, game.cards[cardId], owner, game.eventBus);
 
     const ctx = { emitChild: jest.fn() };
     CompressionService.compress(card, 4, ctx);
@@ -59,8 +59,8 @@ describe("CompressionService", () => {
 
   test("throws for non-positive amount", () => {
     const [owner] = game.usernames;
-    const cardId = getCardIdByName("Fiery Elephant");
-    const card = new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+    const cardId = getCardIdByName("Test Compress Skill");
+    const card = new Card(cardId, game.cards[cardId], owner, game.eventBus);
 
     expect(() => CompressionService.compress(card, 0)).toThrow("positive");
     expect(() => CompressionService.compress(card, -1)).toThrow("positive");

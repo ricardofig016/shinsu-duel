@@ -16,9 +16,9 @@ describe("StealHandler", () => {
   });
 
   test("steals the enemy's cheapest Shinheuh onto the acting player's field", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
-    // Bob controls a Bull (cost 3) as a Shinheuh.
-    const bull = deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
+    // Bob controls a Test Shinheuh (cost 3) as a Shinheuh.
+    const bull = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
 
     const result = handler.execute(
       { owner: "Alice", card: { position: ["frontline-shinheuh", "backline-shinheuh"], cost: "cheapest" }, sourceId: "Unit#Src" },
@@ -33,7 +33,7 @@ describe("StealHandler", () => {
   });
 
   test("no-op when no enemy matches the descriptor", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
     const result = handler.execute(
       { owner: "Alice", card: { position: ["frontline-shinheuh"], cost: 2 }, sourceId: "Unit#Src" },
       context(game),
@@ -43,9 +43,9 @@ describe("StealHandler", () => {
   });
 
   test("steal with choose defers to a target_selection decision", () => {
-    const game = setupGameWithHands({ Bob: ["Bull", "Monkeyman"] });
-    deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
-    deployUnit(game, "Bob", "Monkeyman", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh", "Test Scout"] });
+    deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    deployUnit(game, "Bob", "Test Scout", "fisherman");
 
     const result = handler.execute(
       { owner: "Alice", card: { choose: true }, sourceId: "Unit#Src" },
@@ -59,9 +59,9 @@ describe("StealHandler", () => {
 
   test("steal with random deterministically picks one matching unit", () => {
     const run = () => {
-      const game = setupGameWithHands({ Bob: ["Bull", "Monkeyman"] });
-      deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
-      deployUnit(game, "Bob", "Monkeyman", "fisherman");
+      const game = setupGameWithHands({ Bob: ["Test Shinheuh", "Test Scout"] });
+      deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+      deployUnit(game, "Bob", "Test Scout", "fisherman");
       const result = handler.execute(
         { owner: "Alice", card: { random: true }, sourceId: "Unit#Src" },
         context(game),
@@ -77,8 +77,8 @@ describe("StealHandler", () => {
   });
 
   test("steal into a full line defers to a line_overflow decision", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
-    deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
+    deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
     game.playerStates.Alice.field.frontline = [
       { id: "A1", card: { name: "A", maxHp: 1 }, currentHp: 1 },
       { id: "A2", card: { name: "B", maxHp: 1 }, currentHp: 1 },
@@ -98,8 +98,8 @@ describe("StealHandler", () => {
   });
 
   test("emits UNIT_STOLEN when a unit is stolen", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
-    const bull = deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
+    const bull = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
     const stolen = [];
     game.eventBus.on(EVT.UNIT_STOLEN, (p) => stolen.push(p), { phase: "post" });
 

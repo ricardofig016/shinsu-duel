@@ -12,7 +12,7 @@ describe("DiscardHandler", () => {
   });
 
   test("discards a specific card instance from the hand", () => {
-    const game = setupGameWithCardsInHand(["Baang", "Baang", "Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill", "Test Damage Skill", "Test Damage Skill"]);
     const card = game.playerStates.Alice.hand[0];
 
     const result = handler.execute(
@@ -27,17 +27,17 @@ describe("DiscardHandler", () => {
   });
 
   test("discards matching bearer attachments", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit"]);
     game.currentTurn = "Alice";
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
-    const karakaHand = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka");
+    const karakaHand = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Evolve Unit");
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: karakaHand, placedPositionCode: "fisherman" } });
-    const karaka = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Karaka");
+    const karaka = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Evolve Unit");
 
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
-    const equipHand = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka's Armor Suit");
+    const equipHand = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
     game.processAction({ type: "equip-equipment-action", data: { source: "player", username: "Alice", handId: equipHand, targetUnitId: karaka.id } });
 
     const attachment = karaka.equipmentAttachments[0];
@@ -53,7 +53,7 @@ describe("DiscardHandler", () => {
   });
 
   test("no-op when the target card is not in hand", () => {
-    const game = setupGameWithCardsInHand(["Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill"]);
     const result = handler.execute(
       { owner: "Alice", card: { zone: "hand" }, targetCardId: "Card#Missing" },
       context(game),
@@ -63,7 +63,7 @@ describe("DiscardHandler", () => {
   });
 
   test("emits CARD_DISCARDED when a hand card is discarded", () => {
-    const game = setupGameWithCardsInHand(["Baang", "Baang", "Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill", "Test Damage Skill", "Test Damage Skill"]);
     const card = game.playerStates.Alice.hand[0];
     const discarded = [];
     game.eventBus.on(EVT.CARD_DISCARDED, (p) => discarded.push(p), { phase: "post" });

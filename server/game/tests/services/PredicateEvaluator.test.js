@@ -1,6 +1,6 @@
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck, getCardIdByName } from "../utils.js";
+import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 import PredicateEvaluator from "../../services/PredicateEvaluator.js";
 
 const players = ["Alice", "Bob"];
@@ -9,7 +9,7 @@ function createGame(decks = {}) {
   return new GameState("TEST", players, {
     Alice: decks.Alice || createLegalDeck(),
     Bob: decks.Bob || createLegalDeck(),
-  }, null, { rng: new SeededRng(1) });
+  }, null, { rng: new SeededRng(1), cards });
 }
 
 function unit(id, owner, position = "fisherman", { name = id, rank = "regular", affiliations = {}, attributes = [], maxHp = 10 } = {}) {
@@ -120,20 +120,20 @@ describe("PredicateEvaluator", () => {
   describe("started_with_card", () => {
     test("reflects the per-player starting deck composition", () => {
       const game = createGame({
-        Alice: createLegalDeck([getCardIdByName("Rachel")]),
-        Bob: createLegalDeck([getCardIdByName("Baang")]),
+        Alice: createLegalDeck([getCardIdByName("Test Light Bearer")]),
+        Bob: createLegalDeck([getCardIdByName("Test Damage Skill")]),
       });
 
       expect(PredicateEvaluator.evaluate(
-        { type: "started_with_card", cardName: "Rachel" },
+        { type: "started_with_card", cardName: "Test Light Bearer" },
         game, { owner: "Alice" }
       )).toBe(true);
       expect(PredicateEvaluator.evaluate(
-        { type: "started_with_card", cardName: "Rachel" },
+        { type: "started_with_card", cardName: "Test Light Bearer" },
         game, { owner: "Bob" }
       )).toBe(false);
       expect(PredicateEvaluator.evaluate(
-        { type: "started_with_card", cardName: "Baang" },
+        { type: "started_with_card", cardName: "Test Damage Skill" },
         game, { owner: "Bob" }
       )).toBe(true);
     });
@@ -154,7 +154,7 @@ describe("PredicateEvaluator", () => {
         game, { owner: "Alice", sourceUnit: u }
       )).toBe(false);
 
-      const names = ["First Thorn Fragment", "Second Thorn Fragment", "Third Thorn Fragment", "Fourth Thorn Fragment"];
+      const names = ["Test Thorn Fragment I", "Test Thorn Fragment II", "Test Thorn Fragment III", "Test Thorn Fragment IV"];
       u.equipmentAttachments = names.map((name) => ({ name }));
       expect(PredicateEvaluator.evaluate(
         { type: "has_all_equipped", series: "thorn-fragment" },
@@ -259,7 +259,7 @@ describe("PredicateEvaluator", () => {
 
     test("started_with_card without an owner resolves false", () => {
       const game = createGame();
-      expect(PredicateEvaluator.evaluate({ type: "started_with_card", cardName: "Rachel" }, game, {})).toBe(false);
+      expect(PredicateEvaluator.evaluate({ type: "started_with_card", cardName: "Test Light Bearer" }, game, {})).toBe(false);
     });
 
     test("existence checks reject unsupported sides and missing owners", () => {

@@ -7,7 +7,7 @@ describe("CreateCardHandler", () => {
   let game, handler;
 
   beforeEach(() => {
-    game = setupGameWithCardsInHand(["Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa"]);
+    game = setupGameWithCardsInHand(["Test Hwayeomsa", "Test Hwayeomsa", "Test Hwayeomsa", "Test Hwayeomsa"]);
     handler = new CreateCardHandler();
   });
 
@@ -18,24 +18,24 @@ describe("CreateCardHandler", () => {
   test("plain create: creates an exact-named card in hand and emits card:created", () => {
     const ctx = context();
     const result = handler.execute(
-      { owner: "Alice", card: { name: "Shinwonryu" }, raw: "create Shinwonryu in your hand" },
+      { owner: "Alice", card: { name: "Test Unreachable Skill" }, raw: "create Shinwonryu in your hand" },
       ctx,
       game
     );
 
     expect(result.created).toBe(true);
-    expect(result.card.name).toBe("Shinwonryu");
-    expect(game.playerStates.Alice.hand.some((card) => card.name === "Shinwonryu")).toBe(true);
+    expect(result.card.name).toBe("Test Unreachable Skill");
+    expect(game.playerStates.Alice.hand.some((card) => card.name === "Test Unreachable Skill")).toBe(true);
     expect(ctx.emitChild).toHaveBeenCalledWith(EVT.CARD_CREATED, {
       owner: "Alice",
       cardId: expect.any(Number),
-      name: "Shinwonryu",
+      name: "Test Unreachable Skill",
     });
   });
 
   test("plain create honors the card type filter", () => {
     const result = handler.execute(
-      { owner: "Alice", card: { type: "skill", name: "Shinwonryu" } },
+      { owner: "Alice", card: { type: "skill", name: "Test Unreachable Skill" } },
       context(),
       game
     );
@@ -53,10 +53,10 @@ describe("CreateCardHandler", () => {
 
     expect(result.created).toBe(true);
     expect(result.level).toBe(3);
-    expect(result.name).toBe("Incinerate III");
-    expect(result.card.name).toBe("Incinerate III");
+    expect(result.name).toBe("Test Incinerate III");
+    expect(result.card.name).toBe("Test Incinerate III");
     expect(game.playerStates.Alice.fireCharges).toBe(0);
-    expect(game.playerStates.Alice.hand.some((card) => card.name === "Incinerate III")).toBe(true);
+    expect(game.playerStates.Alice.hand.some((card) => card.name === "Test Incinerate III")).toBe(true);
   });
 
   test("generated_by with insufficient charges skips and does not consume charges", () => {
@@ -90,7 +90,7 @@ describe("CreateCardHandler", () => {
 
     expect(result.created).toBe(true);
     expect(result.level).toBe(1);
-    expect(result.card.name).toBe("Incinerate I");
+    expect(result.card.name).toBe("Test Incinerate I");
     expect(game.playerStates.Alice.fireCharges).toBe(0);
   });
 
@@ -123,7 +123,7 @@ describe("CreateCardHandler", () => {
     );
 
     expect(result.created).toBe(true);
-    expect(["First Thorn Fragment", "Second Thorn Fragment", "Third Thorn Fragment", "Fourth Thorn Fragment"])
+    expect(["Test Thorn Fragment I", "Test Thorn Fragment II", "Test Thorn Fragment III", "Test Thorn Fragment IV"])
       .toContain(result.card.name);
   });
 
@@ -142,11 +142,11 @@ describe("CreateCardHandler", () => {
   test("validate requires name or series", () => {
     expect(() => handler.validate({ owner: "Alice", card: { type: "skill" } })).toThrow(/payload.card.name or payload.card.series is required/i);
     expect(() => handler.validate({ owner: "Alice", card: { series: "thorn-fragment" } })).not.toThrow();
-    expect(() => handler.validate({ owner: "Alice", card: { name: "Shinwonryu" } })).not.toThrow();
+    expect(() => handler.validate({ owner: "Alice", card: { name: "Test Unreachable Skill" } })).not.toThrow();
   });
 
   test("unknown generated_by resource is skipped", () => {
-    const cards = { ...game.constructor.cards };
+    const cards = { ...game.cards };
     cards["9999"] = {
       cardId: 9999,
       type: "skill",
@@ -154,7 +154,7 @@ describe("CreateCardHandler", () => {
       cost: 0,
       deckConstraints: [{ type: "generated_by", resource: "mystery", amount: 1, raw: "x" }],
     };
-    game.constructor.cards = cards;
+    game.cards = cards;
 
     game.eventBus.emit = jest.fn();
     const result = handler.execute(

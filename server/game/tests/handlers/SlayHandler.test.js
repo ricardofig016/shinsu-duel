@@ -12,8 +12,8 @@ describe("SlayHandler", () => {
   });
 
   test("kills an alive target through the lethal pipeline", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
-    const target = deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
+    const target = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
 
     const killed = [];
     game.eventBus.on(EVT.UNIT_KILLED, (p) => killed.push(p.targetId), { phase: "post" });
@@ -30,8 +30,8 @@ describe("SlayHandler", () => {
   });
 
   test("Undying intercepts and saves a Slayed unit", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
-    const target = deployUnit(game, "Bob", "Bull", "frontline-shinheuh");
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
+    const target = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
 
     game.modifierStack.apply({
       sourceId: "System", sourceType: "system", targetId: target.id,
@@ -50,7 +50,7 @@ describe("SlayHandler", () => {
   });
 
   test("no-op when the target is not found", () => {
-    const game = setupGameWithHands({ Bob: ["Bull"] });
+    const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
     expect(handler.execute({ targetId: "Unit#Missing", sourceId: "S" }, context(game), game))
       .toEqual({ slayed: false });
   });

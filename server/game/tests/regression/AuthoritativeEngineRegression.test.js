@@ -2,7 +2,7 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import * as IdFactory from "../../IdFactory.js";
 import { resetModifierCounter } from "../../ModifierStack.js";
-import { createLegalDeck, setupGameWithCardsInHand } from "../utils.js";
+import { createLegalDeck, setupGameWithCardsInHand, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
@@ -11,7 +11,7 @@ describe("authoritative-engine regressions", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
     game.playerStates.Alice.deck = [];
 
     const first = game.currentTurn;
@@ -26,7 +26,7 @@ describe("authoritative-engine regressions", () => {
     const game = new GameState("TEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
     const resolved = [];
     const decisionId = game.createPendingDecision({
       owner: "Alice",
@@ -47,7 +47,7 @@ describe("authoritative-engine regressions", () => {
   });
 
   test("Hwayeomsa core actions create Fire Core then highest affordable Incinerate via play-skill", () => {
-    const game = setupGameWithCardsInHand(["Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa", "Yeon Yihwa"]);
+    const game = setupGameWithCardsInHand(["Test Hwayeomsa", "Test Hwayeomsa", "Test Hwayeomsa", "Test Hwayeomsa"]);
     game.round = 5;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
 
@@ -69,7 +69,7 @@ describe("authoritative-engine regressions", () => {
 
     expect(game.playerStates.Alice.hand.some((card) => card.name === "Fire Core")).toBe(false);
     expect(game.playerStates.Alice.discard.some((card) => card.name === "Fire Core")).toBe(true);
-    expect(game.playerStates.Alice.hand.some((card) => card.name === "Incinerate II")).toBe(true);
+    expect(game.playerStates.Alice.hand.some((card) => card.name === "Test Incinerate II")).toBe(true);
     expect(game.playerStates.Alice.fireCharges).toBe(0);
   });
 
@@ -79,7 +79,7 @@ describe("authoritative-engine regressions", () => {
     for (let i = 0; i < 20; i++) {
       IdFactory.resetAll();
       resetModifierCounter();
-      const game = new GameState("DET", players, decks, null, { rng: new SeededRng(1) });
+      const game = new GameState("DET", players, decks, null, { rng: new SeededRng(1), cards });
       snapshots.push(JSON.stringify(game._createSnapshot()));
     }
     const first = snapshots[0];
@@ -92,7 +92,7 @@ describe("authoritative-engine regressions", () => {
       IdFactory.resetAll();
       resetModifierCounter();
       const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-      const game = new GameState("ORD", players, decks, null, { rng: new SeededRng(1) });
+      const game = new GameState("ORD", players, decks, null, { rng: new SeededRng(1), cards });
       // Capture event order
       const events = [];
       game.eventBus.on("*", (_, ctx) => { if (ctx.phase === "execute") events.push(ctx.eventName); }, { phase: "execute", priority: 0 });
@@ -108,7 +108,7 @@ describe("authoritative-engine regressions", () => {
   });
 
   test("service boundary: no handler mutates shinsu directly", () => {
-    const game = setupGameWithCardsInHand(["Narumada", "Narumada", "Narumada", "Narumada"]);
+    const game = setupGameWithCardsInHand(["Test Ignite Weapon", "Test Ignite Weapon", "Test Ignite Weapon", "Test Ignite Weapon"]);
     const player = game.playerStates.Alice;
     const origShinsu = { ...player.shinsu };
     // SpendShinsuHandler now delegates to ShinsuService — verify the
@@ -123,7 +123,7 @@ describe("authoritative-engine regressions", () => {
     const game = new GameState("LH", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
     game.modifyLighthouses("Alice", 5);
     expect(game.playerStates.Alice.lighthouses.amount).toBe(25);
     game.modifyLighthouses("Alice", -30);
@@ -136,7 +136,7 @@ describe("authoritative-engine regressions", () => {
     const game = new GameState("NEST", players, {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
     const resolved = [];
     game.createPendingDecision({
       owner: "Alice", type: "line_overflow",

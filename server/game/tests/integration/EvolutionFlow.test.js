@@ -5,7 +5,7 @@ import { setupGameWithCardsInHand, getCardIdByName } from "../utils.js";
 
 describe("evolution flow", () => {
   test("Karaka evolves when equipped with Karaka's Armor Suit as Fisherman", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     const shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -17,17 +17,17 @@ describe("evolution flow", () => {
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { ...shinsu };
     const karaka = game.playerStates.Alice.field.frontline[0];
-    expect(karaka.card.name).toBe("Karaka");
+    expect(karaka.card.name).toBe("Test Evolve Unit");
 
-    // Equip Karaka's Armor Suit — should trigger evolution
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka's Armor Suit");
+    // Equip Test Armor — should trigger evolution
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    // Karaka should now be Karaka - Evolved, HP delta preserved (7→9 max, full HP)
-    expect(karaka.card.name).toBe("Karaka - Evolved");
+    // Test Evolve Unit should now be Test Evolve Unit - Evolved, HP delta preserved (7→9 max, full HP)
+    expect(karaka.card.name).toBe("Test Evolve Unit - Evolved");
     expect(karaka.currentHp).toBe(9);
 
     // Evolved unit should have its new passive (round end: deal 3 to all Rooted enemies)
@@ -36,7 +36,7 @@ describe("evolution flow", () => {
   });
 
   test("Karaka does NOT evolve when equipped in wrong position — req blocks", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     const shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -49,17 +49,17 @@ describe("evolution flow", () => {
     game.playerStates.Alice.shinsu = { ...shinsu };
     const karaka = game.playerStates.Alice.field.frontline[0];
 
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka's Armor Suit");
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
     expect(() => game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     })).toThrow(/deployed as fisherman/i);
 
-    expect(karaka.card.name).toBe("Karaka");
+    expect(karaka.card.name).toBe("Test Evolve Unit");
   });
 
   test("evolved unit retains conditions after transformation", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     const shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -75,20 +75,20 @@ describe("evolution flow", () => {
     // Apply a condition before evolution
     game.modifierStack.apply({ sourceId: "test", sourceType: "system", targetId: karaka.id, type: "condition", key: "burned", value: 1 });
 
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka's Armor Suit");
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    expect(karaka.card.name).toBe("Karaka - Evolved");
+    expect(karaka.card.name).toBe("Test Evolve Unit - Evolved");
     expect(game.modifierStack.getEffective(karaka.id, "condition", "burned")).toBe(1);
   });
 });
 
 describe("ignition revert on unequip", () => {
   test("ignited Narumada reverts to base form when unequipped", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Narumada", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Ignite Weapon", "Test Scout", "Test Scout"]);
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
@@ -100,18 +100,18 @@ describe("ignition revert on unequip", () => {
     const bearer = game.playerStates.Alice.field.frontline[0];
 
     // Attach Narumada
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Narumada");
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Ignite Weapon");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: bearer.id },
     });
     game.currentTurn = "Alice";
 
-    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Narumada"]);
+    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Test Ignite Weapon"]);
 
     // Manually trigger ignition by simulating slay
-    const victimCardId = getCardIdByName("Monkeyman");
-    const victimCard = new Card(victimCardId, game.constructor.cards[victimCardId], "Bob", game.eventBus);
+    const victimCardId = getCardIdByName("Test Scout");
+    const victimCard = new Card(victimCardId, game.cards[victimCardId], "Bob", game.eventBus);
     const victim = {
       id: "Unit#revert-victim",
       owner: "Bob",
@@ -128,12 +128,12 @@ describe("ignition revert on unequip", () => {
     game.eventBus.emit(EVT.UNIT_KILLED, { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
     // Narumada should be ignited
-    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Narumada - Ignited"]);
+    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Test Ignite Weapon - Ignited"]);
 
     // Detach → should revert to base form in hand
     LifecycleEngine.detachEquipment(game, bearer);
     expect(bearer.equipmentAttachments.length).toBe(0);
-    expect(game.playerStates.Alice.hand.some((c) => c.name === "Narumada")).toBe(true);
-    expect(game.playerStates.Alice.hand.some((c) => c.name === "Narumada - Ignited")).toBe(false);
+    expect(game.playerStates.Alice.hand.some((c) => c.name === "Test Ignite Weapon")).toBe(true);
+    expect(game.playerStates.Alice.hand.some((c) => c.name === "Test Ignite Weapon - Ignited")).toBe(false);
   });
 });

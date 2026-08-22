@@ -3,7 +3,7 @@ import { setupGameWithCardsInHand, advanceToRound } from "../utils.js";
 
 describe("UseAbilityAction", () => {
   function deployMonkeyman(position) {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 3);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 3, recharged: 0 };
@@ -147,7 +147,7 @@ describe("UseAbilityAction", () => {
 
     test("a quick ability does not end the turn", () => {
       const { game, unit } = deployMonkeymanAsScout();
-      // Monkeyman ability 0 is a quick scout ability.
+      // Test Scout ability 0 is a quick scout ability.
       game.processAction({
         type: "use-ability-action",
         data: { source: "player", username: "Alice", unitId: unit.id, abilityCode: "0" },
@@ -162,7 +162,7 @@ describe("UseAbilityAction", () => {
         sourceId: "System", sourceType: "system", targetId: unit.id,
         type: "condition", key: "poisoned", value: 1,
       });
-      // Monkeyman max HP is 2.
+      // Test Scout max HP is 2.
       unit.currentHp = 2;
 
       game.processAction({

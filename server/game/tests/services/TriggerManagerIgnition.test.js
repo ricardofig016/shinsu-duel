@@ -5,7 +5,7 @@ import { setupGameWithCardsInHand, advanceToRound, getCardIdByName } from "../ut
 
 describe("TriggerManager ignition and given triggers", () => {
   test("a slay while equipped with Narumada ignites it into Narumada - Ignited", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Narumada", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Ignite Weapon", "Test Scout", "Test Scout"]);
     advanceToRound(game, 3);
     game.currentTurn = "Alice";
 
@@ -16,15 +16,15 @@ describe("TriggerManager ignition and given triggers", () => {
     game.currentTurn = "Alice";
     const bearer = game.playerStates.Alice.field.frontline[0];
 
-    const equipmentHandId = game.playerStates.Alice.hand.findIndex((card) => card.name === "Narumada");
+    const equipmentHandId = game.playerStates.Alice.hand.findIndex((card) => card.name === "Test Ignite Weapon");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipmentHandId, targetUnitId: bearer.id },
     });
-    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada"]);
+    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Test Ignite Weapon"]);
 
-    const victimCardId = getCardIdByName("Monkeyman");
-    const victimCard = new Card(victimCardId, game.constructor.cards[victimCardId], "Bob", game.eventBus);
+    const victimCardId = getCardIdByName("Test Scout");
+    const victimCard = new Card(victimCardId, game.cards[victimCardId], "Bob", game.eventBus);
     const victim = {
       id: "Unit#ignition-victim",
       owner: "Bob",
@@ -39,6 +39,6 @@ describe("TriggerManager ignition and given triggers", () => {
     game.eventBus.emit(EVT.DAMAGE_APPLIED, { sourceId: bearer.id, targetId: victim.id, amount: 5 });
     game.eventBus.emit(EVT.UNIT_KILLED, { sourceId: bearer.id, targetId: victim.id, killerId: bearer.id });
 
-    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Narumada - Ignited"]);
+    expect(bearer.equipmentAttachments.map((card) => card.name)).toEqual(["Test Ignite Weapon - Ignited"]);
   });
 });

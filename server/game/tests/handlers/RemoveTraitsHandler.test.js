@@ -12,10 +12,10 @@ describe("RemoveTraitsHandler", () => {
   });
 
   test("removes all traits from a target", () => {
-    const game = setupGameWithHands({ Bob: ["_Test Unit"] });
-    const unit = deployUnit(game, "Bob", "_Test Unit", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Trait Unit"] });
+    const unit = deployUnit(game, "Bob", "Test Trait Unit", "fisherman");
 
-    // _Test Unit has many native traits.
+    // Test Trait Unit has many native traits.
     expect(game.modifierStack.getActiveKeys(unit.id, "trait").size).toBeGreaterThan(0);
 
     const result = handler.execute({ targetId: unit.id }, context(game), game);
@@ -25,8 +25,8 @@ describe("RemoveTraitsHandler", () => {
   });
 
   test("removes only a named trait", () => {
-    const game = setupGameWithHands({ Bob: ["_Test Unit"] });
-    const unit = deployUnit(game, "Bob", "_Test Unit", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Trait Unit"] });
+    const unit = deployUnit(game, "Bob", "Test Trait Unit", "fisherman");
     expect(game.modifierStack.has(unit.id, "trait", "barrier")).toBe(true);
 
     handler.execute({ targetId: unit.id, trait: "barrier" }, context(game), game);
@@ -37,8 +37,8 @@ describe("RemoveTraitsHandler", () => {
   });
 
   test("emits UNIT_SILENCED with the removed traits", () => {
-    const game = setupGameWithHands({ Bob: ["_Test Unit"] });
-    const unit = deployUnit(game, "Bob", "_Test Unit", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Trait Unit"] });
+    const unit = deployUnit(game, "Bob", "Test Trait Unit", "fisherman");
     const silenced = [];
     game.eventBus.on(EVT.UNIT_SILENCED, (p) => silenced.push(p), { phase: "post" });
 

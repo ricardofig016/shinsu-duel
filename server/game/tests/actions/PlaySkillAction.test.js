@@ -3,10 +3,10 @@ import Card from "../../Card.js";
 
 describe("PlaySkillAction", () => {
   test("plays a structured skill, applies effects, discards it, and ends the turn", () => {
-    const game = setupGameWithCardsInHand(["Healing Potion", "Healing Potion", "Healing Potion", "Healing Potion"]);
+    const game = setupGameWithCardsInHand(["Test Heal", "Test Heal", "Test Heal", "Test Heal"]);
     const unitCard = new Card(
-      getCardIdByName("Monkeyman"),
-      game.constructor.cards[getCardIdByName("Monkeyman")],
+      getCardIdByName("Test Scout"),
+      game.cards[getCardIdByName("Test Scout")],
       "Alice",
       game.eventBus
     );
@@ -20,7 +20,7 @@ describe("PlaySkillAction", () => {
     });
 
     expect(unit.currentHp).toBe(unitCard.maxHp);
-    expect(game.playerStates.Alice.discard.at(-1).name).toBe("Healing Potion");
+    expect(game.playerStates.Alice.discard.at(-1).name).toBe("Test Heal");
     expect(game.currentTurn).toBe("Bob");
   });
 });

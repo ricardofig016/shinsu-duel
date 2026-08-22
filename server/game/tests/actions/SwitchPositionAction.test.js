@@ -4,7 +4,7 @@ import EVT from "../../EventCatalog.js";
 
 describe("switch-position-action", () => {
   function deployScoutThenWave(game) {
-    // Deploy Monkeyman (scout) as scout.
+    // Deploy Test Scout (scout) as scout.
     game.processAction({
       type: "deploy-unit-action",
       data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "scout" },
@@ -13,7 +13,7 @@ describe("switch-position-action", () => {
   }
 
   test("moves a unit between lines and updates placedPositionCode", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -38,7 +38,7 @@ describe("switch-position-action", () => {
   });
 
   test("rejects switching to the same position", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -54,7 +54,7 @@ describe("switch-position-action", () => {
   });
 
   test("rejects switching a unit the player does not own", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -71,7 +71,7 @@ describe("switch-position-action", () => {
   });
 
   test("rejects switching a rooted unit", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -91,7 +91,7 @@ describe("switch-position-action", () => {
   });
 
   test("rejects an unknown position code", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -107,7 +107,7 @@ describe("switch-position-action", () => {
   });
 
   test("rejects a position the unit cannot occupy", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
@@ -123,7 +123,7 @@ describe("switch-position-action", () => {
   });
 
   test("LifecycleEngine.switchPosition throws when the unit is not on its line", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
     advanceToRound(game, 2);
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };

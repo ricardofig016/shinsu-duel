@@ -16,7 +16,7 @@ describe("PeekHandHandler", () => {
   }
 
   test("reveals a random card (observer-only, no mutation)", () => {
-    const game = setupGameWithCardsInHand(["Baang", "Baang", "Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill", "Test Damage Skill", "Test Damage Skill"]);
     const ctx = context();
     const handSize = game.playerStates.Bob.hand.length;
 
@@ -37,7 +37,7 @@ describe("PeekHandHandler", () => {
   });
 
   test("reveals all matching cards with mode: all", () => {
-    const game = setupGameWithCardsInHand(["Baang", "Baang", "Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill", "Test Damage Skill", "Test Damage Skill"]);
     const ctx = context();
 
     const result = handler.execute(
@@ -50,14 +50,14 @@ describe("PeekHandHandler", () => {
   });
 
   test("reveals no cards when the hand is empty", () => {
-    const game = setupGameWithCardsInHand(["Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill"]);
     game.playerStates.Bob.hand = [];
     expect(handler.execute({ owner: "Bob", sourceOwner: "Alice" }, context(), game))
       .toEqual({ revealed: [] });
   });
 
   test("random mode with amount reveals that many cards", () => {
-    const game = setupGameWithCardsInHand(["Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill"]);
     const result = handler.execute(
       { owner: "Bob", sourceOwner: "Alice", amount: 2 },
       context(),
@@ -68,7 +68,7 @@ describe("PeekHandHandler", () => {
   });
 
   test("mode choose defers to a card_selection decision", () => {
-    const game = setupGameWithCardsInHand(["Baang"]);
+    const game = setupGameWithCardsInHand(["Test Damage Skill"]);
     const result = handler.execute(
       { owner: "Bob", sourceOwner: "Alice", mode: "choose", amount: 1 },
       context(),
@@ -80,24 +80,24 @@ describe("PeekHandHandler", () => {
   });
 
   test("card filter narrows the revealed cards", () => {
-    const game = setupGameWithCardsInHand(["Baang"]);
-    const baang = new Card(getCardIdByName("Baang"), game.constructor.cards[getCardIdByName("Baang")], "Bob", game.eventBus);
-    const bull = new Card(getCardIdByName("Bull"), game.constructor.cards[getCardIdByName("Bull")], "Bob", game.eventBus);
+    const game = setupGameWithCardsInHand(["Test Damage Skill"]);
+    const baang = new Card(getCardIdByName("Test Damage Skill"), game.cards[getCardIdByName("Test Damage Skill")], "Bob", game.eventBus);
+    const bull = new Card(getCardIdByName("Test Shinheuh"), game.cards[getCardIdByName("Test Shinheuh")], "Bob", game.eventBus);
     game.playerStates.Bob.hand = [baang, bull];
 
     const result = handler.execute(
-      { owner: "Bob", sourceOwner: "Alice", mode: "all", card: { name: "Baang" } },
+      { owner: "Bob", sourceOwner: "Alice", mode: "all", card: { name: "Test Damage Skill" } },
       context(),
       game
     );
 
     expect(result.revealed).toHaveLength(1);
-    expect(result.revealed[0].name).toBe("Baang");
+    expect(result.revealed[0].name).toBe("Test Damage Skill");
   });
 
   test("random peek is deterministic for the same seed", () => {
     const run = () => {
-      const game = setupGameWithCardsInHand(["Baang"]);
+      const game = setupGameWithCardsInHand(["Test Damage Skill"]);
       const result = handler.execute(
         { owner: "Bob", sourceOwner: "Alice", amount: 1 },
         context(),

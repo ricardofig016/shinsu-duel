@@ -6,14 +6,14 @@ import { setupGameWithHands, deployUnit, getCardIdByName } from "../utils.js";
 
 function putInHand(game, username, name) {
   const cardId = getCardIdByName(name);
-  const card = new Card(cardId, game.constructor.cards[cardId], username, game.eventBus);
+  const card = new Card(cardId, game.cards[cardId], username, game.eventBus);
   game.playerStates[username].hand.push(card);
   return card;
 }
 
 function stubUnit(game, username, cardName, position, hpOverride = null) {
   const cardId = getCardIdByName(cardName);
-  const card = new Card(cardId, game.constructor.cards[cardId], username, game.eventBus);
+  const card = new Card(cardId, game.cards[cardId], username, game.eventBus);
   const unit = {
     id: `Unit#stub#${cardName}#${username}`,
     owner: username,
@@ -45,16 +45,16 @@ function useAbility(game, username, unit, abilityCode) {
 
 describe("Modifier runtime integration", () => {
   test("Enryu's Thorn raises the bearer's HP (current+max) and damage, and revokes on detach", () => {
-    const game = setupGameWithHands({ Alice: ["Chang Blarode"], Bob: [] });
-    const bearer = deployUnit(game, "Alice", "Chang Blarode", "fisherman");
+    const game = setupGameWithHands({ Alice: ["Test Fisherman Unit"], Bob: [] });
+    const bearer = deployUnit(game, "Alice", "Test Fisherman Unit", "fisherman");
     const beforeMax = bearer.card.maxHp;
     const beforeCurrent = bearer.currentHp;
 
-    equip(game, "Alice", "Enryu's Thorn", bearer);
+    equip(game, "Alice", "Test Thorn", bearer);
 
     expect(bearer.card.maxHp).toBe(beforeMax + 2);
     expect(bearer.currentHp).toBe(beforeCurrent + 2);
-    const enemy = stubUnit(game, "Bob", "Chang Blarode", "fisherman");
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman");
     expect(game.modifierStack.getDamageDealt(bearer, enemy)).toBe(2);
 
     LifecycleEngine.detachEquipment(game, bearer);
@@ -64,16 +64,16 @@ describe("Modifier runtime integration", () => {
   });
 
   test("Karaka grants Quick to allied karaka's servants", () => {
-    const game = setupGameWithHands({ Alice: ["Karaka", "Pedro"], Bob: [] });
-    deployUnit(game, "Alice", "Karaka", "fisherman");
-    const pedro = deployUnit(game, "Alice", "Pedro", "scout");
+    const game = setupGameWithHands({ Alice: ["Test Evolve Unit", "Test Scout Ranker"], Bob: [] });
+    deployUnit(game, "Alice", "Test Evolve Unit", "fisherman");
+    const pedro = deployUnit(game, "Alice", "Test Scout Ranker", "scout");
 
     expect(game.modifierStack.getKeywords(pedro, true).has("quick")).toBe(true);
   });
 
   test("Edin Dan's first ability each round is Free (no combat slot consumed)", () => {
-    const game = setupGameWithHands({ Alice: ["Edin Dan"], Bob: [] });
-    const edin = deployUnit(game, "Alice", "Edin Dan", "scout");
+    const game = setupGameWithHands({ Alice: ["Test Free Keyword Unit"], Bob: [] });
+    const edin = deployUnit(game, "Alice", "Test Free Keyword Unit", "scout");
 
     useAbility(game, "Alice", edin, "0");
     expect(game.playerStates.Alice.combatSlots.scout.available).toBe(true);
@@ -83,10 +83,10 @@ describe("Modifier runtime integration", () => {
   });
 
   test("Phobos makes the bearer's ability trigger twice", () => {
-    const game = setupGameWithHands({ Alice: ["Monkeyman"], Bob: [] });
-    const monkey = deployUnit(game, "Alice", "Monkeyman", "fisherman");
-    equip(game, "Alice", "Phobos", monkey);
-    const enemy = stubUnit(game, "Bob", "Chang Blarode", "fisherman", 20);
+    const game = setupGameWithHands({ Alice: ["Test Scout"], Bob: [] });
+    const monkey = deployUnit(game, "Alice", "Test Scout", "fisherman");
+    equip(game, "Alice", "Test Repeat Equip", monkey);
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
 
     useAbility(game, "Alice", monkey, "1"); // fisherman: deal 1 to an enemy
 
@@ -94,9 +94,9 @@ describe("Modifier runtime integration", () => {
   });
 
   test("Yeon Yihwa cannot be targeted by a unit with Burned 3+", () => {
-    const game = setupGameWithHands({ Alice: ["Yeon Yihwa"], Bob: ["Monkeyman"] });
-    const yeon = deployUnit(game, "Alice", "Yeon Yihwa", "fisherman");
-    const attacker = deployUnit(game, "Bob", "Monkeyman", "fisherman");
+    const game = setupGameWithHands({ Alice: ["Test Hwayeomsa"], Bob: ["Test Scout"] });
+    const yeon = deployUnit(game, "Alice", "Test Hwayeomsa", "fisherman");
+    const attacker = deployUnit(game, "Bob", "Test Scout", "fisherman");
 
     game.modifierStack.apply({ sourceId: "System", sourceType: "system", targetId: attacker.id, type: "condition", key: "burned", value: 3 });
 
@@ -105,10 +105,10 @@ describe("Modifier runtime integration", () => {
   });
 
   test("Ice Spear makes the bearer's abilities give Frozen to their enemy target", () => {
-    const game = setupGameWithHands({ Alice: ["Monkeyman"], Bob: [] });
-    const monkey = deployUnit(game, "Alice", "Monkeyman", "fisherman");
-    equip(game, "Alice", "Ice Spear", monkey);
-    const enemy = stubUnit(game, "Bob", "Chang Blarode", "fisherman", 20);
+    const game = setupGameWithHands({ Alice: ["Test Scout"], Bob: [] });
+    const monkey = deployUnit(game, "Alice", "Test Scout", "fisherman");
+    equip(game, "Alice", "Test Modify Ability Equip", monkey);
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
 
     useAbility(game, "Alice", monkey, "1");
 
@@ -116,9 +116,9 @@ describe("Modifier runtime integration", () => {
   });
 
   test("Wooden Horse loses 1 HP when any unit uses a Quick ability", () => {
-    const game = setupGameWithHands({ Alice: ["Wooden Horse", "Monkeyman"], Bob: [] });
-    const horse = deployUnit(game, "Alice", "Wooden Horse", "landmark");
-    const monkey = deployUnit(game, "Alice", "Monkeyman", "scout");
+    const game = setupGameWithHands({ Alice: ["Test Landmark Unit", "Test Scout"], Bob: [] });
+    const horse = deployUnit(game, "Alice", "Test Landmark Unit", "landmark");
+    const monkey = deployUnit(game, "Alice", "Test Scout", "scout");
     const beforeHp = horse.currentHp;
 
     useAbility(game, "Alice", monkey, "0"); // scout: quick: peek hand
@@ -127,23 +127,23 @@ describe("Modifier runtime integration", () => {
   });
 
   test("Quaetro Blitz gives Burned 1 when Baang is played", () => {
-    const game = setupGameWithHands({ Alice: ["Quaetro Blitz"], Bob: [] });
-    deployUnit(game, "Alice", "Quaetro Blitz", "wave-controller");
-    const enemy = stubUnit(game, "Bob", "Chang Blarode", "fisherman", 20);
+    const game = setupGameWithHands({ Alice: ["Test Burn Passive Unit"], Bob: [] });
+    deployUnit(game, "Alice", "Test Burn Passive Unit", "wave-controller");
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
 
-    putInHand(game, "Alice", "Baang");
+    putInHand(game, "Alice", "Test Damage Skill");
     game.currentTurn = "Alice";
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const handId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Baang");
+    const handId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Damage Skill");
     game.processAction({ type: "play-skill-action", data: { source: "player", username: "Alice", handId } });
 
     expect(game.modifierStack.has(enemy.id, "condition", "burned")).toBe(true);
   });
 
   test("an equipment's deal_damage triggered effect fires when the bearer deals damage", () => {
-    const game = setupGameWithHands({ Alice: ["Monkeyman"], Bob: [] });
-    const monkey = deployUnit(game, "Alice", "Monkeyman", "fisherman");
-    const enemy = stubUnit(game, "Bob", "Chang Blarode", "fisherman", 20);
+    const game = setupGameWithHands({ Alice: ["Test Scout"], Bob: [] });
+    const monkey = deployUnit(game, "Alice", "Test Scout", "fisherman");
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
 
     const equipment = {
       id: "Equip#narumada",

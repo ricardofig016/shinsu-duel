@@ -9,7 +9,7 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import Card from "../../Card.js";
 import { resolveEffect, initEffectResolver } from "../../EffectResolver.js";
-import { createLegalDeck, getCardIdByName } from "../utils.js";
+import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 
 describe("compress_shinsu targeting integration via EffectResolver", () => {
   let game;
@@ -19,20 +19,20 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
     game = new GameState("TEST", ["Alice", "Bob"], {
       Alice: createLegalDeck(),
       Bob: createLegalDeck(),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
     // Clear hand for controlled setup
     game.playerStates.Alice.hand = [];
   });
 
   function addCardToHand(owner, cardName) {
     const cardId = getCardIdByName(cardName);
-    const card = new Card(cardId, game.constructor.cards[cardId], owner, game.eventBus);
+    const card = new Card(cardId, game.cards[cardId], owner, game.eventBus);
     game.playerStates[owner].hand.push(card);
     return card;
   }
 
   test("EffectResolver resolves name card target to targetCardId before handler", () => {
-    const target = addCardToHand("Alice", "Fiery Elephant");
+    const target = addCardToHand("Alice", "Test Compress Skill");
     const context = {
       emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload),
     };
@@ -41,7 +41,7 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
       {
         type: "compress_shinsu",
         amount: 1,
-        card: { name: "Fiery Elephant" },
+        card: { name: "Test Compress Skill" },
         raw: "Compress 1 from Fiery Elephant in your hand",
       },
       context,
@@ -54,8 +54,8 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
   });
 
   test("EffectResolver resolves attribute card target to targetCardId", () => {
-    const hwayeomsa = addCardToHand("Alice", "Yeon Yihwa");
-    const other = addCardToHand("Alice", "Monkeyman");
+    const hwayeomsa = addCardToHand("Alice", "Test Hwayeomsa");
+    const other = addCardToHand("Alice", "Test Scout");
     const context = {
       emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload),
     };
@@ -77,8 +77,8 @@ describe("compress_shinsu targeting integration via EffectResolver", () => {
   });
 
   test("EffectResolver resolves most-expensive card target", () => {
-    const cheap = addCardToHand("Alice", "Monkeyman");
-    const expensive = addCardToHand("Alice", "The Workshop");
+    const cheap = addCardToHand("Alice", "Test Scout");
+    const expensive = addCardToHand("Alice", "Test Expensive Skill");
     const context = {
       emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload),
     };

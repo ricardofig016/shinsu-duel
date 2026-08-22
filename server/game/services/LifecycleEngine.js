@@ -462,7 +462,7 @@ export default class LifecycleEngine {
    * slot position, identity.
    */
   static transformUnit(gameState, unit, targetCardId) {
-    const targetCard = gameState.constructor.cards[targetCardId];
+    const targetCard = gameState.cards[targetCardId];
     if (!targetCard) throw new Error(`Target card ${targetCardId} not found`);
     if (targetCard.type !== "unit") throw new Error(`Target card ${targetCardId} is not a unit`);
 
@@ -532,7 +532,7 @@ export default class LifecycleEngine {
 
   /** Transform an attached equipment card into its ignited definition. */
   static transformEquipment(gameState, unit, targetCardId, equipmentId = null) {
-    const targetCard = gameState.constructor.cards[targetCardId];
+    const targetCard = gameState.cards[targetCardId];
     const attachments = LifecycleEngine._getEquipment(unit);
     const attachmentIndex = equipmentId
       ? attachments.findIndex((entry) => entry.id === equipmentId)
@@ -670,7 +670,7 @@ export default class LifecycleEngine {
     const player = gameState.playerStates[destOwner];
     let routed = null;
     if (equip.ignitedFrom !== undefined && equip.ignitedFrom !== null) {
-      const baseCardData = gameState.constructor.cards[equip.ignitedFrom];
+      const baseCardData = gameState.cards[equip.ignitedFrom];
       if (baseCardData) {
         routed = new Card(equip.ignitedFrom, baseCardData, destOwner, gameState.eventBus);
       }

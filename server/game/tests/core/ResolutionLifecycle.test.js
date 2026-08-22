@@ -11,7 +11,7 @@
 
 import GameState, { ResolutionState } from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck } from "../utils.js";
+import { createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
@@ -19,7 +19,7 @@ function createGame() {
   return new GameState("TEST", players, {
     Alice: createLegalDeck(),
     Bob: createLegalDeck(),
-  }, null, { rng: new SeededRng(1) });
+  }, null, { rng: new SeededRng(1), cards });
 }
 
 describe("Resolution lifecycle state model", () => {

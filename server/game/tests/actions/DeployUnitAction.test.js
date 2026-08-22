@@ -6,8 +6,8 @@ const USERNAMES = ["Alice", "Bob"];
 
 describe("place cards on field", () => {
   test("placing a scout unit puts it in the frontline", () => {
-    // Monkeyman is a scout
-    const game = setupGameWithCardsInHand(["Monkeyman", "Monkeyman", "Monkeyman", "Monkeyman"]);
+    // Test Scout is a scout
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout", "Test Scout", "Test Scout"]);
 
     // Deploy Monkeyman as a scout
     game.processAction({
@@ -19,14 +19,14 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.frontline.length).toBe(1);
     expect(playerState.field.backline.length).toBe(0);
-    expect(playerState.field.frontline[0].card.name).toBe("Monkeyman");
+    expect(playerState.field.frontline[0].card.name).toBe("Test Scout");
     expect(playerState.field.frontline[0].placedPositionCode).toBe("scout");
     expect(playerState.hand.length).toBe(4); // 5 initial - 1 deployed = 4
   });
 
   test("placing a light-bearer unit puts it in the backline", () => {
-    // Rachel is a light-bearer
-    const game = setupGameWithCardsInHand(["Rachel", "Rachel", "Rachel", "Rachel"]);
+    // Test Light Bearer is a light-bearer
+    const game = setupGameWithCardsInHand(["Test Light Bearer", "Test Light Bearer", "Test Light Bearer", "Test Light Bearer"]);
 
     // Deploy Rachel as a light-bearer
     game.processAction({
@@ -38,14 +38,14 @@ describe("place cards on field", () => {
     const playerState = game.playerStates[USERNAMES[0]];
     expect(playerState.field.backline.length).toBe(1);
     expect(playerState.field.frontline.length).toBe(0);
-    expect(playerState.field.backline[0].card.name).toBe("Rachel");
+    expect(playerState.field.backline[0].card.name).toBe("Test Light Bearer");
     expect(playerState.field.backline[0].placedPositionCode).toBe("light-bearer");
     expect(playerState.hand.length).toBe(4); // 5 initial - 1 deployed = 4
   });
 
   test("deploying a unit costs shinsu", () => {
-    // Evankhell costs 9 shinsu (from YAML)
-    const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
+    // Test Expensive Unit costs 9 shinsu
+    const game = setupGameWithCardsInHand(["Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit"]);
 
     // Fast-forward to round 10 (enough shinsu for 9-cost card)
     advanceToRound(game, 10);
@@ -61,7 +61,7 @@ describe("place cards on field", () => {
 
     // Check that shinsu was spent
     const finalShinsu = game.playerStates[USERNAMES[0]].shinsu;
-    const cardCost = 9; // Evankhell's cost from YAML
+    const cardCost = 9; // Test Expensive Unit's cost
 
     // The cost is first deducted from recharged shinsu, then from normal available
     const expectedRechargedSpent = Math.min(initialShinsu.recharged, cardCost);
@@ -73,8 +73,8 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit with multiple position options works for all valid positions", () => {
-    // Evankhell can be placed as wave-controller or fisherman
-    const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
+    // Test Expensive Unit can be placed as wave-controller or fisherman
+    const game = setupGameWithCardsInHand(["Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit"]);
 
     // Fast-forward to round 10
     advanceToRound(game, 10);
@@ -86,7 +86,7 @@ describe("place cards on field", () => {
     });
 
     // Reset for second test with another game instance
-    const game2 = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
+    const game2 = setupGameWithCardsInHand(["Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit"]);
 
     // Fast-forward to round 10
     advanceToRound(game2, 10);
@@ -103,8 +103,8 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit to invalid position throws error", () => {
-    // Khun Aguero Agnes is only a light-bearer, not a fisherman
-    const game = setupGameWithCardsInHand(["Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes", "Khun Aguero Agnes"]);
+    // Test Light Bearer Only is only a light-bearer, not a fisherman
+    const game = setupGameWithCardsInHand(["Test Light Bearer Only", "Test Light Bearer Only", "Test Light Bearer Only", "Test Light Bearer Only"]);
 
     // Fast-forward to round 2
     advanceToRound(game, 2);
@@ -119,8 +119,8 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit without enough shinsu throws error", () => {
-    // Evankhell costs 9 shinsu, too much for round 1
-    const game = setupGameWithCardsInHand(["Evankhell", "Evankhell", "Evankhell", "Evankhell"]);
+    // Test Expensive Unit costs 9 shinsu, too much for round 1
+    const game = setupGameWithCardsInHand(["Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit", "Test Expensive Unit"]);
 
     // Make sure it's round 1 with only 1 shinsu
     expect(game.round).toBe(1);
@@ -135,8 +135,8 @@ describe("place cards on field", () => {
   });
 
   test("deploying a unit emits events and switches turns", () => {
-    // Rak Wraithraiser is a spear-bearer, costs 2 shinsu
-    const game = setupGameWithCardsInHand(["Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser", "Rak Wraithraiser"]);
+    // Test Spear Bearer is a spear-bearer, costs 2 shinsu
+    const game = setupGameWithCardsInHand(["Test Spear Bearer", "Test Spear Bearer", "Test Spear Bearer", "Test Spear Bearer"]);
 
     // Need at least round 2 for 2 shinsu
     advanceToRound(game, 2);

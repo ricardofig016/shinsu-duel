@@ -40,7 +40,7 @@ export default class CreateCardHandler extends BaseHandler {
   execute(payload, context, gameState) {
     const { owner, card: target } = payload;
 
-    const cards = gameState.constructor.cards;
+    const cards = gameState.cards;
     let candidates = target.series
       ? findCardsBySeries(cards, target.series, target.type)
       : findCardsByName(cards, target.name, target.type);

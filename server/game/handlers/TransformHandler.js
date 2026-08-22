@@ -24,7 +24,7 @@ export default class TransformHandler extends BaseHandler {
     const unit = payload.sourceUnit || gameState._findUnit(payload.sourceId);
     if (!unit || !unit.isAlive()) return { transformed: false };
 
-    const matches = findCardsByName(gameState.constructor.cards, payload.cardName, "unit");
+    const matches = findCardsByName(gameState.cards, payload.cardName, "unit");
     if (matches.length === 0) {
       throw new Error(`TransformHandler: no unit card named "${payload.cardName}"`);
     }

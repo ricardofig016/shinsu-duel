@@ -30,7 +30,7 @@ function recordTimeline(game) {
 
 describe("trigger DFS-ordering — equip evolution", () => {
   test("equipment effects resolve before the equip trigger fires in post", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -44,14 +44,14 @@ describe("trigger DFS-ordering — equip evolution", () => {
 
     const timeline = recordTimeline(game);
 
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka's Armor Suit");
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    // Karaka should have evolved
-    expect(karaka.card.name).toBe("Karaka - Evolved");
+    // Test Evolve Unit should have evolved
+    expect(karaka.card.name).toBe("Test Evolve Unit - Evolved");
 
     // Equipment effects are resolved by LifecycleEngine.attachEquipment BEFORE
     // equipment:attached is emitted, so the equip trigger in the post phase
@@ -84,7 +84,7 @@ describe("trigger DFS-ordering — equip evolution", () => {
   });
 
   test("unit:deployed fires before unit:summoned, and the deploy trigger fires on unit:summoned", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -110,7 +110,7 @@ describe("trigger DFS-ordering — equip evolution", () => {
 
 describe("trigger DFS-ordering — deploy", () => {
   test("unit wiring precedes deploy/summon events, and a unit's own deploy trigger fires on unit:summoned", () => {
-    const game = setupGameWithCardsInHand(["_Test Deploy Evolve"]);
+    const game = setupGameWithCardsInHand(["Test Deploy Evolve"]);
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
@@ -124,7 +124,7 @@ describe("trigger DFS-ordering — deploy", () => {
     // The unit's own deploy trigger subscribed to unit:summoned and fired
     // before the summon event finished resolving, evolving the unit.
     const unit = game.playerStates.Alice.field.frontline[0];
-    expect(unit.card.name).toBe("_Test Deploy Evolve - Evolved");
+    expect(unit.card.name).toBe("Test Deploy Evolve - Evolved");
 
     // Native traits are wired before the announce events: the barrier trait
     // is granted (modifier:trait:granted) before unit:deployed is emitted.
@@ -154,7 +154,7 @@ describe("trigger DFS-ordering — deploy", () => {
 
 describe("trigger DFS-ordering — slay ignition", () => {
   test("slay trigger fires in post phase of unit:killed, after damage resolution", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Narumada", "Monkeyman", "Monkeyman"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Ignite Weapon", "Test Scout", "Test Scout"]);
     advanceToRound(game, 3);
     game.currentTurn = "Alice";
 
@@ -165,7 +165,7 @@ describe("trigger DFS-ordering — slay ignition", () => {
     game.currentTurn = "Alice";
     const bearer = game.playerStates.Alice.field.frontline[0];
 
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Narumada");
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Ignite Weapon");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: bearer.id },
@@ -173,8 +173,8 @@ describe("trigger DFS-ordering — slay ignition", () => {
 
     const timeline = recordTimeline(game);
 
-    const victimCardId = getCardIdByName("Monkeyman");
-    const victimCard = new Card(victimCardId, game.constructor.cards[victimCardId], "Bob", game.eventBus);
+    const victimCardId = getCardIdByName("Test Scout");
+    const victimCard = new Card(victimCardId, game.cards[victimCardId], "Bob", game.eventBus);
     const victim = {
       id: "Unit#timing-victim",
       owner: "Bob",
@@ -193,7 +193,7 @@ describe("trigger DFS-ordering — slay ignition", () => {
     });
 
     // Narumada should be ignited
-    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Narumada - Ignited"]);
+    expect(bearer.equipmentAttachments.map((c) => c.name)).toEqual(["Test Ignite Weapon - Ignited"]);
 
     // The ignition happens during the post phase of unit:killed.
     // equipment:ignited must appear between unit:killed pre and resolved.
@@ -213,7 +213,7 @@ describe("trigger DFS-ordering — slay ignition", () => {
 
 describe("trigger DFS-ordering — ally_dies", () => {
   test("ally_dies trigger fires in post phase of unit:destroyed", () => {
-    const game = setupGameWithCardsInHand(["Monkeyman", "Pedro"]);
+    const game = setupGameWithCardsInHand(["Test Scout", "Test Scout Ranker"]);
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
 
@@ -251,7 +251,7 @@ describe("trigger DFS-ordering — ally_dies", () => {
 
 describe("trigger DFS-ordering — round_start / round_end", () => {
   test("round_start and round_end triggers fire in post phase of their canonical events", () => {
-    const game = setupGameWithCardsInHand(["Karaka - Evolved", "Karaka", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit - Evolved", "Test Evolve Unit", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -291,7 +291,7 @@ describe("trigger DFS-ordering — round_start / round_end", () => {
 
 describe("trigger DFS-ordering — chain through silence/unequip is safe", () => {
   test("equip → evolve → ignition chain produces correct event order", () => {
-    const game = setupGameWithCardsInHand(["Karaka", "Karaka's Armor Suit", "Karaka", "Karaka"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit", "Test Armor", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 
@@ -305,7 +305,7 @@ describe("trigger DFS-ordering — chain through silence/unequip is safe", () =>
 
     const timeline = recordTimeline(game);
 
-    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Karaka's Armor Suit");
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
     game.processAction({
       type: "equip-equipment-action",
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },

@@ -1,20 +1,19 @@
 import GameState from "../GameState.js";
 import SeededRng from "../utils/SeededRng.js";
-import cardsData from "../../data/cards.json" with { type: "json" };
+import { cards, byName } from "./fixtures/cards.js";
+
+export { cards };
 
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
 
-// Build name → cardId lookup from compiled cards.json
-const cardNameToId = {};
-for (const [id, card] of Object.entries(cardsData)) {
-  cardNameToId[card.name.toLowerCase()] = parseInt(id, 10);
-}
+// Test-owned fixture catalog; see fixtures/cards.js.
+const TEST_OPTIONS = () => ({ rng: new SeededRng(1), cards });
 
 export function getCardIdByName(name) {
-  const id = cardNameToId[name.toLowerCase()];
+  const id = byName[name.toLowerCase()];
   if (id === undefined) {
-    throw new Error(`Card not found in cards.json: "${name}"`);
+    throw new Error(`Card not found in fixture catalog: "${name}"`);
   }
   return id;
 }
@@ -38,7 +37,7 @@ export function expectShinsuState(playerState, normalSpent, normalAvailable, rec
 }
 
 export function createLegalDeck(preferredCardIds = []) {
-  const eligible = Object.values(cardsData)
+  const eligible = Object.values(cards)
     .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
     .map((card) => card.cardId);
   const preferred = [...new Set(preferredCardIds)];
@@ -58,12 +57,12 @@ export function setupGameWithCardsInHand(cardsInHand) {
     Alice: [...remaining, ...requestedInDrawOrder],
     Bob: createLegalDeck(),
   };
-  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0], { rng: new SeededRng(1) });
+  return new GameState(ROOM_CODE, USERNAMES, decks, USERNAMES[0], TEST_OPTIONS());
 }
 
 // Helper to create a basic test game
 export function createTestGame() {
-  return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0], { rng: new SeededRng(1) });
+  return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0], TEST_OPTIONS());
 }
 
 // Build a legal deck whose initial draw (top of deck) contains the requested
@@ -83,7 +82,7 @@ export function setupGameWithHands(handsByPlayer) {
   return new GameState(ROOM_CODE, USERNAMES, {
     Alice: deckWith(handsByPlayer.Alice || []),
     Bob: deckWith(handsByPlayer.Bob || []),
-  }, USERNAMES[0], { rng: new SeededRng(1) });
+  }, USERNAMES[0], TEST_OPTIONS());
 }
 
 // Deploy a unit from a player's hand to the battlefield (by card name) and

@@ -1,6 +1,6 @@
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { advanceToRound, createLegalDeck, expectShinsuState, getCardIdByName } from "../utils.js";
+import { advanceToRound, createLegalDeck, expectShinsuState, getCardIdByName, cards } from "../utils.js";
 
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
@@ -10,7 +10,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
   let game, firstPlayer, secondPlayer;
 
   beforeEach(() => {
-    game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1) });
+    game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1), cards });
     firstPlayer = game.currentTurn;
     secondPlayer = firstPlayer === "Alice" ? "Bob" : "Alice";
     advanceToRound(game, round);
@@ -175,12 +175,12 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
 
 describe("deck behavior", () => {
   test("constructor accepts custom decks and draws initial hand from deck (pop semantics)", () => {
-    const cardNames = ["Rak Wraithraiser", "Rachel", "Khun Aguero Agnes", "Evankhell"];
+    const cardNames = ["Test Spear Bearer", "Test Light Bearer", "Test Light Bearer Only", "Test Expensive Unit"];
     const aliceDeck = createLegalDeck(cardNames.map((name) => getCardIdByName(name)));
     const bobDeck = createLegalDeck();
 
     const decks = { Alice: aliceDeck, Bob: bobDeck };
-    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) });
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });
 
     // After constructor, initial hand size GameState INIT_HAND_SIZE
     const aliceClient = game.getClientState("Alice").you;
@@ -201,7 +201,7 @@ describe("deck behavior", () => {
 
   test("getClientState.deckSize matches internal deck length", () => {
     const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) });
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });
 
     const aliceClient = game.getClientState("Alice").you;
     expect(aliceClient.deckSize).toBe(game.playerStates.Alice.deck.length);
@@ -231,7 +231,7 @@ describe("deck behavior", () => {
 
   test("drawing when deck is empty does not crash and does not increase hand", () => {
     const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) });
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });
 
     // Simulate Alice's deck becoming empty
     game.playerStates.Alice.deck = [];
@@ -251,17 +251,17 @@ describe("deck behavior", () => {
 
 describe("startedWithCard", () => {
   test("reflects the immutable starting deck composition per player", () => {
-    const rachelId = getCardIdByName("Rachel");
-    const baangId = getCardIdByName("Baang");
+    const rachelId = getCardIdByName("Test Light Bearer");
+    const baangId = getCardIdByName("Test Damage Skill");
     const game = new GameState(ROOM_CODE, USERNAMES, {
       Alice: createLegalDeck([rachelId]),
       Bob: createLegalDeck([baangId]),
-    }, null, { rng: new SeededRng(1) });
+    }, null, { rng: new SeededRng(1), cards });
 
-    expect(game.startedWithCard("Alice", "Rachel")).toBe(true);
-    expect(game.startedWithCard("Bob", "Rachel")).toBe(false);
-    expect(game.startedWithCard("Bob", "Baang")).toBe(true);
+    expect(game.startedWithCard("Alice", "Test Light Bearer")).toBe(true);
+    expect(game.startedWithCard("Bob", "Test Light Bearer")).toBe(false);
+    expect(game.startedWithCard("Bob", "Test Damage Skill")).toBe(true);
     // Case-insensitive and unaffected by draws/plays.
-    expect(game.startedWithCard("Alice", "rachel")).toBe(true);
+    expect(game.startedWithCard("Alice", "test light bearer")).toBe(true);
   });
 });
