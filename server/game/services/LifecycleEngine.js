@@ -14,7 +14,8 @@ import ShinsuService from "./ShinsuService.js";
 import UnitService from "./UnitService.js";
 import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
-import { resolveEffects } from "../EffectResolver.js";
+import { resolveEffect, resolveEffects } from "../EffectResolver.js";
+import ModifierService from "./ModifierService.js";
 
 export default class LifecycleEngine {
   /**
@@ -50,7 +51,7 @@ export default class LifecycleEngine {
     }
 
     // Compression is a reduction on this card instance. It remains attached to this card until it is played.
-    const cost = Math.max(0, card.cost - (card.costReduction || 0));
+    const cost = ModifierService.getEffectiveCost(card, username, gameState);
 
     // Check shinsu
     if (!ShinsuService.canAfford(player, cost)) {
@@ -569,7 +570,7 @@ export default class LifecycleEngine {
     const card = player.hand?.[handIndex];
     if (!card || card.type !== "equipment") throw new Error("Card is not equipment.");
 
-    const cost = Math.max(0, card.cost - (card.costReduction || 0));
+    const cost = ModifierService.getEffectiveCost(card, username, gameState);
     if (!ShinsuService.canAfford(player, cost)) {
       throw new Error("Not enough shinsu to equip.");
     }
@@ -662,6 +663,7 @@ export default class LifecycleEngine {
   static _detachOne(gameState, unit, equip, destination, destOwner) {
     gameState.modifierStack.removeBySource(equip.id);
     gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
+    gameState.unregisterEquipmentTriggers(equip.id);
     // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
     // (triggered by removeBySource above).
 
@@ -706,14 +708,51 @@ export default class LifecycleEngine {
     const context = {
       emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload),
     };
-    resolveEffects(equipment.effects, context, gameState, {
+    const extra = {
       owner: unit.owner,
       sourceId: equipment.id,
       sourceType: "equipment",
       sourceUnit: unit,
       sourceOwner: unit.owner,
-      targetId: unit.id,
-    });
+    };
+
+    for (const effect of equipment.effects || []) {
+      // Always-on modifiers (`modify_*`, `retain_equipment`) apply as
+      // source-tracked entries and are revoked on detach.
+      if (ModifierService.isModifier(effect)) {
+        ModifierService.applyModifier(effect, gameState, extra);
+        continue;
+      }
+
+      // Deferred/triggered effects (e.g. "the bearer's damage-dealing
+      // abilities give Exhausted 1") subscribe for the equipment's lifetime.
+      // `equip` triggers are the equipment's own attach and resolve now.
+      const trigger = effect?.trigger;
+      if (trigger && typeof trigger === "object" && trigger.type !== "equip") {
+        LifecycleEngine._subscribeEquipmentTrigger(gameState, unit, equipment, effect, extra, context);
+        continue;
+      }
+
+      resolveEffect(effect, context, gameState, extra);
+    }
+  }
+
+  /**
+   * Subscribe an equipment effect's non-attach trigger (e.g. `deal_damage`).
+   * The subscription is scoped to the bearer and removed on detach.
+   */
+  static _subscribeEquipmentTrigger(gameState, unit, equipment, effect, extra, context) {
+    const trigger = effect.trigger;
+    if (trigger.type === "deal_damage") {
+      gameState.registerEquipmentTriggeredEffect(
+        equipment.id,
+        EVT.DAMAGE_APPLIED,
+        (payload) => payload.sourceId === unit.id,
+        () => resolveEffect(effect, context, gameState, extra)
+      );
+      return;
+    }
+    throw new Error(`LifecycleEngine: unsupported equipment effect trigger type "${trigger.type}"`);
   }
 
   /**

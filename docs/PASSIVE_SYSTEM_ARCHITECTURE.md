@@ -65,6 +65,8 @@ A passive with **no `trigger`** is always-on: its effect tracks the live board r
 
 Always-on branches must be revoke-safe (modifier-backed: `grant_trait`, `give_condition`, modifiers, and their `sequence`/`conditional` compositions). The card schemas enforce this — a trigger-less passive whose branch has side effects fails validation.
 
+Trigger-less **modifier** passives (`modify_stat`/`modify_cost`/`modify_condition`/`modify_keyword`/`modify_targeting`/`modify_repeat`/`retain_equipment`/`modify_ability`) follow the same always-on path: `PassiveManager` revokes by source then re-applies them through `ModifierService` on the same event set. Position-scoped passives (`position` on the node) apply only while the source unit occupies that position.
+
 ---
 
 ## Example: Khun Ran - Evolved

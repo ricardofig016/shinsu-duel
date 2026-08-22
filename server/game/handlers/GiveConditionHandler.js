@@ -32,20 +32,26 @@ export default class GiveConditionHandler extends BaseHandler {
       return { blocked: true };
     }
 
+    // Always-on `modify_condition` amplifier: the source applies extra stacks
+    // of this condition to matching targets (e.g. "i give Poisoned +2").
+    const sourceUnit = payload.sourceUnit || gameState._findUnit?.(sourceId);
+    const targetUnit = gameState._findUnit?.(targetId);
+    const amplified = amount + gameState.modifierStack.getConditionAmplifier(sourceUnit, targetUnit, condition);
+
     const mod = gameState.modifierStack.apply({
       sourceId,
       sourceType,
       targetId,
       type: "condition",
       key: condition,
-      value: amount,
+      value: amplified,
       operation: "add",
     });
 
     context.emitChild(EVT.CONDITION_APPLIED, {
       targetId,
       condition,
-      amount,
+      amount: amplified,
       sourceId,
     });
 

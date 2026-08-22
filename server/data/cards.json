@@ -101,10 +101,10 @@
         "code": "barrier"
       },
       {
-        "code": "bloodthirsty"
+        "code": "beacon"
       },
       {
-        "code": "beacon"
+        "code": "bloodthirsty"
       },
       {
         "code": "dealer",
@@ -1511,6 +1511,7 @@
         "target": {
           "side": "enemy"
         },
+        "cardType": "skill",
         "if": {
           "type": "has_unit",
           "target": {
@@ -1536,15 +1537,19 @@
     ],
     "effects": [
       {
-        "type": "give_condition",
-        "condition": "frozen",
+        "type": "modify_ability",
         "target": {
-          "side": "enemy"
+          "side": "bearer"
         },
-        "trigger": {
-          "type": "attack"
+        "effect": {
+          "type": "give_condition",
+          "condition": "frozen",
+          "amount": 1,
+          "target": {
+            "side": "enemy"
+          }
         },
-        "raw": "the bearer's attacks give Frozen to their targets"
+        "raw": "the bearer's abilities give Frozen to enemies"
       },
       {
         "type": "grant_trait",
@@ -2383,31 +2388,38 @@
     ],
     "passives": [
       {
-        "type": "give_condition",
-        "condition": "poisoned",
-        "amount": 1,
+        "type": "modify_ability",
         "position": "wave-controller",
-        "trigger": {
-          "type": "attack",
-          "source": "frontline-shinheuh"
-        },
         "target": {
-          "side": "enemy"
+          "side": "ally",
+          "position": "frontline-shinheuh"
         },
-        "raw": "wave controller: frontline Shinheuh give Poisoned 1"
+        "effect": {
+          "type": "give_condition",
+          "condition": "poisoned",
+          "amount": 1,
+          "target": {
+            "side": "enemy"
+          }
+        },
+        "raw": "wave controller: your frontline Shinheuh's abilities give Poisoned 1"
       },
       {
-        "type": "give_condition",
-        "condition": "ghost",
+        "type": "modify_ability",
         "position": "scout",
-        "trigger": {
-          "type": "attack",
-          "source": "backline-shinheuh"
-        },
         "target": {
-          "side": "enemy"
+          "side": "ally",
+          "position": "backline-shinheuh"
         },
-        "raw": "scout: backline Shinheuh give Ghost"
+        "effect": {
+          "type": "give_condition",
+          "condition": "ghost",
+          "amount": 1,
+          "target": {
+            "side": "enemy"
+          }
+        },
+        "raw": "scout: your backline Shinheuh's abilities give Ghost"
       }
     ]
   },

@@ -25,7 +25,9 @@ export default class HealHandler extends BaseHandler {
     const unit = gameState._findUnit(targetId);
     if (!unit || !unit.isAlive()) return { healed: 0 };
 
-    const { healed: healAmount } = UnitService.heal(unit, amount);
+    const sourceUnit = payload.sourceUnit || gameState._findUnit?.(payload.sourceId);
+    const totalAmount = amount + gameState.modifierStack.getHealModifier(sourceUnit, unit);
+    const { healed: healAmount } = UnitService.heal(unit, totalAmount);
 
     if (healAmount > 0) {
       context.emitChild(EVT.HEAL_APPLIED, {

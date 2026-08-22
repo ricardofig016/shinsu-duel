@@ -1,5 +1,6 @@
 import * as IdFactory from "../IdFactory.js";
 import { resolveEffect } from "../EffectResolver.js";
+import ModifierService from "./ModifierService.js";
 import EVT from "../EventCatalog.js";
 
 /**
@@ -19,11 +20,11 @@ export default class PassiveManager {
       const sourceId = IdFactory.passiveSource(unit.id, index);
 
       // A passive without a `trigger` is always-on: its effect must track the
-      // live board. `conditional` passives re-evaluate on board events; other
-      // always-on branches (modifiers, trait grants) are not yet wired and
-      // remain skipped.
+      // live board. `conditional` passives and modifier nodes (`modify_*`,
+      // `retain_equipment`) re-evaluate on board events; other always-on
+      // branches (trait grants) resolve once and are not re-evaluated.
       if (!passive?.trigger || typeof passive.trigger !== "object") {
-        if (passive?.type === "conditional") {
+        if (passive?.type === "conditional" || ModifierService.isModifier(passive)) {
           this._subscribeAlwaysOn(unit, passive, sourceId, gameState);
         }
         return;
@@ -85,15 +86,7 @@ export default class PassiveManager {
         if (!this._matches(passive, unit, payload, gameState)) return;
         this._reEvaluating.add(sourceId);
         try {
-          gameState.modifierStack.removeBySource(sourceId);
-          resolveEffect(passive, context, gameState, {
-            owner: unit.owner,
-            sourceId,
-            sourceType: "passive",
-            sourceUnit: unit,
-            sourceOwner: unit.owner,
-            targetOwner: gameState.usernames.find((username) => username !== unit.owner),
-          });
+          this._applyAlwaysOn(unit, passive, sourceId, context, gameState);
         } finally {
           this._reEvaluating.delete(sourceId);
         }
@@ -102,6 +95,37 @@ export default class PassiveManager {
       const entries = this._unsubscribers.get(unit.id) || [];
       entries.push(unsubscribe);
       this._unsubscribers.set(unit.id, entries);
+    }
+  }
+
+  /**
+   * Apply (or revoke) a single always-on passive against the live board.
+   *
+   * Revokes the passive's prior grants by source, then re-applies: a
+   * `conditional` resolves through the effect resolver; a modifier node
+   * applies through `ModifierService`. Position-scoped passives apply only
+   * while the source unit occupies their gated position.
+   */
+  _applyAlwaysOn(unit, passive, sourceId, context, gameState) {
+    const extra = {
+      owner: unit.owner,
+      sourceId,
+      sourceType: "passive",
+      sourceUnit: unit,
+      sourceOwner: unit.owner,
+      targetOwner: gameState.usernames.find((username) => username !== unit.owner),
+    };
+
+    if (passive.position && unit.placedPositionCode !== passive.position) {
+      gameState.modifierStack.removeBySource(sourceId);
+      return;
+    }
+
+    gameState.modifierStack.removeBySource(sourceId);
+    if (ModifierService.isModifier(passive)) {
+      ModifierService.applyModifier(passive, gameState, extra);
+    } else {
+      resolveEffect(passive, context, gameState, extra);
     }
   }
 
@@ -127,14 +151,22 @@ export default class PassiveManager {
     if (!trigger || typeof trigger !== "object") return null;
 
     if (trigger.type === "round_start") {
-      return { eventName: EVT.ROUND_START, effect: passive };
+      return { eventName: EVT.ROUND_START, effect: passive, type: trigger.type };
     }
     if (trigger.type === "round_end") {
-      return { eventName: EVT.ROUND_END, effect: passive };
+      return { eventName: EVT.ROUND_END, effect: passive, type: trigger.type };
+    }
+    if (trigger.type === "skill_played") {
+      return { eventName: EVT.SKILL_APPLIED, effect: passive, type: trigger.type, cardName: trigger.cardName };
+    }
+    if (trigger.type === "deal_damage") {
+      return { eventName: EVT.DAMAGE_APPLIED, effect: passive, type: trigger.type };
+    }
+    if (trigger.type === "quick_ability_used") {
+      return { eventName: EVT.UNIT_ABILITY_USED, effect: passive, type: trigger.type };
     }
 
-    // Other trigger types and always-on modifiers are not yet wired here.
-    // Skip registration.
+    // Other trigger types are not yet wired here. Skip registration.
     return null;
   }
 
@@ -144,6 +176,12 @@ export default class PassiveManager {
     // ModifierStack are automatically suppressed by getEffective /
     // getActiveKeys respecting disabledCount — no extra wiring needed.
     if (gameState.modifierStack.has(unit.id, "condition", "disabled")) return false;
-    return gameState._findUnit(unit.id) === unit && unit.isAlive();
+    if (!(gameState._findUnit(unit.id) === unit && unit.isAlive())) return false;
+
+    // Trigger-specific filters.
+    if (trigger.type === "skill_played" && payload?.cardName !== trigger.cardName) return false;
+    if (trigger.type === "deal_damage" && payload?.sourceId !== unit.id) return false;
+    if (trigger.type === "quick_ability_used" && payload?.quick !== true) return false;
+    return true;
   }
 }

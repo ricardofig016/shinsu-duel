@@ -3,7 +3,7 @@ import RequirementValidator from "../services/RequirementValidator.js";
 import ShinsuService from "../services/ShinsuService.js";
 import CombatSlotService from "../services/CombatSlotService.js";
 import EVT from "../EventCatalog.js";
-import { resolveEffect } from "../EffectResolver.js";
+import { resolveEffect, resolveEffects } from "../EffectResolver.js";
 
 /**
  * Use a unit's compiled DSL ability.
@@ -56,10 +56,12 @@ export default class UseAbilityAction extends ActionHandler {
       throw new Error("A Stunned unit cannot use abilities.");
     }
 
+    const isFree = Boolean(ability.free) || UseAbilityAction.effectiveKeywords(gameState, unit).has("free");
+
     const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
     if (isShinheuh) {
       if (!CombatSlotService.isShinheuhSlotAvailable(playerState)) throw new Error("Shinheuh combat slot is unavailable.");
-    } else if (!ability.free) {
+    } else if (!isFree) {
       const slot = playerState.combatSlots?.[unit.placedPositionCode];
       if (slot && !slot.available) throw new Error(`Combat slot for ${unit.placedPositionCode} is already used this round.`);
     }
@@ -72,16 +74,30 @@ export default class UseAbilityAction extends ActionHandler {
     return true;
   }
 
+  /**
+   * Keyword overrides on a unit (quick/free, including `first`-scoped ones
+   * before the unit's first ability use of the round).
+   */
+  static effectiveKeywords(gameState, unit) {
+    return gameState.modifierStack.getKeywords(unit, !gameState.hasUsedAbilityThisRound(unit.id));
+  }
+
   execute(data, gameState) {
     const { username, unitId, abilityCode } = data;
     const playerState = gameState.playerStates[username];
     const unit = gameState._findUnit(unitId);
     const { ability } = UseAbilityAction.resolveAbility(gameState, unit, abilityCode);
 
+    const keywords = UseAbilityAction.effectiveKeywords(gameState, unit);
+    const isFree = Boolean(ability.free) || keywords.has("free");
+    const isQuick = Boolean(ability.quick) || keywords.has("quick");
+
+    gameState.markAbilityUsed(unitId);
+
     const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
     if (isShinheuh) {
       CombatSlotService.consumeShinheuhSlot(playerState);
-    } else if (!ability.free) {
+    } else if (!isFree) {
       CombatSlotService.consume(playerState, unit.placedPositionCode);
     }
 
@@ -90,15 +106,26 @@ export default class UseAbilityAction extends ActionHandler {
     if (heavy > 0) ShinsuService.spend(playerState, heavy);
     const poison = gameState.modifierStack.getEffective(unit.id, "condition", "poisoned");
     const context = { emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload) };
-    resolveEffect(ability, context, gameState, {
+
+    const extra = {
       owner: username,
       sourceId: unit.id,
       sourceUnit: unit,
       sourceOwner: username,
       targetOwner: gameState.usernames.find((candidate) => candidate !== username),
-    });
+      applyAbilityAugments: true,
+    };
+
+    // `modify_repeat`: the ability's effect resolves `repeat` times total,
+    // but its shinsu cost is paid only once (cost is spent by `spend_shinsu`).
+    const repeat = gameState.modifierStack.getRepeat(unit);
+    const effectPart = ability.type === "spend_shinsu" ? ability.effect : ability;
+    const effects = [ability];
+    for (let i = 1; i < Math.max(1, repeat); i++) effects.push(effectPart);
+    resolveEffects(effects, context, gameState, extra);
+
     gameState.completeActionAfterDecision(() => {
-      gameState.eventBus.emit(EVT.UNIT_ABILITY_USED, { username, unitId, abilityCode });
+      gameState.eventBus.emit(EVT.UNIT_ABILITY_USED, { username, unitId, abilityCode, quick: isQuick });
       if (poison > 0 && unit.isAlive()) {
         const poisonContext = { emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload) };
         resolveEffect({ type: "deal_damage", amount: poison, targetId: unit.id, raw: "Poisoned" }, poisonContext, gameState, {
@@ -108,7 +135,7 @@ export default class UseAbilityAction extends ActionHandler {
           targetOwner: username,
         });
       }
-      if (!ability.quick) gameState.endTurn();
+      if (!isQuick) gameState.endTurn();
     });
   }
 }

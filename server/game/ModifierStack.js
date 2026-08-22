@@ -125,6 +125,7 @@ export default class ModifierStack {
       createdAt: this._clock.now(),
       priority: spec.priority ?? 0,
       expiresAt: spec.expiresAt ?? null,
+      meta: spec.meta ?? null,
     };
 
     this._byId.set(mod.id, mod);
@@ -324,6 +325,185 @@ export default class ModifierStack {
     return [...new Set(mods.map((m) => m.sourceId))];
   }
 
+  // -----------------------------------------------------------------------
+  // These read always-on modifier entries (stat / keyword / ability-augment)
+  // and evaluate their filter metadata against passed unit references.
+  // -----------------------------------------------------------------------
+
+  /**
+   * Public alias for `_matchesUnitFilter` (used by TargetResolver to evaluate
+   * a `untargetable_by` blocked-actor filter against a source unit).
+   */
+  matchesUnitFilter(unit, filter) {
+    return this._matchesUnitFilter(unit, filter);
+  }
+
+  /**
+   * Evaluate a `unitFilter` ({ condition, conditionValue, trait, rank,
+   * position, affiliation, attribute, name }) against a unit reference.
+   * A missing/empty filter matches everything.
+   */
+  _matchesUnitFilter(unit, filter) {
+    if (!unit || !filter || typeof filter !== "object") return true;
+
+    if (filter.condition) {
+      const value = this.getEffective(unit.id, "condition", filter.condition);
+      if (filter.conditionValue !== undefined) {
+        if (value < filter.conditionValue) return false;
+      } else if (value <= 0) {
+        return false;
+      }
+    }
+    if (filter.trait && !this.has(unit.id, "trait", filter.trait)) return false;
+    if (filter.rank) {
+      const ranks = Array.isArray(filter.rank) ? filter.rank : [filter.rank];
+      if (!ranks.includes(unit.card?.rank)) return false;
+    }
+    if (filter.position) {
+      const positions = Array.isArray(filter.position) ? filter.position : [filter.position];
+      if (!positions.includes(unit.placedPositionCode)) return false;
+    }
+    if (filter.affiliation) {
+      const codes = Array.isArray(filter.affiliation) ? filter.affiliation : [filter.affiliation];
+      const unitAffiliations = new Set([
+        ...Object.keys(unit.card?.affiliations || {}),
+        ...this.getActiveKeys(unit.id, "affiliation"),
+      ]);
+      if (!codes.some((code) => unitAffiliations.has(code))) return false;
+    }
+    if (filter.attribute) {
+      const codes = Array.isArray(filter.attribute) ? filter.attribute : [filter.attribute];
+      if (!codes.some((code) => (unit.card?.attributes || []).includes(code))) return false;
+    }
+    if (filter.name) {
+      if (String(unit.card?.name || "").toLowerCase() !== String(filter.name).toLowerCase()) return false;
+    }
+    return true;
+  }
+
+  /** Enabled `stat` modifiers of one key on a target. */
+  _statMods(unitId, key) {
+    const mods = this._byTarget.get(unitId);
+    if (!mods) return [];
+    return mods.filter((m) => m.disabledCount === 0 && m.type === "stat" && m.key === key);
+  }
+
+  /**
+   * Total damage amplifier applied by `sourceUnit`'s damage-dealing effects
+   * against `targetUnit`, honoring the modifier's `when` target filter.
+   */
+  getDamageDealt(sourceUnit, targetUnit) {
+    if (!sourceUnit) return 0;
+    return this._statMods(sourceUnit.id, "damage")
+      .filter((m) => !m.meta?.when || this._matchesUnitFilter(targetUnit, m.meta.when))
+      .reduce((sum, m) => sum + (typeof m.value === "number" ? m.value : 0), 0);
+  }
+
+  /**
+   * Total heal amplifier applied by `sourceUnit`'s healing effects against
+   * `targetUnit`, honoring the modifier's `when` target filter.
+   */
+  getHealModifier(sourceUnit, targetUnit) {
+    if (!sourceUnit) return 0;
+    return this._statMods(sourceUnit.id, "heal")
+      .filter((m) => !m.meta?.when || this._matchesUnitFilter(targetUnit, m.meta.when))
+      .reduce((sum, m) => sum + (typeof m.value === "number" ? m.value : 0), 0);
+  }
+
+  /**
+   * Total incoming-damage amplifier on `targetUnit` from `sourceUnit`,
+   * honoring the modifier's `source` attacker filter (e.g. "Spear bearers
+   * deal +4 damage to me").
+   */
+  getDamageTaken(targetUnit, sourceUnit) {
+    if (!targetUnit) return 0;
+    return this._statMods(targetUnit.id, "damage_taken")
+      .filter((m) => !m.meta?.source || this._matchesUnitFilter(sourceUnit, m.meta.source))
+      .reduce((sum, m) => sum + (typeof m.value === "number" ? m.value : 0), 0);
+  }
+
+  /**
+   * Total amplifier on `sourceUnit`'s application of `condition` to
+   * `targetUnit` (e.g. "i give Poisoned +2 to High Ranker units").
+   */
+  getConditionAmplifier(sourceUnit, targetUnit, condition) {
+    if (!sourceUnit) return 0;
+    const mods = this._byTarget.get(sourceUnit.id);
+    if (!mods) return 0;
+    return mods
+      .filter((m) => m.disabledCount === 0 && m.type === "stat" && m.key === "condition" && m.meta?.condition === condition)
+      .filter((m) => !m.meta?.victimFilter || this._matchesUnitFilter(targetUnit, m.meta.victimFilter))
+      .reduce((sum, m) => sum + (typeof m.value === "number" ? m.value : 0), 0);
+  }
+
+  /**
+   * Number of extra ability resolutions `unit`'s abilities trigger
+   * (`modify_repeat`, e.g. Phobos "the bearer's abilities trigger twice").
+   */
+  getRepeat(unit) {
+    if (!unit) return 0;
+    return this._statMods(unit.id, "repeat")
+      .reduce((sum, m) => sum + (typeof m.value === "number" ? m.value : 0), 0);
+  }
+
+  /**
+   * The set of keyword overrides (quick / free / ignore_taunt /
+   * untargetable_by / retain_equipment) on `unit`. `first`-scoped keywords
+   * are included only when `isFirstThisRound` is true (e.g. "the first
+   * ability i use each round has Free").
+   */
+  getKeywords(unit, isFirstThisRound = true) {
+    const keys = new Set();
+    if (!unit) return keys;
+    const mods = this._byTarget.get(unit.id);
+    if (!mods) return keys;
+    for (const m of mods) {
+      if (m.disabledCount !== 0 || m.type !== "keyword") continue;
+      if (m.meta?.first && !isFirstThisRound) continue;
+      keys.add(m.key);
+    }
+    return keys;
+  }
+
+  /**
+   * Targeting rules on `unit`: `{ ignoreTaunt, untargetableBy }` where
+   * `untargetableBy` is the blocked-actor filter (or null).
+   */
+  getTargetingRules(unit) {
+    const rules = { ignoreTaunt: false, untargetableBy: null };
+    if (!unit) return rules;
+    const mods = this._byTarget.get(unit.id);
+    if (!mods) return rules;
+    for (const m of mods) {
+      if (m.disabledCount !== 0 || m.type !== "keyword") continue;
+      if (m.key === "ignore_taunt") rules.ignoreTaunt = true;
+      if (m.key === "untargetable_by") rules.untargetableBy = m.meta?.blockedFilter || {};
+    }
+    return rules;
+  }
+
+  /**
+   * Whether `unit` retains its equipment when returned to hand.
+   */
+  hasRetainEquipment(unit) {
+    if (!unit) return false;
+    return this.getKeywords(unit, true).has("retain_equipment");
+  }
+
+  /**
+   * Augmenting effects (`modify_ability`) attached to `unit`, as
+   * `{ effect, sourceId, sourceType }` tuples. Resolved against an ability's
+   * enemy targets when the unit uses an ability.
+   */
+  getAbilityAugments(unit) {
+    if (!unit) return [];
+    const mods = this._byTarget.get(unit.id);
+    if (!mods) return [];
+    return mods
+      .filter((m) => m.disabledCount === 0 && m.type === "ability-augment" && m.meta?.effect)
+      .map((m) => ({ effect: m.meta.effect, sourceId: m.sourceId, sourceType: m.sourceType }));
+  }
+
   /**
    * Clear all modifiers. Primarily for testing.
    */
@@ -352,6 +532,7 @@ export default class ModifierStack {
       disabledCount: m.disabledCount,
       priority: m.priority,
       expiresAt: m.expiresAt,
+      meta: m.meta ?? null,
     }));
     mods.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
     return mods;

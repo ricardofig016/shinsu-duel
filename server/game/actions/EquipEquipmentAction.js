@@ -2,6 +2,7 @@ import ActionHandler from "../ActionHandler.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
 import RequirementValidator from "../services/RequirementValidator.js";
 import ShinsuService from "../services/ShinsuService.js";
+import ModifierService from "../services/ModifierService.js";
 
 /** Equips a hand card through the authoritative lifecycle engine. */
 export default class EquipEquipmentAction extends ActionHandler {
@@ -23,7 +24,7 @@ export default class EquipEquipmentAction extends ActionHandler {
     if (!card || card.type !== "equipment") throw new Error("Card is not equipment or not in hand.");
     if (!targetUnit || targetUnit.owner !== data.username) throw new Error("Equipment target must be an allied deployed unit.");
 
-    const cost = Math.max(0, card.cost - (card.costReduction || 0));
+    const cost = ModifierService.getEffectiveCost(card, data.username, gameState);
     if (!ShinsuService.canAfford(player, cost)) throw new Error("Not enough shinsu to equip.");
     RequirementValidator.validate(card.requirements, { gameState, username: data.username, card, sourceUnit: targetUnit, targetUnit });
   }

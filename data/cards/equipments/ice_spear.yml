@@ -4,11 +4,14 @@ cost: 3
 requirements:
   - khun family member
 effects:
-  - type: give_condition
-    condition: frozen
-    target: { side: enemy }
-    trigger: { type: attack }
-    raw: "the bearer's attacks give Frozen to their targets"
+  - type: modify_ability
+    target: { side: bearer }
+    effect:
+      type: give_condition
+      condition: frozen
+      amount: 1
+      target: { side: enemy }
+    raw: "the bearer's abilities give Frozen to enemies"
   - type: grant_trait
     trait: pierce
     amount: 1

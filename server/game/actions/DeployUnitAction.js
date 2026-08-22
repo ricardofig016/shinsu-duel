@@ -1,5 +1,6 @@
 import ActionHandler from "../ActionHandler.js";
 import LifecycleEngine from "../services/LifecycleEngine.js";
+import ModifierService from "../services/ModifierService.js";
 
 /**
  * Deploy a unit through the authoritative lifecycle engine.
@@ -30,7 +31,7 @@ export default class DeployUnitAction extends ActionHandler {
     if (!(placedPositionCode in card.positions))
       throw new Error(`Card cannot be placed in position ${placedPositionCode}.`);
 
-    const effectiveCost = Math.max(0, card.cost - (card.costReduction || 0));
+    const effectiveCost = ModifierService.getEffectiveCost(card, username, gameState);
     if (effectiveCost > gameState.getTotalShinsu(username))
       throw new Error("Not enough shinsu to deploy this unit.");
 

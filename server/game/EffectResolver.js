@@ -560,6 +560,29 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Execute
   const result = handler.execute(payload, context, gameState);
 
+  // `modify_ability` augments: when a unit uses an ability that targets a
+  // unit on the matching side, also resolve that unit's augmenting effects
+  // against the same target (Ice Spear, Lo Po Bia Ren). Augment resolutions
+  // never re-augment (`applyAbilityAugments: false`).
+  if (extra.applyAbilityAugments && payload.targetId && extra.sourceUnit) {
+    const targetUnit = gameState._findUnit(payload.targetId);
+    if (targetUnit) {
+      const isEnemy = targetUnit.owner !== extra.sourceUnit.owner;
+      for (const augment of gameState.modifierStack.getAbilityAugments(extra.sourceUnit)) {
+        const side = augment.effect?.target?.side;
+        const matches = !side || (side === "enemy" ? isEnemy : !isEnemy);
+        if (!matches) continue;
+        resolveEffect(augment.effect, context, gameState, {
+          ...extra,
+          targetId: payload.targetId,
+          sourceId: augment.sourceId,
+          sourceType: augment.sourceType,
+          applyAbilityAugments: false,
+        });
+      }
+    }
+  }
+
   // Recursively resolve nested effects. Propagate a pending child so callers
   // suspend their own follow-up work until the child choice is complete.
   if (effect.effect) {

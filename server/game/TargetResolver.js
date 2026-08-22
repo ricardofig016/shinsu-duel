@@ -91,8 +91,24 @@ function getTargetableTaunters(targets, gameState, sourceUnit) {
 }
 
 function applyTauntFilter(targets, gameState, sourceUnit) {
+  if (sourceUnit && gameState.modifierStack.getTargetingRules(sourceUnit).ignoreTaunt) {
+    return targets;
+  }
   const taunters = getTargetableTaunters(targets, gameState, sourceUnit);
   return taunters.length > 0 ? taunters : targets;
+}
+
+/**
+ * Remove units that cannot be targeted by `sourceUnit` via a `modify_targeting`
+ * `untargetable_by` rule (e.g. "units with Burned 3+ can't target me").
+ */
+function filterUntargetable(candidates, gameState, sourceUnit) {
+  if (!sourceUnit) return candidates;
+  return candidates.filter((unit) => {
+    const rules = gameState.modifierStack.getTargetingRules(unit);
+    if (!rules.untargetableBy) return true;
+    return !gameState.modifierStack.matchesUnitFilter(sourceUnit, rules.untargetableBy);
+  });
 }
 
 /**
@@ -478,6 +494,9 @@ export function resolveTargets(gameState, options) {
     hasPassive,
     canSwitch,
   }, sourceUnit);
+
+  // `untargetable_by` targeting rules (source unit cannot target protected units).
+  candidates = filterUntargetable(candidates, gameState, sourceUnit);
 
   // Blinded: randomize choice-descriptor targets (RULES.md).
   // Self, bearer, all_enemies/all_allies, and enemy_lighthouses are not randomized.

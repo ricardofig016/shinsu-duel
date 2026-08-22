@@ -10,6 +10,7 @@ passives:
     stat: cost
     amount: 1
     target: { side: enemy }
+    cardType: skill
     if:
       type: has_unit
       target:

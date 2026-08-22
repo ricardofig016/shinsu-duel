@@ -83,10 +83,18 @@ export default class GameState {
     this.modifierStack = new ModifierStack(this.eventBus, this._clock);
 
     // Cross-system cleanup: when an ability modifier is revoked,
-    // remove the corresponding AbilityRegistry entry.
+    // remove the corresponding AbilityRegistry entry; when an HP stat
+    // modifier is revoked (equipment detach), restore the raised max/current HP.
     this.modifierStack.onRevoke((mod) => {
       if (mod.type === "ability" && this._abilityRegistry) {
         this._abilityRegistry.revokeBySource(mod.targetId, mod.sourceId);
+      }
+      if (mod.type === "stat" && mod.key === "hp" && typeof mod.value === "number") {
+        const unit = this._findUnit(mod.targetId);
+        if (unit && unit.card) {
+          unit.card.maxHp = Math.max(0, unit.card.maxHp - mod.value);
+          unit.currentHp = Math.max(1, Math.min(unit.currentHp, unit.card.maxHp));
+        }
       }
     });
 
@@ -110,6 +118,12 @@ export default class GameState {
 
     // Barrier tracking (reset on round start)
     this._barrierUsedThisRound = new Set();
+
+    // Units that have used an ability this round (for `modify_keyword` `first`).
+    this._abilitiesUsedThisRound = new Set();
+
+    // Equipment-scoped triggered-effect subscriptions (equipmentId → unsubscribe).
+    this._equipmentTriggerSubscriptions = new Map();
 
     // Unit lookup index (O(1) by id)
     this._unitIndex = new Map();
@@ -230,6 +244,7 @@ export default class GameState {
     this.eventBus.on(EVT.ROUND_START, () => {
       this._barrierUsedThisRound.clear();
       this._cardsPlayedThisRound.clear();
+      this._abilitiesUsedThisRound.clear();
       for (const username of this.usernames) {
         CombatSlotService.resetAll(this.playerStates[username]);
       }
@@ -746,6 +761,7 @@ export default class GameState {
       clock: this._clock.peek(),
       rng: typeof this._rng?.getState === "function" ? this._rng.getState() : null,
       barrierUsedThisRound: [...this._barrierUsedThisRound].sort(),
+      abilitiesUsedThisRound: [...this._abilitiesUsedThisRound].sort(),
       cardsPlayedThisRound: cardsPlayed,
       repeatPlays,
     };
@@ -772,6 +788,39 @@ export default class GameState {
   recordCardPlayed(username) {
     const count = this._cardsPlayedThisRound.get(username) || 0;
     this._cardsPlayedThisRound.set(username, count + 1);
+  }
+
+  /**
+   * Mark that `unitId` used an ability this round (for `modify_keyword` `first`).
+   */
+  markAbilityUsed(unitId) {
+    this._abilitiesUsedThisRound.add(unitId);
+  }
+
+  /** Whether `unitId` has already used an ability this round. */
+  hasUsedAbilityThisRound(unitId) {
+    return this._abilitiesUsedThisRound.has(unitId);
+  }
+
+  /**
+   * Subscribe an equipment-scoped triggered effect (e.g. "the bearer's
+   * damage-dealing abilities give Exhausted 1"). Removed on detach via
+   * `unregisterEquipmentTriggers`.
+   */
+  registerEquipmentTriggeredEffect(equipmentId, eventName, matches, resolveFn) {
+    const unsubscribe = this.eventBus.on(eventName, (payload, context) => {
+      if (matches(payload)) resolveFn(payload, context);
+    }, { phase: "execute", priority: -100 });
+    this._equipmentTriggerSubscriptions.set(equipmentId, unsubscribe);
+  }
+
+  /** Remove a single equipment's triggered-effect subscription. */
+  unregisterEquipmentTriggers(equipmentId) {
+    const unsubscribe = this._equipmentTriggerSubscriptions.get(equipmentId);
+    if (unsubscribe) {
+      unsubscribe();
+      this._equipmentTriggerSubscriptions.delete(equipmentId);
+    }
   }
 
   /**

@@ -26,6 +26,16 @@ export default class DealDamageHandler extends BaseHandler {
     const modStack = gameState.modifierStack;
     let damage = amount;
 
+    // Always-on stat modifiers: the source's outgoing `damage` amplifier and
+    // the target's incoming `damage_taken` amplifier (modify_stat, with their
+    // `when`/`source` filters).
+    if (damage > 0) {
+      const sourceUnit = payload.sourceUnit || gameState._findUnit?.(payload.sourceId);
+      const targetUnit = gameState._findUnit?.(targetId);
+      damage += modStack.getDamageDealt(sourceUnit, targetUnit);
+      damage += modStack.getDamageTaken(targetUnit, sourceUnit);
+    }
+
     // Barrier: negate first damage each round
     const barrierMods = modStack.getModifiers(targetId, "trait")
       .filter((m) => m.key === "barrier" && m.disabledCount === 0);

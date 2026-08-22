@@ -7,19 +7,28 @@ positions:
   - wave controller
   - scout
 passives:
-  - type: give_condition
-    condition: poisoned
-    amount: 1
+  - type: modify_ability
     position: wave controller
-    trigger: { type: attack, source: frontline-shinheuh }
-    target: { side: enemy }
-    raw: "wave controller: frontline Shinheuh give Poisoned 1"
-  - type: give_condition
-    condition: ghost
+    target:
+      side: ally
+      position: frontline shinheuh
+    effect:
+      type: give_condition
+      condition: poisoned
+      amount: 1
+      target: { side: enemy }
+    raw: "wave controller: your frontline Shinheuh's abilities give Poisoned 1"
+  - type: modify_ability
     position: scout
-    trigger: { type: attack, source: backline-shinheuh }
-    target: { side: enemy }
-    raw: "scout: backline Shinheuh give Ghost"
+    target:
+      side: ally
+      position: backline shinheuh
+    effect:
+      type: give_condition
+      condition: ghost
+      amount: 1
+      target: { side: enemy }
+    raw: "scout: your backline Shinheuh's abilities give Ghost"
 abilities:
   - type: summon
     card:
