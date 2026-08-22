@@ -110,24 +110,26 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 
 ### Units
 
-| `type`               | Fields                                     | Meaning                                                                                                                                                                          |
-| -------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `deal_damage`        | `amount`, `target`                         | Deal `amount` damage.                                                                                                                                                            |
-| `heal`               | `amount`, `target`                         | Heal `amount` HP.                                                                                                                                                                |
-| `give_condition`     | `condition`, `amount?`, `target`           | Apply a condition (optionally stacked).                                                                                                                                          |
-| `remove_conditions`  | `target`, `mode?`, `amount?`, `condition?` | Remove conditions from `target`. `mode`: `all` (default) \| `random` \| `choose`; `amount` = how many (required for `random`/`choose`); `condition` = restrict to one condition. |
-| `grant_trait`        | `trait`, `amount?`, `target`               | Grant a trait (optionally numeric).                                                                                                                                              |
-| `remove_traits`      | `target`, `trait?`                         | Remove all traits, or one named `trait` (Silence).                                                                                                                               |
-| `copy_traits`        | `target`, `source`                         | Copy traits from `source` onto `target`.                                                                                                                                         |
-| `grant_random_trait` | `target`, `numeric?`                       | Grant a random trait.                                                                                                                                                            |
-| `slay`               | `target`                                   | Kill units directly (ignores damage).                                                                                                                                            |
-| `transform`          | `cardName`                                 | Replace the unit with another card (revert).                                                                                                                                     |
-| `grant_ability`      | `ability`, `target`                        | Grant an ability (register, don't execute).                                                                                                                                      |
-| `copy_ability`       | `source`                                   | Use a copy of an enemy `source`'s ability.                                                                                                                                       |
-| `peek_hand`          | `owner`                                    | Reveal a card in `owner`'s hand (observer-only).                                                                                                                                 |
-| `play_jeonsul_baang` | `trigger?`                                 | Play a random Jeonsul Baang on a random ally.                                                                                                                                    |
+| `type`               | Fields                                          | Meaning                                                                                                                                                                                       |
+| -------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deal_damage`        | `amount`, `target`                              | Deal `amount` damage.                                                                                                                                                                         |
+| `heal`               | `amount`, `target`                              | Heal `amount` HP.                                                                                                                                                                             |
+| `give_condition`     | `condition`, `amount?`, `target`                | Apply a condition (optionally stacked).                                                                                                                                                       |
+| `remove_conditions`  | `target`, `mode?`, `amount?`, `condition?`      | Remove conditions from `target`. `mode`: `all` (default) \| `random` \| `choose`; `amount` = how many (required for `random`/`choose`); `condition` = restrict to one condition.              |
+| `grant_trait`        | `trait`, `amount?`, `target`                    | Grant a trait (optionally numeric).                                                                                                                                                           |
+| `remove_traits`      | `target`, `trait?`                              | Remove all traits, or one named `trait` (Silence).                                                                                                                                            |
+| `copy_traits`        | `target`, `source`                              | Copy traits from `source` onto `target`.                                                                                                                                                      |
+| `grant_random_trait` | `target`, `numeric?`                            | Grant a random trait.                                                                                                                                                                         |
+| `slay`               | `target`                                        | Kill units directly (ignores damage).                                                                                                                                                         |
+| `transform`          | `cardName`                                      | Replace the unit with another card (revert).                                                                                                                                                  |
+| `grant_ability`      | `ability`, `target`                             | Grant an ability (register, don't execute).                                                                                                                                                   |
+| `copy_ability`       | `source`                                        | Use a copy of an enemy `source`'s ability.                                                                                                                                                    |
+| `peek_hand`          | `owner`, `card?`, `mode?`, `amount?`, `random?` | Reveal cards in `owner`'s hand (observer-only). `card` filters eligible cards; `mode` (`all` \| `random` \| `choose`) + `amount` select how many; a bare peek reveals one seeded-random card. |
+| `play_jeonsul_baang` | `trigger?`                                      | Play a random Jeonsul Baang on a random ally.                                                                                                                                                 |
 
 `grant_affiliation` (`target`, `source`, `random?`) grants `target` an affiliation taken from `source` (randomly chosen when `random` is set).
+
+The `summon`/`discard`/`steal`/`disarm`/`switch_position` primitives route through the same authoritative engines as deployment and equipment: `summon` resolves `from` (deck | hand | deck_or_hand | game) and `onto` (self | opponent | both); `steal` moves a matched enemy unit onto the acting player's field; `discard` discards a hand card, or bearer equipment when `card.zone: attachments`; `disarm` routes equipment by `to` (`{ zone: hand|discard, owner: equipment_owner|you }`); `switch_position` targets enemies that can legally switch (`can_switch: true`).
 
 ### Remove conditions
 
@@ -198,11 +200,15 @@ target:
   attribute: anima # filter (attribute code)
   name: Rachel # filter (exact card name)
   cost: 2 # filter, or "cheapest" | "most expensive"
+  has_passive: true # filter: units with >=1 passive ability
+  can_switch: true # filter: units with a legal other printed position (non-full line)
 ```
 
 `self`/`bearer` need only `side`. `any` + `scope: all` addresses both players' units (landmark rules).
 
 `shared_affiliation: true` keeps only units that share at least one affiliation with the source unit (its native `card.affiliations` plus any affiliation granted via the ModifierStack). The source unit itself counts. If the source has no affiliations, the filter matches nothing.
+
+`has_passive: true` keeps only units whose card declares at least one passive ability ("Silence an enemy that has at least one passive"). `can_switch: true` keeps only units that can legally switch position — at least one printed position other than the current one whose destination line is not full.
 
 `rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh". The bare `position: shinheuh` is shorthand for that Shinheuh pair.
 
@@ -212,7 +218,7 @@ A step inside a shared-target `sequence` uses a **link** target instead of a sid
 
 ```yaml
 card:
-  zone: hand # hand | deck | discard (explicit source-zone override; defaults to the effect's natural zone)
+  zone: hand # hand | deck | discard | attachments (explicit source-zone override; defaults to the effect's natural zone)
   name: Shinwonryu # exact card name (exclusive with `series`)
   series: thorn-fragment # exact series code (exclusive with `name`)
   type: unit # unit | skill | equipment
@@ -225,7 +231,7 @@ card:
   random: true
 ```
 
-`name` is an exact card-name match; `series` is an exact series-code match (cards declare `series` at the card level). A card target uses one or the other, never both. `zone` selects the source zone to search; when omitted it defaults to the effect's natural zone (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard).
+`name` is an exact card-name match; `series` is an exact series-code match (cards declare `series` at the card level). A card target uses one or the other, never both. `zone` selects the source zone to search; when omitted it defaults to the effect's natural zone (`compress_shinsu` → hand, `draw_card` → deck, `reclaim_cards` → discard, `discard` → hand). `zone: attachments` targets the source unit's attached equipment (used by `discard` to discard bearer equipment, e.g. the Thorn Fragments).
 
 ---
 
@@ -239,7 +245,7 @@ Predicates are the conditions a `conditional` node (or an always-on modifier) ev
 | `alone_on_line`     | `line`, `negate?`                                   | "while i am alone on the ally frontline"  |
 | `started_with_card` | `cardName`, `negate?`                               | "if you started the game with Ha Jinsung" |
 | `has_equipped`      | `cardName`, `negate?`                               | "if i have Purple Dementor equipped"      |
-| `has_all_equipped`  | `cardNames[]`, `negate?`                            | "all 4 Thorn Fragments equipped"          |
+| `has_all_equipped`  | `series`, `negate?`                                 | "equipped with every card in a series"    |
 | `has_condition`     | `condition`, `conditionValue?`, `target`, `negate?` | "units with Burned 3+"                    |
 
 `has_unit` and `has_condition` are existence checks: they read the whole board and ignore offensive-targeting rules (frontline blocking, Taunt, Blinded). A matching source unit counts toward the check — "an allied Guide" on a Guide unit includes itself.

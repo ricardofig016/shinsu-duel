@@ -12,11 +12,7 @@ effects:
     trigger: { type: equip }
     if:
       type: has_all_equipped
-      cardNames:
-        - "First Thorn Fragment"
-        - "Second Thorn Fragment"
-        - "Third Thorn Fragment"
-        - "Fourth Thorn Fragment"
+      series: thorn-fragment
     then:
       type: sequence
       steps:
@@ -24,6 +20,7 @@ effects:
           card:
             type: equipment
             series: thorn-fragment
+            zone: attachments
           owner: you
         - type: create_card
           card:

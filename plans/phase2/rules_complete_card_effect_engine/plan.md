@@ -1,6 +1,6 @@
 ## Plan: Rules-complete card effect engine
 
-**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–D are complete: all YAML cards are structured DSL (zero-`custom`/zero-`handler`), structured unit and card target resolution (including `random`/`choose`/`cost`/`lowest_hp` selection and the explicit `series` grouping) is runtime-supported, `sequence`/`conditional` plus all six predicates are wired, and shared-target sequences (`targets` + `target: { link: sequence }`) resolve one target set across steps. The remaining work is runtime integration (Phases E–J): the remaining effect handlers, modifiers/global rules, Jeonsulsa mechanics, and richer passives/triggers.
+**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–D are complete: all YAML cards are structured DSL (zero-`custom`/zero-`handler`), structured unit and card target resolution (including `random`/`choose`/`cost`/`lowest_hp` selection and the explicit `series` grouping) is runtime-supported, `sequence`/`conditional` plus all six predicates are wired, and shared-target sequences (`targets` + `target: { link: sequence }`) resolve one target set across steps. The remaining work is runtime integration (Phases F–J): modifiers/global rules, Jeonsulsa mechanics, and richer passives/triggers.
 
 **Steps**
 
@@ -12,7 +12,7 @@ _Phase D — Targeting extensions_ (done)
 
 1. `TargetResolver`: `random`/`choose`/`cost` selection, deck/hand/game sources, extended card-target selectors. Landed: `random`/`choose`/`cost`/`lowest_hp`/`traitNot` unit selection; structured card targets (`resolveCardTargets` + `toCardTargetView`) wired through `EffectResolver` into `compress_shinsu`/`draw_card`/`reclaim_cards`/`create_card`; legacy `targetCardSelector` removed; `Card.rank` added. Card grouping is the explicit, schema-validated `series` field (`findCardsBySeries`), not a name heuristic. The structured `{side, scope, count, filters}` subset (affiliation/attribute/name filters, array-OR rank/position) landed in Phase B5a.
 
-_Phase E — New effect primitives_ (each: handler + service integration + validate/execute tests) _depends on C+D_
+_Phase E — New effect primitives_ (each: handler + service integration + validate/execute tests) _depends on C+D_ (done)
 
 2. Lifecycle: `slay`, `transform`/revert (reuse `LifecycleEngine`).
 3. Zone movement: `summon`, `steal`, `discard`, `disarm`, `switch_position` (`create_card` landed in Phase B6).

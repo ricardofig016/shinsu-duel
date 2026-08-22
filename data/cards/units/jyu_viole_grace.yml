@@ -8,7 +8,7 @@ positions:
 passives:
 abilities:
   - type: remove_traits
-    target: { side: enemy }
+    target: { side: enemy, has_passive: true }
     raw: "Silence an enemy that has at least one passive"
   - type: spend_shinsu
     amount: 2

@@ -208,6 +208,13 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 - `equipment:detached` — equipment removed from unit
 - `equipment:ignited` — attached equipment ignited
 
+### Lifecycle & Zone Movement
+
+- `card:discarded` — a card was sent to the discard pile (hand discard or bearer attachment discard)
+- `unit:stolen` — a deployed unit was moved to the acting player's field
+- `unit:silenced` — a unit's traits were removed (`remove_traits` / Silence)
+- `hand:peeked` — a player's hand was revealed (observer-only; no mutation)
+
 ### Modifier Events
 
 Emitted by the `ModifierStack` — see `MODIFIER_STACK_ARCHITECTURE.md`.

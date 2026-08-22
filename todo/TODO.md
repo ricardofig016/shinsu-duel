@@ -6,9 +6,6 @@
 - [ ] plan: audit phase 2 again
 - [ ] rules: revisit position switching (cost 1 shinsu / spend a combat slot)
 - [ ] public: plan how image artworks should be organized
-- [ ] new card: equipment - my bearer can assume any position
-- [ ] new card: passive - allies in my position have +x HP
-- [ ] new card: landmark - round start: give frontline units Blinded
 - [ ] rules: add "steal" keyword
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)

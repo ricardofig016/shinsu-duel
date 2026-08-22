@@ -211,15 +211,16 @@ Keywords are special terms that provide additional context to cards and abilitie
 6. **Disarm**: Send a unit's equipment back to it's owners hand
 7. **Discard**: Send a card directly to the discard pile without triggering on death effects
 8. **Free**: The ability doesn't expend a combat slot.
-9.  **Quick**: Playing a Quick card or using a Quick ability doesn't end your turn
+9. **Quick**: Playing a Quick card or using a Quick ability doesn't end your turn
 10. **Reclaim `x`**: Put `x` cards from your discard pile into your hand (Unreachable and Shinheuh cards can be reclaimed)
 11. **Silence**: Remove all traits at the moment it's applied (traits gained later are unaffected)
 12. **Slay `x`**: Kill `x` units
-13. **Spend `x`**: Spend `x` shinsu (You must have the shinsu to use it)
-14. **Unreachable**: You can't put me in your deck during deckbuilding
-15. **<position>**: The ability, passive, or effect is only available while the unit is deployed as <position>
-16. **Enemy**: Enemy unit
-17. **Ally**: Ally unit
+13. **Steal**: Take control of an enemy unit, moving it onto your battlefield
+14. **Spend `x`**: Spend `x` shinsu (You must have the shinsu to use it)
+15. **Unreachable**: You can't put me in your deck during deckbuilding
+16. **<position>**: The ability, passive, or effect is only available while the unit is deployed as <position>
+17. **Enemy**: Enemy unit
+18. **Ally**: Ally unit
 
 ## Positions
 
@@ -289,6 +290,7 @@ Traits are positive permanent effects native to cards. They are color coded as s
 17. **Vengeful `x`**: I deal +`x` damage if I am missing HP
 
 Notes:
+
 - **Taunt** only forces targeting if the Taunt unit is a valid target, and only on enemy units' targeting, not skills. With multiple targetable Taunt units, the enemy chooses among them; all targetable Taunt units must be targeted before non-Taunt units.
 - **Sharpshooter** only removes the line restriction; it doesn't bypass Taunt and can't target lighthouses.
 - **Reflect** triggers only on damage from a unit's ability, and only if the damage is greater than 0; conditions and skills don't trigger it, and prevented damage (Barrier, Resilient) doesn't count.
@@ -320,6 +322,7 @@ Conditions are negative temporary effects that last until the end of the round. 
 13. **Weak `x`**: I take +`x` damage from all sources
 
 Notes:
+
 - **Burned** triggers at the end of every turn, including the turn it was applied.
 - **Cursed** counts itself among "each unique condition".
 - **Frozen**'s "all ally combat slots" includes the Shinheuh slot.

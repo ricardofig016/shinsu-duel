@@ -92,6 +92,18 @@ const EVT = {
 
   // Compression
   SHINSU_COMPRESSED: "shinsu:compressed",
+
+  // Card discard
+  CARD_DISCARDED: "card:discarded",
+
+  // Steal
+  UNIT_STOLEN: "unit:stolen",
+
+  // Silence (remove traits)
+  UNIT_SILENCED: "unit:silenced",
+
+  // Hand reveal (observer-only)
+  HAND_PEEKED: "hand:peeked",
 };
 
 export default EVT;

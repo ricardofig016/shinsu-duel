@@ -898,7 +898,8 @@
       {
         "type": "switch_position",
         "target": {
-          "side": "enemy"
+          "side": "enemy",
+          "can_switch": true
         },
         "raw": "force an enemy to switch positions"
       }
@@ -1047,12 +1048,7 @@
         },
         "if": {
           "type": "has_all_equipped",
-          "cardNames": [
-            "First Thorn Fragment",
-            "Second Thorn Fragment",
-            "Third Thorn Fragment",
-            "Fourth Thorn Fragment"
-          ]
+          "series": "thorn-fragment"
         },
         "then": {
           "type": "sequence",
@@ -1061,7 +1057,8 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "series": "thorn-fragment"
+                "series": "thorn-fragment",
+                "zone": "attachments"
               },
               "owner": "you"
             },
@@ -1151,12 +1148,7 @@
         },
         "if": {
           "type": "has_all_equipped",
-          "cardNames": [
-            "First Thorn Fragment",
-            "Second Thorn Fragment",
-            "Third Thorn Fragment",
-            "Fourth Thorn Fragment"
-          ]
+          "series": "thorn-fragment"
         },
         "then": {
           "type": "sequence",
@@ -1165,7 +1157,8 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "series": "thorn-fragment"
+                "series": "thorn-fragment",
+                "zone": "attachments"
               },
               "owner": "you"
             },
@@ -1812,7 +1805,8 @@
       {
         "type": "remove_traits",
         "target": {
-          "side": "enemy"
+          "side": "enemy",
+          "has_passive": true
         },
         "raw": "Silence an enemy that has at least one passive"
       },
@@ -2512,7 +2506,7 @@
         "owner": "opponent",
         "quick": true,
         "position": "scout",
-        "raw": "scout: quick: see a random card in the opponent's hand"
+        "raw": "scout: quick: reveal a random card in the opponent's hand"
       },
       {
         "type": "deal_damage",
@@ -3030,12 +3024,7 @@
         },
         "if": {
           "type": "has_all_equipped",
-          "cardNames": [
-            "First Thorn Fragment",
-            "Second Thorn Fragment",
-            "Third Thorn Fragment",
-            "Fourth Thorn Fragment"
-          ]
+          "series": "thorn-fragment"
         },
         "then": {
           "type": "sequence",
@@ -3044,7 +3033,8 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "series": "thorn-fragment"
+                "series": "thorn-fragment",
+                "zone": "attachments"
               },
               "owner": "you"
             },
@@ -3379,12 +3369,7 @@
         },
         "if": {
           "type": "has_all_equipped",
-          "cardNames": [
-            "First Thorn Fragment",
-            "Second Thorn Fragment",
-            "Third Thorn Fragment",
-            "Fourth Thorn Fragment"
-          ]
+          "series": "thorn-fragment"
         },
         "then": {
           "type": "sequence",
@@ -3393,7 +3378,8 @@
               "type": "discard",
               "card": {
                 "type": "equipment",
-                "series": "thorn-fragment"
+                "series": "thorn-fragment",
+                "zone": "attachments"
               },
               "owner": "you"
             },

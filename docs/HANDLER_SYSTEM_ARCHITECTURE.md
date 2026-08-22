@@ -123,7 +123,7 @@ For a `type` with **no registered handler** (a valid structured type whose handl
 | `HealHandler`              | `heal`               | Applies healing via `UnitService.heal`, capped at max HP                                |
 | `GrantTraitHandler`        | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                             |
 | `GiveConditionHandler`     | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`                               |
-| `RemoveConditionHandler`  | `remove_conditions` | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                    |
+| `RemoveConditionHandler`   | `remove_conditions`  | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                   |
 | `CreateLighthouseHandler`  | `create_lighthouse`  | Delegates to `GameState.modifyLighthouses` (cap 40)                                     |
 | `DestroyLighthouseHandler` | `destroy_lighthouse` | Delegates to `GameState.modifyLighthouses` (floor 0); emits `game:lighthouses:depleted` |
 | `SpendShinsuHandler`       | `spend_shinsu`       | Delegates to `ShinsuService.spend`; recharged first, then normal                        |
@@ -143,7 +143,25 @@ For a `type` with **no registered handler** (a valid structured type whose handl
 | `NoopHandler`           | `noop`            | No-op; resolves to `{ resolved: true }` (test placeholders)                                            |
 | `NoopHandler`           | `quick`           | Display-only Quick marker node; no-op                                                                  |
 
-Structured DSL types not listed above (e.g. `summon`, modifiers, global rules) have no handler yet; the runtime skips them and reports an unsupported-effect event. The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
+## Phase E Handlers
+
+| Handler                   | DSL `type`           | Key behavior                                                                                                  |
+| ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `SlayHandler`             | `slay`               | Kills via `LifecycleEngine.killUnit` (death-intent → `unit:killed` → destroy); Undying can intercept          |
+| `TransformHandler`        | `transform`          | Replaces the source unit's card via `LifecycleEngine.transformUnit` (preserves HP delta/conditions/equipment) |
+| `SummonHandler`           | `summon`             | Resolves `from` (deck/hand/deck_or_hand/game) + `onto`; places via `LifecycleEngine.summonUnit`               |
+| `StealHandler`            | `steal`              | Moves a matching enemy unit onto the acting player's field via `LifecycleEngine.stealUnit`                    |
+| `DiscardHandler`          | `discard`            | Discards a hand card (`targetCardId`) or bearer attachments (`zone: attachments`)                             |
+| `DisarmHandler`           | `disarm`             | Detaches a unit's equipment and routes it by `to` (`{ zone, owner }`)                                         |
+| `SwitchPositionHandler`   | `switch_position`    | Forces a unit to a legal other printed position; Rooted blocked; full lines excluded                          |
+| `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                                             |
+| `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                                 |
+| `GrantRandomTraitHandler` | `grant_random_trait` | Grants a seeded-random trait (optional `numeric` pool filter)                                                 |
+| `PeekHandHandler`         | `peek_hand`          | Reveals hand cards (observer-only); `card` filter + `mode`/`amount`/`random`                                  |
+| `CopyAbilityHandler`      | `copy_ability`       | Resolves one of an enemy's abilities (`ability_selection` decision when several)                              |
+| `RepeatPlayHandler`       | `repeat_play`        | Queues extra plays of a card on `GameState` (consumed by `PlaySkillAction`)                                   |
+
+Structured DSL types not listed above (e.g. modifiers, global rules, `grant_affiliation`, `return_to_hand`, `play_jeonsul_baang`) have no handler yet; the runtime skips them and reports an unsupported-effect event. The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 
@@ -208,7 +226,10 @@ function resolveEffect(effect, context, gameState, extra = {}) {
   if (!registry.has(effect.type)) {
     // A valid structured type whose handler isn't implemented yet is skipped
     // and surfaced through the `effect:unsupported` event.
-    gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, { type: effect.type, raw: effect.raw });
+    gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, {
+      type: effect.type,
+      raw: effect.raw,
+    });
     return { skipped: true, reason: "unsupported_effect" };
   }
   // TargetResolver is called here, before the handler, when effect.target

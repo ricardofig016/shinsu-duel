@@ -113,6 +113,32 @@ export default class ZoneService {
   }
 
   /**
+   * Find and remove a card from a player's hand by instance id.
+   * Used by the `discard` effect to discard a specific card instance.
+   * @returns {Card|null}
+   */
+  static removeFromHandById(playerState, cardId) {
+    if (!Array.isArray(playerState.hand)) return null;
+    const index = playerState.hand.findIndex((card) => card.id === cardId);
+    if (index === -1) return null;
+    const card = playerState.hand.splice(index, 1)[0];
+    CompressionService.clearReduction(card);
+    return card;
+  }
+
+  /**
+   * Find and remove a card from a player's deck by instance id, without
+   * reshuffling. Used by `summon` to pull a specific card from the deck.
+   * @returns {Card|null}
+   */
+  static removeFromDeckById(playerState, cardId) {
+    if (!playerState.deck || !Array.isArray(playerState.deck)) return null;
+    const index = playerState.deck.findIndex((card) => card.id === cardId);
+    if (index === -1) return null;
+    return playerState.deck.splice(index, 1)[0];
+  }
+
+  /**
    * Shuffle the deck using a seeded RNG (deterministic).
    * Callers MUST provide a deterministic RNG; no Math.random fallback.
    */

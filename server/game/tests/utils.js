@@ -65,3 +65,36 @@ export function setupGameWithCardsInHand(cardsInHand) {
 export function createTestGame() {
   return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0], { rng: new SeededRng(1) });
 }
+
+// Build a legal deck whose initial draw (top of deck) contains the requested
+// card names, so both players can be seeded with specific cards in hand.
+function deckWith(names) {
+  const cardIds = (names || []).map((c) => (typeof c === "string" ? getCardIdByName(c) : c));
+  const preferred = [...new Set(cardIds)];
+  const base = createLegalDeck(preferred);
+  const requestedInDrawOrder = [...preferred].reverse();
+  const remaining = base.filter((id) => !preferred.includes(id));
+  return [...remaining, ...requestedInDrawOrder];
+}
+
+// Helper to create a game with specific cards in each player's hand.
+// `handsByPlayer` maps "Alice"/"Bob" to arrays of card names.
+export function setupGameWithHands(handsByPlayer) {
+  return new GameState(ROOM_CODE, USERNAMES, {
+    Alice: deckWith(handsByPlayer.Alice || []),
+    Bob: deckWith(handsByPlayer.Bob || []),
+  }, USERNAMES[0], { rng: new SeededRng(1) });
+}
+
+// Deploy a unit from a player's hand to the battlefield (by card name) and
+// return the deployed unit. Grants enough shinsu for any cost.
+export function deployUnit(game, username, cardName, positionCode) {
+  game.currentTurn = username;
+  game.round = 15;
+  game.playerStates[username].shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
+  const handId = game.playerStates[username].hand.findIndex((c) => c.name === cardName);
+  if (handId < 0) throw new Error(`Card "${cardName}" not found in ${username}'s hand`);
+  game.processAction({ type: "deploy-unit-action", data: { source: "player", username, handId, placedPositionCode: positionCode } });
+  return [...game.playerStates[username].field.frontline, ...game.playerStates[username].field.backline]
+    .find((u) => u.card.name === cardName);
+}

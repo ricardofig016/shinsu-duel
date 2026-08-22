@@ -157,13 +157,13 @@ describe("PredicateEvaluator", () => {
       const names = ["First Thorn Fragment", "Second Thorn Fragment", "Third Thorn Fragment", "Fourth Thorn Fragment"];
       u.equipmentAttachments = names.map((name) => ({ name }));
       expect(PredicateEvaluator.evaluate(
-        { type: "has_all_equipped", cardNames: names },
+        { type: "has_all_equipped", series: "thorn-fragment" },
         game, { owner: "Alice", sourceUnit: u }
       )).toBe(true);
 
       u.equipmentAttachments.pop();
       expect(PredicateEvaluator.evaluate(
-        { type: "has_all_equipped", cardNames: names },
+        { type: "has_all_equipped", series: "thorn-fragment" },
         game, { owner: "Alice", sourceUnit: u }
       )).toBe(false);
     });
@@ -252,7 +252,7 @@ describe("PredicateEvaluator", () => {
       expect(() => PredicateEvaluator.evaluate({ type: "has_equipped" }, game, { owner: "Alice" }))
         .toThrow("has_equipped requires `cardName`");
       expect(() => PredicateEvaluator.evaluate({ type: "has_all_equipped" }, game, { owner: "Alice" }))
-        .toThrow("has_all_equipped requires a `cardNames` array");
+        .toThrow("has_all_equipped requires a `series`");
       expect(() => PredicateEvaluator.evaluate({ type: "has_condition" }, game, { owner: "Alice" }))
         .toThrow("has_condition requires `condition`");
     });

@@ -12,7 +12,7 @@ abilities:
     owner: opponent
     quick: true
     position: scout
-    raw: "scout: quick: see a random card in the opponent's hand"
+    raw: "scout: quick: reveal a random card in the opponent's hand"
   - type: deal_damage
     amount: 1
     target: { side: enemy }

@@ -166,6 +166,29 @@ function selectLowestHp(targets, lowestHp) {
   return targets.filter((u) => u.currentHp === min);
 }
 
+// Keep only units that have at least one passive ability.
+function filterByHasPassive(targets, hasPassive) {
+  if (!hasPassive) return targets;
+  return targets.filter((u) => (u.card?.passiveAbilities || []).length > 0);
+}
+
+// Keep only units that can legally switch position: at least one printed
+// position other than the current one whose destination line is not full.
+function filterByCanSwitch(targets, gameState, canSwitch) {
+  if (!canSwitch) return targets;
+  return targets.filter((unit) => {
+    const positions = Object.keys(unit.card?.positions || {});
+    for (const pos of positions) {
+      if (pos === unit.placedPositionCode) continue;
+      const line = gameState.constructor.positions[pos]?.line;
+      if (line && gameState.playerStates[unit.owner]?.field?.[line]?.length < 5) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
+
 function filterByRank(targets, rank) {
   if (!rank) return targets;
   const ranks = Array.isArray(rank) ? rank : [rank];
@@ -232,6 +255,8 @@ function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
     name = null,
     sharedAffiliation = null,
     lowestHp = false,
+    hasPassive = false,
+    canSwitch = false,
   } = filters;
   candidates = filterByCondition(candidates, gameState, condition, conditionValue);
   candidates = filterByTrait(candidates, gameState, trait);
@@ -244,6 +269,8 @@ function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
   candidates = filterByCost(candidates, cost);
   if (sharedAffiliation) candidates = filterBySharedAffiliation(candidates, gameState, sourceUnit);
   candidates = selectLowestHp(candidates, lowestHp);
+  candidates = filterByHasPassive(candidates, hasPassive);
+  candidates = filterByCanSwitch(candidates, gameState, canSwitch);
   return candidates;
 }
 
@@ -263,7 +290,7 @@ export function normalizeStructuredTarget(descriptor) {
     throw new Error("TargetResolver: structured target must be an object");
   }
 
-  const { side, scope, random, cost, choose, lowest_hp, ...filters } = descriptor;
+  const { side, scope, random, cost, choose, lowest_hp, has_passive, can_switch, ...filters } = descriptor;
 
   let target;
   switch (side) {
@@ -296,6 +323,8 @@ export function normalizeStructuredTarget(descriptor) {
     ...(cost !== undefined ? { cost } : {}),
     ...(choose !== undefined ? { choose } : {}),
     ...(lowest_hp !== undefined ? { lowestHp: lowest_hp } : {}),
+    ...(has_passive !== undefined ? { hasPassive: has_passive } : {}),
+    ...(can_switch !== undefined ? { canSwitch: can_switch } : {}),
   };
 }
 
@@ -335,6 +364,8 @@ export function resolveTargets(gameState, options) {
     name = null,
     sharedAffiliation = null,
     lowestHp = false,
+    hasPassive = false,
+    canSwitch = false,
     count = 1,
   } = options;
 
@@ -444,6 +475,8 @@ export function resolveTargets(gameState, options) {
     name,
     sharedAffiliation,
     lowestHp,
+    hasPassive,
+    canSwitch,
   }, sourceUnit);
 
   // Blinded: randomize choice-descriptor targets (RULES.md).

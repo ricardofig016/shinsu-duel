@@ -57,6 +57,8 @@
             "traitNot": { "type": "string", "minLength": 1 },
             "lowest_hp": { "type": "boolean" },
             "shared_affiliation": { "type": "boolean" },
+            "has_passive": { "type": "boolean" },
+            "can_switch": { "type": "boolean" },
             "rank": { "$ref": "#/definitions/filterValue" },
             "position": { "$ref": "#/definitions/filterValue" },
             "affiliation": { "$ref": "#/definitions/filterValue" },
@@ -80,7 +82,7 @@
     "cardTarget": {
       "type": "object",
       "properties": {
-        "zone": { "enum": ["hand", "deck", "discard"] },
+        "zone": { "enum": ["hand", "deck", "discard", "attachments"] },
         "name": { "type": "string", "minLength": 1 },
         "series": { "type": "string", "minLength": 1 },
         "type": { "enum": ["unit", "skill", "equipment"] },
@@ -110,7 +112,7 @@
         { "type": "object", "required": ["type", "cardName"], "properties": { "type": { "const": "started_with_card" }, "cardName": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "cardName"], "properties": { "type": { "const": "has_equipped" }, "cardName": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "condition"], "properties": { "type": { "const": "has_condition" }, "condition": { "type": "string", "minLength": 1 }, "conditionValue": { "type": "integer", "minimum": 0 }, "target": { "$ref": "#/definitions/predicateTarget" }, "negate": { "type": "boolean" } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "cardNames"], "properties": { "type": { "const": "has_all_equipped" }, "cardNames": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "negate": { "type": "boolean" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "series"], "properties": { "type": { "const": "has_all_equipped" }, "series": { "type": "string", "minLength": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false },
         { "type": "object", "required": ["type", "amount"], "properties": { "type": { "const": "has_equipment_count" }, "amount": { "type": "integer", "minimum": 1 }, "negate": { "type": "boolean" } }, "additionalProperties": false }
       ]
     },

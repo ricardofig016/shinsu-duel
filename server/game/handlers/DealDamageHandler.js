@@ -81,34 +81,14 @@ export default class DealDamageHandler extends BaseHandler {
 
     // Kill check
     if (!unit.isAlive()) {
-      // Emit cancellable death-intent before unit:killed.
-      // Undying (and future cheat-death mechanics) intercept here.
-      const deathResult = context.emitChild(EVT.UNIT_DEATH_INTENT, {
+      const killResult = LifecycleEngine.killUnit(gameState, unit, {
         sourceId: payload.sourceId,
-        targetId,
-        killerId: payload.sourceId,
-        killerOwner: payload.sourceOwner,
+        sourceOwner: payload.sourceOwner,
+        context,
         damage: actualDamage,
       });
-
-      if (deathResult?.cancelled) {
-        return { damageDealt: actualDamage, killed: false, undyingSaved: true };
-      }
-
-      context.emitChild(EVT.UNIT_KILLED, {
-        sourceId: payload.sourceId,
-        targetId,
-        killerId: payload.sourceId,
-        killerOwner: payload.sourceOwner,
-      });
-
-      // Every production lethal path uses the lifecycle engine so zones,
-      // attachments, modifiers, attributes, and trigger subscriptions remain coherent.
-      // The fallback keeps this handler independently testable with a minimal state stub.
-      if (gameState.playerStates && gameState.eventBus) {
-        LifecycleEngine.destroyUnit(gameState, unit);
-      } else {
-        context.emitChild(EVT.UNIT_DESTROYED, { unitId: targetId, owner: payload.targetOwner });
+      if (!killResult.killed) {
+        return { damageDealt: actualDamage, killed: false, undyingSaved: killResult.undyingSaved === true };
       }
     }
 

@@ -113,6 +113,10 @@ export default class GameState {
     // Track cards played per player per round for "first card" requirements
     this._cardsPlayedThisRound = new Map();
 
+    // Pending repeat_play queues: username → Map<cardName, remaining plays>.
+    // "The next time you play X, play it N more times" (turn-scoped).
+    this._repeatPlays = new Map();
+
     // Injectable RNG for deterministic random behavior (Blinded, etc.)
     if (!options.rng || typeof options.rng.next !== "function" || typeof options.rng.getState !== "function") {
       throw new Error(
@@ -240,6 +244,11 @@ export default class GameState {
         }
         CombatSlotService.resetShinheuhSlot(this.playerStates[username]);
       }
+    }, { phase: "execute" });
+
+    // Turn end: clear pending repeat_play queues (they are turn-scoped).
+    this.eventBus.on(EVT.TURN_END, () => {
+      this._repeatPlays.clear();
     }, { phase: "execute" });
   }
 
@@ -704,6 +713,15 @@ export default class GameState {
       cardsPlayed[username] = count;
     }
 
+    const repeatPlays = {};
+    for (const username of [...this._repeatPlays.keys()].sort()) {
+      const entries = {};
+      for (const [cardName, count] of [...this._repeatPlays.get(username).entries()].sort()) {
+        entries[cardName] = count;
+      }
+      repeatPlays[username] = entries;
+    }
+
     return {
       roomCode: this.roomCode,
       usernames: [...this.usernames],
@@ -725,6 +743,7 @@ export default class GameState {
       rng: typeof this._rng?.getState === "function" ? this._rng.getState() : null,
       barrierUsedThisRound: [...this._barrierUsedThisRound].sort(),
       cardsPlayedThisRound: cardsPlayed,
+      repeatPlays,
     };
   }
 
@@ -749,6 +768,30 @@ export default class GameState {
   recordCardPlayed(username) {
     const count = this._cardsPlayedThisRound.get(username) || 0;
     this._cardsPlayedThisRound.set(username, count + 1);
+  }
+
+  /**
+   * Queue `amount` extra plays of `cardName` for `username` ("the next time
+   * you play X, play it N more times"). Turn-scoped; cleared on turn end.
+   */
+  queueRepeatPlay(username, cardName, amount) {
+    if (!this._repeatPlays.has(username)) this._repeatPlays.set(username, new Map());
+    const byName = this._repeatPlays.get(username);
+    const key = String(cardName).toLowerCase();
+    byName.set(key, (byName.get(key) || 0) + amount);
+  }
+
+  /**
+   * Consume and clear the pending repeat count for `cardName` for `username`.
+   * @returns {number} the number of extra plays queued (0 if none).
+   */
+  consumeRepeatPlays(username, cardName) {
+    const byName = this._repeatPlays.get(username);
+    if (!byName) return 0;
+    const key = String(cardName).toLowerCase();
+    const count = byName.get(key) || 0;
+    byName.delete(key);
+    return count;
   }
 
   /**

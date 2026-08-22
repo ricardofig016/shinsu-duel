@@ -23,6 +23,19 @@ import ReclaimCardsHandler from "./handlers/ReclaimCardsHandler.js";
 import GrantAbilityHandler from "./handlers/GrantAbilityHandler.js";
 import CreateCardHandler from "./handlers/CreateCardHandler.js";
 import NoopHandler from "./handlers/NoopHandler.js";
+import SlayHandler from "./handlers/SlayHandler.js";
+import TransformHandler from "./handlers/TransformHandler.js";
+import SummonHandler from "./handlers/SummonHandler.js";
+import StealHandler from "./handlers/StealHandler.js";
+import DiscardHandler from "./handlers/DiscardHandler.js";
+import DisarmHandler from "./handlers/DisarmHandler.js";
+import SwitchPositionHandler from "./handlers/SwitchPositionHandler.js";
+import RemoveTraitsHandler from "./handlers/RemoveTraitsHandler.js";
+import CopyTraitsHandler from "./handlers/CopyTraitsHandler.js";
+import GrantRandomTraitHandler from "./handlers/GrantRandomTraitHandler.js";
+import PeekHandHandler from "./handlers/PeekHandHandler.js";
+import CopyAbilityHandler from "./handlers/CopyAbilityHandler.js";
+import RepeatPlayHandler from "./handlers/RepeatPlayHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
 import PredicateEvaluator from "./services/PredicateEvaluator.js";
@@ -56,6 +69,21 @@ function getRegistry() {
     _registry.register("create_card", CreateCardHandler);
     _registry.register("noop", NoopHandler);
     _registry.register("quick", NoopHandler); // skill-level Quick marker (display-only)
+
+    // Phase E handlers — lifecycle, zone movement, unit state, abilities
+    _registry.register("slay", SlayHandler);
+    _registry.register("transform", TransformHandler);
+    _registry.register("summon", SummonHandler);
+    _registry.register("steal", StealHandler);
+    _registry.register("discard", DiscardHandler);
+    _registry.register("disarm", DisarmHandler);
+    _registry.register("switch_position", SwitchPositionHandler);
+    _registry.register("remove_traits", RemoveTraitsHandler);
+    _registry.register("copy_traits", CopyTraitsHandler);
+    _registry.register("grant_random_trait", GrantRandomTraitHandler);
+    _registry.register("peek_hand", PeekHandHandler);
+    _registry.register("copy_ability", CopyAbilityHandler);
+    _registry.register("repeat_play", RepeatPlayHandler);
   }
   return _registry;
 }
@@ -129,6 +157,8 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     name: structured.name,
     sharedAffiliation: structured.shared_affiliation,
     lowestHp: structured.lowestHp,
+    hasPassive: structured.hasPassive,
+    canSwitch: structured.canSwitch,
     count: Number.MAX_SAFE_INTEGER,
   });
 
@@ -279,6 +309,18 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
   // Build payload from DSL + extra context
   const payload = { ...effect, ...extra };
 
+  // Resolve an authored `owner` role ("you"/"opponent"/"self"/"enemy") into a
+  // concrete username. `owner` is a role in the DSL, never a username; the
+  // spread above already overwrote it with `extra.owner`, so read the role
+  // from the original effect object.
+  const OWNER_ROLES = new Set(["you", "opponent", "self", "enemy"]);
+  if (typeof effect.owner === "string" && OWNER_ROLES.has(effect.owner)) {
+    const acting = extra.owner || extra.sourceOwner;
+    payload.owner = effect.owner === "opponent" || effect.owner === "enemy"
+      ? gameState.usernames.find((u) => u !== acting)
+      : acting;
+  }
+
   // Shared-target link steps are resolved by resolveSharedSequence, which
   // supplies `sharedTargetIds` plus a concrete `targetId`. A link target
   // reached any other way is an authoring/runtime error.
@@ -335,6 +377,8 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       name: targetFilters.name,
       sharedAffiliation: targetFilters.shared_affiliation,
       lowestHp: targetFilters.lowestHp ?? payload.lowestHp,
+      hasPassive: targetFilters.hasPassive,
+      canSwitch: targetFilters.canSwitch,
       count: Number.MAX_SAFE_INTEGER,
     };
   };
@@ -394,22 +438,81 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     return targets.map((target) => resolveEffect(effect, context, gameState, { ...extra, targetId: target.id }));
   }
 
+  // Structured `source` unit descriptor (copy_traits / copy_ability): resolve
+  // it into a concrete `sourceUnitId`. Handlers never receive a `source`
+  // descriptor — there is a single resolution path through TargetResolver.
+  const SOURCE_DESCRIPTOR_TYPES = new Set(["copy_traits", "copy_ability"]);
+  if (SOURCE_DESCRIPTOR_TYPES.has(type) && !payload.sourceUnitId && payload.source && typeof payload.source === "object" && !Array.isArray(payload.source)) {
+    const structured = TargetResolver.normalizeStructuredTarget(payload.source);
+    const sourceCandidates = TargetResolver.resolveTargets(gameState, {
+      target: structured.target,
+      sourceUnit: payload.sourceUnit || gameState._findUnit(payload.sourceId),
+      sourceOwner: payload.sourceOwner || payload.owner,
+      condition: structured.condition,
+      conditionValue: structured.conditionValue,
+      trait: structured.trait,
+      traitNot: structured.traitNot,
+      cost: structured.cost,
+      rank: structured.rank,
+      position: structured.position,
+      affiliation: structured.affiliation,
+      attribute: structured.attribute,
+      name: structured.name,
+      count: Number.MAX_SAFE_INTEGER,
+    });
+
+    if (sourceCandidates.length === 0) {
+      return { skipped: true, reason: "no valid source" };
+    }
+    if (structured.random) {
+      shuffle(sourceCandidates, gameState._rng);
+      return resolveEffect(effect, context, gameState, { ...extra, sourceUnitId: sourceCandidates[0].id });
+    }
+    if (sourceCandidates.length === 1) {
+      payload.sourceUnitId = sourceCandidates[0].id;
+    } else {
+      gameState.createPendingDecision({
+        owner: payload.owner || payload.sourceOwner,
+        type: "target_selection",
+        candidates: sourceCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+        minChoices: 1,
+        maxChoices: 1,
+        resolve: ([sourceUnitId]) => {
+          resolveEffect(effect, context, gameState, { ...extra, sourceUnitId });
+        },
+      });
+      return { pending: true };
+    }
+  }
+
+  // `discard` targeting bearer attachments (`zone: attachments`): resolve the
+  // matching attached equipment instance ids and hand them to the handler.
+  if (type === "discard" && payload.card?.zone === "attachments" && !payload.attachmentIds) {
+    const unit = payload.sourceUnit || gameState._findUnit(payload.sourceId);
+    const attachments = (unit?.equipmentAttachments || []).map(toCardTargetView).filter(Boolean);
+    const matches = TargetResolver.resolveCardTargets(attachments, payload.card);
+    payload.attachmentIds = matches.map((c) => c.id);
+  }
+
   // Structured card targets ({ name, type, cost, ... }) select a card from the
-  // relevant zone for the card-consuming effects. The zone is derived from the
-  // effect type (not `card.zone`, which is not authored today). `create_card`
-  // resolves its own catalog candidates inside its handler.
+  // relevant zone for the card-consuming effects. An explicit `card.zone` wins;
+  // otherwise the zone is derived from the effect type. `create_card` resolves
+  // its own catalog candidates inside its handler, and `discard` against
+  // `zone: attachments` resolves bearer equipment above.
   if (payload.card && typeof payload.card === "object" && !Array.isArray(payload.card) && !payload.targetCardId) {
     const cardTarget = payload.card;
     const owner = payload.owner || payload.sourceOwner || extra.owner;
     const player = owner ? gameState.playerStates[owner] : null;
     // An explicit `card.zone` wins; otherwise the zone is derived from the
-    // effect type (compress → hand, draw → deck, reclaim → discard).
+    // effect type (compress → hand, draw → deck, reclaim → discard, discard
+    // → hand). `attachments` is resolved separately above (bearer equipment).
     const zone = cardTarget.zone ??
       (type === "compress_shinsu" ? "hand"
         : type === "draw_card" ? "deck"
         : type === "reclaim_cards" ? "discard"
+        : type === "discard" ? "hand"
         : null);
-    const zoneCards = zone ? player?.[zone] : null;
+    const zoneCards = zone && zone !== "attachments" ? player?.[zone] : null;
 
     if (zoneCards) {
       const candidates = TargetResolver.resolveCardTargets(

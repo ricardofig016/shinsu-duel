@@ -38,12 +38,22 @@ export default class PlaySkillAction extends ActionHandler {
     const effectContext = {
       emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload),
     };
-    resolveEffects(card.effects, effectContext, gameState, {
+    const extra = {
       owner: data.username,
       sourceId: card.id,
       sourceOwner: data.username,
       targetOwner: gameState.usernames.find((username) => username !== data.username),
-    });
+    };
+
+    // repeat_play: "the next time you play X, play it N more times". Consume the
+    // queued repeats and resolve the skill's effects that many additional times,
+    // flattened into one ordered effect list so pending-decision deferral stays
+    // uniform across the original play and every repeat.
+    const repeats = gameState.consumeRepeatPlays(data.username, card.name);
+    const totalEffects = [];
+    for (let i = 0; i < 1 + repeats; i++) totalEffects.push(...card.effects);
+
+    resolveEffects(totalEffects, effectContext, gameState, extra);
     gameState.completeActionAfterDecision(() => {
       ZoneService.discard(player, card);
       gameState.endTurn();

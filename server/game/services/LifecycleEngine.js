@@ -131,7 +131,20 @@ export default class LifecycleEngine {
     ZoneService.removeFromHand(player, handIndex);
     ShinsuService.spend(player, cost);
 
-    // Create unit. Capacity is guaranteed by the overflow continuation above.
+    const unit = LifecycleEngine._placeOnField(gameState, card, username, positionCode, cost);
+
+    return { unit, overflowDestroyed: false, pending: false };
+  }
+
+  /**
+   * Create a unit from a card instance, wire native traits/triggers/passives/
+   * attributes, and emit the deploy/summon event chain. The sole path that
+   * puts a fully-wired unit onto a field line — shared by deployment and
+   * summoning. Line capacity must be guaranteed by the caller.
+   */
+  static _placeOnField(gameState, card, owner, positionCode, cost) {
+    const positionDef = gameState.constructor.positions[positionCode];
+    const line = gameState.playerStates[owner].field[positionDef.line];
     const unit = new Unit(card, positionCode);
     line.push(unit);
     gameState._indexUnit(unit);
@@ -174,19 +187,162 @@ export default class LifecycleEngine {
     // `deploy` triggers, so the unit's complete observable state (native traits,
     // evolution triggers, passives, attribute engines) must exist first.
     gameState.eventBus.emit(EVT.UNIT_DEPLOYED, {
-      username,
+      username: owner,
       unit,
       positionCode,
       cost,
     });
 
     gameState.eventBus.emit(EVT.UNIT_SUMMONED, {
-      username,
+      username: owner,
       unit,
       unitId: unit.id,
     });
 
+    return unit;
+  }
+
+  /**
+   * Remove a unit from its field line without touching zones, subscriptions,
+   * or modifiers. Shared by `destroyUnit` and `stealUnit` so a unit is removed
+   * from the board in exactly one place.
+   */
+  static _removeFromField(gameState, unit) {
+    for (const username of gameState.usernames) {
+      const field = gameState.playerStates[username]?.field;
+      if (!field) continue;
+      for (const line of ["frontline", "backline"]) {
+        const idx = (field[line] || []).indexOf(unit);
+        if (idx !== -1) {
+          field[line].splice(idx, 1);
+          return;
+        }
+      }
+    }
+  }
+
+  /**
+   * Summon a unit onto a battlefield without paying its cost, spending a
+   * combat slot, or ending the turn (RULES.md §Shinheuh).
+   *
+   * Enforces same-name uniqueness: a summoned copy of a unit already on the
+   * owner's board is discarded. A full destination line defers to the same
+   * line-overflow decision used by deployment.
+   *
+   * @param {GameState} gameState
+   * @param {string} owner — the player whose field receives the unit
+   * @param {Card} card — the unit card instance to summon
+   * @param {string} positionCode — a legal position printed on the card
+   */
+  static summonUnit(gameState, owner, card, positionCode) {
+    const player = gameState.playerStates[owner];
+    if (!player) throw new Error(`Player "${owner}" not found`);
+    const positionDef = gameState.constructor.positions[positionCode];
+    if (!positionDef) throw new Error(`Invalid position: "${positionCode}"`);
+
+    const existingSame = player.field?.frontline
+      ?.concat(player.field?.backline || [])
+      .find((u) => u.card?.name === card.name);
+    if (existingSame) {
+      ZoneService.discard(player, card);
+      return { unit: null, discardedDuplicate: true, pending: false };
+    }
+
+    const line = player.field[positionDef.line];
+    if (line.length >= 5) {
+      const pendingCardId = `pending-summon:${card.id}`;
+      gameState.createPendingDecision({
+        owner,
+        type: "line_overflow",
+        candidates: [
+          ...line.map((candidate) => ({
+            id: candidate.id,
+            name: candidate.card.name,
+            hp: candidate.currentHp,
+          })),
+          { id: pendingCardId, name: card.name, hp: card.maxHp },
+        ],
+        resolve: ([selectedId]) => {
+          if (selectedId === pendingCardId) {
+            ZoneService.discard(player, card);
+            return;
+          }
+          const selectedUnit = gameState._findUnit(selectedId);
+          if (!selectedUnit || !line.includes(selectedUnit)) {
+            throw new Error("Selected overflow unit is no longer in the destination line.");
+          }
+          LifecycleEngine.destroyUnit(gameState, selectedUnit);
+          LifecycleEngine._placeOnField(gameState, card, owner, positionCode, 0);
+        },
+      });
+      return { unit: null, overflowDestroyed: true, pending: true };
+    }
+
+    const unit = LifecycleEngine._placeOnField(gameState, card, owner, positionCode, 0);
     return { unit, overflowDestroyed: false, pending: false };
+  }
+
+  /**
+   * Move a deployed unit to another player's field (steal). Ownership is
+   * reassigned; the unit's modifiers, subscriptions, and identity are kept
+   * intact. A full destination line defers to the same line-overflow decision
+   * as summoning.
+   *
+   * @param {GameState} gameState
+   * @param {object} unit — the deployed unit to steal
+   * @param {string} newOwner — the player receiving the unit
+   * @param {string} positionCode — a legal position printed on the card
+   */
+  static stealUnit(gameState, unit, newOwner, positionCode) {
+    if (!unit || !unit.isAlive()) return { stolen: false };
+    const newPlayer = gameState.playerStates[newOwner];
+    if (!newPlayer) throw new Error(`Player "${newOwner}" not found`);
+    const newLine = gameState.constructor.positions[positionCode]?.line;
+    if (!newLine) throw new Error(`Invalid position: "${positionCode}"`);
+    const line = newPlayer.field[newLine];
+
+    if (line.length >= 5) {
+      const pendingId = `pending-steal:${unit.id}`;
+      gameState.createPendingDecision({
+        owner: newOwner,
+        type: "line_overflow",
+        candidates: [
+          ...line.map((candidate) => ({
+            id: candidate.id,
+            name: candidate.card.name,
+            hp: candidate.currentHp,
+          })),
+          { id: pendingId, name: unit.card.name, hp: unit.card.maxHp },
+        ],
+        resolve: ([selectedId]) => {
+          if (selectedId === pendingId) {
+            LifecycleEngine._removeFromField(gameState, unit);
+            ZoneService.discard(gameState.playerStates[unit.owner], unit.card);
+            return;
+          }
+          const selectedUnit = gameState._findUnit(selectedId);
+          if (!selectedUnit || !line.includes(selectedUnit)) {
+            throw new Error("Selected overflow unit is no longer in the destination line.");
+          }
+          LifecycleEngine.destroyUnit(gameState, selectedUnit);
+          LifecycleEngine.stealUnit(gameState, unit, newOwner, positionCode);
+        },
+      });
+      return { stolen: true, pending: true };
+    }
+
+    LifecycleEngine._removeFromField(gameState, unit);
+    unit.owner = newOwner;
+    unit.card.owner = newOwner;
+    line.push(unit);
+    unit.placedPositionCode = positionCode;
+    gameState._indexUnit(unit);
+    gameState.eventBus.emit(EVT.UNIT_STOLEN, {
+      unitId: unit.id,
+      unit,
+      owner: newOwner,
+    });
+    return { stolen: true, pending: false };
   }
 
   /**
@@ -215,17 +371,7 @@ export default class LifecycleEngine {
 
     // Remove from field
     gameState._unindexUnit(unit.id);
-    for (const username of gameState.usernames) {
-      const field = gameState.playerStates[username]?.field;
-      if (!field) continue;
-      for (const line of ["frontline", "backline"]) {
-        const idx = (field[line] || []).indexOf(unit);
-        if (idx !== -1) {
-          field[line].splice(idx, 1);
-          break;
-        }
-      }
-    }
+    LifecycleEngine._removeFromField(gameState, unit);
 
     // Move card to discard
     const player = gameState.playerStates[unit.owner];
@@ -251,6 +397,60 @@ export default class LifecycleEngine {
       unit,
       owner: unit.owner,
     });
+  }
+
+  /**
+   * Kill a unit through the full lethal pipeline: death-intent (Undying can
+   * intercept) → unit:killed (Slay/kill triggers fire) → destroyUnit.
+   *
+   * Shared by `slay` (direct kill, ignoring damage) and the lethal tail of
+   * damage resolution, so both paths honor cheat-death and on-kill triggers
+   * identically.
+   *
+   * @param {GameState} gameState
+   * @param {object} unit — the unit to kill
+   * @param {object} [options]
+   * @param {string} [options.sourceId] — the killing source (slayer)
+   * @param {string} [options.sourceOwner] — the killing source's owner
+   * @param {EventContext} [options.context] — EventContext for DFS child events
+   * @param {number} [options.damage] — lethal damage amount (0 for Slay)
+   * @returns {{ killed: boolean, undyingSaved?: boolean }}
+   */
+  static killUnit(gameState, unit, { sourceId, sourceOwner, context, damage = 0 } = {}) {
+    if (!unit) return { killed: false };
+
+    const emit = (eventName, payload) =>
+      context ? context.emitChild(eventName, payload) : gameState.eventBus.emit(eventName, payload);
+
+    const deathResult = emit(EVT.UNIT_DEATH_INTENT, {
+      sourceId,
+      targetId: unit.id,
+      killerId: sourceId,
+      killerOwner: sourceOwner,
+      damage,
+    });
+    if (deathResult?.cancelled) {
+      return { killed: false, undyingSaved: true };
+    }
+
+    emit(EVT.UNIT_KILLED, {
+      sourceId,
+      targetId: unit.id,
+      killerId: sourceId,
+      killerOwner: sourceOwner,
+    });
+
+    // Every production lethal path uses the lifecycle engine so zones,
+    // attachments, modifiers, attributes, and trigger subscriptions remain
+    // coherent. The fallback keeps this independently testable with a minimal
+    // state stub.
+    if (gameState.playerStates && gameState.eventBus) {
+      LifecycleEngine.destroyUnit(gameState, unit);
+    } else {
+      emit(EVT.UNIT_DESTROYED, { unitId: unit.id, owner: unit.owner || sourceOwner });
+    }
+
+    return { killed: true };
   }
 
   /**
@@ -424,14 +624,13 @@ export default class LifecycleEngine {
 
   /**
    * Detach one equipment card, or every attachment when no card is specified.
-   * Detached ignited cards return as fresh base-form instances.
+   * Detached ignited cards return as fresh base-form instances to the
+   * controller's hand.
    */
   static detachEquipment(gameState, unit, equipment = null) {
     const attachments = LifecycleEngine._getEquipment(unit);
     const toDetach = equipment ? attachments.filter((entry) => entry === equipment) : attachments;
     if (toDetach.length === 0) return;
-
-    const player = gameState.playerStates[unit.owner];
 
     // Detach from the canonical attachment list FIRST so always-on passives
     // that gate on `has_equipped`/`has_all_equipped` read the post-detach
@@ -440,27 +639,53 @@ export default class LifecycleEngine {
     LifecycleEngine._syncEquipment(unit, attachments.filter((entry) => !toDetach.includes(entry)));
 
     for (const equip of toDetach) {
-      gameState.modifierStack.removeBySource(equip.id);
-      gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
-      // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
-      // (triggered by removeBySource above).
-
-      if (player) {
-        if (equip.ignitedFrom !== undefined && equip.ignitedFrom !== null) {
-          const baseCardData = gameState.constructor.cards[equip.ignitedFrom];
-          if (baseCardData) {
-            ZoneService.addToHand(player, new Card(equip.ignitedFrom, baseCardData, unit.owner, gameState.eventBus));
-          }
-        } else {
-          ZoneService.addToHand(player, equip);
-        }
-      }
-
-      gameState.eventBus.emit(EVT.EQUIPMENT_DETACHED, {
-        unitId: unit.id,
-        equipment: equip,
-      });
+      LifecycleEngine._detachOne(gameState, unit, equip, "hand", unit.owner);
     }
+  }
+
+  /**
+   * Detach one equipment card and send it to the controller's discard pile
+   * (used by the `discard` effect against `zone: attachments`).
+   */
+  static discardEquipment(gameState, unit, equipment) {
+    const attachments = LifecycleEngine._getEquipment(unit);
+    if (!attachments.includes(equipment)) return;
+    LifecycleEngine._syncEquipment(unit, attachments.filter((entry) => entry !== equipment));
+    LifecycleEngine._detachOne(gameState, unit, equipment, "discard", unit.owner);
+  }
+
+  /**
+   * Detach a single equipment card: remove its modifiers and ignition
+   * subscriptions, route the (de-ignited) card to `destination` ("hand" |
+   * "discard") for `destOwner`, and emit `equipment:detached`.
+   */
+  static _detachOne(gameState, unit, equip, destination, destOwner) {
+    gameState.modifierStack.removeBySource(equip.id);
+    gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
+    // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
+    // (triggered by removeBySource above).
+
+    const player = gameState.playerStates[destOwner];
+    let routed = null;
+    if (equip.ignitedFrom !== undefined && equip.ignitedFrom !== null) {
+      const baseCardData = gameState.constructor.cards[equip.ignitedFrom];
+      if (baseCardData) {
+        routed = new Card(equip.ignitedFrom, baseCardData, destOwner, gameState.eventBus);
+      }
+    } else {
+      equip.owner = destOwner;
+      routed = equip;
+    }
+
+    if (player && routed) {
+      if (destination === "discard") ZoneService.discard(player, routed);
+      else ZoneService.addToHand(player, routed);
+    }
+
+    gameState.eventBus.emit(EVT.EQUIPMENT_DETACHED, {
+      unitId: unit.id,
+      equipment: equip,
+    });
   }
 
   static _getEquipment(unit) {

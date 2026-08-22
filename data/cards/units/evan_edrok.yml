@@ -25,7 +25,7 @@ abilities:
       choose: true
     raw: "draw an equipment of your choice"
   - type: switch_position
-    target: { side: enemy }
+    target: { side: enemy, can_switch: true }
     raw: "force an enemy to switch positions"
 evolve:
 traits:

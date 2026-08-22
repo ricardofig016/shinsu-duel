@@ -9,6 +9,7 @@
  */
 
 import TargetResolver from "../TargetResolver.js";
+import { findCardsBySeries } from "../utils/cardData.js";
 
 export default class PredicateEvaluator {
   /**
@@ -59,12 +60,18 @@ export default class PredicateEvaluator {
       }
 
       case "has_all_equipped": {
-        if (!Array.isArray(predicate.cardNames)) {
-          throw new Error("PredicateEvaluator: has_all_equipped requires a `cardNames` array");
+        if (!predicate.series) {
+          throw new Error("PredicateEvaluator: has_all_equipped requires a `series`");
         }
         const unit = extra.sourceUnit || gameState._findUnit(extra.sourceId);
+        const seriesCards = findCardsBySeries(
+          gameState.constructor.cards,
+          predicate.series,
+          "equipment"
+        );
+        if (seriesCards.length === 0) return false;
         const equipped = new Set((unit?.equipmentAttachments || []).map((c) => c.name.toLowerCase()));
-        return predicate.cardNames.every((name) => equipped.has(name.toLowerCase()));
+        return seriesCards.every((card) => equipped.has(card.name.toLowerCase()));
       }
 
       case "has_equipment_count": {

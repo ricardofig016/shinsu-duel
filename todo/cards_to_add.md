@@ -1,5 +1,14 @@
 # cards to add
 
-## Xia Xia
+## cards
+
+### Xia Xia
 
 TBA
+
+## ideas
+
+equipment - "my bearer can assume any position"
+passive - "allies in my position have +x HP"
+landmark - "round start: give frontline units Blinded"
+passive - "give me a random non numeric trait"
