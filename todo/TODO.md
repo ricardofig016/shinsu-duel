@@ -4,9 +4,8 @@
 
 - [ ] frontend: change board background to something from the webtoon
 - [ ] plan: audit phase 2 again
-- [ ] rules: revisit position switching (cost 1 shinsu / spend a combat slot)
-- [ ] public: plan how image artworks should be organized
-- [ ] rules: add "steal" keyword
+- [ ] rules: revisit action switch position (cost 1 shinsu / spend a combat slot)
+- [ ] public: plan how image artworks should be matched to cards
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 - [ ] game: add support for `any` position which represents all main positions
@@ -16,6 +15,7 @@
 
 ## Completed
 
+- [x] rules: add `steal` keyword
 - [x] rules: rename `create` keyword to `light up` - "create" is overloaded with 2 meanings
 - [x] LifecycleEngine: the LIW check in `attachEquipment` compares against the spaced string "living ignition weapon" while compiled card attributes are the dashed "living-ignition-weapon"
 - [x] data: add yml files for new cards in `todo\cards_to_add.md`
