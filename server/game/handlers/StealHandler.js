@@ -37,6 +37,8 @@ export default class StealHandler extends BaseHandler {
       affiliation: descriptor.affiliation,
       attribute: descriptor.attribute,
       name: descriptor.name,
+      kind: descriptor.kind,
+      line: descriptor.line,
     }, acting);
 
     if (candidates.length === 0) return { stolen: false, reason: "no valid target" };
@@ -66,6 +68,12 @@ export default class StealHandler extends BaseHandler {
   }
 
   _autoPosition(unit, newOwner, gameState) {
+    // Special kinds carry no printed position — their destination line is
+    // authored (shinheuh) or implied by kind (landmark/conduit → backline).
+    if (unit.card.kind !== "standard") {
+      return unit.card.kind === "shinheuh" ? unit.card.line : "backline";
+    }
+
     const positions = Object.keys(unit.card.positions || {});
     for (const pos of positions) {
       const line = gameState.constructor.positions[pos]?.line;

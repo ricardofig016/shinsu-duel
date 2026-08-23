@@ -27,7 +27,7 @@ describe("TransformHandler", () => {
 
   test("throws when the target card name does not exist", () => {
     const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
-    const unit = deployUnit(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
+    const unit = deployUnit(game, "Alice", "Test Shinheuh", "frontline");
 
     expect(() => handler.execute(
       { sourceUnit: unit, sourceId: unit.id, cardName: "Does Not Exist" },

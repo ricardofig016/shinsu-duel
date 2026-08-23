@@ -23,13 +23,18 @@ export default class DeployUnitAction extends ActionHandler {
     if (gameState.currentTurn !== username) throw new Error("It's not your turn.");
 
     if (handId < 0 || handId >= playerState.hand.length) throw new Error("Invalid handId.");
-    if (!gameState.constructor.positions[placedPositionCode])
-      throw new Error(`Invalid placedPositionCode: ${placedPositionCode}`);
 
     const card = playerState.hand[handId];
     if (!card || card.type !== "unit") throw new Error("Card is not a unit or not in hand.");
-    if (!(placedPositionCode in card.positions))
-      throw new Error(`Card cannot be placed in position ${placedPositionCode}.`);
+
+    // Standard units occupy a printed main position; special kinds carry no
+    // position (their field line is authored or implied by kind).
+    if (card.kind === "standard") {
+      if (!gameState.constructor.positions[placedPositionCode])
+        throw new Error(`Invalid placedPositionCode: ${placedPositionCode}`);
+      if (!(placedPositionCode in card.positions))
+        throw new Error(`Card cannot be placed in position ${placedPositionCode}.`);
+    }
 
     const effectiveCost = ModifierService.getEffectiveCost(card, username, gameState);
     if (effectiveCost > gameState.getTotalShinsu(username))

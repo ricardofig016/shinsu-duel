@@ -56,6 +56,8 @@ describe("cardData helpers", () => {
       name: "Incinerate II",
       series: "incinerate",
       type: "skill",
+      kind: "standard",
+      line: null,
       cost: 0,
       rank: null,
       positions: ["wave-controller"],

@@ -253,6 +253,18 @@ function filterByName(targets, name) {
   return targets.filter((u) => u.card?.name?.toLowerCase() === expected);
 }
 
+function filterByKind(targets, kind) {
+  if (!kind) return targets;
+  const kinds = Array.isArray(kind) ? kind : [kind];
+  return targets.filter((u) => kinds.includes(u.card?.kind));
+}
+
+function filterByLine(targets, line) {
+  if (!line) return targets;
+  const lines = Array.isArray(line) ? line : [line];
+  return targets.filter((u) => lines.includes(u.line));
+}
+
 /**
  * Apply every unit filter to a candidate list. Shared by `resolveTargets` and
  * `resolveExistenceUnits` so the filter vocabulary has a single source of truth.
@@ -269,6 +281,8 @@ function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
     affiliation = null,
     attribute = null,
     name = null,
+    kind = null,
+    line = null,
     sharedAffiliation = null,
     lowestHp = false,
     hasPassive = false,
@@ -282,6 +296,8 @@ function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
   candidates = filterByAffiliation(candidates, affiliation);
   candidates = filterByAttribute(candidates, attribute);
   candidates = filterByName(candidates, name);
+  candidates = filterByKind(candidates, kind);
+  candidates = filterByLine(candidates, line);
   candidates = filterByCost(candidates, cost);
   if (sharedAffiliation) candidates = filterBySharedAffiliation(candidates, gameState, sourceUnit);
   candidates = selectLowestHp(candidates, lowestHp);
@@ -378,6 +394,8 @@ export function resolveTargets(gameState, options) {
     affiliation = null,
     attribute = null,
     name = null,
+    kind = null,
+    line = null,
     sharedAffiliation = null,
     lowestHp = false,
     hasPassive = false,
@@ -489,6 +507,8 @@ export function resolveTargets(gameState, options) {
     affiliation,
     attribute,
     name,
+    kind,
+    line,
     sharedAffiliation,
     lowestHp,
     hasPassive,
@@ -539,7 +559,7 @@ export function resolveTargets(gameState, options) {
 export function resolveCardTargets(cards, descriptor) {
   if (!Array.isArray(cards) || !descriptor || typeof descriptor !== "object") return [];
 
-  const { name, series, type, cost, rank, position, affiliation, attribute } = descriptor;
+  const { name, series, type, cost, rank, position, affiliation, attribute, kind, line } = descriptor;
 
   const matchAny = (values, test) => {
     const list = Array.isArray(values) ? values : [values];
@@ -570,6 +590,12 @@ export function resolveCardTargets(cards, descriptor) {
   }
   if (attribute !== undefined) {
     candidates = candidates.filter((c) => matchAny(attribute, (a) => c.attributes.includes(a)));
+  }
+  if (kind !== undefined) {
+    candidates = candidates.filter((c) => matchAny(kind, (k) => c.kind === k));
+  }
+  if (line !== undefined) {
+    candidates = candidates.filter((c) => matchAny(line, (l) => c.line === l));
   }
   if (cost !== undefined) {
     if (typeof cost === "number") {

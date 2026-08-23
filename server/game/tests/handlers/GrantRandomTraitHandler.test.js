@@ -23,7 +23,7 @@ describe("GrantRandomTraitHandler", () => {
 
   test("grants a random numeric trait", () => {
     const game = setupGameWithCardsInHand(["Test Shinheuh", "Test Shinheuh"]);
-    const unit = deploy(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
+    const unit = deploy(game, "Alice", "Test Shinheuh", "frontline");
 
     const result = handler.execute(
       { targetId: unit.id, numeric: true, sourceId: "Ability#1", sourceType: "unit" },
@@ -38,7 +38,7 @@ describe("GrantRandomTraitHandler", () => {
 
   test("grants any random trait when numeric is omitted", () => {
     const game = setupGameWithCardsInHand(["Test Shinheuh", "Test Shinheuh"]);
-    const unit = deploy(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
+    const unit = deploy(game, "Alice", "Test Shinheuh", "frontline");
 
     const result = handler.execute(
       { targetId: unit.id, sourceId: "Ability#1" },
@@ -53,7 +53,7 @@ describe("GrantRandomTraitHandler", () => {
   test("deterministically grants the same random trait for the same seed", () => {
     const run = () => {
       const game = setupGameWithCardsInHand(["Test Shinheuh", "Test Shinheuh"]);
-      const unit = deploy(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
+      const unit = deploy(game, "Alice", "Test Shinheuh", "frontline");
       const result = handler.execute(
         { targetId: unit.id, sourceId: "Ability#1" },
         context(game),

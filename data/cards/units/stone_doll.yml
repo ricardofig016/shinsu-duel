@@ -1,10 +1,9 @@
 type: unit
+kind: shinheuh
 name: Stone Doll
 cost: 0
 hp: 20
-rank: 
-positions:
-  - frontline shinheuh
+line: frontline
 deckConstraints:
   - type: unreachable
     raw: "i am Unreachable"

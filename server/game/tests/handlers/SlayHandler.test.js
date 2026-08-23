@@ -13,7 +13,7 @@ describe("SlayHandler", () => {
 
   test("kills an alive target through the lethal pipeline", () => {
     const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
-    const target = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    const target = deployUnit(game, "Bob", "Test Shinheuh", "frontline");
 
     const killed = [];
     game.eventBus.on(EVT.UNIT_KILLED, (p) => killed.push(p.targetId), { phase: "post" });
@@ -31,7 +31,7 @@ describe("SlayHandler", () => {
 
   test("Undying intercepts and saves a Slayed unit", () => {
     const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
-    const target = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    const target = deployUnit(game, "Bob", "Test Shinheuh", "frontline");
 
     game.modifierStack.apply({
       sourceId: "System", sourceType: "system", targetId: target.id,

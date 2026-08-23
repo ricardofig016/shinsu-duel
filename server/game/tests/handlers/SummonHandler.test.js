@@ -46,7 +46,7 @@ describe("SummonHandler", () => {
   test("summons a random Shinheuh from the game catalog", () => {
     const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
     const result = handler.execute(
-      { owner: "Alice", card: { position: ["frontline-shinheuh", "backline-shinheuh"], cost: 3, random: true }, from: "game", onto: "self" },
+      { owner: "Alice", card: { kind: "shinheuh", cost: 3, random: true }, from: "game", onto: "self" },
       context(game),
       game
     );
@@ -59,7 +59,7 @@ describe("SummonHandler", () => {
     const run = () => {
       const game = setupGameWithHands({ Alice: [] });
       handler.execute(
-        { owner: "Alice", card: { position: ["frontline-shinheuh", "backline-shinheuh"], random: true }, from: "game", onto: "self" },
+        { owner: "Alice", card: { kind: "shinheuh", random: true }, from: "game", onto: "self" },
         context(game),
         game
       );
@@ -71,7 +71,7 @@ describe("SummonHandler", () => {
 
   test("a summoned duplicate of an existing unit is discarded", () => {
     const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
-    deployUnit(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
+    deployUnit(game, "Alice", "Test Shinheuh", "frontline");
     addCardToHand(game, "Alice", "Test Shinheuh");
 
     const result = handler.execute(

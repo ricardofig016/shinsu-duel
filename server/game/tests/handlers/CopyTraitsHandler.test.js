@@ -23,7 +23,7 @@ describe("CopyTraitsHandler", () => {
   test("copies every active trait from the source onto the target", () => {
     const game = setupGameWithCardsInHand(["Test Trait Unit", "Test Shinheuh", "Test Trait Unit", "Test Shinheuh"]);
     const source = deploy(game, "Alice", "Test Trait Unit", "fisherman");
-    const target = deploy(game, "Alice", "Test Shinheuh", "frontline-shinheuh");
+    const target = deploy(game, "Alice", "Test Shinheuh", "frontline");
 
     expect(game.modifierStack.getActiveKeys(target.id, "trait").size).toBe(0);
 

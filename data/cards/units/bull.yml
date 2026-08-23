@@ -1,10 +1,9 @@
 type: unit
+kind: shinheuh
 name: Bull
 cost: 3
 hp: 3
-rank:
-positions:
-  - frontline shinheuh
+line: frontline
 passives:
 abilities:
   - type: deal_damage

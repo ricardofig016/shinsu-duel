@@ -481,4 +481,26 @@ describe("TargetResolver structured filters", () => {
     expect(() => TargetResolver.resolveTargets(game, { target: "all_enemies", sourceOwner: game.usernames[0], sharedAffiliation: true }))
       .toThrow("shared_affiliation filter requires sourceUnit");
   });
+
+  test("kind and line filters match a unit's archetype and field line", () => {
+    const source = unit("s", game.usernames[0], "scout", { name: "Source", kind: "standard", affiliations: {}, attributes: [] });
+    const bull = { ...unit("b", game.usernames[1], null, { name: "Bull", kind: "shinheuh", affiliations: {}, attributes: [] }), line: "frontline" };
+    const stone = { ...unit("st", game.usernames[1], null, { name: "Stone Doll", kind: "shinheuh", affiliations: {}, attributes: [] }), line: "frontline" };
+    const landmark = { ...unit("lm", game.usernames[1], null, { name: "Landmark", kind: "landmark", affiliations: {}, attributes: [] }), line: "backline" };
+    game.playerStates[game.usernames[0]].field.frontline = [source];
+    game.playerStates[game.usernames[1]].field.frontline = [bull, stone];
+    game.playerStates[game.usernames[1]].field.backline = [landmark];
+
+    expect(TargetResolver.resolveTargets(game, { target: "unit", kind: "shinheuh", count: 10 }).map((t) => t.id)).toEqual(["b", "st"]);
+    expect(TargetResolver.resolveTargets(game, { target: "unit", kind: "landmark", count: 10 }).map((t) => t.id)).toEqual(["lm"]);
+    expect(TargetResolver.resolveTargets(game, { target: "unit", kind: "shinheuh", line: "frontline", count: 10 }).map((t) => t.id)).toEqual(["b", "st"]);
+  });
+
+  test("resolveExistenceUnits inherits kind filtering via applyFilters", () => {
+    const bull = { ...unit("b", game.usernames[1], null, { name: "Bull", kind: "shinheuh", affiliations: {}, attributes: [] }), line: "frontline" };
+    game.playerStates[game.usernames[1]].field.frontline = [bull];
+
+    expect(TargetResolver.resolveExistenceUnits(game, { side: "enemy", kind: "shinheuh" }, game.usernames[0]).map((u) => u.id)).toEqual(["b"]);
+    expect(TargetResolver.resolveExistenceUnits(game, { side: "enemy", kind: "landmark" }, game.usernames[0])).toEqual([]);
+  });
 });

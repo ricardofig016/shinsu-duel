@@ -7,6 +7,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -24,6 +25,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -41,6 +43,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -58,6 +61,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -75,6 +79,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -92,6 +97,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -109,6 +115,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -126,6 +133,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -143,6 +151,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -160,6 +169,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -177,6 +187,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -194,6 +205,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -211,6 +223,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -228,6 +241,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -245,6 +259,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -262,6 +277,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -279,6 +295,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -296,6 +313,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -313,6 +331,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -330,6 +349,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -347,6 +367,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -364,6 +385,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -381,6 +403,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -398,6 +421,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -415,6 +439,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -432,6 +457,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -449,6 +475,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -466,6 +493,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -483,6 +511,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -500,6 +529,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -517,6 +547,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -534,6 +565,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -551,6 +583,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -568,6 +601,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -585,6 +619,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -602,6 +637,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -619,6 +655,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -636,6 +673,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -653,6 +691,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -670,6 +709,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -713,6 +753,7 @@
     "deckConstraints": [],
     "hp": 5,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "wave-controller",
       "scout"
@@ -728,10 +769,7 @@
       {
         "type": "summon",
         "card": {
-          "position": [
-            "frontline-shinheuh",
-            "backline-shinheuh"
-          ],
+          "kind": "shinheuh",
           "cost": 2,
           "random": true
         },
@@ -742,10 +780,7 @@
       {
         "type": "steal",
         "card": {
-          "position": [
-            "frontline-shinheuh",
-            "backline-shinheuh"
-          ],
+          "kind": "shinheuh",
           "cost": "cheapest"
         },
         "raw": "steal the enemy's cheapest Shinheuh"
@@ -790,6 +825,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "spear-bearer"
     ],
@@ -809,6 +845,7 @@
     "deckConstraints": [],
     "hp": 11,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -875,6 +912,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -948,11 +986,31 @@
   "10008": {
     "cardId": 10008,
     "type": "unit",
+    "name": "Test Conduit",
+    "cost": 0,
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
+    "hp": 2,
+    "kind": "conduit",
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": []
+  },
+  "10009": {
+    "cardId": 10009,
+    "type": "unit",
     "name": "Test Copy Ability Unit",
     "cost": 4,
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -986,8 +1044,8 @@
     ],
     "passives": []
   },
-  "10009": {
-    "cardId": 10009,
+  "10010": {
+    "cardId": 10010,
     "type": "skill",
     "name": "Test Damage Skill",
     "cost": 0,
@@ -1020,14 +1078,15 @@
       }
     ]
   },
-  "10010": {
-    "cardId": 10010,
+  "10011": {
+    "cardId": 10011,
     "type": "unit",
     "name": "Test Deploy Evolve",
     "cost": 1,
     "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer",
@@ -1051,17 +1110,18 @@
           "raw": "when i am deployed"
         }
       ],
-      "cardId": 10011
+      "cardId": 10012
     }
   },
-  "10011": {
-    "cardId": 10011,
+  "10012": {
+    "cardId": 10012,
     "type": "unit",
     "name": "Test Deploy Evolve - Evolved",
     "cost": 1,
     "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer",
@@ -1074,10 +1134,10 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 10010
+    "evolvedFrom": 10011
   },
-  "10012": {
-    "cardId": 10012,
+  "10013": {
+    "cardId": 10013,
     "type": "equipment",
     "name": "Test Dionysos Wings",
     "cost": 2,
@@ -1093,8 +1153,8 @@
       }
     ]
   },
-  "10013": {
-    "cardId": 10013,
+  "10014": {
+    "cardId": 10014,
     "type": "equipment",
     "name": "Test Equipment Filler",
     "cost": 1,
@@ -1110,14 +1170,15 @@
       }
     ]
   },
-  "10014": {
-    "cardId": 10014,
+  "10015": {
+    "cardId": 10015,
     "type": "unit",
     "name": "Test Evolve Unit",
     "cost": 7,
     "deckConstraints": [],
     "hp": 7,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout",
@@ -1153,17 +1214,18 @@
           "raw": "Fisherman: equip with Test Armor"
         }
       ],
-      "cardId": 10015
+      "cardId": 10016
     }
   },
-  "10015": {
-    "cardId": 10015,
+  "10016": {
+    "cardId": 10016,
     "type": "unit",
     "name": "Test Evolve Unit - Evolved",
     "cost": 7,
     "deckConstraints": [],
     "hp": 9,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout",
@@ -1203,10 +1265,10 @@
         "raw": "round end: deal 3 to all Rooted enemies"
       }
     ],
-    "evolvedFrom": 10014
+    "evolvedFrom": 10015
   },
-  "10016": {
-    "cardId": 10016,
+  "10017": {
+    "cardId": 10017,
     "type": "skill",
     "name": "Test Expensive Skill",
     "cost": 3,
@@ -1250,14 +1312,15 @@
       }
     ]
   },
-  "10017": {
-    "cardId": 10017,
+  "10018": {
+    "cardId": 10018,
     "type": "unit",
     "name": "Test Expensive Unit",
     "cost": 9,
     "deckConstraints": [],
     "hp": 7,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "wave-controller"
@@ -1270,14 +1333,15 @@
     "abilities": [],
     "passives": []
   },
-  "10018": {
-    "cardId": 10018,
+  "10019": {
+    "cardId": 10019,
     "type": "unit",
     "name": "Test Filler Unit",
     "cost": 4,
     "deckConstraints": [],
     "hp": 7,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller",
       "spear-bearer"
@@ -1304,14 +1368,15 @@
     ],
     "passives": []
   },
-  "10019": {
-    "cardId": 10019,
+  "10020": {
+    "cardId": 10020,
     "type": "unit",
     "name": "Test Fisherman Unit",
     "cost": 4,
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -1352,14 +1417,15 @@
       }
     ]
   },
-  "10020": {
-    "cardId": 10020,
+  "10021": {
+    "cardId": 10021,
     "type": "unit",
     "name": "Test Free Keyword Unit",
     "cost": 1,
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -1404,8 +1470,8 @@
       }
     ]
   },
-  "10021": {
-    "cardId": 10021,
+  "10022": {
+    "cardId": 10022,
     "type": "equipment",
     "name": "Test Grant Ability Equip",
     "cost": 3,
@@ -1440,8 +1506,8 @@
       }
     ]
   },
-  "10022": {
-    "cardId": 10022,
+  "10023": {
+    "cardId": 10023,
     "type": "skill",
     "name": "Test Heal",
     "cost": 2,
@@ -1457,14 +1523,15 @@
       }
     ]
   },
-  "10023": {
-    "cardId": 10023,
+  "10024": {
+    "cardId": 10024,
     "type": "unit",
     "name": "Test Hwa Ryun",
     "cost": 3,
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -1512,14 +1579,15 @@
       }
     ]
   },
-  "10024": {
-    "cardId": 10024,
+  "10025": {
+    "cardId": 10025,
     "type": "unit",
     "name": "Test Hwayeomsa",
     "cost": 5,
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -1556,8 +1624,8 @@
       }
     ]
   },
-  "10025": {
-    "cardId": 10025,
+  "10026": {
+    "cardId": 10026,
     "type": "equipment",
     "name": "Test Ignite Weapon",
     "cost": 2,
@@ -1581,11 +1649,11 @@
           "raw": "the bearer Slays a unit"
         }
       ],
-      "cardId": 10026
+      "cardId": 10027
     }
   },
-  "10026": {
-    "cardId": 10026,
+  "10027": {
+    "cardId": 10027,
     "type": "equipment",
     "name": "Test Ignite Weapon - Ignited",
     "cost": 2,
@@ -1613,10 +1681,10 @@
         "raw": "the bearer's damage-dealing abilities give Exhausted 1"
       }
     ],
-    "ignitedFrom": 10025
+    "ignitedFrom": 10026
   },
-  "10027": {
-    "cardId": 10027,
+  "10028": {
+    "cardId": 10028,
     "type": "skill",
     "name": "Test Incinerate I",
     "series": "incinerate",
@@ -1644,8 +1712,8 @@
       }
     ]
   },
-  "10028": {
-    "cardId": 10028,
+  "10029": {
+    "cardId": 10029,
     "type": "skill",
     "name": "Test Incinerate II",
     "series": "incinerate",
@@ -1674,8 +1742,8 @@
       }
     ]
   },
-  "10029": {
-    "cardId": 10029,
+  "10030": {
+    "cardId": 10030,
     "type": "skill",
     "name": "Test Incinerate III",
     "series": "incinerate",
@@ -1719,8 +1787,8 @@
       }
     ]
   },
-  "10030": {
-    "cardId": 10030,
+  "10031": {
+    "cardId": 10031,
     "type": "skill",
     "name": "Test Incinerate IV",
     "series": "incinerate",
@@ -1763,16 +1831,34 @@
       }
     ]
   },
-  "10031": {
-    "cardId": 10031,
+  "10032": {
+    "cardId": 10032,
+    "type": "unit",
+    "name": "Test Landmark Rules",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 6,
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "disable_passives",
+        "raw": "passives have no effect"
+      }
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": []
+  },
+  "10033": {
+    "cardId": 10033,
     "type": "unit",
     "name": "Test Landmark Unit",
     "cost": 2,
     "deckConstraints": [],
     "hp": 11,
-    "positions": [
-      "landmark"
-    ],
+    "kind": "landmark",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -1800,14 +1886,15 @@
       }
     ]
   },
-  "10032": {
-    "cardId": 10032,
+  "10034": {
+    "cardId": 10034,
     "type": "unit",
     "name": "Test Light Bearer",
     "cost": 1,
     "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],
@@ -1819,14 +1906,15 @@
     "abilities": [],
     "passives": []
   },
-  "10033": {
-    "cardId": 10033,
+  "10035": {
+    "cardId": 10035,
     "type": "unit",
     "name": "Test Light Bearer Only",
     "cost": 0,
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],
@@ -1849,8 +1937,8 @@
     ],
     "passives": []
   },
-  "10034": {
-    "cardId": 10034,
+  "10036": {
+    "cardId": 10036,
     "type": "equipment",
     "name": "Test Modify Ability Equip",
     "cost": 3,
@@ -1885,14 +1973,15 @@
       }
     ]
   },
-  "10035": {
-    "cardId": 10035,
+  "10037": {
+    "cardId": 10037,
     "type": "unit",
     "name": "Test Multi Position",
     "cost": 3,
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer"
@@ -1933,17 +2022,18 @@
           "raw": "Test Poison Skill is played on me"
         }
       ],
-      "cardId": 10036
+      "cardId": 10038
     }
   },
-  "10036": {
-    "cardId": 10036,
+  "10038": {
+    "cardId": 10038,
     "type": "unit",
     "name": "Test Multi Position - Evolved",
     "cost": 3,
     "deckConstraints": [],
     "hp": 5,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer"
@@ -2000,16 +2090,17 @@
         "raw": "round end: create Test Poison Skill in your hand and revert me to Test Multi Position"
       }
     ],
-    "evolvedFrom": 10035
+    "evolvedFrom": 10037
   },
-  "10037": {
-    "cardId": 10037,
+  "10039": {
+    "cardId": 10039,
     "type": "unit",
     "name": "Test No Undying Unit",
     "cost": 1,
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -2028,14 +2119,15 @@
     ],
     "passives": []
   },
-  "10038": {
-    "cardId": 10038,
+  "10040": {
+    "cardId": 10040,
     "type": "unit",
     "name": "Test Novick",
     "cost": 5,
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "spear-bearer",
       "fisherman"
@@ -2073,8 +2165,8 @@
       }
     ]
   },
-  "10039": {
-    "cardId": 10039,
+  "10041": {
+    "cardId": 10041,
     "type": "skill",
     "name": "Test Poison Skill",
     "cost": 1,
@@ -2094,14 +2186,15 @@
       }
     ]
   },
-  "10040": {
-    "cardId": 10040,
+  "10042": {
+    "cardId": 10042,
     "type": "unit",
     "name": "Test Princess Unit",
     "cost": 6,
     "deckConstraints": [],
     "hp": 8,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -2127,14 +2220,15 @@
     ],
     "passives": []
   },
-  "10041": {
-    "cardId": 10041,
+  "10043": {
+    "cardId": 10043,
     "type": "unit",
     "name": "Test Random Target Unit",
     "cost": 2,
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -2154,8 +2248,8 @@
     ],
     "passives": []
   },
-  "10042": {
-    "cardId": 10042,
+  "10044": {
+    "cardId": 10044,
     "type": "equipment",
     "name": "Test Repeat Equip",
     "cost": 0,
@@ -2176,14 +2270,15 @@
       }
     ]
   },
-  "10043": {
-    "cardId": 10043,
+  "10045": {
+    "cardId": 10045,
     "type": "unit",
     "name": "Test Scout",
     "cost": 1,
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout"
@@ -2213,14 +2308,15 @@
     ],
     "passives": []
   },
-  "10044": {
-    "cardId": 10044,
+  "10046": {
+    "cardId": 10046,
     "type": "unit",
     "name": "Test Scout Ranker",
     "cost": 3,
     "deckConstraints": [],
     "hp": 2,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -2259,16 +2355,15 @@
       }
     ]
   },
-  "10045": {
-    "cardId": 10045,
+  "10047": {
+    "cardId": 10047,
     "type": "unit",
     "name": "Test Shinheuh",
     "cost": 3,
     "deckConstraints": [],
     "hp": 3,
-    "positions": [
-      "frontline-shinheuh"
-    ],
+    "kind": "shinheuh",
+    "line": "frontline",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -2285,14 +2380,15 @@
     ],
     "passives": []
   },
-  "10046": {
-    "cardId": 10046,
+  "10048": {
+    "cardId": 10048,
     "type": "unit",
     "name": "Test Spear Bearer",
     "cost": 2,
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "spear-bearer"
     ],
@@ -2320,14 +2416,15 @@
     ],
     "passives": []
   },
-  "10047": {
-    "cardId": 10047,
+  "10049": {
+    "cardId": 10049,
     "type": "unit",
     "name": "Test Stone Doll",
     "cost": 0,
     "deckConstraints": [],
     "hp": 20,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -2368,14 +2465,15 @@
       }
     ]
   },
-  "10048": {
-    "cardId": 10048,
+  "10050": {
+    "cardId": 10050,
     "type": "unit",
     "name": "Test Switch Position Unit",
     "cost": 6,
     "deckConstraints": [],
     "hp": 5,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "scout",
       "light-bearer"
@@ -2413,8 +2511,8 @@
     ],
     "passives": []
   },
-  "10049": {
-    "cardId": 10049,
+  "10051": {
+    "cardId": 10051,
     "type": "equipment",
     "name": "Test Thorn",
     "cost": 0,
@@ -2463,8 +2561,8 @@
       }
     ]
   },
-  "10050": {
-    "cardId": 10050,
+  "10052": {
+    "cardId": 10052,
     "type": "equipment",
     "name": "Test Thorn Fragment I",
     "series": "thorn-fragment",
@@ -2519,8 +2617,8 @@
       }
     ]
   },
-  "10051": {
-    "cardId": 10051,
+  "10053": {
+    "cardId": 10053,
     "type": "equipment",
     "name": "Test Thorn Fragment II",
     "series": "thorn-fragment",
@@ -2575,8 +2673,8 @@
       }
     ]
   },
-  "10052": {
-    "cardId": 10052,
+  "10054": {
+    "cardId": 10054,
     "type": "equipment",
     "name": "Test Thorn Fragment III",
     "series": "thorn-fragment",
@@ -2631,8 +2729,8 @@
       }
     ]
   },
-  "10053": {
-    "cardId": 10053,
+  "10055": {
+    "cardId": 10055,
     "type": "equipment",
     "name": "Test Thorn Fragment IV",
     "series": "thorn-fragment",
@@ -2687,14 +2785,15 @@
       }
     ]
   },
-  "10054": {
-    "cardId": 10054,
+  "10056": {
+    "cardId": 10056,
     "type": "unit",
     "name": "Test Trait Unit",
     "cost": 1,
     "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer",
@@ -2771,8 +2870,8 @@
     "abilities": [],
     "passives": []
   },
-  "10055": {
-    "cardId": 10055,
+  "10057": {
+    "cardId": 10057,
     "type": "skill",
     "name": "Test Unreachable Skill",
     "cost": 4,
@@ -2796,14 +2895,15 @@
       }
     ]
   },
-  "10056": {
-    "cardId": 10056,
+  "10058": {
+    "cardId": 10058,
     "type": "unit",
     "name": "Test Yeo Goseng",
     "cost": 1,
     "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],

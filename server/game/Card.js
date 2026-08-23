@@ -16,6 +16,8 @@ export default class Card {
     this.maxHp = cardData.hp ?? null;
     this.cost = cardData.cost;
     this.rank = cardData.rank ?? null;
+    this.kind = cardData.kind ?? "standard"; // unit archetype: standard | shinheuh | landmark | conduit
+    this.line = cardData.line ?? null; // authored field line (shinheuh only)
     this.costReduction = 0;
     this.visible = false; // whether the card is visible to the opponent
 
@@ -28,6 +30,7 @@ export default class Card {
 
     this.abilities = cardData.abilities || [];   // unified DSL objects
     this.passiveAbilities = cardData.passives || []; // unified DSL objects
+    this.rules = cardData.rules || []; // landmark-only always-on battlefield rules
     this.attributes = cardData.attributes || [];
     this.keywords = cardData.keywords || [];
     this.requirements = cardData.requirements || [];
@@ -90,6 +93,8 @@ export default class Card {
       id: this.id,
       cardId: this.cardId,
       type: this.type,
+      kind: this.kind,
+      line: this.line,
       name: this.name,
       sobriquet: this.sobriquet,
       rarity: this.rarity,

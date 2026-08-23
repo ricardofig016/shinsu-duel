@@ -1,15 +1,13 @@
 type: unit
+kind: landmark
 name: Water Stadium
 cost: 2
 hp: 7
-rank: 
-positions:
-  - landmark
-passives:
-  - type: global_rule
-    rule: condition_stack_cap
+rules:
+  - type: condition_stack_cap
     cap: 2
     raw: "conditions do not stack past 2" # counter Yeon Yihwa
+passives:
 abilities:
 evolve:
 traits:

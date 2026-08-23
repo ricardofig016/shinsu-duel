@@ -7,14 +7,16 @@ import * as IdFactory from "./IdFactory.js";
  * Unit only emits lifecycle intents and stores instance state.
  */
 export default class Unit {
-  constructor(card, placedPositionCode) {
+  constructor(card, placedPositionCode, line = null) {
     if (!card) throw new Error("Card instance is required to create a Unit");
     if (card.type !== "unit") throw new Error(`Invalid card type: expected 'unit', got '${card.type}'`);
 
     this.id = IdFactory.unitInstance(card.cardId); // deterministic instance id
     this.card = card;
     this.currentHp = card.maxHp;
-    this.placedPositionCode = placedPositionCode;
+    this.kind = card.kind ?? "standard";
+    this.placedPositionCode = placedPositionCode; // main position for standard, null otherwise
+    this.line = line; // field line (frontline | backline)
 
     this.owner = card.owner; // player username
     this.bus = card.bus;
@@ -34,6 +36,7 @@ export default class Unit {
       card: this.card.toSanitizedObject(),
       currentHp: this.currentHp,
       placedPositionCode: this.placedPositionCode,
+      line: this.line,
       owner: this.owner,
     };
   }

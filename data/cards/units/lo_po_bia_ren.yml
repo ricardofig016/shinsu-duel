@@ -11,7 +11,8 @@ passives:
     position: wave controller
     target:
       side: ally
-      position: frontline shinheuh
+      kind: shinheuh
+      line: frontline
     effect:
       type: give_condition
       condition: poisoned
@@ -22,7 +23,8 @@ passives:
     position: scout
     target:
       side: ally
-      position: backline shinheuh
+      kind: shinheuh
+      line: backline
     effect:
       type: give_condition
       condition: ghost
@@ -32,7 +34,7 @@ passives:
 abilities:
   - type: summon
     card:
-      position: [frontline shinheuh, backline shinheuh]
+      kind: shinheuh
       cost: 2
       random: true
     from: game
@@ -40,7 +42,7 @@ abilities:
     raw: "summon a random 2 cost Shinheuh"
   - type: steal
     card:
-      position: [frontline shinheuh, backline shinheuh]
+      kind: shinheuh
       cost: cheapest
     raw: "steal the enemy's cheapest Shinheuh"
 evolve:

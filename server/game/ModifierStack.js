@@ -363,6 +363,14 @@ export default class ModifierStack {
       const positions = Array.isArray(filter.position) ? filter.position : [filter.position];
       if (!positions.includes(unit.placedPositionCode)) return false;
     }
+    if (filter.kind) {
+      const kinds = Array.isArray(filter.kind) ? filter.kind : [filter.kind];
+      if (!kinds.includes(unit.card?.kind)) return false;
+    }
+    if (filter.line) {
+      const lines = Array.isArray(filter.line) ? filter.line : [filter.line];
+      if (!lines.includes(unit.line)) return false;
+    }
     if (filter.affiliation) {
       const codes = Array.isArray(filter.affiliation) ? filter.affiliation : [filter.affiliation];
       const unitAffiliations = new Set([

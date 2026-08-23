@@ -58,7 +58,7 @@ export default class UseAbilityAction extends ActionHandler {
 
     const isFree = Boolean(ability.free) || UseAbilityAction.effectiveKeywords(gameState, unit).has("free");
 
-    const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
+    const isShinheuh = unit.card.kind === "shinheuh";
     if (isShinheuh) {
       if (!CombatSlotService.isShinheuhSlotAvailable(playerState)) throw new Error("Shinheuh combat slot is unavailable.");
     } else if (!isFree) {
@@ -94,7 +94,7 @@ export default class UseAbilityAction extends ActionHandler {
 
     gameState.markAbilityUsed(unitId);
 
-    const isShinheuh = Boolean(unit.card.positions?.["frontline-shinheuh"] || unit.card.positions?.["backline-shinheuh"]);
+    const isShinheuh = unit.card.kind === "shinheuh";
     if (isShinheuh) {
       CombatSlotService.consumeShinheuhSlot(playerState);
     } else if (!isFree) {

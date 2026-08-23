@@ -60,7 +60,15 @@ Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) requi
 
 ### Card metadata
 
-Three card-level fields sit alongside node entries:
+Unit cards carry an archetype discriminator plus a field line, alongside the shared metadata below:
+
+- `kind` — what a unit fundamentally is on the board: `standard | shinheuh | landmark | conduit`. `standard` (the default) occupies a main position and carries a `rank`; the special kinds carry no position and no rank. Normalized like `affiliations` (dash-cased code).
+
+- `line` — a special kind's field line: `frontline | backline`. Only shinheuh author it (`bull`/`stone_doll` = frontline); landmarks and the conduit are backline by kind; a standard unit's line derives from its chosen position at deploy.
+
+- `rules` — a **landmark-only** list of always-on battlefield rules (see [Rules grammar](#rules-grammar)). These are distinct from `passives`: rules are board-wide and always-on, while a landmark's triggered effects stay in `passives`.
+
+Shared metadata:
 
 - `series` — an explicit grouping key for related cards (e.g. `incinerate` for Incinerate I–IV, `thorn-fragment` for First–Fourth Thorn Fragment). It is a first-class data contract, not a name convention: cards in the same series declare the same `series` code explicitly, and card targets reference a series via `card.series`. Normalized like `affiliations` (dash-cased code).
 
@@ -199,6 +207,8 @@ target:
   affiliation: khun-family # filter (affiliation code)
   attribute: anima # filter (attribute code)
   name: Rachel # filter (exact card name)
+  kind: shinheuh # filter (card archetype)
+  line: frontline # filter (field line)
   cost: 2 # filter, or "cheapest" | "most expensive"
   has_passive: true # filter: units with >=1 passive ability
   can_switch: true # filter: units with a legal other printed position (non-full line)
@@ -210,7 +220,7 @@ target:
 
 `has_passive: true` keeps only units whose card declares at least one passive ability ("Silence an enemy that has at least one passive"). `can_switch: true` keeps only units that can legally switch position — at least one printed position other than the current one whose destination line is not full.
 
-`rank`, `position`, `affiliation`, and `attribute` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `position: [frontline shinheuh, backline shinheuh]` means "a Shinheuh". The bare `position: shinheuh` is shorthand for that Shinheuh pair.
+`rank`, `position`, `affiliation`, `attribute`, and `kind` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `kind: shinheuh` means "a Shinheuh" (replacing the old `position: [frontline-shinheuh, backline-shinheuh]` alias). `line` filters by field line.
 
 A step inside a shared-target `sequence` uses a **link** target instead of a side descriptor: `target: { link: sequence }` (all shared targets) or `target: { link: sequence, count: N }` (a subset). Link targets are only valid on steps of a `sequence` that declares `targets`.
 
@@ -227,6 +237,8 @@ card:
   position: fisherman
   affiliation: khun-family
   attribute: anima
+  kind: shinheuh # filter: card archetype
+  line: frontline # filter: field line (shinheuh only)
   choose: true
   random: true
 ```
@@ -258,21 +270,33 @@ Predicates are the conditions a `conditional` node (or an always-on modifier) ev
 
 Always-on passives and equipment-granted stat amplifiers are **modifiers**, not effects. Modifiers may appear in a unit's `passives` or an equipment's `effects`. Each has a `type` discriminator:
 
-| `type`             | Fields                                                         | Meaning                                                                                                                                                                                                                                                                      |
-| ------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `modify_stat`      | `stat`, `amount`, `target`, `when?`, `source?`, `cardType?`    | `stat`: `damage` \| `heal` \| `hp` \| `cost` \| `damage_taken`. `when` filters the affected targets (outgoing `damage`/`heal`); `source` filters the attackers (incoming `damage_taken`). `cardType` (unit\|skill\|equipment) scopes a `cost` modifier to a card type.       |
-| `modify_cost`      | `amount`, `if?`                                                | Reduces the card's own cost by `amount`.                                                                                                                                                                                                                                     |
-| `modify_condition` | `condition`, `amount`, `target`, `if?`                         | My abilities apply +`amount` of `condition` to matching `target`s.                                                                                                                                                                                                           |
-| `modify_keyword`   | `keyword`, `target`, `first?`                                  | `keyword`: `quick` \| `free` (abilities gain that keyword). `first: true` limits it to the first ability used each round.                                                                                                                                                    |
-| `modify_targeting` | `rule`, `target`                                               | `rule`: `ignore_taunt` \| `untargetable_by`.                                                                                                                                                                                                                                 |
-| `modify_ability`   | `target`, `effect`, `position?`, `if?`                         | `target` selects whose abilities are augmented; when such a unit's ability targets the side in `effect.target`, also resolve `effect` against that target — once per target per trigger (a `modify_repeat` re-applies it per trigger; a multi-step ability applies it once). |
-| `global_rule`      | `rule`, `target?`, `trait?`, `condition?`, `position?`, `cap?` | Landmark-wide rule (see below).                                                                                                                                                                                                                                              |
-
-`global_rule` `rule` values: `disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, `prevent_equip`. `position` scopes a rule to a position (`chosen` = the deploy-chosen position sentinel).
+| `type`             | Fields                                                      | Meaning                                                                                                                                                                                                                                                                      |
+| ------------------ | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `modify_stat`      | `stat`, `amount`, `target`, `when?`, `source?`, `cardType?` | `stat`: `damage` \| `heal` \| `hp` \| `cost` \| `damage_taken`. `when` filters the affected targets (outgoing `damage`/`heal`); `source` filters the attackers (incoming `damage_taken`). `cardType` (unit\|skill\|equipment) scopes a `cost` modifier to a card type.       |
+| `modify_cost`      | `amount`, `if?`                                             | Reduces the card's own cost by `amount`.                                                                                                                                                                                                                                     |
+| `modify_condition` | `condition`, `amount`, `target`, `if?`                      | My abilities apply +`amount` of `condition` to matching `target`s.                                                                                                                                                                                                           |
+| `modify_keyword`   | `keyword`, `target`, `first?`                               | `keyword`: `quick` \| `free` (abilities gain that keyword). `first: true` limits it to the first ability used each round.                                                                                                                                                    |
+| `modify_targeting` | `rule`, `target`                                            | `rule`: `ignore_taunt` \| `untargetable_by`.                                                                                                                                                                                                                                 |
+| `modify_ability`   | `target`, `effect`, `position?`, `if?`                      | `target` selects whose abilities are augmented; when such a unit's ability targets the side in `effect.target`, also resolve `effect` against that target — once per target per trigger (a `modify_repeat` re-applies it per trigger; a multi-step ability applies it once). |
 
 Two additional modifier types exist: `modify_repeat` (`amount`, `target`) — the target's abilities trigger `amount` times — and `retain_equipment` (no fields) — the unit keeps its equipment when it returns to hand.
 
 Modifiers carry their own `predicate` (via a `conditional`-style `if`) when gated — see the migration map for the exact modeling of each card. A modifier's `position` (where present) scopes it to the source unit's current position and is enforced at application time, for equipment `effects` and passives alike.
+
+## Rules grammar (landmark-only)
+
+A landmark's always-on battlefield rules are authored as a top-level `rules` list of `ruleNode` entries — distinct from passives, which are unit-scoped. Each rule has a `type` discriminator:
+
+| `type`                   | Fields                   | Meaning                                                                |
+| ------------------------ | ------------------------ | ---------------------------------------------------------------------- |
+| `disable_passives`       | —                        | Unit passives have no effect on the board.                             |
+| `grant_global_trait`     | `trait`, `position?`     | Every unit (optionally in `position`, incl. `chosen`) has `trait`.     |
+| `grant_global_condition` | `condition`, `position?` | Every unit (optionally in `position`, incl. `chosen`) has `condition`. |
+| `condition_stack_cap`    | `cap`                    | Conditions do not stack past `cap`.                                    |
+| `prevent_evolve`         | `position?`              | Units (optionally in `position`) cannot evolve.                        |
+| `prevent_equip`          | `position?`              | Units (optionally in `position`) cannot be equipped.                   |
+
+`position` scopes a rule to a main position or the `chosen` sentinel (Name Hunt Station's deploy-time `choose_position` choice). Rules are registered and revoked by the landmark's source ID — they live on the board only while the landmark is in play.
 
 ---
 

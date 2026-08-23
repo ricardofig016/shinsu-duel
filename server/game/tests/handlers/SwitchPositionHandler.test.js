@@ -27,8 +27,8 @@ describe("SwitchPositionHandler", () => {
 
   test("no-op when no legal destination position exists", () => {
     const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
-    // Test Shinheuh only has one printed position (frontline-shinheuh).
-    const unit = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    // A shinheuh carries no printed position, so it has no legal destination.
+    const unit = deployUnit(game, "Bob", "Test Shinheuh", "frontline");
 
     const result = handler.execute(
       { targetId: unit.id, sourceOwner: "Alice" },
@@ -37,7 +37,7 @@ describe("SwitchPositionHandler", () => {
     );
 
     expect(result.switched).toBe(false);
-    expect(unit.placedPositionCode).toBe("frontline-shinheuh");
+    expect(unit.placedPositionCode).toBe(null);
   });
 
   test("no-op for a Rooted unit", () => {

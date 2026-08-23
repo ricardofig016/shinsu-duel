@@ -44,7 +44,7 @@ Structural patterns live in the existing cards — read the closest match before
 | Minimal unit / skill / equipment             | `data/cards/units/rachel.yml`, `data/cards/skills/healing_potion.yml`, `data/cards/equipments/frog_fisher.yml` |
 | Evolution pair                               | `data/cards/units/karaka.yml` + `karaka_evolved.yml`                                                           |
 | Ignition pair                                | `data/cards/equipments/narumada.yml` + `narumada_ignited.yml`                                                  |
-| Landmark / Shinheuh / special                | `data/cards/units/floor_of_death.yml`, `stone_doll.yml`, `conduit.yml`                                         |
+| Landmark / Shinheuh / Conduit                | `data/cards/units/floor_of_death.yml`, `stone_doll.yml`, `conduit.yml`                                         |
 | Identity keyword with display text           | `data/cards/skills/lightning_baang.yml`                                                                        |
 | Deck constraint (`generated_by`)             | `data/cards/skills/incinerate_iv.yml`                                                                          |
 | Structured triggers / modifiers              | `data/cards/units/karaka_evolved.yml`, `wooden_horse.yml`, `evan_edrok.yml`                                    |

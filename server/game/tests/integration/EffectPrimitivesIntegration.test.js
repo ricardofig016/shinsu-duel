@@ -19,7 +19,7 @@ describe("effect primitives via real cards", () => {
   test("Lo Po Bia Ren steals the enemy's cheapest Shinheuh", () => {
     const game = setupGameWithHands({ Alice: ["Test Anima Unit"], Bob: ["Test Shinheuh"] });
     const ren = deployUnit(game, "Alice", "Test Anima Unit", "wave-controller");
-    deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    deployUnit(game, "Bob", "Test Shinheuh", "frontline");
 
     useAbility(game, "Alice", ren.id, "1");
 
@@ -46,7 +46,7 @@ describe("effect primitives via real cards", () => {
   test("Jyu Viole Grace copies an enemy ability", () => {
     const game = setupGameWithHands({ Alice: ["Test Copy Ability Unit"], Bob: ["Test Shinheuh"] });
     const grace = deployUnit(game, "Alice", "Test Copy Ability Unit", "wave-controller");
-    const bull = deployUnit(game, "Bob", "Test Shinheuh", "frontline-shinheuh");
+    const bull = deployUnit(game, "Bob", "Test Shinheuh", "frontline");
 
     useAbility(game, "Alice", grace.id, "1");
 

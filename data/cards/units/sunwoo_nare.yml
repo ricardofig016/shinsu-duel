@@ -16,7 +16,7 @@ abilities:
       type: has_unit
       target:
         side: ally
-        position: shinheuh
+        kind: shinheuh
     then:
       type: give_condition
       condition: exhausted

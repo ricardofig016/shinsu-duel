@@ -60,7 +60,7 @@ describe("DisarmHandler", () => {
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
     const handId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Shinheuh");
-    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId, placedPositionCode: "frontline-shinheuh" } });
+    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId, placedPositionCode: "frontline" } });
     const bull = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Shinheuh");
 
     expect(handler.execute({ targetId: bull.id, to: { zone: "hand", owner: "equipment_owner" }, sourceOwner: "Alice" }, context(game), game))

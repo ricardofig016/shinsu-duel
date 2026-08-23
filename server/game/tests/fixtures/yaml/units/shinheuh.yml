@@ -1,9 +1,9 @@
 type: unit
+kind: shinheuh
 name: Test Shinheuh
 cost: 3
 hp: 3
-positions:
-  - frontline shinheuh
+line: frontline
 abilities:
   - type: deal_damage
     amount: 3

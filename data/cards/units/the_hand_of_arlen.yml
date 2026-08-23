@@ -1,10 +1,8 @@
 type: unit
+kind: landmark
 name: The Hand Of Arlen
 cost: 2
 hp: 6
-rank: 
-positions:
-  - landmark
 passives:
   - type: extinguish
     amount: 5

@@ -106,6 +106,8 @@ export default class ModifierService {
       affiliation: structured.affiliation,
       attribute: structured.attribute,
       name: structured.name,
+      kind: structured.kind,
+      line: structured.line,
       count: Number.MAX_SAFE_INTEGER,
     });
   }

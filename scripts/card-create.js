@@ -17,11 +17,15 @@ const FOLDER_MAP = {
 
 const templates = {
   unit: `type: unit
+kind: standard  # standard | shinheuh | landmark | conduit
 name: 
 cost: 
 hp: 
 rank: 
 positions:
+  # - fisherman
+# line:         # shinheuh only: frontline | backline
+# rules:        # landmark only: always-on battlefield rules
 passives:
 abilities:
   # - type: deal_damage

@@ -7,6 +7,7 @@
     "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer",
@@ -41,6 +42,7 @@
     "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer",
@@ -89,6 +91,7 @@
     "deckConstraints": [],
     "hp": 100,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer",
@@ -219,6 +222,7 @@
     "deckConstraints": [],
     "hp": 7,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller",
       "spear-bearer"
@@ -277,6 +281,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout",
       "light-bearer"
@@ -386,6 +391,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout",
@@ -459,6 +465,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout",
@@ -527,9 +534,8 @@
     "cost": 3,
     "deckConstraints": [],
     "hp": 3,
-    "positions": [
-      "frontline-shinheuh"
-    ],
+    "kind": "shinheuh",
+    "line": "frontline",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -554,6 +560,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -622,9 +629,7 @@
       }
     ],
     "hp": 2,
-    "positions": [
-      "landmark"
-    ],
+    "kind": "conduit",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -744,6 +749,7 @@
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -869,6 +875,7 @@
     "deckConstraints": [],
     "hp": 5,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "scout",
       "light-bearer"
@@ -936,6 +943,7 @@
     "deckConstraints": [],
     "hp": 7,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "wave-controller"
@@ -1090,20 +1098,18 @@
     "cost": 5,
     "deckConstraints": [],
     "hp": 6,
-    "positions": [
-      "landmark"
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "disable_passives",
+        "raw": "passives have no effect"
+      }
     ],
     "traits": [],
     "attributes": [],
     "affiliations": [],
     "abilities": [],
-    "passives": [
-      {
-        "type": "global_rule",
-        "rule": "disable_passives",
-        "raw": "passives have no effect"
-      }
-    ]
+    "passives": []
   },
   "27": {
     "cardId": 27,
@@ -1208,6 +1214,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "spear-bearer"
     ],
@@ -1236,6 +1243,7 @@
     "deckConstraints": [],
     "hp": 8,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -1353,9 +1361,7 @@
     "cost": 1,
     "deckConstraints": [],
     "hp": 6,
-    "positions": [
-      "landmark"
-    ],
+    "kind": "landmark",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -1387,6 +1393,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -1435,6 +1442,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -1470,6 +1478,7 @@
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -1718,6 +1727,7 @@
     "deckConstraints": [],
     "hp": 5,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout"
@@ -1793,6 +1803,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -1837,6 +1848,7 @@
     "deckConstraints": [],
     "hp": 7,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout",
@@ -1931,6 +1943,7 @@
     "deckConstraints": [],
     "hp": 9,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout",
@@ -2045,6 +2058,7 @@
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],
@@ -2088,6 +2102,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer",
       "spear-bearer"
@@ -2142,6 +2157,7 @@
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer"
@@ -2196,6 +2212,7 @@
     "deckConstraints": [],
     "hp": 5,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "spear-bearer"
@@ -2265,6 +2282,7 @@
     "deckConstraints": [],
     "hp": 7,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -2347,6 +2365,7 @@
     "deckConstraints": [],
     "hp": 5,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "wave-controller",
       "scout"
@@ -2363,10 +2382,7 @@
       {
         "type": "summon",
         "card": {
-          "position": [
-            "frontline-shinheuh",
-            "backline-shinheuh"
-          ],
+          "kind": "shinheuh",
           "cost": 2,
           "random": true
         },
@@ -2377,10 +2393,7 @@
       {
         "type": "steal",
         "card": {
-          "position": [
-            "frontline-shinheuh",
-            "backline-shinheuh"
-          ],
+          "kind": "shinheuh",
           "cost": "cheapest"
         },
         "raw": "steal the enemy's cheapest Shinheuh"
@@ -2392,7 +2405,8 @@
         "position": "wave-controller",
         "target": {
           "side": "ally",
-          "position": "frontline-shinheuh"
+          "kind": "shinheuh",
+          "line": "frontline"
         },
         "effect": {
           "type": "give_condition",
@@ -2409,7 +2423,8 @@
         "position": "scout",
         "target": {
           "side": "ally",
-          "position": "backline-shinheuh"
+          "kind": "shinheuh",
+          "line": "backline"
         },
         "effect": {
           "type": "give_condition",
@@ -2431,6 +2446,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -2503,6 +2519,7 @@
     "deckConstraints": [],
     "hp": 2,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman",
       "scout"
@@ -2539,8 +2556,24 @@
     "cost": 4,
     "deckConstraints": [],
     "hp": 8,
-    "positions": [
-      "landmark"
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "prevent_evolve",
+        "position": "chosen",
+        "raw": "all units in the chosen position cannot evolve"
+      },
+      {
+        "type": "prevent_equip",
+        "position": "chosen",
+        "raw": "all units in the chosen position cannot be equipped"
+      },
+      {
+        "type": "grant_global_condition",
+        "condition": "rooted",
+        "position": "chosen",
+        "raw": "all units in the chosen position have Rooted"
+      }
     ],
     "traits": [],
     "attributes": [],
@@ -2553,25 +2586,6 @@
           "type": "deploy"
         },
         "raw": "deploy: chose a position"
-      },
-      {
-        "type": "global_rule",
-        "rule": "prevent_evolve",
-        "position": "chosen",
-        "raw": "all units in the chosen position cannot evolve"
-      },
-      {
-        "type": "global_rule",
-        "rule": "prevent_equip",
-        "position": "chosen",
-        "raw": "all units in the chosen position cannot be equipped"
-      },
-      {
-        "type": "global_rule",
-        "rule": "grant_global_condition",
-        "condition": "rooted",
-        "position": "chosen",
-        "raw": "all units in the chosen position have Rooted"
       }
     ]
   },
@@ -2642,6 +2656,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "spear-bearer",
       "fisherman"
@@ -2726,6 +2741,7 @@
     "deckConstraints": [],
     "hp": 2,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -2830,6 +2846,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -2883,6 +2900,7 @@
     "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],
@@ -2944,6 +2962,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "spear-bearer"
     ],
@@ -3161,9 +3180,8 @@
       }
     ],
     "hp": 20,
-    "positions": [
-      "frontline-shinheuh"
-    ],
+    "kind": "shinheuh",
+    "line": "frontline",
     "traits": [
       {
         "code": "taunt"
@@ -3229,6 +3247,7 @@
     "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -3248,10 +3267,7 @@
           "type": "has_unit",
           "target": {
             "side": "ally",
-            "position": [
-              "frontline-shinheuh",
-              "backline-shinheuh"
-            ]
+            "kind": "shinheuh"
           }
         },
         "then": {
@@ -3284,9 +3300,7 @@
     "cost": 2,
     "deckConstraints": [],
     "hp": 6,
-    "positions": [
-      "landmark"
-    ],
+    "kind": "landmark",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -3448,6 +3462,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -3492,6 +3507,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -3533,6 +3549,7 @@
     "deckConstraints": [],
     "hp": 11,
     "rank": "high ranker",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -3613,21 +3630,19 @@
     "cost": 2,
     "deckConstraints": [],
     "hp": 7,
-    "positions": [
-      "landmark"
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "condition_stack_cap",
+        "cap": 2,
+        "raw": "conditions do not stack past 2"
+      }
     ],
     "traits": [],
     "attributes": [],
     "affiliations": [],
     "abilities": [],
-    "passives": [
-      {
-        "type": "global_rule",
-        "rule": "condition_stack_cap",
-        "cap": 2,
-        "raw": "conditions do not stack past 2"
-      }
-    ]
+    "passives": []
   },
   "84": {
     "cardId": 84,
@@ -3654,9 +3669,7 @@
     "cost": 2,
     "deckConstraints": [],
     "hp": 11,
-    "positions": [
-      "landmark"
-    ],
+    "kind": "landmark",
     "traits": [],
     "attributes": [],
     "affiliations": [],
@@ -3713,6 +3726,7 @@
     "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],
@@ -3757,6 +3771,7 @@
     "deckConstraints": [],
     "hp": 1,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "scout"
     ],
@@ -3812,6 +3827,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "light-bearer"
     ],
@@ -3864,6 +3880,7 @@
     "deckConstraints": [],
     "hp": 6,
     "rank": "regular",
+    "kind": "standard",
     "positions": [
       "fisherman"
     ],
@@ -3909,6 +3926,7 @@
     "deckConstraints": [],
     "hp": 4,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "wave-controller"
     ],
@@ -3978,6 +3996,7 @@
     "deckConstraints": [],
     "hp": 3,
     "rank": "ranker",
+    "kind": "standard",
     "positions": [
       "wave-controller",
       "scout"

@@ -83,7 +83,17 @@ export default class SummonHandler extends BaseHandler {
 
   _place(owner, card, payload, gameState) {
     const positions = Object.keys(card.positions || {});
-    if (positions.length === 0) return { summoned: false, reason: "no position" };
+    if (positions.length === 0) {
+      // Special kinds carry no printed position — their destination line is
+      // authored (shinheuh) or implied by kind (landmark/conduit → backline).
+      const positionCode = card.kind === "shinheuh" ? card.line : "backline";
+      const result = LifecycleEngine.summonUnit(gameState, owner, card, positionCode);
+      return {
+        summoned: result.unit !== null || result.discardedDuplicate === true,
+        discardedDuplicate: result.discardedDuplicate === true,
+        pending: false,
+      };
+    }
 
     if (positions.length === 1) {
       const result = LifecycleEngine.summonUnit(gameState, owner, card, positions[0]);

@@ -12,7 +12,7 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Physical Layout](#physical-layout)
     - [Lines](#lines)
   - [Gameplay](#gameplay)
-  - [Setup](#setup)
+    - [Setup](#setup)
     - [Round](#round)
     - [Actions](#actions)
   - [Cards](#cards)
@@ -22,10 +22,10 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
   - [Deck](#deck)
   - [Keywords](#keywords)
   - [Positions](#positions)
-    - [Main Positions](#main-positions)
-    - [Special Positions](#special-positions)
-      - [Shinheuh](#shinheuh)
-      - [Landmark](#landmark)
+  - [Kinds](#kinds)
+    - [Shinheuh](#shinheuh)
+    - [Landmark](#landmark)
+    - [Conduit](#conduit)
   - [Traits and Conditions](#traits-and-conditions)
     - [Traits](#traits)
     - [Conditions](#conditions)
@@ -94,7 +94,7 @@ Each player's side is divided into the following zones:
 6. Discard Pile (right)
 7. Battlefield (center)
    1. Frontline: Fisherman, Scout, Wave Controller
-   2. Backline: Spear Bearer, Light Bearer, Landmark
+   2. Backline: Spear Bearer, Light Bearer, Landmarks, the Conduit
 
 ### Lines
 
@@ -108,7 +108,7 @@ Each player's side is divided into the following zones:
 
 ## Gameplay
 
-## Setup
+### Setup
 
 1. Each player draws 5 cards
 2. Players start with 1 shinsu each
@@ -224,9 +224,7 @@ Keywords are special terms that provide additional context to cards and abilitie
 
 ## Positions
 
-Each unit occupies one position on the battlefield. The position determines its role and playstyle. When you play a unit with more than 1 position you must choose a single position for it to take.
-
-### Main Positions
+Each standard unit occupies one position on the battlefield. The position determines its role and playstyle. When you play a unit with more than 1 position you must choose a single position for it to take.
 
 1. **Fisherman** (frontline): Durable units that tank damage and deal consistent damage to enemies
 2. **Light Bearer** (backline): Strategic support units specializing in utility, buffs, and lighthouses
@@ -234,11 +232,11 @@ Each unit occupies one position on the battlefield. The position determines its 
 4. **Spear Bearer** (backline): Long-range units designed to deal massive amounts of damage
 5. **Wave Controller** (frontline): All rounder units that help their team by manipulating shinsu and providing shinsu-related buffs and debuffs
 
-### Special Positions
+## Kinds
 
-These positions don't have a combat slot nor a rank. If a unit has 1 of these positions, they can't have any other position.
+Every unit card has a kind that determines what it fundamentally is on the board: `standard`, `shinheuh`, `landmark`, or `conduit`. `standard` is the default; a standard unit occupies one of the positions above. The special kinds below have no position and no rank.
 
-#### Shinheuh
+### Shinheuh
 
 1. Special units summoned by Animas to attack on their behalf.
 2. Can be frontline or backline, specified in the unit card.
@@ -248,12 +246,18 @@ These positions don't have a combat slot nor a rank. If a unit has 1 of these po
 6. Summoned units count toward line limits and respect name-uniqueness: a summoned copy of a unit already on your board is Discarded.
 7. Shinheuh can be equipped.
 
-#### Landmark
+### Landmark
 
-1. Special units that apply continuous passive effects to the entire battlefield.
-2. They don't have a combat slot or abilities, but they do have HP and passives.
+1. Special units that apply continuous battlefield rules to the entire board.
+2. They don't have a combat slot, a rank, or abilities, but they do have HP, always-on `rules`, and passives.
 3. Backline.
 4. Each player can only have 1 landmark at a time on their board, playing another one causes the existing one to be discarded.
+
+### Conduit
+
+1. A special token summoned by the [Jeonsulsa](#jeonsulsa) attribute onto the enemy backline.
+2. No position, no rank, no combat slot.
+3. Unreachable: it can't be put in a deck during deckbuilding.
 
 ## Traits and Conditions
 
@@ -449,10 +453,8 @@ Irregulars are powerful individuals who were not selected by Headon and came fro
 **Core in-game mechanic:**
 
 ```md
-Unit passives have no effect on me.
+Unit passives and landmark rules have no effect on me.
 ```
-
-Also covers landmark passives and any condition a passive would apply to me: the passive never applies it in the first place.
 
 ### Living Ignition Weapon
 

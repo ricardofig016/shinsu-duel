@@ -29,12 +29,6 @@ const rankCostRanges = {
   "high ranker": [5, 10],
 };
 
-const positionsRequiringNullRank = new Set([
-  "frontline shinheuh",
-  "backline shinheuh",
-  "landmark",
-]);
-
 const traitNames = new Set([
   "barrier", "beacon", "bloodthirsty", "dealer", "immune",
   "last one standing", "lethal", "pierce", "reflect", "regenerate",
@@ -48,8 +42,9 @@ const traitNamesWithNumericValue = new Set([
 
 const allowedPositions = new Set([
   "fisherman", "light bearer", "scout", "spear bearer", "wave controller",
-  "frontline shinheuh", "backline shinheuh", "landmark",
 ]);
+
+const allowedKinds = new Set(["standard", "shinheuh", "landmark", "conduit"]);
 
 const allowedAttributes = new Set([
   "anima", "silver dwarf", "red witch", "hwayeomsa",
@@ -100,15 +95,12 @@ function ensureArray(value) {
   return value;
 }
 
-function isConduit(card) {
-  return card.name && card.name.trim().toLowerCase() === "conduit";
-}
-
 function normalizeCardForSchema(card) {
   const normalized = { ...card };
   const arrayFields = [
     "positions", "passives", "abilities", "evolve", "traits", "attributes",
     "affiliations", "requirements", "effects", "ignition", "keywords", "deckConstraints",
+    "rules",
   ];
 
   for (const field of arrayFields) {
@@ -117,11 +109,12 @@ function normalizeCardForSchema(card) {
     }
   }
 
-  // Conduit is a special Jeonsulsa-mechanic card with no position or rank.
-  // Give it dummy data so AJV passes; custom rules skip these fields.
-  if (isConduit(card)) {
-    normalized.positions = ["landmark"];
-    normalized.rank = "regular";
+  // `kind` defaults to "standard" when omitted so the schema's per-kind
+  // discrimination always sees an explicit value.
+  if (normalized.kind === null || normalized.kind === undefined || normalized.kind === "") {
+    normalized.kind = "standard";
+  } else {
+    normalized.kind = String(normalized.kind).trim().toLowerCase();
   }
 
   return normalized;
@@ -207,13 +200,6 @@ function validateTraits(values, errors) {
 
 function validatePositions(positions, errors) {
   const seen = new Set();
-  const specialPositions = positions.filter((position) =>
-    ["frontline shinheuh", "backline shinheuh", "landmark"].includes(position.toLowerCase())
-  );
-
-  if (specialPositions.length > 0 && positions.length > 1) {
-    addError(errors, "positions", "special positions cannot be combined with another position");
-  }
 
   positions.forEach((pos, index) => {
     const posLower = pos.toLowerCase();
@@ -301,21 +287,18 @@ function validateDeckConstraints(constraints, errors) {
   });
 }
 
-function validateRankAndCost(card, errors) {
+function validateRankAndCost(card, errors, kind) {
   const rank = card.rank;
-  const isNullRankPosition = card.positions && card.positions.every(
-    (p) => positionsRequiringNullRank.has(p.toLowerCase())
-  );
 
-  if (isNullRankPosition) {
-    if (rank !== null && rank !== undefined) {
-      addError(errors, "rank", "must be null/empty for shinheuh and landmark units");
+  if (kind !== "standard") {
+    if (rank !== null && rank !== undefined && rank !== "") {
+      addError(errors, "rank", `must be null/empty for ${kind} units`);
     }
     return;
   }
 
   if (rank === null || rank === undefined || rank === "") {
-    addError(errors, "rank", "must not be null/empty unless the unit is a shinheuh or landmark");
+    addError(errors, "rank", "must not be null/empty for standard units");
     return;
   }
 
@@ -411,19 +394,31 @@ function validateUnit(card) {
     addError(errors, "hp", `must be a positive integer (got ${card.hp})`);
   }
 
-  // Conduit is a special card (Jeonsulsa mechanic) with no position or rank.
-  // It spawns directly on the enemy backline via its own effect.
-  const isConduit = card.name && card.name.trim().toLowerCase() === "conduit";
-
-  const positions = ensureArray(card.positions);
-  if (!isConduit && positions.length === 0) {
-    addError(errors, "positions", "must be a non-empty array");
-  } else if (positions.length > 0) {
-    validatePositions(positions, errors);
+  const kind = (card.kind && String(card.kind).trim().toLowerCase()) || "standard";
+  if (!allowedKinds.has(kind)) {
+    addError(errors, "kind", `"${kind}" is not a valid kind. Must be one of: ${[...allowedKinds].join(", ")}`);
   }
 
-  if (!isConduit) {
-    validateRankAndCost(card, errors);
+  const positions = ensureArray(card.positions);
+  if (kind === "standard") {
+    if (positions.length === 0) {
+      addError(errors, "positions", "must be a non-empty array for standard units");
+    } else {
+      validatePositions(positions, errors);
+    }
+  } else if (positions.length > 0) {
+    addError(errors, "positions", `must be empty for ${kind} units`);
+  }
+
+  validateRankAndCost(card, errors, kind);
+
+  const line = card.line;
+  if (kind === "shinheuh") {
+    if (!line || !["frontline", "backline"].includes(String(line).trim().toLowerCase())) {
+      addError(errors, "line", "shinheuh units must declare a line of frontline or backline");
+    }
+  } else if (line !== null && line !== undefined && line !== "") {
+    addError(errors, "line", `only shinheuh units declare a line (got ${kind})`);
   }
 
   const traits = ensureArray(card.traits);
@@ -435,7 +430,7 @@ function validateUnit(card) {
   const affiliations = ensureArray(card.affiliations);
   validateAffiliations(affiliations, errors);
 
-  // passives, abilities, evolve can be empty — just validate they're arrays when present
+  // passives, abilities, evolve, rules can be empty — just validate they're arrays when present
   if (card.passives !== null && card.passives !== undefined && !Array.isArray(card.passives)) {
     addError(errors, "passives", "must be an array");
   }
@@ -444,14 +439,32 @@ function validateUnit(card) {
     addError(errors, "abilities", "must be an array");
   }
 
+  if (card.rules !== null && card.rules !== undefined && !Array.isArray(card.rules)) {
+    addError(errors, "rules", "must be an array");
+  }
+
   const abilities = ensureArray(card.abilities);
-  const isLandmark = positions.some((p) => p.toLowerCase() === "landmark");
-  if (isLandmark && abilities.length > 0) {
-    addError(errors, "abilities", "landmark units cannot have abilities");
+  if ((kind === "landmark" || kind === "conduit") && abilities.length > 0) {
+    addError(errors, "abilities", `${kind} units cannot have abilities`);
   }
 
   const evolve = ensureArray(card.evolve);
+  if (kind !== "standard" && evolve.length > 0) {
+    addError(errors, "evolve", `${kind} units cannot evolve`);
+  }
   validateEvolve(evolve, errors);
+
+  const rules = ensureArray(card.rules);
+  if (kind !== "landmark" && rules.length > 0) {
+    addError(errors, "rules", `only landmark units declare rules (got ${kind})`);
+  }
+
+  if (kind === "conduit") {
+    const constraints = ensureArray(card.deckConstraints);
+    if (!constraints.some((c) => c && c.type === "unreachable")) {
+      addError(errors, "deckConstraints", "conduit units must be Unreachable");
+    }
+  }
 
   // Push warnings as errors for now (they'll display)
   errors.push(...warnings);

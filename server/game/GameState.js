@@ -3,6 +3,7 @@ import ZoneService from "./services/ZoneService.js";
 import LifecycleEngine from "./services/LifecycleEngine.js";
 import TriggerManager from "./services/TriggerManager.js";
 import PassiveManager from "./services/PassiveManager.js";
+import GlobalRuleRegistry from "./services/GlobalRuleRegistry.js";
 import LighthouseService from "./services/LighthouseService.js";
 import CombatSlotService from "./services/CombatSlotService.js";
 import UnitService from "./services/UnitService.js";
@@ -111,6 +112,7 @@ export default class GameState {
     // Trigger and passive managers own event subscriptions for field units.
     this._triggerManager = new TriggerManager(this.eventBus);
     this._passiveManager = new PassiveManager(this.eventBus);
+    this._globalRuleRegistry = new GlobalRuleRegistry(this.eventBus);
 
     // Ability Registry for runtime-granted abilities
     this._abilityRegistry = new AbilityRegistry();
@@ -278,10 +280,8 @@ export default class GameState {
   #initializePlayerState(username, deck = null) {
     if (!deck) deck = this.#defaultDeckOfCardIds();
 
-    // codes for all non special positions
-    const combatSlotCodes = Object.keys(GameState.positions)
-      .filter((code) => !GameState.positions[code].special)
-      .map((code) => code);
+    // Codes for the five main positions (special kinds carry no combat slot).
+    const combatSlotCodes = Object.keys(GameState.positions);
 
     const builtDeck = this.#buildDeckFromCardIds(deck, username);
 

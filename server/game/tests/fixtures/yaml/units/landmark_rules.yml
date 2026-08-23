@@ -1,14 +1,8 @@
 type: unit
 kind: landmark
-name: Floor of Death
-cost: 5
+name: Test Landmark Rules
+cost: 2
 hp: 6
 rules:
   - type: disable_passives
     raw: "passives have no effect"
-passives:
-abilities:
-evolve:
-traits:
-attributes:
-affiliations:

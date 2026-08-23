@@ -83,7 +83,7 @@ Key differences from offensive targeting:
 - A matching source unit counts toward the check ("an allied Guide" on a Guide unit includes itself).
 - `scope`, `count`, `choose`, `random`, and `cost` are not valid on predicate targets — the `predicateTarget` schema rejects them.
 
-`applyFilters` is the single source of truth for the unit-filter vocabulary (`condition`, `conditionValue`, `trait`, `traitNot`, `rank`, `position`, `affiliation`, `attribute`, `name`, `cost`, `sharedAffiliation`, `lowestHp`, `hasPassive`, `canSwitch`). Both `resolveTargets` and `resolveExistenceUnits` delegate to it, so targeting and existence filters never diverge.
+`applyFilters` is the single source of truth for the unit-filter vocabulary (`condition`, `conditionValue`, `trait`, `traitNot`, `rank`, `position`, `affiliation`, `attribute`, `name`, `cost`, `sharedAffiliation`, `lowestHp`, `hasPassive`, `canSwitch`, `kind`, `line`). Both `resolveTargets` and `resolveExistenceUnits` delegate to it, so targeting and existence filters never diverge.
 
 ---
 

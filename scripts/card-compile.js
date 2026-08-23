@@ -29,9 +29,6 @@ const positionCodeMap = {
   "scout": "scout",
   "spear bearer": "spear-bearer",
   "wave controller": "wave-controller",
-  "frontline shinheuh": "frontline-shinheuh",
-  "backline shinheuh": "backline-shinheuh",
-  "landmark": "landmark",
 };
 
 // Attribute display name → internal code
@@ -101,14 +98,12 @@ function normalizePosition(value) {
   return positionCodeMap[str.toLowerCase()] || toCode(str);
 }
 
-// Position filters in target/predicate descriptors may use the generic
-// "shinheuh" family to mean either Shinheuh line. Expand it to the two
-// concrete codes so existence checks match real placed positions.
+// Position filters in target/predicate descriptors map display names to codes.
+// The special kinds (shinheuh/landmark/conduit) are filtered via `kind`/`line`,
+// not `position`, so position filters only ever reference the five main positions.
 function normalizePositionFilter(value) {
   if (value === null || value === undefined) return value;
-  if (Array.isArray(value)) return value.flatMap((item) => normalizePositionFilter(item));
-  const str = String(value).toLowerCase();
-  if (str === "shinheuh") return ["frontline-shinheuh", "backline-shinheuh"];
+  if (Array.isArray(value)) return value.map((item) => normalizePosition(item));
   return normalizePosition(value);
 }
 
@@ -123,6 +118,14 @@ function normalizeAttribute(value) {
 
 function normalizeRank(value) {
   // Ranks keep their space ("high ranker"), unlike dashed codes.
+  return String(value).trim().toLowerCase();
+}
+
+function normalizeKind(value) {
+  return toCode(value);
+}
+
+function normalizeLine(value) {
   return String(value).trim().toLowerCase();
 }
 
@@ -147,6 +150,8 @@ export function normalizeEffectObject(obj, context) {
   if (obj.affiliation !== undefined) normalized.affiliation = normalizeList(obj.affiliation, normalizeAffiliation);
   if (obj.attribute !== undefined) normalized.attribute = normalizeList(obj.attribute, normalizeAttribute);
   if (obj.rank !== undefined) normalized.rank = normalizeList(obj.rank, normalizeRank);
+  if (obj.kind !== undefined) normalized.kind = normalizeKind(obj.kind);
+  if (obj.line !== undefined) normalized.line = normalizeLine(obj.line);
   if (obj.series !== undefined) normalized.series = toCode(obj.series);
 
   // Nested effect nodes: sequence.steps is an array; the rest are single.
@@ -393,12 +398,12 @@ export function compileCard(rawCard, allCards) {
   if (type === "unit") {
     compiled.hp = rawCard.hp ?? 0;
     compiled.rank = rawCard.rank || null;
+    compiled.kind = rawCard.kind ? normalizeKind(rawCard.kind) : "standard";
+    compiled.line = rawCard.line ? normalizeLine(rawCard.line) : null;
 
-    // Positions
-    const isConduit = (rawCard.name || "").trim().toLowerCase() === "conduit";
-    compiled.positions = isConduit
-      ? ["landmark"] // dummy to pass schema; Conduit spawns via Jeonsulsa mechanics
-      : (rawCard.positions || []).map((p) => positionCodeMap[p.toLowerCase()] || toCode(p));
+    // Positions — only the five main positions; special kinds have none.
+    compiled.positions = (rawCard.positions || []).map((p) => positionCodeMap[p.toLowerCase()] || toCode(p));
+    compiled.rules = compileEntries(rawCard.rules, `${cardName}.rules`);
 
     // Traits — { code, value? } objects (value only present for numeric traits)
     const parsedTraits = (rawCard.traits || [])
@@ -487,16 +492,21 @@ export function cleanCompiled(card) {
   if (card.series === null) delete card.series;
   if (card.rank === null) delete card.rank;
   if (card.hp === null) delete card.hp;
+  if (card.line === null) delete card.line;
   if (card.evolveInto === null) delete card.evolveInto;
   if (card.evolvedFrom === null) delete card.evolvedFrom;
   if (card.igniteInto === null) delete card.igniteInto;
   if (card.ignitedFrom === null) delete card.ignitedFrom;
   if (card.keywords && card.keywords.length === 0) delete card.keywords;
+  if (!card.rules || card.rules.length === 0) delete card.rules;
+
+  // Positions are meaningful only for standard units; delete when empty
+  // (special kinds and non-unit cards have none).
+  if (!card.positions || card.positions.length === 0) delete card.positions;
 
   // Delete type-inappropriate empty arrays (sparse schema per plan)
   // Unit-only arrays — remove from non-unit cards
   if (card.type !== "unit") {
-    if (!card.positions || card.positions.length === 0) delete card.positions;
     if (!card.traits || card.traits.length === 0) delete card.traits;
     if (!card.attributes || card.attributes.length === 0) delete card.attributes;
     if (!card.affiliations || card.affiliations.length === 0) delete card.affiliations;

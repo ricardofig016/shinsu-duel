@@ -1,9 +1,8 @@
 type: unit
+kind: landmark
 name: Test Landmark Unit
 cost: 2
 hp: 11
-positions:
-  - landmark
 passives:
   - type: sequence
     trigger: { type: quick_ability_used }

@@ -161,6 +161,8 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     affiliation: structured.affiliation,
     attribute: structured.attribute,
     name: structured.name,
+    kind: structured.kind,
+    line: structured.line,
     sharedAffiliation: structured.shared_affiliation,
     lowestHp: structured.lowestHp,
     hasPassive: structured.hasPassive,
@@ -381,6 +383,8 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       affiliation: targetFilters.affiliation,
       attribute: targetFilters.attribute,
       name: targetFilters.name,
+      kind: targetFilters.kind,
+      line: targetFilters.line,
       sharedAffiliation: targetFilters.shared_affiliation,
       lowestHp: targetFilters.lowestHp ?? payload.lowestHp,
       hasPassive: targetFilters.hasPassive,
@@ -464,6 +468,8 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       affiliation: structured.affiliation,
       attribute: structured.attribute,
       name: structured.name,
+      kind: structured.kind,
+      line: structured.line,
       count: Number.MAX_SAFE_INTEGER,
     });
 

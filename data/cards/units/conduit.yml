@@ -1,9 +1,8 @@
 type: unit
+kind: conduit
 name: Conduit
 cost: 0
 hp: 2
-rank:
-positions:
 deckConstraints:
   - type: unreachable
     raw: "i am Unreachable"

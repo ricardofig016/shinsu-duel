@@ -20,7 +20,9 @@
         "position": { "$ref": "#/definitions/filterValue" },
         "affiliation": { "$ref": "#/definitions/filterValue" },
         "attribute": { "$ref": "#/definitions/filterValue" },
-        "name": { "type": "string", "minLength": 1 }
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 },
+        "line": { "enum": ["frontline", "backline"] }
       },
       "additionalProperties": false
     },
@@ -36,7 +38,9 @@
         "position": { "$ref": "#/definitions/filterValue" },
         "affiliation": { "$ref": "#/definitions/filterValue" },
         "attribute": { "$ref": "#/definitions/filterValue" },
-        "name": { "type": "string", "minLength": 1 }
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 },
+        "line": { "enum": ["frontline", "backline"] }
       },
       "additionalProperties": false
     },
@@ -64,6 +68,8 @@
             "affiliation": { "$ref": "#/definitions/filterValue" },
             "attribute": { "$ref": "#/definitions/filterValue" },
             "name": { "type": "string", "minLength": 1 },
+            "kind": { "type": "string", "minLength": 1 },
+            "line": { "enum": ["frontline", "backline"] },
             "cost": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["cheapest", "most expensive"] }] }
           },
           "additionalProperties": false
@@ -92,7 +98,9 @@
         "affiliation": { "$ref": "#/definitions/filterValue" },
         "attribute": { "$ref": "#/definitions/filterValue" },
         "choose": { "type": "boolean" },
-        "random": { "type": "boolean" }
+        "random": { "type": "boolean" },
+        "kind": { "type": "string", "minLength": 1 },
+        "line": { "enum": ["frontline", "backline"] }
       },
       "additionalProperties": false
     },
@@ -216,18 +224,16 @@
       "type": "object",
       "required": ["type", "raw"],
       "properties": {
-        "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "modify_cost", "modify_condition", "global_rule", "retain_equipment", "modify_repeat", "modify_ability"] },
+        "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "modify_cost", "modify_condition", "retain_equipment", "modify_repeat", "modify_ability"] },
         "raw": { "type": "string", "minLength": 1 },
         "target": { "$ref": "#/definitions/unitTarget" },
         "stat": { "enum": ["damage", "heal", "hp", "cost", "damage_taken"] },
         "amount": { "type": "integer" },
         "keyword": { "enum": ["quick", "free"] },
         "first": { "type": "boolean" },
-        "rule": { "enum": ["ignore_taunt", "untargetable_by", "disable_passives", "grant_global_trait", "condition_stack_cap", "prevent_evolve", "prevent_equip", "grant_global_condition"] },
-        "trait": { "type": "string", "minLength": 1 },
+        "rule": { "enum": ["ignore_taunt", "untargetable_by"] },
         "condition": { "type": "string", "minLength": 1 },
         "position": { "type": "string", "minLength": 1 },
-        "cap": { "type": "integer", "minimum": 1 },
         "when": { "$ref": "#/definitions/unitFilter" },
         "source": { "$ref": "#/definitions/unitFilter" },
         "if": { "$ref": "#/definitions/predicate" },
@@ -241,9 +247,26 @@
         { "if": { "properties": { "type": { "const": "modify_targeting" } } }, "then": { "required": ["rule", "target"] } },
         { "if": { "properties": { "type": { "const": "modify_cost" } } }, "then": { "required": ["amount"] } },
         { "if": { "properties": { "type": { "const": "modify_condition" } } }, "then": { "required": ["condition", "amount", "target"] } },
-        { "if": { "properties": { "type": { "const": "global_rule" } } }, "then": { "required": ["rule"] } },
         { "if": { "properties": { "type": { "const": "modify_repeat" } } }, "then": { "required": ["amount", "target"] } },
         { "if": { "properties": { "type": { "const": "modify_ability" } } }, "then": { "required": ["target", "effect"] } }
+      ]
+    },
+    "ruleNode": {
+      "type": "object",
+      "required": ["type", "raw"],
+      "properties": {
+        "type": { "enum": ["disable_passives", "grant_global_trait", "grant_global_condition", "condition_stack_cap", "prevent_evolve", "prevent_equip"] },
+        "raw": { "type": "string", "minLength": 1 },
+        "trait": { "type": "string", "minLength": 1 },
+        "condition": { "type": "string", "minLength": 1 },
+        "position": { "type": "string", "minLength": 1 },
+        "cap": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "grant_global_trait" } } }, "then": { "required": ["trait"] } },
+        { "if": { "properties": { "type": { "const": "grant_global_condition" } } }, "then": { "required": ["condition"] } },
+        { "if": { "properties": { "type": { "const": "condition_stack_cap" } } }, "then": { "required": ["cap"] } }
       ]
     },
     "effectEntry": {
@@ -326,7 +349,7 @@
       {
         "type": "object",
         "additionalProperties": false,
-        "required": ["cardId", "type", "name", "cost", "hp", "positions", "traits", "attributes", "affiliations", "abilities", "passives", "deckConstraints"],
+        "required": ["cardId", "type", "name", "cost", "hp", "kind", "traits", "attributes", "affiliations", "abilities", "passives", "deckConstraints"],
         "properties": {
           "cardId": { "type": "integer", "minimum": 0 },
           "type": { "const": "unit" },
@@ -335,8 +358,11 @@
           "sobriquet": { "type": "string", "minLength": 1 },
           "cost": { "type": "integer", "minimum": 0 },
           "hp": { "type": "integer", "minimum": 1 },
+          "kind": { "enum": ["standard", "shinheuh", "landmark", "conduit"] },
+          "line": { "enum": ["frontline", "backline"] },
           "rank": { "type": "string", "enum": ["regular", "ranker", "high ranker"] },
           "positions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "rules": { "type": "array", "items": { "$ref": "#/definitions/ruleNode" } },
           "traits": { "type": "array", "items": { "$ref": "#/definitions/trait" } },
           "attributes": { "type": "array", "items": { "type": "string" } },
           "affiliations": { "type": "array", "items": { "type": "string" } },
@@ -346,7 +372,11 @@
           "evolveInto": { "$ref": "#/definitions/transformation" },
           "evolvedFrom": { "type": "integer", "minimum": 0 },
           "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
-        }
+        },
+        "allOf": [
+          { "if": { "properties": { "kind": { "const": "standard" } } }, "then": { "required": ["rank", "positions"] } },
+          { "if": { "properties": { "kind": { "const": "shinheuh" } } }, "then": { "required": ["line"] } }
+        ]
       },
       {
         "type": "object",

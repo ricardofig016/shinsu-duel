@@ -38,29 +38,5 @@
     "line": "frontline",
     "special": false,
     "combatSlotGroup": "wave-controller"
-  },
-  "frontline-shinheuh": {
-    "name": "Frontline Shinheuh",
-    "description": "Special units summoned by Anima to fight on their behalf",
-    "verboseDescription": "Shinheuh are creatures native to the tower. Some people called Anima are able to subjugate and control these beasts to do their bidding. Shinheuh species are incredibly varied, and so their play style is determind by the creature itself and not their position.",
-    "line": "frontline",
-    "special": true,
-    "combatSlotGroup": "shinheuh"
-  },
-  "backline-shinheuh": {
-    "name": "Backline Shinheuh",
-    "description": "Special units summoned by Anima to fight on their behalf",
-    "verboseDescription": "Shinheuh are creatures native to the tower. Some people called Anima are able to subjugate and control these beasts to do their bidding. Shinheuh species are incredibly varied, and so their play style is determind by the creature itself and not their position.",
-    "line": "backline",
-    "special": true,
-    "combatSlotGroup": "shinheuh"
-  },
-  "landmark": {
-    "name": "Landmark",
-    "description": "Special units that apply continuous effects to the entire battlefield",
-    "verboseDescription": "Landmarks represent notable locations or structures in the tower. Unlike other units they don't attack or take actions, but they apply powerful continuous effects that drastically affect gameplay.",
-    "line": "backline",
-    "special": true,
-    "combatSlotGroup": "landmark"
   }
 }

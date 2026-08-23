@@ -1,0 +1,8 @@
+type: unit
+kind: conduit
+name: Test Conduit
+cost: 0
+hp: 2
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"

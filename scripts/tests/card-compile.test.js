@@ -57,16 +57,17 @@ describe("card-compile normalization helpers", () => {
       .toThrow("card.effects[0]: expected an object");
   });
 
-  test("normalizeEffectObject expands the shinheuh position family in filters", () => {
+  test("normalizeEffectObject normalizes kind and line filter fields", () => {
     const normalized = normalizeEffectObject(
       {
         type: "conditional",
-        if: { type: "has_unit", target: { side: "ally", position: "shinheuh" } },
+        if: { type: "has_unit", target: { side: "ally", kind: "Shinheuh", line: "Frontline" } },
       },
       "card.passives[0]"
     );
 
-    expect(normalized.if.target.position).toEqual(["frontline-shinheuh", "backline-shinheuh"]);
+    expect(normalized.if.target.kind).toBe("shinheuh");
+    expect(normalized.if.target.line).toBe("frontline");
   });
 
   test("normalizeEffectObject leaves a single concrete position filter unchanged", () => {

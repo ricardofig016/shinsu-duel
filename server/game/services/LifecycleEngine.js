@@ -34,9 +34,6 @@ export default class LifecycleEngine {
     const player = gameState.playerStates[username];
     if (!player) throw new Error(`Player "${username}" not found`);
 
-    const positionDef = gameState.constructor.positions[positionCode];
-    if (!positionDef) throw new Error(`Invalid position: "${positionCode}"`);
-
     // Validate it's player's turn
     if (gameState.currentTurn !== username) throw new Error("It's not your turn.");
 
@@ -45,8 +42,11 @@ export default class LifecycleEngine {
     const card = player.hand?.[handIndex];
     if (!card || card.type !== "unit") throw new Error("Card is not a unit or not in hand.");
 
-    // Validate position
-    if (!(positionCode in card.positions)) {
+    // Resolve the field line and validate the position code against the card's
+    // kind. Standard units must occupy a printed position; special kinds carry
+    // no position (their line is authored or implied by kind).
+    const line = LifecycleEngine._lineForCard(gameState, card, positionCode);
+    if (card.kind === "standard" && !(positionCode in card.positions)) {
       throw new Error(`Card "${card.name}" cannot be placed in position "${positionCode}".`);
     }
 
@@ -66,29 +66,29 @@ export default class LifecycleEngine {
       throw new Error(`You already have "${card.name}" deployed.`);
     }
 
-    // Special: landmark — destroy existing landmark if present
-    if (positionDef.special && positionCode === "landmark") {
+    // Landmark replacement: at most one landmark per player.
+    if (card.kind === "landmark") {
       const existingLandmark = (player.field?.backline || [])
-        .find((u) => u.placedPositionCode === "landmark");
+        .find((u) => u.card?.kind === "landmark");
       if (existingLandmark) {
         LifecycleEngine.destroyUnit(gameState, existingLandmark);
       }
     }
 
-    const line = player.field[positionDef.line];
+    const fieldLine = player.field[line];
 
     // A field line may never temporarily exceed its five-unit capacity. When
     // deployment would overflow, defer *all* deployment mutations until the
     // owner chooses which of the five current units or the pending card to
     // destroy. The card remains in hand and no cost is paid while the choice
     // is pending, so the continuation is atomic from the board's perspective.
-    if (line.length >= 5 && !options.overflowSelection) {
+    if (fieldLine.length >= 5 && !options.overflowSelection) {
       const pendingCardId = `pending-deploy:${card.id}`;
       gameState.createPendingDecision({
         owner: username,
         type: "line_overflow",
         candidates: [
-          ...line.map((candidate) => ({
+          ...fieldLine.map((candidate) => ({
             id: candidate.id,
             name: candidate.card.name,
             hp: candidate.currentHp,
@@ -115,7 +115,7 @@ export default class LifecycleEngine {
           }
 
           const selectedUnit = gameState._findUnit(selectedId);
-          if (!selectedUnit || !line.includes(selectedUnit)) {
+          if (!selectedUnit || !fieldLine.includes(selectedUnit)) {
             throw new Error("Selected overflow unit is no longer in the deployment line.");
           }
           LifecycleEngine.destroyUnit(gameState, selectedUnit);
@@ -138,16 +138,36 @@ export default class LifecycleEngine {
   }
 
   /**
+   * Resolve the field line a card occupies.
+   *
+   * Standard units occupy the line of their chosen position; shinheuh occupy
+   * their authored `line`; landmarks and the conduit always occupy the
+   * backline. `positionCode` is only meaningful for standard units.
+   */
+  static _lineForCard(gameState, card, positionCode) {
+    if (card.kind === "shinheuh") {
+      if (!card.line) throw new Error(`Shinheuh "${card.name}" has no line.`);
+      return card.line;
+    }
+    if (card.kind === "landmark" || card.kind === "conduit") {
+      return "backline";
+    }
+    const positionDef = gameState.constructor.positions[positionCode];
+    if (!positionDef) throw new Error(`Invalid position: "${positionCode}"`);
+    return positionDef.line;
+  }
+
+  /**
    * Create a unit from a card instance, wire native traits/triggers/passives/
    * attributes, and emit the deploy/summon event chain. The sole path that
    * puts a fully-wired unit onto a field line — shared by deployment and
    * summoning. Line capacity must be guaranteed by the caller.
    */
   static _placeOnField(gameState, card, owner, positionCode, cost) {
-    const positionDef = gameState.constructor.positions[positionCode];
-    const line = gameState.playerStates[owner].field[positionDef.line];
-    const unit = new Unit(card, positionCode);
-    line.push(unit);
+    const line = LifecycleEngine._lineForCard(gameState, card, positionCode);
+    const placedPositionCode = card.kind === "standard" ? positionCode : null;
+    const unit = new Unit(card, placedPositionCode, line);
+    gameState.playerStates[owner].field[line].push(unit);
     gameState._indexUnit(unit);
 
     // Apply native traits via ModifierStack
@@ -181,6 +201,11 @@ export default class LifecycleEngine {
     // Wire attribute engines
     if (gameState._attributeRegistry) {
       gameState._attributeRegistry.onUnitDeployed(unit, gameState);
+    }
+
+    // Register landmark rules (always-on battlefield rules, distinct from passives).
+    if (card.kind === "landmark" && gameState._globalRuleRegistry) {
+      gameState._globalRuleRegistry.registerUnit(unit, gameState);
     }
 
     // Emit the deploy event chain AFTER the unit is fully wired. `unit:deployed`
@@ -238,8 +263,7 @@ export default class LifecycleEngine {
   static summonUnit(gameState, owner, card, positionCode) {
     const player = gameState.playerStates[owner];
     if (!player) throw new Error(`Player "${owner}" not found`);
-    const positionDef = gameState.constructor.positions[positionCode];
-    if (!positionDef) throw new Error(`Invalid position: "${positionCode}"`);
+    const line = LifecycleEngine._lineForCard(gameState, card, positionCode);
 
     const existingSame = player.field?.frontline
       ?.concat(player.field?.backline || [])
@@ -249,14 +273,14 @@ export default class LifecycleEngine {
       return { unit: null, discardedDuplicate: true, pending: false };
     }
 
-    const line = player.field[positionDef.line];
-    if (line.length >= 5) {
+    const fieldLine = player.field[line];
+    if (fieldLine.length >= 5) {
       const pendingCardId = `pending-summon:${card.id}`;
       gameState.createPendingDecision({
         owner,
         type: "line_overflow",
         candidates: [
-          ...line.map((candidate) => ({
+          ...fieldLine.map((candidate) => ({
             id: candidate.id,
             name: candidate.card.name,
             hp: candidate.currentHp,
@@ -269,7 +293,7 @@ export default class LifecycleEngine {
             return;
           }
           const selectedUnit = gameState._findUnit(selectedId);
-          if (!selectedUnit || !line.includes(selectedUnit)) {
+          if (!selectedUnit || !fieldLine.includes(selectedUnit)) {
             throw new Error("Selected overflow unit is no longer in the destination line.");
           }
           LifecycleEngine.destroyUnit(gameState, selectedUnit);
@@ -298,8 +322,7 @@ export default class LifecycleEngine {
     if (!unit || !unit.isAlive()) return { stolen: false };
     const newPlayer = gameState.playerStates[newOwner];
     if (!newPlayer) throw new Error(`Player "${newOwner}" not found`);
-    const newLine = gameState.constructor.positions[positionCode]?.line;
-    if (!newLine) throw new Error(`Invalid position: "${positionCode}"`);
+    const newLine = LifecycleEngine._lineForCard(gameState, unit.card, positionCode);
     const line = newPlayer.field[newLine];
 
     if (line.length >= 5) {
@@ -336,7 +359,8 @@ export default class LifecycleEngine {
     unit.owner = newOwner;
     unit.card.owner = newOwner;
     line.push(unit);
-    unit.placedPositionCode = positionCode;
+    unit.placedPositionCode = unit.card.kind === "standard" ? positionCode : null;
+    unit.line = newLine;
     gameState._indexUnit(unit);
     gameState.eventBus.emit(EVT.UNIT_STOLEN, {
       unitId: unit.id,
@@ -388,6 +412,7 @@ export default class LifecycleEngine {
     // unit's passive source IDs so they never outlive the source. Ordered after
     // unregister so the revoke events can't re-trigger the outgoing handlers.
     gameState._passiveManager?.revokeGrants(unit.id, unit.card?.passiveAbilities || [], gameState);
+    gameState._globalRuleRegistry?.unregisterUnit(unit.id, gameState);
     gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
     // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
     // (triggered by the UNIT_DESTROYED → removeByTarget cascade below).

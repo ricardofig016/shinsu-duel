@@ -76,6 +76,10 @@ Pure, read-only evaluator for the predicates that gate `conditional` nodes and a
 
 Owns always-on modifier application (`modify_stat`/`modify_cost`/`modify_condition`/`modify_keyword`/`modify_targeting`/`modify_repeat`/`retain_equipment`/`modify_ability`) as source-keyed `ModifierStack` entries, applied by `PassiveManager` and `LifecycleEngine`. It exposes `revokeBySource(gameState, sourceId)` as the symmetric revoke counterpart to `applyModifier`, and enforces a modifier's node-level `position` (the source unit must occupy that position) at application time. It is also the **single cost authority** for playing/deploying/equipping: `getEffectiveCost(card, owner, gameState)` folds a card's base cost, its own `modify_cost` effects (predicate-gated against the acting player), and board-wide `stat: cost` modifiers keyed to the owner and filtered by `cardType`/affiliations. Every action (`PlaySkillAction`, `DeployUnitAction`, `EquipEquipmentAction`) and `LifecycleEngine` cost check routes through it. See `MODIFIER_STACK_ARCHITECTURE.md` for the consultation helpers.
 
+## GlobalRuleRegistry
+
+Owns landmark `rules` as source-keyed `ModifierStack` entries (`sourceType: "landmark"`, `sourceId: Landmark#<unitId>`, `type: "rule"`, `meta.rule`). `registerUnit(unit, gameState)` applies a landmark's rules when it enters play; `unregisterUnit(unitId, gameState)` revokes them by source when it leaves. Rules are **not** modifiers — `ModifierService.isModifier` excludes them — and are applied by `LifecycleEngine` on deploy, mirroring `PassiveManager` but for the always-on board-wide rule contract.
+
 ---
 
 ## Integration

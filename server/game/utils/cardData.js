@@ -85,6 +85,8 @@ export function toCardTargetView(card) {
     name: card.name,
     series: card.series ?? null,
     type: card.type,
+    kind: card.kind ?? "standard",
+    line: card.line ?? null,
     cost: card.cost,
     rank: card.rank ?? null,
     positions: toCodes(card.positions),

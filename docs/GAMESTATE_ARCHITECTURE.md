@@ -19,6 +19,7 @@ This document describes the GameState architecture: zone model, service layer, l
 | **LifecycleEngine**    | Unit lifecycle: deploy, destroy, transform, equip, move   |
 | **TriggerManager**     | Evolution/ignition: AST→event subscriptions               |
 | **PassiveManager**     | Timed passives (round start/end): DSL→event subscriptions |
+| **GlobalRuleRegistry** | Landmark rules: always-on battlefield rule entries        |
 | **AttributeRegistry**  | Pluggable attribute engines (Anima, Hwayeomsa)            |
 
 Each service owns one resource; nothing outside the service mutates it. See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.

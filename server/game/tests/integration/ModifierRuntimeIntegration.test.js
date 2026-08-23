@@ -164,7 +164,7 @@ describe("Modifier runtime integration", () => {
 
   test("Wooden Horse loses 1 HP when any unit uses a Quick ability", () => {
     const game = setupGameWithHands({ Alice: ["Test Landmark Unit", "Test Scout"], Bob: [] });
-    const horse = deployUnit(game, "Alice", "Test Landmark Unit", "landmark");
+    const horse = deployUnit(game, "Alice", "Test Landmark Unit", "backline");
     const monkey = deployUnit(game, "Alice", "Test Scout", "scout");
     const beforeHp = horse.currentHp;
 
@@ -255,7 +255,7 @@ describe("Modifier runtime integration", () => {
 
   test("Wooden Horse charges the ability user (even an enemy) and still loses 1 HP", () => {
     const game = setupGameWithHands({ Alice: ["Test Landmark Unit"], Bob: ["Test Scout"] });
-    const horse = deployUnit(game, "Alice", "Test Landmark Unit", "landmark");
+    const horse = deployUnit(game, "Alice", "Test Landmark Unit", "backline");
     const monkey = deployUnit(game, "Bob", "Test Scout", "scout");
     const beforeHp = horse.currentHp;
     game.currentTurn = "Bob";
