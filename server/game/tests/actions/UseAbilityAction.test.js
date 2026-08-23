@@ -1,5 +1,6 @@
 import UseAbilityAction from "../../actions/UseAbilityAction.js";
-import { setupGameWithCardsInHand, advanceToRound } from "../utils.js";
+import CombatSlotService from "../../services/CombatSlotService.js";
+import { setupGameWithCardsInHand, advanceToRound, setupGameWithHands, deployUnit } from "../utils.js";
 
 describe("UseAbilityAction", () => {
   function deployMonkeyman(position) {
@@ -172,5 +173,31 @@ describe("UseAbilityAction", () => {
 
       expect(unit.currentHp).toBe(1);
     });
+
+  test("a shinheuh ability is gated by the Shinheuh combat slot", () => {
+    const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
+    const unit = deployUnit(game, "Alice", "Test Shinheuh", "frontline");
+    game.currentTurn = "Alice";
+    unit.card.abilities[0] = { type: "heal", amount: 1, target: "self", quick: true };
+    unit.currentHp = 1;
+
+    // Without a Shinheuh slot the ability cannot be used.
+    expect(() =>
+      game.processAction({
+        type: "use-ability-action",
+        data: { source: "player", username: "Alice", unitId: unit.id, abilityCode: "0" },
+      })
+    ).toThrow("Shinheuh combat slot is unavailable");
+
+    // With the slot granted, the ability resolves and consumes the slot.
+    CombatSlotService.grantShinheuhSlot(game.playerStates.Alice, game.eventBus, "Alice");
+    game.processAction({
+      type: "use-ability-action",
+      data: { source: "player", username: "Alice", unitId: unit.id, abilityCode: "0" },
+    });
+
+    expect(unit.currentHp).toBe(2);
+    expect(game.playerStates.Alice.shinheuhSlot.available).toBe(false);
+  });
   });
 });

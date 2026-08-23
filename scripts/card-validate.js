@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import yaml from "js-yaml";
 import Ajv from "ajv";
 
@@ -532,7 +532,7 @@ function validateEquipment(card) {
 
 const allowedTypes = new Set(["unit", "skill", "equipment"]);
 
-function validateCard(card, filename) {
+export function validateCard(card, filename) {
   const errors = [];
   const warnings = [];
 
@@ -631,8 +631,12 @@ async function main() {
   console.log(`${colors.green}✓ Validated ${cardFiles.length} card file(s) successfully.${colors.reset}`);
 }
 
-main().catch((error) => {
-  console.error(`${colors.red}Fatal error: ${error.message}${colors.reset}`);
-  console.error(error.stack);
-  process.exitCode = 1;
-});
+const isMain = process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
+
+if (isMain) {
+  main().catch((error) => {
+    console.error(`${colors.red}Fatal error: ${error.message}${colors.reset}`);
+    console.error(error.stack);
+    process.exitCode = 1;
+  });
+}

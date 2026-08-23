@@ -59,7 +59,7 @@ Id assignment:
 
 One deliberate deviation from `card-compile.js`:
 
-- `card-validate.js` domain rules (rank→cost ranges, null-rank positions) do not apply — fixtures deliberately exercise edge shapes.
+- `card-validate.js` domain rules (rank→cost ranges, kind/position/line/rule constraints) do not apply — fixtures deliberately exercise edge shapes.
 
 ### Conventions (enforced by `FixtureCardAudit.test.js`)
 

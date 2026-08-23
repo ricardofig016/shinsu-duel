@@ -408,4 +408,135 @@ describe("PassiveManager", () => {
     LifecycleEngine.detachEquipment(game, unit, equip);
     expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
   });
+
+  test("summon passive fires on the owner's matching-kind summon", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const nare = putInHand(game, "Alice", "Test Scout");
+    nare.passiveAbilities = [{
+      type: "deal_damage",
+      amount: 1,
+      target: "all_enemies",
+      raw: "when you summon a Shinheuh, deal 1 to all enemies",
+      trigger: { type: "summon", source: "shinheuh" },
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(nare);
+    LifecycleEngine.deployUnit(game, "Alice", handIndex, "scout");
+
+    const targetCardId = getCardIdByName("Test Hwayeomsa");
+    const targetCard = new Card(targetCardId, game.cards[targetCardId], "Bob", game.eventBus);
+    const target = {
+      id: "Unit#summon-target",
+      owner: "Bob",
+      card: targetCard,
+      currentHp: targetCard.maxHp,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(target);
+
+    const shinheuh = {
+      id: "Unit#shinheuh",
+      owner: "Alice",
+      card: { name: "Bull", kind: "shinheuh", maxHp: 3 },
+      currentHp: 3,
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.frontline.push(shinheuh);
+    game.eventBus.emit(EVT.UNIT_SUMMONED, { username: "Alice", unit: shinheuh, unitId: shinheuh.id });
+
+    expect(target.currentHp).toBe(targetCard.maxHp - 1);
+  });
+
+  test("summon passive ignores a non-matching kind and other owners' summons", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const nare = putInHand(game, "Alice", "Test Scout");
+    nare.passiveAbilities = [{
+      type: "deal_damage",
+      amount: 1,
+      target: "all_enemies",
+      raw: "when you summon a Shinheuh, deal 1 to all enemies",
+      trigger: { type: "summon", source: "shinheuh" },
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(nare);
+    LifecycleEngine.deployUnit(game, "Alice", handIndex, "scout");
+
+    const targetCardId = getCardIdByName("Test Hwayeomsa");
+    const targetCard = new Card(targetCardId, game.cards[targetCardId], "Bob", game.eventBus);
+    const target = {
+      id: "Unit#summon-target",
+      owner: "Bob",
+      card: targetCard,
+      currentHp: targetCard.maxHp,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(target);
+
+    // A standard-kind summon does not match `source: shinheuh`.
+    const standard = {
+      id: "Unit#standard",
+      owner: "Alice",
+      card: { name: "Standard", kind: "standard", maxHp: 3 },
+      currentHp: 3,
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.frontline.push(standard);
+    game.eventBus.emit(EVT.UNIT_SUMMONED, { username: "Alice", unit: standard, unitId: standard.id });
+    expect(target.currentHp).toBe(targetCard.maxHp);
+
+    // A shinheuh summoned by the opponent does not fire the passive.
+    const oppShinheuh = {
+      id: "Unit#opp-shinheuh",
+      owner: "Bob",
+      card: { name: "Bull", kind: "shinheuh", maxHp: 3 },
+      currentHp: 3,
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(oppShinheuh);
+    game.eventBus.emit(EVT.UNIT_SUMMONED, { username: "Bob", unit: oppShinheuh, unitId: oppShinheuh.id });
+    expect(target.currentHp).toBe(targetCard.maxHp);
+  });
+
+  test("deploy passive fires on the unit's own deployment only", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+
+    const targetCardId = getCardIdByName("Test Hwayeomsa");
+    const targetCard = new Card(targetCardId, game.cards[targetCardId], "Bob", game.eventBus);
+    const target = {
+      id: "Unit#deploy-target",
+      owner: "Bob",
+      card: targetCard,
+      currentHp: targetCard.maxHp,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(target);
+
+    const card = putInHand(game, "Alice", "Test Scout");
+    card.passiveAbilities = [{
+      type: "deal_damage",
+      amount: 1,
+      target: "all_enemies",
+      raw: "when i am deployed, deal 1 to all enemies",
+      trigger: { type: "deploy" },
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(card);
+    LifecycleEngine.deployUnit(game, "Alice", handIndex, "scout");
+    expect(target.currentHp).toBe(targetCard.maxHp - 1);
+
+    // Deploying a different unit must not re-fire this unit's deploy passive.
+    const other = putInHand(game, "Alice", "Test Fisherman Unit");
+    const otherIdx = game.playerStates.Alice.hand.indexOf(other);
+    LifecycleEngine.deployUnit(game, "Alice", otherIdx, "fisherman");
+    expect(target.currentHp).toBe(targetCard.maxHp - 1);
+  });
 });

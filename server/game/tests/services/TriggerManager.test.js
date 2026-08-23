@@ -103,6 +103,20 @@ describe("TriggerManager trigger subscriptions", () => {
     expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
   });
 
+  test("damaged_by trigger fires on a matching source kind", () => {
+    register([{ type: "damaged_by", source: "shinheuh" }]);
+    gameState._findUnit = (id) => (id === "Unit#1" ? unit : { card: { name: "Bull", kind: "shinheuh" } });
+    bus.emit(EVT.DAMAGE_APPLIED, { targetId: "Unit#1", sourceId: "Source" });
+    expect(LifecycleEngine.transformUnit).toHaveBeenCalled();
+  });
+
+  test("damaged_by trigger ignores a non-matching source kind", () => {
+    register([{ type: "damaged_by", source: "shinheuh" }]);
+    gameState._findUnit = (id) => (id === "Unit#1" ? unit : { card: { name: "Rak", kind: "standard" } });
+    bus.emit(EVT.DAMAGE_APPLIED, { targetId: "Unit#1", sourceId: "Source" });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
   test("round_start trigger fires on round:started", () => {
     register([{ type: "round_start" }]);
     bus.emit(EVT.ROUND_START, {});

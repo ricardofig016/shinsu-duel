@@ -30,7 +30,7 @@ Historical inventory and classification of the legacy `type: "custom"` effects i
 | K   | Slay (3)                            | Evankhell 15, Conduit 11, Submerged Fish 63                                                         | `slay` (target filter by condition/rank)                                                                               |
 | L   | Summon (4)                          | Lo Po Bia Ren 46, Rachel 54, The Hand of Arlen 65, Yuga 81                                          | `summon` (deck/hand source, cost filter, onto both)                                                                    |
 | M   | Steal / discard / Disarm (3)        | Hwa Ryun 29, Lo Po Bia Ren 46, Kurudan 44                                                           | `discard`, `steal`, `disarm`                                                                                           |
-| N   | Global board rules (5)              | Floor of Death 19, Hell Express 26, Name Hunt Station 48, Water Stadium 72, Yeon Yihwa 79           | `global_rule` + `modify_targeting` (79)                                                                                |
+| N   | Global board rules (5)              | Floor of Death 19, Hell Express 26, Name Hunt Station 48, Water Stadium 72, Yeon Yihwa 79           | landmark `rules` + `modify_targeting` (79)                                                                             |
 
 | #   | Cluster                             | Cards (name, id)                                   | Target DSL                                                                                   |
 | --- | ----------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -42,7 +42,7 @@ Historical inventory and classification of the legacy `type: "custom"` effects i
 | T   | Ability copy / repeat-play (2)      | Jyu Viole Grace 36, Twenty-Fifth Baam - Evolved 70 | `copy_ability`, delayed repeat-play trigger                                                  |
 | U   | Hand peek (1)                       | Monkeyman 47                                       | `peek_hand` (observer-only)                                                                  |
 | V   | Quick-grant / quick-trigger (3)     | Karaka 37/38, Wooden Horse 74                      | `modify_keyword { quick }`, passive on `quick_ability_used`                                  |
-| W   | Self-harming / Free+Spend (2)       | The Hand of Arlen 65, Stone Doll 62                | `sequence` of `extinguish`/`spend_shinsu`/`deal_damage`; `free`/`quick` flags              |
+| W   | Self-harming / Free+Spend (2)       | The Hand of Arlen 65, Stone Doll 62                | `sequence` of `extinguish`/`spend_shinsu`/`deal_damage`; `free`/`quick` flags                |
 | X   | Charge-on-summon synergy (1)        | Sunwoo Nare 64                                     | passive `trigger: summon` → `charge_shinsu`                                                  |
 | Y   | Equipment assembly (4)              | Thorn Fragments 18/58/67/21                        | passive `trigger: equip` + `conditional` (all 4 unique equipped) → `discard` + `create_card` |
 | Z   | Revert/transform (1)                | Khun Ran - Evolved 43                              | passive `trigger: round_end` → `sequence` (`create_card`, `transform`)                       |
@@ -53,7 +53,7 @@ The grammar must cover these effects with **generic handlers**, never per-card h
 
 - **Primitives** (one handler each): `deal_damage`, `heal`, `give_condition`, `cleanse`, `grant_trait`, `remove_traits`, `slay`, `transform`, `copy_ability`, `copy_traits`, `grant_random_trait`, `peek_hand`, `charge_shinsu`, `light_up`, `extinguish`, `draw_card`, `reclaim_cards`, `create_card`, `summon`, `discard`, `steal`, `disarm`, `switch_position`, `compress_shinsu`.
 - **Structural**: `sequence`, `conditional`, `spend_shinsu`, `grant_ability`.
-- **Modifiers** (always-on passives): `modify_stat`, `modify_keyword`, `modify_targeting`, `global_rule`.
+- **Modifiers** (always-on passives): `modify_stat`, `modify_keyword`, `modify_targeting`. Landmark `rules` are always-on board rules registered separately (not modifiers).
 - **Predicates**: `has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_all_equipped`, `has_condition`.
 - **Triggers** (new): `attack`, `summon`, `draw`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`.
 
@@ -61,6 +61,6 @@ The grammar must cover these effects with **generic handlers**, never per-card h
 
 - Cluster H's `started_with_card` predicate requires `GameState` to record the starting deck composition (presence, or exact copy count — confirm in Phase C).
 - Cluster T's "play it 4 more times" needs a delayed/queued repeat trigger — confirm in scope now or document as a follow-up.
-- Cluster N's landmark rules are `global_rule` modifiers owned by the landmark unit, gated to their board lifetime.
+- Cluster N's landmark rules are a top-level `rules` list owned by the landmark unit, registered/revoked by `GlobalRuleRegistry` for their board lifetime.
 - Cluster Y is a cross-card condition ("all 4 unique Thorn Fragments equipped") — model as a predicate evaluated on the bearer's equipment set.
 - `_test_Equipment`/`_test_Skill` (`raw: "test"`) should become structured no-op nodes kept in the allowlist, or be removed from the production set.

@@ -1,5 +1,6 @@
 import LifecycleEngine from "./LifecycleEngine.js";
 import EVT from "../EventCatalog.js";
+import { matchesTriggerSource } from "../utils/triggerSource.js";
 
 /**
  * Maps typed trigger ASTs (from compiler) to runtime event subscriptions.
@@ -116,7 +117,7 @@ export default class TriggerManager {
       case "damaged_by":
         this._subscribeEvent(unitId, EVT.DAMAGE_APPLIED, targetCardId, transformType, gameState,
           (payload) => payload.targetId === unitId &&
-            (!trigger.source || gameState._findUnit(payload.sourceId)?.card?.name?.toLowerCase() === trigger.source));
+            matchesTriggerSource(gameState._findUnit(payload.sourceId), trigger.source));
         break;
       case "round_start":
         this._subscribeEvent(unitId, EVT.ROUND_START, targetCardId, transformType, gameState, () => true);

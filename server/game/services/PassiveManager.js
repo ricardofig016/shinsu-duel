@@ -2,6 +2,7 @@ import * as IdFactory from "../IdFactory.js";
 import { resolveEffect } from "../EffectResolver.js";
 import ModifierService from "./ModifierService.js";
 import EVT from "../EventCatalog.js";
+import { matchesTriggerSource } from "../utils/triggerSource.js";
 
 /**
  * Registers compiled, event-driven passives for a unit while it is on field.
@@ -169,6 +170,12 @@ export default class PassiveManager {
     if (trigger.type === "quick_ability_used") {
       return { eventName: EVT.UNIT_ABILITY_USED, effect: passive, type: trigger.type };
     }
+    if (trigger.type === "summon") {
+      return { eventName: EVT.UNIT_SUMMONED, effect: passive, type: trigger.type, source: trigger.source };
+    }
+    if (trigger.type === "deploy") {
+      return { eventName: EVT.UNIT_SUMMONED, effect: passive, type: trigger.type };
+    }
 
     // Other trigger types are not yet wired here. Skip registration.
     return null;
@@ -190,6 +197,13 @@ export default class PassiveManager {
     }
     if (trigger.type === "deal_damage" && payload?.sourceId !== unit.id) return false;
     if (trigger.type === "quick_ability_used" && payload?.quick !== true) return false;
+    if (trigger.type === "summon") {
+      // "when you summon a Shinheuh" — only the passive owner's own summons,
+      // and the summoned unit must match the authored `source` (kind or name).
+      if (payload?.username !== unit.owner) return false;
+      if (trigger.source && !matchesTriggerSource(gameState._findUnit(payload?.unitId), trigger.source)) return false;
+    }
+    if (trigger.type === "deploy" && payload?.unitId !== unit.id) return false;
     return true;
   }
 

@@ -33,9 +33,9 @@ import {
  *   - Named fixtures are name-sorted and assigned 10000+ (mirrors the real
  *     compiler's stable name-sorted assignment).
  *
- * `card-validate.js` domain rules (rank→cost ranges, null-rank positions) do
- * not apply to fixtures; they are small, load-bearing mirrors that
- * deliberately exercise edge shapes. Schema validation still runs.
+ * `card-validate.js` domain rules (rank→cost ranges, kind/position/line/rule
+ * constraints) do not apply to fixtures; they are small, load-bearing mirrors
+ * that deliberately exercise edge shapes. Schema validation still runs.
  */
 
 const currentFile = fileURLToPath(import.meta.url);

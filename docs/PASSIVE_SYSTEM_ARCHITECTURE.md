@@ -31,7 +31,7 @@ A timed passive is a structured DSL node with a structured `trigger` object:
 }
 ```
 
-The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, and `quick_ability_used`. Passives with no `trigger` at all are always-on and handled separately (see below).
+The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, `quick_ability_used`, `summon`, and `deploy`. The `summon` trigger matches an authored `source` against the summoned unit's `kind` (or name); the `deploy` trigger fires on the unit's own deployment. Passives with no `trigger` at all are always-on and handled separately (see below).
 
 ---
 

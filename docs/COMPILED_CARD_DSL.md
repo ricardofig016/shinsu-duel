@@ -220,7 +220,7 @@ target:
 
 `has_passive: true` keeps only units whose card declares at least one passive ability ("Silence an enemy that has at least one passive"). `can_switch: true` keeps only units that can legally switch position — at least one printed position other than the current one whose destination line is not full.
 
-`rank`, `position`, `affiliation`, `attribute`, and `kind` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `kind: shinheuh` means "a Shinheuh" (replacing the old `position: [frontline-shinheuh, backline-shinheuh]` alias). `line` filters by field line.
+`rank`, `position`, `affiliation`, `attribute`, and `kind` accept either a single value or an array of values. An array is an **OR** match ("any of these") — e.g. `attribute: [red witch, silver dwarf]` means "a Guide", and `kind: shinheuh` means "a Shinheuh". `line` filters by field line.
 
 A step inside a shared-target `sequence` uses a **link** target instead of a side descriptor: `target: { link: sequence }` (all shared targets) or `target: { link: sequence, count: N }` (a subset). Link targets are only valid on steps of a `sequence` that declares `targets`.
 
