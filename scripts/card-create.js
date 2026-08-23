@@ -10,7 +10,7 @@ const cardsDirectory = path.join(projectRoot, "data", "cards");
 const allowedTypes = new Set(["unit", "skill", "equipment"]);
 
 const FOLDER_MAP = {
-  unit: "units",
+  unit: "units/standard", // new units default to the standard kind
   skill: "skills",
   equipment: "equipments",
 };
