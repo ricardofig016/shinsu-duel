@@ -1,0 +1,15 @@
+cardId: 1030
+type: equipment
+name: Test Armor
+cost: 4
+requirements:
+  - deployed as Fisherman
+effects:
+  - type: modify_cost
+    amount: -2
+    if: { type: started_with_card, cardName: Ha Jinsung }
+    raw: "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+  - type: grant_trait
+    trait: barrier
+    target: { side: bearer }
+    raw: "the bearer has Barrier"

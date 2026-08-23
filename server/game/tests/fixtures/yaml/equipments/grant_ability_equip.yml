@@ -1,0 +1,16 @@
+cardId: 1033
+type: equipment
+name: Test Grant Ability Equip
+cost: 3
+requirements:
+  - deployed as Scout
+effects:
+  - type: grant_trait
+    trait: resilient
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer has Resilient 2"
+  - type: grant_ability
+    target: { side: bearer }
+    ability: { type: give_condition, condition: poisoned, amount: 4, target: { side: enemy } }
+    raw: "ability: give Poisoned 4 to an enemy"

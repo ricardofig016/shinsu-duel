@@ -1,0 +1,16 @@
+cardId: 1006
+type: unit
+name: Test Light Bearer Only
+cost: 0
+hp: 2
+rank: regular
+positions:
+  - light bearer
+traits:
+  - beacon 1
+affiliations:
+  - khun family
+abilities:
+  - type: light_up
+    amount: 1
+    raw: "Light Up 1"

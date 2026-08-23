@@ -1,0 +1,25 @@
+cardId: 1015
+type: unit
+name: Test Fisherman Unit
+cost: 4
+hp: 6
+rank: regular
+positions:
+  - fisherman
+traits:
+  - bloodthirsty 1
+  - taunt
+affiliations:
+  - team chang
+  - canines
+abilities:
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy }
+    raw: "deal 2 to an enemy"
+passives:
+  - type: grant_trait
+    trait: resilient
+    amount: 1
+    target: { side: ally, affiliation: team chang }
+    raw: "allied team-chang members have Resilient 1"

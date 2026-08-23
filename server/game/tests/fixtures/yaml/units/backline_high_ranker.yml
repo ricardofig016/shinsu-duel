@@ -1,0 +1,10 @@
+cardId: 1065
+type: unit
+name: Test Backline High Ranker
+cost: 4
+hp: 6
+rank: high ranker
+positions:
+  - spear bearer
+affiliations:
+  - fug

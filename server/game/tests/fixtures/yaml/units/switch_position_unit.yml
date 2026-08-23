@@ -1,0 +1,23 @@
+cardId: 1018
+type: unit
+name: Test Switch Position Unit
+cost: 6
+hp: 5
+rank: high ranker
+positions:
+  - scout
+  - light bearer
+traits:
+  - beacon 3
+attributes:
+  - silver dwarf
+affiliations:
+  - edrok family
+abilities:
+  - type: draw_card
+    amount: 1
+    card: { type: equipment, choose: true }
+    raw: "draw an equipment of your choice"
+  - type: switch_position
+    target: { side: enemy, can_switch: true }
+    raw: "force an enemy to switch positions"

@@ -1,0 +1,13 @@
+cardId: 1060
+type: skill
+name: Fire Core
+cost: 0
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+effects:
+  - type: quick
+    raw: "i am Quick"
+  - type: create_card
+    card: { type: skill, series: incinerate }
+    raw: "Spend Fire Charges to create the highest affordable Incinerate in your hand"

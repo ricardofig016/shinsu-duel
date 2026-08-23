@@ -1,0 +1,12 @@
+cardId: 1037
+type: equipment
+name: Test Repeat Equip
+cost: 0
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+effects:
+  - type: modify_repeat
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer's abilities trigger twice"

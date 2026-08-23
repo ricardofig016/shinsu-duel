@@ -1,0 +1,18 @@
+cardId: 1023
+type: unit
+name: Test Filler Unit
+cost: 4
+hp: 7
+rank: regular
+positions:
+  - wave controller
+  - spear bearer
+traits:
+  - resilient 1
+affiliations:
+  - fug
+abilities:
+  - type: heal
+    amount: 3
+    target: { side: self }
+    raw: "heal me 3 HP"

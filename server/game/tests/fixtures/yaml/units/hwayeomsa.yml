@@ -1,0 +1,23 @@
+cardId: 1010
+type: unit
+name: Test Hwayeomsa
+cost: 5
+hp: 6
+rank: regular
+positions:
+  - fisherman
+attributes:
+  - hwayeomsa
+affiliations:
+  - team baam
+  - yeon family
+abilities:
+  - type: give_condition
+    condition: exhausted
+    target: { side: enemy, count: 2, condition: burned }
+    raw: "give 2 Burned enemies Exhausted"
+passives:
+  - type: modify_targeting
+    rule: untargetable_by
+    target: { side: any, condition: burned, conditionValue: 3 }
+    raw: "units with Burned 3+ can't target me"

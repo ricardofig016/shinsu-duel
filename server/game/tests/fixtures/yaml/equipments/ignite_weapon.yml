@@ -1,0 +1,12 @@
+cardId: 1031
+type: equipment
+name: Test Ignite Weapon
+cost: 2
+effects:
+  - type: modify_stat
+    stat: damage
+    amount: 3
+    target: { side: bearer }
+    raw: "the bearer's damage-dealing abilities deal +3 damage"
+ignition:
+  - "the bearer Slays a unit"

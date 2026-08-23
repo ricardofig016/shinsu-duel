@@ -1,0 +1,23 @@
+cardId: 1064
+type: unit
+name: Test Novick
+cost: 5
+hp: 6
+rank: regular
+positions:
+  - spear bearer
+  - fisherman
+affiliations:
+  - team novick
+abilities:
+  - type: deal_damage
+    amount: 7
+    target: { side: enemy }
+    position: spear bearer
+    raw: "spear bearer: deal 7 to an enemy"
+passives:
+  - type: disarm
+    target: { side: enemy }
+    to: { zone: hand, owner: equipment_owner }
+    trigger: { type: deal_damage }
+    raw: "when i deal damage to an enemy: Disarm them"

@@ -1,0 +1,10 @@
+cardId: 1052
+type: skill
+name: Test Damage Skill
+cost: 0
+effects:
+  - type: conditional
+    if: { type: has_unit, target: { side: ally, position: wave controller } }
+    then: { type: deal_damage, amount: 2, target: { side: enemy } }
+    otherwise: { type: deal_damage, amount: 1, target: { side: enemy } }
+    raw: "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"

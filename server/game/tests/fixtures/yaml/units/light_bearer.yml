@@ -1,0 +1,10 @@
+cardId: 1004
+type: unit
+name: Test Light Bearer
+cost: 1
+hp: 1
+rank: regular
+positions:
+  - light bearer
+attributes:
+  - irregular

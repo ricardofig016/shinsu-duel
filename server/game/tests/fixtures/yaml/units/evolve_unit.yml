@@ -1,0 +1,21 @@
+cardId: 1008
+type: unit
+name: Test Evolve Unit
+cost: 7
+hp: 7
+rank: high ranker
+positions:
+  - fisherman
+  - scout
+  - wave controller
+traits:
+  - reflect
+affiliations:
+  - fug
+passives:
+  - type: modify_keyword
+    keyword: quick
+    target: { side: ally, affiliation: "karaka's servants" }
+    raw: "allied karaka's servants' abilities have Quick"
+evolve:
+  - "Fisherman: equip with Test Armor"

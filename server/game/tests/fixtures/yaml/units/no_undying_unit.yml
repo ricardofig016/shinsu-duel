@@ -1,0 +1,13 @@
+cardId: 1022
+type: unit
+name: Test No Undying Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+abilities:
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy }
+    raw: "deal 2 to an enemy"

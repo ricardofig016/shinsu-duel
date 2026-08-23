@@ -1,0 +1,14 @@
+cardId: 1054
+type: skill
+name: Test Compress Skill
+cost: 2
+effects:
+  - type: give_condition
+    condition: burned
+    amount: 1
+    target: { side: enemy }
+    raw: "give Burned 1 to an enemy"
+  - type: compress_shinsu
+    amount: 1
+    card: { attribute: hwayeomsa }
+    raw: "Compress 1 from a Hwayeomsa in your hand"

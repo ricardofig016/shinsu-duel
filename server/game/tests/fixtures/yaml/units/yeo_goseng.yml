@@ -1,0 +1,23 @@
+cardId: 1063
+type: unit
+name: Test Yeo Goseng
+cost: 1
+hp: 1
+rank: regular
+positions:
+  - light bearer
+traits:
+  - beacon 1
+affiliations:
+  - team sweet and sour
+abilities:
+  - type: heal
+    amount: 1
+    target: { side: ally, affiliation: team sweet and sour }
+    raw: "heal a team sweet and sour member 1 HP"
+passives:
+  - type: modify_stat
+    stat: cost
+    amount: -1
+    target: { side: ally, affiliation: team sweet and sour }
+    raw: "team sweet and sour members cost 1 less"

@@ -1,0 +1,20 @@
+cardId: 1017
+type: unit
+name: Test Copy Ability Unit
+cost: 4
+hp: 4
+rank: regular
+positions:
+  - wave controller
+attributes:
+  - irregular
+affiliations:
+  - fug
+abilities:
+  - type: remove_traits
+    target: { side: enemy, has_passive: true }
+    raw: "Silence an enemy that has at least one passive"
+  - type: spend_shinsu
+    amount: 2
+    effect: { type: copy_ability, source: { side: enemy } }
+    raw: "spend 2: use an enemy ability"

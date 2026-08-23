@@ -1,0 +1,22 @@
+cardId: 1003
+type: unit
+name: Test Scout
+cost: 1
+hp: 2
+rank: regular
+positions:
+  - fisherman
+  - scout
+affiliations:
+  - team chang
+abilities:
+  - type: peek_hand
+    owner: opponent
+    quick: true
+    position: scout
+    raw: "scout: quick: reveal a random card in the opponent's hand"
+  - type: deal_damage
+    amount: 1
+    target: { side: enemy }
+    position: fisherman
+    raw: "fisherman: deal 1 to an enemy"

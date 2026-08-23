@@ -287,7 +287,7 @@ export function parseTrigger(raw) {
 
 // ── Cross-reference resolution ──────────────────────────────────────────────
 
-function resolveEvolveInto(card, allCards) {
+export function resolveEvolveInto(card, allCards) {
   if (card.type !== "unit") return null;
   const evolveTriggers = card.evolve;
   if (!Array.isArray(evolveTriggers) || evolveTriggers.length === 0) return null;
@@ -320,7 +320,7 @@ function resolveEvolveInto(card, allCards) {
   };
 }
 
-function resolveEvolvedFrom(card, allCards) {
+export function resolveEvolvedFrom(card, allCards) {
   if (card.type !== "unit") return null;
   // Check if this is an evolved card: name contains " - Evolved"
   if (!card.name.toLowerCase().includes(" - evolved")) return null;
@@ -330,7 +330,7 @@ function resolveEvolvedFrom(card, allCards) {
   return baseCard ? baseCard.cardId : null;
 }
 
-function resolveIgniteInto(card, allCards) {
+export function resolveIgniteInto(card, allCards) {
   if (card.type !== "equipment") return null;
   const ignitionTriggers = card.ignition;
   if (!Array.isArray(ignitionTriggers) || ignitionTriggers.length === 0) return null;
@@ -363,7 +363,7 @@ function resolveIgniteInto(card, allCards) {
   };
 }
 
-function resolveIgnitedFrom(card, allCards) {
+export function resolveIgnitedFrom(card, allCards) {
   if (card.type !== "equipment") return null;
   if (!card.name.toLowerCase().includes(" - ignited")) return null;
 
@@ -477,7 +477,7 @@ export function compileCard(rawCard, allCards) {
   return compiled;
 }
 
-function cleanCompiled(card) {
+export function cleanCompiled(card) {
   // Remove internal temporary fields
   delete card._evolveRaw;
   delete card._ignitionRaw;

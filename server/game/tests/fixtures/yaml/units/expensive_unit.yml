@@ -1,0 +1,11 @@
+cardId: 1005
+type: unit
+name: Test Expensive Unit
+cost: 9
+hp: 7
+rank: high ranker
+positions:
+  - fisherman
+  - wave controller
+affiliations:
+  - fug

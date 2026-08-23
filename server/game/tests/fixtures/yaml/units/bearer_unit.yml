@@ -1,0 +1,20 @@
+cardId: 1024
+type: unit
+name: Test Bearer Unit
+cost: 8
+hp: 11
+rank: high ranker
+positions:
+  - fisherman
+traits:
+  - barrier
+  - last one standing 4
+attributes:
+  - irregular
+affiliations:
+  - wolhaiksong
+abilities:
+  - type: deal_damage
+    amount: 4
+    target: { side: enemy }
+    raw: "deal 4 to an enemy"

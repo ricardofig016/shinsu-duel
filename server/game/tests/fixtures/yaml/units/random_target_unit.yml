@@ -1,0 +1,13 @@
+cardId: 1067
+type: unit
+name: Test Random Target Unit
+cost: 2
+hp: 4
+rank: regular
+positions:
+  - fisherman
+abilities:
+  - type: deal_damage
+    amount: 1
+    target: { side: enemy, random: true }
+    raw: "deal 1 to a random enemy"

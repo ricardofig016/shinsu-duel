@@ -22,6 +22,7 @@ Treat every change as part of the long-term resurrection and evolution of this p
 - Treat `RULES.md` as the authoritative source for game behavior unless the user explicitly overrides it.
 - Read the relevant architecture documents in `docs/` before making any changes to the codebase.
 - For any card or rule work — adding/editing cards, or adding/editing rules — first read `docs/CARD_AUTHORING.md`.
+- For any test or fixture work — writing tests or creating/editing test fixtures — first read `docs/TESTING.md` (test layout, the `compile:fixtures` pipeline, and fixture conventions live there).
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
 - Always use the canonical event-name constants from `server/game/EventCatalog.js` (`EVT`) when emitting or subscribing to events — never hardcode event-name strings.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
@@ -66,7 +67,7 @@ During implementation:
 - Test successful behavior, invalid input, boundary conditions, lifecycle cleanup, repeated operations, failure paths, event ordering, and interactions with related systems.
 - Run the relevant focused tests during development and the full test suite before finishing.
 - Run tests via `npm run test`. Do NOT use bare `npx jest`. The `test` script already wraps Jest with the required Node flags (`node --experimental-vm-modules node_modules/jest/bin/jest.js`).
-- Tests must never depend on shipped card data. Resolve cards against the test-owned fixture catalog (`server/game/tests/fixtures/cards.js`) and inject it via `GameState`'s `options.cards` (or the `tests/utils.js` helpers). You are free to create new fixtures.
+- Tests must never depend on shipped card data. Resolve cards against the test-owned fixture catalog (`server/game/tests/fixtures/cards.js`) and inject it via `GameState`'s `options.cards` (or the `tests/utils.js` helpers). You are free to create new fixtures — author them as YAML and run `npm run compile:fixtures` (see `docs/TESTING.md`).
 
 ## Acceptance Criteria
 

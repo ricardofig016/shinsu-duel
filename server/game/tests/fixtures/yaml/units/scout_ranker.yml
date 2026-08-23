@@ -1,0 +1,24 @@
+cardId: 1014
+type: unit
+name: Test Scout Ranker
+cost: 3
+hp: 2
+rank: ranker
+positions:
+  - scout
+affiliations:
+  - fug
+  - "karaka's servants"
+abilities:
+  - type: give_condition
+    condition: poisoned
+    amount: 1
+    target: { side: enemy, scope: backline }
+    raw: "give Poisoned 1 to a backline enemy"
+passives:
+  - type: modify_condition
+    condition: poisoned
+    amount: 2
+    target: { side: enemy, rank: high ranker }
+    if: { type: has_equipped, cardName: Test Grant Ability Equip }
+    raw: "if i have Test Grant Ability Equip equipped, i give Poisoned +2 to High Ranker units"

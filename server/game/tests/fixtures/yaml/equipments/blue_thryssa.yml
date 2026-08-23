@@ -1,0 +1,13 @@
+cardId: 1036
+type: equipment
+name: Test Blue Thryssa
+cost: 2
+effects:
+  - type: sequence
+    steps:
+      - type: heal
+        amount: 2
+        target: { side: bearer }
+      - type: remove_conditions
+        target: { side: bearer }
+    raw: "heal the bearer 2 HP and Cleanse the bearer"

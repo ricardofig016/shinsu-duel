@@ -1,0 +1,24 @@
+cardId: 1009
+type: unit
+name: Test Evolve Unit - Evolved
+cost: 7
+hp: 9
+rank: high ranker
+positions:
+  - fisherman
+  - scout
+  - wave controller
+traits:
+  - reflect
+affiliations:
+  - fug
+passives:
+  - type: modify_keyword
+    keyword: quick
+    target: { side: ally, affiliation: "karaka's servants" }
+    raw: "allied karaka's servants' abilities have Quick"
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy, scope: all, condition: rooted }
+    trigger: { type: round_end }
+    raw: "round end: deal 3 to all Rooted enemies"

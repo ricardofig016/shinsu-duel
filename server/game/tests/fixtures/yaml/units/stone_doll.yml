@@ -1,0 +1,23 @@
+cardId: 1061
+type: unit
+name: Test Stone Doll
+cost: 0
+hp: 20
+rank: regular
+positions:
+  - fisherman
+traits:
+  - taunt
+abilities:
+  - type: spend_shinsu
+    amount: 1
+    free: true
+    effect: { type: deal_damage, amount: 1, target: { side: enemy } }
+    raw: "Free: Spend 1: deal 1 to an enemy"
+passives:
+  - type: modify_stat
+    stat: damage_taken
+    amount: 4
+    target: { side: self }
+    source: { position: spear bearer }
+    raw: "Spear bearers deal +4 damage to me"

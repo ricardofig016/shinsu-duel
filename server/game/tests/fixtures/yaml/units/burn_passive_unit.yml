@@ -1,0 +1,24 @@
+cardId: 1021
+type: unit
+name: Test Burn Passive Unit
+cost: 2
+hp: 4
+rank: regular
+positions:
+  - wave controller
+traits:
+  - sharpshooter
+affiliations:
+  - team chang
+abilities:
+  - type: spend_shinsu
+    amount: 3
+    effect: { type: deal_damage, amount: 2, target: { side: enemy, scope: all, condition: burned } }
+    raw: "spend 3: deal 2 to all Burned enemies"
+passives:
+  - type: give_condition
+    condition: burned
+    amount: 1
+    target: { side: enemy }
+    trigger: { type: skill_played, cardName: Test Damage Skill }
+    raw: "Test Damage Skill gives Burned 1"

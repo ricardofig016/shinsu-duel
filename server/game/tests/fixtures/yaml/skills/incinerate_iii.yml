@@ -1,0 +1,23 @@
+cardId: 1058
+type: skill
+name: Test Incinerate III
+series: incinerate
+cost: 0
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+  - type: generated_by
+    resource: fire_charge
+    amount: 5
+    raw: "create me by spending 5 Fire Charges"
+effects:
+  - type: sequence
+    targets: { side: enemy, count: 3 }
+    steps:
+      - type: deal_damage
+        amount: 2
+        target: { link: sequence }
+      - type: give_condition
+        condition: burned
+        target: { link: sequence }
+    raw: "deal 2 to 3 enemies and give them Burn"

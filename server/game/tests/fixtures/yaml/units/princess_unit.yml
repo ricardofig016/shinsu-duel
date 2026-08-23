@@ -1,0 +1,17 @@
+cardId: 1025
+type: unit
+name: Test Princess Unit
+cost: 6
+hp: 8
+rank: high ranker
+positions:
+  - fisherman
+traits:
+  - resilient 3
+affiliations:
+  - ha family
+abilities:
+  - type: deal_damage
+    amount: 6
+    target: { side: enemy }
+    raw: "deal 6 to an enemy"

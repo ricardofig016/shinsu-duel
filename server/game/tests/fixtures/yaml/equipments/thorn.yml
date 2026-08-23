@@ -1,0 +1,28 @@
+cardId: 1035
+type: equipment
+name: Test Thorn
+cost: 0
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+effects:
+  - type: modify_stat
+    stat: damage
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer's damage-dealing abilities deal +2 damage"
+  - type: modify_stat
+    stat: heal
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer's healing abilities heal +2 HP"
+  - type: modify_stat
+    stat: hp
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer has +2 HP"
+  - type: grant_trait
+    trait: bloodthirsty
+    amount: 1
+    target: { side: bearer }
+    raw: "the bearer has Bloodthirsty 1"

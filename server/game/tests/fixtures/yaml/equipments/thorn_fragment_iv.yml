@@ -1,0 +1,27 @@
+cardId: 1042
+type: equipment
+name: Test Thorn Fragment IV
+series: thorn-fragment
+cost: 1
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+effects:
+  - type: conditional
+    quick: true
+    trigger: { type: equip }
+    if: { type: has_all_equipped, series: thorn-fragment }
+    then:
+      type: sequence
+      steps:
+        - type: discard
+          card: { type: equipment, series: thorn-fragment, zone: attachments }
+          owner: you
+        - type: create_card
+          card: { name: Test Thorn }
+    raw: "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+  - type: grant_trait
+    trait: bloodthirsty
+    amount: 1
+    target: { side: bearer }
+    raw: "the bearer has Bloodthirsty 1"

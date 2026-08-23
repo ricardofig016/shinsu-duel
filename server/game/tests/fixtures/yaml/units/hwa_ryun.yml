@@ -1,0 +1,28 @@
+cardId: 1062
+type: unit
+name: Test Hwa Ryun
+cost: 3
+hp: 2
+rank: regular
+positions:
+  - scout
+attributes:
+  - red witch
+affiliations:
+  - fug
+  - team baam
+  - team fug
+abilities:
+  - type: give_condition
+    condition: heavy
+    amount: 1
+    target: { side: enemy, scope: backline }
+    raw: "give Heavy 1 to a backline enemy"
+passives:
+  - type: modify_stat
+    stat: cost
+    amount: 1
+    target: { side: enemy }
+    cardType: skill
+    if: { type: has_unit, target: { side: ally, affiliation: [team baam, team fug] } }
+    raw: "while i have an ally team baam or team fug member, opponents' skills cost 1 more"

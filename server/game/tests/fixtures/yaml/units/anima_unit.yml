@@ -1,0 +1,22 @@
+cardId: 1016
+type: unit
+name: Test Anima Unit
+cost: 6
+hp: 5
+rank: ranker
+positions:
+  - wave controller
+  - scout
+attributes:
+  - anima
+affiliations:
+  - lo po bia family
+abilities:
+  - type: summon
+    card: { position: [frontline shinheuh, backline shinheuh], cost: 2, random: true }
+    from: game
+    onto: self
+    raw: "summon a random 2 cost Shinheuh"
+  - type: steal
+    card: { position: [frontline shinheuh, backline shinheuh], cost: cheapest }
+    raw: "steal the enemy's cheapest Shinheuh"

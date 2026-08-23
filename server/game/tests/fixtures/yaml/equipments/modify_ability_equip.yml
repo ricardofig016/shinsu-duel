@@ -1,0 +1,16 @@
+cardId: 1034
+type: equipment
+name: Test Modify Ability Equip
+cost: 3
+requirements:
+  - khun family member
+effects:
+  - type: modify_ability
+    target: { side: bearer }
+    effect: { type: give_condition, condition: frozen, amount: 1, target: { side: enemy } }
+    raw: "the bearer's abilities give Frozen to enemies"
+  - type: grant_trait
+    trait: pierce
+    amount: 1
+    target: { side: bearer }
+    raw: "the bearer has Pierce 1"

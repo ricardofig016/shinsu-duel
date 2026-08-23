@@ -1,0 +1,9 @@
+cardId: 1050
+type: skill
+name: Test Heal
+cost: 2
+effects:
+  - type: heal
+    amount: 5
+    target: { side: ally }
+    raw: "heal an ally 5 HP"

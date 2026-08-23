@@ -1,0 +1,16 @@
+cardId: 1032
+type: equipment
+name: Test Ignite Weapon - Ignited
+cost: 2
+effects:
+  - type: modify_stat
+    stat: damage
+    amount: 3
+    target: { side: bearer }
+    raw: "the bearer's damage-dealing abilities deal +3 damage"
+  - type: give_condition
+    condition: exhausted
+    amount: 1
+    target: { side: enemy }
+    trigger: { type: deal_damage }
+    raw: "the bearer's damage-dealing abilities give Exhausted 1"

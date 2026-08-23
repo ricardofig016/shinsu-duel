@@ -1,0 +1,9 @@
+cardId: 1066
+type: equipment
+name: Test Dionysos Wings
+cost: 2
+effects:
+  - type: charge_shinsu
+    amount: 1
+    trigger: { type: quick_ability_used }
+    raw: "the bearer's Quick abilities Charge 1"

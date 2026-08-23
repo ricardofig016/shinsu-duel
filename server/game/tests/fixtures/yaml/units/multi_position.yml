@@ -1,0 +1,24 @@
+cardId: 1012
+type: unit
+name: Test Multi Position
+cost: 3
+hp: 2
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+attributes:
+  - jeonsulsa
+affiliations:
+  - khun family
+abilities:
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy, scope: frontline }
+    raw: "deal 3 to a frontline enemy"
+  - type: heal
+    amount: 2
+    target: { side: enemy, name: Conduit }
+    raw: "heal enemy Conduit 2 HP"
+evolve:
+  - "Test Poison Skill is played on me"

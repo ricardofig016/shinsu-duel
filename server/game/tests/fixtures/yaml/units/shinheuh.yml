@@ -1,0 +1,13 @@
+cardId: 1011
+type: unit
+name: Test Shinheuh
+cost: 3
+hp: 3
+positions:
+  - frontline shinheuh
+abilities:
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy }
+    quick: true
+    raw: "quick: deal 3 to an enemy"

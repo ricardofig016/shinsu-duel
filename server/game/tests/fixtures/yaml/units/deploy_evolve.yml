@@ -1,0 +1,16 @@
+cardId: 1000
+type: unit
+name: Test Deploy Evolve
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+  - scout
+  - light bearer
+  - wave controller
+traits:
+  - barrier
+evolve:
+  - "when i am deployed"

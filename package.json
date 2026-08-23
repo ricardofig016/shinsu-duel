@@ -12,6 +12,7 @@
     "start": "node server/app.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose=false",
     "compile:cards": "node scripts/card-compile.js",
+    "compile:fixtures": "node scripts/compile-fixtures.js",
     "validate:cards": "node scripts/card-validate.js",
     "create:card": "node scripts/card-create.js",
     "lookup": "node scripts/card-lookup.js"

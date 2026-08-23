@@ -1,0 +1,17 @@
+cardId: 1056
+type: skill
+name: Test Incinerate I
+series: incinerate
+cost: 0
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+  - type: generated_by
+    resource: fire_charge
+    amount: 1
+    raw: "create me by spending 1 Fire Charges"
+effects:
+  - type: deal_damage
+    amount: 1
+    target: { side: enemy }
+    raw: "deal 1 to an enemy"

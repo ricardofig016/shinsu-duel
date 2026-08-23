@@ -1,0 +1,32 @@
+cardId: 1002
+type: unit
+name: Test Trait Unit
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+  - scout
+  - light bearer
+  - wave controller
+traits:
+  - barrier
+  - beacon
+  - bloodthirsty
+  - dealer 10
+  - immune
+  - last one standing 10
+  - lethal
+  - pierce 10
+  - reflect 10
+  - regenerate 10
+  - resilient 10
+  - ruthless 10
+  - sharpshooter
+  - strong 10
+  - taunt
+  - undying
+  - vengeful 10
+attributes:
+  - living ignition weapon
