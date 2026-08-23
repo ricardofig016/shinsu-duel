@@ -70,6 +70,34 @@ describe("ModifierService", () => {
     expect(game.modifierStack.getDamageTaken(target, sword)).toBe(0);
   });
 
+  test("damage_taken with a source filter does not amplify source-less damage", () => {
+    const game = createGame();
+    const target = putUnit(game, "Bob", "Test Shinheuh", "fisherman");
+
+    ModifierService.applyModifier(
+      { type: "modify_stat", stat: "damage_taken", amount: 4, target: { side: "self" }, source: { position: "spear-bearer" } },
+      game,
+      { sourceId: "Passive#t#0", sourceUnit: target, sourceOwner: "Bob" }
+    );
+
+    // Skill-cast damage has no attacking unit; the source filter must not match.
+    expect(game.modifierStack.getDamageTaken(target, null)).toBe(0);
+  });
+
+  test("a modifier with a node-level position mismatch applies nothing", () => {
+    const game = createGame();
+    const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");
+
+    const result = ModifierService.applyModifier(
+      { type: "modify_stat", stat: "damage", amount: 2, target: { side: "self" }, position: "wave-controller" },
+      game,
+      { sourceId: "Passive#u#0", sourceUnit: unit, sourceOwner: "Alice" }
+    );
+
+    expect(result.reason).toBe("position-mismatch");
+    expect(game.modifierStack.getDamageDealt(unit, null)).toBe(0);
+  });
+
   test("modify_stat hp raises current and max HP, and revokes on removeBySource", () => {
     const game = createGame();
     const unit = putUnit(game, "Alice", "Test Shinheuh", "fisherman");

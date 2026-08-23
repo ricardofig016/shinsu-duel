@@ -209,6 +209,10 @@ Always-on modifier passives and equipment effects (`modify_stat`/`modify_keyword
 
 All helpers are pure queries — they never mutate state and take unit references rather than `GameState`, so the stack stays decoupled from the board. Card cost (`stat: cost` keyed to a player, plus a card's own `modify_cost`) is consulted through `ModifierService.getEffectiveCost`, which is the single cost authority for play/deploy/equip.
 
+`getAbilityAugments` returns every augment attached to a unit; `EffectResolver` applies each matching augment **once per target per trigger**. `UseAbilityAction` resets the dedupe set before each `modify_repeat` trigger, so a repeated ability re-applies its augments once per trigger, while a multi-step ability within one trigger still applies each augment once.
+
+A `when`/`source`-filtered modifier only amplifies when a matching unit reference is passed: `getDamageDealt`/`getHealModifier` require a source unit, and `getDamageTaken` ignores its `source` filter (returns 0) when the damage has no attacking unit (e.g. skill-cast damage).
+
 ## Priority & Precedence
 
 Multiple `set`/`override` modifiers on the same key now resolve by priority: higher `priority` wins; tied priorities use most-recent-first (`createdAt`).

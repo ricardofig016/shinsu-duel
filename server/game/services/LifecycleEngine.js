@@ -543,7 +543,7 @@ export default class LifecycleEngine {
     }
 
     const oldEquipment = attachments[attachmentIndex];
-    gameState.modifierStack.removeBySource(oldEquipment.id);
+    ModifierService.revokeBySource(gameState, oldEquipment.id);
     const ignited = new Card(targetCardId, targetCard, unit.owner, gameState.eventBus);
     attachments[attachmentIndex] = ignited;
     LifecycleEngine._syncEquipment(unit, attachments);
@@ -661,7 +661,7 @@ export default class LifecycleEngine {
    * "discard") for `destOwner`, and emit `equipment:detached`.
    */
   static _detachOne(gameState, unit, equip, destination, destOwner) {
-    gameState.modifierStack.removeBySource(equip.id);
+    ModifierService.revokeBySource(gameState, equip.id);
     gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
     gameState.unregisterEquipmentTriggers(equip.id);
     // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge

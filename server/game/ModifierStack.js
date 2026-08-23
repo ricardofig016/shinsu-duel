@@ -418,7 +418,7 @@ export default class ModifierStack {
   getDamageTaken(targetUnit, sourceUnit) {
     if (!targetUnit) return 0;
     return this._statMods(targetUnit.id, "damage_taken")
-      .filter((m) => !m.meta?.source || this._matchesUnitFilter(sourceUnit, m.meta.source))
+      .filter((m) => !m.meta?.source || (sourceUnit && this._matchesUnitFilter(sourceUnit, m.meta.source)))
       .reduce((sum, m) => sum + (typeof m.value === "number" ? m.value : 0), 0);
   }
 

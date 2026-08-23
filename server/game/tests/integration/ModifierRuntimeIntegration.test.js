@@ -118,6 +118,50 @@ describe("Modifier runtime integration", () => {
     expect(game.modifierStack.has(enemy.id, "condition", "frozen")).toBe(true);
   });
 
+  test("a modify_ability augment applies once per target across a multi-step ability", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"], Bob: [] });
+    const monkey = deployUnit(game, "Alice", "Test Scout", "fisherman");
+    equip(game, "Alice", "Test Modify Ability Equip", monkey);
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
+
+    // A sequence that targets the same enemy in two steps must not stack the
+    // augment (Frozen) once per step.
+    monkey.card.abilities = [{
+      type: "sequence",
+      steps: [
+        { type: "deal_damage", amount: 1, target: { side: "enemy" } },
+        { type: "deal_damage", amount: 1, target: { side: "enemy" } },
+      ],
+      raw: "deal 1 to an enemy, twice",
+    }];
+
+    useAbility(game, "Alice", monkey, "0");
+
+    expect(game.modifierStack.getEffective(enemy.id, "condition", "frozen")).toBe(1);
+  });
+
+  test("modify_repeat re-arms modify_ability augments once per trigger", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"], Bob: [] });
+    const monkey = deployUnit(game, "Alice", "Test Scout", "fisherman");
+    const enemy = stubUnit(game, "Bob", "Test Fisherman Unit", "fisherman", 20);
+
+    // A bearer with both `modify_repeat` 2 and an Ice-Spear-style augment:
+    // each of the two triggers is a fresh use, so Frozen applies once each.
+    const equipment = {
+      id: "Equip#combo",
+      effects: [
+        { type: "modify_repeat", amount: 2, target: { side: "bearer" } },
+        { type: "modify_ability", target: { side: "bearer" }, effect: { type: "give_condition", condition: "frozen", amount: 1, target: { side: "enemy" } } },
+      ],
+    };
+    LifecycleEngine._resolveEquipmentEffects(game, monkey, equipment);
+
+    useAbility(game, "Alice", monkey, "1"); // deal 1 to an enemy, twice
+
+    expect(enemy.currentHp).toBe(20 - 2); // 2 triggers
+    expect(game.modifierStack.getEffective(enemy.id, "condition", "frozen")).toBe(2); // once per trigger
+  });
+
   test("Wooden Horse loses 1 HP when any unit uses a Quick ability", () => {
     const game = setupGameWithHands({ Alice: ["Test Landmark Unit", "Test Scout"], Bob: [] });
     const horse = deployUnit(game, "Alice", "Test Landmark Unit", "landmark");

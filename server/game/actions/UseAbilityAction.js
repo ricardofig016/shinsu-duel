@@ -3,7 +3,7 @@ import RequirementValidator from "../services/RequirementValidator.js";
 import ShinsuService from "../services/ShinsuService.js";
 import CombatSlotService from "../services/CombatSlotService.js";
 import EVT from "../EventCatalog.js";
-import { resolveEffect, resolveEffects } from "../EffectResolver.js";
+import { resolveEffect } from "../EffectResolver.js";
 
 /**
  * Use a unit's compiled DSL ability.
@@ -118,11 +118,26 @@ export default class UseAbilityAction extends ActionHandler {
 
     // `modify_repeat`: the ability's effect resolves `repeat` times total,
     // but its shinsu cost is paid only once (cost is spent by `spend_shinsu`).
+    // Each trigger is a fresh "use", so the `modify_ability` augment dedupe
+    // Set is reset before each trigger (augments apply once per trigger).
+    // Within a single trigger the Set is shared across all of that trigger's
+    // steps, so a multi-step ability still applies each augment once.
     const repeat = gameState.modifierStack.getRepeat(unit);
     const effectPart = ability.type === "spend_shinsu" ? ability.effect : ability;
     const effects = [ability];
     for (let i = 1; i < Math.max(1, repeat); i++) effects.push(effectPart);
-    resolveEffects(effects, context, gameState, extra);
+
+    const resolveTrigger = (index) => {
+      if (index >= effects.length) return;
+      extra.abilityAugmentedTargets = new Set();
+      const result = resolveEffect(effects[index], context, gameState, extra);
+      if (result?.pending) {
+        gameState.appendPendingDecisionContinuation(() => resolveTrigger(index + 1));
+      } else {
+        resolveTrigger(index + 1);
+      }
+    };
+    resolveTrigger(0);
 
     gameState.completeActionAfterDecision(() => {
       gameState.eventBus.emit(EVT.UNIT_ABILITY_USED, { username, unitId, abilityCode, quick: isQuick });

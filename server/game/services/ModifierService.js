@@ -54,6 +54,14 @@ export default class ModifierService {
       return { applied: false, reason: "if-false" };
     }
 
+    // Node-level `position` scopes a modifier to the source unit's current
+    // position (e.g. Lo Po Bia Ren "wave controller: ..."). Equipment
+    // `effects` modifiers resolve through this same path, so the gate lives
+    // here rather than in PassiveManager.
+    if (node.position && (!extra.sourceUnit || extra.sourceUnit.placedPositionCode !== node.position)) {
+      return { applied: false, reason: "position-mismatch" };
+    }
+
     switch (node.type) {
       case "modify_stat": return this._applyStat(node, gameState, extra);
       case "modify_cost": return this._applyCost(node, gameState, extra);
@@ -66,6 +74,15 @@ export default class ModifierService {
       default:
         return { applied: false, reason: "unhandled-modifier", type: node.type };
     }
+  }
+
+  /**
+   * Revoke every modifier a source applied — the symmetric counterpart to
+   * `applyModifier`. All modifier revocation funnels through the stack's
+   * `removeBySource` so callers keep a single apply/revoke API.
+   */
+  static revokeBySource(gameState, sourceId) {
+    gameState.modifierStack.removeBySource(sourceId);
   }
 
   /**

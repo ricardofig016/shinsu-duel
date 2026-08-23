@@ -55,7 +55,7 @@ Trigger context is threaded into the resolution: a `deal_damage` passive resolve
 
 ### Disabled
 
-A unit with the `Disabled` condition does not trigger any registered passive. The condition is checked when the round event reaches the passive handler, so applying or removing it during the game takes effect without rebuilding the subscription. Disabled affects passive abilities; it does not remove traits or other modifiers.
+A unit with the `Disabled` condition does not trigger any registered passive. The condition is checked when the round event reaches the passive handler, so applying or removing it during the game takes effect without rebuilding the subscription. Disabled affects passive abilities; it does not remove traits or other modifiers. Always-on passives (conditionals and modifiers) honor it too: when Disabled is granted their grants are revoked by source, and when it is removed they are re-applied.
 
 ### Ordering
 

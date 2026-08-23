@@ -568,10 +568,14 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     const targetUnit = gameState._findUnit(payload.targetId);
     if (targetUnit) {
       const isEnemy = targetUnit.owner !== extra.sourceUnit.owner;
+      const applied = extra.abilityAugmentedTargets ?? (extra.abilityAugmentedTargets = new Set());
       for (const augment of gameState.modifierStack.getAbilityAugments(extra.sourceUnit)) {
         const side = augment.effect?.target?.side;
         const matches = !side || (side === "enemy" ? isEnemy : !isEnemy);
         if (!matches) continue;
+        const key = `${augment.sourceId}:${payload.targetId}`;
+        if (applied.has(key)) continue;
+        applied.add(key);
         resolveEffect(augment.effect, context, gameState, {
           ...extra,
           targetId: payload.targetId,

@@ -290,6 +290,32 @@ describe("PassiveManager", () => {
     expect(game.modifierStack.has(unit.id, "trait", "taunt")).toBe(false);
   });
 
+  test("Disabled suppresses always-on modifier passives and re-applies on un-Disable", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const karaka = putInHand(game, "Alice", "Test Evolve Unit");
+    karaka.passiveAbilities = [{
+      type: "modify_keyword",
+      keyword: "quick",
+      target: { side: "self" },
+      raw: "i have Quick",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(karaka);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+
+    expect(game.modifierStack.getKeywords(unit, true).has("quick")).toBe(true);
+
+    // Disabled turns passives off (RULES.md §Conditions) → the grant is revoked.
+    game.modifierStack.apply({ sourceId: "System", sourceType: "system", targetId: unit.id, type: "condition", key: "disabled", value: 1 });
+    expect(game.modifierStack.getKeywords(unit, true).has("quick")).toBe(false);
+
+    // Un-Disable re-applies the always-on grant.
+    game.modifierStack.removeWhere((m) => m.targetId === unit.id && m.type === "condition" && m.key === "disabled");
+    expect(game.modifierStack.getKeywords(unit, true).has("quick")).toBe(true);
+  });
+
   test("transformUnit revokes the outgoing card's always-on grants", () => {
     const game = createGame();
     game.round = 10;

@@ -76,7 +76,10 @@ export default class PassiveManager {
         // the very modifier events subscribed above. Guard per source so that
         // self (and synchronous mutual) re-triggering cannot recurse.
         if (this._reEvaluating.has(sourceId)) return;
-        if (!this._matches(passive, unit, payload, gameState)) return;
+        // Disabled is intentionally NOT short-circuited here: the Disabled
+        // grant/revoke events must reach `_applyAlwaysOn` so it revokes (and,
+        // on un-Disable, re-applies) the passive's grants.
+        if (!(gameState._findUnit(unit.id) === unit && unit.isAlive())) return;
         this._reEvaluating.add(sourceId);
         try {
           this._applyAlwaysOn(unit, passive, sourceId, context, gameState);
@@ -109,12 +112,20 @@ export default class PassiveManager {
       targetOwner: gameState.usernames.find((username) => username !== unit.owner),
     };
 
-    if (passive.position && unit.placedPositionCode !== passive.position) {
-      gameState.modifierStack.removeBySource(sourceId);
+    // Disabled turns passives off entirely. 
+    // Revoke the passive's grants so a Disabled unit loses its always-on effects,
+    // and re-apply them when Disabled is revoked.
+    if (gameState.modifierStack.has(unit.id, "condition", "disabled")) {
+      ModifierService.revokeBySource(gameState, sourceId);
       return;
     }
 
-    gameState.modifierStack.removeBySource(sourceId);
+    if (passive.position && unit.placedPositionCode !== passive.position) {
+      ModifierService.revokeBySource(gameState, sourceId);
+      return;
+    }
+
+    ModifierService.revokeBySource(gameState, sourceId);
     if (ModifierService.isModifier(passive)) {
       ModifierService.applyModifier(passive, gameState, extra);
     } else {
@@ -135,7 +146,7 @@ export default class PassiveManager {
    */
   revokeGrants(unitId, passives, gameState) {
     for (let index = 0; index < passives.length; index++) {
-      gameState.modifierStack.removeBySource(IdFactory.passiveSource(unitId, index));
+      ModifierService.revokeBySource(gameState, IdFactory.passiveSource(unitId, index));
     }
   }
 
