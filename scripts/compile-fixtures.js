@@ -23,15 +23,19 @@ import {
  * attributes/affiliations, string traits, raw `evolve`/`ignition` strings).
  * This script normalizes and schema-validates them through the real compiler,
  * then emits the compiled artifact `fixtures/cards.json` that `cards.js`
- * imports. A fixture author never hand-writes the compiled shape.
+ * imports. A fixture author never hand-writes the compiled shape or the
+ * `cardId` — ids are assigned here.
  *
- * Two deliberate deviations from `card-compile.js`:
- *   - `cardId` is authored explicitly on each fixture (named 1000+, fillers
- *     1..40) so the numeric-id ordering that `createLegalDeck` relies on is
- *     preserved instead of the compiler's name-sorted assignment.
- *   - `card-validate.js` domain rules (rank→cost ranges, null-rank positions)
- *     do not apply to fixtures; they are small, load-bearing mirrors that
- *     deliberately exercise edge shapes. Schema validation still runs.
+ * Id assignment deviates from `card-compile.js`'s name-sorted assignment:
+ *   - Generic fillers keep ids 1..40 (generated, never authored) so the
+ *     numeric-id ordering that `createLegalDeck` relies on is preserved and
+ *     default decks contain only fillers.
+ *   - Named fixtures are name-sorted and assigned 10000+ (mirrors the real
+ *     compiler's stable name-sorted assignment).
+ *
+ * `card-validate.js` domain rules (rank→cost ranges, null-rank positions) do
+ * not apply to fixtures; they are small, load-bearing mirrors that
+ * deliberately exercise edge shapes. Schema validation still runs.
  */
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -44,8 +48,12 @@ const compiledSchemaPath = path.join(projectRoot, "schemas", "compiled-cards.sch
 // Fillers use the LOWEST ids because JS integer-like object keys sort
 // numerically and `createLegalDeck` slices the first eligible cards. Keeping
 // fillers first means deck-based assertions never depend on a named fixture.
-const FILLER_START = 1;
-const FILLER_COUNT = 40;
+export const FILLER_START = 1;
+export const FILLER_COUNT = 40;
+
+// Named fixtures are assigned ids starting here (name-sorted), mirroring
+// `card-compile.js`'s stable assignment but offset past the filler range.
+export const NAMED_ID_START = 10000;
 
 function buildFillers() {
   const fillers = [];
@@ -72,7 +80,8 @@ function buildFillers() {
 export async function compileFixtures() {
   // 1. Collect named fixtures (YAML source) + generated fillers.
   const yamlFiles = await collectCardFiles(fixturesYamlDir);
-  const rawCards = buildFillers();
+  const fillers = buildFillers();
+  const namedCards = [];
 
   for (const file of yamlFiles) {
     const raw = await fs.readFile(file, "utf-8");
@@ -80,18 +89,23 @@ export async function compileFixtures() {
     if (!card || !card.type) {
       throw new Error(`${path.relative(projectRoot, file)}: no valid card data`);
     }
-    if (!Number.isInteger(card.cardId)) {
-      throw new Error(`${path.relative(projectRoot, file)}: missing integer "cardId"`);
+    if (card.cardId !== undefined) {
+      throw new Error(
+        `${path.relative(projectRoot, file)}: "cardId" is assigned automatically by the fixture compiler; remove it`
+      );
     }
-    rawCards.push(card);
+    namedCards.push(card);
   }
 
-  // 2. Explicit cardId uniqueness (the compiler assigns ids by name sort).
-  const seen = new Set();
-  for (const raw of rawCards) {
-    if (seen.has(raw.cardId)) throw new Error(`duplicate fixture cardId ${raw.cardId}`);
-    seen.add(raw.cardId);
-  }
+  // 2. Assign ids dynamically. Fillers keep the lowest ids (1..40) so
+  // `createLegalDeck` slices them first; named fixtures are name-sorted and
+  // assigned 10000+ (mirrors card-compile.js's name-sorted assignment).
+  namedCards.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  namedCards.forEach((card, index) => {
+    card.cardId = NAMED_ID_START + index;
+  });
+
+  const rawCards = [...fillers, ...namedCards];
 
   // 3. Compile each card through the real compiler.
   const compiled = rawCards.map((raw) => {

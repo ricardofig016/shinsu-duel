@@ -16,9 +16,10 @@
  *   YAML source to this artifact.
  *
  * Conventions (enforced by `FixtureCardAudit.test.js`):
- *   - Named fixtures use ids 1000+ with a `Test` prefix; generic fillers use
- *     ids 1..40 and MUST keep the lowest ids so `createLegalDeck` slices them
- *     first (JS integer-like object keys sort numerically).
+ *   - Named fixtures use compiler-assigned ids 10000+ with a `Test` prefix
+ *     (never authored); generic fillers use ids 1..40 and MUST keep the
+ *     lowest ids so `createLegalDeck` slices them first (JS integer-like
+ *     object keys sort numerically).
  *   - `Fire Core` keeps its exact name (`HwayeomsaEngine` hardcodes it);
  *     `series: "incinerate"` / `"thorn-fragment"` are kept so engines resolve
  *     them structurally.

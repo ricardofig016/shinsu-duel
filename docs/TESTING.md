@@ -49,18 +49,21 @@ Fixtures are **authored as YAML** in `tests/fixtures/yaml/{units,skills,equipmen
 - positions/attributes/affiliations in display form (`"spear bearer"`, `"red witch"`, `"team sweet and sour"`).
 - traits as strings with optional value (`strong 10`, `taunt`).
 - `evolve:` / `ignition:` as raw trigger strings, exactly like real cards.
-- an explicit `cardId` field (required).
 
 Run `npm run compile:fixtures` to normalize and schema-validate them through the real compiler (`scripts/compile-fixtures.js` reuses `compileCard`/`cleanCompiled`/`resolveEvolve*`/`resolveIgnite*` from `card-compile.js`) and regenerate `tests/fixtures/cards.json`. **Never hand-edit the compiled JSON** — the compiler is the single path from YAML source to artifact.
 
-Two deliberate deviations from `card-compile.js`:
+Id assignment:
 
-- `cardId` is explicit (the compiler normally assigns ids by name sort).
+- Generic fillers keep ids **1–40** (generated in code, never authored).
+- Named fixtures are name-sorted and assigned **10000+** by the compiler, mirroring `card-compile.js`.
+
+One deliberate deviation from `card-compile.js`:
+
 - `card-validate.js` domain rules (rank→cost ranges, null-rank positions) do not apply — fixtures deliberately exercise edge shapes.
 
 ### Conventions (enforced by `FixtureCardAudit.test.js`)
 
-- Named fixtures use ids **1000+** with a `Test` prefix (e.g. `Test Scout`); they mirror the mechanics a test exercises.
+- Named fixtures use compiler-assigned ids **10000+** (name-sorted) with a `Test` prefix (e.g. `Test Scout`); they mirror the mechanics a test exercises.
 - Generic fillers use ids **1–40** and MUST keep the lowest ids: JS integer-like object keys sort numerically, so `createLegalDeck` slices them first and default decks contain only fillers. They are generated in `compile-fixtures.js` (`buildFillers`), not authored as YAML.
 - Fillers exist so every test can build a **legal 30-card deck** (RULES.md) without leaking named fixtures into default decks. They are inert (`Test Filler N`, cost 1, hp 3, regular, fisherman, no abilities/passives).
 - `Fire Core` keeps its exact name (`HwayeomsaEngine` hardcodes it); `series: "incinerate"` / `"thorn-fragment"` are kept so engines resolve them structurally.
@@ -80,7 +83,7 @@ Two deliberate deviations from `card-compile.js`:
 
 ### Create a fixture card
 
-1. Add a YAML file in `tests/fixtures/yaml/<type plural>/` with a unique `cardId` (1000+).
+1. Add a YAML file in `tests/fixtures/yaml/<type plural>/` with a unique `Test`-prefixed name.
 2. Run `npm run compile:fixtures` (fails with a precise schema error if the shape is wrong).
 3. Reference it by name in tests via `getCardIdByName("Test …")`.
 

@@ -7,6 +7,7 @@ import affiliations from "../../../data/affiliations.json" with { type: "json" }
 import attributes from "../../../data/attributes.json" with { type: "json" };
 
 import { cards, byName } from "./cards.js";
+import { FILLER_START, FILLER_COUNT, NAMED_ID_START } from "../../../../scripts/compile-fixtures.js";
 
 describe("fixture card audit (contract coupling only)", () => {
   test("fixtures validate against the compiled schema", () => {
@@ -24,6 +25,32 @@ describe("fixture card audit (contract coupling only)", () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(new Set(names).size).toBe(names.length);
     expect(Object.keys(byName).length).toBe(entries.length);
+  });
+
+  test("generic fillers occupy the lowest ids (1..40)", () => {
+    const entries = Object.values(cards);
+    const fillers = entries.filter(
+      (card) => card.cardId >= FILLER_START && card.cardId < FILLER_START + FILLER_COUNT
+    );
+    expect(fillers).toHaveLength(FILLER_COUNT);
+    for (const card of fillers) {
+      expect(card.name).toMatch(/^Test Filler \d+$/);
+    }
+    const named = entries.filter((card) => card.cardId >= NAMED_ID_START);
+    expect(named.length).toBeGreaterThan(0);
+    expect(Math.max(...fillers.map((card) => card.cardId))).toBeLessThan(
+      Math.min(...named.map((card) => card.cardId))
+    );
+  });
+
+  test("named fixtures use compiler-assigned ids (10000+) with no gap ids", () => {
+    const entries = Object.values(cards);
+    expect(entries.length).toBeGreaterThan(FILLER_COUNT);
+    for (const card of entries) {
+      const isFiller = card.cardId >= FILLER_START && card.cardId < FILLER_START + FILLER_COUNT;
+      const isNamed = card.cardId >= NAMED_ID_START;
+      expect(isFiller || isNamed).toBe(true);
+    }
   });
 
   test("fixture catalog codes resolve against the shipped catalog vocabulary", () => {
