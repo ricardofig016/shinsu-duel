@@ -10,7 +10,9 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Combat Slots](#combat-slots)
   - [Board](#board)
     - [Physical Layout](#physical-layout)
-    - [Lines](#lines)
+    - [Deck](#deck)
+    - [Hand](#hand)
+    - [Battlefield](#battlefield)
   - [Gameplay](#gameplay)
     - [Setup](#setup)
     - [Round](#round)
@@ -19,7 +21,6 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Units](#units)
     - [Skills](#skills)
     - [Equipment](#equipment)
-  - [Deck](#deck)
   - [Keywords](#keywords)
   - [Positions](#positions)
   - [Kinds](#kinds)
@@ -56,16 +57,18 @@ Extinguish your opponent's lighthouses. Each lighthouse represents one point of 
 
 ### Shinsu
 
+Shinsu is split into two pools: the **Normal** pool and the **Recharged** pool.
+
 1. Required to play all cards.
 2. Abilities may cost shinsu.
-3. Every round, players' normal shinsu resets and they gain shinsu equal to the round number, to a maximum of 10 shinsu per round.
-4. Up to 2 unspent shinsu carry over to next round to a different pool, called **Recharged Shinsu**, and the rest is lost.
-5. The maximum normal shinsu a player can have is equal to the round number, not counting Recharged Shinsu.
+3. Every round, players' normal shinsu resets and they gain shinsu equal to the round number into the normal pool, to a maximum of 10.
+4. The normal pool can hold at most shinsu equal to the round number, up to a maximum of 10. On rounds 10+, the normal cap is 10.
+5. Up to 2 unspent shinsu carry over to the next round in a separate pool, called **Recharged Shinsu**; the rest is lost.
 6. The maximum Recharged Shinsu is 2.
-7. This means that the true max shinsu on round 4 is 6, on round 9 is 11, and on round 10+ is 12.
-8. When a player gains shinsu it is added exclusively to the normal pool. Recharged Shinsu is only filled by unspent shinsu at the end of a round.
+7. The total shinsu a player can have is the normal pool plus Recharged Shinsu: on round 4 it's 6, on round 9 it's 11, and on round 10+ it's 12.
+8. Shinsu gained during a round is always added to the normal pool. Recharged Shinsu is only filled by unspent shinsu at round end.
 9. Recharged Shinsu is always consumed first.
-10. Effects that add shinsu (like Charge) always add to normal shinsu only and cannot exceed the round number cap. On round 5, a player with 0 shinsu who Charges 20 gains 5 normal shinsu and 0 Recharged Shinsu.
+10. Effects that add shinsu (like Charge) add to the normal pool only and can't exceed the normal pool's cap. On round 5, a player with 0 shinsu who Charges 20 gains 5 normal shinsu and 0 Recharged Shinsu.
 
 ### Lighthouses
 
@@ -75,10 +78,12 @@ Extinguish your opponent's lighthouses. Each lighthouse represents one point of 
 
 ### Combat Slots
 
-1. Each player has 5 combat slots: one for each of the positions.
+1. Each player has 5 combat slots, one for each of the positions, plus a Shinheuh combat slot that only exists while created by the [Anima](#anima) attribute.
 2. A unit deployed in a position can only use an ability if the combat slot for that position is available. Notice that this doesn't stop the player from playing another unit in that position.
-3. When a unit uses an ability, the combat slot for the position the unit currently occupies is spent and becomes unavailable until the end of the round.
+3. When a unit uses an ability, the combat slot for the position the unit currently occupies is spent and becomes unavailable until the end of the round. A Shinheuh using an ability spends the Shinheuh combat slot.
 4. This means the same unit can't use an ability twice in the same round, and other units in the same position can't use their abilities either.
+5. Switching a unit's position spends the combat slot of the position it leaves.
+6. An ability that can't resolve (no legal target, can't pay its cost) can't be used.
 
 ## Board
 
@@ -96,23 +101,34 @@ Each player's side is divided into the following zones:
    1. Frontline: Fisherman, Scout, Wave Controller
    2. Backline: Spear Bearer, Light Bearer, Landmarks, the Conduit
 
-### Lines
+### Deck
 
-1. Each player has 2 lines: a frontline and a backline.
+1. A deck must have exactly 30 cards
+2. A deck may contain up to 3 copies of each card
+3. If at any point a player tries to draw and their deck is empty, they lose the game
+
+### Hand
+
+1. Starting hand: 5 cards, no mulligan
+2. There is no maximum hand size
+
+### Battlefield
+
+1. Each player has 2 lines in their side of the battlefield: a frontline and a backline.
 2. The maximum number of units in each line is 5. Landmarks, Shinheuh, and the Conduit count toward this limit.
-3. If you deploy a unit to a line that already has 5 units, choose a unit to be Discarded. This substitution isn't a kill, so on-death effects don't trigger.
+3. A line or the board counts as **empty** when it contains no units or only Ghost units.
 4. Units can only target units in the enemy backline if the enemy frontline is empty, and can only target lighthouses if the enemy board is empty. This restriction applies only to units; skills target whatever their text allows.
-5. A line or the lighthouses can be targeted only if every line in front of it is empty or contains only Ghost units.
-6. Switching a unit into a full line is illegal.
-7. Skills can target lighthouses if their text allows it, but "target a unit" or "enemy" never includes lighthouses.
+5. A line or the lighthouses can be targeted only if every line in front of it is empty.
+6. If you deploy a unit to a line that already has 5 units, choose a unit to be Discarded. This substitution isn't a kill, so on-death effects don't trigger.
+7. Switching a unit into a full line is illegal.
+8. Skills can target lighthouses if their text allows it, but "target a unit" or "enemy" never includes lighthouses.
 
 ## Gameplay
 
 ### Setup
 
 1. Each player draws 5 cards
-2. Players start with 1 shinsu each
-3. A random player goes first
+2. A random player goes first
 
 ### Round
 
@@ -157,13 +173,11 @@ Represent characters, creatures or locations from Tower of God:
 8. May have affiliations that promote synergies with other units
 9. Have a rank that may be targeted by other cards
 10. May evolve when a specified trigger is met
-11. Can't be played or summoned if a unit with the same name is already on your board
-12. Can only target backline enemies when the enemy frontline is empty
-13. Can only target lighthouses when the enemy board is empty
-14. When you play a unit, you must choose a position for it to occupy from the positions available on the card.
-15. You can change the unit's position later by using your turn for it.
-16. You may have more than one unit in each position at a time.
-17. When a unit dies, it is Discarded.
+11. You can't play a unit if a unit with the same name is already on your board. A summoned copy of a unit already on your board is Discarded.
+12. When you play a unit, you must choose a position for it to occupy from the positions available on the card.
+13. You can change the unit's position later by using your turn for it.
+14. You may have more than one unit in each position at a time.
+15. When a unit dies, it is Discarded.
 
 ### Skills
 
@@ -171,56 +185,58 @@ Single-use items/spells/techniques that provide an immediate effect. Playing a s
 
 Skills may have requirements that must all be met when and how it is played.
 
-Unlike unit/uquipment abilities, skills can target any unit unless otherwise specified.
+Unlike unit/equipment abilities, skills can target any unit unless otherwise specified.
 
 **Examples**: Redan, Flower of Zygaena, Shinwonryu
 
 ### Equipment
 
-Equipments can be attached to ally deployed units for enhancements. Equiping a unit ends your turn.
+Equipments can be attached to ally deployed units for enhancements. Equipping a unit ends your turn.
 
 Units can only hold 1 equipment at a time, unless they are a [Living Ignition Weapon](#living-ignition-weapon).
 
 Equipments may have requirements that must all be met when and how it is played.
 
-**Ignition**: Some equipments can ignite when a trigger is met. The trigger is specified in the equipments's card. Ignited equipments have different effects. Example: `Narumada` ignites into `Narumada (ignited)` when its bearer kills a unit.
+**Ignition**: Some equipments can ignite when a trigger is met. The trigger is specified in the equipment's card. Ignited equipments have different effects. Example: `Narumada` ignites into `Narumada (ignited)` when its bearer kills a unit.
 
 Equipments with more than 1 trigger ignite when any of the triggers are met.
 
-When a bearer dies or is equiped with another equipment, its equipments return to the controlling player's hand. The card returns to its default non-ignited version. A [Living Ignition Weapon](#living-ignition-weapon) overrides this: it can be equipped with multiple equipment without returning the old ones.
+When a bearer dies or is equipped with another equipment, its equipments return to the controlling player's hand, back to their default non-ignited versions. A [Living Ignition Weapon](#living-ignition-weapon) overrides this: it can be equipped with multiple equipment without returning the old ones. When a bearer is Discarded without dying (e.g. substituted from a full line), its equipments are Discarded along with it.
 
 **Examples**: Green April, Zahard's Ring, Woon's Hammer
 
-## Deck
-
-1. A deck must have exactly 30 cards
-2. A deck may contain up to 3 copies of each card
-3. Starting hand: 5 cards, no mulligan
-4. If at any point a player tries to draw and their deck is empty, they lose the game
-5. Maximum hand size is 5
-
 ## Keywords
 
-Keywords are special terms that provide additional context to cards and abilities. Their purpose is to provide common language for effects and abilities, making each description less verbose.
+Keywords are terms that provide common language for effects and abilities, making each description less verbose. They can represent everyhting from a specific effect to a simple canonical term or domain-specific jargon. A keyword that defines what an effect does not define its target, scope, or timing: the card or effect that uses the keyword provides those.
 
-1. **Charge `x`**: Regain `x` normal shinsu (up to the round cap)
+1. **Charge `x`**: Regain `x` normal shinsu
 2. **Cleanse**: Remove all conditions
-3. **Compress `x`**: Reduce a card's shinsu cost by `x` (minimum 0)
-4. **Disarm**: Send a unit's equipment back to it's owners hand
+3. **Compress `x`**: Reduce a card's shinsu cost by `x`
+4. **Disarm**: Send a unit's equipment back to its owner's hand
 5. **Discard**: Send a card directly to the discard pile without triggering on death effects
-6. **Extinguish `x`**: Deal `x` damage to enemy lighthouses (ignores targeting restrictions)
-7. **Free**: The ability doesn't expend a combat slot.
-8. **Light Up `x`**: Heal `x` HP from ally lighthouses
+6. **Extinguish `x`**: Deal `x` damage to enemy lighthouses
+7. **Free**: The ability doesn't expend a combat slot
+8. **Light Up `x`**: Regain `x` lighthouses
 9. **Quick**: Playing a Quick card or using a Quick ability doesn't end your turn
-10. **Reclaim `x`**: Put `x` cards from your discard pile into your hand (Unreachable and Shinheuh cards can be reclaimed)
-11. **Silence**: Remove all traits at the moment it's applied (traits gained later are unaffected)
+10. **Reclaim `x`**: Put `x` cards from your discard pile into your hand
+11. **Silence**: Remove all of a unit's traits
 12. **Slay `x`**: Kill `x` units
 13. **Steal**: Take control of an enemy unit, moving it onto your battlefield
-14. **Spend `x`**: Spend `x` shinsu (You must have the shinsu to use it)
+14. **Spend `x`**: Spend `x` shinsu
 15. **Unreachable**: You can't put me in your deck during deckbuilding
 16. **<position>**: The ability, passive, or effect is only available while the unit is deployed as <position>
 17. **Enemy**: Enemy unit
 18. **Ally**: Ally unit
+
+Notes:
+
+- **Charge** gains are capped by the round's shinsu cap.
+- **Compress** can't reduce a card's cost below 0.
+- **Extinguish** ignores targeting restrictions.
+- **Free** has no effect on shinsu costs.
+- **Silence** is an instant action, not a condition or a lasting state: it only removes the traits the unit has at that moment, and traits gained afterwards are unaffected.
+- **Slaying** counts as killing for on-kill effects, e.g. Bloodthirsty and Pierce.
+- To **Spend**, you must have the shinsu to use it.
 
 ## Positions
 
@@ -236,14 +252,16 @@ Each standard unit occupies one position on the battlefield. The position determ
 
 Every unit card has a kind that determines what it fundamentally is on the board: `standard`, `shinheuh`, `landmark`, or `conduit`. `standard` is the default; a standard unit occupies one of the positions above. The special kinds below have no position and no rank.
 
+All kinds are units: whenever a rule or effect refers to a unit (including "ally" and "enemy"), it includes standard units, Shinheuh, landmarks, and the Conduit.
+
 ### Shinheuh
 
 1. Special units summoned by Animas to attack on their behalf.
 2. Can be frontline or backline, specified in the unit card.
-3. To use their abilities, you need a Shinheuh combat slot, which is exclusivly created by [Anima](#anima).
-4. A unit doesn't need to be a Anima to have Shinheuh related abilities.
+3. To use their abilities, you need a Shinheuh combat slot, which is exclusively created by [Anima](#anima). Unlike the 5 position slots, the Shinheuh slot doesn't reset at round start; it only exists if an Anima has created it at this round start.
+4. A unit doesn't need to be an Anima to have Shinheuh related abilities.
 5. Summoning doesn't cost shinsu, doesn't spend the Shinheuh slot, and doesn't end your turn.
-6. Summoned units count toward line limits and respect name-uniqueness: a summoned copy of a unit already on your board is Discarded.
+6. Summoned units count toward line limits. A summoned copy of a unit already on your board is Discarded, and a summon into a full line fails, Discarding the summoned unit.
 7. Shinheuh can be equipped.
 
 ### Landmark
@@ -263,7 +281,16 @@ Every unit card has a kind that determines what it fundamentally is on the board
 
 Traits and Conditions are special effects that units can have.
 Both can stack: stacking merges into a single instance (Burned 2 + Burned 3 = Burned 5), and a unit can't have two copies of the same trait or condition.
-Traits and passives are different mechanics: Disabled affects passives only, Silence affects traits only.
+
+Traits, conditions, and passives are three separate mechanics:
+
+- **Traits** are positive permanent effects native to cards.
+- **Conditions** are negative temporary effects that last until the end of the round.
+- **Passives** are unit effects that are always active or trigger automatically (see Cards).
+
+The mechanics never cross over: Disabled affects passives only, Silence removes traits only, and Immune protects against conditions only.
+
+Damage modifiers (Strong, Vengeful, Ruthless, Exhausted, Weak, Resilient) all apply to a damage instance before the damage is dealt, in any order. They apply to damage from all sources, including conditions (Burned, Cursed, Poisoned).
 
 ### Traits
 
@@ -290,16 +317,17 @@ Traits are positive permanent effects native to cards. They are color coded as s
 13. **Sharpshooter**: I can target any enemy unit
 14. **Strong `x`**: I deal +`x` damage
 15. **Taunt**: Enemies are forced to target me if they can
-16. **Undying**: When i would die, i survive with 1 HP instead
+16. **Undying**: When I would die, I survive with 1 HP instead
 17. **Vengeful `x`**: I deal +`x` damage if I am missing HP
 
 Notes:
 
-- **Taunt** only forces targeting if the Taunt unit is a valid target, and only on enemy units' targeting, not skills. With multiple targetable Taunt units, the enemy chooses among them; all targetable Taunt units must be targeted before non-Taunt units.
+- **Taunt** doesn't make a unit targetable or bypass line restrictions: it only forces enemies to target the Taunt unit among the units an effect can already legally target. With multiple targetable Taunt units, the enemy chooses among them; all targetable Taunt units must be targeted before non-Taunt units. Skills aren't affected.
 - **Sharpshooter** only removes the line restriction; it doesn't bypass Taunt and can't target lighthouses.
-- **Reflect** triggers only on damage from a unit's ability, and only if the damage is greater than 0; conditions and skills don't trigger it, and prevented damage (Barrier, Resilient) doesn't count.
-- **Undying** is consumed when it triggers and saves a Doomed unit.
-- **Last One Standing** counts Shinheuh, landmarks, and the Conduit as ally units, and its +x HP raises both current and max HP (a 12/17 unit with Last One Standing 3 becomes 15/20).
+- **Reflect** triggers only on damage from a unit's ability, and only if the damage is greater than 0; conditions and skills don't trigger it, and prevented damage (Barrier, Resilient) doesn't count. Reflect damage can trigger another unit's Reflect; recursion ends when a unit's HP runs out.
+- **Lethal** triggers only if the unit actually takes damage: if all damage is prevented (Barrier, Resilient), it doesn't kill.
+- **Undying** is removed when it triggers; it doesn't refresh, and it can save a Doomed unit.
+- **Last One Standing**'s +x HP raises both current and max HP (a 12/17 unit with Last One Standing 3 becomes 15/20).
 - **Barrier** resets at round start; "the first time" means the first damage event, not the first point of damage.
 
 ### Conditions
@@ -311,16 +339,16 @@ Conditions are negative temporary effects that last until the end of the round. 
 
 **List of Conditions:**
 
-1. **Blinded**: My targets are chosen at random
-2. **Burned `x`**: Turn end: i take `x` damage
-3. **Cursed `x`**: Round end: i take `x` damage for each unique condition i have
+1. **Blinded**: My targets are chosen at random among legal targets
+2. **Burned `x`**: Turn end: I take `x` damage
+3. **Cursed `x`**: Round end: I take `x` damage for each unique condition I have
 4. **Disabled**: My passives have no effect
 5. **Doomed**: I will die at the end of this round
 6. **Exhausted `x`**: I deal -`x` damage
-7. **Frozen**: When i use an ability, spend all ally combat slots
+7. **Frozen**: When I use an ability, spend all ally combat slots
 8. **Ghost**: I don't prevent the enemy from targeting what's behind me
 9. **Heavy `x`**: My abilities cost +`x` shinsu
-10. **Poisoned `x`**: I take `x` damage when i use an ability
+10. **Poisoned `x`**: I take `x` damage when I use an ability
 11. **Rooted**: I can't switch positions or be substituted
 12. **Stunned**: I can't use abilities
 13. **Weak `x`**: I take +`x` damage from all sources
@@ -329,7 +357,9 @@ Notes:
 
 - **Burned** triggers at the end of every turn, including the turn it was applied.
 - **Cursed** counts itself among "each unique condition".
+- **Exhausted** can't reduce damage below 0.
 - **Frozen**'s "all ally combat slots" includes the Shinheuh slot.
+- **Heavy** also applies to abilities with no cost, making them cost `x`; if the unit can't pay the cost, the ability can't be used.
 - **Rooted**'s "substituted" means deploying a unit into a full line, which Discards a unit.
 - All units can receive conditions (including Landmarks); lighthouses can't.
 
@@ -339,7 +369,7 @@ Some specific units have an attribute, which changes the core of how they functi
 
 ### Anima
 
-**Descripttion:**
+**Description:**
 
 Anima summon and control special creatures called [Shinheuh](#shinheuh) to fight for them. Yu Han Sung is an Anima.
 
@@ -360,7 +390,7 @@ The Shinheuh slot is single-use and is removed at round end with the other slots
 
 ### Guide
 
-**Descripttion:**
+**Description:**
 
 Guides are support units that help their team by providing information. They can tell what's the best move and predict the future.
 
@@ -397,7 +427,7 @@ You can always see your opponent's hand and the top card of both players' decks.
 
 ### Hwayeomsa
 
-**Descripttion:**
+**Description:**
 
 Hwayeomsa are flame users who are able to convert shinsu into fire. They deal team-wide massive fire damage. Yeon Yihwa is a Hwayeomsa.
 
@@ -412,7 +442,7 @@ Spend 1, Free: Gain 1 **Fire Charge** and create **Fire Core** in your hand if y
 **Incinerate IV**: Create me by spending 7 Fire Charges. Deal 3 to all enemies, and give them Burn 2.
 ```
 
-Fire Charges are a persistent pool (maximum 7) that carries across rounds.
+Fire Charges are a per-player pool (maximum 7) that carries across rounds.
 
 **Example Synergies:**
 
@@ -422,21 +452,21 @@ Fire Charges are a persistent pool (maximum 7) that carries across rounds.
 
 ### Jeonsulsa
 
-**Descripttion:**
+**Description:**
 
 Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units. Khun Eduan is a Jeonsulsa.
 
 **Core in-game mechanic:**
 
 ```md
-When I'm deployed, heal 2 HP from or summon **Conduit** on the enemy backline.
+When I'm deployed, grant the enemy **Conduit** +2 HP or summon a **Conduit** on the enemy backline.
 **Conduit**: No position. 2 HP. Round start: give me Ghost. Round start or Activation: if there is no Jeonsulsa on the enemy team, Slay me. Round start or Activation: for every 2 HP that I have, play 1 random **Jeonsul Baang** on a random ally.
 **Lightning Baang**: give Burned 1 to a unit.
 **Thunder Baang**: give Exhausted 1 to a unit.
 **Static Baang**: give Weak 1 to a unit.
 ```
 
-"When I'm deployed, heal 2 HP from or summon Conduit": heal 2 from the enemy Conduit if one exists, otherwise summon a Conduit on the enemy backline. The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
+"When I'm deployed, grant the enemy Conduit +2 HP or summon Conduit": grant +2 HP (raising both max and current HP) to the enemy Conduit if one exists, otherwise summon a Conduit on the enemy backline. Granting HP to the Conduit always raises both its max and current HP. The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
 
 **Example Synergies:**
 
@@ -446,7 +476,7 @@ When I'm deployed, heal 2 HP from or summon **Conduit** on the enemy backline.
 
 ### Irregular
 
-**Descripttion:**
+**Description:**
 
 Irregulars are powerful individuals who were not selected by Headon and came from outside the Tower. They don't follow the rules of the Tower and so are unaltered by many card effects. Jyu Viole Grace is an Irregular.
 
@@ -456,9 +486,11 @@ Irregulars are powerful individuals who were not selected by Headon and came fro
 Unit passives and landmark rules have no effect on me.
 ```
 
+Only unit passives and landmark rules are ignored: traits, conditions, and abilities affect Irregulars normally (e.g. Reflect still damages an Irregular).
+
 ### Living Ignition Weapon
 
-**Descripttion:**
+**Description:**
 
 Living Ignition Weapons are living beings who were fused with a Weapon by the Workshop. They can use a plethora of equipments to adapt to any circumstance. Kang Horyang is a Living Ignition Weapon.
 
@@ -526,7 +558,7 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 
 ## Rank
 
-How the person is ranked in the tower. In game, it represents how expensive the unit is. A unit's rank is written on the card; the rank enforces the cost, not the other way around.
+How the person is ranked in the tower. In game, it represents how expensive the unit is. A unit's rank is written on the card, and a card's shinsu cost must fall within its rank's cost range: the rank enforces the range, not the other way around.
 
 - **Regular** (cost **0-5**): someone chosen by Headon to climb the tower
 - **Ranker** (cost **3-7**): someone who has reached the 134th floor of the tower (also encompasses advanced rankers)
@@ -562,7 +594,7 @@ Add new attributes such as:
 
 ## Random Tables
 
-When a rule or card calls for a random event, consult consult these random tables.
+When a rule or card calls for a random event, consult these random tables.
 If the tables can't satisfy your specific need, decide with your opponent how to resolve your random event.
 
 ### Random Trait
