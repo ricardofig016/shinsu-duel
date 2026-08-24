@@ -79,11 +79,12 @@ Shinsu is split into two pools: the **Normal** pool and the **Recharged** pool.
 ### Combat Slots
 
 1. Each player has 5 combat slots, one for each of the positions, plus a Shinheuh combat slot that only exists while created by the [Anima](#anima) attribute.
-2. A unit deployed in a position can only use an ability if the combat slot for that position is available. Notice that this doesn't stop the player from playing another unit in that position.
-3. When a unit uses an ability, the combat slot for the position the unit currently occupies is spent and becomes unavailable until the end of the round. A Shinheuh using an ability spends the Shinheuh combat slot.
-4. This means the same unit can't use an ability twice in the same round, and other units in the same position can't use their abilities either.
-5. Switching a unit's position spends the combat slot of the position it leaves.
-6. An ability that can't resolve (no legal target, can't pay its cost) can't be used.
+2. Combat slots are a resource that belong to positions, not to units. A unit never carries a slot with it — a slot is only ever tied to the position the unit currently occupies.
+3. A unit deployed in a position can use an ability only if the combat slot for that position is available. A [Free](#free) ability is the exception: it doesn't require the slot to be available. A spent slot doesn't stop the player from playing another unit in that position.
+4. When a unit uses an ability that isn't Free, the combat slot for the position the unit currently occupies is spent and becomes unavailable until the end of the round. A Shinheuh using an ability that isn't Free spends the Shinheuh combat slot.
+5. The combat slot is the only limit on ability use, and it applies per position, not per unit: an ability that requires an unavailable slot can't be used, so a position produces at most one non-Free ability per round. A unit can use Free abilities any number of times, and Quick doesn't lift the slot limit — it only keeps the ability from ending the turn.
+6. Switching a unit's position spends the combat slot of the position it leaves. A unit can't switch out of a position whose slot was already spent that round. The destination position's slot doesn't need to be available to switch there, and once there the unit can use the destination's slot.
+7. An ability that can't resolve (no legal target, can't pay its cost) can't be used.
 
 ## Board
 
@@ -122,6 +123,7 @@ Each player's side is divided into the following zones:
 6. If you deploy a unit to a line that already has 5 units, choose a unit to be Discarded. This substitution isn't a kill, so on-death effects don't trigger.
 7. Switching a unit into a full line is illegal.
 8. Skills can target lighthouses if their text allows it, but "target a unit" or "enemy" never includes lighthouses.
+9. Effects that choose or imply targets are target effects even when they don't say "target": "deal 2 to all enemies" means "deal 2 to all enemies I can target", "deal 2 to the lowest-HP enemy" means "the lowest-HP enemy I can target". Such effects respect line restrictions, Taunt, and Blinded just like any explicit targeting effect.
 
 ## Gameplay
 
@@ -141,6 +143,7 @@ Each player's side is divided into the following zones:
    1. The round ends when both players pass consecutively
    2. Players reset their shinsu, saving up to 2 unspent shinsu
    3. "Round end" effects trigger before conditions are cleared
+4. **Trigger priority**: effects and triggers that share the same moment (round start, turn end, round end, deployment, etc.) resolve in priority order; every effect and trigger in the game has a priority score that determines this order.
 
 ### Actions
 
@@ -151,7 +154,7 @@ During your turn, choose one of these actions:
 3. Switch a unit's position
 4. Pass the turn
 
-Each action ends your turn unless the card or ability has Quick.
+Each action ends your turn unless the card or ability has Quick. Passing ends your turn like any other action, and ending a turn triggers "turn end" effects (e.g. Burned).
 
 ## Cards
 
@@ -201,7 +204,9 @@ Equipments may have requirements that must all be met when and how it is played.
 
 Equipments with more than 1 trigger ignite when any of the triggers are met.
 
-When a bearer dies or is equipped with another equipment, its equipments return to the controlling player's hand, back to their default non-ignited versions. A [Living Ignition Weapon](#living-ignition-weapon) overrides this: it can be equipped with multiple equipment without returning the old ones. When a bearer is Discarded without dying (e.g. substituted from a full line), its equipments are Discarded along with it.
+Once ignited, an equipment stays ignited until something specifically changes it; nothing un-ignites it on its own (an effect, such as a round-end landmark rule, may). Leaving the board is what resets an equipment to its default non-ignited version.
+
+When a bearer dies or is equipped with another equipment, its equipments leave the board and return to the controlling player's hand, back to their default non-ignited versions. A [Living Ignition Weapon](#living-ignition-weapon) overrides this: it can be equipped with multiple equipment without returning the old ones. When a bearer is Discarded without dying (e.g. substituted from a full line), its equipments are Discarded along with it. When a bearer is stolen, its equipments go with it and keep their ignited state; evolution preserves a bearer's equipments, which also keep their ignited state.
 
 **Examples**: Green April, Zahard's Ring, Woon's Hammer
 
@@ -215,7 +220,7 @@ Keywords are terms that provide common language for effects and abilities, makin
 4. **Disarm**: Send a unit's equipment back to its owner's hand
 5. **Discard**: Send a card directly to the discard pile without triggering on death effects
 6. **Extinguish `x`**: Deal `x` damage to enemy lighthouses
-7. **Free**: The ability doesn't expend a combat slot
+7. **Free**: The ability doesn't require or expend a combat slot
 8. **Light Up `x`**: Regain `x` lighthouses
 9. **Quick**: Playing a Quick card or using a Quick ability doesn't end your turn
 10. **Reclaim `x`**: Put `x` cards from your discard pile into your hand
@@ -232,11 +237,14 @@ Notes:
 
 - **Charge** gains are capped by the round's shinsu cap.
 - **Compress** can't reduce a card's cost below 0.
+- **Disarm** the player disarming chooses which equipment on [Living Ignition Weapons](#living-ignition-weapon).
 - **Extinguish** ignores targeting restrictions.
 - **Free** has no effect on shinsu costs.
+- **Free** abilities can be used any number of times per round; since they don't rely on combat slots, they're balanced by other costs such as shinsu or HP.
 - **Silence** is an instant action, not a condition or a lasting state: it only removes the traits the unit has at that moment, and traits gained afterwards are unaffected.
-- **Slaying** counts as killing for on-kill effects, e.g. Bloodthirsty and Pierce.
+- **Slaying** counts as killing for on-kill effects, e.g. Bloodthirsty and Pierce, and can target any units, including your own.
 - To **Spend**, you must have the shinsu to use it.
+- **Stealing** a unit moves it to its current position on your side, counting toward the line limit like any unit, and stealing into a full line is illegal. Everything about the unit is preserved: its HP, conditions, equipments (keeping their ignited state), traits, and effects. Rooted doesn't prevent stealing.
 
 ## Positions
 
@@ -310,7 +318,7 @@ Traits are positive permanent effects native to cards. They are color coded as s
 6. **Last One Standing `x`**: If I am the only ally unit, I have +`x` HP
 7. **Lethal**: When I damage another unit, kill it
 8. **Pierce `x`**: When I kill a unit, Extinguish `x`
-9. **Reflect `x`**: When I take damage from a unit, deal `x` damage back
+9. **Reflect `x`**: When I take damage from a unit's ability, deal `x` damage back
 10. **Regenerate `x`**: Round end: heal me `x` HP
 11. **Resilient `x`**: I take -`x` damage from all sources
 12. **Ruthless `x`**: I deal +`x` damage if the enemy has less than 10 lighthouses
@@ -322,9 +330,9 @@ Traits are positive permanent effects native to cards. They are color coded as s
 
 Notes:
 
-- **Taunt** doesn't make a unit targetable or bypass line restrictions: it only forces enemies to target the Taunt unit among the units an effect can already legally target. With multiple targetable Taunt units, the enemy chooses among them; all targetable Taunt units must be targeted before non-Taunt units. Skills aren't affected.
+- **Taunt** doesn't make a unit targetable or bypass line restrictions: it only forces enemies to target the Taunt unit among the units an effect can already legally target. With multiple targetable Taunt units, the enemy chooses among them; all targetable Taunt units must be targeted before non-Taunt units. Single-target effects that auto-pick their target (e.g. "the lowest-HP enemy", "a random enemy", "the cheapest unit") must pick a targetable Taunt unit if one exists, even when the auto-selection would have chosen someone else. Skills aren't affected.
 - **Sharpshooter** only removes the line restriction; it doesn't bypass Taunt and can't target lighthouses.
-- **Reflect** triggers only on damage from a unit's ability, and only if the damage is greater than 0; conditions and skills don't trigger it, and prevented damage (Barrier, Resilient) doesn't count. Reflect damage can trigger another unit's Reflect; recursion ends when a unit's HP runs out.
+- **Reflect** triggers only if the damage is greater than 0; conditions and skills don't trigger it, and prevented damage (Barrier, Resilient) doesn't count.
 - **Lethal** triggers only if the unit actually takes damage: if all damage is prevented (Barrier, Resilient), it doesn't kill.
 - **Undying** is removed when it triggers; it doesn't refresh, and it can save a Doomed unit.
 - **Last One Standing**'s +x HP raises both current and max HP (a 12/17 unit with Last One Standing 3 becomes 15/20).
@@ -361,6 +369,7 @@ Notes:
 - **Frozen**'s "all ally combat slots" includes the Shinheuh slot.
 - **Heavy** also applies to abilities with no cost, making them cost `x`; if the unit can't pay the cost, the ability can't be used.
 - **Rooted**'s "substituted" means deploying a unit into a full line, which Discards a unit.
+- **Doomed**'s death counts as a kill: it triggers the unit's on-death effects, and the kill is attributed to the entity that gave the condition.
 - All units can receive conditions (including Landmarks); lighthouses can't.
 
 ## Attributes

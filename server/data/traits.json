@@ -65,7 +65,7 @@
   },
   "reflect": {
     "name": "Reflect",
-    "description": "When I take damage from a unit, deal x damage back",
+    "description": "When I take damage from a unit's ability, deal x damage back",
     "color": "yellow",
     "colorName": "Defensive Buff",
     "numeric": true,

@@ -1,1 +1,0 @@
-read RULES.md and tell me whats ambiguous there. do not open any other files.

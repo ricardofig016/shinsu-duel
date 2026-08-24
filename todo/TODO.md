@@ -7,7 +7,7 @@
 - [ ] public: plan how image artworks should be matched to cards
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
-- [ ] game: add support for `any` position which represents all main positions
+- [ ] game: add support for position:`any`
 - [ ] rules: create a `RULES_TLDR.md` that are the default rules shown in the rules page
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`
 
