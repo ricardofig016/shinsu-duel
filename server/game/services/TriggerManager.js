@@ -111,7 +111,7 @@ export default class TriggerManager {
         this._subscribeEvent(unitId, EVT.UNIT_DESTROYED, targetCardId, transformType, gameState,
           (payload) => {
             const owner = gameState._findUnit(unitId)?.owner;
-            return Boolean(owner && payload.owner === owner && payload.unitId !== unitId);
+            return Boolean(owner && payload.owner === owner);
           });
         break;
       case "damaged_by":

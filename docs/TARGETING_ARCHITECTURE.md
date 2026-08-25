@@ -15,7 +15,7 @@ This document describes the canonical target resolution system: line blocking ru
 | Descriptor          | Behavior                                               |
 | ------------------- | ------------------------------------------------------ |
 | `self`              | The source unit itself                                 |
-| `ally`              | One allied unit (excluding self)                       |
+| `ally`              | One allied unit (including self)                       |
 | `enemy`             | One enemy unit (frontline-first, taunt-constrained)    |
 | `bearer`            | The equipment's bearer (resolved by caller)            |
 | `all_allies`        | All allied units                                       |
@@ -62,7 +62,7 @@ Always-on `modify_targeting` entries (read through `ModifierStack.getTargetingRu
 
 Compiled cards author unit targets as structured objects — `{ side, scope, count, ...filters }` — rather than string descriptors. The field grammar (`side`, `scope`, `count`, `choose`, `random`, the filter vocabulary, and `sequence` link targets) is defined in the [Target grammar](COMPILED_CARD_DSL.md#target-grammar) section of `COMPILED_CARD_DSL.md`. `EffectResolver` translates them through `TargetResolver.normalizeStructuredTarget()` into the canonical string target plus filter fields before resolution, so handlers never receive an object target.
 
-`scope` maps `enemy`+`all` → `all_enemies`, `frontline` → `enemy_frontline`, `backline` → `enemy_backline`, `ally`+`all` → `all_allies`. `choose` and `random` are selection strategies applied after filtering; `random` uses the game's seeded RNG so it is deterministic in tests and replays. Card targets resolve through `resolveCardTargets` (see [Card Target Resolution](#card-target-resolution)).
+`scope` maps `enemy`+`all` → `all_enemies`, `frontline` → `enemy_frontline`, `backline` → `enemy_backline`, `ally`+`all` → `all_allies`, and `ally`+`frontline`/`backline` → `ally` with a `line` filter (ally line scope is honored, not dropped). `choose` and `random` are selection strategies applied after filtering; `random` uses the game's seeded RNG so it is deterministic in tests and replays. Card targets resolve through `resolveCardTargets` (see [Card Target Resolution](#card-target-resolution)).
 
 ---
 
@@ -85,7 +85,7 @@ Key differences from offensive targeting:
 - A matching source unit counts toward the check ("an allied Guide" on a Guide unit includes itself).
 - `scope`, `count`, `choose`, `random`, and `cost` are not valid on predicate targets — the `predicateTarget` schema rejects them.
 
-`applyFilters` is the single source of truth for the unit-filter vocabulary (`condition`, `conditionValue`, `trait`, `traitNot`, `rank`, `position`, `affiliation`, `attribute`, `name`, `cost`, `sharedAffiliation`, `lowestHp`, `hasPassive`, `canSwitch`, `kind`, `line`). Both `resolveTargets` and `resolveExistenceUnits` delegate to it, so targeting and existence filters never diverge.
+`applyFilters` is the single source of truth for the unit-filter vocabulary (`condition`, `conditionValue`, `trait`, `traitNot`, `rank`, `position`, `affiliation`, `attribute`, `name`, `cost`, `sharedAffiliation`, `lowestHp`, `hasPassive`, `canSwitch`, `kind`, `line`). The `excludeSelf` flag is applied in the `ally` descriptor case (not in `applyFilters`), since existence checks share `applyFilters` with a null source unit and must stay self-inclusive. Both `resolveTargets` and `resolveExistenceUnits` delegate to it, so targeting and existence filters never diverge.
 
 ---
 

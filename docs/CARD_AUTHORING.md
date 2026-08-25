@@ -102,7 +102,7 @@ The definitive list of implemented node types is **not in this file and not in t
 ### Targets
 
 - Singular enemy: `an enemy`. Multiple: `2 enemies`, `all enemies`. Line-scoped: `a frontline enemy`, `a backline enemy`. Filtered: `all Rooted enemies`, `2 Burned enemies`.
-- Ally: `an ally`, `all allies`, `me`, `the bearer`.
+- Ally: `an ally`, `all allies`, `me`, `the bearer`. `another ally` targets an ally other than the source unit and maps to `exclude_self: true` in the structured target.
 - Affiliations keep their natural casing as proper nouns: `team sweet and sour`, `karaka's servants`, `yeon family`.
 
 ### Prefixes and scope

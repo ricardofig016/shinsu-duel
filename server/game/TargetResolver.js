@@ -364,9 +364,10 @@ export function normalizeStructuredTarget(descriptor) {
     throw new Error("TargetResolver: structured target must be an object");
   }
 
-  const { side, scope, random, cost, choose, lowest_hp, has_passive, can_switch, ...filters } = descriptor;
+  const { side, scope, random, cost, choose, lowest_hp, has_passive, can_switch, exclude_self, ...filters } = descriptor;
 
   let target;
+  let line;
   switch (side) {
     case "self":
       target = "self";
@@ -375,7 +376,12 @@ export function normalizeStructuredTarget(descriptor) {
       target = "bearer";
       break;
     case "ally":
-      target = scope === "all" ? "all_allies" : "ally";
+      if (scope === "all") {
+        target = "all_allies";
+      } else {
+        target = "ally";
+        if (scope === "frontline" || scope === "backline") line = scope;
+      }
       break;
     case "enemy":
       if (scope === "all") target = "all_enemies";
@@ -393,12 +399,14 @@ export function normalizeStructuredTarget(descriptor) {
   return {
     target,
     ...filters,
+    ...(line !== undefined ? { line } : {}),
     ...(random !== undefined ? { random } : {}),
     ...(cost !== undefined ? { cost } : {}),
     ...(choose !== undefined ? { choose } : {}),
     ...(lowest_hp !== undefined ? { lowestHp: lowest_hp } : {}),
     ...(has_passive !== undefined ? { hasPassive: has_passive } : {}),
     ...(can_switch !== undefined ? { canSwitch: can_switch } : {}),
+    ...(exclude_self !== undefined ? { excludeSelf: exclude_self } : {}),
   };
 }
 
@@ -461,7 +469,7 @@ export function resolveTargets(gameState, options) {
       const allyField = gameState.playerStates[sourceOwner]?.field;
       if (!allyField) return [];
       candidates = [...(allyField.frontline || []), ...(allyField.backline || [])]
-        .filter((u) => u.isAlive() && (!sourceUnit || u.id !== sourceUnit.id));
+        .filter((u) => u.isAlive() && (!options.excludeSelf || !sourceUnit || u.id !== sourceUnit.id));
       break;
     }
 

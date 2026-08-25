@@ -230,8 +230,8 @@ Keywords are terms that provide common language for effects and abilities, makin
 14. **Spend `x`**: Spend `x` shinsu
 15. **Unreachable**: You can't put me in your deck during deckbuilding
 16. **<position>**: The ability, passive, or effect is only available while the unit is deployed as <position>
-17. **Enemy**: Enemy unit
-18. **Ally**: Ally unit
+17. **Enemy**: A unit on the opponent's side of the board
+18. **Ally**: A unit on your side of the board, yourself included
 
 Notes:
 
@@ -245,6 +245,8 @@ Notes:
 - **Slaying** counts as killing for on-kill effects, e.g. Bloodthirsty and Pierce, and can target any units, including your own.
 - To **Spend**, you must have the shinsu to use it.
 - **Stealing** a unit moves it to its current position on your side, counting toward the line limit like any unit, and stealing into a full line is illegal. Everything about the unit is preserved: its HP, conditions, equipments (keeping their ignited state), traits, and effects. Rooted doesn't prevent stealing.
+- **Ally** includes the source unit: targeting an ally counts every unit on your side, including the unit resolving the effect. There is no self-exclusion; the source unit is just another ally and may be chosen like any other. To target an ally other than the source unit, cards say "another ally". "When an ally dies" includes the source unit's own death.
+- A target selection is offered only when the outcome is not already forced. When the legal candidates are equal to or fewer than the required count, or every candidate is mandatory (e.g. Taunt), the effect resolves automatically without a choice.
 
 ## Positions
 

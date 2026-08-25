@@ -125,6 +125,56 @@ describe("structured target resolution via EffectResolver", () => {
     expect(other.currentHp).toBe(3);
   });
 
+  test("heal with { side: ally } heals the source unit when it is the only ally", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    src.currentHp = 4;
+
+    resolveEffect(
+      { type: "heal", amount: 2, target: { side: "ally" } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(src.currentHp).toBe(6);
+  });
+
+  test("heal with { side: ally, exclude_self: true } never targets the source unit", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    const other = push(game, "Alice", unit("other", "Alice", "scout"));
+    src.currentHp = 4;
+    other.currentHp = 4;
+
+    resolveEffect(
+      { type: "heal", amount: 2, target: { side: "ally", exclude_self: true } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(other.currentHp).toBe(6);
+    expect(src.currentHp).toBe(4);
+  });
+
+  test("ally line scope narrows by field line through resolveEffect", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    const back = push(game, "Alice", unit("back", "Alice", "light-bearer"));
+    src.line = "frontline";
+    back.line = "backline";
+    src.currentHp = 4;
+    back.currentHp = 4;
+
+    resolveEffect(
+      { type: "heal", amount: 2, target: { side: "ally", scope: "backline" } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(back.currentHp).toBe(6);
+    expect(src.currentHp).toBe(4);
+  });
+
   test("grant_trait with an affiliation array target does not throw and applies", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice", "scout"));

@@ -167,6 +167,7 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     lowestHp: structured.lowestHp,
     hasPassive: structured.hasPassive,
     canSwitch: structured.canSwitch,
+    excludeSelf: structured.excludeSelf,
     count: Number.MAX_SAFE_INTEGER,
   });
 
@@ -445,6 +446,7 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       lowestHp: targetFilters.lowestHp ?? payload.lowestHp,
       hasPassive: targetFilters.hasPassive,
       canSwitch: targetFilters.canSwitch,
+      excludeSelf: targetFilters.excludeSelf,
       count: Number.MAX_SAFE_INTEGER,
     };
   };
@@ -537,6 +539,7 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       name: structured.name,
       kind: structured.kind,
       line: structured.line,
+      excludeSelf: structured.excludeSelf,
       count: Number.MAX_SAFE_INTEGER,
     });
 

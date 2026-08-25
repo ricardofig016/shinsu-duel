@@ -280,7 +280,7 @@ describe("Taunt multi-target selection regressions", () => {
     expect(other.currentHp).toBe(10);
   });
 
-  test("a multi-target ally effect auto-resolves when the ally count matches", () => {
+  test("a multi-target ally effect prompts a choice when allies outnumber the count (source unit included)", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice"));
     const ally1 = push(game, "Alice", unit("ally1", "Alice"));
@@ -292,11 +292,29 @@ describe("Taunt multi-target selection regressions", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.candidates).toHaveLength(3);
+    expect(game.pendingDecision.minChoices).toBe(2);
+    expect(game.pendingDecision.maxChoices).toBe(2);
+    expect(game.pendingDecision.lockedIds).toEqual([]);
+  });
+
+  test("a multi-target ally effect auto-resolves when the ally count matches (source unit included)", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice"));
+    const ally1 = push(game, "Alice", unit("ally1", "Alice"));
+
+    const result = resolveEffect(
+      { type: "grant_trait", trait: "strong", amount: 1, target: { side: "ally", count: 2 } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
     expect(Array.isArray(result)).toBe(true);
     expect(result).toHaveLength(2);
     expect(game.pendingDecision).toBeNull();
+    expect(game.modifierStack.getEffective(src.id, "trait", "strong")).toBe(1);
     expect(game.modifierStack.getEffective(ally1.id, "trait", "strong")).toBe(1);
-    expect(game.modifierStack.getEffective(ally2.id, "trait", "strong")).toBe(1);
   });
 
   test("the pending-decision event surfaces lockedIds", () => {

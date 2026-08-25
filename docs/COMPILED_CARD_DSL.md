@@ -212,9 +212,12 @@ target:
   cost: 2 # filter, or "cheapest" | "most expensive"
   has_passive: true # filter: units with >=1 passive ability
   can_switch: true # filter: units with a legal other printed position (non-full line)
+  exclude_self: true # ally filter: exclude the source unit
 ```
 
 `self`/`bearer` need only `side`. `any` + `scope: all` addresses both players' units (landmark rules).
+
+`side: ally` means any unit on the source's side, including the source unit itself. There is no self-exclusion. `scope: all` maps to `all_allies`; `scope: frontline`/`backline` narrows ally targets by field line (via the `line` filter). `exclude_self: true` targets an ally other than the source unit; with no source unit (a skill), it is a no-op.
 
 `side: enemy` with `count > 1` (no `scope`, or `scope: single`) selects N enemy units and is normalized to the `enemies` descriptor: targetable Taunt units are locked as mandatory and the player chooses only the remaining free (non-Taunt) slots. When the Taunt units already satisfy `count`, or when every remaining candidate is forced, the selection auto-resolves with no decision. When there are more Taunt units than `count`, the player chooses `count` among them. `side: enemy` with no count (or `count: 1`) is the single-target `enemy` descriptor and is Taunt-collapsed. `random: true` selects targets automatically via the seeded RNG (no decision); a `Blinded` source is treated the same way, with Taunt still enforced for enemy targets.
 
@@ -308,7 +311,7 @@ Triggers drive triggered passives and transformations (`evolveInto` / `igniteInt
 
 `equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `enemy_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`, `dies`, `evolve`, `has_all_equipped`.
 
-`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death (unlike `ally_dies`, which excludes self). `ally_dies` and `enemy_dies` are an ally's / enemy's death respectively (optionally filtered by `rank`); `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card.
+`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death; `ally_dies` and `enemy_dies` are an ally's / enemy's death respectively (optionally filtered by `rank`). An `ally_dies` trigger includes the source unit's own death per the ally definition, but the source unit's own trigger never actually fires because its subscription is removed before `unit:destroyed` emits. `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card.
 
 ---
 

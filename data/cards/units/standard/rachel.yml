@@ -10,7 +10,7 @@ abilities:
   - type: sequence
     steps:
       - type: slay
-        target: { side: ally }
+        target: { side: ally, exclude_self: true }
       - type: light_up
         amount: 3
       - type: grant_random_trait

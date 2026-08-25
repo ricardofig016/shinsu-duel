@@ -234,13 +234,34 @@ describe("TargetResolver.resolveTargets — remaining descriptors", () => {
     expect(targets.map((t) => t.id)).toEqual(["s", "af", "ab"]);
   });
 
-  test("'ally' excludes the source unit", () => {
+  test("'ally' includes the source unit", () => {
     const source = unit("s", game.usernames[0]);
     const allyFront = unit("af", game.usernames[0], "scout");
     game.playerStates[game.usernames[0]].field.frontline = [source, allyFront];
 
-    const targets = TargetResolver.resolveTargets(game, { target: "ally", sourceUnit: source });
+    const targets = TargetResolver.resolveTargets(game, { target: "ally", sourceUnit: source, count: 10 });
+    expect(targets.map((t) => t.id)).toEqual(["s", "af"]);
+  });
+
+  test("'ally' with excludeSelf excludes only the source unit", () => {
+    const source = unit("s", game.usernames[0]);
+    const allyFront = unit("af", game.usernames[0], "scout");
+    game.playerStates[game.usernames[0]].field.frontline = [source, allyFront];
+
+    const targets = TargetResolver.resolveTargets(game, { target: "ally", sourceUnit: source, excludeSelf: true });
     expect(targets.map((t) => t.id)).toEqual(["af"]);
+  });
+
+  test("'ally' line scope filters by field line", () => {
+    const source = unit("s", game.usernames[0], "scout", { line: "frontline" });
+    const allyFront = unit("af", game.usernames[0], "scout", { line: "frontline" });
+    const allyBack = unit("ab", game.usernames[0], "light-bearer", { line: "backline" });
+    game.playerStates[game.usernames[0]].field.frontline = [source, allyFront];
+    game.playerStates[game.usernames[0]].field.backline = [allyBack];
+
+    expect(TargetResolver.resolveTargets(game, { target: "ally", sourceUnit: source, line: "frontline", count: 10 }).map((t) => t.id)).toEqual(["s", "af"]);
+    expect(TargetResolver.resolveTargets(game, { target: "ally", sourceUnit: source, line: "backline", count: 10 }).map((t) => t.id)).toEqual(["ab"]);
+    expect(TargetResolver.resolveTargets(game, { target: "ally", sourceUnit: source, line: "backline", excludeSelf: true, count: 10 }).map((t) => t.id)).toEqual(["ab"]);
   });
 
   test("'bearer' returns the source unit", () => {
@@ -429,6 +450,8 @@ describe("TargetResolver.normalizeStructuredTarget", () => {
     expect(TargetResolver.normalizeStructuredTarget({ side: "bearer" }).target).toBe("bearer");
     expect(TargetResolver.normalizeStructuredTarget({ side: "ally" }).target).toBe("ally");
     expect(TargetResolver.normalizeStructuredTarget({ side: "ally", scope: "all" }).target).toBe("all_allies");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "ally", scope: "frontline" })).toEqual({ target: "ally", line: "frontline" });
+    expect(TargetResolver.normalizeStructuredTarget({ side: "ally", scope: "backline" })).toEqual({ target: "ally", line: "backline" });
     expect(TargetResolver.normalizeStructuredTarget({ side: "enemy" }).target).toBe("enemy");
     expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", scope: "single" }).target).toBe("enemy");
     expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", scope: "all" }).target).toBe("all_enemies");
@@ -465,6 +488,7 @@ describe("TargetResolver.normalizeStructuredTarget", () => {
     expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", cost: 2 }).cost).toBe(2);
     expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", choose: true }).choose).toBe(true);
     expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", lowest_hp: true }).lowestHp).toBe(true);
+    expect(TargetResolver.normalizeStructuredTarget({ side: "ally", exclude_self: true })).toMatchObject({ target: "ally", excludeSelf: true });
   });
 });
 

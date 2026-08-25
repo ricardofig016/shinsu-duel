@@ -2470,7 +2470,8 @@
         },
         "source": {
           "side": "ally",
-          "random": true
+          "random": true,
+          "exclude_self": true
         },
         "raw": "give me a random affiliation of another ally"
       },
@@ -2489,7 +2490,8 @@
         "type": "slay",
         "target": {
           "side": "ally",
-          "scope": "backline"
+          "scope": "backline",
+          "exclude_self": true
         },
         "trigger": {
           "type": "deploy"
@@ -2921,7 +2923,8 @@
           {
             "type": "slay",
             "target": {
-              "side": "ally"
+              "side": "ally",
+              "exclude_self": true
             }
           },
           {

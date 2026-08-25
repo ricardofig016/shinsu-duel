@@ -82,10 +82,19 @@ describe("TriggerManager trigger subscriptions", () => {
     expect(LifecycleEngine.transformUnit).toHaveBeenCalled();
   });
 
-  test("ally_dies trigger ignores own death and enemies", () => {
+  test("ally_dies trigger ignores enemy deaths", () => {
     register([{ type: "ally_dies" }]);
-    bus.emit(EVT.UNIT_DESTROYED, { owner: "Alice", unitId: "Unit#1" }); // own death
     bus.emit(EVT.UNIT_DESTROYED, { owner: "Bob", unitId: "Enemy#1" }); // enemy
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
+  test("ally_dies trigger does not fire once the subscriber is removed", () => {
+    register([{ type: "ally_dies" }]);
+    // The dying unit's own subscription is removed before unit:destroyed fires
+    // (LifecycleEngine.destroyUnit unregisters first), so its owner lookup fails
+    // and its own death never triggers its own transform.
+    gameState._findUnit = () => null;
+    bus.emit(EVT.UNIT_DESTROYED, { owner: "Alice", unitId: "Unit#1" });
     expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
   });
 

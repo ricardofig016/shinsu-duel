@@ -63,6 +63,7 @@
             "shared_affiliation": { "type": "boolean" },
             "has_passive": { "type": "boolean" },
             "can_switch": { "type": "boolean" },
+            "exclude_self": { "type": "boolean" },
             "rank": { "$ref": "#/definitions/filterValue" },
             "position": { "$ref": "#/definitions/filterValue" },
             "affiliation": { "$ref": "#/definitions/filterValue" },
