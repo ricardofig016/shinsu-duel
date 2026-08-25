@@ -112,24 +112,66 @@ function filterUntargetable(candidates, gameState, sourceUnit) {
 }
 
 /**
- * Validates a player-selected multi-target set against Taunt.
- * Every targetable enemy Taunt unit must be selected before any other enemy
- * may be selected. Skill effects do not have a source unit and bypass Taunt.
+ * Plan a multi-target enemy selection against Taunt (and, via `random`, Blinded).
+ *
+ * Targetable enemy Taunt units are mandatory: they must be targeted before any
+ * other enemy. Skills (no source unit) bypass Taunt and have no mandatory
+ * targets. When the mandatory units already satisfy the requested `count`, when
+ * every remaining target is forced, or when there is no genuine choice, the
+ * selection is fully automatic. When there are more Taunt units than slots, the
+ * player chooses `count` among them. Otherwise the caller receives the locked
+ * Taunt ids plus the free (non-Taunt) candidates the player may still choose
+ * from.
+ *
+ * `random` selects the free slots via the seeded RNG instead of a player
+ * decision; the caller passes it for both explicit `random` targets and Blinded
+ * sources (which cannot choose their targets).
+ *
+ * @param {GameState} gameState
+ * @param {Array} candidates — already-filtered legal enemy targets
+ * @param {object} options
+ * @param {number} [options.count=1] — total number of targets to select
+ * @param {object} [options.sourceUnit] — the unit originating the effect
+ * @param {boolean} [options.random=false] — select free slots randomly
+ * @returns {{ auto: boolean, ids?: string[], lockedIds?: string[], freeCandidates?: Array, freeCount?: number }}
  */
-export function validateTauntSelection(candidates, selectedIds, gameState, sourceUnit) {
-  if (!sourceUnit) return true;
-  const selected = new Set(selectedIds);
-  const taunters = getTargetableTaunters(candidates, gameState, sourceUnit);
-  const missingTaunter = taunters.some((unit) => !selected.has(unit.id));
-  if (!missingTaunter) return true;
-
-  const selectedOtherEnemy = candidates.some((unit) =>
-    selected.has(unit.id) && unit.owner !== sourceUnit.owner && !taunters.includes(unit)
+export function resolveTargetSelection(gameState, candidates, { count = 1, sourceUnit = null, random = false } = {}) {
+  const ignoreTaunt = Boolean(
+    sourceUnit && gameState.modifierStack.getTargetingRules(sourceUnit).ignoreTaunt
   );
-  if (selectedOtherEnemy) {
-    throw new Error("All targetable Taunt units must be selected before other enemy units.");
+  const mandatory = ignoreTaunt ? [] : getTargetableTaunters(candidates, gameState, sourceUnit);
+  const mandatoryIds = mandatory.map((unit) => unit.id);
+
+  // More targetable Taunt units than slots: the player must choose `count`
+  // among them (RULES.md — with multiple Taunt units the enemy chooses).
+  if (mandatory.length > count) {
+    if (random) {
+      return { auto: true, ids: shuffle(mandatory, gameState._rng).slice(0, count).map((unit) => unit.id) };
+    }
+    return { auto: false, lockedIds: [], freeCandidates: mandatory, freeCount: count };
   }
-  return true;
+
+  const free = candidates.filter((unit) => !mandatory.includes(unit));
+  const freeCount = count - mandatoryIds.length;
+
+  // Taunts exactly fill the requested count — no choice needed.
+  if (freeCount === 0) {
+    return { auto: true, ids: mandatoryIds };
+  }
+
+  // Every remaining target is forced — no genuine choice remains.
+  if (freeCount >= free.length) {
+    return { auto: true, ids: [...mandatoryIds, ...free.map((unit) => unit.id)] };
+  }
+
+  if (random) {
+    return {
+      auto: true,
+      ids: [...mandatoryIds, ...shuffle(free, gameState._rng).slice(0, freeCount).map((unit) => unit.id)],
+    };
+  }
+
+  return { auto: false, lockedIds: mandatoryIds, freeCandidates: free, freeCount };
 }
 
 // ─── Filter helpers ─────────────────────────────────────────────────────────
@@ -339,7 +381,7 @@ export function normalizeStructuredTarget(descriptor) {
       if (scope === "all") target = "all_enemies";
       else if (scope === "frontline") target = "enemy_frontline";
       else if (scope === "backline") target = "enemy_backline";
-      else target = "enemy";
+      else target = descriptor.count > 1 ? "enemies" : "enemy";
       break;
     case "any":
       target = "unit";
@@ -659,4 +701,4 @@ export function resolveExistenceUnits(gameState, descriptor, sourceOwner) {
   return applyFilters(candidates, gameState, filters, null);
 }
 
-export default { resolveTargets, resolveCardTargets, resolveExistenceUnits, canTargetEnemyLighthouses, validateTauntSelection, normalizeStructuredTarget };
+export default { resolveTargets, resolveCardTargets, resolveExistenceUnits, canTargetEnemyLighthouses, resolveTargetSelection, normalizeStructuredTarget };

@@ -157,6 +157,23 @@ describe("RemoveConditionHandler", () => {
     expect(stack.getEffective("Unit#1", "condition", "burned")).toBe(2);
   });
 
+  test("mode choose with amount >= available conditions removes all without a decision", () => {
+    stack.apply({ sourceId: "A", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "poisoned", value: 1 });
+    stack.apply({ sourceId: "B", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "burned", value: 2 });
+
+    const createPendingDecision = jest.fn();
+    const ctx = { emitChild: (eventName, payload) => bus.emit(eventName, payload) };
+    const result = handler.execute(
+      { targetId: "Unit#1", mode: "choose", amount: 99, owner: "Alice" },
+      ctx,
+      { modifierStack: stack, usernames: ["Alice"], createPendingDecision }
+    );
+
+    expect(createPendingDecision).not.toHaveBeenCalled();
+    expect(result.pending).not.toBe(true);
+    expect([...stack.getActiveKeys("Unit#1", "condition")]).toHaveLength(0);
+  });
+
   test("rejects an invalid mode", () => {
     expect(() => handler.validate({ targetId: "Unit#1", mode: "bogus" })).toThrow('invalid mode "bogus"');
   });

@@ -77,7 +77,7 @@ Each player state has typed zones:
 
 ## Pending Decisions
 
-Some effects and actions require a player choice mid-resolution (target selection, line-overflow destruction). `GameState.createPendingDecision()` publishes the choice and blocks further `processAction()` calls until `resolveDecision()` is called with a validated selection.
+Some effects and actions require a player choice mid-resolution (target selection, line-overflow destruction). `GameState.createPendingDecision()` publishes the choice and blocks further `processAction()` calls until `resolveDecision()` is called with a validated selection. A decision carries an optional `lockedIds` list — targets that are already committed (mandatory Taunt units) and excluded from the player's own choices — surfaced to clients via `getClientState`, `toSerializedState`, and the `DECISION_PENDING` event. Callers must not create a decision when there is no genuine choice (candidates ≤ requested count, or a forced/random/Blinded selection): those resolve immediately.
 
 ### Resolution Lifecycle State
 

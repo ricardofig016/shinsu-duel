@@ -387,6 +387,7 @@ export default class GameState {
             candidates: this.pendingDecision.candidates,
             minChoices: this.pendingDecision.minChoices,
             maxChoices: this.pendingDecision.maxChoices,
+            lockedIds: this.pendingDecision.lockedIds,
           }
         : null,
       field: {
@@ -728,6 +729,7 @@ export default class GameState {
           candidates: this.pendingDecision.candidates.map(({ id, name, hp }) => ({ id, name, hp })),
           minChoices: this.pendingDecision.minChoices,
           maxChoices: this.pendingDecision.maxChoices,
+          lockedIds: this.pendingDecision.lockedIds,
         }
       : null;
 
@@ -888,7 +890,7 @@ export default class GameState {
    * Re-entrancy is capped at MAX_RESOLUTION_DEPTH to prevent infinite
    * decision loops.
    */
-  createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve }) {
+  createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve, lockedIds = [] }) {
     if (this._resolutionDepth >= MAX_RESOLUTION_DEPTH) {
       throw new Error(
         `Maximum nested pending decision depth (${MAX_RESOLUTION_DEPTH}) exceeded. ` +
@@ -914,6 +916,7 @@ export default class GameState {
       }),
       minChoices,
       maxChoices,
+      lockedIds: [...lockedIds],
       resolve,
       continuations: [],
     };
@@ -936,6 +939,7 @@ export default class GameState {
       candidates: decision.candidates,
       minChoices,
       maxChoices,
+      lockedIds: decision.lockedIds,
     });
     return decision.decisionId;
   }
@@ -1016,6 +1020,7 @@ export default class GameState {
           candidates: this.pendingDecision.candidates,
           minChoices: this.pendingDecision.minChoices,
           maxChoices: this.pendingDecision.maxChoices,
+          lockedIds: this.pendingDecision.lockedIds,
         });
       }
 

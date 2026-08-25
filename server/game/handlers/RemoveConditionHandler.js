@@ -49,8 +49,12 @@ export default class RemoveConditionHandler extends BaseHandler {
       return this._remove(targetId, chosen, modStack, context);
     }
 
-    // mode === "choose" — defer the selection to the owning player.
+    // mode === "choose" — defer the selection to the owning player unless the
+    // whole eligible set is required (no genuine choice).
     const owner = payload.owner || payload.sourceOwner;
+    if (count >= eligible.length) {
+      return this._remove(targetId, eligible, modStack, context);
+    }
     gameState.createPendingDecision({
       owner,
       type: "remove_conditions",

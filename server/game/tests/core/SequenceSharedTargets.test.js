@@ -73,6 +73,7 @@ describe("shared-target sequence resolution", () => {
     const e1 = push(game, "Bob", unit("e1", "Bob"));
     const e2 = push(game, "Bob", unit("e2", "Bob"));
     const e3 = push(game, "Bob", unit("e3", "Bob"));
+    const e4 = push(game, "Bob", unit("e4", "Bob"));
 
     const result = resolveEffect(
       {
@@ -89,7 +90,7 @@ describe("shared-target sequence resolution", () => {
 
     expect(result).toEqual({ resolved: true, pending: true });
     expect(game.pendingDecision.type).toBe("target_selection");
-    expect(game.pendingDecision.candidates).toHaveLength(3);
+    expect(game.pendingDecision.candidates).toHaveLength(4);
 
     game.resolveDecision({
       decisionId: game.pendingDecision.decisionId,
@@ -102,6 +103,7 @@ describe("shared-target sequence resolution", () => {
       expect(e.currentHp).toBe(8);
       expect(game.modifierStack.has(e.id, "condition", "burned")).toBe(true);
     }
+    expect(e4.currentHp).toBe(10);
   });
 
   test("subset step (count: 1) creates a second decision restricted to the shared set", () => {
@@ -109,6 +111,7 @@ describe("shared-target sequence resolution", () => {
     const src = push(game, "Alice", unit("src", "Alice"));
     const e1 = push(game, "Bob", unit("e1", "Bob"));
     const e2 = push(game, "Bob", unit("e2", "Bob"));
+    const e3 = push(game, "Bob", unit("e3", "Bob"));
 
     resolveEffect(
       {
@@ -123,16 +126,17 @@ describe("shared-target sequence resolution", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    // Resolve the shared set first.
+    // Resolve the shared set first (choose 2 of 3).
     game.resolveDecision({
       decisionId: game.pendingDecision.decisionId,
       choices: [e1.id, e2.id],
       username: "Alice",
     });
 
-    // Both took damage; a subset decision now asks for ONE of the two.
+    // The two chosen targets took damage; a subset decision asks for ONE of them.
     expect(e1.currentHp).toBe(9);
     expect(e2.currentHp).toBe(9);
+    expect(e3.currentHp).toBe(10);
     expect(game.pendingDecision.type).toBe("target_selection");
     expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual([e1.id, e2.id].sort());
     expect(game.pendingDecision.minChoices).toBe(1);

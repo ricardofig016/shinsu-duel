@@ -139,11 +139,12 @@ describe("structured target resolution via EffectResolver", () => {
     expect(game.modifierStack.getEffective(ally.id, "trait", "strong")).toBe(2);
   });
 
-  test("deal_damage with { side: enemy, count: 2 } creates a multi-choice decision", () => {
+  test("deal_damage with { side: enemy, count: 2 } creates a multi-choice decision when there are extra enemies", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice", "scout"));
     push(game, "Bob", unit("e1", "Bob", "scout"));
     push(game, "Bob", unit("e2", "Bob", "scout"));
+    push(game, "Bob", unit("e3", "Bob", "scout"));
 
     const result = resolveEffect(
       { type: "deal_damage", amount: 1, target: { side: "enemy", count: 2 } },
@@ -153,6 +154,48 @@ describe("structured target resolution via EffectResolver", () => {
 
     expect(result).toEqual({ pending: true });
     expect(game.pendingDecision.maxChoices).toBe(2);
+    expect(game.pendingDecision.candidates).toHaveLength(3);
+    expect(game.pendingDecision.lockedIds).toEqual([]);
+  });
+
+  test("deal_damage with { side: enemy, count: 2 } and exactly two enemies auto-resolves without a decision", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    const e1 = push(game, "Bob", unit("e1", "Bob", "scout"));
+    const e2 = push(game, "Bob", unit("e2", "Bob", "scout"));
+
+    const result = resolveEffect(
+      { type: "deal_damage", amount: 1, target: { side: "enemy", count: 2 } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(2);
+    expect(game.pendingDecision).toBeNull();
+    expect(e1.currentHp).toBe(9);
+    expect(e2.currentHp).toBe(9);
+  });
+
+  test("deal_damage with { side: enemy, count: 2 } locks a Taunt and asks for the one free slot", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    const taunter = push(game, "Bob", unit("taunter", "Bob", "scout"));
+    const other1 = push(game, "Bob", unit("other1", "Bob", "scout"));
+    const other2 = push(game, "Bob", unit("other2", "Bob", "scout"));
+    game.modifierStack.apply({ sourceId: "system", sourceType: "system", targetId: "taunter", type: "trait", key: "taunt", value: 1 });
+
+    const result = resolveEffect(
+      { type: "deal_damage", amount: 1, target: { side: "enemy", count: 2 } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(1);
+    expect(game.pendingDecision.maxChoices).toBe(1);
+    expect(game.pendingDecision.lockedIds).toEqual(["taunter"]);
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual(["other1", "other2"]);
   });
 
   test("grant_trait with lowest_hp and traitNot selects the lowest-HP non-immune target", () => {

@@ -58,28 +58,84 @@ describe("TargetResolver", () => {
     expect(targets[0].id).toBe("enemy2");
   });
 
-  test("Taunt requires all targetable taunters before other enemies in a multi-target choice", () => {
+  test("resolveTargetSelection locks Taunt units and leaves free slots for a multi-target choice", () => {
     const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
     const taunter = { id: "taunter", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
-    const otherEnemy = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const other1 = { id: "other1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const other2 = { id: "other2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
     game.modifierStack.has = (id, type, key) => id === "taunter" && type === "trait" && key === "taunt";
 
-    expect(() => TargetResolver.validateTauntSelection(
-      [taunter, otherEnemy], [otherEnemy.id], game, source
-    )).toThrow(/Taunt/);
-    expect(TargetResolver.validateTauntSelection(
-      [taunter, otherEnemy], [taunter.id, otherEnemy.id], game, source
-    )).toBe(true);
+    const plan = TargetResolver.resolveTargetSelection(game, [taunter, other1, other2], { count: 2, sourceUnit: source });
+    expect(plan.auto).toBe(false);
+    expect(plan.lockedIds).toEqual(["taunter"]);
+    expect(plan.freeCandidates.map((u) => u.id)).toEqual(["other1", "other2"]);
+    expect(plan.freeCount).toBe(1);
   });
 
-  test("Taunt does not constrain targetable skills without a source unit", () => {
+  test("resolveTargetSelection auto-selects all Taunt units when they equal the count", () => {
+    const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
+    const taunter1 = { id: "t1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const taunter2 = { id: "t2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const other = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    game.modifierStack.has = (id, type, key) => (id === "t1" || id === "t2") && type === "trait" && key === "taunt";
+
+    const plan = TargetResolver.resolveTargetSelection(game, [taunter1, taunter2, other], { count: 2, sourceUnit: source });
+    expect(plan.auto).toBe(true);
+    expect(plan.ids).toEqual(["t1", "t2"]);
+  });
+
+  test("resolveTargetSelection defers the choice among Taunt units when they outnumber the count", () => {
+    const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
+    const taunter1 = { id: "t1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const taunter2 = { id: "t2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const other = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    game.modifierStack.has = (id, type, key) => (id === "t1" || id === "t2") && type === "trait" && key === "taunt";
+
+    const plan = TargetResolver.resolveTargetSelection(game, [taunter1, taunter2, other], { count: 1, sourceUnit: source });
+    expect(plan.auto).toBe(false);
+    expect(plan.lockedIds).toEqual([]);
+    expect(plan.freeCandidates.map((u) => u.id)).toEqual(["t1", "t2"]);
+    expect(plan.freeCount).toBe(1);
+  });
+
+  test("resolveTargetSelection auto-selects every candidate when no genuine choice remains", () => {
+    const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
+    const e1 = { id: "e1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const e2 = { id: "e2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    game.modifierStack.has = () => false;
+
+    // candidates == count
+    expect(TargetResolver.resolveTargetSelection(game, [e1, e2], { count: 2, sourceUnit: source }))
+      .toEqual({ auto: true, ids: ["e1", "e2"] });
+    // candidates < count
+    expect(TargetResolver.resolveTargetSelection(game, [e1, e2], { count: 3, sourceUnit: source }))
+      .toEqual({ auto: true, ids: ["e1", "e2"] });
+  });
+
+  test("resolveTargetSelection with random auto-selects Taunt plus random free slots", () => {
+    const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
     const taunter = { id: "taunter", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
-    const otherEnemy = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const free1 = { id: "free1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const free2 = { id: "free2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
     game.modifierStack.has = (id, type, key) => id === "taunter" && type === "trait" && key === "taunt";
 
-    expect(TargetResolver.validateTauntSelection(
-      [taunter, otherEnemy], [otherEnemy.id], game, null
-    )).toBe(true);
+    const plan = TargetResolver.resolveTargetSelection(game, [taunter, free1, free2], { count: 2, sourceUnit: source, random: true });
+    expect(plan.auto).toBe(true);
+    expect(plan.ids).toHaveLength(2);
+    expect(plan.ids).toContain("taunter");
+    expect(plan.ids.filter((id) => id !== "taunter")).toHaveLength(1);
+  });
+
+  test("resolveTargetSelection ignores Taunt for skills without a source unit", () => {
+    const taunter = { id: "taunter", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    const other = { id: "other", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
+    game.modifierStack.has = (id, type, key) => id === "taunter" && type === "trait" && key === "taunt";
+
+    const plan = TargetResolver.resolveTargetSelection(game, [taunter, other], { count: 1, sourceUnit: null });
+    expect(plan.auto).toBe(false);
+    expect(plan.lockedIds).toEqual([]);
+    expect(plan.freeCandidates.map((u) => u.id)).toEqual(["taunter", "other"]);
+    expect(plan.freeCount).toBe(1);
   });
 });
 
@@ -386,13 +442,20 @@ describe("TargetResolver.normalizeStructuredTarget", () => {
       side: "enemy", count: 2, condition: "rooted", trait: "taunt",
       rank: ["regular", "ranker"], name: "Conduit", affiliation: "team-chang",
     });
-    expect(result.target).toBe("enemy");
+    expect(result.target).toBe("enemies");
     expect(result.count).toBe(2);
     expect(result.condition).toBe("rooted");
     expect(result.trait).toBe("taunt");
     expect(result.rank).toEqual(["regular", "ranker"]);
     expect(result.name).toBe("Conduit");
     expect(result.affiliation).toBe("team-chang");
+  });
+
+  test("maps multi-target enemy (count > 1) to the 'enemies' descriptor", () => {
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", count: 2 }).target).toBe("enemies");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", count: 3 }).target).toBe("enemies");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy" }).target).toBe("enemy");
+    expect(TargetResolver.normalizeStructuredTarget({ side: "enemy", count: 1 }).target).toBe("enemy");
   });
 
   test("throws on non-object and unknown side; passes random/cost/choose/lowest_hp through", () => {

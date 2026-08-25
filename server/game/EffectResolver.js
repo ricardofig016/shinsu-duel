@@ -174,8 +174,46 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     return { resolved: true, skipped: true, reason: "no valid targets" };
   }
 
-  // Random selection: deterministic seeded shuffle, no player decision.
-  if (structured.random) {
+  const isBlinded = Boolean(
+    sourceUnit && gameState.modifierStack.has(sourceUnit.id, "condition", "blinded")
+  );
+
+  // Choice descriptors select a fixed number of targets. The planner locks
+  // mandatory Taunt units, auto-selects when there is no genuine choice
+  // (including Blinded), else presents only the free candidates.
+  const choiceTargets = new Set(["ally", "enemy", "enemies", "enemy_frontline", "enemy_backline", "unit"]);
+  if (choiceTargets.has(structured.target)) {
+    const plan = TargetResolver.resolveTargetSelection(gameState, candidates, {
+      count,
+      sourceUnit,
+      random: Boolean(structured.random) || isBlinded,
+    });
+    if (plan.auto) {
+      return resolveSharedSteps(effect.steps, context, gameState, extra, plan.ids);
+    }
+    let chosenIds = null;
+    gameState.createPendingDecision({
+      owner: extra.owner || extra.sourceOwner,
+      type: "target_selection",
+      candidates: plan.freeCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+      minChoices: plan.freeCount,
+      maxChoices: plan.freeCount,
+      lockedIds: plan.lockedIds,
+      resolve: (targetIds) => {
+        chosenIds = [...plan.lockedIds, ...targetIds];
+      },
+    });
+    // Queue the step runner as the first continuation (before the action's own
+    // completion) so any nested subset decision defers the end-turn correctly.
+    gameState.appendPendingDecisionContinuation(() => {
+      resolveSharedSteps(effect.steps, context, gameState, extra, chosenIds);
+    });
+    return { resolved: true, pending: true };
+  }
+
+  // Random selection (explicit `random` or Blinded): deterministic seeded
+  // shuffle, no player decision.
+  if (structured.random || isBlinded) {
     shuffle(candidates, gameState._rng);
     return resolveSharedSteps(
       effect.steps, context, gameState, extra,
@@ -188,6 +226,11 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     return resolveSharedSteps(effect.steps, context, gameState, extra, candidates.map((unit) => unit.id));
   }
 
+  // Every candidate is required — no genuine choice remains.
+  if (count >= candidates.length) {
+    return resolveSharedSteps(effect.steps, context, gameState, extra, candidates.map((unit) => unit.id));
+  }
+
   const take = count && count > 1 ? Math.min(count, candidates.length) : 1;
   let chosenIds = null;
   gameState.createPendingDecision({
@@ -197,7 +240,6 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     minChoices: take,
     maxChoices: take,
     resolve: (targetIds) => {
-      TargetResolver.validateTauntSelection(candidates, targetIds, gameState, sourceUnit);
       chosenIds = targetIds;
     },
   });
@@ -231,6 +273,20 @@ function resolveSharedSteps(steps, context, gameState, extra, sharedTargetIds) {
     const subset = target.count;
     if (subset === undefined || subset >= sharedTargetIds.length) {
       for (const id of sharedTargetIds) {
+        results.push(resolveEffect(step, context, gameState, { ...extra, sharedTargetIds, targetId: id }));
+      }
+      continue;
+    }
+
+    const sourceUnit = extra.sourceUnit || gameState._findUnit(extra.sourceId);
+    const isBlinded = Boolean(
+      sourceUnit && gameState.modifierStack.has(sourceUnit.id, "condition", "blinded")
+    );
+
+    // Blinded: the player cannot choose the subset — pick it at random.
+    if (isBlinded) {
+      const chosen = shuffle([...sharedTargetIds], gameState._rng).slice(0, subset);
+      for (const id of chosen) {
         results.push(resolveEffect(step, context, gameState, { ...extra, sharedTargetIds, targetId: id }));
       }
       continue;
@@ -393,44 +449,55 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     };
   };
 
-  // Single-target and non-choice descriptors — resolve immediately through
-  // TargetResolver so handlers only ever receive a pre-resolved targetId.
-  // This ensures taunt, frontline blocking, ghost, sharpshooter, blinded,
-  // and condition filters are always applied consistently.
+  // Choice and fixed-unit descriptors resolve through TargetResolver so
+  // handlers only ever receive a pre-resolved targetId. Taunt, frontline
+  // blocking, ghost, sharpshooter, blinded, and condition filters are applied
+  // here consistently for every descriptor.
   const immediateTargets = new Set(["self", "ally", "enemy", "enemies", "bearer", "enemy_frontline", "enemy_backline", "unit"]);
+  const choiceTargets = new Set(["ally", "enemy", "enemies", "enemy_frontline", "enemy_backline", "unit"]);
   if (!payload.targetId && immediateTargets.has(payload.target)) {
     const candidates = TargetResolver.resolveTargets(gameState, buildTargetOptions());
+    const sourceUnit = payload.sourceUnit || gameState._findUnit(payload.sourceId);
+    const isBlinded = Boolean(
+      sourceUnit && gameState.modifierStack.has(sourceUnit.id, "condition", "blinded")
+    );
 
-    // Explicit random selection: shuffle with the seeded RNG and auto-pick
-    // the requested count — no player decision.
-    if (targetFilters.random && candidates.length > 0) {
-      shuffle(candidates, gameState._rng);
-      const take = payload.count && payload.count > 1 ? Math.min(payload.count, candidates.length) : 1;
-      return candidates.slice(0, take).map((unit) =>
-        resolveEffect(effect, context, gameState, { ...extra, targetId: unit.id })
-      );
-    }
-
-    if (candidates.length > 1) {
-      const maxChoices = payload.count && payload.count > 1 ? Math.min(payload.count, candidates.length) : 1;
+    // Choice descriptors select a fixed number of targets. The planner locks
+    // mandatory Taunt units, auto-selects when there is no genuine choice
+    // (including explicit `random` and Blinded), else defers a decision over
+    // only the free candidates.
+    if (choiceTargets.has(payload.target)) {
+      if (candidates.length === 0) {
+        return { skipped: true, reason: "no valid targets" };
+      }
+      const count = payload.count && payload.count > 1 ? payload.count : 1;
+      const plan = TargetResolver.resolveTargetSelection(gameState, candidates, {
+        count,
+        sourceUnit,
+        random: Boolean(targetFilters.random) || isBlinded,
+      });
+      if (plan.auto) {
+        return plan.ids.map((unitId) =>
+          resolveEffect(effect, context, gameState, { ...extra, targetId: unitId })
+        );
+      }
       gameState.createPendingDecision({
         owner: payload.owner || payload.sourceOwner,
         type: "target_selection",
-        candidates: candidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
-        minChoices: maxChoices,
-        maxChoices,
-        resolve: (targetIds) => {
-          TargetResolver.validateTauntSelection(
-            candidates,
-            targetIds,
-            gameState,
-            payload.sourceUnit || gameState._findUnit(payload.sourceId)
+        candidates: plan.freeCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+        minChoices: plan.freeCount,
+        maxChoices: plan.freeCount,
+        lockedIds: plan.lockedIds,
+        resolve: (chosenIds) => {
+          [...plan.lockedIds, ...chosenIds].forEach((targetId) =>
+            resolveEffect(effect, context, gameState, { ...extra, targetId })
           );
-          targetIds.forEach((targetId) => resolveEffect(effect, context, gameState, { ...extra, targetId }));
         },
       });
       return { pending: true };
     }
+
+    // Fixed-unit descriptors (self, bearer) resolve to the single source unit.
     if (candidates.length === 1) payload.targetId = candidates[0].id;
   }
 

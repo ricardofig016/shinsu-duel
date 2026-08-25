@@ -79,6 +79,23 @@ describe("PeekHandHandler", () => {
     expect(game.pendingDecision.type).toBe("card_selection");
   });
 
+  test("mode choose with amount >= hand size reveals all without a decision", () => {
+    const game = setupGameWithCardsInHand(["Test Damage Skill"]);
+    const handSize = game.playerStates.Bob.hand.length;
+    const ctx = context();
+
+    const result = handler.execute(
+      { owner: "Bob", sourceOwner: "Alice", mode: "choose", amount: 99 },
+      ctx,
+      game
+    );
+
+    expect(result.pending).not.toBe(true);
+    expect(game.pendingDecision).toBeNull();
+    expect(result.revealed).toHaveLength(handSize);
+    expect(ctx.emitChild).toHaveBeenCalledWith(EVT.HAND_PEEKED, expect.objectContaining({ owner: "Bob", observer: "Alice" }));
+  });
+
   test("card filter narrows the revealed cards", () => {
     const game = setupGameWithCardsInHand(["Test Damage Skill"]);
     const baang = new Card(getCardIdByName("Test Damage Skill"), game.cards[getCardIdByName("Test Damage Skill")], "Bob", game.eventBus);

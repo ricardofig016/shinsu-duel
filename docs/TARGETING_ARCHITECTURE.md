@@ -44,11 +44,13 @@ Units with the **Sharpshooter** trait ignore line restrictions entirely — they
 
 ### Taunt enforcement
 
-Taunt applies only to effects originating from an **enemy unit**. It does not constrain targetable skills. A single-target effect MUST target a valid Taunt unit. For a player-selected multi-target effect, every valid Taunt unit must be selected before any other enemy unit may be selected. Effects that unconditionally target all enemies do not require a choice and include all valid enemies.
+Taunt applies only to effects originating from an **enemy unit**. It does not constrain targetable skills. A single-target effect MUST target a valid Taunt unit. A multi-target effect (`{ side: enemy, count: N }`, normalized to the `enemies` descriptor) locks every targetable Taunt unit as **mandatory**; the player chooses only the remaining free (non-Taunt) slots, and only if more free candidates exist than slots remain. Effects that unconditionally target all enemies do not require a choice and include all valid enemies.
+
+Multi-target enemy selection goes through `TargetResolver.resolveTargetSelection()`, which returns either a complete auto-selection (`{ auto: true, ids }`) or a decision plan (`{ auto: false, lockedIds, freeCandidates, freeCount }`). It auto-selects when there is no genuine choice: when the Taunt units already satisfy the count, when every remaining candidate is forced, or when `random`/Blinded picks the free slots automatically. When there are more targetable Taunt units than slots, the player chooses `count` among them. The same planner drives every choice descriptor (`enemy`, `enemies`, `enemy_frontline`, `enemy_backline`, `unit`, `ally`), so line-scoped and any-unit effects enforce Taunt exactly like plain `enemy` targeting.
 
 ### Blinded
 
-A unit with the `Blinded` condition cannot choose targeted units. For choice descriptors such as `enemy`, `ally`, and `unit`, `TargetResolver` shuffles the already-filtered valid candidates and selects from that order. Line blocking, Ghost, Sharpshooter, Taunt, and other filters are applied before randomization. Self, bearer, all-target descriptors, and lighthouse targeting are not randomized. The resolver uses the game's seeded RNG so random targeting is deterministic in tests and replays.
+A unit with the `Blinded` condition cannot choose targeted units — its targets are chosen at random among legal targets. `TargetResolver` shuffles the already-filtered valid candidates for choice descriptors (`enemy`, `enemies`, `ally`, `unit`, `enemy_frontline`, `enemy_backline`) before selection. `EffectResolver` then **auto-selects** the requested count rather than creating a decision, and `resolveTargetSelection` randomizes the free slots of a multi-target enemy selection. Line blocking, Ghost, Sharpshooter, Taunt, and other filters are applied before randomization, so Taunt is still enforced for a Blinded source. Self, bearer, all-target descriptors, and lighthouse targeting are not randomized. The resolver uses the game's seeded RNG so random targeting is deterministic in tests and replays.
 
 ### Modifier targeting rules
 
@@ -99,6 +101,7 @@ gameState.eventBus.emit("pending-decision", {
   candidates: [{ id, name, hp }, ...],
   minChoices: 1,
   maxChoices: 2,
+  lockedIds: ["Unit#3"], // auto-selected mandatory targets (Taunt), already resolved
 });
 
 // Client sends
@@ -107,5 +110,7 @@ socket.emit("game-decision", {
   choices: ["Unit#5", "Unit#7"],
 });
 ```
+
+A decision is created **only when there is a genuine choice**: when the number of legal candidates equals (or is fewer than) the requested count, when every target is forced (e.g. Taunt), when the effect declares `random`, or when the source is `Blinded`, the engine auto-selects and does not pause. `lockedIds` carries targets that are already committed (mandatory Taunt units) so clients can render them as pre-selected; the player's `choices` cover only the remaining `minChoices..maxChoices` slots.
 
 The engine validates choices and resumes the event chain. Validation includes the decision ID, owner, choice count, uniqueness, candidate membership, and whether a real unit candidate was destroyed while the decision was pending. Decisions stack. If a resolution creates a second choice while one is still pending, the active decision is pushed aside and the new one becomes current; resolving it pops the previous one back and re-emits `pending-decision` for it. Clients always resolve exactly one choice at a time.

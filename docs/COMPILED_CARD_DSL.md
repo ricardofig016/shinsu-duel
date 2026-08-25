@@ -216,6 +216,8 @@ target:
 
 `self`/`bearer` need only `side`. `any` + `scope: all` addresses both players' units (landmark rules).
 
+`side: enemy` with `count > 1` (no `scope`, or `scope: single`) selects N enemy units and is normalized to the `enemies` descriptor: targetable Taunt units are locked as mandatory and the player chooses only the remaining free (non-Taunt) slots. When the Taunt units already satisfy `count`, or when every remaining candidate is forced, the selection auto-resolves with no decision. When there are more Taunt units than `count`, the player chooses `count` among them. `side: enemy` with no count (or `count: 1`) is the single-target `enemy` descriptor and is Taunt-collapsed. `random: true` selects targets automatically via the seeded RNG (no decision); a `Blinded` source is treated the same way, with Taunt still enforced for enemy targets.
+
 `shared_affiliation: true` keeps only units that share at least one affiliation with the source unit (its native `card.affiliations` plus any affiliation granted via the ModifierStack). The source unit itself counts. If the source has no affiliations, the filter matches nothing.
 
 `has_passive: true` keeps only units whose card declares at least one passive ability ("Silence an enemy that has at least one passive"). `can_switch: true` keeps only units that can legally switch position — at least one printed position other than the current one whose destination line is not full.

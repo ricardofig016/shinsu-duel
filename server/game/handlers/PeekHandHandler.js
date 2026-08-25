@@ -53,6 +53,12 @@ export default class PeekHandHandler extends BaseHandler {
 
     if (mode === "choose") {
       const count = Math.min(amount, hand.length);
+      // Revealing the whole hand is not a genuine choice.
+      if (count >= hand.length) {
+        const views = hand.map(toView);
+        context.emitChild(EVT.HAND_PEEKED, { owner, observer, cards: views });
+        return { revealed: views };
+      }
       gameState.createPendingDecision({
         owner: observer,
         type: "card_selection",
