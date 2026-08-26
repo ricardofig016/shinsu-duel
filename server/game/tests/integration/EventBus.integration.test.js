@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import ModifierStack from "../../ModifierStack.js";
+import EVT from "../../EventCatalog.js";
 
 /**
  * Integration tests that wire EventBus + ModifierStack together
@@ -24,7 +25,7 @@ describe("EventBus + ModifierStack integration", () => {
     test("attach equipment → trait granted → detach → trait revoked", () => {
       const timeline = [];
 
-      bus.on("equipment:attach", (p, ctx) => {
+      bus.on(EVT.EQUIPMENT_ATTACHED, (p, ctx) => {
         timeline.push("attach");
         // Equipment gives Barrier to bearer
         stack.apply({
@@ -35,14 +36,14 @@ describe("EventBus + ModifierStack integration", () => {
           key: "barrier",
           value: 1,
         });
-        ctx.emitChild("state:trait:granted", {
+        ctx.emitChild(EVT.TRAIT_GRANTED, {
           targetId: p.targetId,
           trait: "barrier",
           sourceId: p.equipmentId,
         });
       }, { phase: "execute" });
 
-      bus.on("equipment:detach", (p, ctx) => {
+      bus.on(EVT.EQUIPMENT_DETACHED, (p, ctx) => {
         timeline.push("detach");
         stack.removeBySource(p.equipmentId);
         ctx.emitChild("state:trait:revoked", {
@@ -52,15 +53,15 @@ describe("EventBus + ModifierStack integration", () => {
         });
       }, { phase: "execute" });
 
-      bus.on("state:trait:granted", () => timeline.push("trait-granted"), { phase: "post" });
+      bus.on(EVT.TRAIT_GRANTED, () => timeline.push("trait-granted"), { phase: "post" });
       bus.on("state:trait:revoked", () => timeline.push("trait-revoked"), { phase: "post" });
 
       // Attach
-      bus.emit("equipment:attach", { equipmentId: "Equip#17", targetId: "Unit#8" });
+      bus.emit(EVT.EQUIPMENT_ATTACHED, { equipmentId: "Equip#17", targetId: "Unit#8" });
       expect(stack.getEffective("Unit#8", "trait", "barrier")).toBe(1);
 
       // Detach
-      bus.emit("equipment:detach", { equipmentId: "Equip#17", targetId: "Unit#8" });
+      bus.emit(EVT.EQUIPMENT_DETACHED, { equipmentId: "Equip#17", targetId: "Unit#8" });
       expect(stack.getEffective("Unit#8", "trait", "barrier")).toBe(0);
 
       expect(timeline).toEqual([
@@ -71,30 +72,30 @@ describe("EventBus + ModifierStack integration", () => {
 
     test("equipment → silence → unequip → unsilence yields no trait (no negative)", () => {
       // Attach equipment giving Barrier
-      bus.on("equipment:attach", (p) => {
+      bus.on(EVT.EQUIPMENT_ATTACHED, (p) => {
         stack.apply({
           sourceId: p.equipmentId, sourceType: "equipment",
           targetId: p.targetId, type: "trait", key: "barrier", value: 1,
         });
       }, { phase: "execute" });
 
-      bus.emit("equipment:attach", { equipmentId: "Equip#17", targetId: "Unit#8" });
+      bus.emit(EVT.EQUIPMENT_ATTACHED, { equipmentId: "Equip#17", targetId: "Unit#8" });
       expect(stack.getEffective("Unit#8", "trait", "barrier")).toBe(1);
 
       // Silence the bearer
-      bus.on("unit:silence", (p) => {
+      bus.on(EVT.UNIT_SILENCED, (p) => {
         stack.disableByTarget(p.targetId, "trait");
       }, { phase: "execute" });
 
-      bus.emit("unit:silence", { targetId: "Unit#8" });
+      bus.emit(EVT.UNIT_SILENCED, { targetId: "Unit#8" });
       expect(stack.getEffective("Unit#8", "trait", "barrier")).toBe(0);
 
       // Unequip while silenced
-      bus.on("equipment:detach", (p) => {
+      bus.on(EVT.EQUIPMENT_DETACHED, (p) => {
         stack.removeBySource(p.equipmentId);
       }, { phase: "execute" });
 
-      bus.emit("equipment:detach", { equipmentId: "Equip#17", targetId: "Unit#8" });
+      bus.emit(EVT.EQUIPMENT_DETACHED, { equipmentId: "Equip#17", targetId: "Unit#8" });
       expect(stack.getSources("Unit#8")).toEqual([]);
 
       // Unsilence
@@ -122,45 +123,45 @@ describe("EventBus + ModifierStack integration", () => {
       // Set up: unit has 3 HP
       const unitState = { currentHp: 3, maxHp: 5, isAlive: () => unitState.currentHp > 0 };
 
-      bus.on("unit:damage:intent", (p) => {
+      bus.on(EVT.DAMAGE_INTENT, (p) => {
         timeline.push("damage-intent");
       }, { phase: "execute" });
 
-      bus.on("unit:damage:intent", (p, ctx) => {
+      bus.on(EVT.DAMAGE_INTENT, (p, ctx) => {
         timeline.push("apply-damage");
         unitState.currentHp -= p.amount;
-        ctx.emitChild("unit:damage:applied", {
+        ctx.emitChild(EVT.DAMAGE_APPLIED, {
           targetId: p.targetId,
           amount: p.amount,
           remainingHp: unitState.currentHp,
         });
       }, { phase: "post" });
 
-      bus.on("unit:damage:applied", (p, ctx) => {
+      bus.on(EVT.DAMAGE_APPLIED, (p, ctx) => {
         timeline.push("damage-applied");
         if (unitState.currentHp <= 0) {
-          ctx.emitChild("unit:killed", {
+          ctx.emitChild(EVT.UNIT_KILLED, {
             targetId: p.targetId,
             killerId: "Unit#Attacker",
           });
         }
       }, { phase: "post" });
 
-      bus.on("unit:killed", (p, ctx) => {
+      bus.on(EVT.UNIT_KILLED, (p, ctx) => {
         timeline.push("killed");
         ctx.emitChild("unit:slay", { killerId: p.killerId, targetId: p.targetId });
       }, { phase: "post" });
 
       bus.on("unit:slay", (p, ctx) => {
         timeline.push("slay");
-        ctx.emitChild("card:draw", { owner: "Alice", amount: 1 });
+        ctx.emitChild(EVT.CARD_DRAWN, { owner: "Alice", amount: 1 });
       }, { phase: "post" });
 
-      bus.on("card:draw", () => {
+      bus.on(EVT.CARD_DRAWN, () => {
         timeline.push("draw-card");
       }, { phase: "execute" });
 
-      bus.emit("unit:damage:intent", { targetId: "Unit#1", amount: 5 });
+      bus.emit(EVT.DAMAGE_INTENT, { targetId: "Unit#1", amount: 5 });
 
       expect(timeline).toEqual([
         "damage-intent",
@@ -184,17 +185,17 @@ describe("EventBus + ModifierStack integration", () => {
 
       // Unit A deployed round 1 (older)
       const ageUnitA = clock.now();
-      bus.on("game:round:end", (p, ctx) => {
+      bus.on(EVT.ROUND_END, (p, ctx) => {
         timeline.push("unit-A");
       }, { phase: "execute", sourceAge: ageUnitA });
 
       // Unit B deployed round 3 (newer)
       const ageUnitB = clock.now();
-      bus.on("game:round:end", (p, ctx) => {
+      bus.on(EVT.ROUND_END, (p, ctx) => {
         timeline.push("unit-B");
       }, { phase: "execute", sourceAge: ageUnitB });
 
-      bus.emit("game:round:end", { round: 5 });
+      bus.emit(EVT.ROUND_END, { round: 5 });
       expect(timeline).toEqual(["unit-A", "unit-B"]);
     });
   });
@@ -243,21 +244,21 @@ describe("EventBus + ModifierStack integration", () => {
         targetId: "Unit#1", type: "trait", key: "immune", value: 1,
       });
 
-      bus.on("state:condition:apply", (p, ctx) => {
+      bus.on(EVT.CONDITION_APPLIED, (p, ctx) => {
         if (stack.has(p.targetId, "trait", "immune")) {
           ctx.cancel("immune");
           return;
         }
       }, { phase: "pre" });
 
-      bus.on("state:condition:apply", (p) => {
+      bus.on(EVT.CONDITION_APPLIED, (p) => {
         stack.apply({
           sourceId: p.sourceId, sourceType: "unit",
           targetId: p.targetId, type: "condition", key: p.condition, value: p.amount,
         });
       }, { phase: "execute" });
 
-      const result = bus.emit("state:condition:apply", {
+      const result = bus.emit(EVT.CONDITION_APPLIED, {
         sourceId: "Unit#Enemy",
         targetId: "Unit#1",
         condition: "poisoned",
@@ -286,16 +287,16 @@ describe("EventBus + ModifierStack integration", () => {
           if (ctx.depth === 0) log.push(ctx.eventName);
         }, { phase: "resolved", priority: 9999 });
 
-        b.on("game:round:start", (p, ctx) => {
+        b.on(EVT.ROUND_START, (p, ctx) => {
           ctx.emitChild("unit:passive:round-start", { unitId: "Unit#A" });
           ctx.emitChild("unit:passive:round-start", { unitId: "Unit#B" });
         }, { phase: "execute" });
 
         b.on("unit:passive:round-start", (p, ctx) => {
-          ctx.emitChild("state:shinsu:change", { unitId: p.unitId });
+          ctx.emitChild(EVT.SHINSU_CHANGED, { unitId: p.unitId });
         }, { phase: "execute" });
 
-        b.emit("game:round:start", { round: 3 });
+        b.emit(EVT.ROUND_START, { round: 3 });
         return log;
       };
 

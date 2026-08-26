@@ -139,6 +139,32 @@ describe("PassiveManager", () => {
     expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(0);
   });
 
+  test("always-on re-evaluation does not recurse on its own grant events", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const bearer = putInHand(game, "Alice", "Test Bearer Unit");
+    bearer.passiveAbilities = [{
+      type: "conditional",
+      if: { type: "alone_on_line", line: "frontline" },
+      then: { type: "grant_trait", trait: "strong", amount: 2, target: { side: "self" } },
+      raw: "while i am alone on the ally frontline, i have Strong 2",
+    }];
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(bearer);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+
+    // Applying the passive grants Strong, which emits the modifier-granted
+    // event the passive itself subscribes to. The per-source re-entrancy guard
+    // stops that self-emission from re-triggering, so the grant lands exactly
+    // once instead of recursing.
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(2);
+
+    // A later re-evaluation (round start) re-applies idempotently.
+    game.eventBus.emit(EVT.ROUND_START, { round: game.round });
+    expect(game.modifierStack.getEffective(unit.id, "trait", "strong")).toBe(2);
+  });
+
   test("always-on conditional passive applies when its predicate becomes true mid-game", () => {
     const game = createGame();
     game.round = 10;

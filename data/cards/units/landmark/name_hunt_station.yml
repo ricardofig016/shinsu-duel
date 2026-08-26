@@ -17,7 +17,7 @@ rules:
 passives:
   - type: choose_position
     trigger: { type: deploy }
-    raw: "deploy: chose a position"
+    raw: "deploy: choose a position"
 abilities:
 evolve:
 traits:

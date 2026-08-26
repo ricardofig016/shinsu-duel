@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import EventBus from "../../EventBus.js";
 import GameClock from "../../GameClock.js";
 import Logger from "../../Logger.js";
+import EVT from "../../EventCatalog.js";
 
 describe("Logger", () => {
   let clock, bus, logger;
@@ -16,11 +17,11 @@ describe("Logger", () => {
   });
 
   test("captures root events with state diffs", () => {
-    bus.emit("game:round:start", { round: 2 });
+    bus.emit(EVT.ROUND_START, { round: 2 });
 
     const logs = logger.getLogs();
     expect(logs.length).toBe(1);
-    expect(logs[0].rootEvent).toBe("game:round:start");
+    expect(logs[0].rootEvent).toBe(EVT.ROUND_START);
     expect(logs[0].stateBefore).toBeDefined();
     expect(logs[0].stateAfter).toBeDefined();
     expect(logs[0].diff).toBeDefined();

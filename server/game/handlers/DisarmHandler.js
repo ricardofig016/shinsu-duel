@@ -27,18 +27,13 @@ export default class DisarmHandler extends BaseHandler {
     const unit = gameState._findUnit(targetId);
     if (!unit || !unit.isAlive()) return { disarmed: false };
 
-    const attachments = LifecycleEngine._getEquipment(unit);
-    if (attachments.length === 0) return { disarmed: false, reason: "no equipment" };
-
     const destOwner = to.owner === "you" ? sourceOwner : unit.owner;
-    const destination = to.zone === "discard" ? "discard" : "hand";
+    const detached = LifecycleEngine.disarmUnit(gameState, unit, {
+      zone: to.zone,
+      owner: destOwner,
+    });
+    if (detached === 0) return { disarmed: false, reason: "no equipment" };
 
-    const detached = attachments.slice();
-    LifecycleEngine._syncEquipment(unit, []);
-    for (const equip of detached) {
-      LifecycleEngine._detachOne(gameState, unit, equip, destination, destOwner);
-    }
-
-    return { disarmed: true, detached: detached.length };
+    return { disarmed: true, detached };
   }
 }

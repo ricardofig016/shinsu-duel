@@ -1,4 +1,5 @@
 import ZoneService from "../../services/ZoneService.js";
+import EVT from "../../EventCatalog.js";
 
 describe("ZoneService", () => {
   test("draw moves cards from deck to hand", () => {
@@ -26,7 +27,7 @@ describe("ZoneService", () => {
     ZoneService.draw(state, 2, gameState);
     expect(state.deck).toHaveLength(0);
     expect(state.hand).toHaveLength(1);
-    expect(emittedEvent.eventName).toBe("game:deck:empty");
+    expect(emittedEvent.eventName).toBe(EVT.GAME_DECK_EMPTY);
   });
 
   test("discard adds card to discard pile", () => {

@@ -10,6 +10,7 @@
 - [ ] game: add support for position:`any`
 - [ ] rules: create a `RULES_TLDR.md` that are the default rules shown in the rules page
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`
+- [ ] cards: dynamically mark all cards in `data\cards\test` as unreachable
 
 ## In Progress
 

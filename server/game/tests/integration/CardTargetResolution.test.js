@@ -12,6 +12,7 @@ import SeededRng from "../../utils/SeededRng.js";
 import Card from "../../Card.js";
 import { resolveEffect } from "../../EffectResolver.js";
 import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
+import EVT from "../../EventCatalog.js";
 
 function createGame() {
   return new GameState("TEST", ["Alice", "Bob"], {
@@ -121,7 +122,7 @@ describe("structured card target resolution via EffectResolver", () => {
     game.playerStates.Alice.deck = [skill];
     game.playerStates.Alice.hand = [];
     const drawn = [];
-    game.eventBus.on("card:drawn", () => drawn.push(true));
+    game.eventBus.on(EVT.CARD_DRAWN, () => drawn.push(true));
 
     const result = resolveEffect(
       { type: "draw_card", amount: 1, card: { type: "equipment" }, raw: "draw an equipment" },
@@ -141,7 +142,7 @@ describe("structured card target resolution via EffectResolver", () => {
     game.playerStates.Alice.discard = [skill];
     game.playerStates.Alice.hand = [];
     const reclaimed = [];
-    game.eventBus.on("card:reclaimed", () => reclaimed.push(true));
+    game.eventBus.on(EVT.CARD_RECLAIMED, () => reclaimed.push(true));
 
     const result = resolveEffect(
       { type: "reclaim_cards", amount: 1, card: { type: "equipment" }, raw: "Reclaim 1 Equipment card" },

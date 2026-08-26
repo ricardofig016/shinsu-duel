@@ -11,6 +11,7 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import { createLegalDeck, cards } from "../utils.js";
 import { resolveEffect } from "../../EffectResolver.js";
+import EVT from "../../EventCatalog.js";
 
 const players = ["Alice", "Bob"];
 
@@ -326,7 +327,7 @@ describe("Taunt multi-target selection regressions", () => {
     grantTaunt(game, taunter);
 
     const events = [];
-    game.eventBus.on("pending-decision", (payload) => events.push(payload));
+    game.eventBus.on(EVT.DECISION_PENDING, (payload) => events.push(payload));
 
     resolveEffect(
       { type: "deal_damage", amount: 1, target: { side: "enemy", count: 2 } },

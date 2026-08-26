@@ -166,6 +166,9 @@ export default class LifecycleEngine {
   static _placeOnField(gameState, card, owner, positionCode, cost) {
     const line = LifecycleEngine._lineForCard(gameState, card, positionCode);
     const placedPositionCode = card.kind === "standard" ? positionCode : null;
+    // Field placement is the single ownership boundary for deployed and
+    // summoned units: the receiving player owns the card.
+    card.owner = owner;
     const unit = new Unit(card, placedPositionCode, line);
     gameState.playerStates[owner].field[line].push(unit);
     gameState._indexUnit(unit);
@@ -678,6 +681,30 @@ export default class LifecycleEngine {
     if (!attachments.includes(equipment)) return;
     LifecycleEngine._syncEquipment(unit, attachments.filter((entry) => entry !== equipment));
     LifecycleEngine._detachOne(gameState, unit, equipment, "discard", unit.owner);
+  }
+
+  /**
+   * Remove all of a unit's equipment and route each card to a destination
+   * (the `disarm` effect). Detached ignited cards return as fresh base-form
+   * instances. Returns the number of cards detached.
+   *
+   * @param {GameState} gameState
+   * @param {object} unit — the unit whose equipment is removed
+   * @param {{ zone?: "hand"|"discard", owner?: string }} dest — where each
+   *   detached card goes; `zone` defaults to "hand", `owner` to the unit's
+   *   controller.
+   */
+  static disarmUnit(gameState, unit, { zone = "hand", owner = unit.owner } = {}) {
+    const attachments = LifecycleEngine._getEquipment(unit);
+    if (attachments.length === 0) return 0;
+
+    const destination = zone === "discard" ? "discard" : "hand";
+    const detached = attachments.slice();
+    LifecycleEngine._syncEquipment(unit, []);
+    for (const equip of detached) {
+      LifecycleEngine._detachOne(gameState, unit, equip, destination, owner);
+    }
+    return detached.length;
   }
 
   /**

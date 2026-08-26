@@ -1,5 +1,6 @@
-import { setupGameWithCardsInHand } from "../utils.js";
+import { setupGameWithCardsInHand, getCardIdByName } from "../utils.js";
 import DisarmHandler from "../../handlers/DisarmHandler.js";
+import Card from "../../Card.js";
 
 const context = (game) => ({ emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) });
 
@@ -52,6 +53,35 @@ describe("DisarmHandler", () => {
 
     expect(result.disarmed).toBe(true);
     expect(game.playerStates.Alice.discard.some((c) => c.name === "Test Armor")).toBe(true);
+  });
+
+  test("disarms every attachment at once", () => {
+    const game = setupGameWithCardsInHand(["Test Evolve Unit"]);
+    game.currentTurn = "Alice";
+    game.round = 15;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
+    const karakaHand = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Evolve Unit");
+    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: karakaHand, placedPositionCode: "fisherman" } });
+    const karaka = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Evolve Unit");
+
+    // A unit can carry several attachments (Living Ignition Weapon). Build two
+    // directly and confirm disarm clears them all in one call.
+    const armorId = getCardIdByName("Test Armor");
+    karaka.equipmentAttachments = [
+      new Card(armorId, game.cards[armorId], "Alice", game.eventBus),
+      new Card(armorId, game.cards[armorId], "Alice", game.eventBus),
+    ];
+
+    const result = handler.execute(
+      { targetId: karaka.id, to: { zone: "hand", owner: "equipment_owner" }, sourceOwner: "Alice" },
+      context(game),
+      game
+    );
+
+    expect(result.disarmed).toBe(true);
+    expect(result.detached).toBe(2);
+    expect(karaka.equipmentAttachments).toHaveLength(0);
+    expect(game.playerStates.Alice.hand.filter((c) => c.name === "Test Armor")).toHaveLength(2);
   });
 
   test("no-op when the target has no equipment", () => {

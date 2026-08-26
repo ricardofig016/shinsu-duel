@@ -1,94 +1,109 @@
-## Plan: Rules-complete card effect engine
+# Plan: Rules-complete card effect engine
 
-**TL;DR** — The runtime handler architecture (`EffectResolver` + `HandlerRegistry` + `BaseHandler` validate/execute + target pre-resolution + pending-decision protocol + service-layer mutations + `ModifierStack`) is sound and will be kept. Phases A–F are complete: all 93 YAML cards are structured DSL (zero `custom`/`handler`, enforced by the landed `CardDataAudit` test), structured unit and card target resolution (including `random`/`choose`/`cost`/`lowest_hp` selection and the explicit `series` grouping) is runtime-supported, `sequence`/`conditional` plus all seven predicates are wired, shared-target sequences (`targets` + `target: { link: sequence }`) resolve one target set across steps, the full effect-primitive catalog has handlers with tests, and the modifier system runtime (`modify_*`/`retain_equipment`/`modify_ability`) is wired end-to-end. The remaining work is runtime integration of grammar that already landed in the schemas/compiler (Phases G–J): global-rule runtime, Jeonsulsa mechanics, extended passive triggers, and rules-completeness enforcement.
+## Summary
 
-**Steps**
+The card-effect runtime is nearly complete. The DSL is schema-validated and all 93 cards compile through it. The resolver handles structural nodes and shared-target sequences, targeting covers units and cards, every registered effect type has a handler with tests, and the always-on modifier system is wired end to end. What remains is runtime that does not exist yet. Landmark rules have a registry but no consumer. Four schema types have cards authoring them but no handler. The Jeonsulsa attribute engine is unbuilt. Seven passive triggers are unwired. Unknown effect types still skip instead of throwing.
 
-_Phase A — DSL language & contracts_ (done)
+## What is in place
 
-Schema-validated structured grammar in both `card.schema.json` and `compiled-cards.schema.json`: effect nodes, modifier nodes, predicates, triggers, unit/card targets, keywords (`{code, raw}` objects), `deckConstraints` (with required `raw`), and card-level `series`. The extension batches (B4/B5/B6, the cards_to_add batch, and the audit corrections) added `filterValue` arrays (OR semantics), `traitNot`/`lowest_hp`/`shared_affiliation`/`has_passive`/`can_switch` filters, `grant_affiliation`, `return_to_hand`, `choose_position`, `play_jeonsul_baang`, `modify_repeat`, `retain_equipment`, `modify_cost`, `modify_condition`, `global_rule`, the `quick` marker node, and the extended trigger catalog.
+### DSL, compiler, and audit
 
-_Phase B — Compiler revamp + full DSL migration_ (done)
+`card.schema.json` and `compiled-cards.schema.json` validate the structured grammar. Effect nodes, modifier nodes, rule nodes, predicates, triggers, unit and card targets, keywords as `{code, raw}` objects, `deckConstraints` with required `raw`, card-level `series`, and the top-level `rules:` array on landmark cards are all schema-backed. The rule-node types are `disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, and `prevent_equip`. All 93 cards in `data/cards` compile with zero `custom` and zero `handler`. `CardDataAudit.test.js` asserts that invariant against the checked-in `server/data/cards.json`.
 
-All 93 cards compile with zero `custom`/`handler`; the compiled artifact is regenerated and checked in. `create_card`/Hwayeomsa (B6) was pulled forward. `CardDataAudit.test.js` asserts the zero-`custom`/zero-`handler` invariant against the checked-in `cards.json`. Compiler internals are exported and unit-tested.
+### Resolver, targeting, and predicates
 
-_Phase C — Resolver structural nodes & predicates_ (done)
+`EffectResolver` resolves `sequence` and `conditional` structurally, runs shared-target sequences (`targets` plus `target: { link: sequence }`) as one decision set, and dispatches every other node through `HandlerRegistry` to a `BaseHandler` subclass that validates then executes. `PredicateEvaluator` implements all seven predicates (`has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_all_equipped`, `has_condition`, `has_equipment_count`). `GameState` records `startingDeck` and `startedWithCard` reads it.
 
-`sequence`/`conditional` resolve in `EffectResolver` (structural — no handler class); shared-target sequences (`targets` + `target: { link: sequence, count? }`) resolve one target set across steps with pending-decision continuations. `PredicateEvaluator` implements all seven predicates: `has_unit`, `alone_on_line`, `started_with_card`, `has_equipped`, `has_all_equipped`, `has_condition`, `has_equipment_count`. Trigger-less `conditional` passives re-evaluate via `PassiveManager` (always-on, revoke-safe, re-entrancy guarded). `GameState` records `startingDeck`; `startedWithCard` reads it.
+`TargetResolver` handles unit selection (`random`, `choose`, `cost`, `lowest_hp`, `traitNot`, `shared_affiliation`, `has_passive`, `can_switch`, position filters) and card targets (`resolveCardTargets` + `toCardTargetView`) wired into `compress_shinsu`, `draw_card`, `reclaim_cards`, and `create_card`. Card grouping uses the explicit `series` field via `findCardsBySeries`. `Card.rank` exists.
 
-_Phase D — Targeting extensions_ (done)
+### Effect primitives
 
-`TargetResolver` landed: `random`/`choose`/`cost`/`lowest_hp`/`traitNot` unit selection plus `shared_affiliation`/`has_passive`/`can_switch` filters; structured card targets (`resolveCardTargets` + `toCardTargetView`) wired through `EffectResolver` into `compress_shinsu`/`draw_card`/`reclaim_cards`/`create_card`; deck/hand/game sources; card decisions carry `cost`/`type`; `ZoneService.searchDeck`/`removeFromDiscard`; legacy `targetCardSelector` removed; `Card.rank` added. Card grouping is the explicit, schema-validated `series` field (`findCardsBySeries`), not a name heuristic — `findCardsByFamily` was removed.
+Twenty-nine effect types are registered in `HandlerRegistry` with handler classes. `EffectPrimitivesIntegration.test.js` exercises five primitives (`steal`, `summon`, `copy_ability`, `peek_hand`, `switch_position`) through real fixture cards on the `use-ability-action` path. The rest of the catalog has dedicated handler unit tests only, for example `DealDamageHandler`, `ChargeShinsuHandler`, `CompressShinsuHandler`, `SlayHandler`, `TransformHandler`, `RepeatPlayHandler`, `CreateCardHandler`, `CopyTraitsHandler`, `DisarmHandler`, `SummonHandler`, `GrantRandomTraitHandler`, `RemoveConditionHandler`, `PeekHandHandler`, `SwitchPositionHandler`, and `CopyAbilityHandler`, all under `tests/handlers/`.
 
-_Phase E — New effect primitives_ (each: handler + service integration + validate/execute tests) _depends on C+D_ (done)
+### Always-on modifier system
 
-1. Lifecycle: `slay`, `transform`/revert (reuse `LifecycleEngine.killUnit`/`transformUnit`).
-2. Zone movement: `summon`, `steal`, `discard`, `disarm`, `switch_position` (`create_card` landed in Phase B6).
-3. Unit state: `remove_traits` (Silence), `copy_traits`, `grant_random_trait`, `peek_hand` (observer-only).
-4. Abilities: `copy_ability` ("use an enemy ability"), `repeat_play` (delayed repeat + wildcard when `cardName` omitted).
-5. Events: `card:discarded`, `unit:stolen`, `unit:silenced`, `hand:peeked`; audit points closed with `PhaseEHandlersIntegration.test.js`.
+Trigger-less `modify_*` and `retain_equipment` passives and equipment `effects` modifier nodes route through `PassiveManager` to `ModifierService` into the `ModifierStack`. Application is predicate-gated by `if`, position-scoped by node `position`, and suppressed by Disabled. `ModifierStack` stores filter metadata and exposes the consultation helpers (`getDamageDealt`, `getHealModifier`, `getDamageTaken`, `getConditionAmplifier`, `getKeywords`, `getTargetingRules`, `getRepeat`, `hasRetainEquipment`, `getAbilityAugments`, `matchesUnitFilter`). `ModifierService.getEffectiveCost` is the single cost authority, wired into `PlaySkillAction`, `DeployUnitAction`, and `EquipEquipmentAction`.
 
-_Phase F — Modifier system runtime (always-on passives)_ _depends on C+D_ (done)
+`PassiveManager._parseTrigger` wires timed passives for `round_start`, `round_end`, `skill_played`, `deal_damage`, `quick_ability_used`, `summon`, and `deploy`. `TriggerManager` handles `given` (Khun Ran's "Redan is played on me" evolve trigger) and the other `evolveInto` triggers.
 
-The modifier grammar and its **runtime are fully landed**: trigger-less `modify_*`/`retain_equipment` passives and equipment `effects` modifier nodes route through the always-on, revoke-safe, re-entrancy-guarded path (`PassiveManager` → `ModifierService`), predicate-gated via `PredicateEvaluator` (`if`), position-scoped (node-level `position` enforced at application), and suppressed by Disabled.
+### Landmark rules
 
-7. `ModifierStack`: `apply()` stores filter metadata (`when`/`source`/`victimFilter`/`blockedFilter`/`first`/`effect`/`cardType`/`affiliations`); consultation helpers `getDamageDealt`, `getHealModifier`, `getDamageTaken` (null-source-guarded), `getConditionAmplifier`, `getKeywords(unit,isFirst)`, `getTargetingRules`, `getRepeat`, `hasRetainEquipment`, `getAbilityAugments`, `matchesUnitFilter`.
-8. `ModifierService` owns apply (`applyModifier` — all 8 modifier types) + revoke (`revokeBySource`) + `getEffectiveCost` (the single cost authority, wired into `PlaySkillAction`/`DeployUnitAction`/`EquipEquipmentAction` validate + execute). Consultation points consume the stack: damage/heal amplifiers, `damage_taken` with `source` filter, cost modifiers, Quick/Free + `first`-per-round, targeting restrictions, condition amplification, `modify_repeat`, and `modify_ability` augments (once per target per trigger).
-9. Trigger wiring: `PassiveManager._parseTrigger` also handles `skill_played`/`deal_damage`/`quick_ability_used` (payload-threaded); `LifecycleEngine._resolveEquipmentEffects` dispatches modifier / effect / triggered-effect (`deal_damage`, `quick_ability_used`). Grammar: `attack` removed from both schemas + docs; `modify_ability` + `cardType` added; `ice_spear`/`lo_po_bia_ren` re-authored; `cards.json` regenerated (zero `custom`/`handler`). Migrates clusters B, F, V, I + the newer modifier cards (Edin Dan, Phobos, Beta, Karaka, etc.).
-10. `retain_equipment` helper is registered but its consumer (`return_to_hand`) lands in Phase J — no behavior change yet.
+The landmark cards (`name_hunt_station`, `water_stadium`, `floor_of_death`) author their rules as a top-level `rules:` array, not as passives. `GlobalRuleRegistry.registerUnit`, called from `LifecycleEngine` on deploy, applies each rule to the `ModifierStack` as a source-tracked entry with `type: "rule"`, `key: rule.type`, and `sourceType: "landmark"`. `unregisterUnit` revokes them by source on removal. Nothing at runtime consumes those entries yet.
 
-_Phase G — Global rule modifiers (landmarks)_ _depends on C+D+E+F_ (reuses the Phase F always-on revoke/re-apply + position machinery)
+## Remaining work
 
-11. `global_rule` grammar is landed (`disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, `prevent_equip`; `position` scoping incl. the `chosen` sentinel). Remaining: `GlobalRuleRegistry` + hooks — `disable_passives` (suppress `PassiveManager`), `condition_stack_cap` (cap condition stacking), `prevent_evolve`/`prevent_equip` (gate `LifecycleEngine`), `grant_global_*` (position-scoped application, incl. `position: chosen`). NOTE: `global_rule` nodes are NOT in `ModifierService.isModifier`'s type set today, so trigger-less `global_rule` passives (Floor of Death, Water Stadium, Name Hunt Station) are currently skipped by `PassiveManager` — route them through `GlobalRuleRegistry` as source-tracked entries on the Phase F always-on path.
-12. `choose_position` handler + stored landmark choice (Name Hunt Station) resolve the `chosen` sentinel. NOTE: Name Hunt Station's `choose_position` passive is `trigger: { type: deploy }` — pull the `deploy` trigger wiring forward from Phase I or the landmark choice never fires.
-13. Migrates cluster N.
+### Landmark rule enforcement
 
-_Phase H — Jeonsulsa attribute engine_ _depends on E_
+A consumer for `type: "rule"` entries. Each rule type needs behavior at the right authority.
 
-14. `play_jeonsul_baang` node is landed and Conduit's passives are migrated (`round_start_or_activation` trigger). Remaining: `JeonsulsaEngine` in `AttributeRegistry` — deploy mechanic ("heal 2 HP from or summon Conduit on the enemy backline"), Conduit lifecycle (round-start Ghost, self-slay when no enemy Jeonsulsa, "for every 2 HP play 1 random Jeonsul Baang on a random ally"), the Activation event backing `round_start_or_activation`, and the `play_jeonsul_baang` handler (seeded-random Lightning/Thunder/Static Baang on a random ally).
-15. Migrates clusters P, Q.
+- `disable_passives` suppresses passive evaluation in scope.
+- `prevent_evolve` and `prevent_equip` gate `LifecycleEngine`.
+- `grant_global_trait` and `grant_global_condition` apply position-scoped grants.
+- `condition_stack_cap` caps condition stacking.
 
-_Phase I — Trigger/passive extension_ _depends on C+D+E_
+Every rule carries a `position` string, including the `chosen` sentinel. Completion criterion: each rule type has a consumer wired at the correct authority, a test drives a real landmark card through deploy and removal, and the rules revoke cleanly on removal.
 
-16. `PassiveManager._parseTrigger` currently wires `round_start`/`round_end`/`skill_played`/`deal_damage`/`quick_ability_used` (Phase F) and silently skips the rest. Wire the remaining triggers used by compiled cards: `deploy` (pulled forward into Phase G for Name Hunt Station), `summon`, `draw`, `reclaim`, `equip` (unit passives), `dies`, `ally_dies`, `free_ability_played`, `evolve` — adding events where none exists (free-ability usage; the `quick` flag on `UNIT_ABILITY_USED` already landed in Phase F). `round_start_or_activation` is wired in Phase H (Activation event). `attack` was removed from the grammar in Phase F. Migrates the remaining passive clusters (X, Y, T).
-17. `enemy_dies` stays in the grammar (unused; kept per user).
+### Effect handlers still missing
 
-_Phase J — Rules-completeness enforcement + cleanup + docs_ _depends on all_
+Four schema types have cards authoring them but no handler. Resolving any of them falls through to the `EFFECT_UNSUPPORTED` skip.
 
-18. Complete the last effect primitives that currently skip via `EFFECT_UNSUPPORTED`: `grant_affiliation` (Michael), `return_to_hand` (Beta) — `choose_position` is handled in Phase G.
-19. Remove the `custom` skip in `EffectResolver` (unknown types throw); repurpose `EFFECT_UNSUPPORTED` (retained only for `CreateCardHandler` `generated_by` resource skips); the `handler` field is already gone from the compiled contract (kept out by the audit test).
-20. Per-cluster integration matrix (the zero-`custom` audit test is landed), full suite + determinism.
-21. Docs updates (below), applied incrementally per phase.
+- `grant_affiliation` (Michael's ability)
+- `return_to_hand` (Beta's quick ability). `retain_equipment` is already applied and readable via `ModifierStack.hasRetainEquipment`, so a consumer is ready for it.
+- `choose_position` (Name Hunt Station's deploy-triggered passive). The deploy trigger is already wired, so the handler and the stored choice are the missing pieces.
+- `play_jeonsul_baang` (Conduit's round-start passive)
 
-**Relevant files**
+Completion criterion: each handler is registered in `HandlerRegistry`, has validate and execute tests, and works through the card that uses it.
 
-- `EffectResolver.js` — structural nodes (done); register new handlers; remove skip (Phase J)
-- `TargetResolver.js` — targeting restrictions (Phase F)
-- `services/PassiveManager.js` — always-on modifiers (F) + full trigger mapping (I)
-- `services/GlobalRuleRegistry.js` (new, Phase G); `services/LifecycleEngine.js`, `services/UnitService.js`, `services/ZoneService.js`, `services/PredicateEvaluator.js`
-- `attributes/JeonsulsaEngine.js` (new, Phase H); `attributes/AttributeRegistry.js`
-- `ModifierStack.js` — modifier vocabulary + consultation helpers (Phase F)
-- `services/ModifierService.js` — `applyModifier`/`revokeBySource`/`getEffectiveCost` (Phase F)
-- `EventCatalog.js`, `GameState.js` — new events (F/G/H/I); deck-history tracking (done)
-- `handlers` — new `BaseHandler` subclasses (registered via `handlerRegistry`, key = DSL type)
-- Tests: `handlers/`, `tests/integration/`, `tests/regression/`
+### Jeonsulsa attribute engine
 
-**Docs updates** (per `docs_update.md` conventions, incremental): `MODIFIER_STACK_ARCHITECTURE.md` (Phase F), `ATTRIBUTE_SYSTEM_ARCHITECTURE.md` (Jeonsulsa, Phase H), `PASSIVE_SYSTEM_ARCHITECTURE.md` + `TRIGGER_SYSTEM_ARCHITECTURE.md` (Phase I), plus incremental updates to the docs already written for Phases B–E (`COMPILED_CARD_DSL.md`, `HANDLER_SYSTEM_ARCHITECTURE.md`, `TARGETING_ARCHITECTURE.md`, `SERVICE_LAYER_ARCHITECTURE.md`, `EVENT_BUS_ARCHITECTURE.md`). `RULES.md` is untouched — cards are made to match it.
+The `attributes` directory holds `AttributeRegistry.js`, `AnimaEngine.js`, and `HwayeomsaEngine.js`. There is no Jeonsulsa engine, and `AttributeRegistry` registers only `anima` and `hwayeomsa`. The mechanics in RULES.md §Jeonsulsa are unimplemented. That includes the deploy effect (grant the enemy Conduit +2 HP or summon a Conduit on the enemy backline), the Conduit lifecycle (round-start Ghost, self-slay when no enemy Jeonsulsa, one random Jeonsul Baang per 2 HP on a random ally), the Activation event backing `round_start_or_activation`, and the `play_jeonsul_baang` handler with seeded-random Lightning, Thunder, and Static Baang. Conduit's card authors these as passives with the `round_start_or_activation` trigger, which `_parseTrigger` does not wire.
 
-**Verification**
+Completion criterion: a jeonsulsa engine is registered, the Activation event exists in `EventCatalog`, and a Conduit lifecycle test covers deploy, round-start Ghost, self-slay, and Baang play with seeded randomness.
 
-1. Run focused Jest per phase and the full suite at the end via `npm run test` (the script wraps Jest with the required Node flags; bare `npx jest` breaks ESM).
-2. At least one playthrough integration test per cluster (24).
-3. Determinism/replay tests for new random/choice paths. Hwayeomsa/Incinerate integration is covered by the `create_card` handler (green).
-4. `npm run validate:cards` + `npm run compile:cards` whenever grammar or cards change.
+### Passive trigger wiring
 
-**Decisions**
+`PassiveManager._parseTrigger` skips `draw`, `reclaim`, `equip`, `dies`, `ally_dies`, `free_ability_played`, and `evolve`. Wire each to its `EVT` constant, adding events where none exist. The events for the first six exist (`CARD_DRAWN`, `CARD_RECLAIMED`, `EQUIPMENT_ATTACHED`, `UNIT_KILLED`, `UNIT_EVOLVED`). Free-ability usage has no event yet; the `quick` flag on `UNIT_ABILITY_USED` already exists.
 
-- Structured DSL in YAML; text is display-only and never parsed; no dual paths (regex matcher removed).
-- The registry is the single type→handler mapping; unknown types throw (Phase J).
-- Always-on modifiers and global rules are source-tracked modifiers owned by their unit/landmark (revoke-safe, re-evaluated on the same event set as always-on conditionals).
+Completion criterion: every trigger used by compiled cards registers a passive, and a test fires each event and observes the passive effect.
 
-**Further Considerations**
+### Rules-completeness enforcement
 
-1. `given` (used only by Khun Ran's `evolveInto`, handled by `TriggerManager`) and `enemy_dies` (unused) stay in the grammar; no `PassiveManager` wiring needed.
-2. Khun Ran's "heal 2 HP from or summon Conduit on the enemy backline" deploy mechanic is an attribute-engine concern (RULES.md §Jeonsulsa), not card YAML — confirm the engine owns it (Phase H).
+`EffectResolver` skips unknown effect types through `EFFECT_UNSUPPORTED` as a transitional path. Make unknown types throw. Keep `EFFECT_UNSUPPORTED` only for `CreateCardHandler`'s `generated_by` resource skips. The `handler` field is already gone from the compiled contract.
+
+Completion criterion: an unknown effect type raises, no test depends on the silent skip, and the audit test still passes.
+
+## Approach
+
+- Build each missing handler as a `BaseHandler` subclass registered in `HandlerRegistry` by DSL type, following the validate and execute contract of the existing handlers. Zone movement mirrors `SummonHandler`; lifecycle work mirrors `SlayHandler`.
+- For rule enforcement, read `type: "rule"` entries from the `ModifierStack` at the existing authority boundaries. `LifecycleEngine` gates evolve and equip. `PassiveManager` enforces `disable_passives`. Condition application enforces `condition_stack_cap`. `ModifierStack`-scoped grants handle `grant_global_*`. Key everything by the landmark source id from `GlobalRuleRegistry`.
+- The `chosen` sentinel needs a stored landmark choice. Name Hunt Station's deploy trigger is already wired, so the `choose_position` handler and the stored choice complete it.
+- When each area lands, update the doc that owns it (`PASSIVE_SYSTEM_ARCHITECTURE.md` for triggers, `ATTRIBUTE_SYSTEM_ARCHITECTURE.md` for Jeonsulsa, `MODIFIER_STACK_ARCHITECTURE.md` for rule enforcement) per `plans/prompts/docs_update.md`.
+
+## Relevant files
+
+- `EffectResolver.js` — structural nodes done; make unknown types throw
+- `services/PassiveManager.js` — wire `draw`, `reclaim`, `equip`, `dies`, `ally_dies`, `free_ability_played`, `evolve`
+- `services/GlobalRuleRegistry.js` — exists; the consumers are the missing part
+- `services/LifecycleEngine.js` — evolve and equip rule gating
+- `attributes/AttributeRegistry.js` — register the Jeonsulsa engine; `attributes/JeonsulsaEngine.js` is new
+- `EventCatalog.js` — Activation event and the free-ability event
+- `handlers/` — four new `BaseHandler` subclasses, registered via `handlerRegistry`
+- Tests — `tests/handlers/`, `tests/integration/` (mirror `EffectPrimitivesIntegration.test.js`), `tests/services/`
+
+## Verification
+
+- Run focused Jest per area during work and the full suite at the end via `npm run test`.
+- Each new handler gets unit tests plus at least one card-level integration test on the `use-ability-action` or deploy path.
+- Add determinism and replay coverage for the new random and choice paths. `SeededRng` and `ReplayDriver` already exist.
+- Run `npm run validate:cards` and `npm run compile:cards` when grammar or cards change.
+
+## Decisions
+
+- Structured DSL in YAML. Text is display-only and never parsed. No dual paths.
+- `HandlerRegistry` is the single type-to-handler mapping. Unknown types throw once the catalog is complete.
+- Always-on modifiers and landmark rules are source-tracked entries owned by their unit or landmark, revoked by source, and re-evaluated on the same event set as always-on conditionals.
+
+## Further considerations
+
+- `given` is handled by `TriggerManager`, not `PassiveManager`. `enemy_dies` stays in the grammar unused. Neither needs passive wiring.
+- Khun Ran's "grant the enemy Conduit +2 HP or summon a Conduit" deploy mechanic belongs in the Jeonsulsa attribute engine (RULES.md §Jeonsulsa), not in card YAML. Confirm the engine owns it before authoring card data.

@@ -537,7 +537,7 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 | [Team Rachel](https://towerofgod.fandom.com/wiki/Team_Rachel)                                          | Team         | Rachel                |
 | [Team Sachi](https://towerofgod.fandom.com/wiki/Team_Sachi)                                            | Team         | Sachi Faker           |
 | [Team Sweet and Sour](https://towerofgod.fandom.com/wiki/Team_Tangsooyook)                             | Team         | Ja Wangnan            |
-| [Khun's Team](https://towerofgod.fandom.com/wiki/Khun's_Team)                                          | Team         | Khun Aguero Agnes     |
+| [Khun's Team](https://towerofgod.fandom.com/wiki/Khun's_Team)                                          | Team         | Khun Aguero Agnis     |
 | [Team Ship](https://towerofgod.fandom.com/wiki/Ship's_Team)                                            | Team         | Ship Leesoo           |
 | [FUG](https://towerofgod.fandom.com/wiki/FUG)                                                          | Organization | Ha Jinsung            |
 | [Hidden Grove](https://towerofgod.fandom.com/wiki/Hidden_Grove)                                        | Organization | Cha                   |
@@ -550,7 +550,7 @@ Affiliations have no direct effect on gameplay, but they can be targeted by abil
 | [Great Warriors](https://towerofgod.fandom.com/wiki/Great_Warriors)                                    | Organization | V                     |
 | [Shining Ones](https://towerofgod.fandom.com/wiki/Shining_Ones)                                        | Organization | Urek Mazino           |
 | [Arie Family](https://towerofgod.fandom.com/wiki/Arie_Family)                                          | Great Family | White                 |
-| [Khun Family](https://towerofgod.fandom.com/wiki/Khun_Family)                                          | Great Family | Khun Aguero Agnes     |
+| [Khun Family](https://towerofgod.fandom.com/wiki/Khun_Family)                                          | Great Family | Khun Aguero Agnis     |
 | [Ha Family](https://towerofgod.fandom.com/wiki/Ha_Family)                                              | Great Family | Ha Jinsung            |
 | [Tu Perie Family](https://towerofgod.fandom.com/wiki/Tu_Perie_Family)                                  | Great Family | Tu Perie Tperie       |
 | [Eurasia Family](https://towerofgod.fandom.com/wiki/Eurasia_Family)                                    | Great Family | Phonsekal Laure       |
@@ -585,9 +585,9 @@ The evolved unit may have different HP, passives, abilities, traits, attributes,
 
 Examples:
 
-- `Khun Aguero Agnis` evolves into `Khun Aguero Agnis (evolved)` when equipped with `Ice Spear`.
-- `Karaka` evolves into `Karaka (evolved)` when equipped with `Steel Tree`, `Karaka's Armor Suit`, or `Purple Dementor`.
-- `Khun Ran` evolves into `Khun Ran (evolved)` when given `Redan`
+- `Khun Aguero Agnis` evolves into `Khun Aguero Agnis - Evolved` when equipped with `Ice Spear`.
+- `Karaka` evolves into `Karaka - Evolved` when equipped with `Steel Tree`, `Karaka's Armor Suit`, or `Purple Dementor`.
+- `Khun Ran` evolves into `Khun Ran - Evolved` when given `Redan`
 
 ## Future Features
 

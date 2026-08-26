@@ -174,7 +174,7 @@ The `summon`/`discard`/`steal`/`disarm`/`switch_position` primitives route throu
 | `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                                                                      |
 | `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played; without `cardName`, the next card played is replayed. |
 | `quick`           | —                          | Card-level Quick marker (display-only).                                                                                |
-| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position (cluster R).                                                                   |
+| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position.                                                                   |
 | `noop`            | —                          | Explicit no-op (test placeholders).                                                                                    |
 
 `spend_shinsu` and `grant_ability` are also structural: they wrap a nested `effect` / `ability` that is resolved (or registered) after their own step.

@@ -74,7 +74,6 @@ export default class SummonHandler extends BaseHandler {
         ? ZoneService.removeFromHandById(player, chosen.id)
         : ZoneService.removeFromDeckById(player, chosen.id);
       if (card) {
-        card.owner = owner;
         return card;
       }
     }
