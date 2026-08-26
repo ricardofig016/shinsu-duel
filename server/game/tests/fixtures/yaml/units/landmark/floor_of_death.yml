@@ -3,6 +3,10 @@ kind: landmark
 name: Test Floor of Death
 cost: 2
 hp: 7
+passives:
+  - type: choose_position
+    trigger: { type: deploy }
+    raw: "deploy: choose a position"
 rules:
   - type: disable_passives
     raw: "unit passives have no effect"

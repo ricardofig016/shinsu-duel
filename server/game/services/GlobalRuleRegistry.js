@@ -1,5 +1,7 @@
 import * as IdFactory from "../IdFactory.js";
 import GiveConditionHandler from "../handlers/GiveConditionHandler.js";
+import conditions from "../../data/conditions.json" with { type: "json" };
+import traits from "../../data/traits.json" with { type: "json" };
 import positions from "../../data/positions.json" with { type: "json" };
 
 const RULE_TYPES = new Set([
@@ -46,7 +48,7 @@ export default class GlobalRuleRegistry {
   registerUnit(unit, gameState) {
     if (!unit || unit.card?.kind !== "landmark") return;
     const rules = unit.card.rules || [];
-    this._validateRules(rules, gameState);
+    this._validateRules(rules);
 
     const sourceId = IdFactory.landmarkSource(unit.id);
     const needsChoice = rules.some((rule) => rule.position === "chosen");
@@ -149,12 +151,36 @@ export default class GlobalRuleRegistry {
     this._reconciling = true;
     try {
       const entries = this.getActiveRules(gameState).filter((entry) => GRANT_TYPES.has(entry.key));
+      const desiredGrants = new Set();
 
-      // Drop every previously derived grant before rebuilding. This includes
-      // grants from a rule that has since been disabled. The metadata keeps
-      // ordinary traits/conditions and grants from non-landmark sources out.
-      gameState.modifierStack.removeWhere(
-        (mod) => mod.sourceType === "landmark" && mod.meta?.landmarkGrant === true
+      for (const entry of entries) {
+        const rule = entry.meta.rule;
+        const source = gameState._findUnit?.(entry.targetId);
+        if (!source) continue;
+
+        for (const unit of this._units(gameState)) {
+          if (!this.matches(rule, unit, gameState, source)) continue;
+          const type = entry.key === "grant_global_trait" ? "trait" : "condition";
+          const key = type === "trait" ? rule.trait : rule.condition;
+          desiredGrants.add(this._grantKey(entry.sourceId, unit.id, type, key, entry.key));
+        }
+      }
+
+      const existingGrants = [
+        ...gameState.modifierStack.getModifiersByType("trait"),
+        ...gameState.modifierStack.getModifiersByType("condition"),
+      ].filter((mod) => mod.sourceType === "landmark" && mod.meta?.landmarkGrant === true);
+      const existingGrantKeys = new Set(existingGrants.map((mod) => this._grantKey(
+        mod.sourceId, mod.targetId, mod.type, mod.key, mod.meta.ruleType
+      )));
+
+      // Preserve an already-correct grant. Only the landmark source whose
+      // desired scope changed loses a modifier, so independent landmarks do
+      // not revoke and recreate each other's grants during reconciliation.
+      gameState.modifierStack.removeWhere((mod) =>
+        mod.sourceType === "landmark" &&
+        mod.meta?.landmarkGrant === true &&
+        !desiredGrants.has(this._grantKey(mod.sourceId, mod.targetId, mod.type, mod.key, mod.meta.ruleType))
       );
 
       for (const entry of entries) {
@@ -164,28 +190,28 @@ export default class GlobalRuleRegistry {
 
         for (const unit of this._units(gameState)) {
           if (!this.matches(rule, unit, gameState, source)) continue;
+          const type = entry.key === "grant_global_trait" ? "trait" : "condition";
+          const key = type === "trait" ? rule.trait : rule.condition;
+          const grantKey = this._grantKey(entry.sourceId, unit.id, type, key, entry.key);
+          if (existingGrantKeys.has(grantKey)) continue;
 
-          if (entry.key === "grant_global_trait") {
+          if (type === "trait") {
             gameState.modifierStack.apply({
               sourceId: entry.sourceId,
               sourceType: "landmark",
               targetId: unit.id,
-              type: "trait",
-              key: rule.trait,
+              type,
+              key,
               value: 1,
               operation: "add",
               meta: { landmarkGrant: true, ruleType: entry.key },
             });
           } else {
-            // grant_global_condition: a continuous condition grant is exactly
-            // one application of the authoritative give_condition path. It
-            // is re-applied every reconcile, so it is naturally suppressed
-            // while the target is Immune and capped like any other source.
             GiveConditionHandler.applyCondition({
               sourceId: entry.sourceId,
               sourceType: "landmark",
               targetId: unit.id,
-              condition: rule.condition,
+              condition: key,
               amount: 1,
               meta: { landmarkGrant: true, ruleType: entry.key },
             }, gameState);
@@ -197,28 +223,50 @@ export default class GlobalRuleRegistry {
     }
   }
 
-  _validateRules(rules, gameState) {
+  _validateRules(rules) {
+    const allowedFields = new Set(["type", "raw", "trait", "condition", "cap", "position"]);
     for (const rule of rules) {
-      if (!rule || typeof rule !== "object" || !RULE_TYPES.has(rule.type)) {
+      if (!rule || typeof rule !== "object" || Array.isArray(rule) || !RULE_TYPES.has(rule.type)) {
         throw new Error(`Unknown landmark rule type: ${rule?.type}`);
       }
-      if (rule.type === "grant_global_trait" && !rule.trait) {
-        throw new Error("grant_global_trait requires a trait");
+      if (typeof rule.raw !== "string" || rule.raw.trim().length === 0) {
+        throw new Error(`Landmark rule ${rule.type} requires non-empty raw text`);
       }
-      if (rule.type === "grant_global_condition" && !rule.condition) {
-        throw new Error("grant_global_condition requires a condition");
+      for (const field of Object.keys(rule)) {
+        if (!allowedFields.has(field)) throw new Error(`Unknown landmark rule field: ${field}`);
       }
-      if (rule.type === "condition_stack_cap" && (!Number.isInteger(rule.cap) || rule.cap < 1)) {
-        throw new Error("condition_stack_cap requires a positive integer cap");
+      if (rule.type === "grant_global_trait") {
+        if (typeof rule.trait !== "string" || !Object.hasOwn(traits, rule.trait)) {
+          throw new Error(`Invalid landmark trait: ${rule.trait}`);
+        }
+      } else if (rule.trait !== undefined) {
+        throw new Error(`${rule.type} cannot declare a trait`);
       }
-      if (
-        rule.position !== undefined &&
-        rule.position !== "chosen" &&
-        !positions[rule.position]
-      ) {
+      if (rule.type === "grant_global_condition") {
+        if (typeof rule.condition !== "string" || !Object.hasOwn(conditions, rule.condition)) {
+          throw new Error(`Invalid landmark condition: ${rule.condition}`);
+        }
+      } else if (rule.condition !== undefined) {
+        throw new Error(`${rule.type} cannot declare a condition`);
+      }
+      if (rule.type === "condition_stack_cap") {
+        if (!Number.isInteger(rule.cap) || rule.cap < 1) {
+          throw new Error("condition_stack_cap requires a positive integer cap");
+        }
+        if (rule.position !== undefined) {
+          throw new Error("condition_stack_cap cannot declare a position");
+        }
+      } else if (rule.cap !== undefined) {
+        throw new Error(`${rule.type} cannot declare a cap`);
+      }
+      if (rule.position !== undefined && rule.position !== "chosen" && !Object.hasOwn(positions, rule.position)) {
         throw new Error(`Invalid landmark rule position: ${rule.position}`);
       }
     }
+  }
+
+  _grantKey(sourceId, targetId, type, key, ruleType) {
+    return JSON.stringify([sourceId, targetId, type, key, ruleType]);
   }
 
   _units(gameState) {

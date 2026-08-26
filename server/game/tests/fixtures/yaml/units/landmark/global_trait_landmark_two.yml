@@ -1,0 +1,10 @@
+type: unit
+kind: landmark
+name: Test Global Trait Landmark Two
+cost: 2
+hp: 7
+rules:
+  - type: grant_global_trait
+    trait: strong
+    position: scout
+    raw: "units in Scout have Strong"

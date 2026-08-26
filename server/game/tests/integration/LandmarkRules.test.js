@@ -1,5 +1,7 @@
-import { deployUnit, setupGameWithHands } from "../utils.js";
+import { deployUnit, getCardIdByName, setupGameWithHands } from "../utils.js";
 import GiveConditionHandler from "../../handlers/GiveConditionHandler.js";
+import LifecycleEngine from "../../services/LifecycleEngine.js";
+import * as IdFactory from "../../IdFactory.js";
 import EVT from "../../EventCatalog.js";
 
 describe("landmark rule enforcement", () => {
@@ -64,5 +66,98 @@ describe("landmark rule enforcement", () => {
     expect(game.modifierStack.has(target.id, "condition", "rooted")).toBe(true);
     game.eventBus.emit(EVT.ROUND_END, {});
     expect(game.modifierStack.has(target.id, "condition", "rooted")).toBe(true);
+  });
+
+  test("chosen-position prevention blocks evolution and equipment through LifecycleEngine", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Name Hunt Station", "Test Evolve Unit", "Test Armor"],
+    });
+    deployUnit(game, "Alice", "Test Name Hunt Station", "backline");
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, choices: ["fisherman"], username: "Alice" });
+    const target = deployUnit(game, "Alice", "Test Evolve Unit", "fisherman");
+    const armorIndex = game.playerStates.Alice.hand.findIndex((card) => card.name === "Test Armor");
+
+    expect(LifecycleEngine.transformUnit(game, target, getCardIdByName("Test Evolve Unit - Evolved"))).toEqual({
+      prevented: true,
+      reason: "landmark rule",
+    });
+    expect(target.card.name).toBe("Test Evolve Unit");
+    expect(() => LifecycleEngine.attachEquipment(game, "Alice", armorIndex, target)).toThrow("landmark rule");
+  });
+
+  test("rules apply to both boards and derived grants follow position changes", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Name Hunt Station", "Test Scout"],
+      Bob: ["Test Scout"],
+    });
+    deployUnit(game, "Alice", "Test Name Hunt Station", "backline");
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, choices: ["scout"], username: "Alice" });
+    const ally = deployUnit(game, "Alice", "Test Scout", "scout");
+    const enemy = deployUnit(game, "Bob", "Test Scout", "fisherman");
+
+    expect(game._globalRuleRegistry.hasRule(ally, "prevent_equip", game)).toBe(true);
+    expect(game.modifierStack.has(ally.id, "condition", "rooted")).toBe(true);
+    expect(game._globalRuleRegistry.hasRule(enemy, "prevent_equip", game)).toBe(false);
+
+    LifecycleEngine.switchPosition(game, enemy, "scout");
+    expect(game._globalRuleRegistry.hasRule(enemy, "prevent_equip", game)).toBe(true);
+    expect(game.modifierStack.has(enemy.id, "condition", "rooted")).toBe(true);
+
+    LifecycleEngine.switchPosition(game, enemy, "fisherman");
+    expect(game._globalRuleRegistry.hasRule(enemy, "prevent_equip", game)).toBe(false);
+    expect(game.modifierStack.has(enemy.id, "condition", "rooted")).toBe(false);
+  });
+
+  test("replacing or removing a landmark revokes its rules and derived grants", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Name Hunt Station", "Test Landmark Rules"],
+      Bob: ["Test Scout"],
+    });
+    const station = deployUnit(game, "Alice", "Test Name Hunt Station", "backline");
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, choices: ["scout"], username: "Alice" });
+    const target = deployUnit(game, "Bob", "Test Scout", "scout");
+
+    const replacement = deployUnit(game, "Alice", "Test Landmark Rules", "backline");
+    expect(game._globalRuleRegistry.hasRule(target, "prevent_evolve", game)).toBe(false);
+    expect(game.modifierStack.has(target.id, "condition", "rooted")).toBe(false);
+    expect(game.modifierStack.getModifiersByType("rule").some((mod) => mod.sourceId === IdFactory.landmarkSource(station.id))).toBe(false);
+
+    LifecycleEngine.destroyUnit(game, replacement);
+    expect(game.modifierStack.getModifiersByType("rule").some((mod) => mod.sourceId === IdFactory.landmarkSource(replacement.id))).toBe(false);
+  });
+
+  test("global trait grants reconcile by source without revoking an independent landmark", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Global Trait Landmark", "Test Scout"],
+      Bob: ["Test Global Trait Landmark Two", "Test Scout", "Test Irregular Unit"],
+    });
+    const first = deployUnit(game, "Alice", "Test Global Trait Landmark", "backline");
+    const second = deployUnit(game, "Bob", "Test Global Trait Landmark Two", "backline");
+    const ally = deployUnit(game, "Alice", "Test Scout", "scout");
+    const enemy = deployUnit(game, "Bob", "Test Scout", "scout");
+    const irregular = deployUnit(game, "Bob", "Test Irregular Unit", "scout");
+
+    expect(game.modifierStack.getModifiers(ally.id, "trait").filter((mod) => mod.key === "strong" && mod.meta?.landmarkGrant)).toHaveLength(2);
+    expect(game.modifierStack.getModifiers(enemy.id, "trait").filter((mod) => mod.key === "strong" && mod.meta?.landmarkGrant)).toHaveLength(2);
+    expect(game.modifierStack.has(irregular.id, "trait", "strong")).toBe(false);
+
+    LifecycleEngine.destroyUnit(game, first);
+    const remaining = game.modifierStack.getModifiers(enemy.id, "trait").filter((mod) => mod.key === "strong" && mod.meta?.landmarkGrant);
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].sourceId).toBe(IdFactory.landmarkSource(second.id));
+
+    LifecycleEngine.switchPosition(game, enemy, "fisherman");
+    expect(game.modifierStack.has(enemy.id, "trait", "strong")).toBe(false);
+  });
+
+  test("disable_passives suppresses a landmark's own passive", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Floor of Death", "Test Prevent Evolve Landmark"],
+    });
+    deployUnit(game, "Alice", "Test Prevent Evolve Landmark", "backline");
+    const floor = deployUnit(game, "Alice", "Test Floor of Death", "backline");
+
+    expect(game._globalRuleRegistry.hasRule(floor, "disable_passives", game)).toBe(true);
+    expect(game.pendingDecision).toBeNull();
   });
 });

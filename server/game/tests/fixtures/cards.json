@@ -1435,7 +1435,15 @@
     "attributes": [],
     "affiliations": [],
     "abilities": [],
-    "passives": []
+    "passives": [
+      {
+        "type": "choose_position",
+        "trigger": {
+          "type": "deploy"
+        },
+        "raw": "deploy: choose a position"
+      }
+    ]
   },
   "10022": {
     "cardId": 10022,
@@ -1492,6 +1500,50 @@
   },
   "10023": {
     "cardId": 10023,
+    "type": "unit",
+    "name": "Test Global Trait Landmark",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 7,
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "grant_global_trait",
+        "trait": "strong",
+        "position": "scout",
+        "raw": "units in Scout have Strong"
+      }
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": []
+  },
+  "10024": {
+    "cardId": 10024,
+    "type": "unit",
+    "name": "Test Global Trait Landmark Two",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 7,
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "grant_global_trait",
+        "trait": "strong",
+        "position": "scout",
+        "raw": "units in Scout have Strong"
+      }
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": []
+  },
+  "10025": {
+    "cardId": 10025,
     "type": "equipment",
     "name": "Test Grant Ability Equip",
     "cost": 3,
@@ -1526,8 +1578,8 @@
       }
     ]
   },
-  "10024": {
-    "cardId": 10024,
+  "10026": {
+    "cardId": 10026,
     "type": "skill",
     "name": "Test Heal",
     "cost": 2,
@@ -1543,8 +1595,8 @@
       }
     ]
   },
-  "10025": {
-    "cardId": 10025,
+  "10027": {
+    "cardId": 10027,
     "type": "unit",
     "name": "Test Hwa Ryun",
     "cost": 3,
@@ -1599,8 +1651,8 @@
       }
     ]
   },
-  "10026": {
-    "cardId": 10026,
+  "10028": {
+    "cardId": 10028,
     "type": "unit",
     "name": "Test Hwayeomsa",
     "cost": 5,
@@ -1644,8 +1696,8 @@
       }
     ]
   },
-  "10027": {
-    "cardId": 10027,
+  "10029": {
+    "cardId": 10029,
     "type": "equipment",
     "name": "Test Ignite Weapon",
     "cost": 2,
@@ -1669,11 +1721,11 @@
           "raw": "the bearer Slays a unit"
         }
       ],
-      "cardId": 10028
+      "cardId": 10030
     }
   },
-  "10028": {
-    "cardId": 10028,
+  "10030": {
+    "cardId": 10030,
     "type": "equipment",
     "name": "Test Ignite Weapon - Ignited",
     "cost": 2,
@@ -1701,10 +1753,10 @@
         "raw": "the bearer's damage-dealing abilities give Exhausted 1"
       }
     ],
-    "ignitedFrom": 10027
+    "ignitedFrom": 10029
   },
-  "10029": {
-    "cardId": 10029,
+  "10031": {
+    "cardId": 10031,
     "type": "skill",
     "name": "Test Incinerate I",
     "series": "incinerate",
@@ -1732,8 +1784,8 @@
       }
     ]
   },
-  "10030": {
-    "cardId": 10030,
+  "10032": {
+    "cardId": 10032,
     "type": "skill",
     "name": "Test Incinerate II",
     "series": "incinerate",
@@ -1762,8 +1814,8 @@
       }
     ]
   },
-  "10031": {
-    "cardId": 10031,
+  "10033": {
+    "cardId": 10033,
     "type": "skill",
     "name": "Test Incinerate III",
     "series": "incinerate",
@@ -1807,8 +1859,8 @@
       }
     ]
   },
-  "10032": {
-    "cardId": 10032,
+  "10034": {
+    "cardId": 10034,
     "type": "skill",
     "name": "Test Incinerate IV",
     "series": "incinerate",
@@ -1851,8 +1903,8 @@
       }
     ]
   },
-  "10033": {
-    "cardId": 10033,
+  "10035": {
+    "cardId": 10035,
     "type": "unit",
     "name": "Test Irregular Unit",
     "cost": 2,
@@ -1871,8 +1923,8 @@
     "abilities": [],
     "passives": []
   },
-  "10034": {
-    "cardId": 10034,
+  "10036": {
+    "cardId": 10036,
     "type": "unit",
     "name": "Test Landmark Rules",
     "cost": 2,
@@ -1891,8 +1943,8 @@
     "abilities": [],
     "passives": []
   },
-  "10035": {
-    "cardId": 10035,
+  "10037": {
+    "cardId": 10037,
     "type": "unit",
     "name": "Test Landmark Unit",
     "cost": 2,
@@ -1926,8 +1978,8 @@
       }
     ]
   },
-  "10036": {
-    "cardId": 10036,
+  "10038": {
+    "cardId": 10038,
     "type": "unit",
     "name": "Test Light Bearer",
     "cost": 1,
@@ -1946,8 +1998,8 @@
     "abilities": [],
     "passives": []
   },
-  "10037": {
-    "cardId": 10037,
+  "10039": {
+    "cardId": 10039,
     "type": "unit",
     "name": "Test Light Bearer Only",
     "cost": 0,
@@ -1977,8 +2029,8 @@
     ],
     "passives": []
   },
-  "10038": {
-    "cardId": 10038,
+  "10040": {
+    "cardId": 10040,
     "type": "equipment",
     "name": "Test Modify Ability Equip",
     "cost": 3,
@@ -2013,8 +2065,8 @@
       }
     ]
   },
-  "10039": {
-    "cardId": 10039,
+  "10041": {
+    "cardId": 10041,
     "type": "unit",
     "name": "Test Multi Position",
     "cost": 3,
@@ -2062,11 +2114,11 @@
           "raw": "Test Poison Skill is played on me"
         }
       ],
-      "cardId": 10040
+      "cardId": 10042
     }
   },
-  "10040": {
-    "cardId": 10040,
+  "10042": {
+    "cardId": 10042,
     "type": "unit",
     "name": "Test Multi Position - Evolved",
     "cost": 3,
@@ -2130,10 +2182,10 @@
         "raw": "round end: create Test Poison Skill in your hand and revert me to Test Multi Position"
       }
     ],
-    "evolvedFrom": 10039
+    "evolvedFrom": 10041
   },
-  "10041": {
-    "cardId": 10041,
+  "10043": {
+    "cardId": 10043,
     "type": "unit",
     "name": "Test Name Hunt Station",
     "cost": 2,
@@ -2172,8 +2224,8 @@
       }
     ]
   },
-  "10042": {
-    "cardId": 10042,
+  "10044": {
+    "cardId": 10044,
     "type": "unit",
     "name": "Test No Undying Unit",
     "cost": 1,
@@ -2199,8 +2251,8 @@
     ],
     "passives": []
   },
-  "10043": {
-    "cardId": 10043,
+  "10045": {
+    "cardId": 10045,
     "type": "unit",
     "name": "Test Novick",
     "cost": 5,
@@ -2245,8 +2297,8 @@
       }
     ]
   },
-  "10044": {
-    "cardId": 10044,
+  "10046": {
+    "cardId": 10046,
     "type": "skill",
     "name": "Test Poison Skill",
     "cost": 1,
@@ -2266,8 +2318,29 @@
       }
     ]
   },
-  "10045": {
-    "cardId": 10045,
+  "10047": {
+    "cardId": 10047,
+    "type": "unit",
+    "name": "Test Prevent Evolve Landmark",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 7,
+    "kind": "landmark",
+    "rules": [
+      {
+        "type": "prevent_evolve",
+        "position": "scout",
+        "raw": "units in Scout cannot evolve"
+      }
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [],
+    "passives": []
+  },
+  "10048": {
+    "cardId": 10048,
     "type": "unit",
     "name": "Test Princess Unit",
     "cost": 6,
@@ -2300,8 +2373,8 @@
     ],
     "passives": []
   },
-  "10046": {
-    "cardId": 10046,
+  "10049": {
+    "cardId": 10049,
     "type": "unit",
     "name": "Test Random Target Unit",
     "cost": 2,
@@ -2328,8 +2401,8 @@
     ],
     "passives": []
   },
-  "10047": {
-    "cardId": 10047,
+  "10050": {
+    "cardId": 10050,
     "type": "equipment",
     "name": "Test Repeat Equip",
     "cost": 0,
@@ -2350,8 +2423,8 @@
       }
     ]
   },
-  "10048": {
-    "cardId": 10048,
+  "10051": {
+    "cardId": 10051,
     "type": "unit",
     "name": "Test Scout",
     "cost": 1,
@@ -2388,8 +2461,8 @@
     ],
     "passives": []
   },
-  "10049": {
-    "cardId": 10049,
+  "10052": {
+    "cardId": 10052,
     "type": "unit",
     "name": "Test Scout Ranker",
     "cost": 3,
@@ -2435,8 +2508,8 @@
       }
     ]
   },
-  "10050": {
-    "cardId": 10050,
+  "10053": {
+    "cardId": 10053,
     "type": "unit",
     "name": "Test Shinheuh",
     "cost": 3,
@@ -2460,8 +2533,8 @@
     ],
     "passives": []
   },
-  "10051": {
-    "cardId": 10051,
+  "10054": {
+    "cardId": 10054,
     "type": "unit",
     "name": "Test Spear Bearer",
     "cost": 2,
@@ -2496,8 +2569,8 @@
     ],
     "passives": []
   },
-  "10052": {
-    "cardId": 10052,
+  "10055": {
+    "cardId": 10055,
     "type": "unit",
     "name": "Test Stone Doll",
     "cost": 0,
@@ -2545,8 +2618,8 @@
       }
     ]
   },
-  "10053": {
-    "cardId": 10053,
+  "10056": {
+    "cardId": 10056,
     "type": "unit",
     "name": "Test Switch Position Unit",
     "cost": 6,
@@ -2591,8 +2664,8 @@
     ],
     "passives": []
   },
-  "10054": {
-    "cardId": 10054,
+  "10057": {
+    "cardId": 10057,
     "type": "equipment",
     "name": "Test Thorn",
     "cost": 0,
@@ -2641,8 +2714,8 @@
       }
     ]
   },
-  "10055": {
-    "cardId": 10055,
+  "10058": {
+    "cardId": 10058,
     "type": "equipment",
     "name": "Test Thorn Fragment I",
     "series": "thorn-fragment",
@@ -2697,8 +2770,8 @@
       }
     ]
   },
-  "10056": {
-    "cardId": 10056,
+  "10059": {
+    "cardId": 10059,
     "type": "equipment",
     "name": "Test Thorn Fragment II",
     "series": "thorn-fragment",
@@ -2753,8 +2826,8 @@
       }
     ]
   },
-  "10057": {
-    "cardId": 10057,
+  "10060": {
+    "cardId": 10060,
     "type": "equipment",
     "name": "Test Thorn Fragment III",
     "series": "thorn-fragment",
@@ -2809,8 +2882,8 @@
       }
     ]
   },
-  "10058": {
-    "cardId": 10058,
+  "10061": {
+    "cardId": 10061,
     "type": "equipment",
     "name": "Test Thorn Fragment IV",
     "series": "thorn-fragment",
@@ -2865,8 +2938,8 @@
       }
     ]
   },
-  "10059": {
-    "cardId": 10059,
+  "10062": {
+    "cardId": 10062,
     "type": "unit",
     "name": "Test Trait Unit",
     "cost": 1,
@@ -2950,8 +3023,8 @@
     "abilities": [],
     "passives": []
   },
-  "10060": {
-    "cardId": 10060,
+  "10063": {
+    "cardId": 10063,
     "type": "skill",
     "name": "Test Unreachable Skill",
     "cost": 4,
@@ -2975,8 +3048,8 @@
       }
     ]
   },
-  "10061": {
-    "cardId": 10061,
+  "10064": {
+    "cardId": 10064,
     "type": "unit",
     "name": "Test Water Stadium",
     "cost": 2,
@@ -2996,8 +3069,8 @@
     "abilities": [],
     "passives": []
   },
-  "10062": {
-    "cardId": 10062,
+  "10065": {
+    "cardId": 10065,
     "type": "unit",
     "name": "Test Yeo Goseng",
     "cost": 1,

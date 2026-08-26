@@ -1,0 +1,9 @@
+type: unit
+kind: landmark
+name: Test Prevent Evolve Landmark
+cost: 2
+hp: 7
+rules:
+  - type: prevent_evolve
+    position: scout
+    raw: "units in Scout cannot evolve"

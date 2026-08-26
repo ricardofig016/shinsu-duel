@@ -113,4 +113,18 @@ describe("GlobalRuleRegistry", () => {
       card: { kind: "landmark", rules: [{ type: "prevent_equip", position: "not-a-position", raw: "bad" }] },
     }), game)).toThrow("Invalid landmark rule position");
   });
+
+  test.each([
+    [{ type: "disable_passives", raw: "   " }, "non-empty raw text"],
+    [{ type: "grant_global_trait", trait: "not-a-trait", raw: "bad trait" }, "Invalid landmark trait"],
+    [{ type: "grant_global_condition", condition: "not-a-condition", raw: "bad condition" }, "Invalid landmark condition"],
+    [{ type: "prevent_equip", raw: "bad field", cap: 1 }, "cannot declare a cap"],
+    [{ type: "condition_stack_cap", cap: 2, position: "scout", raw: "bad scope" }, "cannot declare a position"],
+    [{ type: "prevent_evolve", raw: "bad field", unexpected: true }, "Unknown landmark rule field"],
+  ])("rejects compiled rule contract violations", (rule, error) => {
+    const game = makeGame();
+    expect(() => registry.registerUnit(landmarkUnit({
+      card: { kind: "landmark", rules: [rule] },
+    }), game)).toThrow(error);
+  });
 });
