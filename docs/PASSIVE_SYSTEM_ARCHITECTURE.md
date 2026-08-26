@@ -8,7 +8,7 @@ This document describes how timed passive abilities (round start / round end) ar
 
 Most unit passives are conditional checks read by other systems (e.g. "I ignore Taunt") and don't need a runtime subscription. A smaller set are **timed**: they fire automatically at round start or round end for as long as their unit is on the field. Those are compiled into structured DSL and executed by `PassiveManager`.
 
-A landmark's `rules` (always-on, board-wide) are **not** passives — they are registered and revoked by `GlobalRuleRegistry` (see `SERVICE_LAYER_ARCHITECTURE.md`), while a landmark's triggered effects remain ordinary `passives` handled here.
+A landmark's `rules` are not passives. `GlobalRuleRegistry` registers, queries, and revokes them. `PassiveManager` checks `disable_passives` when it registers, re-evaluates, and executes timed or always-on passives. That query excludes Irregular units, so Floor of Death suppresses a standard unit's passives but never an Irregular's passives. A landmark's own triggered effects remain ordinary `passives` handled here.
 
 | Layer        | Location                                 | Purpose                                        |
 | ------------ | ---------------------------------------- | ---------------------------------------------- |

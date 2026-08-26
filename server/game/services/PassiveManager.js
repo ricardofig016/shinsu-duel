@@ -36,6 +36,11 @@ export default class PassiveManager {
 
       const unsubscribe = this._bus.on(trigger.eventName, (payload, context) => {
         if (!this._matches(trigger, unit, payload, gameState)) return;
+        if (gameState._globalRuleRegistry?.hasRule(unit, "disable_passives", gameState)) return;
+        if (trigger.effect?.type === "choose_position") {
+          this._choosePosition(unit, gameState);
+          return;
+        }
         resolveEffect(trigger.effect, context, gameState, this._triggerExtra(trigger, unit, payload, sourceId, gameState));
       }, { phase: "execute", priority: -100 });
 
@@ -104,6 +109,10 @@ export default class PassiveManager {
    * while the source unit occupies their gated position.
    */
   _applyAlwaysOn(unit, passive, sourceId, context, gameState) {
+    if (gameState._globalRuleRegistry?.hasRule(unit, "disable_passives", gameState)) {
+      ModifierService.revokeBySource(gameState, sourceId);
+      return;
+    }
     const extra = {
       owner: unit.owner,
       sourceId,
@@ -131,6 +140,53 @@ export default class PassiveManager {
       ModifierService.applyModifier(passive, gameState, extra);
     } else {
       resolveEffect(passive, context, gameState, extra);
+    }
+  }
+
+  /**
+   * Resolve a landmark's deploy-time `choose_position` decision: the owner
+   * picks one of the five canonical positions (not the unit's own card
+   * positions — landmarks have none). The choice is stored on the unit and
+   * activates any `position: "chosen"` landmark rule via `registerUnit`.
+   */
+  _choosePosition(unit, gameState) {
+    if (unit.chosenPositionCode) return;
+    // A deploy trigger can be revisited while an earlier decision is pending.
+    // Leave the existing decision in charge rather than creating duplicates.
+    if (gameState.pendingDecision?.type === "position_selection" && gameState.pendingDecision.owner === unit.owner) return;
+
+    const positions = gameState.constructor.positions;
+    const candidates = Object.keys(positions)
+      .filter((code) => positions[code].special === false)
+      .sort()
+      .map((code) => ({ id: code, name: positions[code].name }));
+
+    gameState.createPendingDecision({
+      owner: unit.owner,
+      type: "position_selection",
+      candidates,
+      minChoices: 1,
+      maxChoices: 1,
+      resolve: ([positionCode]) => {
+        if (!candidates.some((candidate) => candidate.id === positionCode)) {
+          throw new Error(`Invalid selected position: ${positionCode}`);
+        }
+        unit.chosenPositionCode = positionCode;
+        gameState._globalRuleRegistry?.registerUnit(unit, gameState);
+        gameState._globalRuleRegistry?.reconcile(gameState);
+      },
+    });
+  }
+
+  reapplyAll(gameState) {
+    for (const [unitId] of this._unsubscribers) {
+      const unit = gameState._findUnit?.(unitId);
+      if (!unit || !unit.isAlive()) continue;
+      for (const passive of unit.card.passiveAbilities || []) {
+        if (!passive?.trigger && (passive?.type === "conditional" || ModifierService.isModifier(passive))) {
+          this._applyAlwaysOn(unit, passive, IdFactory.passiveSource(unit.id, (unit.card.passiveAbilities || []).indexOf(passive)), null, gameState);
+        }
+      }
     }
   }
 

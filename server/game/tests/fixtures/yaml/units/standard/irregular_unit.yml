@@ -1,0 +1,8 @@
+type: unit
+kind: standard
+name: Test Irregular Unit
+cost: 2
+hp: 5
+rank: regular
+positions: [Scout]
+attributes: [Irregular]

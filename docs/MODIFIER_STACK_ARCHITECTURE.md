@@ -44,7 +44,9 @@ The `ModifierStack` is the **sole authority for mutable state** on units. Traits
 | `stat`      | HP/damage/cost modifications                               | +2 HP from equipment, -1 cost      |
 | `ability`   | Granted-ability lifetime marker; `key` is the ability code | Tracks `grant_ability` for cleanup |
 | `keyword`   | Keyword overrides                                          | Quick, Free, Sharpshooter          |
-| `rule`      | Battlefield landmark rules, source-tracked                 | Floor of Death, Water Stadium      |
+| `rule`      | Battlefield landmark rules, source-tracked and queried by `GlobalRuleRegistry` | Floor of Death, Water Stadium      |
+
+Landmark rules are query entries. They never double as the trait or condition they cause. `GlobalRuleRegistry` marks its generated continuous grants with `meta.landmarkGrant`, so reconciliation can remove and rebuild those entries without touching ordinary grants or another landmark's rule entries.
 
 Granted abilities themselves live in the `AbilityRegistry` (structured DSL, not JSON) and are addressed by the bearer's player as `granted:<sourceId>:<type>` through `UseAbilityAction`. The ModifierStack entry with `type: "ability"` exists purely to tie the grant's lifetime to its source: removing the source (e.g. unequip) revokes both the modifier and the registry entry.
 

@@ -78,7 +78,9 @@ Owns always-on modifier application (`modify_stat`/`modify_cost`/`modify_conditi
 
 ## GlobalRuleRegistry
 
-Owns landmark `rules` as source-keyed `ModifierStack` entries (`sourceType: "landmark"`, `sourceId: Landmark#<unitId>`, `type: "rule"`, `meta.rule`). `registerUnit(unit, gameState)` applies a landmark's rules when it enters play; `unregisterUnit(unitId, gameState)` revokes them by source when it leaves. Rules are **not** modifiers — `ModifierService.isModifier` excludes them — and are applied by `LifecycleEngine` on deploy, mirroring `PassiveManager` but for the always-on board-wide rule contract.
+Owns landmark `rules` as source-keyed `ModifierStack` entries (`sourceType: "landmark"`, `sourceId: Landmark#<unitId>`, `type: "rule"`, `meta.rule`). `registerUnit(unit, gameState)` validates and applies a landmark's rules when it enters play. A `position: "chosen"` rule remains inactive until its landmark has stored `chosenPositionCode`. `unregisterUnit(unitId, gameState)` revokes the landmark source when it leaves.
+
+`getActiveRules` ignores disabled rule entries and can filter by rule type. Every rule query uses the same matching predicate: position-scoped rules require a deployed unit in that position, and Irregulars never match landmark rules. `reconcile(gameState)` rebuilds only generated entries marked `meta.landmarkGrant`. It runs after field changes and round-end condition cleanup. Global condition grants use `GiveConditionHandler.applyCondition`, so Immune and condition caps apply; they do not remove ordinary condition sources. `LifecycleEngine` enforces evolution and equipment bans, while `PassiveManager` consults `disable_passives`. Rules are not ordinary modifiers, so `ModifierService.isModifier` excludes them.
 
 ---
 

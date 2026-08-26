@@ -209,6 +209,10 @@ export default class LifecycleEngine {
     // Register landmark rules (always-on battlefield rules, distinct from passives).
     if (card.kind === "landmark" && gameState._globalRuleRegistry) {
       gameState._globalRuleRegistry.registerUnit(unit, gameState);
+    } else {
+      // A newly placed standard/shinheuh unit may match an already-active
+      // landmark's global trait/condition grant or position-scoped rule.
+      gameState._globalRuleRegistry?.reconcile(gameState);
     }
 
     // Emit the deploy event chain AFTER the unit is fully wired. `unit:deployed`
@@ -370,6 +374,9 @@ export default class LifecycleEngine {
       unit,
       owner: newOwner,
     });
+    // Ownership and position both changed, which may change whether the
+    // unit matches a position-scoped landmark rule on either board.
+    gameState._globalRuleRegistry?.reconcile(gameState);
     return { stolen: true, pending: false };
   }
 
@@ -491,6 +498,10 @@ export default class LifecycleEngine {
    */
   static transformUnit(gameState, unit, targetCardId) {
     const targetCard = gameState.cards[targetCardId];
+    const isEvolution = Boolean(unit.card?.evolveInto?.cardId === targetCardId);
+    if (isEvolution && gameState._globalRuleRegistry?.hasRule(unit, "prevent_evolve", gameState)) {
+      return { prevented: true, reason: "landmark rule" };
+    }
     if (!targetCard) throw new Error(`Target card ${targetCardId} not found`);
     if (targetCard.type !== "unit") throw new Error(`Target card ${targetCardId} is not a unit`);
 
@@ -556,6 +567,10 @@ export default class LifecycleEngine {
       fromCardId: oldCard.cardId,
       toCardId: targetCardId,
     });
+
+    // A transformation can change attributes (e.g. gaining/losing Irregular)
+    // independent of any trait swap, which changes landmark rule matching.
+    gameState._globalRuleRegistry?.reconcile(gameState);
   }
 
   /** Transform an attached equipment card into its ignited definition. */
@@ -597,6 +612,10 @@ export default class LifecycleEngine {
     // use remains transactional when validation fails.
     const card = player.hand?.[handIndex];
     if (!card || card.type !== "equipment") throw new Error("Card is not equipment.");
+
+    if (gameState._globalRuleRegistry?.hasRule(targetUnit, "prevent_equip", gameState)) {
+      throw new Error("A landmark rule prevents equipping this unit.");
+    }
 
     const cost = ModifierService.getEffectiveCost(card, username, gameState);
     if (!ShinsuService.canAfford(player, cost)) {
@@ -844,5 +863,7 @@ export default class LifecycleEngine {
     player.field[oldLine].splice(oldIndex, 1);
     player.field[newLine].push(unit);
     unit.placedPositionCode = positionCode;
+    gameState._globalRuleRegistry?.reconcile(gameState);
+    gameState._passiveManager?.reapplyAll?.(gameState);
   }
 }

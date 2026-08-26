@@ -22,6 +22,12 @@ This document describes the GameState architecture: zone model, service layer, l
 | **GlobalRuleRegistry** | Landmark rules: always-on battlefield rule entries        |
 | **AttributeRegistry**  | Pluggable attribute engines (Anima, Hwayeomsa)            |
 
+### Landmark lifecycle
+
+`LifecycleEngine` registers landmark rules when a landmark enters play and revokes its source when it leaves. It reconciles continuous landmark grants after deployment, transformation, movement, ownership changes, and landmark removal. `GameState` also reconciles after round-end condition cleanup, because a continuous `grant_global_condition` must return if its source landmark and target still qualify.
+
+A `choose_position` landmark stores its selected code on `unit.chosenPositionCode`. Snapshots and serialized state include that field. The pending decision itself records only serializable candidate data. `GlobalRuleRegistry` activates `position: "chosen"` rules only after the code exists and excludes Irregulars from every landmark-rule query.
+
 Each service owns one resource; nothing outside the service mutates it. See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.
 
 **Card catalog injection.** `GameState` resolves every card lookup (deck construction, `create_card`/`summon`/`transform` handlers, and the Hwayeomsa attribute engine) through an injectable catalog. The constructor accepts `options.cards`; when omitted it falls back to the compiled `server/data/cards.json`. Tests inject a stable fixture catalog (`server/game/tests/fixtures/cards.js`) so balance changes to shipped cards never affect implementation tests — only the catalog _contract_ (`schemas/compiled-cards.schema.json`) is shared.

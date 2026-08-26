@@ -87,6 +87,14 @@ export default class GameState {
     // falls back to the compiled static catalog.
     this.cards = options.cards ?? GameState.cards;
 
+    // Trigger and passive managers own event subscriptions for field units.
+    this._triggerManager = new TriggerManager(this.eventBus);
+    this._passiveManager = new PassiveManager(this.eventBus);
+    this._globalRuleRegistry = new GlobalRuleRegistry();
+
+    // Ability Registry for runtime-granted abilities
+    this._abilityRegistry = new AbilityRegistry();
+
     // Cross-system cleanup: when an ability modifier is revoked,
     // remove the corresponding AbilityRegistry entry; when an HP stat
     // modifier is revoked (equipment detach), restore the raised max/current HP.
@@ -101,6 +109,19 @@ export default class GameState {
           unit.currentHp = Math.max(1, Math.min(unit.currentHp, unit.card.maxHp));
         }
       }
+      // A trait change (e.g. Immune revoked) can change which units a
+      // landmark's global grant/cap should affect.
+      if (mod.type === "trait" && mod.sourceType !== "landmark") {
+        this._globalRuleRegistry?.reconcile(this);
+      }
+    });
+
+    // Symmetric to onRevoke: a trait grant (e.g. Immune) can also change
+    // which units a landmark's global grant/cap should affect.
+    this.modifierStack.onApply((mod) => {
+      if (mod.type === "trait" && mod.sourceType !== "landmark") {
+        this._globalRuleRegistry?.reconcile(this);
+      }
     });
 
     this.actionRegistry = createActionRegistry();
@@ -108,14 +129,6 @@ export default class GameState {
       snapshotFn: () => this._createSnapshot(),
       serializeFn: () => this.toSerializedState(),
     });
-
-    // Trigger and passive managers own event subscriptions for field units.
-    this._triggerManager = new TriggerManager(this.eventBus);
-    this._passiveManager = new PassiveManager(this.eventBus);
-    this._globalRuleRegistry = new GlobalRuleRegistry(this.eventBus);
-
-    // Ability Registry for runtime-granted abilities
-    this._abilityRegistry = new AbilityRegistry();
 
     // Attribute Registry
     this._attributeRegistry = new AttributeRegistry();
@@ -269,6 +282,10 @@ export default class GameState {
         }
         CombatSlotService.resetShinheuhSlot(this.playerStates[username]);
       }
+      // A continuous grant_global_condition (e.g. Name Hunt Station's Rooted)
+      // is a condition, so the wipe above just removed it too — reapply it
+      // for every unit that still matches an active grant.
+      this._globalRuleRegistry?.reconcile(this);
     }, { phase: "execute" });
 
     // Turn end: clear pending repeat_play queues (they are turn-scoped).
@@ -647,6 +664,7 @@ export default class GameState {
           hp: u.currentHp,
           maxHp: u.card?.maxHp,
           position: u.placedPositionCode,
+          chosenPositionCode: u.chosenPositionCode,
           equipmentAttachments: (u.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
@@ -658,6 +676,7 @@ export default class GameState {
           hp: u.currentHp,
           maxHp: u.card?.maxHp,
           position: u.placedPositionCode,
+          chosenPositionCode: u.chosenPositionCode,
           equipmentAttachments: (u.equipmentAttachments || []).map((card) => card.name),
           conditions: [...this.modifierStack.getActiveKeys(u.id, "condition")],
           traits: [...this.modifierStack.getActiveKeys(u.id, "trait")],
@@ -692,6 +711,7 @@ export default class GameState {
       cardId: unit.card?.cardId,
       currentHp: unit.currentHp,
       placedPositionCode: unit.placedPositionCode,
+      chosenPositionCode: unit.chosenPositionCode,
       owner: unit.owner,
       equipmentAttachments: (unit.equipmentAttachments || [])
         .map((c) => ({ cardId: c.cardId, id: c.id }))

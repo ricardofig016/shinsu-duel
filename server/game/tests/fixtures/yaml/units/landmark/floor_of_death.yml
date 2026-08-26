@@ -1,0 +1,8 @@
+type: unit
+kind: landmark
+name: Test Floor of Death
+cost: 2
+hp: 7
+rules:
+  - type: disable_passives
+    raw: "unit passives have no effect"

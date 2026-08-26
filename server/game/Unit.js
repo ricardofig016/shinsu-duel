@@ -17,6 +17,7 @@ export default class Unit {
     this.kind = card.kind ?? "standard";
     this.placedPositionCode = placedPositionCode; // main position for standard, null otherwise
     this.line = line; // field line (frontline | backline)
+    this.chosenPositionCode = null; // landmark rule choice, when applicable
 
     this.owner = card.owner; // player username
     this.bus = card.bus;
@@ -37,6 +38,7 @@ export default class Unit {
       currentHp: this.currentHp,
       placedPositionCode: this.placedPositionCode,
       line: this.line,
+      chosenPositionCode: this.chosenPositionCode,
       owner: this.owner,
     };
   }

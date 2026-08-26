@@ -174,7 +174,7 @@ The `summon`/`discard`/`steal`/`disarm`/`switch_position` primitives route throu
 | `conditional`     | `if`, `then`, `otherwise?` | Resolve `then` if `if` is true, else `otherwise`.                                                                      |
 | `repeat_play`     | `amount`, `cardName?`      | Queue `amount` extra plays of `cardName` next time it is played; without `cardName`, the next card played is replayed. |
 | `quick`           | —                          | Card-level Quick marker (display-only).                                                                                |
-| `choose_position` | `trigger?`                 | Deploy-time decision: choose a position.                                                                   |
+| `choose_position` | `trigger?`                 | Deploy-time decision: choose one canonical standard position; the chosen code is stored on the unit. |
 | `noop`            | —                          | Explicit no-op (test placeholders).                                                                                    |
 
 `spend_shinsu` and `grant_ability` are also structural: they wrap a nested `effect` / `ability` that is resolved (or registered) after their own step.
@@ -301,7 +301,9 @@ A landmark's always-on battlefield rules are authored as a top-level `rules` lis
 | `prevent_evolve`         | `position?`              | Units (optionally in `position`) cannot evolve.                        |
 | `prevent_equip`          | `position?`              | Units (optionally in `position`) cannot be equipped.                   |
 
-`position` scopes a rule to a main position or the `chosen` sentinel (Name Hunt Station's deploy-time `choose_position` choice). Rules are registered and revoked by the landmark's source ID — they live on the board only while the landmark is in play.
+`position` scopes a rule to a main position or the `chosen` sentinel. `chosen` reads the source landmark's stored `chosenPositionCode`; the registry does not activate that rule before a choice exists. Rules affect both boards and current or future matching units. A unit with no placed position does not match a position scope. Irregulars ignore every landmark rule.
+
+Rules are registered and revoked by the landmark source ID while the landmark is in play. Global trait and condition rules generate separate source-owned modifiers. The registry rebuilds them after relevant lifecycle changes. Condition grants use the normal condition application path, so Immune and condition-stack caps still apply.
 
 ---
 

@@ -102,6 +102,26 @@ describe("card-validate kind rules", () => {
     expect(errorsFor(card)).toEqual([]);
   });
 
+  test("rejects malformed landmark rule metadata", () => {
+    const errors = errorsFor(baseUnit({
+      kind: "landmark",
+      rank: undefined,
+      positions: [],
+      rules: [
+        { type: "grant_global_trait", trait: "not a trait", raw: "bad trait" },
+        { type: "grant_global_condition", condition: "not a condition", raw: "bad condition" },
+        { type: "condition_stack_cap", cap: 0, raw: "bad cap" },
+        { type: "prevent_equip", position: "not a position", raw: "bad position" },
+      ],
+    }));
+    expect(errors).toEqual(expect.arrayContaining([
+      'rules[0].trait: "not a trait" is not a valid trait',
+      'rules[1].condition: "not a condition" is not a valid condition',
+      "rules[2].cap: must be a positive integer",
+      'rules[3].position: "not a position" is not a valid position (must be a main position or "chosen")',
+    ]));
+  });
+
   test("accepts a valid conduit", () => {
     const card = baseUnit({
       kind: "conduit",

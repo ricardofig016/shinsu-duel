@@ -82,6 +82,9 @@ export default class ModifierStack {
 
     /** @type {Function|null} Called with each removed modifier for cross-system cleanup. */
     this._onRevoke = null;
+
+    /** @type {Function|null} Called with each applied modifier for cross-system cleanup. */
+    this._onApply = null;
   }
 
   /**
@@ -90,6 +93,15 @@ export default class ModifierStack {
    */
   onRevoke(callback) {
     this._onRevoke = callback;
+  }
+
+  /**
+   * Register a callback invoked for every applied modifier.
+   * Used by GameState to keep GlobalRuleRegistry's derived grants in sync
+   * with trait changes (e.g. Immune) that affect who a landmark rule matches.
+   */
+  onApply(callback) {
+    this._onApply = callback;
   }
 
   // -----------------------------------------------------------------------
@@ -145,6 +157,8 @@ export default class ModifierStack {
       key: mod.key,
       value: mod.value,
     });
+
+    if (this._onApply) this._onApply(mod);
 
     return mod;
   }
@@ -307,6 +321,10 @@ export default class ModifierStack {
     if (!mods) return [];
     if (!type) return [...mods];
     return mods.filter((m) => m.type === type);
+  }
+
+  getModifiersByType(type) {
+    return [...this._byId.values()].filter((m) => m.type === type);
   }
 
   /**

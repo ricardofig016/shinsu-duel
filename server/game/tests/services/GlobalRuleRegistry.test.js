@@ -73,4 +73,44 @@ describe("GlobalRuleRegistry", () => {
     registry.unregisterUnit(unit.id, game);
     expect(game.modifierStack.getModifiers(unit.id, "rule")).toHaveLength(0);
   });
+
+  test("active queries filter type and disabled rules", () => {
+    const game = makeGame();
+    const unit = landmarkUnit();
+    registry.registerUnit(unit, game);
+    const [disablePassives] = game.modifierStack.getModifiers(unit.id, "rule");
+    disablePassives.disabledCount = 1;
+
+    expect(registry.getActiveRules(game).map((rule) => rule.key)).toEqual(["condition_stack_cap"]);
+    expect(registry.getActiveRules(game, "disable_passives")).toEqual([]);
+    expect(registry.getActiveRules(game, "condition_stack_cap")).toHaveLength(1);
+  });
+
+  test("chosen-position rules activate only after a choice and ignore Irregulars", () => {
+    const game = makeGame();
+    const landmark = landmarkUnit({
+      card: {
+        kind: "landmark",
+        rules: [{ type: "prevent_evolve", position: "chosen", raw: "chosen units cannot evolve" }],
+      },
+    });
+    const regular = { id: "Unit#1", placedPositionCode: "scout", card: { attributes: [] } };
+    const irregular = { id: "Unit#2", placedPositionCode: "scout", card: { attributes: ["irregular"] } };
+    game._findUnit = (id) => id === landmark.id ? landmark : null;
+
+    registry.registerUnit(landmark, game);
+    expect(registry.getActiveRules(game)).toHaveLength(0);
+
+    landmark.chosenPositionCode = "scout";
+    registry.registerUnit(landmark, game);
+    expect(registry.hasRule(regular, "prevent_evolve", game)).toBe(true);
+    expect(registry.hasRule(irregular, "prevent_evolve", game)).toBe(false);
+  });
+
+  test("validates positions without relying on a GameState constructor", () => {
+    const game = makeGame();
+    expect(() => registry.registerUnit(landmarkUnit({
+      card: { kind: "landmark", rules: [{ type: "prevent_equip", position: "not-a-position", raw: "bad" }] },
+    }), game)).toThrow("Invalid landmark rule position");
+  });
 });

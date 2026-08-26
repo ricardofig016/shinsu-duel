@@ -6,6 +6,7 @@ import yaml from "js-yaml";
 import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
+import conditions from "../server/data/conditions.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
@@ -49,6 +50,13 @@ const allowedKinds = new Set(["standard", "shinheuh", "landmark", "conduit"]);
 const allowedAttributes = new Set([
   "anima", "silver dwarf", "red witch", "hwayeomsa",
   "jeonsulsa", "irregular", "living ignition weapon",
+]);
+
+const allowedConditions = new Set(Object.keys(conditions));
+
+const ruleTypes = new Set([
+  "disable_passives", "prevent_evolve", "prevent_equip",
+  "grant_global_trait", "grant_global_condition", "condition_stack_cap",
 ]);
 
 const allowedAffiliations = new Set([
@@ -210,6 +218,58 @@ function validatePositions(positions, errors) {
       addError(errors, `positions[${index}]`, `duplicate position "${pos}"`);
     }
     seen.add(posLower);
+  });
+}
+
+function validateRules(rules, errors) {
+  rules.forEach((rule, index) => {
+    const field = `rules[${index}]`;
+    if (!rule || typeof rule !== "object" || Array.isArray(rule)) {
+      addError(errors, field, "must be an object");
+      return;
+    }
+    if (typeof rule.type !== "string" || !ruleTypes.has(rule.type)) {
+      addError(errors, `${field}.type`, `"${rule.type}" is not a valid rule type. Must be one of: ${[...ruleTypes].join(", ")}`);
+      return;
+    }
+    if (typeof rule.raw !== "string" || rule.raw.trim().length === 0) {
+      addError(errors, `${field}.raw`, "must be a non-empty string");
+    }
+
+    if (rule.type === "grant_global_trait") {
+      if (typeof rule.trait !== "string" || !traitNames.has(rule.trait.toLowerCase())) {
+        addError(errors, `${field}.trait`, `"${rule.trait}" is not a valid trait`);
+      }
+    } else if (rule.trait !== undefined) {
+      addError(errors, `${field}.trait`, `only grant_global_trait declares a trait (got ${rule.type})`);
+    }
+
+    if (rule.type === "grant_global_condition") {
+      if (typeof rule.condition !== "string" || !allowedConditions.has(rule.condition.toLowerCase())) {
+        addError(errors, `${field}.condition`, `"${rule.condition}" is not a valid condition`);
+      }
+    } else if (rule.condition !== undefined) {
+      addError(errors, `${field}.condition`, `only grant_global_condition declares a condition (got ${rule.type})`);
+    }
+
+    if (rule.type === "condition_stack_cap") {
+      if (!Number.isInteger(rule.cap) || rule.cap < 1) {
+        addError(errors, `${field}.cap`, "must be a positive integer");
+      }
+    } else if (rule.cap !== undefined) {
+      addError(errors, `${field}.cap`, `only condition_stack_cap declares a cap (got ${rule.type})`);
+    }
+
+    if (rule.position !== undefined) {
+      if (rule.type === "condition_stack_cap") {
+        addError(errors, `${field}.position`, `${rule.type} does not support a position scope`);
+      } else {
+        const posLower = String(rule.position).toLowerCase();
+        if (posLower !== "chosen" && !allowedPositions.has(posLower)) {
+          addError(errors, `${field}.position`, `"${rule.position}" is not a valid position (must be a main position or "chosen")`);
+        }
+      }
+    }
   });
 }
 
@@ -457,6 +517,8 @@ function validateUnit(card) {
   const rules = ensureArray(card.rules);
   if (kind !== "landmark" && rules.length > 0) {
     addError(errors, "rules", `only landmark units declare rules (got ${kind})`);
+  } else if (kind === "landmark") {
+    validateRules(rules, errors);
   }
 
   if (kind === "conduit") {
