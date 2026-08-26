@@ -28,38 +28,9 @@ Trigger-less `modify_*` and `retain_equipment` passives and equipment `effects` 
 
 ### Landmark rules
 
-The landmark cards (`name_hunt_station`, `water_stadium`, `floor_of_death`) author their rules as a top-level `rules:` array, not as passives. `GlobalRuleRegistry.registerUnit`, called from `LifecycleEngine` on deploy, applies each rule to the `ModifierStack` as a source-tracked entry with `type: "rule"`, `key: rule.type`, and `sourceType: "landmark"`. `unregisterUnit` revokes them by source on removal. `GlobalRuleRegistry`, `LifecycleEngine`, `PassiveManager`, and `GiveConditionHandler` consume these entries at their own rule boundaries.
+Landmark cards author battlefield rules in a top-level `rules` array. `GlobalRuleRegistry` validates and registers all six rule types as source-tracked `ModifierStack` entries, owns chosen-position state, and reconciles landmark grants across both boards. `LifecycleEngine` removes rules during replacement and destruction, while `PassiveManager` and `GiveConditionHandler` enforce passive suppression, evolution and equipment blockers, condition grants, and stack caps at their authoritative boundaries. Test-owned landmark fixtures cover deployment, continuous scope changes, Irregular exclusions, grant cleanup, replacement, and serialized position choices.
 
 ## Remaining work
-
-### Landmark rule enforcement
-
-Build rule enforcement around the existing `GlobalRuleRegistry` and `ModifierStack` provenance model. The registry remains the owner of landmark rule lifetime, validation, chosen-position state, and rule queries. It must expose active-rule lookups by rule type and affected unit, while enforcement stays at the service that already owns the behavior. Do not route rules through `ModifierService`, and do not copy rule state into unrelated services.
-
-#### Phase 1: make rule state queryable and scoped
-
-1. Extend `GlobalRuleRegistry` to validate every compiled rule before registration. Accept only the six schema-backed rule types, require the fields already conditional in the card schemas, validate positive condition caps, and reject malformed `position` values instead of silently registering an unusable rule. Add duplicate-registration protection so repeated lifecycle callbacks cannot stack the same landmark's rules.
-2. Store a landmark's selected position as runtime state on the landmark unit, using a serializable `chosenPositionCode` field. Resolve `position: chosen` through the existing pending-decision continuation flow, with the landmark owner choosing one legal position once during deployment. The choice must complete before the rule entries are considered active, remain stable through re-evaluation and serialization/replay, and be discarded when the landmark leaves play. A rule with an explicit position is active immediately.
-3. Add rule queries that inspect enabled `type: "rule"` entries, match both sides of the battlefield, and treat explicit positions as continuous scopes. A chosen-position rule affects units already in the selected position and later entrants, including units that switch into it. Units with `placedPositionCode === null` do not match a position-scoped rule. Global rules without a position apply to all applicable units.
-4. Add one reconciliation path that runs after rule registration/removal and after units deploy, move, transform, or are destroyed. It must revoke and rebuild only landmark-owned grants, deduplicate repeated reconciliation, and leave each source's modifiers isolated from every other landmark source.
-
-#### Phase 2: wire each consumer at its authority
-
-5. Wire `disable_passives` into `PassiveManager`'s registration, trigger dispatch, and always-on re-evaluation. Consult the active rule registry at execution time so a rule added after a passive is registered suppresses it, and a removed rule lets it resume. Suppress all passives in scope, including the source landmark's passives when the rule matches that landmark. Do not remove native traits, conditions, abilities, equipment effects, or the rule entries themselves. Name Hunt Station's `choose_position` passive is unrelated to Floor of Death's `disable_passives` rule and must continue to resolve normally.
-6. Gate evolution in `LifecycleEngine.transformUnit` for evolution calls, not only in `TriggerManager`. The gate must run before card/state mutation and must distinguish evolution from non-evolution transformations such as ignition. When blocked, skip the attempt without payment, partial transformation, or pending retry; a later eligible trigger can try again after the rule no longer applies.
-7. Gate `LifecycleEngine.attachEquipment` using the target bearer's normal `placedPositionCode`, before cost calculation/payment, detachment, hand mutation, or replacement. Null-position units do not match chosen-position rules. Multiple active blockers continue to block until all applicable sources are removed.
-8. Implement `grant_global_trait` and `grant_global_condition` as landmark-source modifiers on every currently matching unit and every future matching unit. Grants apply on both boards and exclude null-position units for chosen scopes. Reconciliation must remove only stale entries from that landmark source and reapply the current set, honor Immune for conditions, avoid duplicate condition accumulation, and preserve normal condition cleanup at round end. Reapply continuous condition grants after round cleanup and whenever matching scope or rule state changes so Rooted remains active while the landmark remains in play.
-9. Enforce `condition_stack_cap` in the central condition-application path used by `GiveConditionHandler`, after amplifier calculation and before `ModifierStack.apply`. Treat the cap as per condition per unit, cap the merged amount rather than discarding the application, and use the minimum active cap when several landmarks apply. Cap checks must cover ordinary and global grants, immunity, existing stacks, expiration, and cap removal without mutating unrelated conditions.
-
-#### Phase 3: integration and regression coverage
-
-10. Extend `GlobalRuleRegistry` tests for rule validation, active queries, chosen-position persistence, duplicate registration, scope matching, source isolation, and revocation. Add focused enforcement tests for passive suppression/resumption, evolution and equipment gates, global trait/condition reconciliation, and cap combination semantics.
-11. Add fixture YAML/cards for Name Hunt Station, Water Stadium, and Floor of Death using the test-owned catalog. Add integration tests that deploy each real landmark, exercise its behavior against units on both boards, move/deploy units into and out of scope, remove or replace the landmark, and assert that all landmark-owned rules and grants disappear cleanly. Verify Name Hunt's pending position choice and serialized state.
-12. Run `npm run compile:fixtures`, the focused landmark/passive/lifecycle/condition tests, and `npm run test`. Each test must inject cards through `GameState({ options: { cards }})` rather than reading shipped card data.
-
-Completion criterion: all six rule types validate and have consumers at their authoritative boundaries; chosen-position rules persist and apply continuously; global grants and caps reconcile without duplicate or leaked modifiers; automatic and direct lifecycle paths obey blockers; and integration tests prove real landmark deploy, behavior, replacement/removal, serialization, and clean revocation.
-
-### Effect handlers still missing
 
 Four schema types have cards authoring them but no handler. Resolving any of them falls through to the `EFFECT_UNSUPPORTED` skip.
 
