@@ -910,7 +910,7 @@ export default class GameState {
    * Re-entrancy is capped at MAX_RESOLUTION_DEPTH to prevent infinite
    * decision loops.
    */
-  createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve, lockedIds = [] }) {
+  createPendingDecision({ owner, type, candidates, minChoices = 1, maxChoices = minChoices, resolve, lockedIds = [], unitId = null }) {
     if (this._resolutionDepth >= MAX_RESOLUTION_DEPTH) {
       throw new Error(
         `Maximum nested pending decision depth (${MAX_RESOLUTION_DEPTH}) exceeded. ` +
@@ -937,6 +937,9 @@ export default class GameState {
       minChoices,
       maxChoices,
       lockedIds: [...lockedIds],
+      // Internal lifecycle binding: which unit's choice this is, so a unit
+      // leaving play can cancel its own pending decisions. Never serialized.
+      unitId,
       resolve,
       continuations: [],
     };
@@ -1049,5 +1052,38 @@ export default class GameState {
       this.logger.endUserInput({ ok: false, error });
       throw error;
     }
+  }
+
+  /**
+   * Cancel pending decisions matching `predicate` without running their
+   * resolve callbacks or continuations. Used when the source of a decision
+   * leaves play — e.g. a landmark destroyed while its `position_selection`
+   * choice is still pending must not keep the game blocked on a choice whose
+   * source is gone, and resolving it later must not resurrect the landmark's
+   * rules.
+   *
+   * The active decision is popped first, then matching stacked decisions are
+   * dropped; the next stacked decision (if any) becomes active again.
+   *
+   * @param {(decision: object) => boolean} predicate
+   * @returns {number} the number of decisions cancelled
+   */
+  cancelPendingDecisions(predicate) {
+    if (typeof predicate !== "function") return 0;
+    let removed = 0;
+    // Pop every matching decision from the top of the stack — the active
+    // decision first, then any stacked one that matches.
+    while (this.pendingDecision && predicate(this.pendingDecision)) {
+      this.pendingDecision = this._pendingDecisions.pop() || null;
+      removed++;
+    }
+    const kept = this._pendingDecisions.filter((d) => !predicate(d));
+    removed += this._pendingDecisions.length - kept.length;
+    this._pendingDecisions = kept;
+    if (removed > 0) {
+      this._resolutionDepth = Math.max(0, this._resolutionDepth - removed);
+      if (!this.pendingDecision) this._resolutionState = ResolutionState.IDLE;
+    }
+    return removed;
   }
 }

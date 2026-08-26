@@ -40,10 +40,12 @@ export default class GlobalRuleRegistry {
   /**
    * Register (or idempotently re-register) a landmark's rules.
    *
-   * A `position: "chosen"` rule cannot go live until the landmark's owner has
-   * picked a position (`unit.chosenPositionCode`); calling this again after
-   * the choice is made re-registers cleanly because rule entries are
-   * rebuilt from scratch every time.
+   * Each rule is registered independently: explicit-position and global rules
+   * are active the moment the landmark enters play, while a
+   * `position: "chosen"` rule stays deferred until the landmark's owner has
+   * picked a position (`unit.chosenPositionCode`). Re-registration after the
+   * choice is made is clean because rule entries are rebuilt from scratch
+   * every time — repeated calls never stack duplicates.
    */
   registerUnit(unit, gameState) {
     if (!unit || unit.card?.kind !== "landmark") return;
@@ -51,20 +53,15 @@ export default class GlobalRuleRegistry {
     this._validateRules(rules);
 
     const sourceId = IdFactory.landmarkSource(unit.id);
-    const needsChoice = rules.some((rule) => rule.position === "chosen");
-    if (needsChoice && !unit.chosenPositionCode) {
-      // Not activatable yet; ensure no stale entries linger from a prior
-      // registration attempt (there should never be any, but this keeps the
-      // method safe to call repeatedly before the choice resolves).
-      gameState.modifierStack.removeWhere((mod) => mod.sourceId === sourceId);
-      this._registered.delete(sourceId);
-      return;
-    }
 
     // Rebuild rule entries from scratch so re-registration (e.g. after a
     // chosen-position pick) never duplicates or leaves stale entries.
     gameState.modifierStack.removeWhere((mod) => mod.sourceId === sourceId && mod.type === "rule");
     for (const rule of rules) {
+      // Defer only the chosen rule while no choice exists. An unrelated
+      // chosen rule on the same landmark must not hold up its explicit or
+      // global rules.
+      if (rule.position === "chosen" && !unit.chosenPositionCode) continue;
       gameState.modifierStack.apply({
         sourceId,
         sourceType: "landmark",
@@ -80,11 +77,17 @@ export default class GlobalRuleRegistry {
     this.reconcile(gameState);
   }
 
-  /** Revoke every rule and derived grant a landmark unit owns. */
-  unregisterUnit(unitId, gameState) {
-    const sourceId = IdFactory.landmarkSource(unitId);
+  /**
+   * Revoke every rule and derived grant a landmark unit owns.
+   *
+   * The chosen position dies with the landmark: a unit that left play must
+   * not reactivate its chosen rules if it is ever re-registered.
+   */
+  unregisterUnit(unit, gameState) {
+    const sourceId = IdFactory.landmarkSource(unit.id);
     gameState.modifierStack.removeBySource(sourceId);
     this._registered.delete(sourceId);
+    unit.chosenPositionCode = null;
     this.reconcile(gameState);
   }
 

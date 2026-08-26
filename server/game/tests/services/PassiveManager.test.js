@@ -4,6 +4,7 @@ import Card from "../../Card.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
 import EVT from "../../EventCatalog.js";
 import { resolveEffect } from "../../EffectResolver.js";
+import { jest } from "@jest/globals";
 import { createLegalDeck, getCardIdByName, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
@@ -564,5 +565,31 @@ describe("PassiveManager", () => {
     const otherIdx = game.playerStates.Alice.hand.indexOf(other);
     LifecycleEngine.deployUnit(game, "Alice", otherIdx, "fisherman");
     expect(target.currentHp).toBe(targetCard.maxHp - 1);
+  });
+
+  test("a landmark position choice resolver is a no-op once the landmark left play", () => {
+    const game = createGame();
+    const decisions = [];
+    game.createPendingDecision = (opts) => { decisions.push(opts); };
+    const landmarkCardId = getCardIdByName("Test Name Hunt Station");
+    const unit = {
+      id: "Unit#stale-landmark",
+      owner: "Alice",
+      chosenPositionCode: null,
+      isAlive: () => true,
+      card: new Card(landmarkCardId, game.cards[landmarkCardId], "Alice", game.eventBus),
+    };
+    const registry = { registerUnit: jest.fn(), reconcile: jest.fn() };
+    game._globalRuleRegistry = registry;
+    game._findUnit = () => null; // the landmark is off the field
+
+    game._passiveManager._choosePosition(unit, game);
+    expect(decisions).toHaveLength(1);
+    decisions[0].resolve(["scout"]);
+
+    // The stale resolution must not store a choice or re-register rules.
+    expect(unit.chosenPositionCode).toBeNull();
+    expect(registry.registerUnit).not.toHaveBeenCalled();
+    expect(registry.reconcile).not.toHaveBeenCalled();
   });
 });

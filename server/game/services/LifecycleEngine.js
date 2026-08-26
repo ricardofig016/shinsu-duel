@@ -422,7 +422,12 @@ export default class LifecycleEngine {
     // unit's passive source IDs so they never outlive the source. Ordered after
     // unregister so the revoke events can't re-trigger the outgoing handlers.
     gameState._passiveManager?.revokeGrants(unit.id, unit.card?.passiveAbilities || [], gameState);
-    gameState._globalRuleRegistry?.unregisterUnit(unit.id, gameState);
+    gameState._globalRuleRegistry?.unregisterUnit(unit, gameState);
+    // A unit that leaves play while one of its own pending decisions is still
+    // open must not keep the game blocked on a choice whose source is gone.
+    // Landmark `position_selection` decisions carry the owning unit id, so
+    // resolving a stale choice later cannot resurrect the landmark's rules.
+    gameState.cancelPendingDecisions?.((d) => d.type === "position_selection" && d.unitId === unit.id);
     gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
     // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge
     // (triggered by the UNIT_DESTROYED → removeByTarget cascade below).
@@ -550,6 +555,16 @@ export default class LifecycleEngine {
     gameState._passiveManager?.unregisterUnit(unit.id);
     gameState._passiveManager?.revokeGrants(unit.id, oldCard.passiveAbilities || [], gameState);
     gameState._passiveManager?.registerUnit(unit, gameState);
+
+    // Landmark rules are tied to the card definition. A transformation that
+    // changes the unit's kind (landmark ⇄ standard) must revoke the outgoing
+    // kind's rule entries and register the incoming kind's; transforming from
+    // one landmark into another re-registers the new rule set too.
+    if (oldCard.kind === "landmark" || unit.card.kind === "landmark") {
+      const registry = gameState._globalRuleRegistry;
+      registry?.unregisterUnit(unit, gameState);
+      if (unit.card.kind === "landmark") registry?.registerUnit(unit, gameState);
+    }
 
     // Re-evaluate attribute engines for the transformed unit.
     // The unit may have gained or lost attributes through transformation.

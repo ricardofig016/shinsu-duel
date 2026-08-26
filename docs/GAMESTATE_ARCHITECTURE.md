@@ -26,7 +26,7 @@ This document describes the GameState architecture: zone model, service layer, l
 
 `LifecycleEngine` registers landmark rules when a landmark enters play and revokes its source when it leaves. It reconciles continuous landmark grants after deployment, transformation, movement, ownership changes, and landmark removal. `GameState` also reconciles after round-end condition cleanup, because a continuous `grant_global_condition` must return if its source landmark and target still qualify.
 
-A `choose_position` landmark stores its selected code on `unit.chosenPositionCode`. Snapshots and serialized state include that field. The pending decision itself records only serializable candidate data. `GlobalRuleRegistry` activates `position: "chosen"` rules only after the code exists and excludes Irregulars from every landmark-rule query.
+A `choose_position` landmark stores its selected code on `unit.chosenPositionCode`. Snapshots and serialized state include that field. The pending decision itself records only serializable candidate data and an internal owning-unit binding used for cancellation. `GlobalRuleRegistry` activates `position: "chosen"` rules only after the code exists and excludes Irregulars from every landmark-rule query. When a landmark leaves play, `LifecycleEngine` cancels its still-pending position choice so the game is not blocked on a decision whose source is gone; resolving a stale choice is a no-op.
 
 Each service owns one resource; nothing outside the service mutates it. See `SERVICE_LAYER_ARCHITECTURE.md` for the full contract.
 
@@ -83,7 +83,7 @@ Each player state has typed zones:
 
 ## Pending Decisions
 
-Some effects and actions require a player choice mid-resolution (target selection, line-overflow destruction). `GameState.createPendingDecision()` publishes the choice and blocks further `processAction()` calls until `resolveDecision()` is called with a validated selection. A decision carries an optional `lockedIds` list — targets that are already committed (mandatory Taunt units) and excluded from the player's own choices — surfaced to clients via `getClientState`, `toSerializedState`, and the `DECISION_PENDING` event. Callers must not create a decision when there is no genuine choice (candidates ≤ requested count, or a forced/random/Blinded selection): those resolve immediately.
+Some effects and actions require a player choice mid-resolution (target selection, line-overflow destruction). `GameState.createPendingDecision()` publishes the choice and blocks further `processAction()` calls until `resolveDecision()` is called with a validated selection. A decision carries an optional `lockedIds` list — targets that are already committed (mandatory Taunt units) and excluded from the player's own choices — surfaced to clients via `getClientState`, `toSerializedState`, and the `DECISION_PENDING` event. Callers must not create a decision when there is no genuine choice (candidates ≤ requested count, or a forced/random/Blinded selection): those resolve immediately. `cancelPendingDecisions(predicate)` drops pending decisions whose source left play (a landmark destroyed while its position choice is open), discarding their resolve callbacks and continuations and restoring the next stacked decision, if any.
 
 ### Resolution Lifecycle State
 

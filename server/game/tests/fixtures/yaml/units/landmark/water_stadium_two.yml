@@ -1,0 +1,9 @@
+type: unit
+kind: landmark
+name: Test Water Stadium Two
+cost: 2
+hp: 7
+rules:
+  - type: condition_stack_cap
+    cap: 3
+    raw: "conditions do not stack past 3"

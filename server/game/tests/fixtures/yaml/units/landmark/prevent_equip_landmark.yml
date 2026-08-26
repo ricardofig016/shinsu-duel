@@ -1,0 +1,9 @@
+type: unit
+kind: landmark
+name: Test Prevent Equip Landmark
+cost: 2
+hp: 7
+rules:
+  - type: prevent_equip
+    position: scout
+    raw: "units in Scout cannot be equipped"

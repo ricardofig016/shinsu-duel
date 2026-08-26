@@ -53,6 +53,7 @@ Trigger context is threaded into the resolution: a `deal_damage` passive resolve
 - **Deploy / evolve:** `registerUnit` is called after the new card definition is attached, so subscriptions always match the unit's current passives.
 - **Evolve / transform:** subscriptions are unregistered and re-registered against the new card so a unit never keeps a previous form's passive.
 - **Destroy:** `unregisterUnit` removes all subscriptions for that unit.
+- A landmark's deploy-time `choose_position` passive opens a `position_selection` decision bound to the landmark unit. Resolving it stores the picked code on the unit and activates its `position: "chosen"` rules; if the landmark leaves play while the choice is still pending, `LifecycleEngine` cancels the decision and the resolver becomes a no-op, so a destroyed landmark can never resurrect its rules.
 - Passives only fire while their unit is alive and still on the field — checked on every trigger, not just at registration time.
 
 ### Disabled

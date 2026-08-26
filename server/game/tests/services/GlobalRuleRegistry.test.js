@@ -70,8 +70,93 @@ describe("GlobalRuleRegistry", () => {
     registry.registerUnit(unit, game);
     expect(game.modifierStack.getModifiers(unit.id, "rule")).toHaveLength(2);
 
-    registry.unregisterUnit(unit.id, game);
+    registry.unregisterUnit(unit, game);
     expect(game.modifierStack.getModifiers(unit.id, "rule")).toHaveLength(0);
+  });
+
+  test("unregisterUnit discards the landmark's chosen position", () => {
+    const game = makeGame();
+    const unit = landmarkUnit();
+    unit.chosenPositionCode = "scout";
+    registry.registerUnit(unit, game);
+    registry.unregisterUnit(unit, game);
+    expect(unit.chosenPositionCode).toBeNull();
+  });
+
+  test("a chosen rule defers alone while explicit rules register immediately", () => {
+    const game = makeGame();
+    const landmark = landmarkUnit({
+      card: {
+        kind: "landmark",
+        rules: [
+          { type: "prevent_evolve", position: "chosen", raw: "chosen units cannot evolve" },
+          { type: "prevent_equip", position: "scout", raw: "scout units cannot be equipped" },
+        ],
+      },
+    });
+    const scout = { id: "Unit#scout", placedPositionCode: "scout", card: { attributes: [] } };
+    game._findUnit = (id) => (id === landmark.id ? landmark : null);
+
+    registry.registerUnit(landmark, game);
+    // The explicit scout rule is active while the choice is still pending;
+    // the unrelated chosen rule does not hold it up.
+    expect(game.modifierStack.getModifiersByType("rule")).toHaveLength(1);
+    expect(registry.hasRule(scout, "prevent_equip", game)).toBe(true);
+    expect(registry.hasRule(scout, "prevent_evolve", game)).toBe(false);
+
+    landmark.chosenPositionCode = "scout";
+    registry.registerUnit(landmark, game);
+    // The chosen rule joins without duplicating the explicit one.
+    expect(game.modifierStack.getModifiersByType("rule")).toHaveLength(2);
+    expect(registry.hasRule(scout, "prevent_equip", game)).toBe(true);
+    expect(registry.hasRule(scout, "prevent_evolve", game)).toBe(true);
+  });
+
+  test("repeated registration never stacks rule entries", () => {
+    const game = makeGame();
+    const unit = landmarkUnit();
+    registry.registerUnit(unit, game);
+    registry.registerUnit(unit, game);
+    registry.registerUnit(unit, game);
+    expect(game.modifierStack.getModifiersByType("rule")).toHaveLength(2);
+
+    // The same holds across a chosen-position pick and further re-registration.
+    const chosen = landmarkUnit({
+      id: "Unit#9#2",
+      card: {
+        kind: "landmark",
+        rules: [{ type: "prevent_evolve", position: "chosen", raw: "chosen units cannot evolve" }],
+      },
+    });
+    game._findUnit = (id) => (id === chosen.id ? chosen : null);
+    registry.registerUnit(chosen, game);
+    expect(game.modifierStack.getModifiersByType("rule")).toHaveLength(2); // deferred
+    chosen.chosenPositionCode = "scout";
+    registry.registerUnit(chosen, game);
+    expect(game.modifierStack.getModifiersByType("rule")).toHaveLength(3);
+    registry.registerUnit(chosen, game);
+    expect(game.modifierStack.getModifiersByType("rule")).toHaveLength(3);
+  });
+
+  test("getConditionCap returns the minimum cap among active rules", () => {
+    const game = makeGame();
+    const cap2 = landmarkUnit({
+      id: "Unit#cap2",
+      card: { kind: "landmark", rules: [{ type: "condition_stack_cap", cap: 2, raw: "cap 2" }] },
+    });
+    const cap5 = landmarkUnit({
+      id: "Unit#cap5",
+      card: { kind: "landmark", rules: [{ type: "condition_stack_cap", cap: 5, raw: "cap 5" }] },
+    });
+    const unit = { id: "Unit#target", placedPositionCode: "scout", card: { attributes: [] } };
+    game._findUnit = (id) => (id === cap2.id ? cap2 : id === cap5.id ? cap5 : null);
+
+    registry.registerUnit(cap2, game);
+    expect(registry.getConditionCap(unit, "poisoned", game)).toBe(2);
+    registry.registerUnit(cap5, game);
+    expect(registry.getConditionCap(unit, "poisoned", game)).toBe(2);
+    registry.unregisterUnit(cap2, game);
+    expect(registry.getConditionCap(unit, "poisoned", game)).toBe(5);
   });
 
   test("active queries filter type and disabled rules", () => {

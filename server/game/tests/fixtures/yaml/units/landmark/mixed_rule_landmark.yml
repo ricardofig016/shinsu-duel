@@ -1,0 +1,17 @@
+type: unit
+kind: landmark
+name: Test Mixed Rule Landmark
+cost: 2
+hp: 7
+passives:
+  - type: choose_position
+    trigger: { type: deploy }
+    raw: "deploy: choose a position"
+rules:
+  - type: prevent_evolve
+    position: chosen
+    raw: "units in the chosen position cannot evolve"
+  - type: grant_global_trait
+    trait: strong
+    position: scout
+    raw: "units in Scout have Strong"

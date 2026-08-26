@@ -151,9 +151,13 @@ export default class PassiveManager {
    */
   _choosePosition(unit, gameState) {
     if (unit.chosenPositionCode) return;
-    // A deploy trigger can be revisited while an earlier decision is pending.
-    // Leave the existing decision in charge rather than creating duplicates.
-    if (gameState.pendingDecision?.type === "position_selection" && gameState.pendingDecision.owner === unit.owner) return;
+    // A deploy trigger can be revisited while this unit's own earlier
+    // decision is pending. Leave the existing decision in charge rather
+    // than creating duplicates.
+    if (
+      gameState.pendingDecision?.type === "position_selection" &&
+      gameState.pendingDecision.unitId === unit.id
+    ) return;
 
     const positions = gameState.constructor.positions;
     const candidates = Object.keys(positions)
@@ -164,10 +168,14 @@ export default class PassiveManager {
     gameState.createPendingDecision({
       owner: unit.owner,
       type: "position_selection",
+      unitId: unit.id,
       candidates,
       minChoices: 1,
       maxChoices: 1,
       resolve: ([positionCode]) => {
+        // The landmark may have left play while its choice was pending.
+        // A unit off the field must never recreate its rules or grants.
+        if (gameState._findUnit(unit.id) !== unit || !unit.isAlive()) return;
         if (!candidates.some((candidate) => candidate.id === positionCode)) {
           throw new Error(`Invalid selected position: ${positionCode}`);
         }
