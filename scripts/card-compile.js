@@ -7,6 +7,7 @@ import yaml from "js-yaml";
 import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
+import dslCatalog from "../schemas/dsl-catalog.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
@@ -65,6 +66,21 @@ function parseTrait(raw) {
 
 const NESTED_NODE_KEYS = ["effect", "ability", "then", "otherwise"];
 const NESTED_DESCRIPTOR_KEYS = ["target", "targets", "card", "source", "if", "trigger", "when"];
+
+// Node ownership — `schemas/dsl-catalog.json` is the canonical inventory of
+// DSL discriminators. The compiler refuses any node, trigger, or predicate
+// type outside it, so unknown vocabulary fails at the source path that
+// introduced it instead of as a late schema error. Nested nodes are checked
+// too: `normalizeEffectObject` routes every nested node through `compileNode`.
+const CATALOG_NODE_TYPES = new Set([
+  ...dslCatalog.structural,
+  ...dslCatalog.markers,
+  ...dslCatalog.effects,
+  ...dslCatalog.modifiers,
+  ...dslCatalog.rules,
+]);
+const CATALOG_TRIGGER_TYPES = new Set(dslCatalog.triggers);
+const CATALOG_PREDICATE_TYPES = new Set(dslCatalog.predicates);
 
 function normalizeCondition(value) {
   return String(value).trim().toLowerCase();
@@ -155,17 +171,19 @@ export function normalizeEffectObject(obj, context) {
   if (obj.series !== undefined) normalized.series = toCode(obj.series);
 
   // Nested effect nodes: sequence.steps is an array; the rest are single.
+  // Each nested node goes through compileNode so its `type` is validated
+  // against the catalog at its own source path.
   if (obj.steps !== undefined) {
     if (!Array.isArray(obj.steps)) {
       throw new Error(`${context}.steps: expected an array`);
     }
     normalized.steps = obj.steps.map((step, i) =>
-      normalizeEffectObject(step, `${context}.steps[${i}]`)
+      compileNode(step, `${context}.steps[${i}]`)
     );
   }
   for (const key of NESTED_NODE_KEYS) {
     if (obj[key] !== undefined) {
-      normalized[key] = normalizeEffectObject(obj[key], `${context}.${key}`);
+      normalized[key] = compileNode(obj[key], `${context}.${key}`);
     }
   }
 
@@ -177,6 +195,25 @@ export function normalizeEffectObject(obj, context) {
     }
   }
 
+  const trigger = obj.trigger;
+  if (
+    trigger && typeof trigger === "object" && !Array.isArray(trigger) &&
+    typeof trigger.type === "string" && !CATALOG_TRIGGER_TYPES.has(trigger.type)
+  ) {
+    throw new Error(
+      `${context}.trigger: unknown trigger type "${trigger.type}" — list it in schemas/dsl-catalog.json and both card schemas`
+    );
+  }
+  const predicate = obj.if;
+  if (
+    predicate && typeof predicate === "object" && !Array.isArray(predicate) &&
+    typeof predicate.type === "string" && !CATALOG_PREDICATE_TYPES.has(predicate.type)
+  ) {
+    throw new Error(
+      `${context}.if: unknown predicate type "${predicate.type}" — list it in schemas/dsl-catalog.json and both card schemas`
+    );
+  }
+
   return normalized;
 }
 
@@ -186,6 +223,11 @@ export function compileNode(node, context) {
   }
   if (typeof node.type !== "string" || node.type.trim() === "") {
     throw new Error(`${context}: missing non-empty "type"`);
+  }
+  if (!CATALOG_NODE_TYPES.has(node.type)) {
+    throw new Error(
+      `${context}: unknown node type "${node.type}" — list it in schemas/dsl-catalog.json and both card schemas before compiling`
+    );
   }
   return normalizeEffectObject(node, context);
 }
@@ -579,21 +621,26 @@ const colors = {
   yellow: "\x1b[33m",
 };
 
-export async function compileAll(options = {}) {
+/**
+ * Compile the source YAML into the final keyed artifact shape **in memory**.
+ *
+ * This is the non-mutating path used by the data audit and tests: it loads
+ * every YAML file, assigns the stable name-sorted cardIds, resolves
+ * evolve/ignite cross-references, cleans sparse fields, and validates the
+ * result against the compiled schema. It never writes a file.
+ *
+ * Duplicate card names are a hard failure — a duplicate would make the
+ * evolve/ignite lookups and any by-name reference ambiguous, and one keyed
+ * artifact entry would silently shadow the other.
+ *
+ * @returns {Promise<{ output: object, cards: object[] }>} `output` is the
+ *   cardId-keyed artifact object; `cards` is the same data as a flat array.
+ */
+export async function compileCards(options = {}) {
   const {
     cardsDirectory: cardsDir = cardsDirectory,
-    outputPath: outPath = outputPath,
     compiledSchemaPath: schemaPath = compiledSchemaPath,
-    runValidate = true,
   } = options;
-
-  // Source YAML is the only authoring input. Never compile unvalidated cards.
-  if (runValidate) {
-    execFileSync(process.execPath, [validatorPath], {
-      cwd: projectRoot,
-      stdio: "inherit",
-    });
-  }
 
   // 1. Read all YAML files recursively
   const yamlFiles = await collectCardFiles(cardsDir);
@@ -616,14 +663,19 @@ export async function compileAll(options = {}) {
   }
 
   if (errors.length > 0) {
-    console.error(`${colors.red}Errors loading cards:${colors.reset}`);
-    errors.forEach((e) => console.error(`  ${colors.red}✗${colors.reset} ${e}`));
-    process.exitCode = 1;
-    return;
+    throw new Error(`Errors loading cards:\n${errors.map((e) => `  ${e}`).join("\n")}`);
   }
 
   // 2. Sort by name for stable cardId assignment
   rawCards.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+  const seenNames = new Set();
+  const duplicateNames = rawCards
+    .map((card) => card.name || "")
+    .filter((name) => (seenNames.has(name) ? true : (seenNames.add(name), false)));
+  if (duplicateNames.length > 0) {
+    throw new Error(`Duplicate card names: ${[...new Set(duplicateNames)].join(", ")}`);
+  }
 
   // 3. Assign cardIds
   rawCards.forEach((card, index) => {
@@ -680,15 +732,20 @@ export async function compileAll(options = {}) {
   // 6. Clean up temporary fields
   const finalCards = compiledCards.map(cleanCompiled);
 
+  // 7. Convert to keyed object (by cardId as string), failing on any
+  //    identity collision instead of silently shadowing an entry.
+  const output = {};
+  for (const card of finalCards) {
+    const key = String(card.cardId);
+    if (Object.prototype.hasOwnProperty.call(output, key)) {
+      throw new Error(`Duplicate compiled cardId: ${key} ("${card.name}")`);
+    }
+    output[key] = card;
+  }
+
   const compiledSchema = JSON.parse(await fs.readFile(schemaPath, "utf-8"));
   const ajv = new Ajv({ allErrors: true, strict: false });
   const validateCompiled = ajv.compile(compiledSchema);
-
-  // 7. Convert to keyed object (by cardId as string)
-  const output = {};
-  for (const card of finalCards) {
-    output[String(card.cardId)] = card;
-  }
 
   if (!validateCompiled(output)) {
     const details = (validateCompiled.errors || [])
@@ -697,14 +754,37 @@ export async function compileAll(options = {}) {
     throw new Error(`Compiled card data failed ${path.relative(projectRoot, schemaPath)}:\n  ${details}`);
   }
 
-  // 8. Write output
+  return { output, cards: finalCards };
+}
+
+export async function compileAll(options = {}) {
+  const {
+    cardsDirectory: cardsDir = cardsDirectory,
+    outputPath: outPath = outputPath,
+    runValidate = true,
+  } = options;
+
+  // Source YAML is the only authoring input. Never compile unvalidated cards.
+  if (runValidate) {
+    execFileSync(process.execPath, [validatorPath], {
+      cwd: projectRoot,
+      stdio: "inherit",
+    });
+  }
+
+  const { output, cards: finalCards } = await compileCards({
+    cardsDirectory: cardsDir,
+    compiledSchemaPath: options.compiledSchemaPath,
+  });
+
+  // Write output
   await fs.mkdir(path.dirname(outPath), { recursive: true });
   await fs.writeFile(outPath, JSON.stringify(output, null, 2) + "\n", "utf-8");
 
-  // 9. Check icons
+  // Check icons
   const missingIcons = await checkIcons(finalCards);
 
-  // 10. Report
+  // Report
   console.log(`${colors.green}✓ Compiled ${finalCards.length} cards to ${path.relative(projectRoot, outPath)}${colors.reset}`);
 
   const units = finalCards.filter((c) => c.type === "unit").length;

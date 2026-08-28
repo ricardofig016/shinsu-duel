@@ -88,6 +88,10 @@ registry.get("deal_damage").execute(payload, ctx, gameState);
 
 **⚠️ The registry key is the DSL `type` field** from the compiled `cards.json`. This is the bridge between the compiler and the runtime engine.
 
+**Inspection.** `initEffectResolver()` returns the initialized registry; `registry.names()` lists every registered DSL `type`. The shipped-data audit uses this to report dispatchable types with no handler.
+
+**Structural vs dispatchable.** `sequence` and `conditional` never reach the registry — `EffectResolver` resolves them recursively. `schemas/dsl-catalog.json` records the owner category of every `type`; the contract tests fail if a structural type is registered as a handler or a dispatchable type has no owner (see [`COMPILED_CARD_DSL.md`](./COMPILED_CARD_DSL.md)).
+
 ---
 
 ## DSL-to-Handler Mapping

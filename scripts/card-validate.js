@@ -103,7 +103,10 @@ function ensureArray(value) {
   return value;
 }
 
-function normalizeCardForSchema(card) {
+// Normalizes a source card for schema validation (null array fields → [],
+// explicit `kind`). Exported for the shipped-data audit, which validates each
+// YAML source against the source schema independently of this CLI.
+export function normalizeCardForSchema(card) {
   const normalized = { ...card };
   const arrayFields = [
     "positions", "passives", "abilities", "evolve", "traits", "attributes",

@@ -12,6 +12,8 @@ Cards are authored as YAML in `data/cards/` and compiled to a single `server/dat
 | --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `data/cards/**/*.yml` | `server/data/cards.json` | `scripts/card-validate.js` + `schemas/card.schema.json` (YAML) → `schemas/compiled-cards.schema.json` (JSON) |
 
+`schemas/dsl-catalog.json` is the canonical machine-readable inventory of every node, trigger, predicate, and deck-constraint discriminator, together with the runtime owner each category requires. The compiler validates types against it (see [Node catalog](#node-catalog)).
+
 Commands:
 
 ```powershell
@@ -38,8 +40,31 @@ effects:
 Guarantees:
 
 - `raw` is display text. It is **never parsed** at compile or run time.
-- The compiler **fails loudly** on any node `type` it does not recognize. There is no `custom` fallback and no `handler` field — the handler registry maps `type` to a handler class, one per type.
+- The compiler **fails loudly** on any node, trigger, or predicate `type` outside `schemas/dsl-catalog.json`, at the exact source path that introduced it — including nested nodes. There is no `custom` fallback and no `handler` field — the handler registry maps `type` to a handler class, one per type.
 - `type` is the single bridge between a compiled node and its runtime handler.
+
+---
+
+## Node catalog
+
+`schemas/dsl-catalog.json` lists every accepted discriminator and the owner each category requires:
+
+| Category          | Required owner                                                            |
+| ----------------- | ------------------------------------------------------------------------- |
+| `structural`      | `EffectResolver` resolves `sequence`/`conditional` inline                  |
+| `markers`         | Registered display-only handlers (`noop`, `quick`)                         |
+| `effects`         | One handler per type in `HandlerRegistry`                                  |
+| `modifiers`       | `ModifierService` applies and revokes always-on modifiers                  |
+| `rules`           | `GlobalRuleRegistry` registers landmark rules                              |
+| `predicates`      | `PredicateEvaluator` evaluates conditional/modifier gates                  |
+| `triggers`        | `TriggerManager` (transformations), `PassiveManager` (triggered passives)  |
+| `deckConstraints` | Deck-construction validation                                               |
+
+Three checks keep the catalog, both schemas, and the compiler in lockstep (`npm run test -- DslCatalogContract CardDataAudit`):
+
+- **Schema drift** — every discriminator in `schemas/card.schema.json` and `schemas/compiled-cards.schema.json` must appear in the catalog, and every catalog entry must be accepted by both schemas.
+- **Compiler recognition** — the compiler refuses any type outside the catalog, so a catalog entry can never be silently un-compilable.
+- **Runtime ownership** — the shipped-data audit fails while any dispatchable effect type used by shipped cards has no registered handler. Schema validity therefore never implies runtime support.
 
 ---
 
@@ -347,9 +372,22 @@ The compiler normalizes human-readable vocab into codes before emitting `cards.j
 | `silver dwarf` | `silver-dwarf` |
 | `khun family`  | `khun-family`  |
 
-The compiled schema is **closed**: `type` must be a known node type, unknown fields are rejected, and there is no `custom` type and no `handler` field. The runtime throws on any `type` with no registered handler.
+The compiled schema is **closed**: `type` must be a known node type, unknown fields are rejected, and there is no `custom` type and no `handler` field. The compiler additionally refuses any `type` outside `schemas/dsl-catalog.json` at the source path that introduced it.
 
-> **Transitional behavior** — while handlers are being brought online per `type`, a node whose `type` is valid but unregistered emits `EFFECT_UNSUPPORTED` and is skipped. Once the catalog is fully implemented, the runtime throws on any unregistered `type`.
+> **Transitional behavior** — a node whose `type` is cataloged but whose handler is not yet registered emits `EFFECT_UNSUPPORTED` and is skipped at runtime. The runtime ownership coverage test in [`CardDataAudit.test.js`](../server/game/tests/integration/CardDataAudit.test.js) fails for every such type until its handler is registered; do not treat a passing schema check as runtime support.
+
+---
+
+## Compiled artifact audit
+
+[`server/game/tests/integration/CardDataAudit.test.js`](../server/game/tests/integration/CardDataAudit.test.js) audits the shipped data on every test run:
+
+- a fresh in-memory compile (`compileCards()` in `scripts/card-compile.js`) must equal the checked-in `server/data/cards.json` exactly — same content, same stable name-sorted `cardId`s;
+- every node, trigger, and predicate type in the compiled data must be cataloged;
+- every dispatchable effect type must have a registered handler (see the transitional note above);
+- identity is unique (names and `cardId`s) and evolution/ignition cross-references point at their conventioned counterparts.
+
+The audit is read-only: it never rewrites the artifact. If it fails after editing cards, run `npm run compile:cards` to refresh `server/data/cards.json`.
 
 ---
 

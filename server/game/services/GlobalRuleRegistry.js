@@ -4,7 +4,11 @@ import conditions from "../../data/conditions.json" with { type: "json" };
 import traits from "../../data/traits.json" with { type: "json" };
 import positions from "../../data/positions.json" with { type: "json" };
 
-const RULE_TYPES = new Set([
+/**
+ * Landmark rule types owned by this registry. Exported so the shipped-data
+ * audit can verify every cataloged rule has a runtime owner.
+ */
+export const RULE_TYPES = new Set([
   "disable_passives",
   "prevent_evolve",
   "prevent_equip",

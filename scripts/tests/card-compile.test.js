@@ -2,9 +2,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import dslCatalog from "../../schemas/dsl-catalog.json" with { type: "json" };
+
 import {
   compileAll,
   compileCard,
+  compileCards,
   compileNode,
   normalizeEffectObject,
   normalizeKeyword,
@@ -145,6 +148,63 @@ describe("card-compile structured-node validation", () => {
     const node = compileNode({ type: "deal_damage", amount: 2, target: { side: "enemy" } }, "card.effects[0]");
     expect(node.type).toBe("deal_damage");
     expect(node.target).toEqual({ side: "enemy" });
+  });
+
+  test("compileNode rejects an unknown node type at its own source path", () => {
+    expect(() => compileNode({ type: "banana", raw: " peel " }, "card.effects[0]"))
+      .toThrow('card.effects[0]: unknown node type "banana"');
+  });
+
+  test("compileNode rejects unknown node types nested in sequence steps", () => {
+    expect(() => compileNode(
+      { type: "sequence", steps: [{ type: "deal_damage", amount: 1 }, { type: "banana", raw: "x" }] },
+      "card.effects[0]"
+    )).toThrow('card.effects[0].steps[1]: unknown node type "banana"');
+  });
+
+  test("compileNode rejects unknown node types in nested single-node fields", () => {
+    for (const key of ["effect", "ability", "then", "otherwise"]) {
+      expect(() => compileNode(
+        { type: "spend_shinsu", amount: 1, [key]: { type: "banana", raw: "x" } },
+        "card.effects[0]"
+      )).toThrow(`card.effects[0].${key}: unknown node type "banana"`);
+    }
+  });
+
+  test("compileNode rejects an unknown trigger type on a passive entry", () => {
+    expect(() => compileNode(
+      { type: "deal_damage", amount: 1, target: { side: "enemy" }, trigger: { type: "banana" } },
+      "card.passives[0]"
+    )).toThrow('card.passives[0].trigger: unknown trigger type "banana"');
+  });
+
+  test("compileNode rejects an unknown predicate type on a conditional", () => {
+    expect(() => compileNode(
+      { type: "conditional", if: { type: "banana" }, then: { type: "noop" } },
+      "card.passives[0]"
+    )).toThrow('card.passives[0].if: unknown predicate type "banana"');
+  });
+
+  test("compileNode accepts every catalog node type", () => {
+    const catalogTypes = [
+      ...dslCatalog.structural,
+      ...dslCatalog.markers,
+      ...dslCatalog.effects,
+      ...dslCatalog.modifiers,
+      ...dslCatalog.rules,
+    ];
+    expect(catalogTypes.length).toBeGreaterThan(0);
+    for (const type of catalogTypes) {
+      expect(() => compileNode({ type, raw: "test" }, "card.effects[0]"))
+        .not.toThrow();
+    }
+  });
+
+  test("structural and marker types compile without needing a registered handler", () => {
+    for (const type of [...dslCatalog.structural, ...dslCatalog.markers]) {
+      const node = compileNode({ type, raw: "test" }, "card.effects[0]");
+      expect(node.type).toBe(type);
+    }
   });
 });
 
@@ -427,5 +487,102 @@ effects:
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
     })).rejects.toThrow("Compiled card data failed");
+  });
+});
+
+describe("card-compile compileCards (in-memory)", () => {
+  let tmpDir;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "card-compile-memory-"));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  async function writeTestCards() {
+    await fs.writeFile(path.join(tmpDir, "b.yml"), `type: skill
+name: B Skill
+cost: 1
+deckConstraints: []
+effects:
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy }
+    raw: "deal 2 to an enemy"
+`, "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a.yml"), `type: unit
+name: A Unit
+cost: 2
+hp: 5
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives: []
+deckConstraints: []
+`, "utf-8");
+  }
+
+  test("returns the same keyed artifact that compileAll writes, without touching files", async () => {
+    await writeTestCards();
+
+    const { output, cards } = await compileCards({ cardsDirectory: tmpDir });
+    expect(cards).toHaveLength(2);
+    expect(Object.keys(output)).toHaveLength(2);
+
+    const outputPath = path.join(tmpDir, "cards.json");
+    await compileAll({ cardsDirectory: tmpDir, outputPath, runValidate: false });
+    const written = JSON.parse(await fs.readFile(outputPath, "utf-8"));
+
+    expect(output).toEqual(written);
+  });
+
+  test("compiles deterministically with stable name-sorted cardIds", async () => {
+    await writeTestCards();
+
+    const first = await compileCards({ cardsDirectory: tmpDir });
+    const second = await compileCards({ cardsDirectory: tmpDir });
+
+    expect(first.output).toEqual(second.output);
+    expect(first.output["0"].name).toBe("A Unit");
+    expect(first.output["1"].name).toBe("B Skill");
+    for (const [key, card] of Object.entries(first.output)) {
+      expect(String(card.cardId)).toBe(key);
+    }
+  });
+
+  test("fails on duplicate card names instead of shadowing an artifact entry", async () => {
+    await writeTestCards();
+    await fs.writeFile(path.join(tmpDir, "a2.yml"), `type: skill
+name: A Unit
+cost: 1
+deckConstraints: []
+effects: []
+`, "utf-8");
+
+    await expect(compileCards({ cardsDirectory: tmpDir }))
+      .rejects.toThrow("Duplicate card names: A Unit");
+  });
+
+  test("fails on an unknown node type before any file is written", async () => {
+    await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
+name: Test Unknown Type
+cost: 1
+deckConstraints: []
+effects:
+  - type: sequence
+    steps:
+      - type: banana
+        raw: "mystery step"
+    raw: "mystery"
+`, "utf-8");
+
+    await expect(compileCards({ cardsDirectory: tmpDir }))
+      .rejects.toThrow('effects[0].steps[0]: unknown node type "banana"');
   });
 });

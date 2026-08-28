@@ -40,7 +40,18 @@ The shared helper `tests/utils.js` lives at the tests root; subfolder tests impo
 
 ## Card fixtures
 
-Tests never read shipped card data. They resolve cards **only** against the test-owned catalog at `tests/fixtures/cards.js` (which imports the compiled artifact `tests/fixtures/cards.json`), injected via `GameState`'s `options.cards`. `CardDataAudit` (shipped data) and `FixtureCardAudit` (fixture data) are the only tests that touch real files.
+Tests never read shipped card data. They resolve cards **only** against the test-owned catalog at `tests/fixtures/cards.js` (which imports the compiled artifact `tests/fixtures/cards.json`), injected via `GameState`'s `options.cards`. `CardDataAudit` and `DslCatalogContract` (shipped data + schema contracts) and `FixtureCardAudit` (fixture data) are the only tests that touch real files.
+
+### Shipped-data audits
+
+`CardDataAudit.test.js` audits `data/cards/` against `server/data/cards.json` on every run: fresh-compile parity, stable name-sorted ids, recursive DSL-catalog coverage, and runtime handler ownership. Its handler-coverage test is intentionally strict — it fails while a dispatchable `type` used by shipped cards has no registered handler. `DslCatalogContract.test.js` keeps `schemas/dsl-catalog.json` in lockstep with both JSON Schemas and the compiler's accepted vocabulary:
+
+```powershell
+npm run test -- CardDataAudit
+npm run test -- DslCatalogContract
+```
+
+`FixtureCardAudit.test.js` enforces the fixture contract only; production audits never gate fixtures.
 
 ### Authoring workflow
 

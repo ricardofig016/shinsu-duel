@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Card DSL node catalog",
+  "description": "Canonical ownership inventory for every DSL discriminator the card pipeline accepts. The compiler validates node, trigger, and predicate types against this catalog, and the contract tests keep it in lockstep with schemas/card.schema.json and schemas/compiled-cards.schema.json. Ownership strings describe where a type must be implemented; they are a requirement, not a claim that every dispatchable type already has a handler. Runtime ownership of shipped data is audited by server/game/tests/integration/CardDataAudit.test.js.",
+  "ownership": {
+    "structural": "Resolved recursively inside EffectResolver; never dispatched to a handler class.",
+    "markers": "Registered in HandlerRegistry as display-only markers (NoopHandler); no state mutation.",
+    "effects": "Dispatchable nodes. Every type must have a registered handler in HandlerRegistry (see EffectResolver.getRegistry).",
+    "modifiers": "Always-on modifier nodes applied and revoked through ModifierService.",
+    "rules": "Landmark battlefield rules registered and revoked through GlobalRuleRegistry.",
+    "predicates": "Conditional and modifier gates evaluated by PredicateEvaluator.",
+    "triggers": "Typed trigger ASTs subscribed by TriggerManager (transformations) and PassiveManager (triggered passives).",
+    "deckConstraints": "Deck-construction validation over the compiled card's deckConstraints list."
+  },
+  "structural": [
+    "sequence",
+    "conditional"
+  ],
+  "markers": [
+    "noop",
+    "quick"
+  ],
+  "effects": [
+    "charge_shinsu",
+    "spend_shinsu",
+    "compress_shinsu",
+    "reclaim_cards",
+    "light_up",
+    "extinguish",
+    "draw_card",
+    "create_card",
+    "summon",
+    "discard",
+    "steal",
+    "disarm",
+    "switch_position",
+    "deal_damage",
+    "heal",
+    "give_condition",
+    "remove_conditions",
+    "grant_trait",
+    "remove_traits",
+    "copy_traits",
+    "grant_random_trait",
+    "slay",
+    "transform",
+    "grant_ability",
+    "copy_ability",
+    "peek_hand",
+    "play_jeonsul_baang",
+    "repeat_play",
+    "choose_position",
+    "grant_affiliation",
+    "return_to_hand"
+  ],
+  "modifiers": [
+    "modify_stat",
+    "modify_keyword",
+    "modify_targeting",
+    "modify_cost",
+    "modify_condition",
+    "retain_equipment",
+    "modify_repeat",
+    "modify_ability"
+  ],
+  "rules": [
+    "disable_passives",
+    "grant_global_trait",
+    "grant_global_condition",
+    "condition_stack_cap",
+    "prevent_evolve",
+    "prevent_equip"
+  ],
+  "predicates": [
+    "has_unit",
+    "alone_on_line",
+    "started_with_card",
+    "has_equipped",
+    "has_condition",
+    "has_all_equipped",
+    "has_equipment_count"
+  ],
+  "triggers": [
+    "equip",
+    "slay",
+    "deploy",
+    "given",
+    "kill",
+    "ally_dies",
+    "enemy_dies",
+    "damaged_by",
+    "round_start",
+    "round_end",
+    "deal_damage",
+    "ability_used",
+    "summon",
+    "draw",
+    "reclaim",
+    "free_ability_played",
+    "quick_ability_used",
+    "round_start_or_activation",
+    "skill_played",
+    "dies",
+    "evolve",
+    "has_all_equipped"
+  ],
+  "deckConstraints": [
+    "unreachable",
+    "generated_by"
+  ],
+  "notes": [
+    "The effects list is an inventory, not a claim of runtime support. A dispatchable type without a registered handler is reported as unowned by the runtime coverage audit in CardDataAudit.test.js.",
+    "choose_position is dispatched through a special case in PassiveManager for landmark deploy passives only; EffectResolver itself has no handler for it, so any other use path skips it as unsupported."
+  ]
+}

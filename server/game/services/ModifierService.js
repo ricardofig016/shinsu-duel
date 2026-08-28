@@ -19,7 +19,11 @@ import TargetResolver from "../TargetResolver.js";
  *   - blocked-actor filter — who cannot target the source (modify_targeting
  *     `untargetable_by`).
  */
-const MODIFIER_TYPES = new Set([
+/**
+ * Always-on modifier node types owned by this service. Exported so the
+ * shipped-data audit can verify every cataloged modifier has a runtime owner.
+ */
+export const MODIFIER_TYPES = new Set([
   "modify_stat",
   "modify_cost",
   "modify_condition",

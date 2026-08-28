@@ -8,7 +8,7 @@ The card-effect runtime is nearly complete. The DSL is schema-validated and all 
 
 ### DSL, compiler, and audit
 
-`card.schema.json` and `compiled-cards.schema.json` validate the structured grammar. Effect nodes, modifier nodes, rule nodes, predicates, triggers, unit and card targets, keywords as `{code, raw}` objects, `deckConstraints` with required `raw`, card-level `series`, and the top-level `rules:` array on landmark cards are all schema-backed. The rule-node types are `disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, and `prevent_equip`. All 93 cards in `data/cards` compile with zero `custom` and zero `handler`. `CardDataAudit.test.js` asserts that invariant against the checked-in `server/data/cards.json`.
+`card.schema.json` and `compiled-cards.schema.json` validate the structured grammar. Effect nodes, modifier nodes, rule nodes, predicates, triggers, unit and card targets, keywords as `{code, raw}` objects, `deckConstraints` with required `raw`, card-level `series`, and the top-level `rules:` array on landmark cards are all schema-backed. The rule-node types are `disable_passives`, `grant_global_trait`, `grant_global_condition`, `condition_stack_cap`, `prevent_evolve`, and `prevent_equip`. `schemas/dsl-catalog.json` is the canonical machine-readable inventory of every discriminator the pipeline accepts, with the runtime owner each category requires. The compiler validates every node, trigger, and predicate type against the catalog before schema validation, failing at the exact source path, and exposes a non-mutating in-memory compile path (`compileCards()`) alongside the writing command (`compileAll()`). Duplicate card names and duplicate cardIds are explicit failures. `DslCatalogContract.test.js` couples the catalog to both schemas and the compiler so any discriminator edited in one contract without the other fails with the stale category and value. `CardDataAudit.test.js` asserts source/artifact parity by canonical comparison, stable name-sorted cardIds, recursive node/trigger/predicate coverage, compiled-schema validity, and zero `custom` and zero `handler` against the checked-in `server/data/cards.json`. All 93 cards in `data/cards` compile through this pipeline. Its runtime-ownership test fails while any dispatchable effect type used by shipped cards has no registered handler, currently naming `grant_affiliation`, `return_to_hand`, `choose_position`, and `play_jeonsul_baang`.
 
 ### Resolver, targeting, and predicates
 
@@ -32,7 +32,7 @@ Landmark cards author battlefield rules in a top-level `rules` array. `GlobalRul
 
 ## Remaining work
 
-Four schema types have cards authoring them but no handler. Resolving any of them falls through to the `EFFECT_UNSUPPORTED` skip.
+Four schema types have cards authoring them but no handler. Resolving any of them falls through to the `EFFECT_UNSUPPORTED` skip. The runtime-ownership coverage test in `CardDataAudit.test.js` already names all four as unowned, so the gap stays visible until each handler lands.
 
 - `grant_affiliation` (Michael's ability)
 - `return_to_hand` (Beta's quick ability). `retain_equipment` is already applied and readable via `ModifierStack.hasRetainEquipment`, so a consumer is ready for it.
