@@ -23,6 +23,7 @@ const EVT = {
   // Unit lifecycle
   UNIT_DEPLOYED:  "unit:deployed",
   UNIT_SUMMONED:  "unit:summoned",
+  ACTIVATION:     "unit:activation",
   UNIT_DESTROY_INTENT: "unit:destroy:intent",
   UNIT_DESTROYED: "unit:destroyed",
   UNIT_EVOLVED:   "unit:evolved",

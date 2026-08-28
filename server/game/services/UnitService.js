@@ -52,4 +52,25 @@ export default class UnitService {
     unit.currentHp = Math.max(0, Number(value) || 0);
     return unit.currentHp;
   }
+
+  /**
+   * Permanently raise a unit's maximum and current HP by `amount`.
+   *
+   * Both `unit.card.maxHp` and `unit.currentHp` rise by the same amount, so
+   * the lost-HP delta is preserved. This is the authoritative boundary for
+   * permanent HP grants: unlike `ModifierService._applyHp`, which records a
+   * reversible stat modifier for equipment auras, it records no modifier and
+   * is not reversible. `UnitService` owns `currentHp`; this extends that
+   * ownership to permanent `maxHp` grants.
+   *
+   * @param {object} unit — has `currentHp` and `card.maxHp`
+   * @param {number} amount — non-negative HP to grant
+   * @returns {{ granted: number, currentHp: number, maxHp: number }}
+   */
+  static grantHp(unit, amount) {
+    const grant = Math.max(0, Number(amount) || 0);
+    unit.card.maxHp += grant;
+    unit.currentHp += grant;
+    return { granted: grant, currentHp: unit.currentHp, maxHp: unit.card.maxHp };
+  }
 }

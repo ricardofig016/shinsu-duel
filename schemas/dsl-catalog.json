@@ -51,7 +51,8 @@
     "repeat_play",
     "choose_position",
     "grant_affiliation",
-    "return_to_hand"
+    "return_to_hand",
+    "activate"
   ],
   "modifiers": [
     "modify_stat",

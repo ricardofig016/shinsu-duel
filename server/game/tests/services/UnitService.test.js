@@ -61,4 +61,28 @@ describe("UnitService", () => {
       expect(unit.currentHp).toBe(0);
     });
   });
+
+  describe("grantHp", () => {
+    test("raises both current and max HP by the granted amount (2/8 +2 -> 4/10)", () => {
+      const unit = { currentHp: 2, card: { maxHp: 8 } };
+      const result = UnitService.grantHp(unit, 2);
+      expect(result).toEqual({ granted: 2, currentHp: 4, maxHp: 10 });
+      expect(unit.currentHp).toBe(4);
+      expect(unit.card.maxHp).toBe(10);
+    });
+
+    test("preserves the lost-HP delta (a unit 6 below max stays 6 below max)", () => {
+      const unit = { currentHp: 2, card: { maxHp: 8 } };
+      UnitService.grantHp(unit, 2);
+      expect(unit.card.maxHp - unit.currentHp).toBe(6);
+    });
+
+    test("ignores negative grants", () => {
+      const unit = { currentHp: 2, card: { maxHp: 8 } };
+      const result = UnitService.grantHp(unit, -3);
+      expect(result.granted).toBe(0);
+      expect(unit.currentHp).toBe(2);
+      expect(unit.card.maxHp).toBe(8);
+    });
+  });
 });

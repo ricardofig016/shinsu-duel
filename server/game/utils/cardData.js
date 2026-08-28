@@ -56,6 +56,33 @@ export function findCardsBySeries(cards, series, type) {
 }
 
 /**
+ * Find all cards carrying a keyword whose `code` exactly matches `keywordCode`
+ * (case-insensitive), optionally filtered to a card `type`.
+ *
+ * Keywords are identity markers authored on each card; the compiler normalizes
+ * them to a uniform `{ code, raw? }` object. Unlike `series`, a keyword is not
+ * a first-class grouping field, so this helper inspects the `keywords` array
+ * directly. The three Jeonsul Baangs carry `jeonsul-baang` as a keyword code
+ * rather than a `series`, so `findCardsBySeries` returns nothing for them.
+ *
+ * @param {object} cards keyed compiled card object
+ * @param {string} keywordCode
+ * @param {string} [type]
+ * @returns {Array<object>}
+ */
+export function findCardsByKeyword(cards, keywordCode, type) {
+  if (!cards || typeof cards !== "object") return [];
+  const expected = String(keywordCode).toLowerCase();
+  return Object.values(cards).filter(
+    (card) =>
+      card &&
+      Array.isArray(card.keywords) &&
+      card.keywords.some((k) => k?.code?.toLowerCase() === expected) &&
+      (type === undefined || card.type === type)
+  );
+}
+
+/**
  * Normalize a card (a runtime `Card` instance or a compiled `cards.json`
  * entry) into a uniform filter view for card-target resolution.
  *
@@ -95,4 +122,4 @@ export function toCardTargetView(card) {
   };
 }
 
-export default { findCardsByName, findCardsBySeries, toCardTargetView };
+export default { findCardsByName, findCardsBySeries, findCardsByKeyword, toCardTargetView };
