@@ -1,3 +1,0 @@
-read RULES.md and tell me whats ambiguous/inconsistent there. do not open any other files.
-
-do not fabricate ambiguities where they dont exit. example: if a rule says `unit` and not `enemy`, then its every unit, not just enemies. just because you think it makes more sense to be `enemy` instead of `unit` doesn't make it ambiguous. the wording is very clear and completely unambiguous. i dont want your opinion, i want ambiguities and inconsistencies.
