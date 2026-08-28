@@ -648,9 +648,14 @@
       },
       {
         "type": "conditional",
-        "trigger": {
-          "type": "round_start_or_activation"
-        },
+        "triggers": [
+          {
+            "type": "round_start"
+          },
+          {
+            "type": "activation"
+          }
+        ],
         "if": {
           "type": "has_unit",
           "target": {
@@ -669,9 +674,14 @@
       },
       {
         "type": "play_jeonsul_baang",
-        "trigger": {
-          "type": "round_start_or_activation"
-        },
+        "triggers": [
+          {
+            "type": "round_start"
+          },
+          {
+            "type": "activation"
+          }
+        ],
         "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
       }
     ]

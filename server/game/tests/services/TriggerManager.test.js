@@ -195,4 +195,29 @@ describe("TriggerManager trigger subscriptions", () => {
     bus.emit(EVT.ROUND_START, {});
     expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
   });
+
+  test("activation trigger fires on the bearer's unit:activation", () => {
+    register([{ type: "activation" }]);
+    bus.emit(EVT.ACTIVATION, { unitId: "Unit#1", unit, username: "Alice" });
+    expect(LifecycleEngine.transformUnit).toHaveBeenCalledWith(gameState, unit, 99);
+  });
+
+  test("activation trigger ignores an activation of another unit", () => {
+    register([{ type: "activation" }]);
+    bus.emit(EVT.ACTIVATION, { unitId: "Unit#other", unit: null, username: "Alice" });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
+  test("activation trigger does not fire on round:started", () => {
+    register([{ type: "activation" }]);
+    bus.emit(EVT.ROUND_START, {});
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
+  test("unregisterAll removes the activation subscription", () => {
+    register([{ type: "activation" }]);
+    manager.unregisterAll("Unit#1");
+    bus.emit(EVT.ACTIVATION, { unitId: "Unit#1", unit, username: "Alice" });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
 });

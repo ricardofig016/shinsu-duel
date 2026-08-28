@@ -20,32 +20,38 @@ export default class PassiveManager {
     passives.forEach((passive, index) => {
       const sourceId = IdFactory.passiveSource(unit.id, index);
 
-      // A passive without a `trigger` is always-on: its effect must track the
-      // live board. `conditional` passives and modifier nodes (`modify_*`,
+      // A passive carries its trigger(s) as either a singular `trigger`
+      // object or a `triggers` array (an effect that fires on more than one
+      // event, e.g. a Conduit passive on both round start and activation).
+      // A passive with neither is always-on: its effect must track the live
+      // board. `conditional` passives and modifier nodes (`modify_*`,
       // `retain_equipment`) re-evaluate on board events; other always-on
       // branches (trait grants) resolve once and are not re-evaluated.
-      if (!passive?.trigger || typeof passive.trigger !== "object") {
+      const triggerObjs = this._triggerObjects(passive);
+
+      if (triggerObjs.length === 0) {
         if (passive?.type === "conditional" || ModifierService.isModifier(passive)) {
           this._subscribeAlwaysOn(unit, passive, sourceId, gameState);
         }
         return;
       }
 
-      const trigger = this._parseTrigger(passive);
-      if (!trigger) return; // unsupported trigger type — not yet wired
-
-      const unsubscribe = this._bus.on(trigger.eventName, (payload, context) => {
-        if (!this._matches(trigger, unit, payload, gameState)) return;
-        if (gameState._globalRuleRegistry?.hasRule(unit, "disable_passives", gameState)) return;
-        if (trigger.effect?.type === "choose_position") {
-          this._choosePosition(unit, gameState);
-          return;
-        }
-        resolveEffect(trigger.effect, context, gameState, this._triggerExtra(trigger, unit, payload, sourceId, gameState));
-      }, { phase: "execute", priority: -100 });
-
       const entries = this._unsubscribers.get(unit.id) || [];
-      entries.push(unsubscribe);
+      for (const triggerObj of triggerObjs) {
+        const trigger = this._parseTrigger(triggerObj, passive);
+        if (!trigger) continue; // unsupported trigger type — not yet wired
+
+        const callback = (payload, context) => {
+          if (!this._matches(trigger, unit, payload, gameState)) return;
+          if (gameState._globalRuleRegistry?.hasRule(unit, "disable_passives", gameState)) return;
+          if (trigger.effect?.type === "choose_position") {
+            this._choosePosition(unit, gameState);
+            return;
+          }
+          resolveEffect(trigger.effect, context, gameState, this._triggerExtra(trigger, unit, payload, sourceId, gameState));
+        };
+        entries.push(this._bus.on(trigger.eventName, callback, { phase: "execute", priority: -100 }));
+      }
       this._unsubscribers.set(unit.id, entries);
     });
   }
@@ -191,7 +197,7 @@ export default class PassiveManager {
       const unit = gameState._findUnit?.(unitId);
       if (!unit || !unit.isAlive()) continue;
       for (const passive of unit.card.passiveAbilities || []) {
-        if (!passive?.trigger && (passive?.type === "conditional" || ModifierService.isModifier(passive))) {
+        if (this._triggerObjects(passive).length === 0 && (passive?.type === "conditional" || ModifierService.isModifier(passive))) {
           this._applyAlwaysOn(unit, passive, IdFactory.passiveSource(unit.id, (unit.card.passiveAbilities || []).indexOf(passive)), null, gameState);
         }
       }
@@ -215,12 +221,25 @@ export default class PassiveManager {
     }
   }
 
-  _parseTrigger(passive) {
-    const trigger = passive?.trigger;
+  /**
+   * Collect a passive's trigger objects: the `triggers` array when authored,
+   * otherwise a one-element wrapper around the singular `trigger`. An empty
+   * result marks the passive as always-on.
+   */
+  _triggerObjects(passive) {
+    if (Array.isArray(passive?.triggers) && passive.triggers.length) return passive.triggers;
+    if (passive?.trigger && typeof passive.trigger === "object") return [passive.trigger];
+    return [];
+  }
+
+  _parseTrigger(trigger, passive) {
     if (!trigger || typeof trigger !== "object") return null;
 
     if (trigger.type === "round_start") {
       return { eventName: EVT.ROUND_START, effect: passive, type: trigger.type };
+    }
+    if (trigger.type === "activation") {
+      return { eventName: EVT.ACTIVATION, effect: passive, type: trigger.type };
     }
     if (trigger.type === "round_end") {
       return { eventName: EVT.ROUND_END, effect: passive, type: trigger.type };
@@ -268,6 +287,7 @@ export default class PassiveManager {
       if (trigger.source && !matchesTriggerSource(gameState._findUnit(payload?.unitId), trigger.source)) return false;
     }
     if (trigger.type === "deploy" && payload?.unitId !== unit.id) return false;
+    if (trigger.type === "activation" && payload?.unitId !== unit.id) return false;
     return true;
   }
 

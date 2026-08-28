@@ -122,6 +122,11 @@ export default class TriggerManager {
       case "round_start":
         this._subscribeEvent(unitId, EVT.ROUND_START, targetCardId, transformType, gameState, () => true);
         break;
+      case "activation":
+        // Only the activated unit's own transformation trigger fires.
+        this._subscribeEvent(unitId, EVT.ACTIVATION, targetCardId, transformType, gameState,
+          (payload) => payload?.unitId === unitId);
+        break;
       case "round_end":
         this._subscribeEvent(unitId, EVT.ROUND_END, targetCardId, transformType, gameState, () => true);
         break;

@@ -204,6 +204,30 @@ export function normalizeEffectObject(obj, context) {
       `${context}.trigger: unknown trigger type "${trigger.type}" — list it in schemas/dsl-catalog.json and both card schemas`
     );
   }
+  // `triggers` is the plural form: an effect that fires on more than one event
+  // (e.g. a Conduit passive that fires on both round start and activation).
+  // Each entry is validated against the trigger catalog and normalized like the
+  // singular `trigger`.
+  const triggersArr = obj.triggers;
+  if (triggersArr !== undefined) {
+    if (!Array.isArray(triggersArr)) {
+      throw new Error(`${context}.triggers: expected an array`);
+    }
+    normalized.triggers = triggersArr.map((t, i) => {
+      if (!t || typeof t !== "object" || Array.isArray(t)) {
+        throw new Error(`${context}.triggers[${i}]: expected a trigger object`);
+      }
+      if (typeof t.type !== "string" || t.type.trim() === "") {
+        throw new Error(`${context}.triggers[${i}]: missing non-empty "type"`);
+      }
+      if (!CATALOG_TRIGGER_TYPES.has(t.type)) {
+        throw new Error(
+          `${context}.triggers[${i}]: unknown trigger type "${t.type}" — list it in schemas/dsl-catalog.json and both card schemas`
+        );
+      }
+      return normalizeEffectObject(t, `${context}.triggers[${i}]`);
+    });
+  }
   const predicate = obj.if;
   if (
     predicate && typeof predicate === "object" && !Array.isArray(predicate) &&
@@ -305,6 +329,9 @@ export function parseTrigger(raw) {
 
   // "round start" 
   if (/^round start$/i.test(text)) return { type: "round_start" };
+
+  // "activation"
+  if (/^activation$/i.test(text)) return { type: "activation" };
   
   // "round end"
   if (/^round end$/i.test(text)) return { type: "round_end" };

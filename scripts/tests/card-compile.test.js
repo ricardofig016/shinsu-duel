@@ -134,6 +134,18 @@ describe("card-compile parseTrigger", () => {
     expect(parseTrigger("i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"))
       .toEqual({ type: "has_all_equipped", cardNames: ["Dionysos: Arms", "Dionysos: Legs", "Dionysos: Wings"] });
   });
+
+  test("parses an activation trigger", () => {
+    expect(parseTrigger("activation")).toEqual({ type: "activation" });
+  });
+
+  test("still parses a bare round start trigger", () => {
+    expect(parseTrigger("round start")).toEqual({ type: "round_start" });
+  });
+
+  test("rejects the removed compound round-start-or-activation prose", () => {
+    expect(parseTrigger("round start or activation")).toBeNull();
+  });
 });
 
 describe("card-compile structured-node validation", () => {
@@ -148,6 +160,28 @@ describe("card-compile structured-node validation", () => {
     const node = compileNode({ type: "deal_damage", amount: 2, target: { side: "enemy" } }, "card.effects[0]");
     expect(node.type).toBe("deal_damage");
     expect(node.target).toEqual({ side: "enemy" });
+  });
+
+  test("compileNode accepts and passes through a triggers array", () => {
+    const node = compileNode(
+      { type: "deal_damage", amount: 1, target: { side: "enemy" }, triggers: [{ type: "round_start" }, { type: "activation" }] },
+      "card.passives[0]"
+    );
+    expect(node.triggers).toEqual([{ type: "round_start" }, { type: "activation" }]);
+  });
+
+  test("compileNode rejects an unknown trigger type inside a triggers array", () => {
+    expect(() => compileNode(
+      { type: "deal_damage", amount: 1, triggers: [{ type: "round_start" }, { type: "bogus" }] },
+      "card.passives[0]"
+    )).toThrow('card.passives[0].triggers[1]: unknown trigger type "bogus"');
+  });
+
+  test("compileNode rejects a non-array triggers field", () => {
+    expect(() => compileNode(
+      { type: "deal_damage", amount: 1, triggers: { type: "round_start" } },
+      "card.passives[0]"
+    )).toThrow("card.passives[0].triggers: expected an array");
   });
 
   test("compileNode rejects an unknown node type at its own source path", () => {

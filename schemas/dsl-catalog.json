@@ -99,7 +99,7 @@
     "reclaim",
     "free_ability_played",
     "quick_ability_used",
-    "round_start_or_activation",
+    "activation",
     "skill_played",
     "dies",
     "evolve",

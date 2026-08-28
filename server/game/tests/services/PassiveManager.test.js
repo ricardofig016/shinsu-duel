@@ -202,31 +202,31 @@ describe("PassiveManager", () => {
   test("_parseTrigger maps structured round triggers and skips unknown ones", () => {
     const game = createGame();
     const manager = game._passiveManager;
+    const effect = { type: "deal_damage", amount: 1, target: { side: "enemy" } };
 
-    const roundStart = manager._parseTrigger({
-      type: "deal_damage", amount: 1, target: { side: "enemy" }, trigger: { type: "round_start" },
-    });
+    const roundStart = manager._parseTrigger({ type: "round_start" }, effect);
     expect(roundStart.eventName).toBe(EVT.ROUND_START);
-    expect(roundStart.effect.trigger).toEqual({ type: "round_start" });
+    expect(roundStart.effect).toBe(effect);
+    expect(roundStart.type).toBe("round_start");
 
-    const roundEnd = manager._parseTrigger({
-      type: "heal", amount: 1, target: { side: "self" }, trigger: { type: "round_end" },
-    });
+    const activation = manager._parseTrigger({ type: "activation" }, effect);
+    expect(activation.eventName).toBe(EVT.ACTIVATION);
+    expect(activation.type).toBe("activation");
+
+    const roundEnd = manager._parseTrigger({ type: "round_end" }, { type: "heal", amount: 1, target: { side: "self" } });
     expect(roundEnd.eventName).toBe(EVT.ROUND_END);
 
-    expect(manager._parseTrigger({
-      type: "modify_stat", stat: "damage", amount: 1, target: { side: "self" },
-    })).toBeNull();
-    expect(manager._parseTrigger({ type: "deal_damage", amount: 1 })).toBeNull();
+    expect(manager._parseTrigger(undefined, effect)).toBeNull();
+    expect(manager._parseTrigger({ type: "bogus" }, effect)).toBeNull();
 
-    const skillPlayed = manager._parseTrigger({ trigger: { type: "skill_played", cardName: "Baang" } });
+    const skillPlayed = manager._parseTrigger({ type: "skill_played", cardName: "Baang" }, effect);
     expect(skillPlayed.eventName).toBe(EVT.SKILL_APPLIED);
     expect(skillPlayed.cardName).toBe("Baang");
 
-    const dealDamage = manager._parseTrigger({ trigger: { type: "deal_damage" } });
+    const dealDamage = manager._parseTrigger({ type: "deal_damage" }, effect);
     expect(dealDamage.eventName).toBe(EVT.DAMAGE_APPLIED);
 
-    const quickAbility = manager._parseTrigger({ trigger: { type: "quick_ability_used" } });
+    const quickAbility = manager._parseTrigger({ type: "quick_ability_used" }, effect);
     expect(quickAbility.eventName).toBe(EVT.UNIT_ABILITY_USED);
   });
 
@@ -591,5 +591,138 @@ describe("PassiveManager", () => {
     expect(unit.chosenPositionCode).toBeNull();
     expect(registry.registerUnit).not.toHaveBeenCalled();
     expect(registry.reconcile).not.toHaveBeenCalled();
+  });
+
+  test("a triggers-array passive fires on ROUND_START for every owner and on ACTIVATION only for the matching unit", () => {
+    const game = createGame();
+    game.round = 10;
+
+    const passive = {
+      type: "deal_damage",
+      amount: 1,
+      target: "all_enemies",
+      raw: "round start or activation: deal 1 to all enemies",
+      triggers: [{ type: "round_start" }, { type: "activation" }],
+    };
+    const makeUnit = (id) => ({
+      id,
+      owner: "Alice",
+      card: { name: "Conduit", maxHp: 8, passiveAbilities: [passive] },
+      currentHp: 8,
+      placedPositionCode: "backline",
+      isAlive() { return this.currentHp > 0; },
+    });
+    const unitA = makeUnit("Unit#rsa-a");
+    const unitB = makeUnit("Unit#rsa-b");
+    game.playerStates.Alice.field.backline.push(unitA, unitB);
+    game._passiveManager.registerUnit(unitA, game);
+    game._passiveManager.registerUnit(unitB, game);
+
+    const targetCardId = getCardIdByName("Test Hwayeomsa");
+    const targetCard = new Card(targetCardId, game.cards[targetCardId], "Bob", game.eventBus);
+    const target = {
+      id: "Unit#rsa-target",
+      owner: "Bob",
+      card: targetCard,
+      currentHp: targetCard.maxHp,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(target);
+
+    // ROUND_START carries no unitId, so every owner's passive fires (2 damage).
+    game.eventBus.emit(EVT.ROUND_START, { round: game.round });
+    expect(target.currentHp).toBe(targetCard.maxHp - 2);
+
+    // ACTIVATION carries the activated unit's id, so only that owner fires.
+    target.currentHp = targetCard.maxHp;
+    game.eventBus.emit(EVT.ACTIVATION, { unitId: unitA.id, unit: unitA, username: "Alice" });
+    expect(target.currentHp).toBe(targetCard.maxHp - 1);
+
+    // An ACTIVATION whose unitId matches neither owner fires nothing.
+    target.currentHp = targetCard.maxHp;
+    game.eventBus.emit(EVT.ACTIVATION, { unitId: "Unit#someone-else", unit: null, username: "Alice" });
+    expect(target.currentHp).toBe(targetCard.maxHp);
+  });
+
+  test("a triggers-array passive's subscriptions are torn down when the unit leaves the field", () => {
+    const game = createGame();
+    game.round = 10;
+
+    const unit = {
+      id: "Unit#rsa-cleanup",
+      owner: "Alice",
+      card: {
+        name: "Conduit",
+        maxHp: 8,
+        passiveAbilities: [{
+          type: "deal_damage",
+          amount: 1,
+          target: "all_enemies",
+          raw: "round start or activation: deal 1 to all enemies",
+          triggers: [{ type: "round_start" }, { type: "activation" }],
+        }],
+      },
+      currentHp: 8,
+      placedPositionCode: "backline",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.backline.push(unit);
+    game._passiveManager.registerUnit(unit, game);
+
+    const targetCardId = getCardIdByName("Test Hwayeomsa");
+    const targetCard = new Card(targetCardId, game.cards[targetCardId], "Bob", game.eventBus);
+    const target = {
+      id: "Unit#rsa-cleanup-target",
+      owner: "Bob",
+      card: targetCard,
+      currentHp: targetCard.maxHp,
+      placedPositionCode: "fisherman",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Bob.field.frontline.push(target);
+
+    // Both subscriptions are live before cleanup.
+    game.eventBus.emit(EVT.ACTIVATION, { unitId: unit.id, unit, username: "Alice" });
+    expect(target.currentHp).toBe(targetCard.maxHp - 1);
+
+    // Unregistering must remove both the ROUND_START and ACTIVATION subscriptions.
+    game._passiveManager.unregisterUnit(unit.id);
+    target.currentHp = targetCard.maxHp;
+    game.eventBus.emit(EVT.ROUND_START, { round: game.round });
+    game.eventBus.emit(EVT.ACTIVATION, { unitId: unit.id, unit, username: "Alice" });
+    expect(target.currentHp).toBe(targetCard.maxHp);
+  });
+
+  test("a conditional passive with triggers is event-driven, not treated as always-on by reapplyAll", () => {
+    const game = createGame();
+    game.round = 10;
+
+    const unit = {
+      id: "Unit#rsa-conditional",
+      owner: "Alice",
+      card: {
+        name: "Conduit",
+        maxHp: 8,
+        passiveAbilities: [{
+          type: "conditional",
+          triggers: [{ type: "round_start" }, { type: "activation" }],
+          if: { type: "has_unit", target: { side: "enemy", attribute: "jeonsulsa" }, negate: true },
+          then: { type: "slay", target: { side: "self" } },
+          raw: "round start or activation: if no enemy Jeonsulsa, Slay me",
+        }],
+      },
+      currentHp: 8,
+      placedPositionCode: "backline",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.backline.push(unit);
+    game._passiveManager.registerUnit(unit, game);
+
+    // reapplyAll must skip a triggers-based conditional: it is event-driven,
+    // not an always-on passive that re-evaluates on every board event.
+    const applySpy = jest.spyOn(game._passiveManager, "_applyAlwaysOn");
+    game._passiveManager.reapplyAll(game);
+    expect(applySpy).not.toHaveBeenCalled();
   });
 });

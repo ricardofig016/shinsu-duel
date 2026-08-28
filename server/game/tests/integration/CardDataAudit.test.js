@@ -77,6 +77,13 @@ function collectInventory(cards) {
     if (node.trigger && typeof node.trigger === "object" && typeof node.trigger.type === "string") {
       record(triggerTypes, node.trigger.type, `${location}.trigger`);
     }
+    if (Array.isArray(node.triggers)) {
+      node.triggers.forEach((trigger, index) => {
+        if (trigger && typeof trigger === "object" && typeof trigger.type === "string") {
+          record(triggerTypes, trigger.type, `${location}.triggers[${index}]`);
+        }
+      });
+    }
     if (node.if && typeof node.if === "object" && typeof node.if.type === "string") {
       record(predicateTypes, node.if.type, `${location}.if`);
     }

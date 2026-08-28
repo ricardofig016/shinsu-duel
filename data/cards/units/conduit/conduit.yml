@@ -13,7 +13,9 @@ passives:
     trigger: { type: round_start }
     raw: "round start: give me Ghost"
   - type: conditional
-    trigger: { type: round_start_or_activation }
+    triggers:
+      - { type: round_start }
+      - { type: activation }
     if:
       type: has_unit
       target:
@@ -25,7 +27,9 @@ passives:
       target: { side: self }
     raw: "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
   - type: play_jeonsul_baang
-    trigger: { type: round_start_or_activation }
+    triggers:
+      - { type: round_start }
+      - { type: activation }
     raw: "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
 abilities:
 evolve:
