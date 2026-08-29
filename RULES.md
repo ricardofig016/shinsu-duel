@@ -230,7 +230,7 @@ Keywords are terms that provide common language for effects and abilities, makin
 13. **Steal**: Take control of an enemy unit, moving it onto your battlefield
 14. **Spend `x`**: Spend `x` shinsu
 15. **Unreachable**: You can't put me in your deck during deckbuilding
-16. **<position>**: The ability, passive, or effect is only available while the unit is deployed as <position>
+16. **`<position>`**: The ability, passive, or effect is only available while the unit is deployed as `<position>`
 17. **Enemy**: A unit on the opponent's side of the board
 18. **Ally**: A unit on your side of the board, yourself included
 
@@ -307,9 +307,9 @@ Damage modifiers (Strong, Vengeful, Ruthless, Exhausted, Weak, Resilient) all ap
 
 Traits are positive permanent effects native to cards. They are color coded as such:
 
-- **Defensive Buffs (Yellow #FFFF00)**
-- **Damage Buffs (Orange #FFA500)**
-- **Utility Buffs (Blue #00FFFF)**
+- **Defensive Buffs** (Yellow `#FFFF00`)
+- **Damage Buffs** (Orange `#FFA500`)
+- **Utility Buffs** (Blue `#00FFFF`)
 
 **List of Traits:**
 
@@ -345,8 +345,8 @@ Notes:
 
 Conditions are negative temporary effects that last until the end of the round. They are color coded as such:
 
-- **Damage Debuffs (Red #FF0000)**
-- **Utility Debuffs (Purple #AA00FF)**
+- **Damage Debuffs** (Red `#FF0000`)
+- **Utility Debuffs** (Purple `#AA00FF`)
 
 **List of Conditions:**
 
@@ -395,10 +395,10 @@ The Shinheuh slot is single-use and is removed at round end with the other slots
 
 **Example Synergies:**
 
-- `**Passive**: round start: choose 1 of 3 random Shinheuh to create in your hand`
-- `**Passive**: when you summon a Shinheuh, Charge 1`
-- `**Passive**: when I am deployed, summon Bull`
-- `**Ability**: spend 1: Summon a random 2-3 cost Shinheuh`
+- Passive: `round start: choose 1 of 3 random Shinheuh to create in your hand`
+- Passive: `when you summon a Shinheuh, Charge 1`
+- Passive: `when i'm deployed, summon Bull`
+- Ability: `spend 1: summon a random 2-3 cost Shinheuh`
 
 ### Guide
 
@@ -432,10 +432,10 @@ You can always see your opponent's hand and the top card of both players' decks.
 
 **Example Synergies:**
 
-- `**Passive**: Round start: draw a card`
-- `**Ability**: Spend 3: switch a card in your hand with a card in your opponent's hand`
-- `**Ability**: Spend 3: draw 3 cards, Charge 1 for each Skill drawn`
-- `**Ability**: Spend 1: discard a Ranker from your opponent's hand`
+- Passive: `round start: draw a card`
+- Ability: `spend 3: switch a card in your hand with a card in your opponent's hand`
+- Ability: `spend 3: draw 3 cards, Charge 1 for each Skill drawn`
+- Ability: `spend 1: discard a Ranker from your opponent's hand`
 
 ### Hwayeomsa
 
@@ -446,21 +446,21 @@ Hwayeomsa are flame users who are able to convert shinsu into fire. They deal te
 **Core in-game mechanic:**
 
 ```md
-Spend 1, Free: Gain 1 **Fire Charge** and create **Fire Core** in your hand if you don't already have one.
-**Fire Core**: Quick: Spend Fire Charges to create the highest affordable Incinerate in your hand.
-**Incinerate I**: Create me by spending 1 Fire Charge. Deal 1 to an enemy.
-**Incinerate II**: Create me by spending 3 Fire Charges. Deal 2 to 2 enemies.
-**Incinerate III**: Create me by spending 5 Fire Charges. Deal 2 to 3 enemies and give them Burn.
-**Incinerate IV**: Create me by spending 7 Fire Charges. Deal 3 to all enemies, and give them Burn 2.
+spend 1, Free: gain 1 Fire Charge and create Fire Core in your hand if you don't already have one
+Fire Core: Quick: spend Fire Charges to create the highest affordable Incinerate in your hand
+Incinerate I: create me by spending 1 Fire Charge. deal 1 to an enemy
+Incinerate II: create me by spending 3 Fire Charges. deal 2 to 2 enemies
+Incinerate III: create me by spending 5 Fire Charges. deal 2 to 3 enemies and give them Burned
+Incinerate IV: create me by spending 7 Fire Charges. deal 3 to all enemies and give them Burned 2
 ```
 
 Fire Charges are a per-player pool (maximum 7) that carries across rounds.
 
 **Example Synergies:**
 
-- `**Passive**: Baang gives Burned`
-- `**Passive**: when an ally gives Burned <x> to an enemy, they give Burned <x+1> instead`
-- `**Ability**: spend 3: deal 2 to all Burned enemies`
+- Passive: `Baang gives Burned`
+- Passive: `when an ally gives Burned <x> to an enemy, they give Burned <x+1> instead`
+- Ability: `spend 3: deal 2 to all Burned enemies`
 
 ### Jeonsulsa
 
@@ -471,20 +471,20 @@ Jeonsulsa are lightning users who have the ability to give electrical properties
 **Core in-game mechanic:**
 
 ```md
-When I'm deployed, grant the enemy **Conduit** +2 HP or summon a **Conduit** on the enemy backline.
-**Conduit**: No position. 8 max HP. Enters with 2 HP. Round start: give me Ghost. Round start or Activation: if there is no Jeonsulsa on the enemy team, Slay me. Round start or Activation: for every 2 HP that I have, play 1 random **Jeonsul Baang** on a random ally.
-**Lightning Baang**: give Burned 1 to a unit.
-**Thunder Baang**: give Exhausted 1 to a unit.
-**Static Baang**: give Weak 1 to a unit.
+when i'm deployed, grant the enemy Conduit +2 HP or summon a Conduit on the enemy backline
+Conduit: No position. 8 max HP. Deployed with 2 HP. round start: give me Ghost. round start or activation: if there is no Jeonsulsa on the enemy team, Slay me. round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally
+Lightning Baang: give Burned 1 to a unit
+Thunder Baang: give Exhausted 1 to a unit
+Static Baang: give Weak 1 to a unit
 ```
 
 "When I'm deployed, grant the enemy Conduit +2 HP or summon Conduit": grant +2 HP (raising both max and current HP) to the enemy Conduit if one exists, otherwise summon a Conduit on the enemy backline. Granting HP to the Conduit always raises both its max and current HP. The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
 
 **Example Synergies:**
 
-- `**Passive**: when I use an ability, grant the enemy **Conduit** 1 HP or summon a new one.`
-- `**Ability**: spend 3: Activate the enemy **Conduit** twice.`
-- `**Passive**: the first time an ally Jeonsulsa dies this game, activate the enemy **Conduit** 4 times.`
+- Passive: `when i use an ability, grant the enemy Conduit 1 HP or summon a new one`
+- Ability: `spend 3: activate the enemy Conduit twice`
+- Passive: `the first time an ally Jeonsulsa dies this game, activate the enemy Conduit 4 times`
 
 ### Irregular
 
@@ -516,9 +516,9 @@ You may equip me as many times as you want with unique equipments.
 
 **Example Synergies:**
 
-- `**Passive**: equipments cost 1 less`
-- `**Passive**: when you equip me, give a random condition to a random enemy`
-- `**Ability**: spend 3: steal an enemy equipment and play it on me`
+- Passive: `equipments cost 1 less`
+- Passive: `when you equip me, give a random condition to a random enemy`
+- Ability: `spend 3: steal an enemy equipment and play it on me`
 
 ## Affiliations
 
@@ -587,8 +587,8 @@ The evolved unit may have different HP, passives, abilities, traits, attributes,
 Examples:
 
 - `Khun Aguero Agnis` evolves into `Khun Aguero Agnis - Evolved` when equipped with `Ice Spear`.
-- `Karaka` evolves into `Karaka - Evolved` when equipped with `Steel Tree`, `Karaka's Armor Suit`, or `Purple Dementor`.
-- `Khun Ran` evolves into `Khun Ran - Evolved` when given `Redan`
+- `Karaka` evolves into `Karaka - Evolved` when equipped with `Karaka's Armor Suit` as a Fisherman, `Steel Tree` as a Wave Controller, or `Purple Dementor` as a Scout.
+- `Khun Ran` evolves into `Khun Ran - Evolved` when `Redan` is played on him.
 
 ## Future Features
 
