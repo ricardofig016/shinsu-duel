@@ -1,0 +1,13 @@
+type: unit
+name: Test Equip Passive Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+passives:
+  - type: reclaim_cards
+    amount: 1
+    card: { type: equipment }
+    trigger: { type: equip, cardName: Test Armor }
+    raw: "when i'm equipped with Test Armor, Reclaim 1 Equipment card"

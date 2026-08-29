@@ -348,28 +348,44 @@ describe("card data audit (runtime ownership coverage)", () => {
     expect(unowned).toEqual([]);
   });
 
-  test("trigger wiring is classified per owner (report, not a failure)", async () => {
+  test("every used trigger type is wired to its subscription owner", async () => {
     const { triggerTypes } = collectInventory(cardsData);
-    const used = [...triggerTypes.keys()].sort();
 
-    const wired = new Set();
-    for (const owner of ["TriggerManager.js", "PassiveManager.js"]) {
-      const source = await fs.readFile(
-        path.join(projectRoot, "server", "game", "services", owner),
-        "utf-8"
-      );
-      for (const match of source.matchAll(/trigger\.type === "([a-z_]+)"/g)) wired.add(match[1]);
-      for (const match of source.matchAll(/case "([a-z_]+)":/g)) wired.add(match[1]);
-    }
-
-    const report = {
-      wired: used.filter((type) => wired.has(type)),
-      usedButUnwired: used.filter((type) => !wired.has(type)),
-      catalogedButUnused: dslCatalog.triggers.filter((type) => !triggerTypes.has(type)),
+    const wiredIn = async (owner) => {
+      const source = await fs.readFile(path.join(projectRoot, "server", "game", "services", owner), "utf-8");
+      const types = new Set();
+      for (const match of source.matchAll(/trigger\.type === "([a-z_]+)"/g)) types.add(match[1]);
+      for (const match of source.matchAll(/case "([a-z_]+)":/g)) types.add(match[1]);
+      return types;
     };
-    // Gameplay wiring is owned by the trigger/passive plans; this audit only
-    // reports which used trigger types have no subscription owner today.
+    const passiveWired = await wiredIn("PassiveManager.js");
+    const transformationWired = await wiredIn("TriggerManager.js");
+
+    // Passive-position triggers (passives[...] entries) belong to
+    // PassiveManager; transformation triggers (evolveInto/igniteInto ASTs)
+    // belong to TriggerManager. Triggers on equipment `effects` entries
+    // resolve through LifecycleEngine's attach pipeline and stay
+    // informational. The scan reads each manager's trigger.type literals and
+    // switch cases; keep those if-chains or this check goes blind.
+    const unowned = [];
+    const informational = [];
+    for (const [type, locations] of [...triggerTypes.entries()].sort()) {
+      for (const location of locations) {
+        if (location.includes(".passives[")) {
+          if (!passiveWired.has(type)) unowned.push(`${type} (passive) at ${location}`);
+        } else if (location.includes("Into.triggers[")) {
+          if (!transformationWired.has(type)) unowned.push(`${type} (transformation) at ${location}`);
+        } else {
+          informational.push(`${type} at ${location}`);
+        }
+      }
+    }
+    expect(unowned).toEqual([]);
+
+    // Cataloged trigger types no shipped card uses (e.g. enemy_dies) and
+    // equipment-effect triggers stay informational.
+    const catalogedButUnused = dslCatalog.triggers.filter((type) => !triggerTypes.has(type));
     // eslint-disable-next-line no-console
-    console.log(`[trigger wiring audit] ${JSON.stringify(report)}`);
+    console.log(`[trigger wiring audit] cataloged but unused: ${JSON.stringify(catalogedButUnused)}; equipment-effect: ${JSON.stringify(informational)}`);
   });
 });

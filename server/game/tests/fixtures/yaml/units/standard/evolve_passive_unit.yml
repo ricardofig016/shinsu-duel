@@ -1,0 +1,14 @@
+type: unit
+name: Test Evolve Passive Unit
+cost: 1
+hp: 5
+rank: regular
+positions:
+  - fisherman
+evolve:
+  - "when i am deployed"
+passives:
+  - type: create_card
+    card: { name: "Test Filler 1" }
+    trigger: { type: evolve }
+    raw: "when i evolve: create Test Filler 1 in hand"

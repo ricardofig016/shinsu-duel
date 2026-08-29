@@ -1,0 +1,13 @@
+type: unit
+name: Test Reclaim Passive Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+passives:
+  - type: compress_shinsu
+    amount: 1
+    card: { type: equipment }
+    trigger: { type: reclaim, cardType: equipment }
+    raw: "when you reclaim an equipment, Compress 1 from it"

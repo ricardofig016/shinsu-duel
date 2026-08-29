@@ -1,0 +1,12 @@
+type: unit
+name: Test Ally Dies Passive Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+passives:
+  - type: light_up
+    amount: 1
+    trigger: { type: ally_dies, rank: regular }
+    raw: "when an ally Regular dies: Light Up 1"

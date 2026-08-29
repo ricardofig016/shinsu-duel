@@ -504,6 +504,7 @@ export default class LifecycleEngine {
       targetId: unit.id,
       killerId: sourceId,
       killerOwner: sourceOwner,
+      owner: unit.owner,
     });
 
     // Every production lethal path uses the lifecycle engine so zones,
@@ -607,6 +608,20 @@ export default class LifecycleEngine {
     }
     if (!targetCard) throw new Error(`Target card ${targetCardId} not found`);
     if (targetCard.type !== "unit") throw new Error(`Target card ${targetCardId} is not a unit`);
+
+    // Announce the evolution before any mutation, while the outgoing form's
+    // own `evolve` passives are still subscribed: the passive swap below
+    // unregisters them before `unit:evolved` fires, so a self-`evolve`
+    // passive could never hear the completion event. Non-cancellable, and
+    // only for true evolutions — a `transform`-effect revert is not an
+    // evolution (RULES.md makes evolution mandatory and automatic).
+    if (isEvolution) {
+      gameState.eventBus.emit(EVT.UNIT_EVOLVING, {
+        unitId: unit.id,
+        unit,
+        toCardId: targetCardId,
+      });
+    }
 
     const lostHp = unit.card.maxHp - unit.currentHp;
     const oldCard = unit.card;

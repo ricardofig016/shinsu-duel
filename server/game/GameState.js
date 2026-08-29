@@ -526,9 +526,23 @@ export default class GameState {
     this.round++;
     ShinsuService.reset(this.playerStates[this.usernames[0]], this.round);
     ShinsuService.reset(this.playerStates[this.usernames[1]], this.round);
-    ZoneService.draw(this.playerStates[this.usernames[0]], GameState.PER_ROUND_DRAW_AMOUNT, this);
-    ZoneService.draw(this.playerStates[this.usernames[1]], GameState.PER_ROUND_DRAW_AMOUNT, this);
     this.roundEndOnTurnEnd = false; // reset the flag for the next round
+    for (const username of this.usernames) {
+      // The per-round draw is a draw like any other: announce each card so
+      // `draw` passives observe it. The opening-hand deal stays silent
+      // because no unit exists to observe it.
+      const { cards: drawn } = ZoneService.draw(this.playerStates[username], GameState.PER_ROUND_DRAW_AMOUNT, this);
+      for (const card of drawn) {
+        this.eventBus.emit(EVT.CARD_DRAWN, {
+          owner: username,
+          cardId: card.cardId,
+          cardName: card.name,
+          card,
+          handSize: this.playerStates[username].hand.length,
+          deckSize: this.playerStates[username].deck.length,
+        });
+      }
+    }
     this.eventBus.emit(EVT.ROUND_START, {
       username: this.currentTurn,
       round: this.round,

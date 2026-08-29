@@ -33,6 +33,7 @@ export default class DrawCardHandler extends BaseHandler {
         owner,
         cardId: card.cardId,
         cardName: card.name,
+        card,
         handSize: player.hand.length,
         deckSize: player.deck.length,
       });
@@ -47,6 +48,7 @@ export default class DrawCardHandler extends BaseHandler {
         owner,
         cardId: card.cardId,
         cardName: card.name,
+        card,
         handSize: player.hand.length,
         deckSize: player.deck.length,
       });

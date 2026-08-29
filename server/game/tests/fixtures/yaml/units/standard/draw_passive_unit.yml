@@ -1,0 +1,12 @@
+type: unit
+name: Test Draw Passive Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - scout
+passives:
+  - type: draw_card
+    amount: 1
+    trigger: { type: draw, cardType: equipment }
+    raw: "whenever you draw an equipment, draw again"

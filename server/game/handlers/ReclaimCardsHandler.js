@@ -29,6 +29,7 @@ export default class ReclaimCardsHandler extends BaseHandler {
         owner,
         cardId: card.cardId,
         cardName: card.name,
+        card,
       });
       return { reclaimed: 1, cards: [card] };
     }
@@ -46,6 +47,7 @@ export default class ReclaimCardsHandler extends BaseHandler {
         owner,
         cardId: card.cardId,
         cardName: card.name,
+        card,
       });
     }
 

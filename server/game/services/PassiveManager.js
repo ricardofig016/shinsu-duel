@@ -212,6 +212,27 @@ export default class PassiveManager {
     if (trigger.type === "deploy") {
       return { eventName: EVT.UNIT_SUMMONED, effect: passive, type: trigger.type };
     }
+    if (trigger.type === "draw") {
+      return { eventName: EVT.CARD_DRAWN, effect: passive, type: trigger.type, cardType: trigger.cardType };
+    }
+    if (trigger.type === "reclaim") {
+      return { eventName: EVT.CARD_RECLAIMED, effect: passive, type: trigger.type, cardType: trigger.cardType };
+    }
+    if (trigger.type === "equip") {
+      return { eventName: EVT.EQUIPMENT_ATTACHED, effect: passive, type: trigger.type, cardName: trigger.cardName };
+    }
+    if (trigger.type === "dies") {
+      return { eventName: EVT.UNIT_KILLED, effect: passive, type: trigger.type };
+    }
+    if (trigger.type === "ally_dies") {
+      return { eventName: EVT.UNIT_KILLED, effect: passive, type: trigger.type, rank: trigger.rank };
+    }
+    if (trigger.type === "free_ability_played") {
+      return { eventName: EVT.UNIT_ABILITY_USED, effect: passive, type: trigger.type };
+    }
+    if (trigger.type === "evolve") {
+      return { eventName: EVT.UNIT_EVOLVING, effect: passive, type: trigger.type };
+    }
 
     // Other trigger types are not yet wired here. Skip registration.
     return null;
@@ -223,7 +244,15 @@ export default class PassiveManager {
     // ModifierStack are automatically suppressed by getEffective /
     // getActiveKeys respecting disabledCount — no extra wiring needed.
     if (gameState.modifierStack.has(unit.id, "condition", "disabled")) return false;
-    if (!(gameState._findUnit(unit.id) === unit && unit.isAlive())) return false;
+    // Every trigger requires its unit to still be on the field. Living is
+    // required too — except for the death triggers: a unit's own `dies` (and
+    // its `ally_dies`, which includes its own death) fires at `unit:killed`,
+    // where the dying unit is already at 0 HP but still on the field and
+    // still subscribed. `unit:destroyed` cannot serve them: destroyUnit
+    // unregisters passives before emitting it.
+    if (!(gameState._findUnit(unit.id) === unit)) return false;
+    const deathTrigger = trigger.type === "dies" || trigger.type === "ally_dies";
+    if (!deathTrigger && !unit.isAlive()) return false;
 
     // Trigger-specific filters.
     if (trigger.type === "skill_played") {
@@ -241,6 +270,28 @@ export default class PassiveManager {
     }
     if (trigger.type === "deploy" && payload?.unitId !== unit.id) return false;
     if (trigger.type === "activation" && payload?.unitId !== unit.id) return false;
+    if (trigger.type === "draw" || trigger.type === "reclaim") {
+      // "whenever you draw an equipment" — only the passive owner's own
+      // draws/reclaims, filtered to the authored card type.
+      if (payload?.owner !== unit.owner) return false;
+      if (trigger.cardType && payload?.card?.type !== trigger.cardType) return false;
+    }
+    if (trigger.type === "equip") {
+      // "when i'm equipped with X" — the bearer's own attach, optionally
+      // narrowed to one equipment card name.
+      if (payload?.unitId !== unit.id) return false;
+      if (trigger.cardName && payload?.equipment?.name !== trigger.cardName) return false;
+    }
+    if (trigger.type === "dies" && payload?.targetId !== unit.id) return false;
+    if (trigger.type === "ally_dies") {
+      // The dead unit's owner must match, with its authored rank when present.
+      // No self-exclusion: RULES.md's ally definition includes the unit itself.
+      const deadUnit = gameState._findUnit(payload?.targetId);
+      if (deadUnit?.owner !== unit.owner) return false;
+      if (trigger.rank && deadUnit?.card?.rank !== trigger.rank) return false;
+    }
+    if (trigger.type === "free_ability_played" && payload?.free !== true) return false;
+    if (trigger.type === "evolve" && payload?.unitId !== unit.id) return false;
     return true;
   }
 
@@ -251,6 +302,9 @@ export default class PassiveManager {
    *
    * - `deal_damage`: "Disarm them" → target the damaged unit.
    * - `quick_ability_used`: "they Charge 1" → the unit that used the ability.
+   * - `free_ability_played`: "the unit Extinguishes their own lighthouses" →
+   *   the Free ability's user.
+   * - `reclaim`: "Compress 1 from it" → the reclaimed card instance.
    */
   _triggerExtra(trigger, unit, payload, sourceId, gameState) {
     const extra = {
@@ -265,6 +319,15 @@ export default class PassiveManager {
       extra.targetId = payload.targetId;
     } else if (trigger.type === "quick_ability_used") {
       extra.owner = payload.username;
+    } else if (trigger.type === "free_ability_played") {
+      // "the unit Extinguishes 5 of their own lighthouses" — the ability
+      // user, not the passive owner.
+      extra.owner = payload.username;
+    } else if (trigger.type === "reclaim") {
+      // "Compress 1 from it" — the reclaimed card itself. The pre-resolved
+      // targetCardId also skips card-descriptor resolution, so the effect
+      // never opens a hand-selection decision.
+      extra.targetCardId = payload.card?.id;
     }
     return extra;
   }

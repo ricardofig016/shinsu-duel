@@ -1,25 +1,25 @@
 # Passive System Architecture — Shinsu Duel
 
-This document describes how timed passive abilities (round start / round end) are compiled and executed. For always-on passives that grant traits or abilities instead of firing on a timer, see `MODIFIER_STACK_ARCHITECTURE.md` and `HANDLER_SYSTEM_ARCHITECTURE.md`.
+This document describes how triggered and timed passive abilities are compiled and executed. For always-on passives that grant traits or abilities instead of firing on an event, see `MODIFIER_STACK_ARCHITECTURE.md` and `HANDLER_SYSTEM_ARCHITECTURE.md`.
 
 ---
 
 ## Overview
 
-Most unit passives are conditional checks read by other systems (e.g. "I ignore Taunt") and don't need a runtime subscription. A smaller set are **timed**: they fire automatically at round start or round end for as long as their unit is on the field. Those are compiled into structured DSL and executed by `PassiveManager`.
+Most unit passives are conditional checks read by other systems (e.g. "I ignore Taunt") and don't need a runtime subscription. A smaller set are **event-driven**: they fire on their authored trigger events, from round start and round end through deaths, draws, reclaims, equips, and Free ability uses, for as long as their unit is on the field. Those are compiled into structured DSL and executed by `PassiveManager`.
 
-A landmark's `rules` are not passives. `GlobalRuleRegistry` registers, queries, and revokes them. `PassiveManager` checks `disable_passives` when it registers, re-evaluates, and executes timed or always-on passives. That query excludes Irregular units, so Floor of Death suppresses a standard unit's passives but never an Irregular's passives. A landmark's own triggered effects remain ordinary `passives` handled here.
+A landmark's `rules` are not passives. `GlobalRuleRegistry` registers, queries, and revokes them. `PassiveManager` checks `disable_passives` when it registers, re-evaluates, and executes triggered or always-on passives. That query excludes Irregular units, so Floor of Death suppresses a standard unit's passives but never an Irregular's passives. A landmark's own triggered effects remain ordinary `passives` handled here.
 
 | Layer        | Location                                 | Purpose                                        |
 | ------------ | ---------------------------------------- | ---------------------------------------------- |
 | **Compiler** | `scripts/card-compile.js`                | Validates/normalizes structured passive nodes  |
-| **Runtime**  | `server/game/services/PassiveManager.js` | Subscribes the compiled effect to round events |
+| **Runtime**  | `server/game/services/PassiveManager.js` | Subscribes the compiled effect to its trigger's event |
 
 ---
 
 ## Compiled Shape
 
-A timed passive is a structured DSL node with a structured `trigger` object:
+A triggered passive is a structured DSL node with a structured `trigger` object:
 
 ```json
 {
@@ -31,7 +31,7 @@ A timed passive is a structured DSL node with a structured `trigger` object:
 }
 ```
 
-The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, `quick_ability_used`, `summon`, `deploy`, and `activation`. The `summon` trigger matches an authored `source` against the summoned unit's `kind` (or name); the `deploy` trigger fires on the unit's own deployment; the `activation` trigger fires on the `unit:activation` event and only for the unit that event names (`payload.unitId`), so activating a Conduit replays its passives while other bearers of the same card stay silent. Passives with no `trigger` at all are always-on and handled separately (see below).
+The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, `quick_ability_used`, `summon`, `deploy`, `activation`, `draw`, `reclaim`, `equip`, `dies`, `ally_dies`, `free_ability_played`, and `evolve`. The `summon` trigger matches an authored `source` against the summoned unit's `kind` (or name); the `deploy` trigger fires on the unit's own deployment; the `activation` trigger fires on the `unit:activation` event and only for the unit that event names (`payload.unitId`), so activating a Conduit replays its passives while other bearers of the same card stay silent. `draw` and `reclaim` fire for the passive owner's own card movements, filtered by the authored `cardType` (`unit` | `skill` | `equipment`); `draw` observes every draw including the round-start draw. `equip` fires when the unit is equipped, narrowed by the authored `cardName` when present. `dies` and `ally_dies` fire on the `unit:killed` event: the lethal pipeline announces the death while the dying unit's own subscriptions are still live, so a self-`dies` passive resolves before cleanup, and non-death removals (substitution, landmark replacement, returning to hand) never fire them. `free_ability_played` fires on the `free` flag of the `unit:ability:used` event for any player's Free ability. `evolve` fires on the `unit:evolving` announcement that precedes an evolution, so the outgoing form's passive resolves before its subscription is swapped; a `transform`-effect revert is not an evolution and never fires it. Passives with no `trigger` at all are always-on and handled separately (see below).
 
 An effect that fires on more than one event declares a `triggers` array of single-event trigger objects instead of a compound trigger type; each entry is parsed and subscribed independently to its own event:
 
@@ -59,7 +59,7 @@ passiveManager.unregisterUnit(unit.id);
 
 The source ID is `Passive#<unitId>#<index>` (`IdFactory.passiveSource`), so any modifiers the passive applies (e.g. via `give_condition`) are provenance tracked like any other effect.
 
-Trigger context is threaded into the resolution: a `deal_damage` passive resolves against the damaged unit (`payload.targetId`), and a `quick_ability_used` passive resolves `owner`-relative steps such as `charge_shinsu` against the unit that used the ability (`payload.username`). A `skill_played` passive only fires for the passive owner's own skill play.
+Trigger context is threaded into the resolution: a `deal_damage` passive resolves against the damaged unit (`payload.targetId`), a `quick_ability_used` passive resolves `owner`-relative steps such as `charge_shinsu` against the unit that used the ability (`payload.username`), a `free_ability_played` passive resolves them the same way (an `extinguish` with `owner: "self"` hits the ability user's lighthouses), and a `reclaim` passive resolves card-consuming steps against the reclaimed card itself (`targetCardId`), so Kurudan's "Compress 1 from it" never opens a hand selection. A `skill_played` passive only fires for the passive owner's own skill play.
 
 ### Lifecycle
 
@@ -67,7 +67,7 @@ Trigger context is threaded into the resolution: a `deal_damage` passive resolve
 - **Evolve / transform:** subscriptions are unregistered and re-registered against the new card so a unit never keeps a previous form's passive.
 - **Destroy:** `unregisterUnit` removes all subscriptions for that unit.
 - A landmark's deploy-time `choose_position` passive opens a `position_selection` decision bound to the landmark unit. Resolving it stores the picked code on the unit and activates its `position: "chosen"` rules; if the landmark leaves play while the choice is still pending, `LifecycleEngine` cancels the decision and the resolver becomes a no-op, so a destroyed landmark can never resurrect its rules.
-- Passives only fire while their unit is alive and still on the field — checked on every trigger, not just at registration time.
+- Passives only fire while their unit is still on the field, and — except for the death triggers, which resolve at `unit:killed` while the dying unit sits at 0 HP — while it is alive. Checked on every trigger, not just at registration time.
 
 ### Disabled
 

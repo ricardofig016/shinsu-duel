@@ -34,6 +34,7 @@ describe("ReclaimCardsHandler", () => {
       owner: game.usernames[0],
       cardId: 2,
       cardName: "Card B",
+      card: cardB,
     }]);
   });
 
@@ -98,6 +99,7 @@ describe("ReclaimCardsHandler", () => {
       owner: game.usernames[0],
       cardId: 1,
       cardName: "Card A",
+      card: target,
     });
   });
 

@@ -1,0 +1,12 @@
+type: unit
+name: Test Dies Passive Unit
+cost: 1
+hp: 1
+rank: regular
+positions:
+  - fisherman
+passives:
+  - type: light_up
+    amount: 1
+    trigger: { type: dies }
+    raw: "when i die, Light Up 1"

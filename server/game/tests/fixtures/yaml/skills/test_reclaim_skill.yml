@@ -1,0 +1,8 @@
+type: skill
+name: Test Reclaim Skill
+cost: 0
+effects:
+  - type: reclaim_cards
+    amount: 1
+    card: { type: equipment }
+    raw: "Reclaim 1 Equipment card"

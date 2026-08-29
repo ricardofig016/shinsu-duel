@@ -1,0 +1,7 @@
+type: unit
+name: Test Evolve Passive Unit - Evolved
+cost: 1
+hp: 6
+rank: regular
+positions:
+  - fisherman

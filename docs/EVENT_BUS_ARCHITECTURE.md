@@ -168,10 +168,11 @@ The `maxDepth` parameter (default 50) prevents infinite event loops. If a handle
 - `unit:death:intent` — cancellable lethal-damage hook before `unit:killed`
 - `unit:undying:saved` — Undying prevented a lethal damage result
 - `unit:destroyed` — unit leaves battlefield (ModifierStack auto-cleans)
+- `unit:evolving` — non-cancellable announcement that an evolution is starting, emitted before the transformation mutates anything (never for `transform`-effect reverts)
 - `unit:evolved` — unit transformed (evolution)
-- `unit:killed` — unit HP reached 0
+- `unit:killed` — unit died through the lethal pipeline (lethal damage or Slay)
 - `unit:position:switched` — unit moved to another position
-- `unit:ability:used` — ability resolved; payload `{ username, unitId, abilityCode, quick }` (the `quick` flag gates `quick_ability_used` passives/equipment triggers and `quick` keyword consumption)
+- `unit:ability:used` — ability resolved; payload `{ username, unitId, abilityCode, quick, free }` (the `quick` flag gates `quick_ability_used` passives/equipment triggers and `quick` keyword consumption; the `free` flag gates `free_ability_played` passives)
 - `unit:ability:granted` — ability granted to a unit
 
 #### Distinguishing overlapping unit events
@@ -187,8 +188,13 @@ Ordering guarantee: `unit:deployed` always precedes `unit:summoned`.
 
 **`unit:killed` vs `unit:destroyed`**
 
-- `unit:killed` — emitted by `DealDamageHandler` when a unit's HP reaches 0, after `unit:death:intent` and Undying interception. The unit is still on the field at this point. Payload: `{ sourceId, targetId, killerId, killerOwner }`. Canonical for `slay` and `kill` triggers.
-- `unit:destroyed` — emitted by `LifecycleEngine.destroyUnit` after the unit has been detached from equipment, removed from the field, moved to the discard pile, and had its subsystems cleaned up. `ModifierStack` auto-cleans its modifiers here. Payload: `{ unitId, unit, owner }`. Canonical for `ally_dies` triggers. It fires for **any** unit removal (lethal damage, line overflow, landmark replacement), not just combat deaths.
+- `unit:killed` — emitted by `LifecycleEngine.killUnit` when a unit dies through the lethal pipeline (the damage tail or Slay), after `unit:death:intent` and Undying interception. The unit is still on the field and its own passives are still subscribed at this point, so a self-`dies` passive resolves here. Payload: `{ sourceId, targetId, killerId, killerOwner, owner }` where `owner` is the dead unit's owner. Canonical for the `slay` and `kill` transformation triggers and for the passive `dies` and `ally_dies` triggers.
+- `unit:destroyed` — emitted by `LifecycleEngine.destroyUnit` after the unit has been detached from equipment, removed from the field, moved to the discard pile, and had its subsystems cleaned up. `ModifierStack` auto-cleans its modifiers here. Payload: `{ unitId, unit, owner }`. It fires for **any** unit removal (lethal damage, line overflow, landmark replacement, return to hand's destroy-style cleanup excepted), not just combat deaths. A unit's own passives are already unregistered when it fires, so it can never serve self-death triggers.
+
+**`unit:evolving` vs `unit:evolved`**
+
+- `unit:evolving` — non-cancellable announcement emitted by `LifecycleEngine.transformUnit` after validation and before any mutation, and only for true evolutions; a `transform`-effect revert never emits it. Payload: `{ unitId, unit, toCardId }`. Canonical for passive `evolve` triggers, whose subscription would otherwise be torn down before `unit:evolved` fires.
+- `unit:evolved` — completion announcement emitted after the transformation is fully wired. Payload: `{ unitId, unit, from, to, fromCardId, toCardId }`. Canonical for observers of the new form.
 
 **Cancellable intent hooks**
 

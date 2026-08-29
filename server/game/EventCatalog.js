@@ -27,6 +27,7 @@ const EVT = {
   UNIT_DESTROY_INTENT: "unit:destroy:intent",
   UNIT_DESTROYED: "unit:destroyed",
   UNIT_EVOLVED:   "unit:evolved",
+  UNIT_EVOLVING:  "unit:evolving",
   UNIT_KILLED:    "unit:killed",
   UNIT_RETURNED_TO_HAND: "unit:returned-to-hand",
 
