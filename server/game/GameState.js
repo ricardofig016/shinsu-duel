@@ -710,6 +710,16 @@ export default class GameState {
       visible: card.visible ?? false,
     });
 
+    // Hand cards carry the equipment a `retain_equipment` bearer kept from its
+    // last deployment, so replay assertions observe the attachments while the
+    // card waits in hand.
+    const serializeHandCard = (card) => ({
+      ...serializeCard(card),
+      retainedEquipment: (card.retainedEquipment || [])
+        .map((c) => ({ cardId: c.cardId, id: c.id }))
+        .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
+    });
+
     const serializeUnit = (unit) => ({
       id: unit.id,
       cardId: unit.card?.cardId,
@@ -732,7 +742,7 @@ export default class GameState {
       }
       players[username] = {
         deck: (p.deck || []).map(serializeCard),
-        hand: (p.hand || []).map(serializeCard),
+        hand: (p.hand || []).map(serializeHandCard),
         discard: (p.discard || []).map(serializeCard),
         startingDeck: p.startingDeck || [],
         lighthouses: p.lighthouses ? { amount: p.lighthouses.amount, max: p.lighthouses.max } : null,

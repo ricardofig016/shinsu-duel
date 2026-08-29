@@ -166,6 +166,7 @@ Handlers are grouped by the domain they mutate.
 | `SwitchPositionHandler` | `switch_position` | Forces a unit to a legal other printed position; Rooted blocked; full lines excluded                          |
 | `SlayHandler`           | `slay`            | Kills via `LifecycleEngine.killUnit` (death-intent → `unit:killed` → destroy); Undying can intercept          |
 | `TransformHandler`      | `transform`       | Replaces the source unit's card via `LifecycleEngine.transformUnit` (preserves HP delta/conditions/equipment) |
+| `ReturnToHandHandler`   | `return_to_hand`  | Returns a unit to its owner's hand via `LifecycleEngine.returnUnitToHand`; not a kill or a discard            |
 
 ### Abilities & observation
 
@@ -183,7 +184,7 @@ Handlers are grouped by the domain they mutate.
 | `NoopHandler` | `noop`     | No-op; resolves to `{ resolved: true }` (test placeholders) |
 | `NoopHandler` | `quick`    | Display-only Quick marker node; no-op                       |
 
-Structured DSL types not listed above (e.g. global rules, `return_to_hand`) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
+Structured DSL types not listed above (e.g. global rules) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 

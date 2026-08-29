@@ -21,6 +21,8 @@ export default class Card {
     this.line = cardData.line ?? null; // authored field line (shinheuh only)
     this.costReduction = 0;
     this.visible = false; // whether the card is visible to the opponent
+    // Equipment instances kept through a return-to-hand; restored on redeploy.
+    this.retainedEquipment = [];
 
     this.affiliations = this.#mapCodesToDictionary(cardData.affiliations || [], affiliations);
     this.positions = this.#mapCodesToDictionary(cardData.positions || [], positions);

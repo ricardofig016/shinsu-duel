@@ -1,0 +1,19 @@
+type: unit
+name: Test Retaining Returner
+cost: 2
+hp: 3
+rank: regular
+positions:
+  - fisherman
+passives:
+  - type: retain_equipment
+    raw: "when i return to hand, i keep my equipments"
+abilities:
+  - type: return_to_hand
+    target: { side: self }
+    quick: true
+    raw: "quick: return me to hand"
+  - type: slay
+    free: true
+    target: { side: enemy }
+    raw: "Free: Slay an enemy"

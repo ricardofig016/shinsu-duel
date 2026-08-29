@@ -1,5 +1,7 @@
 import EVT from "../../EventCatalog.js";
-import { setupGameWithHands, deployUnit } from "../utils.js";
+import LifecycleEngine from "../../services/LifecycleEngine.js";
+import ReplayDriver from "../../replay/ReplayDriver.js";
+import { setupGameWithHands, deployUnit, advanceToRound, getCardIdByName, cards } from "../utils.js";
 
 /**
  * Card-level integration: effect primitives exercised through their real
@@ -13,6 +15,14 @@ function useAbility(game, username, unitId, abilityCode) {
     type: "use-ability-action",
     data: { source: "player", username, unitId, abilityCode },
   });
+}
+
+function equipFromHand(game, unit, cardName) {
+  game.currentTurn = unit.owner;
+  game.round = 15;
+  game.playerStates[unit.owner].shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
+  const handId = game.playerStates[unit.owner].hand.findIndex((c) => c.name === cardName);
+  game.processAction({ type: "equip-equipment-action", data: { source: "player", username: unit.owner, handId, targetUnitId: unit.id } });
 }
 
 describe("effect primitives via real cards", () => {
@@ -105,5 +115,92 @@ describe("effect primitives via real cards", () => {
     const unreachable = granted[0] === "fug" ? [donorWol] : [donorFug, kin];
     for (const u of reachable) expect(u.currentHp).toBe(u.card.maxHp);
     for (const u of unreachable) expect(u.currentHp).toBe(u.card.maxHp - 1);
+  });
+
+  test("a returning unit without retain_equipment detaches its equipment de-ignited to hand", () => {
+    const game = setupGameWithHands({ Alice: ["Test Returner", "Test Ignite Weapon"] });
+    const unit = deployUnit(game, "Alice", "Test Returner", "fisherman");
+    equipFromHand(game, unit, "Test Ignite Weapon");
+    LifecycleEngine.transformEquipment(game, unit, getCardIdByName("Test Ignite Weapon - Ignited"));
+    expect(unit.equipmentAttachments[0].name).toBe("Test Ignite Weapon - Ignited");
+
+    useAbility(game, "Alice", unit.id, "0");
+
+    const hand = game.playerStates.Alice.hand;
+    expect(hand.some((c) => c.name === "Test Returner")).toBe(true);
+    expect(hand.some((c) => c.name === "Test Ignite Weapon")).toBe(true);
+    expect(hand.some((c) => c.name === "Test Ignite Weapon - Ignited")).toBe(false);
+  });
+
+  test("a retain_equipment bearer keeps its equipment through the hand trip and re-attaches it ignited on redeploy", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Retaining Returner", "Test Return Equipment"],
+      Bob: ["Test Filler 1"],
+    });
+    const bearer = deployUnit(game, "Alice", "Test Retaining Returner", "fisherman");
+    deployUnit(game, "Bob", "Test Filler 1", "fisherman");
+    equipFromHand(game, bearer, "Test Return Equipment");
+
+    // The bearer Slays the lone enemy: the weapon ignites through the real trigger.
+    useAbility(game, "Alice", bearer.id, "1");
+    expect(bearer.equipmentAttachments[0].name).toBe("Test Return Equipment - Ignited");
+
+    useAbility(game, "Alice", bearer.id, "0");
+
+    expect(game._findUnit(bearer.id)).toBeNull();
+    const hand = game.playerStates.Alice.hand;
+    const bearerCard = hand.find((c) => c.name === "Test Retaining Returner");
+    expect(bearerCard.retainedEquipment.map((c) => c.name)).toEqual(["Test Return Equipment - Ignited"]);
+    expect(hand.some((c) => c.type === "equipment")).toBe(false);
+
+    // Serialized hand state observes the retained attachment.
+    const handEntry = game.toSerializedState().players.Alice.hand
+      .find((c) => c.cardId === getCardIdByName("Test Retaining Returner"));
+    expect(handEntry.retainedEquipment).toEqual([
+      { cardId: getCardIdByName("Test Return Equipment - Ignited"), id: bearerCard.retainedEquipment[0].id },
+    ]);
+
+    const redeployed = deployUnit(game, "Alice", "Test Retaining Returner", "fisherman");
+    expect(bearerCard.retainedEquipment).toHaveLength(0);
+    expect(redeployed.equipmentAttachments.map((c) => c.name)).toEqual(["Test Return Equipment - Ignited"]);
+    expect(redeployed.equipmentAttachments[0].ignitedFrom).toBe(getCardIdByName("Test Return Equipment"));
+    // The fresh unit's equipment effects were re-resolved against it; the
+    // outgoing unit's entries died with it.
+    expect(game.modifierStack.has(redeployed.id, "stat", "damage")).toBe(true);
+    expect(game.modifierStack.has(bearer.id, "stat", "damage")).toBe(false);
+  });
+
+  test("a return-to-hand and redeploy sequence replays to identical serialized state", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Retaining Returner", "Test Return Equipment"],
+      Bob: ["Test Filler 1"],
+    });
+    advanceToRound(game, 4);
+
+    const bearerHandId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Retaining Returner");
+    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: bearerHandId, placedPositionCode: "fisherman" } });
+    const bearer = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Retaining Returner");
+
+    const fillerHandId = game.playerStates.Bob.hand.findIndex((c) => c.name === "Test Filler 1");
+    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Bob", handId: fillerHandId, placedPositionCode: "fisherman" } });
+
+    const weaponHandId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Return Equipment");
+    game.processAction({ type: "equip-equipment-action", data: { source: "player", username: "Alice", handId: weaponHandId, targetUnitId: bearer.id } });
+
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
+    game.processAction({ type: "use-ability-action", data: { source: "player", username: "Alice", unitId: bearer.id, abilityCode: "1" } });
+    expect(bearer.equipmentAttachments[0].name).toBe("Test Return Equipment - Ignited");
+
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
+    game.processAction({ type: "use-ability-action", data: { source: "player", username: "Alice", unitId: bearer.id, abilityCode: "0" } });
+
+    const returnedHandId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Retaining Returner");
+    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: returnedHandId, placedPositionCode: "fisherman" } });
+    const redeployed = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Retaining Returner");
+    expect(redeployed.equipmentAttachments.map((c) => c.name)).toEqual(["Test Return Equipment - Ignited"]);
+
+    const finalState = game.toSerializedState();
+    const replayed = ReplayDriver.replay(game.logger.getReplayLog(), { cards });
+    expect(replayed.toSerializedState()).toEqual(finalState);
   });
 });

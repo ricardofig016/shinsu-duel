@@ -21,6 +21,7 @@ Shinsu Duel is a 1vs1 collectible card game (CCG) inspired by SIU's _[Tower of G
     - [Units](#units)
     - [Skills](#skills)
     - [Equipment](#equipment)
+    - [Returning a unit to hand](#returning-a-unit-to-hand)
   - [Keywords](#keywords)
   - [Positions](#positions)
   - [Kinds](#kinds)
@@ -210,6 +211,14 @@ Once ignited, an equipment stays ignited until something specifically changes it
 When a bearer dies or is equipped with another equipment, its equipments leave the board and return to the controlling player's hand, back to their default non-ignited versions. A [Living Ignition Weapon](#living-ignition-weapon) overrides this: it can be equipped with multiple equipment without returning the old ones. When a bearer is Discarded without dying (e.g. substituted from a full line), its equipments are Discarded along with it. When a bearer is stolen, its equipments go with it and keep their ignited state; evolution preserves a bearer's equipments, which also keep their ignited state.
 
 **Examples**: Green April, Zahard's Ring, Woon's Hammer
+
+### Returning a unit to hand
+
+Some effects return a unit from the battlefield to its owner's hand. Returning is neither killing nor Discarding: no on-death or on-kill effects fire, and the card is not Discarded. The unit still leaves the board like any leaving unit: its equipments are handled per the [Equipment](#equipment) rules, its passives and granted effects end, and its conditions and traits are cleared.
+
+The returned card can be deployed again later. A redeploy starts fresh: the unit enters with its printed HP and none of the conditions, traits, or lost HP it carried in its previous deployment.
+
+**Retain equipment**: a unit with the `retain_equipment` passive keeps its equipments attached when it returns to hand, keeping their ignited state, and they re-attach to the unit when it is deployed again. This restore is not an Equip action, so effects that prevent equipping don't apply to it. Without `retain_equipment`, returning to hand detaches equipments exactly as death does: they return to the controller's hand, back to their default non-ignited versions. A unit card discarded from hand while holding retained equipments discards them along with it, mirroring the discard-without-dying rule.
 
 ## Keywords
 

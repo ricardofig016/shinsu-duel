@@ -2734,6 +2734,132 @@
   "10060": {
     "cardId": 10060,
     "type": "unit",
+    "name": "Test Retaining Returner",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 3,
+    "rank": "regular",
+    "kind": "standard",
+    "positions": [
+      "fisherman"
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [
+      {
+        "type": "return_to_hand",
+        "target": {
+          "side": "self"
+        },
+        "quick": true,
+        "raw": "quick: return me to hand"
+      },
+      {
+        "type": "slay",
+        "free": true,
+        "target": {
+          "side": "enemy"
+        },
+        "raw": "Free: Slay an enemy"
+      }
+    ],
+    "passives": [
+      {
+        "type": "retain_equipment",
+        "raw": "when i return to hand, i keep my equipments"
+      }
+    ]
+  },
+  "10061": {
+    "cardId": 10061,
+    "type": "equipment",
+    "name": "Test Return Equipment",
+    "cost": 1,
+    "deckConstraints": [],
+    "effects": [
+      {
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 2,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+      }
+    ],
+    "igniteInto": {
+      "triggers": [
+        {
+          "type": "slay",
+          "target": "unit",
+          "raw": "the bearer Slays a unit"
+        }
+      ],
+      "cardId": 10062
+    }
+  },
+  "10062": {
+    "cardId": 10062,
+    "type": "equipment",
+    "name": "Test Return Equipment - Ignited",
+    "cost": 1,
+    "deckConstraints": [],
+    "effects": [
+      {
+        "type": "modify_stat",
+        "stat": "damage",
+        "amount": 2,
+        "target": {
+          "side": "bearer"
+        },
+        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+      },
+      {
+        "type": "give_condition",
+        "condition": "exhausted",
+        "amount": 1,
+        "target": {
+          "side": "enemy"
+        },
+        "trigger": {
+          "type": "deal_damage"
+        },
+        "raw": "the bearer's damage-dealing abilities give Exhausted 1"
+      }
+    ],
+    "ignitedFrom": 10061
+  },
+  "10063": {
+    "cardId": 10063,
+    "type": "unit",
+    "name": "Test Returner",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 3,
+    "rank": "regular",
+    "kind": "standard",
+    "positions": [
+      "fisherman"
+    ],
+    "traits": [],
+    "attributes": [],
+    "affiliations": [],
+    "abilities": [
+      {
+        "type": "return_to_hand",
+        "target": {
+          "side": "self"
+        },
+        "quick": true,
+        "raw": "quick: return me to hand"
+      }
+    ],
+    "passives": []
+  },
+  "10064": {
+    "cardId": 10064,
+    "type": "unit",
     "name": "Test Scout",
     "cost": 1,
     "deckConstraints": [],
@@ -2769,8 +2895,8 @@
     ],
     "passives": []
   },
-  "10061": {
-    "cardId": 10061,
+  "10065": {
+    "cardId": 10065,
     "type": "unit",
     "name": "Test Scout Ranker",
     "cost": 3,
@@ -2816,8 +2942,8 @@
       }
     ]
   },
-  "10062": {
-    "cardId": 10062,
+  "10066": {
+    "cardId": 10066,
     "type": "unit",
     "name": "Test Shinheuh",
     "cost": 3,
@@ -2841,8 +2967,8 @@
     ],
     "passives": []
   },
-  "10063": {
-    "cardId": 10063,
+  "10067": {
+    "cardId": 10067,
     "type": "unit",
     "name": "Test Spear Bearer",
     "cost": 2,
@@ -2877,8 +3003,8 @@
     ],
     "passives": []
   },
-  "10064": {
-    "cardId": 10064,
+  "10068": {
+    "cardId": 10068,
     "type": "skill",
     "name": "Test Static Baang",
     "cost": 1,
@@ -2901,8 +3027,8 @@
       }
     ]
   },
-  "10065": {
-    "cardId": 10065,
+  "10069": {
+    "cardId": 10069,
     "type": "unit",
     "name": "Test Stone Doll",
     "cost": 0,
@@ -2950,8 +3076,8 @@
       }
     ]
   },
-  "10066": {
-    "cardId": 10066,
+  "10070": {
+    "cardId": 10070,
     "type": "unit",
     "name": "Test Switch Position Unit",
     "cost": 6,
@@ -2996,8 +3122,8 @@
     ],
     "passives": []
   },
-  "10067": {
-    "cardId": 10067,
+  "10071": {
+    "cardId": 10071,
     "type": "equipment",
     "name": "Test Thorn",
     "cost": 0,
@@ -3046,8 +3172,8 @@
       }
     ]
   },
-  "10068": {
-    "cardId": 10068,
+  "10072": {
+    "cardId": 10072,
     "type": "equipment",
     "name": "Test Thorn Fragment I",
     "series": "thorn-fragment",
@@ -3102,8 +3228,8 @@
       }
     ]
   },
-  "10069": {
-    "cardId": 10069,
+  "10073": {
+    "cardId": 10073,
     "type": "equipment",
     "name": "Test Thorn Fragment II",
     "series": "thorn-fragment",
@@ -3158,8 +3284,8 @@
       }
     ]
   },
-  "10070": {
-    "cardId": 10070,
+  "10074": {
+    "cardId": 10074,
     "type": "equipment",
     "name": "Test Thorn Fragment III",
     "series": "thorn-fragment",
@@ -3214,8 +3340,8 @@
       }
     ]
   },
-  "10071": {
-    "cardId": 10071,
+  "10075": {
+    "cardId": 10075,
     "type": "equipment",
     "name": "Test Thorn Fragment IV",
     "series": "thorn-fragment",
@@ -3270,8 +3396,8 @@
       }
     ]
   },
-  "10072": {
-    "cardId": 10072,
+  "10076": {
+    "cardId": 10076,
     "type": "skill",
     "name": "Test Thunder Baang",
     "cost": 1,
@@ -3294,8 +3420,8 @@
       }
     ]
   },
-  "10073": {
-    "cardId": 10073,
+  "10077": {
+    "cardId": 10077,
     "type": "unit",
     "name": "Test Trait Unit",
     "cost": 1,
@@ -3379,8 +3505,8 @@
     "abilities": [],
     "passives": []
   },
-  "10074": {
-    "cardId": 10074,
+  "10078": {
+    "cardId": 10078,
     "type": "skill",
     "name": "Test Unreachable Skill",
     "cost": 4,
@@ -3404,8 +3530,8 @@
       }
     ]
   },
-  "10075": {
-    "cardId": 10075,
+  "10079": {
+    "cardId": 10079,
     "type": "unit",
     "name": "Test Water Stadium",
     "cost": 2,
@@ -3425,8 +3551,8 @@
     "abilities": [],
     "passives": []
   },
-  "10076": {
-    "cardId": 10076,
+  "10080": {
+    "cardId": 10080,
     "type": "unit",
     "name": "Test Water Stadium Two",
     "cost": 2,
@@ -3446,8 +3572,8 @@
     "abilities": [],
     "passives": []
   },
-  "10077": {
-    "cardId": 10077,
+  "10081": {
+    "cardId": 10081,
     "type": "unit",
     "name": "Test Yeo Goseng",
     "cost": 1,

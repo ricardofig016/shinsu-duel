@@ -215,6 +215,31 @@ export default class LifecycleEngine {
       gameState._globalRuleRegistry?.reconcile(gameState);
     }
 
+    // Restore equipment a `retain_equipment` bearer kept from its previous
+    // deployment. The instances never left the card, so this is not an equip
+    // action: no cost, no replacement, and `prevent_equip` rules do not apply.
+    // Their effects resolve against the fresh unit, and ignited definitions
+    // stay ignited.
+    const retained = card.retainedEquipment || [];
+    if (retained.length > 0) {
+      card.retainedEquipment = [];
+      unit.equipmentAttachments = [...retained];
+      for (const equip of retained) {
+        equip.owner = owner;
+        if (equip.igniteInto && gameState._triggerManager) {
+          gameState._triggerManager.registerTransformation(
+            unit.id,
+            equip.igniteInto.triggers,
+            equip.igniteInto.cardId,
+            "ignition",
+            gameState,
+            equip.id
+          );
+        }
+        LifecycleEngine._resolveEquipmentEffects(gameState, unit, equip);
+      }
+    }
+
     // Emit the deploy event chain AFTER the unit is fully wired. `unit:deployed`
     // announces battlefield entry; `unit:summoned` is the canonical event for
     // `deploy` triggers, so the unit's complete observable state (native traits,
@@ -492,6 +517,79 @@ export default class LifecycleEngine {
     }
 
     return { killed: true };
+  }
+
+  /**
+   * Return a unit to its owner's hand: the non-kill, non-discard way off the
+   * board. No death intent, no `UNIT_KILLED`, no on-death triggers, and the
+   * card instance goes back to the hand through `ZoneService.addToHand`
+   * rather than the discard pile.
+   *
+   * Board cleanup mirrors `destroyUnit`'s leaving-board work. Equipment
+   * disposition depends on `retain_equipment` (consulted before any cleanup
+   * can revoke the keyword, since an attachment may grant it): by default
+   * every attachment detaches to the controller's hand de-ignited, exactly as
+   * on death; with retain the attached card instances move onto the card
+   * untouched — ignited state included — and re-attach on the next deployment
+   * (see `_placeOnField`).
+   *
+   * Idempotent — returning a unit that is no longer on the field is a no-op.
+   *
+   * @returns {{ returned: boolean, retainedEquipment?: number }}
+   */
+  static returnUnitToHand(gameState, unit) {
+    if (!unit) return { returned: false };
+
+    const stillOnField = gameState._findUnit(unit.id);
+    if (!stillOnField || stillOnField !== unit) return { returned: false };
+
+    const retain = gameState.modifierStack.hasRetainEquipment(unit);
+
+    const attachments = LifecycleEngine._getEquipment(unit);
+    if (retain && attachments.length > 0) {
+      LifecycleEngine._syncEquipment(unit, []);
+      unit.card.retainedEquipment = [...(unit.card.retainedEquipment || []), ...attachments];
+      for (const equip of attachments) {
+        ModifierService.revokeBySource(gameState, equip.id);
+        gameState._triggerManager?.unregisterAll(unit.id, "ignition", equip.id);
+        gameState.unregisterEquipmentTriggers(equip.id);
+        // AbilityRegistry cleanup is handled by the ModifierStack.onRevoke bridge.
+      }
+    } else if (attachments.length > 0) {
+      LifecycleEngine.detachEquipment(gameState, unit);
+    }
+
+    gameState._unindexUnit(unit.id);
+    LifecycleEngine._removeFromField(gameState, unit);
+
+    const player = gameState.playerStates[unit.owner];
+    if (player) {
+      ZoneService.addToHand(player, unit.card);
+    }
+
+    gameState._triggerManager?.unregisterAll(unit.id);
+    gameState._passiveManager?.unregisterUnit(unit.id);
+    // Revoke any always-on grants this unit's passives still hold on other
+    // units, ordered after unregister so the revoke events can't re-trigger
+    // the outgoing handlers (same reasoning as destroyUnit).
+    gameState._passiveManager?.revokeGrants(unit.id, unit.card?.passiveAbilities || [], gameState);
+    gameState._globalRuleRegistry?.unregisterUnit(unit, gameState);
+    gameState.cancelPendingDecisions?.((d) => d.type === "position_selection" && d.unitId === unit.id);
+    gameState._attributeRegistry?.onUnitRemoved(unit, gameState);
+
+    // A redeploy creates a fresh unit, so nothing the outgoing unit owned may
+    // survive keyed to its id. UNIT_DESTROYED is intentionally not emitted;
+    // its ModifierStack cascade runs here instead.
+    gameState.modifierStack.removeByTarget(unit.id);
+
+    gameState.eventBus.emit(EVT.UNIT_RETURNED_TO_HAND, {
+      unitId: unit.id,
+      unit,
+      owner: unit.owner,
+      retainedEquipment: retain ? attachments.length : 0,
+    });
+
+    return { returned: true, retainedEquipment: retain ? attachments.length : 0 };
   }
 
   /**
