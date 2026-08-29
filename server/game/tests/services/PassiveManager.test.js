@@ -75,7 +75,7 @@ describe("PassiveManager", () => {
     game.eventBus.on(EVT.EFFECT_UNSUPPORTED, (payload) => events.push(payload));
 
     const result = resolveEffect(
-      { type: "grant_affiliation", target: { side: "self" }, source: { side: "ally" }, raw: "grant an affiliation" },
+      { type: "synthetic_unregistered_effect", raw: "unknown effect" },
       { emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) },
       game,
       { owner: "Alice", sourceId: "System" }

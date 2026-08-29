@@ -1,0 +1,21 @@
+type: unit
+name: Test Affiliation Granter
+cost: 4
+hp: 4
+rank: regular
+positions:
+  - wave controller
+abilities:
+  - type: grant_affiliation
+    free: true
+    target: { side: self }
+    source: { side: ally, random: true, exclude_self: true }
+    raw: "Free: give me a random affiliation of another ally"
+  - type: heal
+    free: true
+    amount: 1
+    target:
+      side: ally
+      scope: all
+      shared_affiliation: true
+    raw: "Free: heal all ally members of my affiliations 1 HP"

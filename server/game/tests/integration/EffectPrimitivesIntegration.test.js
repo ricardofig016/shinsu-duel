@@ -78,4 +78,32 @@ describe("effect primitives via real cards", () => {
 
     expect(khunRan.placedPositionCode).toBe("spear-bearer");
   });
+
+  test("the affiliation granter gains a random donor affiliation and shared-affiliation readers see it", () => {
+    const game = setupGameWithHands({
+      Alice: ["Test Affiliation Granter", "Test Affiliation Donor Fug", "Test Affiliation Donor Wolhaiksong", "Test Affiliation Kin"],
+    });
+    const granter = deployUnit(game, "Alice", "Test Affiliation Granter", "wave-controller");
+    const donorFug = deployUnit(game, "Alice", "Test Affiliation Donor Fug", "scout");
+    const donorWol = deployUnit(game, "Alice", "Test Affiliation Donor Wolhaiksong", "fisherman");
+    const kin = deployUnit(game, "Alice", "Test Affiliation Kin", "spear-bearer");
+
+    useAbility(game, "Alice", granter.id, "0");
+
+    const granted = [...game.modifierStack.getActiveKeys(granter.id, "affiliation")];
+    expect(granted).toHaveLength(1);
+    expect(["fug", "wolhaiksong"]).toContain(granted[0]);
+    const [mod] = game.modifierStack.getModifiers(granter.id, "affiliation");
+    expect(mod.sourceId).toBe(granter.id);
+
+    // The granter's shared-affiliation heal reaches every ally holding the
+    // granted affiliation — the non-donor kin included — and skips the rest.
+    for (const u of [donorFug, donorWol, kin]) u.currentHp -= 1;
+    useAbility(game, "Alice", granter.id, "1");
+
+    const reachable = granted[0] === "fug" ? [donorFug, kin] : [donorWol];
+    const unreachable = granted[0] === "fug" ? [donorWol] : [donorFug, kin];
+    for (const u of reachable) expect(u.currentHp).toBe(u.card.maxHp);
+    for (const u of unreachable) expect(u.currentHp).toBe(u.card.maxHp - 1);
+  });
 });

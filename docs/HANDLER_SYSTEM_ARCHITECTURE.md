@@ -151,6 +151,7 @@ Handlers are grouped by the domain they mutate.
 | `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                                                                               |
 | `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                                                                   |
 | `GrantRandomTraitHandler` | `grant_random_trait` | Grants a seeded-random trait (optional `numeric` pool filter)                                                                                   |
+| `GrantAffiliationHandler` | `grant_affiliation`  | Grants one affiliation from the donor's pool (native + granted) as a source-tracked ModifierStack entry; donor pre-resolved into `sourceUnitId` |
 | `GiveConditionHandler`    | `give_condition`     | Respects Immune; `stack.apply({ type:"condition", ... })`; applies `modify_condition` amplifier                                                 |
 | `RemoveConditionHandler`  | `remove_conditions`  | `stack.removeWhere(m => m.type === "condition" && keySet.has(m.key))`                                                                           |
 
@@ -182,7 +183,7 @@ Handlers are grouped by the domain they mutate.
 | `NoopHandler` | `noop`     | No-op; resolves to `{ resolved: true }` (test placeholders) |
 | `NoopHandler` | `quick`    | Display-only Quick marker node; no-op                       |
 
-Structured DSL types not listed above (e.g. global rules, `grant_affiliation`, `return_to_hand`) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
+Structured DSL types not listed above (e.g. global rules, `return_to_hand`) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 

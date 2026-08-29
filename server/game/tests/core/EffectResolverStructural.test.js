@@ -117,11 +117,11 @@ describe("EffectResolver structural nodes", () => {
     const result = resolveEffect({
       type: "conditional",
       if: { type: "has_unit", target: { side: "ally", name: "Yeo Miseng" } },
-      then: { type: "grant_affiliation", target: { side: "self" }, source: { side: "ally" } },
+      then: { type: "synthetic_unregistered_effect", raw: "unknown leaf" },
     }, context(game), game, { owner: "Alice", sourceOwner: "Alice" });
 
     expect(result).toEqual(expect.objectContaining({ reason: "unsupported_effect" }));
-    expect(events.some((e) => e.type === "grant_affiliation")).toBe(true);
+    expect(events.some((e) => e.type === "synthetic_unregistered_effect")).toBe(true);
   });
 
   test("sequence defers remaining steps while a target choice is pending", () => {

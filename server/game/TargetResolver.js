@@ -259,10 +259,16 @@ function filterByPosition(targets, position) {
   return targets.filter((u) => positions.includes(u.placedPositionCode));
 }
 
-function filterByAffiliation(targets, affiliation) {
+function filterByAffiliation(targets, gameState, affiliation) {
   if (!affiliation) return targets;
   const codes = Array.isArray(affiliation) ? affiliation : [affiliation];
-  return targets.filter((u) => codes.some((code) => u.card?.affiliations?.[code] !== undefined));
+  return targets.filter((u) => {
+    const unitAffiliations = new Set([
+      ...Object.keys(u.card?.affiliations || {}),
+      ...gameState.modifierStack.getActiveKeys(u.id, "affiliation"),
+    ]);
+    return codes.some((code) => unitAffiliations.has(code));
+  });
 }
 
 function filterBySharedAffiliation(targets, gameState, sourceUnit) {
@@ -335,7 +341,7 @@ function applyFilters(candidates, gameState, filters = {}, sourceUnit = null) {
   candidates = filterByTraitNot(candidates, gameState, traitNot);
   candidates = filterByRank(candidates, rank);
   candidates = filterByPosition(candidates, position);
-  candidates = filterByAffiliation(candidates, affiliation);
+  candidates = filterByAffiliation(candidates, gameState, affiliation);
   candidates = filterByAttribute(candidates, attribute);
   candidates = filterByName(candidates, name);
   candidates = filterByKind(candidates, kind);

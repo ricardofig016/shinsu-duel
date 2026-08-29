@@ -33,6 +33,7 @@ import SwitchPositionHandler from "./handlers/SwitchPositionHandler.js";
 import RemoveTraitsHandler from "./handlers/RemoveTraitsHandler.js";
 import CopyTraitsHandler from "./handlers/CopyTraitsHandler.js";
 import GrantRandomTraitHandler from "./handlers/GrantRandomTraitHandler.js";
+import GrantAffiliationHandler from "./handlers/GrantAffiliationHandler.js";
 import PeekHandHandler from "./handlers/PeekHandHandler.js";
 import CopyAbilityHandler from "./handlers/CopyAbilityHandler.js";
 import RepeatPlayHandler from "./handlers/RepeatPlayHandler.js";
@@ -70,6 +71,7 @@ function getRegistry() {
     _registry.register("remove_traits", RemoveTraitsHandler);
     _registry.register("copy_traits", CopyTraitsHandler);
     _registry.register("grant_random_trait", GrantRandomTraitHandler);
+    _registry.register("grant_affiliation", GrantAffiliationHandler);
     _registry.register("give_condition", GiveConditionHandler);
     _registry.register("remove_conditions", RemoveConditionHandler);
     _registry.register("activate", ActivateHandler);
@@ -523,10 +525,11 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     return targets.map((target) => resolveEffect(effect, context, gameState, { ...extra, targetId: target.id }));
   }
 
-  // Structured `source` unit descriptor (copy_traits / copy_ability): resolve
-  // it into a concrete `sourceUnitId`. Handlers never receive a `source`
-  // descriptor — there is a single resolution path through TargetResolver.
-  const SOURCE_DESCRIPTOR_TYPES = new Set(["copy_traits", "copy_ability"]);
+  // Structured `source` unit descriptor (copy_traits / copy_ability /
+  // grant_affiliation): resolve it into a concrete `sourceUnitId`. Handlers
+  // never receive a `source` descriptor — there is a single resolution path
+  // through TargetResolver.
+  const SOURCE_DESCRIPTOR_TYPES = new Set(["copy_traits", "copy_ability", "grant_affiliation"]);
   if (SOURCE_DESCRIPTOR_TYPES.has(type) && !payload.sourceUnitId && payload.source && typeof payload.source === "object" && !Array.isArray(payload.source)) {
     const structured = TargetResolver.normalizeStructuredTarget(payload.source);
     const sourceCandidates = TargetResolver.resolveTargets(gameState, {

@@ -58,6 +58,30 @@ describe("TargetResolver", () => {
     expect(targets[0].id).toBe("enemy2");
   });
 
+  test("the affiliation filter matches a unit holding only a granted affiliation", () => {
+    const granted = { id: "granted1", owner: "Alice", isAlive: () => true, placedPositionCode: "scout", card: { rank: "regular", affiliations: {} } };
+    const native = { id: "native1", owner: "Alice", isAlive: () => true, placedPositionCode: "scout", card: { rank: "regular", affiliations: { fug: {} } } };
+    game.playerStates.Alice.field.frontline = [granted, native];
+
+    game.modifierStack.apply({
+      sourceId: "Passive#1",
+      sourceType: "passive",
+      targetId: "granted1",
+      type: "affiliation",
+      key: "fug",
+      value: 1,
+      operation: "add",
+    });
+
+    const targets = TargetResolver.resolveTargets(game, {
+      target: "all_allies",
+      sourceUnit: granted,
+      affiliation: "fug",
+      count: 10,
+    });
+    expect(targets.map((u) => u.id)).toEqual(["granted1", "native1"]);
+  });
+
   test("resolveTargetSelection locks Taunt units and leaves free slots for a multi-target choice", () => {
     const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
     const taunter = { id: "taunter", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };

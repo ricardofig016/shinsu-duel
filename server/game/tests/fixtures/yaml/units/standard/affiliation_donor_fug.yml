@@ -1,0 +1,9 @@
+type: unit
+name: Test Affiliation Donor Fug
+cost: 1
+hp: 2
+rank: regular
+positions:
+  - scout
+affiliations:
+  - fug

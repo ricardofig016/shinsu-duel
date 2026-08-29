@@ -1,0 +1,9 @@
+type: unit
+name: Test Affiliation Kin
+cost: 1
+hp: 2
+rank: regular
+positions:
+  - spear bearer
+affiliations:
+  - fug
