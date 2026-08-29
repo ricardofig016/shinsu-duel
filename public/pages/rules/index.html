@@ -11,7 +11,15 @@
   <body>
     <div id="navbar-component"></div>
 
-    <div class="allow-scroll" id="rules-container"></div>
+    <div class="rules-tabs">
+      <button type="button" id="learn-tab-button" class="button active">Learn to play</button>
+      <button type="button" id="full-tab-button" class="button">Full rules</button>
+    </div>
+
+    <div class="allow-scroll" id="rules-container">
+      <div id="learn-panel"></div>
+      <div id="full-panel" class="hidden"></div>
+    </div>
 
     <script type="module" src="/pages/rules/script.js"></script>
   </body>
