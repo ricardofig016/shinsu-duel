@@ -38,6 +38,12 @@ describe("Unit", () => {
     expect(unit.equipmentAttachments).toEqual([]);
   });
 
+  test("initializes currentHp from entryHp when the card carries one", () => {
+    const unit = new Unit(unitCard({ hp: 8, entryHp: 2 }), "scout");
+    expect(unit.card.maxHp).toBe(8);
+    expect(unit.currentHp).toBe(2);
+  });
+
   test("throws when constructed without a card", () => {
     expect(() => new Unit(null, "scout")).toThrow("Card instance is required");
   });
@@ -61,5 +67,13 @@ describe("Unit", () => {
     expect(obj.currentHp).toBe(10);
     expect(obj.placedPositionCode).toBe("scout");
     expect(obj.owner).toBe("Alice");
+  });
+
+  test("toSanitizedObject exposes the card's entryHp, null when absent", () => {
+    expect(unitCard({ hp: 8, entryHp: 2 }).toSanitizedObject().entryHp).toBe(2);
+    expect(unitCard().toSanitizedObject().entryHp).toBeNull();
+
+    const unit = new Unit(unitCard({ hp: 8, entryHp: 2 }), "scout");
+    expect(unit.toSanitizedObject().card.entryHp).toBe(2);
   });
 });

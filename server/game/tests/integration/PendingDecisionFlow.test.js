@@ -36,7 +36,9 @@ describe("pending decision continuations", () => {
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
     const unitId = getCardIdByName("Test Scout");
-    const pendingCard = new Card(unitId, game.cards[unitId], "Alice", game.eventBus);
+    // entryHp below maxHp so the pending candidate's displayed HP is the
+    // entry state, not the full max.
+    const pendingCard = new Card(unitId, { ...game.cards[unitId], entryHp: 1 }, "Alice", game.eventBus);
     game.playerStates.Alice.hand = [pendingCard];
 
     for (let index = 0; index < 5; index++) addUnit(game, "Alice", "Test Light Bearer");
@@ -51,12 +53,18 @@ describe("pending decision continuations", () => {
     expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
     expect(game.playerStates.Alice.hand).toEqual([pendingCard]);
     expect(game.getTotalShinsu("Alice")).toBe(10);
+    // The pending card's candidate shows its entry HP (1), not its max (2).
+    const pendingCandidate = game.pendingDecision.candidates
+      .find((candidate) => candidate.id === `pending-deploy:${pendingCard.id}`);
+    expect(pendingCandidate.hp).toBe(1);
 
     const [chosen] = game.pendingDecision.candidates;
     game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [chosen.id] });
 
     expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
-    expect(game.playerStates.Alice.field.frontline.some((unit) => unit.card.name === "Test Scout")).toBe(true);
+    const deployed = game.playerStates.Alice.field.frontline.find((unit) => unit.card.name === "Test Scout");
+    expect(deployed).toBeDefined();
+    expect(deployed.currentHp).toBe(1); // unit creation consumed the entry HP
     expect(game.playerStates.Alice.hand).toHaveLength(0);
     expect(game.getTotalShinsu("Alice")).toBe(9);
     expect(game.currentTurn).toBe("Bob");
