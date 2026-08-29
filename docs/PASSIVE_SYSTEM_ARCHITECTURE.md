@@ -31,7 +31,20 @@ A timed passive is a structured DSL node with a structured `trigger` object:
 }
 ```
 
-The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, `quick_ability_used`, `summon`, and `deploy`. The `summon` trigger matches an authored `source` against the summoned unit's `kind` (or name); the `deploy` trigger fires on the unit's own deployment. Passives with no `trigger` at all are always-on and handled separately (see below).
+The `trigger.type` selects the subscription. `PassiveManager` wires `round_start`, `round_end`, `skill_played`, `deal_damage`, `quick_ability_used`, `summon`, `deploy`, and `activation`. The `summon` trigger matches an authored `source` against the summoned unit's `kind` (or name); the `deploy` trigger fires on the unit's own deployment; the `activation` trigger fires on the `unit:activation` event and only for the unit that event names (`payload.unitId`), so activating a Conduit replays its passives while other bearers of the same card stay silent. Passives with no `trigger` at all are always-on and handled separately (see below).
+
+An effect that fires on more than one event declares a `triggers` array of single-event trigger objects instead of a compound trigger type; each entry is parsed and subscribed independently to its own event:
+
+```json
+{
+  "type": "conditional",
+  "triggers": [{ "type": "round_start" }, { "type": "activation" }],
+  "if": { "type": "has_unit", "target": { "side": "enemy", "attribute": "jeonsulsa" }, "negate": true },
+  "then": { "type": "slay", "target": { "side": "self" } }
+}
+```
+
+A passive carrying `triggers` is event-driven like any triggered passive — `reapplyAll` never treats it as always-on.
 
 ---
 
@@ -66,7 +79,7 @@ Passive handlers run at `phase: "execute"` with a low priority, so they resolve 
 
 ### Always-on passives
 
-A passive with **no `trigger`** is always-on: its effect tracks the live board rather than firing on a timer. `PassiveManager` subscribes these to round start; unit summoned/destroyed/evolved/position-switched; equipment attached/detached/ignited; and trait/condition grant/revoke events. On each such event it revokes the passive's prior grants (by `Passive#<unitId>#<index>` source) and re-resolves the passive, so a predicate that is no longer true stops applying and one that just became true starts applying. Re-apply is idempotent because every grant is tracked under the passive's source ID. A per-source re-entrancy guard stops a re-evaluation's own grant/revoke events from re-triggering it.
+A passive with **neither `trigger` nor a non-empty `triggers`** is always-on: its effect tracks the live board rather than firing on a timer. `PassiveManager` subscribes these to round start; unit summoned/destroyed/evolved/position-switched; equipment attached/detached/ignited; and trait/condition grant/revoke events. On each such event it revokes the passive's prior grants (by `Passive#<unitId>#<index>` source) and re-resolves the passive, so a predicate that is no longer true stops applying and one that just became true starts applying. Re-apply is idempotent because every grant is tracked under the passive's source ID. A per-source re-entrancy guard stops a re-evaluation's own grant/revoke events from re-triggering it.
 
 Always-on branches must be revoke-safe (modifier-backed: `grant_trait`, `give_condition`, modifiers, and their `sequence`/`conditional` compositions). The card schemas enforce this — a trigger-less passive whose branch has side effects fails validation.
 

@@ -20,6 +20,7 @@ Handlers never mutate `playerState` fields directly. Shared-resource changes del
 | Combat slots   | `CombatSlotService.consume` / `resetAll`         |
 | Lighthouses    | `GameState.modifyLighthouses`                    |
 | Unit HP        | `UnitService.damage` / `heal` / `setHp`          |
+| Skill plays    | `SkillPlayService.play`                          |
 | Unit modifiers | `ModifierStack`                                  |
 
 | Concept           | Implementation                                                             |
@@ -28,6 +29,8 @@ Handlers never mutate `playerState` fields directly. Shared-resource changes del
 | Registration      | `HandlerRegistry` maps DSL `type` → handler instance                       |
 | Nested DSL        | `spend_shinsu` wraps an inner `effect`; `grant_ability` wraps an `ability` |
 | Cascading effects | `context.emitChild()` triggers downstream events                           |
+
+`SkillPlayService.play(gameState, context, { card, effects?, owner, extra? })` is the single definition of "play a skill": it announces `SKILL_APPLIED` as `{ owner, cardName, card }` through `context.emitChild`, then resolves the card's effect nodes with the caller's `extra`. Both the player path (`PlaySkillAction`) and synthetic plays (`PlayJeonsulBaangHandler`) delegate to it, so every `SKILL_APPLIED` subscriber sees the same payload shape. Synthetic plays get full play visibility — including `skill_played` synergies — but belong to the passive layer: they pay no cost, touch no hand, discard nothing, end no turn, consume no repeat queues, and never call `recordCardPlayed`, so the round-start play tracker does not count them.
 
 ---
 
@@ -142,6 +145,8 @@ Handlers are grouped by the domain they mutate.
 | ------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DealDamageHandler`       | `deal_damage`        | Barrier → Resilient → Weak → `UnitService.damage` → kill check via `LifecycleEngine.killUnit`; applies `stat: damage`/`damage_taken` amplifiers |
 | `HealHandler`             | `heal`               | Applies healing via `UnitService.heal`, capped at max HP; applies `stat: heal` amplifier                                                        |
+| `ActivateHandler`         | `activate`           | Emits `unit:activation` `amount` times (default 1) per live target, re-firing its `activation`-triggered passives and transformations           |
+| `PlayJeonsulBaangHandler` | `play_jeonsul_baang` | Plays `floor(currentHp / 2)` random Baangs on random other friendly units via `SkillPlayService`; the passive's Conduit comes from `sourceUnit` |
 | `GrantTraitHandler`       | `grant_trait`        | `stack.apply({ type:"trait", key, value })`                                                                                                     |
 | `RemoveTraitsHandler`     | `remove_traits`      | Removes all traits or one named `trait` (Silence)                                                                                               |
 | `CopyTraitsHandler`       | `copy_traits`        | Copies every active trait from `sourceUnitId` onto the target                                                                                   |
@@ -177,7 +182,7 @@ Handlers are grouped by the domain they mutate.
 | `NoopHandler` | `noop`     | No-op; resolves to `{ resolved: true }` (test placeholders) |
 | `NoopHandler` | `quick`    | Display-only Quick marker node; no-op                       |
 
-Structured DSL types not listed above (e.g. global rules, `grant_affiliation`, `return_to_hand`, `play_jeonsul_baang`) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
+Structured DSL types not listed above (e.g. global rules, `grant_affiliation`, `return_to_hand`) have no handler yet; the runtime skips them and reports an unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 

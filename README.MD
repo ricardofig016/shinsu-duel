@@ -56,7 +56,11 @@ Compile and validate runtime card data:
 npm run compile:cards
 ```
 
-The compiler validates YAML before reading any cards, compiles recognized common effects into DSL objects, preserves source text in each `raw` field, and retains unsupported effects as `custom` entries for later handlers. Evolution and ignition are optional; a non-empty source trigger must have its exact target card.
+The compiler validates YAML before reading any cards, compiles effects into structured DSL objects, preserves source text in each `raw` field, and refuses any effect type outside the closed DSL catalog — there is no `custom` type and no `handler` field. Evolution and ignition are optional; a non-empty source trigger must have its exact target card.
+
+## Attribute system
+
+Units can carry an attribute that changes core mechanics, each backed by a dedicated engine: **Anima** (Shinheuh combat slots), **Hwayeomsa** (Fire Charges and Incinerate), and **Jeonsulsa** (the enemy Conduit token). See `docs/ATTRIBUTE_SYSTEM_ARCHITECTURE.md`.
 
 ## Tests
 

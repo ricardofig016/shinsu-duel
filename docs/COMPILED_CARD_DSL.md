@@ -80,6 +80,7 @@ Every node is an object with a discriminator `type` and a field set that depends
 | `free`     | abilities, effects           | `true` if the entry has the Free keyword.      |
 | `position` | abilities, passives          | Position code if position-scoped, else `null`. |
 | `trigger`  | passives                     | The event that activates a triggered passive.  |
+| `triggers` | passives                     | Multiple single-event triggers; each entry is wired independently to its own event (no compound trigger types). |
 
 Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) require `raw`. Nested nodes (`sequence.steps[]`, `spend_shinsu.effect`, `grant_ability.ability`, `conditional.then/otherwise`) omit `raw`.
 
@@ -90,6 +91,8 @@ Unit cards carry an archetype discriminator plus a field line, alongside the sha
 - `kind` — what a unit fundamentally is on the board: `standard | shinheuh | landmark | conduit`. `standard` (the default) occupies a main position and carries a `rank`; the special kinds carry no position and no rank. Normalized like `affiliations` (dash-cased code).
 
 - `line` — a special kind's field line: `frontline | backline`. Only shinheuh author it (`bull`/`stone_doll` = frontline); landmarks and the conduit are backline by kind; a standard unit's line derives from its chosen position at deploy.
+
+- `entryHp` — optional, unit-only HP the unit enters play with instead of its full HP. Must not exceed `hp`; the bound is compiler-enforced because JSON Schema cannot compare two fields, and the compiler rejects `entryHp` on non-unit cards outright. It is consumed exactly once at unit creation and never re-applied: transformation re-derives HP from the preserved lost-HP delta. Cards without it carry no `entryHp` key in compiled data; the runtime `Card` exposes it as `null` there and through serialization.
 
 - `rules` — a **landmark-only** list of always-on battlefield rules (see [Rules grammar](#rules-grammar)). These are distinct from `passives`: rules are board-wide and always-on, while a landmark's triggered effects stay in `passives`.
 
@@ -147,6 +150,7 @@ Card-level keywords (Quick, Free) that apply to the whole card — not to a sing
 | -------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `deal_damage`        | `amount`, `target`                         | Deal `amount` damage.                                                                                                                                                                         |
 | `heal`               | `amount`, `target`                         | Heal `amount` HP.                                                                                                                                                                             |
+| `activate`           | `amount?`, `target`                        | Emit the Activation event for `target` `amount` times (default 1), re-firing that unit's `activation`-triggered passives and transformations.                                                  |
 | `give_condition`     | `condition`, `amount?`, `target`           | Apply a condition (optionally stacked).                                                                                                                                                       |
 | `remove_conditions`  | `target`, `mode?`, `amount?`, `condition?` | Remove conditions from `target`. `mode`: `all` (default) \| `random` \| `choose`; `amount` = how many (required for `random`/`choose`); `condition` = restrict to one condition.              |
 | `grant_trait`        | `trait`, `amount?`, `target`               | Grant a trait (optionally numeric).                                                                                                                                                           |
@@ -336,9 +340,9 @@ Rules are registered and revoked by the landmark source ID while the landmark is
 
 Triggers drive triggered passives and transformations (`evolveInto` / `igniteInto`). Trigger `type` values:
 
-`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `enemy_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `round_start_or_activation`, `skill_played`, `dies`, `evolve`, `has_all_equipped`.
+`equip`, `slay`, `deploy`, `given`, `kill`, `ally_dies`, `enemy_dies`, `damaged_by`, `round_start`, `round_end`, `deal_damage`, `ability_used`, `summon`, `draw`, `reclaim`, `free_ability_played`, `quick_ability_used`, `activation`, `skill_played`, `dies`, `evolve`, `has_all_equipped`.
 
-`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death; `ally_dies` and `enemy_dies` are an ally's / enemy's death respectively (optionally filtered by `rank`). An `ally_dies` trigger includes the source unit's own death per the ally definition, but the source unit's own trigger never actually fires because its subscription is removed before `unit:destroyed` emits. `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card.
+`cardType` (`unit` | `skill` | `equipment`) further filters `draw` / `equip` / `reclaim` triggers to a card type. `dies` is a unit's own death; `ally_dies` and `enemy_dies` are an ally's / enemy's death respectively (optionally filtered by `rank`). An `ally_dies` trigger includes the source unit's own death per the ally definition, but the source unit's own trigger never actually fires because its subscription is removed before `unit:destroyed` emits. `evolve` fires when the unit evolves; `has_all_equipped` carries `cardNames[]` and fires when the unit is equipped with every listed card. `activation` fires on the `unit:activation` event and only for the unit that event names (`payload.unitId`), so an `activate` effect replays the target's passives without touching other copies of the card.
 
 ---
 

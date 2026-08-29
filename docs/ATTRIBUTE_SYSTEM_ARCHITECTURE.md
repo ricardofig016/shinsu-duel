@@ -1,6 +1,6 @@
 # Attribute System Architecture — Shinsu Duel
 
-This document describes the pluggable attribute engine system and the attribute implementations: Anima and Hwayeomsa.
+This document describes the pluggable attribute engine system and the attribute implementations: Anima, Hwayeomsa, and Jeonsulsa.
 
 ---
 
@@ -12,6 +12,7 @@ Attributes change core gameplay mechanics for specific units. Each attribute is 
 const registry = new AttributeRegistry();
 registry.register("anima", new AnimaEngine(eventBus));
 registry.register("hwayeomsa", new HwayeomsaEngine(eventBus, cards));
+registry.register("jeonsulsa", new JeonsulsaEngine(eventBus, cards));
 ```
 
 When a unit is deployed, `GameState` calls:
@@ -106,6 +107,32 @@ hwayeomsaEngine.getAvailableLevels(username, gameState)
 
 ---
 
+## Jeonsulsa Engine
+
+**Core mechanic (RULES.md):**
+
+> When I'm deployed, grant the enemy Conduit +2 HP or summon a Conduit on the enemy backline.
+
+### State
+
+The engine owns no counters. Its state is the Conduit token itself: a `kind: conduit` unit on the enemy backline, created with `entryHp: 2` of 8 max HP. Everything the Conduit does after entering play (Ghost, the self-slay conditional, Baang plays) lives in its card passives and runs through `PassiveManager`.
+
+### Lifecycle
+
+1. **Deploy:** scan the enemy field for a Conduit. Found → `UnitService.grantHp(conduit, 2)` permanently raises both its max and current HP. Not found → look up the Conduit card data and `LifecycleEngine.summonUnit(gameState, enemyOwner, card, "backline")`. The summon is re-entrant — it runs inside the deploying unit's attribute wiring, so the Conduit's full event chain completes before the deployer's own deploy event fires.
+2. **After entry:** the Conduit's passives handle the rest — Ghost on round start, the self-slay and Baang passives on round start and `activation` events.
+
+### API
+
+```js
+// Called by GameState when a Jeonsulsa unit is deployed
+jeonsulsaEngine.onDeploy(unit, gameState);
+```
+
+The engine subscribes to no events and needs no cleanup.
+
+---
+
 ## Extending: Adding a New Attribute
 
 1. Create `server/game/attributes/<name>Engine.js` with:
@@ -117,7 +144,7 @@ hwayeomsaEngine.getAvailableLevels(username, gameState)
    ```js
    this._attributeRegistry.register(
      "jeonsulsa",
-     new JeonsulsaEngine(this.eventBus),
+     new JeonsulsaEngine(this.eventBus, this.cards),
    );
    ```
 
@@ -131,3 +158,4 @@ hwayeomsaEngine.getAvailableLevels(username, gameState)
 | --------- | -------------------- |
 | Anima     | `AnimaEngine.js`     |
 | Hwayeomsa | `HwayeomsaEngine.js` |
+| Jeonsulsa | `JeonsulsaEngine.js` |

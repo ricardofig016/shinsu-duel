@@ -181,6 +181,7 @@ Represent characters, creatures or locations from Tower of God:
 13. You can change the unit's position later by using your turn for it.
 14. You may have more than one unit in each position at a time.
 15. When a unit dies, it is Discarded.
+16. A unit with **Entry HP** enters play with that much HP instead of its full HP. Transformation preserves the lost-HP delta and does not re-apply Entry HP.
 
 ### Skills
 
@@ -471,7 +472,7 @@ Jeonsulsa are lightning users who have the ability to give electrical properties
 
 ```md
 When I'm deployed, grant the enemy **Conduit** +2 HP or summon a **Conduit** on the enemy backline.
-**Conduit**: No position. 2 HP. Round start: give me Ghost. Round start or Activation: if there is no Jeonsulsa on the enemy team, Slay me. Round start or Activation: for every 2 HP that I have, play 1 random **Jeonsul Baang** on a random ally.
+**Conduit**: No position. 8 max HP. Enters with 2 HP. Round start: give me Ghost. Round start or Activation: if there is no Jeonsulsa on the enemy team, Slay me. Round start or Activation: for every 2 HP that I have, play 1 random **Jeonsul Baang** on a random ally.
 **Lightning Baang**: give Burned 1 to a unit.
 **Thunder Baang**: give Exhausted 1 to a unit.
 **Static Baang**: give Weak 1 to a unit.
