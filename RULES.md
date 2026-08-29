@@ -206,7 +206,7 @@ Equipments may have requirements that must all be met when and how it is played.
 
 Equipments with more than 1 trigger ignite when any of the triggers are met.
 
-Once ignited, an equipment stays ignited until something specifically changes it; nothing un-ignites it on its own (an effect, such as a round-end landmark rule, may). Leaving the board is what resets an equipment to its default non-ignited version.
+Once ignited, an equipment stays ignited until something specifically changes it; nothing un-ignites it on its own (an effect, such as a round-end landmark rule, may). Leaving the board is what resets an equipment to its default non-ignited version. The one exception is the [retain_equipment](#returning-a-unit-to-hand) passive: its bearer's equipments stay attached and keep their ignited state when the bearer returns to hand.
 
 When a bearer dies or is equipped with another equipment, its equipments leave the board and return to the controlling player's hand, back to their default non-ignited versions. A [Living Ignition Weapon](#living-ignition-weapon) overrides this: it can be equipped with multiple equipment without returning the old ones. When a bearer is Discarded without dying (e.g. substituted from a full line), its equipments are Discarded along with it. When a bearer is stolen, its equipments go with it and keep their ignited state; evolution preserves a bearer's equipments, which also keep their ignited state.
 
