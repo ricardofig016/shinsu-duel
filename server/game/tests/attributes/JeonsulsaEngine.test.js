@@ -1,4 +1,5 @@
 import Card from "../../Card.js";
+import EVT from "../../EventCatalog.js";
 import UnitService from "../../services/UnitService.js";
 import ZoneService from "../../services/ZoneService.js";
 import JeonsulsaEngine from "../../attributes/JeonsulsaEngine.js";
@@ -38,6 +39,8 @@ describe("JeonsulsaEngine", () => {
 
   test("deploying a Jeonsulsa unit with no enemy Conduit summons one on the enemy backline at 8 max HP, 2 current HP", () => {
     const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
+    const damageEvents = [];
+    game.eventBus.on(EVT.DAMAGE_APPLIED, (payload) => damageEvents.push(payload), { phase: "pre" });
 
     deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
 
@@ -46,9 +49,12 @@ describe("JeonsulsaEngine", () => {
     expect(conduit.owner).toBe("Bob");
     expect(conduit.line).toBe("backline");
     expect(conduit.placedPositionCode).toBeNull();
-    // The self-damage passive fires on the Conduit's own summon: 8 - 6 = 2.
+    // Entry HP is consumed at unit creation: the Conduit is initialized at
+    // 2/8 with no damage event — entry is initialization, not damage.
+    expect(conduit.card.entryHp).toBe(2);
     expect(conduit.card.maxHp).toBe(8);
     expect(conduit.currentHp).toBe(2);
+    expect(damageEvents).toHaveLength(0);
   });
 
   test("deploying a Jeonsulsa unit with an enemy Conduit on the field grants it +2 max and current HP", () => {

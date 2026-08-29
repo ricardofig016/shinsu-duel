@@ -13,7 +13,10 @@ export default class Unit {
 
     this.id = IdFactory.unitInstance(card.cardId); // deterministic instance id
     this.card = card;
-    this.currentHp = card.maxHp;
+    // Entry HP is consumed exactly once, here at unit creation: a card may
+    // enter play below its max HP without emitting anything. Transformation
+    // re-derives HP from the preserved lost-HP delta and never re-applies it.
+    this.currentHp = card.entryHp ?? card.maxHp;
     this.kind = card.kind ?? "standard";
     this.placedPositionCode = placedPositionCode; // main position for standard, null otherwise
     this.line = line; // field line (frontline | backline)

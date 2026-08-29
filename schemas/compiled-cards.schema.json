@@ -361,6 +361,7 @@
           "sobriquet": { "type": "string", "minLength": 1 },
           "cost": { "type": "integer", "minimum": 0 },
           "hp": { "type": "integer", "minimum": 1 },
+          "entryHp": { "type": "integer", "minimum": 1 },
           "kind": { "enum": ["standard", "shinheuh", "landmark", "conduit"] },
           "line": { "enum": ["frontline", "backline"] },
           "rank": { "type": "string", "enum": ["regular", "ranker", "high ranker"] },

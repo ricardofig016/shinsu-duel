@@ -338,6 +338,7 @@
     "sobriquet": { "type": "string", "minLength": 1 },
     "cost": { "type": "integer", "minimum": 0 },
     "hp": { "type": "integer", "minimum": 1 },
+    "entryHp": { "type": "integer", "minimum": 1 },
     "rank": { "type": ["string", "null"], "enum": ["regular", "ranker", "high ranker", null] },
     "positions": { "type": "array", "items": { "enum": ["fisherman", "light bearer", "scout", "spear bearer", "wave controller"] } },
     "kind": { "enum": ["standard", "shinheuh", "landmark", "conduit"] },
@@ -357,7 +358,7 @@
   },
   "oneOf": [
     {
-      "properties": { "type": { "const": "unit" } },
+      "properties": { "type": { "const": "unit" }, "entryHp": { "type": "integer", "minimum": 1 } },
       "required": ["type", "name", "cost", "hp", "kind", "passives", "abilities", "traits", "attributes", "affiliations"],
       "allOf": [
         { "if": { "properties": { "kind": { "const": "standard" } } }, "then": { "required": ["rank", "positions"], "properties": { "positions": { "type": "array", "minItems": 1 } } } },

@@ -93,7 +93,7 @@ export default class LifecycleEngine {
             name: candidate.card.name,
             hp: candidate.currentHp,
           })),
-          { id: pendingCardId, name: card.name, hp: card.maxHp },
+          { id: pendingCardId, name: card.name, hp: card.entryHp ?? card.maxHp },
         ],
         resolve: ([selectedId]) => {
           // A pending decision blocks player actions, but validate the card
@@ -292,7 +292,7 @@ export default class LifecycleEngine {
             name: candidate.card.name,
             hp: candidate.currentHp,
           })),
-          { id: pendingCardId, name: card.name, hp: card.maxHp },
+          { id: pendingCardId, name: card.name, hp: card.entryHp ?? card.maxHp },
         ],
         resolve: ([selectedId]) => {
           if (selectedId === pendingCardId) {
@@ -343,7 +343,7 @@ export default class LifecycleEngine {
             name: candidate.card.name,
             hp: candidate.currentHp,
           })),
-          { id: pendingId, name: unit.card.name, hp: unit.card.maxHp },
+          { id: pendingId, name: unit.card.name, hp: unit.card.entryHp ?? unit.card.maxHp },
         ],
         resolve: ([selectedId]) => {
           if (selectedId === pendingId) {

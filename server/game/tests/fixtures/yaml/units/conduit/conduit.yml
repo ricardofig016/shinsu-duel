@@ -3,15 +3,11 @@ kind: conduit
 name: Conduit
 cost: 0
 hp: 8
+entryHp: 2
 deckConstraints:
   - type: unreachable
     raw: "i am Unreachable"
 passives:
-  - type: deal_damage
-    amount: 6
-    target: { side: self }
-    trigger: { type: deploy }
-    raw: "when i'm summoned, deal 6 to me"
   - type: give_condition
     condition: ghost
     target: { side: self }

@@ -25,6 +25,7 @@ describe("Jeonsulsa Conduit lifecycle", () => {
     game.eventBus.on(EVT.SKILL_APPLIED, (p) => events.push({ kind: "skill", cardName: p.cardName, owner: p.owner }), { phase: "pre" });
     game.eventBus.on(EVT.CONDITION_APPLIED, (p) => events.push({ kind: "condition", condition: p.condition, targetId: p.targetId }), { phase: "pre" });
     game.eventBus.on(EVT.ACTIVATION, (p) => events.push({ kind: "activation", unitId: p.unitId }), { phase: "pre" });
+    game.eventBus.on(EVT.DAMAGE_APPLIED, (p) => events.push({ kind: "damage", targetId: p.targetId }), { phase: "pre" });
 
     const ran = deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
 
@@ -41,13 +42,16 @@ describe("Jeonsulsa Conduit lifecycle", () => {
     expect(conduit).toBeDefined();
     expect(conduit.owner).toBe("Bob");
     expect(conduit.placedPositionCode).toBeNull();
+    expect(conduit.card.entryHp).toBe(2);
     expect(conduit.card.maxHp).toBe(8);
-    expect(conduit.currentHp).toBe(2); // 8 max HP, 6 dealt to itself on summon
+    expect(conduit.currentHp).toBe(2); // created at 2 via the card's entryHp
+    // Entry is initialization, not damage: the summon emits no DAMAGE_APPLIED.
+    expect(events.filter((e) => e.kind === "damage")).toHaveLength(0);
 
-    // The self-damage is an entry effect: a later summon by the Conduit's
-    // owner must not re-trigger it. The Light Bearer is Bob's Baang target and
-    // shares his backline, so the enemy frontline stays empty and the Conduit
-    // remains targetable by Khun Ran's ability (RULES.md §Battlefield 4).
+    // Entry HP applied once at creation; later summons leave the Conduit
+    // untouched. The Light Bearer is Bob's Baang target and shares his
+    // backline, so the enemy frontline stays empty and the Conduit remains
+    // targetable by Khun Ran's ability (RULES.md §Battlefield 4).
     const bearer = deployUnit(game, "Bob", "Test Light Bearer", "light-bearer");
     expect(game._findUnit(conduit.id)).toBe(conduit);
     expect(conduit.card.maxHp).toBe(8);

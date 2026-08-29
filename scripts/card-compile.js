@@ -452,6 +452,13 @@ export function compileCard(rawCard, allCards) {
   const type = rawCard.type;
   const cardName = rawCard.name || "<unnamed>";
 
+  // `entryHp` is a unit-only field (a skill or equipment has no battlefield
+  // entry to initialize); JSON Schema cannot express the cross-field bound,
+  // so both rejections live here.
+  if (rawCard.entryHp !== undefined && rawCard.entryHp !== null && type !== "unit") {
+    throw new Error(`${cardName}: "entryHp" is only valid on unit cards`);
+  }
+
   // Base fields (shared by all card types)
   const compiled = {
     cardId: null, // assigned after sorting
@@ -466,6 +473,12 @@ export function compileCard(rawCard, allCards) {
 
   if (type === "unit") {
     compiled.hp = rawCard.hp ?? 0;
+    if (rawCard.entryHp !== undefined && rawCard.entryHp !== null && rawCard.entryHp > compiled.hp) {
+      throw new Error(
+        `${cardName}: "entryHp" (${rawCard.entryHp}) cannot exceed "hp" (${compiled.hp}) — a unit cannot enter above its max`
+      );
+    }
+    compiled.entryHp = rawCard.entryHp ?? null;
     compiled.rank = rawCard.rank || null;
     compiled.kind = rawCard.kind ? normalizeKind(rawCard.kind) : "standard";
     compiled.line = rawCard.line ? normalizeLine(rawCard.line) : null;
@@ -561,6 +574,7 @@ export function cleanCompiled(card) {
   if (card.series === null) delete card.series;
   if (card.rank === null) delete card.rank;
   if (card.hp === null) delete card.hp;
+  if (card.entryHp === null) delete card.entryHp;
   if (card.line === null) delete card.line;
   if (card.evolveInto === null) delete card.evolveInto;
   if (card.evolvedFrom === null) delete card.evolvedFrom;

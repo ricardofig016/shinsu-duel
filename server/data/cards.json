@@ -629,23 +629,13 @@
       }
     ],
     "hp": 8,
+    "entryHp": 2,
     "kind": "conduit",
     "traits": [],
     "attributes": [],
     "affiliations": [],
     "abilities": [],
     "passives": [
-      {
-        "type": "deal_damage",
-        "amount": 6,
-        "target": {
-          "side": "self"
-        },
-        "trigger": {
-          "type": "deploy"
-        },
-        "raw": "when i'm summoned, deal 6 to me"
-      },
       {
         "type": "give_condition",
         "condition": "ghost",

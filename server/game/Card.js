@@ -14,6 +14,7 @@ export default class Card {
     this.sobriquet = cardData.sobriquet || null;
     this.rarity = cardData.rarity;
     this.maxHp = cardData.hp ?? null;
+    this.entryHp = cardData.entryHp ?? null; // unit creation HP; null = enter at maxHp
     this.cost = cardData.cost;
     this.rank = cardData.rank ?? null;
     this.kind = cardData.kind ?? "standard"; // unit archetype: standard | shinheuh | landmark | conduit
@@ -99,6 +100,7 @@ export default class Card {
       sobriquet: this.sobriquet,
       rarity: this.rarity,
       maxHp: this.maxHp,
+      entryHp: this.entryHp,
       cost: this.cost,
       costReduction: this.costReduction,
       effectiveCost: Math.max(0, this.cost - this.costReduction),
