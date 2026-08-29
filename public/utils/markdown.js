@@ -16,6 +16,8 @@ const slugify = (text) =>
 const HEADING_PATTERN = /^(#{1,4})\s+(.+)$/;
 const ORDERED_LIST_PATTERN = /^(\s*)\d+\.\s+(.+)$/;
 const UNORDERED_LIST_PATTERN = /^(\s*)[*-]\s+(.+)$/;
+const FENCE_PATTERN = /^\s*```/;
+const CODE_PATTERN = /`([^`]+)`/g;
 const TABLE_ROW_PATTERN = /^\s*\|/;
 const IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)]+)\)/g;
 const LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -37,10 +39,17 @@ const renderInlineMarkdown = (text) => {
     return `@@LINKTOKEN${links.length - 1}@@`;
   });
 
-  return escapeHtml(withLinkTokens)
+  const codeSpans = [];
+  const withCodeTokens = withLinkTokens.replace(CODE_PATTERN, (_, content) => {
+    codeSpans.push(`<code>${escapeHtml(content)}</code>`);
+    return `@@CODETOKEN${codeSpans.length - 1}@@`;
+  });
+
+  return escapeHtml(withCodeTokens)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/_([^_]+)_/g, "<em>$1</em>")
     .replace(/@@LINKTOKEN(\d+)@@/g, (_, index) => links[Number(index)])
+    .replace(/@@CODETOKEN(\d+)@@/g, (_, index) => codeSpans[Number(index)])
     .replace(/@@IMGTOKEN(\d+)@@/g, (_, index) => images[Number(index)]);
 };
 
@@ -136,6 +145,20 @@ export const renderRulesMarkdown = (markdown) => {
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
+
+    if (FENCE_PATTERN.test(line)) {
+      flushParagraph();
+      closeLists();
+      const contentLines = [];
+      let fenceEnd = index + 1;
+      while (fenceEnd < lines.length && !FENCE_PATTERN.test(lines[fenceEnd])) {
+        contentLines.push(lines[fenceEnd]);
+        fenceEnd += 1;
+      }
+      html.push(`<pre><code>${escapeHtml(contentLines.join("\n"))}</code></pre>`);
+      index = fenceEnd;
+      continue;
+    }
 
     if (TABLE_ROW_PATTERN.test(line)) {
       let blockEnd = index;

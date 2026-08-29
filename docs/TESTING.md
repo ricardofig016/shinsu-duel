@@ -36,6 +36,10 @@ The shared helper `tests/utils.js` lives at the tests root; subfolder tests impo
 - `deployUnit(game, username, name, positionCode)` — deploy a unit from hand by name.
 - `advanceToRound(game, round)`, `getCardIdByName(name)`, `createLegalDeck([...ids])`, `expectShinsuState(...)`.
 
+### Frontend tests
+
+Tests for browser utilities live in `public/tests/`, mirroring `public/` (e.g. `public/tests/utils/markdown.test.js` tests `public/utils/markdown.js`). They join the same suite as plain ESM and run in Node, so they must stay DOM-free; DOM behavior is verified in the browser.
+
 ---
 
 ## Card fixtures

@@ -40,3 +40,23 @@
   padding: 0.4rem 0.6rem;
   text-align: left;
 }
+
+#rules-container code {
+  font-family: Consolas, "Courier New", monospace;
+  background-color: #e2e2e2;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+#rules-container pre {
+  background-color: #e2e2e2;
+  border-radius: 5px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+#rules-container pre code {
+  background-color: transparent;
+  padding: 0;
+}
