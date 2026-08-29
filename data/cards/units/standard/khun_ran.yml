@@ -12,12 +12,19 @@ abilities:
     amount: 3
     target: { side: enemy, scope: frontline }
     raw: "deal 3 to a frontline enemy"
-  - type: heal
-    amount: 2
-    target:
-      side: enemy
-      name: Conduit
-    raw: "heal enemy Conduit 2 HP"
+  - type: sequence
+    steps:
+      - type: heal
+        amount: 2
+        target:
+          side: enemy
+          name: Conduit
+      - type: activate
+        amount: 1
+        target:
+          side: enemy
+          name: Conduit
+    raw: "heal enemy Conduit 2 HP and activate it"
 evolve:
   - Redan is played on me
 traits:
