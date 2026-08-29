@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Stable, test-owned card catalog (compiled artifact).
  *
  * These cards are the ONLY card definitions unit/integration tests resolve
@@ -22,7 +22,8 @@
  *     object keys sort numerically).
  *   - `Fire Core` keeps its exact name (`HwayeomsaEngine` hardcodes it);
  *     `series: "incinerate"` / `"thorn-fragment"` are kept so engines resolve
- *     them structurally.
+ *     them structurally. `Conduit` likewise keeps its exact name
+ *     (`JeonsulsaEngine` resolves it via `findCardsByName`).
  */
 
 import compiledCards from "./cards.json" with { type: "json" };

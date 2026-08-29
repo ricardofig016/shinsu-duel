@@ -1,0 +1,12 @@
+type: skill
+name: Test Static Baang
+cost: 1
+keywords:
+  - code: jeonsul-baang
+    raw: "i am a Jeonsul Baang"
+effects:
+  - type: give_condition
+    condition: weak
+    amount: 1
+    target: { side: any }
+    raw: "give Weak 1 to a unit"

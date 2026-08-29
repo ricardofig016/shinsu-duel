@@ -725,4 +725,42 @@ describe("PassiveManager", () => {
     game._passiveManager.reapplyAll(game);
     expect(applySpy).not.toHaveBeenCalled();
   });
+
+  test("a triggers-array passive subscribes each trigger at execute phase priority -100", () => {
+    const game = createGame();
+    game.round = 10;
+
+    const unit = {
+      id: "Unit#rsa-phases",
+      owner: "Alice",
+      card: {
+        name: "Conduit",
+        maxHp: 8,
+        passiveAbilities: [{
+          type: "deal_damage",
+          amount: 1,
+          target: "all_enemies",
+          raw: "round start or activation: deal 1 to all enemies",
+          triggers: [{ type: "round_start" }, { type: "activation" }],
+        }],
+      },
+      currentHp: 8,
+      placedPositionCode: "backline",
+      isAlive() { return this.currentHp > 0; },
+    };
+    game.playerStates.Alice.field.backline.push(unit);
+
+    const onSpy = jest.spyOn(game.eventBus, "on");
+    game._passiveManager.registerUnit(unit, game);
+
+    const triggerSubscriptions = onSpy.mock.calls.filter(
+      ([eventName]) => eventName === EVT.ROUND_START || eventName === EVT.ACTIVATION
+    );
+    // Each trigger is wired independently to its own event, in passive order.
+    expect(triggerSubscriptions.map(([eventName]) => eventName)).toEqual([EVT.ROUND_START, EVT.ACTIVATION]);
+    for (const [, , options] of triggerSubscriptions) {
+      expect(options).toEqual({ phase: "execute", priority: -100 });
+    }
+    onSpy.mockRestore();
+  });
 });

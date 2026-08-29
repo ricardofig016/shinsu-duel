@@ -1,0 +1,38 @@
+type: unit
+kind: conduit
+name: Conduit
+cost: 0
+hp: 8
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
+passives:
+  - type: deal_damage
+    amount: 6
+    target: { side: self }
+    trigger: { type: deploy }
+    raw: "when i'm summoned, deal 6 to me"
+  - type: give_condition
+    condition: ghost
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Ghost"
+  - type: conditional
+    triggers:
+      - { type: round_start }
+      - { type: activation }
+    if:
+      type: has_unit
+      target:
+        side: enemy
+        attribute: jeonsulsa
+      negate: true
+    then:
+      type: slay
+      target: { side: self }
+    raw: "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+  - type: play_jeonsul_baang
+    triggers:
+      - { type: round_start }
+      - { type: activation }
+    raw: "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"

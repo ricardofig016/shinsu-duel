@@ -1,0 +1,30 @@
+type: unit
+name: Test Khun Ran
+cost: 3
+hp: 2
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+attributes:
+  - jeonsulsa
+affiliations:
+  - khun family
+abilities:
+  - type: deal_damage
+    amount: 3
+    target: { side: enemy, scope: frontline }
+    raw: "deal 3 to a frontline enemy"
+  - type: sequence
+    steps:
+      - type: heal
+        amount: 2
+        target:
+          side: enemy
+          name: Conduit
+      - type: activate
+        amount: 1
+        target:
+          side: enemy
+          name: Conduit
+    raw: "heal enemy Conduit 2 HP and activate it"

@@ -74,7 +74,7 @@ One deliberate deviation from `card-compile.js`:
 
 ### Conventions (enforced by `FixtureCardAudit.test.js`)
 
-- Named fixtures use compiler-assigned ids **10000+** (name-sorted) with a `Test` prefix (e.g. `Test Scout`); they mirror the mechanics a test exercises.
+- Named fixtures use compiler-assigned ids **10000+** (name-sorted) with a `Test` prefix (e.g. `Test Scout`); they mirror the mechanics a test exercises. Exact-name exceptions follow the shipped engines that resolve them: `Fire Core` (`HwayeomsaEngine`) and `Conduit` (`JeonsulsaEngine` looks it up by name via `findCardsByName`).
 - Generic fillers use ids **1–40** and MUST keep the lowest ids: JS integer-like object keys sort numerically, so `createLegalDeck` slices them first and default decks contain only fillers. They are generated in `compile-fixtures.js` (`buildFillers`), not authored as YAML.
 - Fillers exist so every test can build a **legal 30-card deck** (RULES.md) without leaking named fixtures into default decks. They are inert (`Test Filler N`, cost 1, hp 3, regular, fisherman, no abilities/passives).
 - `Fire Core` keeps its exact name (`HwayeomsaEngine` hardcodes it); `series: "incinerate"` / `"thorn-fragment"` are kept so engines resolve them structurally.
