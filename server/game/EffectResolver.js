@@ -38,6 +38,7 @@ import CopyAbilityHandler from "./handlers/CopyAbilityHandler.js";
 import RepeatPlayHandler from "./handlers/RepeatPlayHandler.js";
 import ActivateHandler from "./handlers/ActivateHandler.js";
 import PlayJeonsulBaangHandler from "./handlers/PlayJeonsulBaangHandler.js";
+import ChoosePositionHandler from "./handlers/ChoosePositionHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
 import PredicateEvaluator from "./services/PredicateEvaluator.js";
@@ -80,6 +81,7 @@ function getRegistry() {
     _registry.register("discard", DiscardHandler);
     _registry.register("disarm", DisarmHandler);
     _registry.register("switch_position", SwitchPositionHandler);
+    _registry.register("choose_position", ChoosePositionHandler);
     _registry.register("slay", SlayHandler);
     _registry.register("transform", TransformHandler);
 

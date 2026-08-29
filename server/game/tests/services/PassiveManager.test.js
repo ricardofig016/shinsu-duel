@@ -567,32 +567,6 @@ describe("PassiveManager", () => {
     expect(target.currentHp).toBe(targetCard.maxHp - 1);
   });
 
-  test("a landmark position choice resolver is a no-op once the landmark left play", () => {
-    const game = createGame();
-    const decisions = [];
-    game.createPendingDecision = (opts) => { decisions.push(opts); };
-    const landmarkCardId = getCardIdByName("Test Name Hunt Station");
-    const unit = {
-      id: "Unit#stale-landmark",
-      owner: "Alice",
-      chosenPositionCode: null,
-      isAlive: () => true,
-      card: new Card(landmarkCardId, game.cards[landmarkCardId], "Alice", game.eventBus),
-    };
-    const registry = { registerUnit: jest.fn(), reconcile: jest.fn() };
-    game._globalRuleRegistry = registry;
-    game._findUnit = () => null; // the landmark is off the field
-
-    game._passiveManager._choosePosition(unit, game);
-    expect(decisions).toHaveLength(1);
-    decisions[0].resolve(["scout"]);
-
-    // The stale resolution must not store a choice or re-register rules.
-    expect(unit.chosenPositionCode).toBeNull();
-    expect(registry.registerUnit).not.toHaveBeenCalled();
-    expect(registry.reconcile).not.toHaveBeenCalled();
-  });
-
   test("a triggers-array passive fires on ROUND_START for every owner and on ACTIVATION only for the matching unit", () => {
     const game = createGame();
     game.round = 10;

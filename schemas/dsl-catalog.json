@@ -110,7 +110,6 @@
     "generated_by"
   ],
   "notes": [
-    "The effects list is an inventory, not a claim of runtime support. A dispatchable type without a registered handler is reported as unowned by the runtime coverage audit in CardDataAudit.test.js.",
-    "choose_position is dispatched through a special case in PassiveManager for landmark deploy passives only; EffectResolver itself has no handler for it, so any other use path skips it as unsupported."
+    "The effects list is an inventory, not a claim of runtime support. A dispatchable type without a registered handler is reported as unowned by the runtime coverage audit in CardDataAudit.test.js."
   ]
 }

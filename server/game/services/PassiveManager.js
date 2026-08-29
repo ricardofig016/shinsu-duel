@@ -44,10 +44,6 @@ export default class PassiveManager {
         const callback = (payload, context) => {
           if (!this._matches(trigger, unit, payload, gameState)) return;
           if (gameState._globalRuleRegistry?.hasRule(unit, "disable_passives", gameState)) return;
-          if (trigger.effect?.type === "choose_position") {
-            this._choosePosition(unit, gameState);
-            return;
-          }
           resolveEffect(trigger.effect, context, gameState, this._triggerExtra(trigger, unit, payload, sourceId, gameState));
         };
         entries.push(this._bus.on(trigger.eventName, callback, { phase: "execute", priority: -100 }));
@@ -147,49 +143,6 @@ export default class PassiveManager {
     } else {
       resolveEffect(passive, context, gameState, extra);
     }
-  }
-
-  /**
-   * Resolve a landmark's deploy-time `choose_position` decision: the owner
-   * picks one of the five canonical positions (not the unit's own card
-   * positions — landmarks have none). The choice is stored on the unit and
-   * activates any `position: "chosen"` landmark rule via `registerUnit`.
-   */
-  _choosePosition(unit, gameState) {
-    if (unit.chosenPositionCode) return;
-    // A deploy trigger can be revisited while this unit's own earlier
-    // decision is pending. Leave the existing decision in charge rather
-    // than creating duplicates.
-    if (
-      gameState.pendingDecision?.type === "position_selection" &&
-      gameState.pendingDecision.unitId === unit.id
-    ) return;
-
-    const positions = gameState.constructor.positions;
-    const candidates = Object.keys(positions)
-      .filter((code) => positions[code].special === false)
-      .sort()
-      .map((code) => ({ id: code, name: positions[code].name }));
-
-    gameState.createPendingDecision({
-      owner: unit.owner,
-      type: "position_selection",
-      unitId: unit.id,
-      candidates,
-      minChoices: 1,
-      maxChoices: 1,
-      resolve: ([positionCode]) => {
-        // The landmark may have left play while its choice was pending.
-        // A unit off the field must never recreate its rules or grants.
-        if (gameState._findUnit(unit.id) !== unit || !unit.isAlive()) return;
-        if (!candidates.some((candidate) => candidate.id === positionCode)) {
-          throw new Error(`Invalid selected position: ${positionCode}`);
-        }
-        unit.chosenPositionCode = positionCode;
-        gameState._globalRuleRegistry?.registerUnit(unit, gameState);
-        gameState._globalRuleRegistry?.reconcile(gameState);
-      },
-    });
   }
 
   reapplyAll(gameState) {
