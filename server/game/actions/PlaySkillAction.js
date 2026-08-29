@@ -2,8 +2,7 @@ import ActionHandler from "../ActionHandler.js";
 import ZoneService from "../services/ZoneService.js";
 import ShinsuService from "../services/ShinsuService.js";
 import RequirementValidator from "../services/RequirementValidator.js";
-import EVT from "../EventCatalog.js";
-import { resolveEffects } from "../EffectResolver.js";
+import SkillPlayService from "../services/SkillPlayService.js";
 import ModifierService from "../services/ModifierService.js";
 
 /** Plays a one-shot skill through the DSL effect resolver. */
@@ -35,7 +34,6 @@ export default class PlaySkillAction extends ActionHandler {
     ShinsuService.spend(player, cost);
     gameState.recordCardPlayed(data.username);
 
-    gameState.eventBus.emit(EVT.SKILL_APPLIED, { owner: data.username, cardName: card.name, card });
     const effectContext = {
       emitChild: (eventName, payload) => gameState.eventBus.emit(eventName, payload),
     };
@@ -47,14 +45,21 @@ export default class PlaySkillAction extends ActionHandler {
     };
 
     // repeat_play: "the next time you play X, play it N more times". Consume the
-    // queued repeats and resolve the skill's effects that many additional times,
-    // flattened into one ordered effect list so pending-decision deferral stays
-    // uniform across the original play and every repeat.
+    // queued repeats BEFORE the announce so SKILL_APPLIED observers see the
+    // play's full effect count, and flatten every repetition into one ordered
+    // effect list so pending-decision deferral stays uniform across the
+    // original play and every repeat.
     const repeats = gameState.consumeRepeatPlays(data.username, card.name);
     const totalEffects = [];
     for (let i = 0; i < 1 + repeats; i++) totalEffects.push(...card.effects);
 
-    resolveEffects(totalEffects, effectContext, gameState, extra);
+    SkillPlayService.play(gameState, effectContext, {
+      card,
+      effects: totalEffects,
+      owner: data.username,
+      extra,
+    });
+
     gameState.completeActionAfterDecision(() => {
       ZoneService.discard(player, card);
       gameState.endTurn();

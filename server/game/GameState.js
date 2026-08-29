@@ -10,6 +10,7 @@ import UnitService from "./services/UnitService.js";
 import AttributeRegistry from "./attributes/AttributeRegistry.js";
 import AnimaEngine from "./attributes/AnimaEngine.js";
 import HwayeomsaEngine from "./attributes/HwayeomsaEngine.js";
+import JeonsulsaEngine from "./attributes/JeonsulsaEngine.js";
 import AbilityRegistry from "./registries/abilityRegistry.js";
 import * as IdFactory from "./IdFactory.js";
 import EVT from "./EventCatalog.js";
@@ -134,6 +135,9 @@ export default class GameState {
     this._attributeRegistry = new AttributeRegistry();
     this._attributeRegistry.register("anima", new AnimaEngine(this.eventBus));
     this._attributeRegistry.register("hwayeomsa", new HwayeomsaEngine(this.eventBus, this.cards));
+    // `cards` is passed so the engine can look up the Conduit card data to
+    // summon; the injectable catalog keeps production and tests aligned.
+    this._attributeRegistry.register("jeonsulsa", new JeonsulsaEngine(this.eventBus, this.cards));
 
     // Barrier tracking (reset on round start)
     this._barrierUsedThisRound = new Set();

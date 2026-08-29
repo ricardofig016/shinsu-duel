@@ -36,6 +36,8 @@ import GrantRandomTraitHandler from "./handlers/GrantRandomTraitHandler.js";
 import PeekHandHandler from "./handlers/PeekHandHandler.js";
 import CopyAbilityHandler from "./handlers/CopyAbilityHandler.js";
 import RepeatPlayHandler from "./handlers/RepeatPlayHandler.js";
+import ActivateHandler from "./handlers/ActivateHandler.js";
+import PlayJeonsulBaangHandler from "./handlers/PlayJeonsulBaangHandler.js";
 import HandlerRegistry from "./registries/handlerRegistry.js";
 import TargetResolver from "./TargetResolver.js";
 import PredicateEvaluator from "./services/PredicateEvaluator.js";
@@ -69,6 +71,8 @@ function getRegistry() {
     _registry.register("grant_random_trait", GrantRandomTraitHandler);
     _registry.register("give_condition", GiveConditionHandler);
     _registry.register("remove_conditions", RemoveConditionHandler);
+    _registry.register("activate", ActivateHandler);
+    _registry.register("play_jeonsul_baang", PlayJeonsulBaangHandler);
 
     // ── Zone movement & lifecycle ─────────────────────────────────────────
     _registry.register("summon", SummonHandler);
