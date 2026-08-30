@@ -77,7 +77,7 @@ Reports are written to `reports/`; coverage is written to `coverage/`.
 - `server/app.js`: Express entry point.
 - `server/game/GameState.js`: authoritative game state.
 - `server/game/EventBus.js`: game event publication and subscriptions.
-- `server/game/websocket.js`: Socket.IO game transport.
+- `server/game/net/`: game session core, wire protocol, and Socket.IO gateway.
 - `server/routes/`: REST routes.
 - `public/`: static client.
 - `RULES.md`: current game rules.

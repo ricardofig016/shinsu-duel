@@ -9,7 +9,11 @@ import morgan from "morgan";
 import winston from "winston";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { initializeGameWebSocket } from "./game/websocket.js";
+import { readJsonFile } from "./utils/file-util.js";
+import { roomsFilePath } from "./routes/game.js";
+import { createSeededGame } from "./game/gameFactory.js";
+import SessionRegistry from "./game/net/SessionRegistry.js";
+import SocketGateway from "./game/net/socketGateway.js";
 
 dotenv.config();
 const app = express();
@@ -48,9 +52,16 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(path.resolve("public")));
 app.use("/", router);
-initializeGameWebSocket(io);
 
-const port = 3000;
+const gameGateway = new SocketGateway({
+  registry: new SessionRegistry(),
+  loadRoom: async (roomCode) => (await readJsonFile(roomsFilePath))[roomCode] ?? null,
+  createGame: ({ roomCode, usernames, seed }) => createSeededGame({ roomCode, usernames, seed }),
+  logger,
+});
+gameGateway.attach(io);
+
+const port = Number(process.env.PORT) || 3000;
 server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
