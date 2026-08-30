@@ -27,3 +27,7 @@ Raw images were normalized to **1200×800 PNG** files (**3x2** aspect ratio) usi
 ```sh
 magick mogrify -path .\public\assets\images\artworks\ -format png -filter Lanczos -resize "1200x800>" .\public\assets\images\artworks\raw\*.*
 ```
+
+## Naming
+
+Artwork filenames are the card slug: `<normalizeName(name)>.png` ("Twenty-Fifth Baam" → `twenty_fifth_baam.png`). The compiler binds files to cards by this rule and stamps the resolved path into the compiled card data; see [`docs/CARD_AUTHORING.md`](../../../../docs/CARD_AUTHORING.md) for the authoring contract.

@@ -992,7 +992,8 @@
         },
         "raw": "round end: Slay all enemies with Burned 3+"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/evankhell.png"
   },
   "23": {
     "cardId": 23,
@@ -1849,7 +1850,8 @@
         "raw": "spend 2: use an enemy ability"
       }
     ],
-    "passives": []
+    "passives": [],
+    "artworkPath": "/assets/images/artworks/jyu_viole_grace.png"
   },
   "45": {
     "cardId": 45,
@@ -1944,7 +1946,8 @@
         }
       ],
       "cardId": 46
-    }
+    },
+    "artworkPath": "/assets/images/artworks/karaka.png"
   },
   "46": {
     "cardId": 46,
@@ -2030,7 +2033,8 @@
         "raw": "round end: deal 3 to all Rooted enemies"
       }
     ],
-    "evolvedFrom": 45
+    "evolvedFrom": 45,
+    "artworkPath": "/assets/images/artworks/karaka_evolved.png"
   },
   "47": {
     "cardId": 47,
@@ -2621,7 +2625,8 @@
         },
         "raw": "deploy: choose a position"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/name_hunt_station.png"
   },
   "58": {
     "cardId": 58,
@@ -2649,7 +2654,8 @@
         }
       ],
       "cardId": 59
-    }
+    },
+    "artworkPath": "/assets/images/artworks/narumada.png"
   },
   "59": {
     "cardId": 59,
@@ -2680,7 +2686,8 @@
         "raw": "the bearer's damage-dealing abilities give Exhausted 1"
       }
     ],
-    "ignitedFrom": 58
+    "ignitedFrom": 58,
+    "artworkPath": "/assets/images/artworks/narumada_ignited.png"
   },
   "60": {
     "cardId": 60,
@@ -3046,7 +3053,8 @@
         },
         "raw": "ability: deal 5 to an enemy"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/red_thryssa.png"
   },
   "68": {
     "cardId": 68,
@@ -3148,7 +3156,8 @@
         },
         "raw": "give an enemy Doomed"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/shinwonryu.png"
   },
   "71": {
     "cardId": 71,
@@ -3407,7 +3416,8 @@
         },
         "raw": "Silence an enemy"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/the_workshop.png"
   },
   "78": {
     "cardId": 78,
@@ -3532,7 +3542,8 @@
         }
       ],
       "cardId": 81
-    }
+    },
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png"
   },
   "81": {
     "cardId": 81,
@@ -3574,7 +3585,8 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 80
+    "evolvedFrom": 80,
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_evolved.png"
   },
   "82": {
     "cardId": 82,

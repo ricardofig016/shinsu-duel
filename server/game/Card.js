@@ -45,7 +45,9 @@ export default class Card {
     this.ignitedFrom = cardData.ignitedFrom ?? null;
 
     this.owner = owner; // player username
-    this.artworkPath = `/assets/images/artworks/${this.cardId}.png`;
+    // Resolved by the compiler from the card slug (`<normalizeName(name)>.png`);
+    // null for cards without artwork, which the frontend renders as placeholder.
+    this.artworkPath = cardData.artworkPath ?? null;
     this.bus = bus;
   }
 

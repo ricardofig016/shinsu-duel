@@ -11,6 +11,7 @@ import dslCatalog from "../../../../schemas/dsl-catalog.json" with { type: "json
 
 import { compileCards } from "../../../../scripts/card-compile.js";
 import { normalizeCardForSchema } from "../../../../scripts/card-validate.js";
+import { normalizeName } from "../../../../scripts/lib/normalize-name.js";
 import { MODIFIER_TYPES } from "../../services/ModifierService.js";
 import { RULE_TYPES } from "../../services/GlobalRuleRegistry.js";
 import { initEffectResolver } from "../../EffectResolver.js";
@@ -250,6 +251,21 @@ describe("card data audit (source/artifact identity)", () => {
         if (base?.name !== card.name.replace(/\s*-\s*ignited\s*/i, "").trim()) {
           violations.push(`"${card.name}".ignitedFrom -> ${card.ignitedFrom} ("${base?.name}")`);
         }
+      }
+    }
+    expect(violations).toEqual([]);
+  });
+
+  test("artwork paths follow the slug contract (absent or exactly <slug>.png)", () => {
+    // The compiler stamps /assets/images/artworks/<normalizeName(name)>.png
+    // when the artwork file exists and leaves the field absent otherwise.
+    // File existence is intentionally not checked here (most cards ship
+    // before their art); the derivation itself is the invariant.
+    const violations = [];
+    for (const card of Object.values(cardsData)) {
+      const expected = `/assets/images/artworks/${normalizeName(card.name)}.png`;
+      if (card.artworkPath !== undefined && card.artworkPath !== expected) {
+        violations.push(`"${card.name}".artworkPath is ${JSON.stringify(card.artworkPath)}, expected ${expected} or absent`);
       }
     }
     expect(violations).toEqual([]);

@@ -3,6 +3,8 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { normalizeName } from "./lib/normalize-name.js";
+
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const cardsDirectory = path.join(projectRoot, "data", "cards");
@@ -73,13 +75,6 @@ const colors = {
   green: "\x1b[32m",
   cyan: "\x1b[36m",
 };
-
-function normalizeName(rawName) {
-  return rawName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_|_$/g, "");
-}
 
 async function main() {
   const type = process.argv[2];

@@ -5,6 +5,7 @@ import path from "node:path";
 import dslCatalog from "../../schemas/dsl-catalog.json" with { type: "json" };
 
 import {
+  checkArtworks,
   compileAll,
   compileCard,
   compileCards,
@@ -618,5 +619,90 @@ effects:
 
     await expect(compileCards({ cardsDirectory: tmpDir }))
       .rejects.toThrow('effects[0].steps[0]: unknown node type "banana"');
+  });
+});
+
+describe("card-compile artwork resolution", () => {
+  let tmpDir;
+  let artDir;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "card-compile-art-"));
+    artDir = path.join(tmpDir, "artworks");
+    await fs.mkdir(artDir);
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  async function writeUnit(name) {
+    await fs.writeFile(path.join(tmpDir, `${name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.yml`), `type: unit
+name: ${name}
+cost: 2
+hp: 5
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives: []
+deckConstraints: []
+`, "utf-8");
+  }
+
+  test("stamps artworkPath only for cards whose slug exists in the artworks directory", async () => {
+    await writeUnit("A Unit");
+    await writeUnit("B Skill");
+    await fs.writeFile(path.join(artDir, "a_unit.png"), "png", "utf-8");
+
+    const { output, cards } = await compileCards({
+      cardsDirectory: tmpDir,
+      artworksDirectory: artDir,
+    });
+
+    const withArt = cards.find((card) => card.name === "A Unit");
+    const withoutArt = cards.find((card) => card.name === "B Skill");
+    expect(withArt.artworkPath).toBe("/assets/images/artworks/a_unit.png");
+    expect(withoutArt).not.toHaveProperty("artworkPath");
+    // The stamped field must survive schema validation inside compileCards
+    // (a validation failure would have thrown above) and reach the artifact.
+    expect(output[String(withArt.cardId)].artworkPath).toBe("/assets/images/artworks/a_unit.png");
+  });
+
+  test("checkArtworks reports missing card slugs and orphan files, ignoring raw/ and non-png files", async () => {
+    await writeUnit("A Unit");
+    await writeUnit("B Skill");
+    await fs.writeFile(path.join(artDir, "a_unit.png"), "png", "utf-8");
+    await fs.writeFile(path.join(artDir, "orphan.png"), "png", "utf-8");
+    await fs.writeFile(path.join(artDir, "README.md"), "docs", "utf-8");
+    await fs.mkdir(path.join(artDir, "raw"));
+    await fs.writeFile(path.join(artDir, "raw", "source.png"), "png", "utf-8");
+
+    const { cards } = await compileCards({
+      cardsDirectory: tmpDir,
+      artworksDirectory: artDir,
+    });
+    const { missing, orphans } = await checkArtworks(cards, artDir);
+
+    expect(missing).toEqual(["b_skill"]);
+    expect(orphans).toEqual(["orphan"]);
+  });
+
+  test("models a missing artworks directory as no artwork at all", async () => {
+    await writeUnit("A Unit");
+    const absentDir = path.join(tmpDir, "does-not-exist");
+
+    const { cards } = await compileCards({
+      cardsDirectory: tmpDir,
+      artworksDirectory: absentDir,
+    });
+    expect(cards.every((card) => card.artworkPath === undefined)).toBe(true);
+
+    const { missing, orphans } = await checkArtworks(cards, absentDir);
+    expect(missing).toEqual(["a_unit"]);
+    expect(orphans).toEqual([]);
   });
 });

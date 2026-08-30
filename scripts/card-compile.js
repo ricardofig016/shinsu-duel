@@ -7,6 +7,7 @@ import yaml from "js-yaml";
 import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
+import { normalizeName } from "./lib/normalize-name.js";
 import dslCatalog from "../schemas/dsl-catalog.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -14,6 +15,7 @@ const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const cardsDirectory = path.join(projectRoot, "data", "cards");
 const outputPath = path.join(projectRoot, "server", "data", "cards.json");
 const iconsDir = path.join(projectRoot, "public", "assets", "icons");
+const artworksDir = path.join(projectRoot, "public", "assets", "images", "artworks");
 const validatorPath = path.join(projectRoot, "scripts", "card-validate.js");
 const compiledSchemaPath = path.join(projectRoot, "schemas", "compiled-cards.schema.json");
 
@@ -652,6 +654,63 @@ async function checkIcons(cards) {
   return missingIcons;
 }
 
+// ── Artwork resolution ──────────────────────────────────────────────────────
+
+/**
+ * List the slug stems of the top-level artwork files in a directory.
+ *
+ * Only top-level `.png` files count: `raw/` holds pre-normalization sources
+ * and is ignored by construction, as is the pipeline README. A missing
+ * directory models as "no artwork exists" rather than a build failure.
+ *
+ * @param {string} dir - artworks directory
+ * @returns {Promise<Set<string>>} filename stems without the .png extension
+ */
+async function listArtworkStems(dir) {
+  let entries;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === "ENOENT") return new Set();
+    throw error;
+  }
+  const stems = new Set();
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name.endsWith(".png")) {
+      stems.add(entry.name.replace(/\.png$/, ""));
+    }
+  }
+  return stems;
+}
+
+/**
+ * Warn-only consistency check between compiled cards and artwork files
+ * (mirrors checkIcons: reports, never fails).
+ *
+ * Missing: card slugs with no `<slug>.png` in the artworks directory.
+ * Orphans: artwork files whose stem matches no card, which almost always
+ * means a filename typo or a renamed card.
+ *
+ * @param {object[]} cards - cleaned compiled cards
+ * @param {string} dir - artworks directory
+ * @returns {Promise<{ missing: string[], orphans: string[] }>} slug stems,
+ *   sorted, ready to be printed as `<slug>.png`
+ */
+export async function checkArtworks(cards, dir = artworksDir) {
+  const stems = await listArtworkStems(dir);
+  const missing = [];
+  const cardStems = new Set();
+  for (const card of cards) {
+    const stem = normalizeName(card.name);
+    cardStems.add(stem);
+    if (!stems.has(stem)) {
+      missing.push(stem);
+    }
+  }
+  const orphans = [...stems].filter((stem) => !cardStems.has(stem)).sort();
+  return { missing, orphans };
+}
+
 // ── Main ────────────────────────────────────────────────────────────────────
 
 const colors = {
@@ -681,6 +740,7 @@ export async function compileCards(options = {}) {
   const {
     cardsDirectory: cardsDir = cardsDirectory,
     compiledSchemaPath: schemaPath = compiledSchemaPath,
+    artworksDirectory: artDir = artworksDir,
   } = options;
 
   // 1. Read all YAML files recursively
@@ -773,7 +833,20 @@ export async function compileCards(options = {}) {
   // 6. Clean up temporary fields
   const finalCards = compiledCards.map(cleanCompiled);
 
-  // 7. Convert to keyed object (by cardId as string), failing on any
+  // 7. Stamp artwork paths. The artwork contract binds `<slug>.png` files in
+  //    the artworks directory to the card whose name produces that slug (the
+  //    same derivation that names the YAML source). Cards without a file stay
+  //    fieldless, matching cleanCompiled's sparse optional-field convention;
+  //    gaps and orphans are reported by checkArtworks, not failed here.
+  const artworkStems = await listArtworkStems(artDir);
+  for (const card of finalCards) {
+    const stem = normalizeName(card.name);
+    if (artworkStems.has(stem)) {
+      card.artworkPath = `/assets/images/artworks/${stem}.png`;
+    }
+  }
+
+  // 8. Convert to keyed object (by cardId as string), failing on any
   //    identity collision instead of silently shadowing an entry.
   const output = {};
   for (const card of finalCards) {
@@ -803,6 +876,7 @@ export async function compileAll(options = {}) {
     cardsDirectory: cardsDir = cardsDirectory,
     outputPath: outPath = outputPath,
     runValidate = true,
+    artworksDirectory: artDir = artworksDir,
   } = options;
 
   // Source YAML is the only authoring input. Never compile unvalidated cards.
@@ -816,6 +890,7 @@ export async function compileAll(options = {}) {
   const { output, cards: finalCards } = await compileCards({
     cardsDirectory: cardsDir,
     compiledSchemaPath: options.compiledSchemaPath,
+    artworksDirectory: artDir,
   });
 
   // Write output
@@ -824,6 +899,9 @@ export async function compileAll(options = {}) {
 
   // Check icons
   const missingIcons = await checkIcons(finalCards);
+
+  // Check artwork coverage (warn-only, like icons)
+  const { missing: missingArtworks, orphans: orphanArtworks } = await checkArtworks(finalCards, artDir);
 
   // Report
   console.log(`${colors.green}✓ Compiled ${finalCards.length} cards to ${path.relative(projectRoot, outPath)}${colors.reset}`);
@@ -841,6 +919,16 @@ export async function compileAll(options = {}) {
   if (missingIcons.length > 0) {
     console.log(`\n${colors.yellow}⚠ Missing ${missingIcons.length} icon(s):${colors.reset}`);
     missingIcons.forEach((icon) => console.log(`  - ${icon}`));
+  }
+
+  if (missingArtworks.length > 0) {
+    console.log(`\n${colors.yellow}⚠ Missing ${missingArtworks.length} artwork(s):${colors.reset}`);
+    missingArtworks.forEach((slug) => console.log(`  - ${slug}.png`));
+  }
+
+  if (orphanArtworks.length > 0) {
+    console.log(`\n${colors.yellow}⚠ Unmatched ${orphanArtworks.length} artwork file(s):${colors.reset}`);
+    orphanArtworks.forEach((slug) => console.log(`  - ${slug}.png`));
   }
 
   return finalCards;

@@ -4,7 +4,6 @@
 
 - [ ] frontend: change board background to something from the webtoon
 - [ ] plan: audit phase 2 again
-- [ ] public: plan how image artworks should be matched to cards
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 - [ ] game: add support for position:`any`
@@ -16,6 +15,7 @@
 
 ## Completed
 
+- [x] public: plan how image artworks should be matched to cards
 - [x] rules: create a `HOW_TO_PLAY.md` that are the default rules shown in the rules page
 - [x] rules: revisit action switch position - it now costs the combat slot of the position it leaves
 - [x] rules: add `steal` keyword

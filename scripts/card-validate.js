@@ -6,6 +6,7 @@ import yaml from "js-yaml";
 import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
+import { normalizeName } from "./lib/normalize-name.js";
 import conditions from "../server/data/conditions.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -88,13 +89,6 @@ function addError(errors, field, message) {
 
 function addWarning(warnings, field, message) {
   warnings.push(`[WARN] ${field}: ${message}`);
-}
-
-function normalizeName(rawName) {
-  return rawName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_|_$/g, "");
 }
 
 // Normalize null/undefined to empty array for YAML null fields

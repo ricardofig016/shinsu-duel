@@ -15,6 +15,7 @@ Read the listed files **in order**. Each task needs a different subset; you rare
 3. [`scripts/card-create.js`](../scripts/card-create.js) — the scaffold for a new card (`npm run create:card <type> <name>`).
 4. [`scripts/card-validate.js`](../scripts/card-validate.js) — **domain rules the schema does not enforce**: allowed affiliations/traits/positions/attributes, rank→cost ranges, filename convention, evolution/ignition cross-reference existence.
 5. Copy an existing card of the same type as a structural template (see _Reference cards_ below).
+6. Optional artwork: drop `<normalizeName(name)>.png` into the artworks folder — see _Card artwork_ below.
 
 ### Modify an existing card's effect
 
@@ -57,6 +58,19 @@ Structural patterns live in the existing cards — read the closest match before
 **`npm run validate:cards` passing does not mean a card works at runtime.** The schema and compiler validate _shape_; they do not guarantee a handler exists for every `type`.
 
 `schemas/dsl-catalog.json` is the inventory of every accepted `type` and the runtime owner each category requires. Before authoring an effect, confirm its `type` has an owner: [`server/game/EffectResolver.js`](../server/game/EffectResolver.js) (structural nodes + handler registry) for effects, [`server/game/services/PassiveManager.js`](../server/game/services/PassiveManager.js) for passive triggers, [`server/game/services/ModifierService.js`](../server/game/services/ModifierService.js) for always-on modifiers, and [`server/game/services/GlobalRuleRegistry.js`](../server/game/services/GlobalRuleRegistry.js) for landmark rules. The runtime ownership coverage test in [`CardDataAudit.test.js`](../server/game/tests/integration/CardDataAudit.test.js) fails for every shipped `type` whose handler is not registered, so the gap stays visible; unregistered types currently emit `EFFECT_UNSUPPORTED` and do nothing. See the "Transitional behavior" note in [`COMPILED_CARD_DSL.md`](./COMPILED_CARD_DSL.md).
+
+---
+
+## Card artwork
+
+A card's artwork file is `<normalizeName(name)>.png` in [`public/assets/images/artworks/`](../public/assets/images/artworks/) (lowercase snake_case: "Twenty-Fifth Baam" → `twenty_fifth_baam.png`, "Karaka - Evolved" → `karaka_evolved.png`). The slug is the same derivation the filename convention enforces on the YAML source, so one rule binds card name, card file, and artwork file. Target format is a 1200x800 PNG; the image processing pipeline is documented in that folder's README.
+
+The compiler binds the file at compile time and stamps the resolved path into the compiled card as `artworkPath`; runtime and frontend never derive artwork paths themselves. Two warn-only build notices keep the folder honest:
+
+- **Missing artwork** — every card whose slug has no file.
+- **Unmatched files** — artwork files whose slug matches no card, almost always a typo or a renamed card; rename the file together with the card.
+
+Both are warnings, never build failures: a card without art renders the frontend placeholder until its file lands.
 
 ---
 
