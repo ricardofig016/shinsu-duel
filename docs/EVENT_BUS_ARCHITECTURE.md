@@ -242,7 +242,7 @@ Emitted by the `ModifierStack` — see `MODIFIER_STACK_ARCHITECTURE.md`.
 - `card:reclaimed` — card reclaimed from discard
 - `card:created` — a card was created directly into a player's hand (e.g. `create_card`)
 - `game:deck:empty` — player's deck exhausted (triggers loss)
-- `effect:unsupported` — an effect `type` with no registered handler is skipped
+- `effect:unsupported` — a `create_card` target names a `generated_by` resource with no creation path (unregistered effect types throw instead)
 
 ### Skills & Decisions
 

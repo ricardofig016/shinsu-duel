@@ -46,7 +46,6 @@ import TargetResolver from "./TargetResolver.js";
 import PredicateEvaluator from "./services/PredicateEvaluator.js";
 import shuffle from "./utils/shuffle.js";
 import { toCardTargetView } from "./utils/cardData.js";
-import EVT from "./EventCatalog.js";
 
 // Singleton handler registry — populated at module load
 let _registry = null;
@@ -367,16 +366,7 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
 
   const registry = getRegistry();
   if (!registry.has(type)) {
-    // Transitional: a valid DSL `type` whose handler is not yet implemented is
-    // skipped and surfaced through EFFECT_UNSUPPORTED rather than throwing.
-    // Once the full catalog is implemented, this path becomes a hard error.
-    const result = { skipped: true, reason: "unsupported_effect", type, raw: effect.raw };
-    gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, {
-      ...result,
-      owner: extra.owner || extra.sourceOwner || null,
-      sourceId: extra.sourceId || null,
-    });
-    return result;
+    throw new Error(`EffectResolver: unknown effect type "${type}"`);
   }
 
   const handler = registry.get(type);

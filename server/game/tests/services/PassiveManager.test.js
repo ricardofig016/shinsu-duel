@@ -69,24 +69,6 @@ describe("PassiveManager", () => {
     expect(target.currentHp).toBe(targetCard.maxHp);
   });
 
-  test("emits an observable event when an unregistered effect type is skipped", () => {
-    const game = createGame();
-    const events = [];
-    game.eventBus.on(EVT.EFFECT_UNSUPPORTED, (payload) => events.push(payload));
-
-    const result = resolveEffect(
-      { type: "synthetic_unregistered_effect", raw: "unknown effect" },
-      { emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) },
-      game,
-      { owner: "Alice", sourceId: "System" }
-    );
-
-    expect(result).toEqual(expect.objectContaining({ reason: "unsupported_effect" }));
-    expect(events).toEqual(expect.arrayContaining([
-      expect.objectContaining({ reason: "unsupported_effect", sourceId: "System" }),
-    ]));
-  });
-
   test("resolves a registered noop effect without error", () => {
     const game = createGame();
     const result = resolveEffect(

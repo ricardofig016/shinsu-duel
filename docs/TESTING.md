@@ -48,7 +48,7 @@ Tests never read shipped card data. They resolve cards **only** against the test
 
 ### Shipped-data audits
 
-`CardDataAudit.test.js` audits `data/cards/` against `server/data/cards.json` on every run: fresh-compile parity, stable name-sorted ids, recursive DSL-catalog coverage, runtime handler ownership, and the artwork slug contract (every compiled `artworkPath` is absent or exactly `/assets/images/artworks/<normalizeName(name)>.png`). Its handler-coverage test is intentionally strict — it fails while a dispatchable `type` used by shipped cards has no registered handler. `DslCatalogContract.test.js` keeps `schemas/dsl-catalog.json` in lockstep with both JSON Schemas and the compiler's accepted vocabulary:
+`CardDataAudit.test.js` audits `data/cards/` against `server/data/cards.json` on every run: fresh-compile parity, stable name-sorted ids, recursive DSL-catalog coverage, runtime handler ownership, and the artwork slug contract (every compiled `artworkPath` is absent or exactly `/assets/images/artworks/<normalizeName(name)>.png`). Its handler-coverage test is intentionally strict — it fails while a cataloged dispatchable `type` has no registered handler. `DslCatalogContract.test.js` keeps `schemas/dsl-catalog.json` in lockstep with both JSON Schemas and the compiler's accepted vocabulary:
 
 ```powershell
 npm run test -- CardDataAudit

@@ -2,7 +2,6 @@ import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import { createLegalDeck, cards } from "../utils.js";
 import { resolveEffect } from "../../EffectResolver.js";
-import EVT from "../../EventCatalog.js";
 
 const players = ["Alice", "Bob"];
 
@@ -108,20 +107,21 @@ describe("EffectResolver structural nodes", () => {
     expect(src.currentHp).toBe(11);
   });
 
-  test("an unsupported leaf type inside a branch is reported, not thrown", () => {
+  test("an unknown effect type throws, at the top level and inside a resolved branch", () => {
     const game = createGame();
     push(game, "Alice", unit("miseng", "Alice", "scout", { name: "Yeo Miseng" }));
-    const events = [];
-    game.eventBus.on(EVT.EFFECT_UNSUPPORTED, (payload) => events.push(payload));
 
-    const result = resolveEffect({
+    expect(() => resolveEffect(
+      { type: "synthetic_unregistered_effect", raw: "unknown top level" },
+      context(game), game, { owner: "Alice", sourceOwner: "Alice" },
+    )).toThrow('EffectResolver: unknown effect type "synthetic_unregistered_effect"');
+
+    expect(() => resolveEffect({
       type: "conditional",
       if: { type: "has_unit", target: { side: "ally", name: "Yeo Miseng" } },
       then: { type: "synthetic_unregistered_effect", raw: "unknown leaf" },
-    }, context(game), game, { owner: "Alice", sourceOwner: "Alice" });
-
-    expect(result).toEqual(expect.objectContaining({ reason: "unsupported_effect" }));
-    expect(events.some((e) => e.type === "synthetic_unregistered_effect")).toBe(true);
+    }, context(game), game, { owner: "Alice", sourceOwner: "Alice" }))
+      .toThrow('EffectResolver: unknown effect type "synthetic_unregistered_effect"');
   });
 
   test("sequence defers remaining steps while a target choice is pending", () => {

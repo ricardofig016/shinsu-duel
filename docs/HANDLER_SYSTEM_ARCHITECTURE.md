@@ -118,7 +118,7 @@ At runtime, the resolution engine:
 4. Calls `handler.validate(payload)` with concrete `targetId` values
 5. Calls `handler.execute(payload, context, gameState)`
 
-For a `type` with **no registered handler** (a valid structured type whose handler is not yet implemented), there is **no handler registered**. The resolution engine skips the effect and reports it through the unsupported-effect event; it never parses prose.
+A `type` with **no registered handler** makes `resolveEffect` throw `EffectResolver: unknown effect type "<type>"`. Resolution is structural only: the resolver never parses prose as a fallback.
 
 ---
 
@@ -185,7 +185,7 @@ Handlers are grouped by the domain they mutate.
 | `NoopHandler` | `noop`     | No-op; resolves to `{ resolved: true }` (test placeholders) |
 | `NoopHandler` | `quick`    | Display-only Quick marker node; no-op                       |
 
-Every effect type cataloged in `schemas/dsl-catalog.json` has a registered handler in the tables above. A structured type that reaches `resolveEffect` without a registered handler (a future catalog addition, for example) is skipped and reported through the unsupported-effect event. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
+Every effect type cataloged in `schemas/dsl-catalog.json` has a registered handler in the tables above. A structured type that reaches `resolveEffect` without a registered handler throws; the runtime-ownership test in `CardDataAudit.test.js` fails while any cataloged effect type has no registered handler. Always-on **modifiers** (`modify_*`/`retain_equipment`) are not handlers at all — they are applied as source-tracked `ModifierStack` entries by `ModifierService` and consumed through filter-aware consultation helpers (see `MODIFIER_STACK_ARCHITECTURE.md`). The structural nodes `sequence` and `conditional` are the exception — they are resolved by `EffectResolver` directly, not through a handler class (see below).
 
 ## Ability Registry
 
@@ -213,7 +213,7 @@ resolveEffect(effect, context, gameState, extra);
 2. Otherwise reads `effect.type` and looks up the handler via `HandlerRegistry`
 3. Handles nested effects: `spend_shinsu.effect` resolved recursively after deduction
 4. `grant_ability.ability` is stored by the GrantAbilityHandler, not resolved immediately
-5. A `type` with no registered handler is skipped and reported via `effect:unsupported`
+5. A `type` with no registered handler throws `EffectResolver: unknown effect type "<type>"`
 
 ---
 
@@ -243,18 +243,12 @@ Resolution flow:
 2. If successful, it resolves the inner `effect` by looking up its `type` in the registry
 3. The inner effect may itself be nested (e.g., `spend_shinsu` wrapping `deal_damage`)
 
-**⚠️ This requires a recursive resolution function**:
+**Resolution recurses through the same function**:
 
 ```js
 function resolveEffect(effect, context, gameState, extra = {}) {
   if (!registry.has(effect.type)) {
-    // A valid structured type whose handler isn't implemented yet is skipped
-    // and surfaced through the `effect:unsupported` event.
-    gameState.eventBus.emit(EVT.EFFECT_UNSUPPORTED, {
-      type: effect.type,
-      raw: effect.raw,
-    });
-    return { skipped: true, reason: "unsupported_effect" };
+    throw new Error(`EffectResolver: unknown effect type "${effect.type}"`);
   }
   // TargetResolver is called here, before the handler, when effect.target
   // is a descriptor. The handler receives only concrete targetId values.
@@ -330,4 +324,4 @@ Every handler receives the DSL object as its payload (plus `context` and `gameSt
 - **Don't parse `raw` text for logic** — use structured fields.
 - **Don't skip validation** — always call `handler.validate()` before `execute()`.
 - **Don't hold state in handler instances** — they're singletons.
-- **Don't swallow unregistered effects silently** — emit `effect:unsupported` so they get handlers eventually.
+- **Don't add a skip path for unknown effect types** — resolution throws so the gap surfaces immediately.

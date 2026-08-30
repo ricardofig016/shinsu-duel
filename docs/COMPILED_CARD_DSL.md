@@ -380,8 +380,6 @@ The compiled schema is **closed**: `type` must be a known node type, unknown fie
 
 Artwork is resolved at compile time: for each card the compiler looks for `<normalizeName(name)>.png` in `public/assets/images/artworks/` (the same slug that names the YAML source) and stamps the public path into the compiled card as `artworkPath`. The field is present only when the file exists — cards without artwork carry no `artworkPath` at all, and the frontend renders its placeholder for them. The authoring rules for artwork files live in [`CARD_AUTHORING.md`](./CARD_AUTHORING.md).
 
-> **Transitional behavior** — a node whose `type` is cataloged but whose handler is not yet registered emits `EFFECT_UNSUPPORTED` and is skipped at runtime. The runtime ownership coverage test in [`CardDataAudit.test.js`](../server/game/tests/integration/CardDataAudit.test.js) fails for every such type until its handler is registered; do not treat a passing schema check as runtime support.
-
 ---
 
 ## Compiled artifact audit
@@ -390,7 +388,7 @@ Artwork is resolved at compile time: for each card the compiler looks for `<norm
 
 - a fresh in-memory compile (`compileCards()` in `scripts/card-compile.js`) must equal the checked-in `server/data/cards.json` exactly — same content, same stable name-sorted `cardId`s;
 - every node, trigger, and predicate type in the compiled data must be cataloged;
-- every dispatchable effect type must have a registered handler (see the transitional note above);
+- every dispatchable effect type must have a registered handler;
 - identity is unique (names and `cardId`s) and evolution/ignition cross-references point at their conventioned counterparts;
 - every compiled `artworkPath` is absent or exactly `/assets/images/artworks/<normalizeName(name)>.png` (the artwork slug contract).
 

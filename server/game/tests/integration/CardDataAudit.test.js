@@ -324,8 +324,8 @@ describe("card data audit (runtime ownership coverage)", () => {
       }));
 
     // Intentionally strict: schema validity does not imply runtime support.
-    // This test stays red until every dispatchable type used by shipped cards
-    // has a registered handler (or a declared runtime owner).
+    // Every cataloged effect type must have a registered handler, whether or
+    // not shipped cards use it yet.
     const report = unowned.map(({ type, usedByShippedCards, exampleLocations }) =>
       `${type} [used=${usedByShippedCards}] e.g. ${exampleLocations.join("; ")}`);
     expect(report).toEqual([]);
