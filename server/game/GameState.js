@@ -415,14 +415,14 @@ export default class GameState {
         frontline: playerState.field.frontline.map((unit) => ({
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          conditions: this.#getConditionViews(unit.id),
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
         backline: playerState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          conditions: this.#getConditionViews(unit.id),
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
@@ -447,6 +447,17 @@ export default class GameState {
       .map((entry) => ({ abilityCode: entry.code, ability: entry.ability, sourceId: entry.sourceId }));
   }
 
+  /**
+   * Project the conditions active on a unit with their effective magnitude
+   * from the ModifierStack, so clients can render stacks (e.g. "Poisoned 3").
+   */
+  #getConditionViews(unitId) {
+    return [...this.modifierStack.getActiveKeys(unitId, "condition")].map((key) => ({
+      key,
+      magnitude: this.modifierStack.getEffective(unitId, "condition", key),
+    }));
+  }
+
   #getOpponentUsername(username) {
     const opponent = this.usernames.find((u) => u !== username);
     if (!opponent) throw new Error(`Opponent for ${username} not found.`);
@@ -468,13 +479,13 @@ export default class GameState {
         frontline: opponentState.field.frontline.map((unit) => ({
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          conditions: this.#getConditionViews(unit.id),
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
         })),
         backline: opponentState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: [...this.modifierStack.getActiveKeys(unit.id, "condition")],
+          conditions: this.#getConditionViews(unit.id),
           traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
         })),
       },
@@ -490,9 +501,11 @@ export default class GameState {
 
   getClientState(username) {
     return {
+      round: this.round,
+      currentTurn: this.currentTurn,
+      gameOver: this.gameOver ? { ...this.gameOver } : null,
       you: this.#filterYouState(username),
       opponent: this.#filterOpponentState(username),
-      currentTurn: this.currentTurn,
     };
   }
 

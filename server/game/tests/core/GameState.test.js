@@ -1,6 +1,6 @@
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { advanceToRound, createLegalDeck, expectShinsuState, getCardIdByName, cards } from "../utils.js";
+import { advanceToRound, createLegalDeck, deployUnit, expectShinsuState, getCardIdByName, setupGameWithHands, cards } from "../utils.js";
 
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
@@ -71,9 +71,13 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
     const state = game.getClientState(firstPlayer);
 
     // Top-level keys
+    expect(state).toHaveProperty("round");
+    expect(state).toHaveProperty("currentTurn");
+    expect(state).toHaveProperty("gameOver");
     expect(state).toHaveProperty("you");
     expect(state).toHaveProperty("opponent");
-    expect(state).toHaveProperty("currentTurn");
+    expect(state.round).toBe(round);
+    expect(state.gameOver).toBeNull();
 
     // 'you' and 'opponent' should have expected keys
     [
@@ -263,5 +267,69 @@ describe("startedWithCard", () => {
     expect(game.startedWithCard("Bob", "Test Damage Skill")).toBe(true);
     // Case-insensitive and unaffected by draws/plays.
     expect(game.startedWithCard("Alice", "test light bearer")).toBe(true);
+  });
+});
+
+describe("client state projections", () => {
+  test("unit conditions carry their effective magnitude in own and opponent views", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    game.modifierStack.apply({
+      sourceId: unit.id,
+      sourceType: "unit",
+      targetId: unit.id,
+      type: "condition",
+      key: "poisoned",
+      value: 1,
+      operation: "add",
+    });
+    game.modifierStack.apply({
+      sourceId: unit.id,
+      sourceType: "unit",
+      targetId: unit.id,
+      type: "condition",
+      key: "poisoned",
+      value: 2,
+      operation: "add",
+    });
+    game.modifierStack.apply({
+      sourceId: unit.id,
+      sourceType: "unit",
+      targetId: unit.id,
+      type: "condition",
+      key: "stunned",
+      value: 1,
+      operation: "add",
+    });
+
+    const toMagnitudes = (conditions) =>
+      Object.fromEntries(conditions.map((condition) => [condition.key, condition.magnitude]));
+    const expected = { poisoned: 3, stunned: 1 };
+
+    const ownView = game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id);
+    expect(toMagnitudes(ownView.conditions)).toEqual(expected);
+    expect(ownView.conditions[0]).toHaveProperty("key");
+    expect(ownView.conditions[0]).toHaveProperty("magnitude");
+
+    const opponentView = game.getClientState("Bob").opponent.field.frontline.find((u) => u.id === unit.id);
+    expect(toMagnitudes(opponentView.conditions)).toEqual(expected);
+  });
+
+  test("gameOver is projected as a copy once the game has ended", () => {
+    const game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1), cards });
+    expect(game.getClientState("Alice").gameOver).toBeNull();
+
+    game.playerStates.Alice.deck = [];
+    const first = game.currentTurn;
+    const second = first === "Alice" ? "Bob" : "Alice";
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: first } });
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: second } });
+
+    const gameOver = game.getClientState("Alice").gameOver;
+    expect(gameOver).toEqual({ winner: "Bob", reason: "deck exhausted" });
+
+    // Mutating the projection must not corrupt the authoritative result.
+    gameOver.winner = "tampered";
+    expect(game.gameOver.winner).toBe("Bob");
   });
 });
