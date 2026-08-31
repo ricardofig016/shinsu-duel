@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import EVT from "../../EventCatalog.js";
-import EventBridge from "../../net/EventBridge.js";
+import EventBridge from "../../net/eventBridge.js";
 import GameSession from "../../net/GameSession.js";
 import { EVENTS } from "../../net/protocol.js";
 import { createTestGame, deployUnit, setupGameWithHands } from "../utils.js";
