@@ -102,6 +102,15 @@ const alignHandCards = () => {
   });
 };
 
+const showGameOver = (gameOver) => {
+  const model = buildGameOverViewModel(gameOver, store.state?.you?.username);
+  document.querySelector("#game-over-overlay").classList.toggle("hidden", model === null);
+  if (model) {
+    document.querySelector("#game-over-headline").textContent = model.headline;
+    document.querySelector("#game-over-detail").textContent = `${model.winner} wins: ${model.reason}`;
+  }
+};
+
 /* ── renderers ────────────────────────────────────────────────────────── */
 
 const renderRound = (state) => {
@@ -340,12 +349,7 @@ const render = async (state, data, socket) => {
   renderPassButton(state);
   renderFireCharge(state);
   renderDecisionPrompt(state, socket);
-  const gameOver = buildGameOverViewModel(state.gameOver, state.you?.username);
-  document.querySelector("#game-over-overlay").classList.toggle("hidden", gameOver === null);
-  if (gameOver) {
-    document.querySelector("#game-over-headline").textContent = gameOver.headline;
-    document.querySelector("#game-over-detail").textContent = `${gameOver.winner} wins: ${gameOver.reason}`;
-  }
+  showGameOver(state.gameOver);
   document.querySelector("#waiting-overlay").classList.add("hidden");
 };
 
@@ -567,6 +571,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   socket.on(EVENTS.GAME_INIT, scheduleRender);
   socket.on(EVENTS.GAME_UPDATE, scheduleRender);
   socket.on(EVENTS.GAME_ERROR, (payload) => alert(payload?.message ?? "Something went wrong."));
+  socket.on(EVENTS.GAME_OVER, (payload) => showGameOver(payload));
   socket.on(EVENTS.GAME_WAITING, (payload) => showWaiting(payload));
   socket.on(EVENTS.GAME_HAND_PEEK, (payload) => showPeekReveal(payload));
   // after a transport reconnect the server treats the socket as new, so ask
