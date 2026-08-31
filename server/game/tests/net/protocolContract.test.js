@@ -314,6 +314,39 @@ describe("game-over: exact delivery to both seats", () => {
   });
 });
 
+describe("generate-fire-charge-action: the hwayeomsa core mechanic over the wire", () => {
+  test("a qualifying player gains a charge and a Fire Core through the exact client payload", async () => {
+    const { roomCode, alice } = await harness.seatPlayers({ hands: { Alice: ["Test Hwayeomsa"] } });
+    const session = harness.registry.get(roomCode);
+    deployUnit(session.game, "Alice", "Test Hwayeomsa", "fisherman");
+    // deploying ends the deployer's turn; the core ability needs it back
+    session.game.currentTurn = "Alice";
+
+    // the exact payload the client builder emits
+    alice.emit(EVENTS.GAME_ACTION, { type: "generate-fire-charge-action", data: {} });
+    const update = await alice.next(EVENTS.GAME_UPDATE);
+
+    expect(update.you.fireCharges).toBe(1);
+    expect(update.you.hand.some((card) => card.name === "Fire Core")).toBe(true);
+    const deployed = [...update.you.field.frontline, ...update.you.field.backline].find(
+      (candidate) => candidate.card.name === "Test Hwayeomsa"
+    );
+    expect(deployed.card.attributes).toEqual(["hwayeomsa"]);
+  });
+
+  test("a player with no hwayeomsa unit is rejected and the revision stays put", async () => {
+    const { roomCode, alice } = await harness.seatPlayers();
+    const session = harness.registry.get(roomCode);
+    const revisionBefore = session.revision;
+
+    alice.emit(EVENTS.GAME_ACTION, { type: "generate-fire-charge-action", data: {} });
+    const error = await alice.next(EVENTS.GAME_ERROR);
+
+    expect(error).toEqual({ message: "No Hwayeomsa on field" });
+    expect(session.revision).toBe(revisionBefore);
+  });
+});
+
 describe("game-waiting: the lone player is not left in silence", () => {
   test("a player alone in an unfinished room receives the exact waiting payload", async () => {
     const roomCode = harness.createRoom();
