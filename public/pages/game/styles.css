@@ -269,6 +269,37 @@ hr {
   opacity: 0.7;
 }
 
+#fire-charge-container {
+  padding: 0.4rem;
+  border-radius: 1rem;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  gap: 0.2rem;
+}
+
+#fire-charge-container h2 {
+  margin: 0;
+  color: white;
+}
+
+#fire-charge-container h2::before {
+  content: "Fire ";
+  font-size: 0.7em;
+  opacity: 0.7;
+}
+
+#fire-charge-container button {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+#fire-charge-container button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .overlay {
   position: fixed;
   inset: 0;

@@ -41,6 +41,7 @@ const flattenCard = (card) => ({
     description: trait.description ?? null,
     iconPath: trait.iconPath ?? null,
   })),
+  attributes: [...(card.attributes ?? [])],
   affiliations: Object.entries(card.affiliations ?? {}).map(([code, affiliation]) => ({
     code,
     name: affiliation.name,
@@ -134,6 +135,25 @@ export function buildRoundViewModel(state) {
     round: state.round,
     currentTurn: state.currentTurn,
     isYourTurn: state.currentTurn === state.you?.username,
+  };
+}
+
+/**
+ * The fire charge panel state. The core Hwayeomsa ability needs one of your
+ * field units carrying the `hwayeomsa` attribute; charges accumulate on your
+ * player state.
+ */
+export function buildFireChargeViewModel(state) {
+  if (!state || typeof state !== "object") {
+    throw new TypeError("buildFireChargeViewModel needs the game state.");
+  }
+  const you = state.you;
+  const hasHwayeomsaUnit = ["frontline", "backline"].some((line) =>
+    (you?.field?.[line] ?? []).some((unit) => (unit.card?.attributes ?? []).includes("hwayeomsa"))
+  );
+  return {
+    charges: you?.fireCharges ?? 0,
+    canGenerate: hasHwayeomsaUnit && state.currentTurn === you?.username,
   };
 }
 

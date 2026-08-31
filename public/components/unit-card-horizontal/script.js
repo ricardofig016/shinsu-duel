@@ -67,9 +67,15 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   // status badges
   loadStatus(container, unit);
 
-  // position icon (the placed position; landmark units have none)
-  const positionContainer = container.querySelector(".unit-card-horizontal-position");
+  // position icons: the placed position, plus the chosen one when a landmark
+  // choice moved the unit and differs from where it stands
+  const positionContainer = container.querySelector(".unit-card-horizontal-position:not(.unit-card-horizontal-position-chosen)");
+  const chosenContainer = container.querySelector(".unit-card-horizontal-position-chosen");
   const placedPosition = unit.placedPositionCode ? unit.positions[unit.placedPositionCode] : null;
+  const chosenPosition =
+    unit.chosenPositionCode && unit.chosenPositionCode !== unit.placedPositionCode
+      ? unit.positions[unit.chosenPositionCode]
+      : null;
   positionContainer.innerHTML = "";
   if (placedPosition) {
     const positionIcon = safePath(placedPosition.iconPath, DEFAULT_POSITION_ICON);
@@ -77,6 +83,20 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
     await addTooltip(container, positionContainer, placedPosition.name, placedPosition.description, positionIcon);
   } else {
     positionContainer.style.backgroundImage = `url("${DEFAULT_POSITION_ICON}")`;
+  }
+  if (chosenPosition) {
+    const chosenIcon = safePath(chosenPosition.iconPath, DEFAULT_POSITION_ICON);
+    chosenContainer.classList.remove("hidden");
+    chosenContainer.style.backgroundImage = `url("${chosenIcon}")`;
+    await addTooltip(
+      container,
+      chosenContainer,
+      chosenPosition.name,
+      chosenPosition.description + " (chosen)",
+      chosenIcon
+    );
+  } else {
+    chosenContainer.classList.add("hidden");
   }
 
   // hp (use 0 if missing)

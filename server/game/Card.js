@@ -112,6 +112,7 @@ export default class Card {
       affiliations: this.affiliations,
       positions: this.positions,
       traits: this.traits,
+      attributes: [...this.attributes],
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
       owner: this.owner,

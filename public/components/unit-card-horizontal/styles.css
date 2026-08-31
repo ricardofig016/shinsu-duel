@@ -64,12 +64,23 @@
   justify-content: space-between;
 }
 
+.unit-card-horizontal-positions {
+  height: 100%;
+  flex: 2;
+  gap: 6%;
+}
+
 .unit-card-horizontal-position {
   height: 85%;
   flex: 1;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.unit-card-horizontal-position-chosen {
+  outline: 2px solid rgba(255, 255, 160, 0.9);
+  border-radius: 0.3em;
 }
 
 .unit-card-horizontal-hp {

@@ -5,6 +5,7 @@ import {
   buildEquipEquipmentAction,
   buildSwitchPositionAction,
   buildUseAbilityAction,
+  buildGenerateFireChargeAction,
   buildPassTurnAction,
   buildDecision,
 } from "../../game/actions.js";
@@ -16,6 +17,7 @@ describe("outbound action builders", () => {
     expect(ACTION_TYPES.EQUIP_EQUIPMENT).toBe("equip-equipment-action");
     expect(ACTION_TYPES.SWITCH_POSITION).toBe("switch-position-action");
     expect(ACTION_TYPES.USE_ABILITY).toBe("use-ability-action");
+    expect(ACTION_TYPES.GENERATE_FIRE_CHARGE).toBe("generate-fire-charge-action");
     expect(ACTION_TYPES.PASS_TURN).toBe("pass-turn-action");
   });
 
@@ -56,6 +58,10 @@ describe("outbound action builders", () => {
       data: { unitId: "unit-9", abilityCode: "peek" },
     });
     expect(() => buildUseAbilityAction("unit-9", "")).toThrow(TypeError);
+  });
+
+  test("buildGenerateFireChargeAction returns the exact payload", () => {
+    expect(buildGenerateFireChargeAction()).toEqual({ type: "generate-fire-charge-action", data: {} });
   });
 
   test("buildPassTurnAction returns the exact payload", () => {

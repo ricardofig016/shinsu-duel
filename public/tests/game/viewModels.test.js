@@ -6,6 +6,7 @@ import {
   buildHandCardViewModel,
   buildShinsuViewModel,
   buildRoundViewModel,
+  buildFireChargeViewModel,
   buildGameOverViewModel,
 } from "../../game/viewModels.js";
 
@@ -88,6 +89,15 @@ describe("buildUnitViewModel", () => {
     ]);
     expect(model.runtimeTraits).toEqual(["scout", "fearless"]);
     expect(model.conditions).toEqual([{ key: "poisoned", magnitude: 2 }]);
+  });
+
+  test("carries the card's attributes for attribute-driven mechanics", () => {
+    const model = buildUnitViewModel({
+      id: "unit-attr",
+      card: { name: "Yeon Yihwa", attributes: ["hwayeomsa"] },
+    });
+
+    expect(model.attributes).toEqual(["hwayeomsa"]);
   });
 
   test("carries equipment attachments, granted abilities, and both positions", () => {
@@ -204,6 +214,51 @@ describe("buildRoundViewModel", () => {
   test("marks your own turn", () => {
     const model = buildRoundViewModel({ round: 2, currentTurn: "Alice", you: { username: "Alice" } });
     expect(model.isYourTurn).toBe(true);
+  });
+});
+
+describe("buildFireChargeViewModel", () => {
+  const stateWith = (overrides = {}) => ({
+    currentTurn: "Alice",
+    you: {
+      username: "Alice",
+      fireCharges: 2,
+      field: { frontline: [], backline: [] },
+      ...overrides,
+    },
+  });
+
+  const hwayeomsaUnit = {
+    id: "unit-h",
+    card: { name: "Yeon Yihwa", attributes: ["hwayeomsa"] },
+  };
+
+  test("counts charges and allows generation with your hwayeomsa unit on your turn", () => {
+    const state = stateWith({ field: { frontline: [hwayeomsaUnit], backline: [] } });
+
+    expect(buildFireChargeViewModel(state)).toEqual({ charges: 2, canGenerate: true });
+  });
+
+  test("denies generation when it is not your turn", () => {
+    const state = stateWith({ field: { frontline: [hwayeomsaUnit], backline: [] } });
+    state.currentTurn = "Bob";
+
+    expect(buildFireChargeViewModel(state).canGenerate).toBe(false);
+  });
+
+  test("denies generation without a hwayeomsa unit on the field", () => {
+    const state = stateWith({
+      field: {
+        frontline: [{ id: "unit-x", card: { name: "Scout", attributes: ["anima"] } }],
+        backline: [],
+      },
+    });
+
+    expect(buildFireChargeViewModel(state)).toEqual({ charges: 2, canGenerate: false });
+  });
+
+  test("defaults charges to zero and tolerates a missing seat", () => {
+    expect(buildFireChargeViewModel({ currentTurn: "Alice" })).toEqual({ charges: 0, canGenerate: false });
   });
 });
 

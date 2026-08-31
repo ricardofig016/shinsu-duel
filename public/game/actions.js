@@ -12,6 +12,7 @@ export const ACTION_TYPES = Object.freeze({
   EQUIP_EQUIPMENT: "equip-equipment-action",
   SWITCH_POSITION: "switch-position-action",
   USE_ABILITY: "use-ability-action",
+  GENERATE_FIRE_CHARGE: "generate-fire-charge-action",
   PASS_TURN: "pass-turn-action",
 });
 
@@ -56,6 +57,10 @@ export function buildUseAbilityAction(unitId, abilityCode) {
   assertNonEmptyString(unitId, "unitId");
   assertNonEmptyString(abilityCode, "abilityCode");
   return buildAction(ACTION_TYPES.USE_ABILITY, { unitId, abilityCode });
+}
+
+export function buildGenerateFireChargeAction() {
+  return buildAction(ACTION_TYPES.GENERATE_FIRE_CHARGE, {});
 }
 
 export function buildPassTurnAction() {

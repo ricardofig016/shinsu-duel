@@ -4,6 +4,7 @@ import { createGameStore } from "/game/store.js";
 import {
   buildCardViewModel,
   buildDecisionPromptViewModel,
+  buildFireChargeViewModel,
   buildGameOverViewModel,
   buildHandCardViewModel,
   buildRoundViewModel,
@@ -15,6 +16,7 @@ import {
   buildDeployUnitAction,
   buildDecision,
   buildEquipEquipmentAction,
+  buildGenerateFireChargeAction,
   buildPassTurnAction,
   buildPlaySkillAction,
   buildSwitchPositionAction,
@@ -269,6 +271,15 @@ const renderPassButton = (state) => {
   }
 };
 
+const renderFireCharge = (state) => {
+  const model = buildFireChargeViewModel(state);
+  const container = document.querySelector("#fire-charge-container");
+  // visible while the mechanic is live: charges held or generation available
+  container.classList.toggle("hidden", !model.canGenerate && model.charges === 0);
+  document.querySelector("#fire-charge-count").textContent = model.charges;
+  document.querySelector("#fire-charge-generate").disabled = !model.canGenerate;
+};
+
 const renderDecisionPrompt = (state, socket) => {
   const promptEl = document.querySelector("#decision-prompt");
   const prompt = buildDecisionPromptViewModel(state.you?.pendingDecision ?? null);
@@ -327,6 +338,7 @@ const render = async (state, data, socket) => {
   await renderHands(state, socket);
   renderShinsu(state);
   renderPassButton(state);
+  renderFireCharge(state);
   renderDecisionPrompt(state, socket);
   const gameOver = buildGameOverViewModel(state.gameOver, state.you?.username);
   document.querySelector("#game-over-overlay").classList.toggle("hidden", gameOver === null);
@@ -402,6 +414,18 @@ const prepareBoard = async (positionData, socket) => {
   const passButtonFrame = document.querySelector(`#you-container .pass-button-frame`);
   passButtonFrame.addEventListener("click", () => {
     socket.emit(EVENTS.GAME_ACTION, buildPassTurnAction());
+  });
+
+  // fire charges: the Hwayeomsa core ability
+  const fireChargeContainer = document.querySelector("#fire-charge-container");
+  await addTooltip(
+    fireChargeContainer,
+    fireChargeContainer.querySelector("h2"),
+    "Fire Charges",
+    "Gained by your Hwayeomsa units; Fire Core consumes them to create Incinerate cards"
+  );
+  document.querySelector("#fire-charge-generate").addEventListener("click", () => {
+    socket.emit(EVENTS.GAME_ACTION, buildGenerateFireChargeAction());
   });
 
   // hand focus follows the cursor; attached once so re-renders never stack listeners
