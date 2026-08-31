@@ -3,7 +3,7 @@
   height: 100%;
   padding: 0.5em;
   border-radius: 4px;
-  gap: 5%;
+  gap: 3%;
   background-image: url("/assets/images/card/background.png");
   background-size: cover;
   background-position: center;
@@ -14,11 +14,47 @@
 
 .unit-card-horizontal-artwork {
   width: 100%;
-  flex: 0 0 65%;
+  flex: 0 0 55%;
   border-radius: 4px;
   background-image: url("/assets/images/placeholder.png");
   background-size: cover;
   background-position: center;
+}
+
+.unit-card-horizontal-status {
+  width: 100%;
+  flex: 0 0 12%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.unit-card-horizontal-badge {
+  font-size: 0.65em;
+  padding: 0 0.3em;
+  border-radius: 0.4em;
+  background-color: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.unit-card-horizontal-badge.condition {
+  border-color: #b0413e;
+}
+
+.unit-card-horizontal-badge.equipment {
+  border-color: #4f97d0;
+}
+
+.unit-card-horizontal-badge.granted-ability {
+  border-color: #d0a94f;
+}
+
+.unit-card-horizontal-badge.runtime-trait {
+  border-color: #67b06a;
 }
 
 .unit-card-horizontal-stats {

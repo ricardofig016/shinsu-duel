@@ -15,9 +15,20 @@ const load = async (container, { hoverContainer, title, textList, iconPath = nul
     if (iconEl) iconEl.src = safeIcon;
   }
   container.querySelector(".tooltip-title").innerText = title;
+
+  // Payload text is rendered as text content only, so card names and ability
+  // text can never inject markup.
   const tooltipTextContainer = container.querySelector(".tooltip-text");
-  if (typeof textList === "string") tooltipTextContainer.innerHTML = `<p>${textList}</p>`;
-  else tooltipTextContainer.innerHTML = textList.map((text) => `<p>${text}</p>`).join("");
+  const entries = typeof textList === "string" ? [textList] : textList ?? [];
+  tooltipTextContainer.replaceChildren(
+    ...entries
+      .filter((text) => typeof text === "string" && text.trim() !== "")
+      .map((text) => {
+        const p = document.createElement("p");
+        p.textContent = text;
+        return p;
+      })
+  );
 
   const tooltipFrame = container.querySelector(".tooltip-frame");
   hoverContainer.addEventListener("mousemove", (event) => {

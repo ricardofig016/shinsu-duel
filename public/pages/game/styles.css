@@ -245,3 +245,132 @@ hr {
   z-index: 10;
   cursor: pointer;
 }
+
+#round-indicator {
+  width: 100%;
+  min-height: 8px;
+  padding: 0 1rem;
+  justify-content: center;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  border: 1px solid black;
+}
+
+#round-indicator h2 {
+  margin: 0;
+  padding: 0.2rem 0;
+  color: white;
+  font-weight: normal;
+}
+
+#round-indicator h2::before {
+  content: "Round ";
+  opacity: 0.7;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.overlay-panel {
+  max-width: 40rem;
+  max-height: 80vh;
+  padding: 1.5rem 2rem;
+  border-radius: 1rem;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  gap: 1rem;
+}
+
+#game-over-headline {
+  font-size: 3.5rem;
+}
+
+#peek-overlay-cards {
+  max-height: 50vh;
+  gap: 0.3rem;
+}
+
+#decision-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 15;
+}
+
+.decision-prompt-panel {
+  padding: 0.8rem 1.2rem;
+  border-radius: 1rem;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  gap: 0.6rem;
+}
+
+#decision-prompt-title,
+#decision-prompt-hint {
+  margin: 0;
+}
+
+#decision-prompt-candidates {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+#decision-prompt-candidates button {
+  padding: 0.4rem 0.8rem;
+  background-color: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0.6rem;
+}
+
+#decision-prompt-candidates button.selected {
+  border-color: #ffd75e;
+  background-color: rgba(120, 100, 0, 0.6);
+}
+
+#decision-prompt-candidates button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#decision-prompt-confirm:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#position-chooser {
+  position: fixed;
+  z-index: 16;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  border-radius: 0.8rem;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+
+#position-chooser button {
+  padding: 0.3rem 0.8rem;
+  background-color: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.equip-target {
+  outline: 3px solid #4f97d0;
+  cursor: pointer;
+}

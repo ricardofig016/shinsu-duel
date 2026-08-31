@@ -61,6 +61,10 @@
         </div>
       </div>
       <hr />
+      <div id="round-indicator" class="container-horizontal">
+        <h2>Round 1</h2>
+      </div>
+      <hr />
       <!-- you -->
       <div id="you-container" class="side-container container-horizontal">
         <div class="combat-slots-container container-vertical"></div>
@@ -111,6 +115,43 @@
           </div>
           <div class="hand-container container-horizontal"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- position switch chooser -->
+    <div id="position-chooser" class="hidden"></div>
+
+    <!-- pending decision prompt -->
+    <div id="decision-prompt" class="hidden">
+      <div class="decision-prompt-panel container-vertical">
+        <h2 id="decision-prompt-title">Choose</h2>
+        <p id="decision-prompt-hint"></p>
+        <div id="decision-prompt-candidates" class="container-horizontal"></div>
+        <button id="decision-prompt-confirm" type="button">Confirm</button>
+      </div>
+    </div>
+
+    <!-- hand peek reveal -->
+    <div id="peek-overlay" class="overlay hidden">
+      <div class="overlay-panel container-vertical">
+        <h2>Revealed hand</h2>
+        <ul id="peek-overlay-cards" class="allow-scroll"></ul>
+      </div>
+    </div>
+
+    <!-- waiting for the opponent -->
+    <div id="waiting-overlay" class="overlay hidden">
+      <div class="overlay-panel container-vertical">
+        <h2>Waiting</h2>
+        <p id="waiting-overlay-message"></p>
+      </div>
+    </div>
+
+    <!-- game over -->
+    <div id="game-over-overlay" class="overlay hidden">
+      <div class="overlay-panel container-vertical">
+        <h1 id="game-over-headline">Game over</h1>
+        <p id="game-over-detail"></p>
       </div>
     </div>
 
