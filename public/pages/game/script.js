@@ -499,14 +499,12 @@ const prepareBoard = async (positionData, socket) => {
     if (!chooser.classList.contains("hidden") && !chooser.contains(event.target)) hidePositionChooser();
   });
 
-  // the decision prompt confirms through one stable listener
+  // the decision prompt confirms through one stable listener; locked
+  // candidates are engine-committed, so only the free selections are sent
   document.querySelector("#decision-prompt-confirm").addEventListener("click", () => {
     const prompt = activeDecisionPrompt;
     if (!prompt || !canSubmitDecision(prompt, selectedDecisionChoices)) return;
-    socket.emit(
-      EVENTS.GAME_DECISION,
-      buildDecision(prompt.decisionId, [...prompt.lockedIds, ...selectedDecisionChoices])
-    );
+    socket.emit(EVENTS.GAME_DECISION, buildDecision(prompt.decisionId, selectedDecisionChoices));
   });
 
   // overlays close on click

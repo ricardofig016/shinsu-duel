@@ -149,8 +149,9 @@ export function buildGameOverViewModel(gameOver, username) {
 
 /**
  * Render a pending decision into a prompt model, or null when the player has
- * nothing to decide. Candidates are pre-locked when their id is in
- * `lockedIds`; they count towards the required choices but cannot be toggled.
+ * nothing to decide. `lockedIds` are engine-committed picks (e.g. mandatory
+ * Taunt targets) rendered pre-selected and disabled; they sit outside the
+ * candidates list and are never submitted.
  */
 export function buildDecisionPromptViewModel(pendingDecision) {
   if (!pendingDecision) return null;
@@ -170,14 +171,15 @@ export function buildDecisionPromptViewModel(pendingDecision) {
 }
 
 /**
- * Whether the current selection may be submitted. The engine requires the
- * full choice list (locked candidates included) to be unique, within the
- * min/max range, and restricted to real candidates.
+ * Whether the current selection may be submitted. Locked candidates are
+ * engine-committed and rendered pre-selected; they are not part of the
+ * candidates list and are not submitted. The engine validates the free
+ * selections against the min/max range and the candidate list.
  */
 export function canSubmitDecision(prompt, selectedIds) {
   if (!prompt) return false;
-  const ids = [...new Set([...prompt.lockedIds, ...(selectedIds ?? [])])];
-  if (ids.length < prompt.minChoices || ids.length > prompt.maxChoices) return false;
+  const selected = [...new Set(selectedIds ?? [])];
   const candidateIds = new Set(prompt.candidates.map((candidate) => candidate.id));
-  return ids.every((id) => candidateIds.has(id));
+  if (selected.some((id) => !candidateIds.has(id))) return false;
+  return selected.length >= prompt.minChoices && selected.length <= prompt.maxChoices;
 }

@@ -16,17 +16,30 @@ const targetDecision = {
   lockedIds: [],
 };
 
-const cardDecision = {
+// Locked decisions carry only the free candidates; locked ids are
+// engine-committed picks outside the candidate list (mandatory Taunts).
+const lockedDecision = {
   decisionId: "decision-2",
+  type: "target_selection",
+  candidates: [
+    { id: "unit-3", name: "Free Ally", hp: 2 },
+    { id: "unit-4", name: "Free Enemy", hp: 4 },
+  ],
+  minChoices: 1,
+  maxChoices: 1,
+  lockedIds: ["unit-taunt"],
+};
+
+const cardDecision = {
+  decisionId: "decision-3",
   type: "card_selection",
   candidates: [
     { id: 101, name: "Test Scout", hp: null },
     { id: 102, name: "Test Skill", hp: null },
-    { id: 103, name: "Test Equipment", hp: null },
   ],
   minChoices: 1,
   maxChoices: 2,
-  lockedIds: [103],
+  lockedIds: [],
 };
 
 describe("buildDecisionPromptViewModel", () => {
@@ -51,14 +64,21 @@ describe("buildDecisionPromptViewModel", () => {
     });
   });
 
-  test("renders a card selection with locked candidates", () => {
+  test("renders a decision with engine-locked picks", () => {
+    const prompt = buildDecisionPromptViewModel(lockedDecision);
+
+    expect(prompt.title).toBe("Choose a target");
+    expect(prompt.candidates.map((candidate) => candidate.id)).toEqual(["unit-3", "unit-4"]);
+    expect(prompt.lockedIds).toEqual(["unit-taunt"]);
+  });
+
+  test("renders a card selection with its range", () => {
     const prompt = buildDecisionPromptViewModel(cardDecision);
 
     expect(prompt.title).toBe("Choose cards");
     expect(prompt.minChoices).toBe(1);
     expect(prompt.maxChoices).toBe(2);
-    expect(prompt.lockedIds).toEqual([103]);
-    expect(prompt.candidates).toHaveLength(3);
+    expect(prompt.candidates).toHaveLength(2);
   });
 
   test("defaults the choice range and title for unknown types", () => {
@@ -76,22 +96,24 @@ describe("buildDecisionPromptViewModel", () => {
 });
 
 describe("canSubmitDecision", () => {
-  test("accepts a selection that meets the range with candidate ids", () => {
+  test("accepts free selections within the range with candidate ids", () => {
     const prompt = buildDecisionPromptViewModel(cardDecision);
-    expect(canSubmitDecision(prompt, [])).toBe(true); // locked 103 alone satisfies min 1
-    expect(canSubmitDecision(prompt, [101])).toBe(true); // locked + 1 more reaches max 2
+    expect(canSubmitDecision(prompt, [])).toBe(false);
+    expect(canSubmitDecision(prompt, [101])).toBe(true);
+    expect(canSubmitDecision(prompt, [101, 102])).toBe(true);
   });
 
   test("rejects selections outside the range or with unknown ids", () => {
     const prompt = buildDecisionPromptViewModel(cardDecision);
     expect(canSubmitDecision(prompt, [999])).toBe(false);
-    expect(canSubmitDecision(prompt, [101, 102])).toBe(false); // locked + 2 exceeds max 2
+    expect(canSubmitDecision(prompt, [101, 102, 103])).toBe(false);
   });
 
-  test("counts locked candidates but not duplicated picks", () => {
-    const prompt = buildDecisionPromptViewModel(cardDecision);
-    expect(canSubmitDecision(prompt, [103])).toBe(true); // duplicate of the locked pick
-    expect(canSubmitDecision(prompt, [102, 103])).toBe(true);
+  test("locked picks are not selectable and not required in the selection", () => {
+    const prompt = buildDecisionPromptViewModel(lockedDecision);
+    expect(canSubmitDecision(prompt, [])).toBe(false); // one free choice still required
+    expect(canSubmitDecision(prompt, ["unit-3"])).toBe(true);
+    expect(canSubmitDecision(prompt, ["unit-taunt"])).toBe(false); // not a candidate
   });
 
   test("rejects a single-choice decision with nothing selected", () => {
