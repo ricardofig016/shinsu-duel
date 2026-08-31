@@ -82,7 +82,7 @@ Both inbound paths funnel through the gateway before anything reaches the engine
 
 1. **Shape validation.** Actions must be `{ type, data }` with a non-empty string type and a plain-object data payload; decisions must be `{ decisionId, choices }` with a non-empty string id and an array of choices. Anything else is answered with a `game-error` ("Malformed action/decision payload.") and never reaches the engine.
 2. **Identity stamping.** The connection's authenticated username is written onto the action; a payload claiming another player is ignored.
-3. **State guards.** Messages before the game starts are answered with `game-waiting`; messages after game over are answered with the `game-over` result and leave the state untouched.
+3. **State guards.** Actions or decisions sent before the game starts are answered with a `game-error` ("Game has not started yet."); after game over they are answered with the `game-over` result and leave the state untouched. `game-waiting` is reserved for parked lone players and for state requests that arrive before the game exists.
 4. **Engine rejection.** Engine throws (unknown action type, wrong turn, invalid choices, foreign decision id, ...) are forwarded as `game-error` to the sender; the revision and state stay unchanged.
 
 Accepted actions and decisions broadcast a `game-update` per seat, preceded by `game-over` when the move ended the game.
