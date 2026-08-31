@@ -155,6 +155,19 @@ LifecycleEngine.detachEquipment(gameState, unit, equipment?)
 
 ---
 
+## Client Projection
+
+`getClientState(username)` builds the per-username view the net layer sends on every snapshot. It carries `round`, `currentTurn`, `gameOver`, and two seat projections:
+
+- `you`: combat slot codes and slot status, deck and discard sizes, lighthouses, shinheuh slot, fire charges, full hand card views, field units, shinsu, pass-button state, and `pendingDecision` when the viewer owns it (`decisionId`, `type`, `candidates`, `minChoices`, `maxChoices`, `lockedIds`).
+- `opponent`: combat slot codes, deck size, lighthouses, field units, hand, shinsu, and pass-button state. Hand cards are empty objects unless the card is marked visible, and the opponent's pending decision is never included.
+
+Field units are projected with the runtime state a client renders: instance id, current HP, owner, placed and chosen position codes, conditions with their effective magnitudes from the `ModifierStack`, active runtime trait keys, and equipment attachment names. Your units additionally carry granted abilities with their registry codes. Printed card data (name, cost, traits, abilities, positions) comes along inside each unit's card view.
+
+Locked decision candidates sit outside the candidates list: `lockedIds` are engine-committed picks (mandatory Taunt targets), the `minChoices`/`maxChoices` range counts only the free selections, and the engine prepends the locked ids itself when the decision resolves. The net layer wraps this view with the session revision counter; transport semantics are documented in `NET_PROTOCOL_ARCHITECTURE.md`.
+
+---
+
 ## Snapshot Design
 
 The engine exposes two capture functions to the Logger:

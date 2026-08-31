@@ -20,6 +20,7 @@ Tests live in `server/game/tests/`, mirroring the source tree under `server/game
 | `attributes/`  | Attribute engine tests (`AnimaEngine`, `HwayeomsaEngine`, …)                                             |
 | `handlers/`    | One test per handler class                                                                               |
 | `services/`    | Service unit tests (`PassiveManager`, `ModifierService`, `RequirementValidator`, …)                      |
+| `net/`         | Net layer tests: session, protocol, gateway, registry, and bridge units plus real-transport suites        |
 | `core/`        | Engine components at `server/game/` root (`EventBus`, `GameState`, `ModifierStack`, `TargetResolver`, …) |
 | `integration/` | Cross-component flows (evolution, triggers, modifiers, lifecycle, final actions)                         |
 | `regression/`  | Regression suites keyed to a specific past bug                                                           |
@@ -38,7 +39,16 @@ The shared helper `tests/utils.js` lives at the tests root; subfolder tests impo
 
 ### Frontend tests
 
-Tests for browser utilities live in `public/tests/`, mirroring `public/` (e.g. `public/tests/utils/markdown.test.js` tests `public/utils/markdown.js`). They join the same suite as plain ESM and run in Node, so they must stay DOM-free; DOM behavior is verified in the browser.
+Tests for browser modules live in `public/tests/`, mirroring `public/` (e.g. `public/tests/utils/markdown.test.js` tests `public/utils/markdown.js`, `public/tests/game/` tests the DOM-free game modules in `public/game/`). They join the same suite as plain ESM and run in Node, so they must stay DOM-free; DOM behavior is verified in the browser.
+
+### Net tests (`tests/net/`)
+
+Two layers, both owned by the net test folder:
+
+- **Unit suites** (`GameSession`, `protocol`, `socketGateway`, `SessionRegistry`, `eventBridge`) drive the net modules with fake sockets and never open a port.
+- **Real-transport suites** (`protocolContract`, `reconnect`) drive `harness.js`, which boots the express app plus Socket.IO on an ephemeral port through `server/createGameServer.js`, keeps room records in an injected in-memory store, authenticates both players through the real `/auth/login` endpoint, and connects them with `socket.io-client` (a devDependency). Games are built from the fixture catalog, so net tests never touch shipped card data.
+
+Each test creates its own harness and `afterEach` disconnects every client and closes the io server and HTTP server; the seats are always Alice and Bob, matching the fixture helpers.
 
 ---
 
@@ -121,6 +131,7 @@ One deliberate deviation from `card-compile.js`:
 | File                                                  | Role                                              |
 | ----------------------------------------------------- | ------------------------------------------------- |
 | `server/game/tests/utils.js`                          | Shared test helpers (deck/game construction)      |
+| `server/game/tests/net/harness.js`                    | Real-transport net harness (app + sockets, login) |
 | `server/game/tests/fixtures/yaml/**`                  | Fixture source (YAML, same shape as `data/cards`) |
 | `server/game/tests/fixtures/cards.json`               | Compiled fixture artifact (generated)             |
 | `server/game/tests/fixtures/cards.js`                 | Thin importer of `cards.json` + `byName`          |
