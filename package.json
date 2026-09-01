@@ -15,7 +15,8 @@
     "compile:fixtures": "node scripts/compile-fixtures.js",
     "validate:cards": "node scripts/card-validate.js",
     "create:card": "node scripts/card-create.js",
-    "lookup": "node scripts/card-lookup.js"
+    "lookup": "node scripts/card-lookup.js",
+    "replay": "node scripts/replay.js"
   },
   "author": "Ricardo Castro Figueiredo",
   "license": "MIT",
