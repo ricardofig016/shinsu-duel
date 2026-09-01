@@ -66,6 +66,7 @@ export default class GameState {
    * @param {string} firstPlayer (optional) username of the player to take the first turn. If omitted, the first username is chosen deterministically.
    * @param {Object} options (optional) additional configuration options.
    * @param {SeededRng} options.rng required seeded RNG (implementing next() and getState()) for deterministic random events (Blinded targeting, etc.). There is no Math.random fallback.
+   * @param {Array} [options.loggerBackends] extra Logger backends attached at construction so they observe every entry, including InitialState.
    */
   constructor(roomCode, usernames, decks = {}, firstPlayer = null, options = {}) {
     if (!roomCode || !usernames || usernames.length !== 2)
@@ -129,6 +130,7 @@ export default class GameState {
     this.logger = new Logger(this.eventBus, {
       snapshotFn: () => this._createSnapshot(),
       serializeFn: () => this.toSerializedState(),
+      backends: options.loggerBackends ?? [],
     });
 
     // Attribute Registry
@@ -203,13 +205,15 @@ export default class GameState {
     this.#wireLifecycleEvents();
 
     // Record the initial state for replay before any event fires.
-    const rngSeed = typeof this._rng?.getState === "function" ? this._rng.getState().seed : null;
+    const rngState = typeof this._rng?.getState === "function" ? this._rng.getState() : null;
+    const rngSeed = rngState ? rngState.seed : null;
     this.logger.recordInitialState({
       roomCode,
       usernames: [...this.usernames],
       decks: decksMeta,
       firstPlayer: this.currentTurn,
       rngSeed,
+      rngState,
       startingCounters: this._startingCounters,
       startingModifierCounter: this._startingModifierCounter,
     });

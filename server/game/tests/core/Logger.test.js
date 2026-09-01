@@ -113,6 +113,48 @@ describe("Logger", () => {
     expect(customLogs[0].rootEvent).toBe("Test");
   });
 
+  test("constructor-injected backends observe every entry including InitialState", () => {
+    const captured = [];
+    const injected = { write: (entry) => captured.push(entry), getAll: () => captured, clear: () => {} };
+    const injectedLogger = new Logger(bus, {
+      snapshotFn: () => ({}),
+      serializeFn: () => ({ round: 1 }),
+      backends: [injected],
+    });
+
+    injectedLogger.recordInitialState({ roomCode: "R" });
+    injectedLogger.beginUserInput({ kind: "action", payload: { type: "pass" } });
+    injectedLogger.endUserInput({ ok: true });
+
+    expect(captured.some((entry) => entry.type === "InitialState")).toBe(true);
+    expect(captured.some((entry) => entry.type === "UserAction")).toBe(true);
+    expect(injectedLogger.getLogs().length).toBe(2);
+  });
+
+  test("rejects constructor backends that do not fulfill the backend contract", () => {
+    expect(() => new Logger(bus, { backends: [{ write: () => {} }] })).toThrow(TypeError);
+    expect(() => new Logger(bus, { backends: ["nope"] })).toThrow(TypeError);
+  });
+
+  test("a throwing backend does not break the game loop or starve other backends", () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    const captured = [];
+    const throwing = {
+      write: () => { throw new Error("disk on fire"); },
+      getAll: () => [],
+      clear: () => {},
+    };
+    const healthy = { write: (entry) => captured.push(entry), getAll: () => captured, clear: () => {} };
+    const mixedLogger = new Logger(bus, { snapshotFn: () => ({ hp: 1 }), backends: [throwing, healthy] });
+
+    expect(() => bus.emit("Test", {})).not.toThrow();
+    expect(captured).toHaveLength(1);
+    expect(captured[0].rootEvent).toBe("Test");
+    expect(mixedLogger.getLogs()).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
   test("computes correct diff for state changes", () => {
     let state = { a: 1, b: "hello" };
     const stateLogger = new Logger(bus, {

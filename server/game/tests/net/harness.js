@@ -63,20 +63,34 @@ function wrapSocket(socket) {
   };
 }
 
-export async function createNetHarness() {
+export async function createNetHarness({ createGame: customCreateGame, gameLogDirectory } = {}) {
   const rooms = {};
   let createGameCalls = 0;
   const clients = [];
 
-  const createGame = ({ roomCode }) => {
+  const handsGameFactory = ({ roomCode }) => {
     createGameCalls += 1;
     const hands = rooms[roomCode]?.hands;
     return hands ? setupGameWithHands({ Alice: hands.Alice ?? [], Bob: hands.Bob ?? [] }) : createTestGame();
   };
 
+  // A harness either injects its own game factory, or — by supplying a
+  // gameLogDirectory without a factory — boots the production default
+  // factory from createGameServer (used by the dev-room logging tests).
+  const createGame =
+    customCreateGame !== undefined
+      ? (...args) => {
+          createGameCalls += 1;
+          return customCreateGame(...args);
+        }
+      : gameLogDirectory !== undefined
+        ? undefined
+        : handsGameFactory;
+
   const { server, io, registry } = createGameServer({
     loadRoom: async (roomCode) => rooms[roomCode] ?? null,
-    createGame,
+    ...(createGame !== undefined ? { createGame } : {}),
+    ...(gameLogDirectory !== undefined ? { gameLogDirectory } : {}),
     logToFile: false,
   });
 

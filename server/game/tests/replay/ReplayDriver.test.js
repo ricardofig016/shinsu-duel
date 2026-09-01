@@ -1,6 +1,7 @@
 import GameState from "../../GameState.js";
 import ReplayDriver from "../../replay/ReplayDriver.js";
 import SeededRng from "../../utils/SeededRng.js";
+import { createSeededGame } from "../../gameFactory.js";
 import { createLegalDeck, cards } from "../utils.js";
 
 const players = ["Alice", "Bob"];
@@ -25,6 +26,18 @@ describe("ReplayDriver", () => {
 
     const replayed = ReplayDriver.replay(replayLog, { cards });
     expect(replayed.toSerializedState()).toEqual(finalState);
+  });
+
+  test("replays a game created by the seeded factory with factory-built decks", () => {
+    // The factory builds default decks before GameState exists, consuming
+    // RNG draws up front; the replay must restore that exact RNG position.
+    const game = createSeededGame({ roomCode: "REP", usernames: players, seed: 42 });
+
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: game.currentTurn } });
+    const replayLog = game.logger.getReplayLog();
+
+    const replayed = ReplayDriver.replay(replayLog);
+    expect(replayed.toSerializedState()).toEqual(game.toSerializedState());
   });
 
   test("records and replays a failed action deterministically", () => {

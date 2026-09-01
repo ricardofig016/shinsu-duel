@@ -62,4 +62,19 @@ describe("createSeededGame", () => {
       expect(deck.every((id) => eligible.has(id))).toBe(true);
     }
   });
+
+  test("forwards loggerBackends so they capture the initial state", () => {
+    const entries = [];
+    const backend = { write: (entry) => entries.push(entry), getAll: () => entries, clear: () => {} };
+
+    createSeededGame({ roomCode: "R", usernames: players, seed: 42, cards, loggerBackends: [backend] });
+
+    expect(entries.some((entry) => entry.type === "InitialState")).toBe(true);
+  });
+
+  test("rejects loggerBackends that are not an array", () => {
+    expect(() =>
+      createSeededGame({ roomCode: "R", usernames: players, seed: 42, cards, loggerBackends: "nope" })
+    ).toThrow(TypeError);
+  });
 });

@@ -3,7 +3,8 @@
  *
  * Reconstructs a game from a replay log produced by `Logger.getReplayLog()`:
  *
- *   1. Resets all global ID/modifier counters.
+ *   1. Restores the global ID/modifier counters and the RNG position
+ *      recorded at construction time.
  *   2. Rebuilds `GameState` from the recorded initial metadata (decks, first
  *      player, RNG seed).
  *   3. Verifies the reconstructed initial state is byte-identical to the
@@ -42,7 +43,7 @@ export default class ReplayDriver {
     const { initial, actions } = replayLog || {};
     if (!initial) throw new Error("Replay log is missing its initial state.");
 
-    const { roomCode, usernames, decks, firstPlayer, rngSeed, startingCounters, startingModifierCounter } = initial.meta;
+    const { roomCode, usernames, decks, firstPlayer, rngSeed, rngState, startingCounters, startingModifierCounter } = initial.meta;
     if (rngSeed === null || rngSeed === undefined) {
       throw new Error("Replay requires a seeded RNG (rngSeed is missing from the log).");
     }
@@ -52,8 +53,14 @@ export default class ReplayDriver {
     IdFactory.setCounters(startingCounters);
     setModifierCounter(startingModifierCounter ?? 0);
 
+    // Restore the exact RNG position the original game started from: decks
+    // built by the game factory consume draws before GameState exists, and
+    // later draws (e.g. Blinded targeting) must stay aligned with the log.
+    const rng = new SeededRng(rngSeed);
+    if (rngState) rng.restoreState(rngState);
+
     const game = new GameState(roomCode, usernames, decks, firstPlayer, {
-      rng: new SeededRng(rngSeed),
+      rng,
       cards,
     });
 

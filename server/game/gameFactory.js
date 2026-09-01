@@ -27,11 +27,16 @@ import shuffle from "./utils/shuffle.js";
  *   usernames receive a seeded shuffled default deck
  * @param {string} [args.firstPlayer] optional first-turn username; when
  *   omitted, the first player is rolled deterministically from the seed
+ * @param {Array} [args.loggerBackends] extra Logger backends attached at game
+ *   construction so they observe every entry, including InitialState
  * @returns {GameState}
  */
-export function createSeededGame({ roomCode, usernames, seed, decks = null, firstPlayer = null, cards = null }) {
+export function createSeededGame({ roomCode, usernames, seed, decks = null, firstPlayer = null, cards = null, loggerBackends = [] }) {
   if (typeof seed !== "number" || !Number.isFinite(seed)) {
     throw new Error("createSeededGame requires a numeric seed.");
+  }
+  if (!Array.isArray(loggerBackends)) {
+    throw new TypeError("loggerBackends must be an array of Logger backends.");
   }
 
   const rng = new SeededRng(seed);
@@ -43,7 +48,7 @@ export function createSeededGame({ roomCode, usernames, seed, decks = null, firs
     resolvedDecks[username] = decks?.[username] ?? buildDefaultDeck(rng, cards);
   }
 
-  return new GameState(roomCode, usernames, resolvedDecks, resolvedFirstPlayer, { rng, cards });
+  return new GameState(roomCode, usernames, resolvedDecks, resolvedFirstPlayer, { rng, cards, loggerBackends });
 }
 
 /**

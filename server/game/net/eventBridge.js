@@ -24,6 +24,14 @@ export default class EventBridge {
   /**
    * Subscribe to the session game's event bus. The game must be started.
    * Returns the unsubscribe function.
+   *
+   * The observer registers with an explicit sourceAge: a default
+   * registration consumes a GameClock tick, and this happens after the game
+   * recorded its InitialState — the tick would shift every subsequent
+   * serialized clock, so replays of games played through the socket gateway
+   * would diverge from their logs. The bridge only reads payloads and hands
+   * protocol messages to a seat, so its sort position never affects the
+   * authoritative state.
    */
   subscribe() {
     const game = this.#session.game;
@@ -36,7 +44,7 @@ export default class EventBridge {
       (peek) => {
         this.#session.sendTo(peek.observer, EVENTS.GAME_HAND_PEEK, () => buildHandPeek(peek));
       },
-      { phase: "post", role: "observer" }
+      { phase: "post", role: "observer", sourceAge: 0 }
     );
   }
 }

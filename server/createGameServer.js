@@ -11,6 +11,7 @@ import router from "./routes/router.js";
 import { roomsFilePath } from "./routes/game.js";
 import { readJsonFile } from "./utils/file-util.js";
 import { createSeededGame } from "./game/gameFactory.js";
+import { devRoomLoggingBackends } from "./game/logging/GameFileLogger.js";
 import SessionRegistry from "./game/net/SessionRegistry.js";
 import SocketGateway from "./game/net/socketGateway.js";
 
@@ -35,11 +36,14 @@ async function readFileRoom(code) {
  * @param {Function} [args.createGame] `({ roomCode, usernames, seed }) => GameState`
  * @param {boolean} [args.logToFile=true] when false, no file logging is
  *   configured (embedded and test boots)
+ * @param {string} [args.gameLogDirectory="server/logs/games"] directory for
+ *   live dev-room game logs; only rooms whose code matches the TESTROOM
+ *   pattern (see GameFileLogger) ever write there
  * @returns {{ app: express.Express, server: import("http").Server,
  *   io: import("socket.io").Server, gateway: SocketGateway,
  *   registry: SessionRegistry }}
  */
-export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, logToFile = true } = {}) {
+export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
   const app = express();
   const server = createServer(app);
   const io = new Server(server);
@@ -85,7 +89,13 @@ export function createGameServer({ registry = new SessionRegistry(), loadRoom, c
   const gameGateway = new SocketGateway({
     registry,
     loadRoom: loadRoom ?? readFileRoom,
-    createGame: createGame ?? (({ roomCode, usernames, seed }) => createSeededGame({ roomCode, usernames, seed })),
+    createGame: createGame ?? (({ roomCode, usernames, seed }) =>
+      createSeededGame({
+        roomCode,
+        usernames,
+        seed,
+        loggerBackends: devRoomLoggingBackends(roomCode, { directory: gameLogDirectory }),
+      })),
     logger,
   });
   gameGateway.attach(io);

@@ -24,6 +24,11 @@
  * The logger supports pluggable backends. Built-in:
  *  - MemoryBackend (default): stores logs in memory, accessible via getLogs().
  *  - ConsoleBackend: prints to console in debug mode.
+ *
+ * Additional backends can be attached at construction (`options.backends`, so
+ * they observe every entry including InitialState) or later via addBackend().
+ * A backend that throws during write is reported and skipped; it never
+ * interrupts the game loop.
  */
 
 // ---------------------------------------------------------------------------
@@ -73,6 +78,8 @@ export default class Logger {
    * @param {boolean} [options.debug=false]  Enable console output.
    * @param {Function} [options.snapshotFn]  Function that returns the flat state snapshot.
    * @param {Function} [options.serializeFn]  Function that returns the full deterministic state.
+   * @param {Array} [options.backends]  Backends attached at construction so they
+   *   observe every entry, including InitialState (written by the game's constructor).
    */
   constructor(eventBus, options = {}) {
     this._bus = eventBus;
@@ -86,6 +93,7 @@ export default class Logger {
 
     /** @type {Array<MemoryBackend|ConsoleBackend>} */
     this._backends = [new MemoryBackend()];
+    for (const backend of options.backends ?? []) this._addBackend(backend);
     if (this._debug) this._backends.push(new ConsoleBackend());
 
     this._subscribe();
@@ -107,6 +115,13 @@ export default class Logger {
 
   /** Add a custom backend. */
   addBackend(backend) {
+    this._addBackend(backend);
+  }
+
+  _addBackend(backend) {
+    if (!backend || typeof backend.write !== "function" || typeof backend.getAll !== "function" || typeof backend.clear !== "function") {
+      throw new TypeError("A logger backend must implement write(entry), getAll(), and clear().");
+    }
     this._backends.push(backend);
   }
 
@@ -240,8 +255,14 @@ export default class Logger {
   }
 
   _write(entry) {
+    // Backends run synchronously inside the engine loop; one failing backend
+    // (e.g. a disk error) must never break gameplay or starve the others.
     for (const backend of this._backends) {
-      backend.write(entry);
+      try {
+        backend.write(entry);
+      } catch (error) {
+        console.error(`Logger: backend ${backend.constructor?.name ?? "anonymous"} failed to write entry ${entry?.sequence}:`, error);
+      }
     }
   }
 

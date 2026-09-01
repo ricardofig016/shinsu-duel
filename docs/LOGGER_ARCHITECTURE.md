@@ -16,9 +16,10 @@ The Logger hooks into the EventBus to capture **before/after snapshots** of game
 | ------------------ | -------------------------------------------------------------- |
 | State snapshots    | `snapshotFn()` (flat diff view) + `serializeFn()` (full state) |
 | Causation trees    | `ctx._children` from DFS resolution (full depth)               |
-| Pluggable backends | `MemoryBackend`, `ConsoleBackend`, custom                      |
+| Pluggable backends | `MemoryBackend`, `ConsoleBackend`, `GameFileLogger`, custom    |
 | Diff computation   | Added/removed/changed keys between snapshots                   |
 | Replay log         | `recordInitialState` + `begin/endUserInput` → `getReplayLog()` |
+| Live file capture  | `GameFileLogger` for `TESTROOM*` rooms (see Live dev logging)  |
 
 ---
 
@@ -115,9 +116,15 @@ class ConsoleBackend {
   getAll()      // return [] (console has no retrieval)
   clear()       // no-op
 }
+
+class GameFileLogger {
+  write(entry)  // append one JSONL line to the replay or events stream
+  getAll()      // return [] (files are the retrieval)
+  clear()       // no-op
+}
 ```
 
-**Adding a custom backend:**
+**Adding a custom backend:** backends can be attached at construction — `new Logger(bus, { backends: [...] })` — so they observe every entry, including `InitialState` (written by the game's constructor, before any handler runs). Backends attached later via `addBackend(...)` see everything from that point on. A backend whose `write` throws is reported via `console.error` and skipped; it never breaks the game loop or starves the other backends.
 
 ```js
 class FileBackend {
@@ -139,6 +146,25 @@ logger.addBackend(new FileBackend("./logs/game-42.jsonl"));
 ```
 
 **⚠️ Backends receive the entry object by reference.** If a backend mutates the entry, subsequent backends see the mutated version. Always copy if you need to transform.
+
+---
+
+## Live dev logging
+
+`GameFileLogger` (in `server/game/logging/GameFileLogger.js`) is the built-in file backend for debugging a live game. It is wired into the production game factory: `createGameServer` attaches one to every game whose **room code matches `TESTROOM` followed by digits** (e.g. `TESTROOM01`). Rooms with any other code never touch the disk.
+
+Each matching session writes two JSONL streams into `gameLogDirectory` (default `server/logs/games`), one file per stream per session, named `<roomCode>.<startedAt>.replay.jsonl` and `<roomCode>.<startedAt>.events.jsonl`:
+
+- **replay stream** — `InitialState`, `UserAction`, and `UserDecision` entries only: the exact input `ReplayDriver.replay()` consumes.
+- **events stream** — root-event entries (with before/after snapshots, diff, and causation tree) and `EventFailure` entries: the "why did this happen" view.
+
+Guarantees:
+
+- **Entries are serialized eagerly at write time.** Root-event snapshots alias live game state, so deferring `JSON.stringify` would capture mutated values.
+- **Writes never throw.** A disk failure is reported via `console.error` and gameplay continues; a game whose log directory cannot even be created fails loudly at game creation (the gateway reports it to the players).
+- **Files are append-only and created on first write.** Each write is a synchronous append, so a hard crash loses at most the line being written.
+
+**To watch a live game:** add a room record whose code starts with `TESTROOM` to `server/data/rooms.json` (e.g. `"TESTROOM01": { "players": [], "opponent": "friend", "difficulty": null, "seed": 1 }`), then log both seats in through the normal join flow. The files appear under `server/logs/games/` the moment the game starts; pass the newest `replay.jsonl` to `ReplayDriver.replay()` to reconstruct the game at any point.
 
 ---
 
@@ -216,9 +242,9 @@ logger.addBackend(b); // → register custom backend
 
 ## Replay
 
-`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters, reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision`, asserting the full state matches after every step.
+`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters **and the recorded RNG position** (`initial.meta.rngState`), reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision`, asserting the full state matches after every step.
 
-Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`. `gameFactory` turns a room's persisted seed into the seeded first-player roll and shuffled default decks, then passes them explicitly to `GameState`. The engine's constructor therefore never consumes RNG, so replay reconstruction always matches the recorded initial state.
+Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`. `gameFactory` turns a room's persisted seed into the seeded first-player roll and shuffled default decks, then passes them explicitly to `GameState`. Deck building consumes RNG draws before the constructor runs, which is why the driver restores `meta.rngState` — the exact `{ seed, calls }` position captured alongside the initial state — before reconstructing, so subsequent draws stay aligned with the log.
 
 ---
 
