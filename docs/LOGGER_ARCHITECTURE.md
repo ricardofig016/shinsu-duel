@@ -96,8 +96,8 @@ The tree is fully recursive: `_buildCausationTree` follows `ctx._children` arbit
 
 In addition to root-event entries (shown above), the Logger writes:
 
-- `InitialState` — the reconstructed construction metadata (decks, first player, RNG seed, starting ID counters) plus the full serialized state.
-- `UserAction` / `UserDecision` — one entry per `processAction` / `resolveDecision`, with `stateBefore`/`stateAfter` (full serialization), `ok`, and `error` (for failed inputs).
+- `InitialState` — the reconstructed construction metadata (decks, first player, RNG seed, RNG position, starting ID counters) plus the full serialized state.
+- `UserAction` / `UserDecision` — one entry per `processAction` / `resolveDecision`, with the input payload, `stateAfter` (full serialization), `ok`, and `error` (for failed inputs). The state before an input is never stored: it is exactly the previous entry's after-state (or the `InitialState` state), so storing it would duplicate half of every replay artifact.
 - `EventFailure` — written via `EventBus.onAbort` when an authoritative handler failure aborts a transaction.
 
 ---
@@ -118,7 +118,7 @@ class ConsoleBackend {
 }
 
 class GameFileLogger {
-  write(entry)  // append one JSONL line to the replay or events stream
+  write(entry)  // append replay entries to the JSONL stream; skip others
   getAll()      // return [] (files are the retrieval)
   clear()       // no-op
 }
@@ -153,18 +153,19 @@ logger.addBackend(new FileBackend("./logs/game-42.jsonl"));
 
 `GameFileLogger` (in `server/game/logging/GameFileLogger.js`) is the built-in file backend for debugging a live game. It is wired into the production game factory: `createGameServer` attaches one to every game whose **room code matches `TESTROOM` followed by digits** (e.g. `TESTROOM01`). Rooms with any other code never touch the disk.
 
-Each matching session writes two JSONL streams into `gameLogDirectory` (default `server/logs/games`), one file per stream per session, named `<roomCode>.<startedAt>.replay.jsonl` and `<roomCode>.<startedAt>.events.jsonl`:
+Each matching session writes one JSONL file into `gameLogDirectory` (default `server/logs/games`), named `<roomCode>.<startedAt>.replay.jsonl`:
 
-- **replay stream** — `InitialState`, `UserAction`, and `UserDecision` entries only: the exact input `ReplayDriver.replay()` consumes.
-- **events stream** — root-event entries (with before/after snapshots, diff, and causation tree) and `EventFailure` entries: the "why did this happen" view.
+- **replay stream** — the `InitialState` entry plus every `UserAction` / `UserDecision` entry (failed inputs included): the exact input `ReplayDriver.replay()` consumes. User-input entries carry the input, `stateAfter`, `ok`, and `error`; the before-state is the previous line's after-state, so it is never duplicated.
+
+Root-event and `EventFailure` entries are deliberately **not** persisted: the engine is deterministic, so replaying the artifact regenerates the complete events view (before/after snapshots, diffs, causation trees, authoritative failures) in the reconstructed game's own logger — `replayed.logger.getLogs()`. Persisting them would duplicate information the replay stream already determines.
 
 Guarantees:
 
-- **Entries are serialized eagerly at write time.** Root-event snapshots alias live game state, so deferring `JSON.stringify` would capture mutated values.
-- **Writes never throw.** A disk failure is reported via `console.error` and gameplay continues; a game whose log directory cannot even be created fails loudly at game creation (the gateway reports it to the players).
-- **Files are append-only and created on first write.** Each write is a synchronous append, so a hard crash loses at most the line being written.
+- **Entries are serialized eagerly at write time.** Snapshots alias live game state, so deferring `JSON.stringify` would capture mutated values.
+- **Writes never throw.** A disk failure is reported via `console.error` and gameplay continues; a game whose log directory cannot even be created fails loudly at game creation (the gateway reports it to the players); an entry that cannot be serialized writes a loud placeholder line instead of being dropped silently.
+- **The file is append-only and created on its first replay write.** Each write is a synchronous append, so a hard crash loses at most the line being written.
 
-**To watch a live game:** add a room record whose code is `TESTROOM` followed by digits to `server/data/rooms.json` (e.g. `"TESTROOM01": { "players": [], "opponent": "friend", "difficulty": null, "seed": 1 }`), then log both seats in through the normal join flow. The files appear under `server/logs/games/` the moment the game starts. To reconstruct the game at any point, read the newest `replay.jsonl` back: parse each line as JSON, take the `InitialState` entry as `initial` and the `UserAction`/`UserDecision` entries in file order as `actions`, then call `ReplayDriver.replay({ initial, actions })`.
+**To watch a live game:** add a room record whose code is `TESTROOM` followed by digits to `server/data/rooms.json` (e.g. `"TESTROOM01": { "players": [], "opponent": "friend", "difficulty": null, "seed": 1 }`), then log both seats in through the normal join flow. The file appears under `server/logs/games/` the moment the game starts. To reconstruct the game at any point, read the newest `replay.jsonl` back: parse each line as JSON, take the `InitialState` entry as `initial` and the `UserAction`/`UserDecision` entries in file order as `actions`, then call `ReplayDriver.replay({ initial, actions })`; call `replayed.logger.getLogs()` on the result for the full events view.
 
 ---
 

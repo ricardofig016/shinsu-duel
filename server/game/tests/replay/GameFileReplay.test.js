@@ -68,8 +68,8 @@ describe("GameFileLogger replay round-trip", () => {
     await harness.close();
 
     const files = fs.readdirSync(tmpRoot);
-    expect(files).toHaveLength(2);
-    const replayPath = path.join(tmpRoot, files.find((file) => file.endsWith(".replay.jsonl")));
+    expect(files).toHaveLength(1);
+    const replayPath = path.join(tmpRoot, files[0]);
 
     const entries = fs
       .readFileSync(replayPath, "utf8")

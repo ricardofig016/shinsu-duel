@@ -23,7 +23,7 @@ describe("GameFileLogger", () => {
       .split("\n")
       .filter((line) => line !== "");
 
-  test("routes InitialState and user inputs to the replay stream, other entries to the events stream", () => {
+  test("persists replay entries and skips every other entry", () => {
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM01", directory: makeTempDir("routed") });
 
     fileLogger.write({ type: "InitialState", sequence: 1, meta: { roomCode: "TESTROOM01" }, state: {} });
@@ -32,57 +32,54 @@ describe("GameFileLogger", () => {
     fileLogger.write({ rootEvent: "round:start", sequence: 4, diff: {} });
     fileLogger.write({ type: "EventFailure", sequence: 5, eventName: "boom" });
 
-    const replay = readLines(fileLogger.paths.replay).map((line) => JSON.parse(line));
-    const events = readLines(fileLogger.paths.events).map((line) => JSON.parse(line));
-
+    const replay = readLines(fileLogger.path).map((line) => JSON.parse(line));
     expect(replay.map((entry) => entry.type)).toEqual(["InitialState", "UserAction", "UserDecision"]);
-    expect(events.map((entry) => entry.type ?? entry.rootEvent)).toEqual(["round:start", "EventFailure"]);
+    expect(fs.readdirSync(makeTempDir("routed"))).toHaveLength(1);
   });
 
-  test("writes one replay and one events file per session, named after the room", () => {
+  test("names the single artifact after the room", () => {
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM02", directory: makeTempDir("named") });
     fileLogger.write({ type: "InitialState", sequence: 1, state: {} });
-    fileLogger.write({ rootEvent: "round:start", sequence: 2, diff: {} });
 
     const files = fs.readdirSync(makeTempDir("named"));
-    expect(files).toHaveLength(2);
-    expect(files.every((file) => file.startsWith("TESTROOM02."))).toBe(true);
-    expect(files.some((file) => file.endsWith(".replay.jsonl"))).toBe(true);
-    expect(files.some((file) => file.endsWith(".events.jsonl"))).toBe(true);
+    expect(files).toHaveLength(1);
+    expect(files[0]).toBe(path.basename(fileLogger.path));
+    expect(files[0].startsWith("TESTROOM02.")).toBe(true);
+    expect(files[0].endsWith(".replay.jsonl")).toBe(true);
   });
 
-  test("creates each stream's file on its first write", () => {
+  test("creates the file on its first replay write only", () => {
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM02B", directory: makeTempDir("lazy") });
 
     expect(fs.readdirSync(makeTempDir("lazy"))).toEqual([]);
-    fileLogger.write({ type: "InitialState", sequence: 1, state: {} });
+    fileLogger.write({ rootEvent: "round:start", sequence: 1 });
+    expect(fs.readdirSync(makeTempDir("lazy"))).toEqual([]);
+    fileLogger.write({ type: "InitialState", sequence: 2, state: {} });
     expect(fs.readdirSync(makeTempDir("lazy"))).toHaveLength(1);
-    fileLogger.write({ rootEvent: "round:start", sequence: 2, diff: {} });
-    expect(fs.readdirSync(makeTempDir("lazy"))).toHaveLength(2);
   });
 
   test("every written line parses as JSON", () => {
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM03", directory: makeTempDir("jsonl") });
     fileLogger.write({ type: "InitialState", sequence: 1, state: {} });
-    fileLogger.write({ rootEvent: "round:start", sequence: 2, diff: {} });
+    fileLogger.write({ type: "UserAction", sequence: 2, action: { type: "pass" }, ok: true });
 
-    for (const file of [fileLogger.paths.replay, fileLogger.paths.events]) {
-      for (const line of readLines(file)) {
-        expect(() => JSON.parse(line)).not.toThrow();
-      }
+    for (const line of readLines(fileLogger.path)) {
+      expect(() => JSON.parse(line)).not.toThrow();
     }
   });
 
   test("serializes eagerly so later mutations of live state do not alter the file", () => {
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM04", directory: makeTempDir("eager") });
 
-    const liveSnapshot = { hp: 5, shinsu: { normalAvailable: 3 } };
-    fileLogger.write({ rootEvent: "unit:damage", sequence: 1, stateAfter: liveSnapshot });
+    // Root-event snapshots alias live game state; the file must capture the
+    // entry as it looked at write time.
+    const liveState = { hp: 5, shinsu: { normalAvailable: 3 } };
+    fileLogger.write({ type: "UserAction", sequence: 1, action: { type: "pass" }, stateAfter: liveState, ok: true });
 
-    liveSnapshot.hp = 99;
-    liveSnapshot.shinsu.normalAvailable = 0;
+    liveState.hp = 99;
+    liveState.shinsu.normalAvailable = 0;
 
-    const [entry] = readLines(fileLogger.paths.events).map((line) => JSON.parse(line));
+    const [entry] = readLines(fileLogger.path).map((line) => JSON.parse(line));
     expect(entry.stateAfter).toEqual({ hp: 5, shinsu: { normalAvailable: 3 } });
   });
 
@@ -92,8 +89,7 @@ describe("GameFileLogger", () => {
 
     expect(fs.existsSync(dir)).toBe(true);
     fileLogger.write({ type: "InitialState", sequence: 1, state: {} });
-    fileLogger.write({ rootEvent: "round:start", sequence: 2, diff: {} });
-    expect(fs.readdirSync(dir)).toHaveLength(2);
+    expect(fs.readdirSync(dir)).toHaveLength(1);
   });
 
   test("throws when the directory cannot be created", () => {
@@ -110,7 +106,9 @@ describe("GameFileLogger", () => {
     fs.rmSync(dir, { recursive: true, force: true });
 
     expect(() => fileLogger.write({ rootEvent: "round:start", sequence: 1 })).not.toThrow();
-    expect(consoleError).toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled(); // skipped entries never touch the disk
+    expect(() => fileLogger.write({ type: "UserAction", sequence: 2, action: {}, ok: true })).not.toThrow();
+    expect(consoleError).toHaveBeenCalled(); // the append failure is reported
     consoleError.mockRestore();
   });
 
@@ -118,13 +116,13 @@ describe("GameFileLogger", () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM08", directory: makeTempDir("circular") });
 
-    const circular = { sequence: 9, self: null };
+    const circular = { sequence: 9, type: "UserAction", self: null };
     circular.self = circular;
     expect(() => fileLogger.write(circular)).not.toThrow();
     expect(consoleError).toHaveBeenCalled();
     consoleError.mockRestore();
 
-    const [entry] = readLines(fileLogger.paths.events).map((line) => JSON.parse(line));
+    const [entry] = readLines(fileLogger.path).map((line) => JSON.parse(line));
     expect(entry.sequence).toBe(9);
     expect(entry.serializationError).toBeDefined();
   });

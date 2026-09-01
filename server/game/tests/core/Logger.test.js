@@ -233,7 +233,9 @@ describe("Logger", () => {
     expect(initial.meta.roomCode).toBe("R");
     expect(initial.state).toEqual({ round: 1 });
     expect(action.action).toEqual({ type: "pass" });
-    expect(action.stateBefore).toEqual({ round: 1 });
+    // User-input entries carry only the after-state: the before-state is the
+    // previous entry's after-state, here the InitialState's.
+    expect(action.stateBefore).toBeUndefined();
     expect(action.stateAfter).toEqual({ round: 2 });
     expect(action.ok).toBe(true);
   });

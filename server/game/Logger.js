@@ -19,6 +19,11 @@
  *     diff:            { added: [], removed: [], changed: [] }
  *   }
  *
+ * User-input entries (`UserAction` / `UserDecision`) are slimmer: input
+ * payload, the state AFTER the input, ok, and error. The state before an
+ * input is always the previous entry's after-state (or the `InitialState`
+ * state), so it is never stored twice.
+ *
  * ## Backends
  *
  * The logger supports pluggable backends. Built-in:
@@ -148,13 +153,16 @@ export default class Logger {
   }
 
   /**
-   * Mark the start of a player input (action or decision) and capture the
-   * full state before it is applied.
+   * Mark the start of a player input (action or decision).
+   *
+   * User-input entries record only the state AFTER the input: the before-state
+   * is exactly the previous entry's after-state (or the `InitialState` state),
+   * so storing it would duplicate half of every replay artifact.
    *
    * @param {{ kind: "action"|"decision", payload: object }} input
    */
   beginUserInput({ kind, payload }) {
-    this._pendingUserInput = { kind, payload, stateBefore: this._serializeFn() };
+    this._pendingUserInput = { kind, payload };
   }
 
   /**
@@ -172,7 +180,6 @@ export default class Logger {
       type: isAction ? "UserAction" : "UserDecision",
       sequence: ++this._idCounter,
       [isAction ? "action" : "decision"]: ui.payload,
-      stateBefore: ui.stateBefore,
       stateAfter: this._serializeFn(),
       ok,
       error: error ? { name: error.name, message: error.message, stack: error.stack } : null,

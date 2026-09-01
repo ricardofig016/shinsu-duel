@@ -1,7 +1,6 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import EVT from "../../EventCatalog.js";
 import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "./harness.js";
 
@@ -32,7 +31,7 @@ describe("dev-room live logging (production wiring)", () => {
       .split("\n")
       .filter((line) => line !== "");
 
-  test("a TESTROOM room logs both streams; a normal room logs nothing", async () => {
+  test("a TESTROOM room logs its replay stream; a normal room logs nothing", async () => {
     harness = await createNetHarness({ gameLogDirectory: tmpRoot });
 
     // Registered exactly like a hand-edited server/data/rooms.json record.
@@ -77,14 +76,15 @@ describe("dev-room live logging (production wiring)", () => {
       expect(client.payloadsOf(EVENTS.GAME_ERROR)).toEqual([]);
     }
 
-    // Only the dev room produced files: one replay and one events stream.
+    // Only the dev room produced files: exactly one replay artifact. The
+    // events view (diffs, causation trees, failures) is derivable by
+    // replaying this stream, so there is no separate events file.
     const files = fs.readdirSync(tmpRoot);
-    expect(files).toHaveLength(2);
-    expect(files.some((file) => file.startsWith("TESTROOM01.") && file.endsWith(".replay.jsonl"))).toBe(true);
-    expect(files.some((file) => file.startsWith("TESTROOM01.") && file.endsWith(".events.jsonl"))).toBe(true);
+    expect(files).toHaveLength(1);
+    expect(files[0].startsWith("TESTROOM01.")).toBe(true);
+    expect(files[0].endsWith(".replay.jsonl")).toBe(true);
 
-    const replayPath = path.join(tmpRoot, files.find((file) => file.endsWith(".replay.jsonl")));
-    const eventsPath = path.join(tmpRoot, files.find((file) => file.endsWith(".events.jsonl")));
+    const replayPath = path.join(tmpRoot, files[0]);
 
     const replayEntries = readLines(replayPath).map((line) => JSON.parse(line));
     expect(replayEntries[0].type).toBe("InitialState");
@@ -92,12 +92,6 @@ describe("dev-room live logging (production wiring)", () => {
     expect(replayEntries[0].meta.rngSeed).toBe(1);
     expect(replayEntries.filter((entry) => entry.type === "UserAction")).toHaveLength(2);
     expect(replayEntries.every((entry) => ["InitialState", "UserAction", "UserDecision"].includes(entry.type))).toBe(true);
-
-    const eventEntries = readLines(eventsPath).map((line) => JSON.parse(line));
-    expect(eventEntries.length).toBeGreaterThan(0);
-    expect(eventEntries.some((entry) => entry.rootEvent === EVT.GAME_STARTED)).toBe(true);
-    expect(eventEntries.some((entry) => entry.rootEvent === EVT.ROUND_START)).toBe(true);
-    expect(eventEntries.every((entry) => entry.type === undefined || entry.type === "EventFailure")).toBe(true);
   });
 
   test("a dev room still plays normally when the log directory cannot be used", async () => {
