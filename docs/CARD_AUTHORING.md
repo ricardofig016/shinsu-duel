@@ -74,6 +74,12 @@ Both are warnings, never build failures: a card without art renders the frontend
 
 ---
 
+## Card design
+
+The card frame and layout are designed in the [Shinsu Duel Figma file](https://www.figma.com/design/7zMg02emi5SlJAJbpdYuRi/Shinsu-Duel). Consult it when a task touches how cards look on screen.
+
+---
+
 ## Raw text conventions
 
 `raw` is player-visible display text. It is never parsed, but it must read consistently. Follow these conventions from the existing card set; when unsure, match the phrasing of the nearest reference card.
