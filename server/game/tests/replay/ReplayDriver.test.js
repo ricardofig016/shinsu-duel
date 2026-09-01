@@ -31,12 +31,14 @@ describe("ReplayDriver", () => {
   test("replays a game created by the seeded factory with factory-built decks", () => {
     // The factory builds default decks before GameState exists, consuming
     // RNG draws up front; the replay must restore that exact RNG position.
-    const game = createSeededGame({ roomCode: "REP", usernames: players, seed: 42 });
+    // The fixture catalog is injected (tests must never depend on shipped
+    // card data); buildDefaultDeck still consumes draws with it.
+    const game = createSeededGame({ roomCode: "REP", usernames: players, seed: 42, cards });
 
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: game.currentTurn } });
     const replayLog = game.logger.getReplayLog();
 
-    const replayed = ReplayDriver.replay(replayLog);
+    const replayed = ReplayDriver.replay(replayLog, { cards });
     expect(replayed.toSerializedState()).toEqual(game.toSerializedState());
   });
 

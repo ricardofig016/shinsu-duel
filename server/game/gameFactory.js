@@ -9,9 +9,10 @@
  *
  * Keeping the seeded first-player roll and deck shuffle OUTSIDE the
  * `GameState` constructor means the constructor itself never consumes RNG.
- * That keeps replay construction RNG-neutral: `ReplayDriver` reconstructs a
- * game from recorded decks + first player with an RNG at zero calls, matching
- * the original initial state.
+ * The deck shuffle does consume draws before the constructor runs, though:
+ * `GameState` records that exact RNG position in its `InitialState` metadata
+ * (`meta.rngState`), and `ReplayDriver` restores it before reconstructing, so
+ * a replayed game's subsequent draws stay aligned with the log.
  */
 
 import GameState from "./GameState.js";

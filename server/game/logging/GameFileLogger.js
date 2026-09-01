@@ -22,11 +22,10 @@
 
 import fs from "fs";
 import path from "path";
+import { REPLAY_ENTRY_TYPES } from "../Logger.js";
 
 /** The only switch for live game logging: the room code itself. */
 export const DEV_ROOM_CODE_PATTERN = /^TESTROOM\d+$/;
-
-const REPLAY_ENTRY_TYPES = new Set(["InitialState", "UserAction", "UserDecision"]);
 
 export class GameFileLogger {
   /**
@@ -64,13 +63,19 @@ export class GameFileLogger {
   }
 
   write(entry) {
-    const target = REPLAY_ENTRY_TYPES.has(entry?.type) ? "replay" : "events";
+    const target = REPLAY_ENTRY_TYPES.includes(entry?.type) ? "replay" : "events";
 
     let line;
     try {
       line = JSON.stringify(entry);
       if (typeof line !== "string") throw new Error("entry serialized to nothing");
-    } catch {
+    } catch (error) {
+      // Loud: a silently dropped replay-stream entry would corrupt a rebuilt
+      // artifact, so the placeholder line is never written silently.
+      console.error(
+        `GameFileLogger: entry ${entry?.sequence} was not JSON-serializable; writing a placeholder line.`,
+        error
+      );
       line = JSON.stringify({
         sequence: entry?.sequence ?? null,
         serializationError: "entry was not JSON-serializable",

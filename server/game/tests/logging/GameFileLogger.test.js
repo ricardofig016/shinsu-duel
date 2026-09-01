@@ -115,11 +115,14 @@ describe("GameFileLogger", () => {
   });
 
   test("records a placeholder line for entries that cannot be serialized", () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     const fileLogger = new GameFileLogger({ roomCode: "TESTROOM08", directory: makeTempDir("circular") });
 
     const circular = { sequence: 9, self: null };
     circular.self = circular;
     expect(() => fileLogger.write(circular)).not.toThrow();
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
 
     const [entry] = readLines(fileLogger.paths.events).map((line) => JSON.parse(line));
     expect(entry.sequence).toBe(9);

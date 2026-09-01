@@ -164,7 +164,7 @@ Guarantees:
 - **Writes never throw.** A disk failure is reported via `console.error` and gameplay continues; a game whose log directory cannot even be created fails loudly at game creation (the gateway reports it to the players).
 - **Files are append-only and created on first write.** Each write is a synchronous append, so a hard crash loses at most the line being written.
 
-**To watch a live game:** add a room record whose code starts with `TESTROOM` to `server/data/rooms.json` (e.g. `"TESTROOM01": { "players": [], "opponent": "friend", "difficulty": null, "seed": 1 }`), then log both seats in through the normal join flow. The files appear under `server/logs/games/` the moment the game starts; pass the newest `replay.jsonl` to `ReplayDriver.replay()` to reconstruct the game at any point.
+**To watch a live game:** add a room record whose code is `TESTROOM` followed by digits to `server/data/rooms.json` (e.g. `"TESTROOM01": { "players": [], "opponent": "friend", "difficulty": null, "seed": 1 }`), then log both seats in through the normal join flow. The files appear under `server/logs/games/` the moment the game starts. To reconstruct the game at any point, read the newest `replay.jsonl` back: parse each line as JSON, take the `InitialState` entry as `initial` and the `UserAction`/`UserDecision` entries in file order as `actions`, then call `ReplayDriver.replay({ initial, actions })`.
 
 ---
 

@@ -71,6 +71,13 @@ class ConsoleBackend {
 // Logger
 // ---------------------------------------------------------------------------
 
+/**
+ * Entry types that form the authoritative replay stream. This is the single
+ * source of truth for replay routing: `getReplayLog()` filters by it and
+ * file backends (see GameFileLogger) split their streams by it.
+ */
+export const REPLAY_ENTRY_TYPES = Object.freeze(["InitialState", "UserAction", "UserDecision"]);
+
 export default class Logger {
   /**
    * @param {import('./EventBus.js').default} eventBus
@@ -179,7 +186,7 @@ export default class Logger {
   getReplayLog() {
     const logs = this.getLogs();
     const initial = logs.find((l) => l.type === "InitialState") ?? null;
-    const actions = logs.filter((l) => l.type === "UserAction" || l.type === "UserDecision");
+    const actions = logs.filter((l) => l.type !== "InitialState" && REPLAY_ENTRY_TYPES.includes(l.type));
     return this._safeClone({ initial, actions });
   }
 
