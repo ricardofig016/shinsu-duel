@@ -19,10 +19,10 @@
  *     diff:            { added: [], removed: [], changed: [] }
  *   }
  *
- * User-input entries (`UserAction` / `UserDecision`) are slimmer: input
- * payload, the state AFTER the input, ok, and error. The state before an
- * input is always the previous entry's after-state (or the `InitialState`
- * state), so it is never stored twice.
+ * User-input entries (`UserAction` / `UserDecision`) are slimmer still: the
+ * input payload, a deep diff against the previous recorded state, ok, and
+ * error. The previous recorded state is the `InitialState` state or the
+ * prior entry's diff base, so each change is stored exactly once.
  *
  * ## Backends
  *
@@ -35,6 +35,10 @@
  * A backend that throws during write is reported and skipped; it never
  * interrupts the game loop.
  */
+
+// ---------------------------------------------------------------------------
+
+import { computeStateDiff } from "./utils/stateDiff.js";
 
 // ---------------------------------------------------------------------------
 // Backends
@@ -144,12 +148,15 @@ export default class Logger {
    * @param {object} meta { roomCode, usernames, decks, firstPlayer, rngSeed }
    */
   recordInitialState(meta) {
+    const state = this._serializeFn();
     this._write({
       type: "InitialState",
       sequence: ++this._idCounter,
       meta,
-      state: this._serializeFn(),
+      state,
     });
+    // The base every later user-input diff is computed against.
+    this._previousReplayState = state;
   }
 
   /**
@@ -176,11 +183,16 @@ export default class Logger {
     if (!ui) return;
 
     const isAction = ui.kind === "action";
+    const stateAfter = this._serializeFn();
+    // The diff base is the previous recorded state — the InitialState's or
+    // the prior entry's. A log without an initial state diffs against {}.
+    const diff = computeStateDiff(this._previousReplayState ?? {}, stateAfter);
+    this._previousReplayState = stateAfter;
     this._write({
       type: isAction ? "UserAction" : "UserDecision",
       sequence: ++this._idCounter,
       [isAction ? "action" : "decision"]: ui.payload,
-      stateAfter: this._serializeFn(),
+      diff,
       ok,
       error: error ? { name: error.name, message: error.message, stack: error.stack } : null,
     });

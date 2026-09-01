@@ -2,6 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import ReplayDriver from "../../replay/ReplayDriver.js";
+import { applyStateDiff } from "../../utils/stateDiff.js";
 import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "../net/harness.js";
 
@@ -86,10 +87,17 @@ describe("GameFileLogger replay round-trip", () => {
     expect(actions.filter((action) => action.ok === false)).toHaveLength(1);
     expect(actions.filter((action) => action.ok === true)).toHaveLength(4);
     expect(actions[0].ok).toBe(false);
+    expect(actions.every((action) => action.diff && action.stateAfter === undefined)).toBe(true);
+    // The failed first action changed nothing: an empty diff.
+    expect(actions[0].diff).toEqual({ changed: {}, removed: [] });
 
     // Replay exactly the way a crash artifact is replayed: no options.
     const replayed = ReplayDriver.replay({ initial, actions });
-    const lastAccepted = actions[actions.length - 1];
-    expect(replayed.toSerializedState()).toEqual(lastAccepted.stateAfter);
+
+    // Independent end-to-end check: applying the recorded diffs to the
+    // initial state must land on the same final state the driver produced.
+    let expected = initial.state;
+    for (const action of actions) expected = applyStateDiff(expected, action.diff);
+    expect(replayed.toSerializedState()).toEqual(expected);
   });
 });

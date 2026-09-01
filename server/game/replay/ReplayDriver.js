@@ -9,8 +9,15 @@
  *      player, RNG seed).
  *   3. Verifies the reconstructed initial state is byte-identical to the
  *      recorded initial state.
- *   4. Re-applies each recorded player input, asserting that the full
- *      serialized state after every step matches the recorded state.
+ *   4. Re-applies each recorded player input and steps an in-memory
+ *      expected state forward with the recorded diff, asserting that the
+ *      full serialized state matches after every step. Failed inputs record
+ *      an empty diff, so replay also asserts they changed nothing.
+ *
+ * The artifact stores only the fields each step changed; the driver
+ * accumulates them into the full expected state, keeping verification
+ * byte-for-byte while the file stays small. Legacy artifacts that stored a
+ * full `stateAfter` per entry are rejected loudly.
  *
  * Replay is only possible for games that used a seeded RNG (see
  * `SeededRng`); an unseeded RNG produces no captureable state.
@@ -19,6 +26,7 @@
 import GameState from "../GameState.js";
 import * as IdFactory from "../IdFactory.js";
 import { setModifierCounter } from "../ModifierStack.js";
+import { applyStateDiff } from "../utils/stateDiff.js";
 import SeededRng from "../utils/SeededRng.js";
 
 function assertEqual(actual, expected, label) {
@@ -66,8 +74,23 @@ export default class ReplayDriver {
 
     assertEqual(game.toSerializedState(), initial.state, "initial state");
 
+    // The expected state is accumulated in memory: each recorded diff turns
+    // the previous expected state into the next one, so every step can still
+    // be asserted against a full serialized state.
+    let expected = initial.state;
+
     for (let i = 0; i < (actions || []).length; i++) {
       const entry = actions[i];
+      if (entry.stateAfter !== undefined) {
+        throw new Error(
+          `Replay entry ${i} (${entry.type}) carries a full stateAfter — legacy artifacts are no longer supported.`
+        );
+      }
+      const diff = entry.diff;
+      if (!diff || typeof diff !== "object" || !diff.changed || typeof diff.changed !== "object" || !Array.isArray(diff.removed)) {
+        throw new Error(`Replay entry ${i} (${entry.type}) is missing a well-formed { changed, removed } diff.`);
+      }
+
       let threw = false;
       try {
         if (entry.type === "UserAction") {
@@ -86,7 +109,8 @@ export default class ReplayDriver {
         throw new Error(`Expected replay step ${i} (${entry.type}) to fail, but it succeeded.`);
       }
 
-      assertEqual(game.toSerializedState(), entry.stateAfter, `step ${i} (${entry.type})`);
+      expected = applyStateDiff(expected, diff);
+      assertEqual(game.toSerializedState(), expected, `step ${i} (${entry.type})`);
     }
 
     return game;

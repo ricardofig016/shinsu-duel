@@ -90,7 +90,7 @@ describe("ReplayDriver", () => {
   test("throws on an unknown replay entry type", () => {
     const game = makeSeededGame();
     const replayLog = game.logger.getReplayLog();
-    replayLog.actions.push({ type: "BogusEntry", ok: true, stateAfter: game.toSerializedState() });
+    replayLog.actions.push({ type: "BogusEntry", ok: true, diff: { changed: {}, removed: [] } });
 
     expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow("Unknown replay entry type");
   });
@@ -103,18 +103,36 @@ describe("ReplayDriver", () => {
       type: "UserAction",
       ok: false,
       action: { type: "pass-turn-action", data: { source: "player", username: "Alice" } },
-      stateAfter: game.toSerializedState(),
+      diff: { changed: {}, removed: [] },
     });
 
     expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow("Expected replay step");
+  });
+
+  test("rejects legacy full-state artifacts loudly", () => {
+    const game = makeSeededGame();
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });
+    const replayLog = game.logger.getReplayLog();
+    replayLog.actions[0].stateAfter = game.toSerializedState();
+
+    expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow(/no longer supported/);
+  });
+
+  test("rejects entries without a well-formed diff", () => {
+    const game = makeSeededGame();
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });
+    const replayLog = game.logger.getReplayLog();
+    delete replayLog.actions[0].diff;
+
+    expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow(/well-formed/);
   });
 
   test("throws when the replay diverges from the recorded state", () => {
     const game = makeSeededGame();
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });
     const replayLog = game.logger.getReplayLog();
-    // Tamper with the recorded post-action state to force a divergence.
-    replayLog.actions[0].stateAfter = { tampered: true };
+    // Tamper with the recorded post-action diff to force a divergence.
+    replayLog.actions[0].diff = { changed: { round: 99 }, removed: [] };
 
     expect(() => ReplayDriver.replay(replayLog, { cards })).toThrow("Replay divergence");
   });

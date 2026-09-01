@@ -388,10 +388,6 @@ export default class GameState {
 
     let passButtonText = username;
     if (username === this.currentTurn) {
-      const previousUserAction = this.logger
-        .getLogs()
-        .reverse()
-        .find((log) => log.type === "UserAction");
       // if the previous opponent passed in the current round, passing will end the round
       // we inform the player of this
       passButtonText = this.roundEndOnTurnEnd ? "End Round" : "Pass Turn";

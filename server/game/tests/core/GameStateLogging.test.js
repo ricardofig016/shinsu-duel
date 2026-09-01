@@ -39,6 +39,8 @@ describe("GameState logger backends", () => {
     expect(action).toBeDefined();
     expect(action.action.type).toBe("pass-turn-action");
     expect(action.ok).toBe(true);
+    // The entry carries the diff against the initial state, not a full copy.
+    expect(action.diff.changed.currentTurn).toBe("Bob");
   });
 
   test("failed player actions reach backends recorded with their error", () => {
@@ -53,6 +55,8 @@ describe("GameState logger backends", () => {
     expect(failed).toBeDefined();
     expect(failed.ok).toBe(false);
     expect(failed.error).toBeDefined();
+    // A failed input must change nothing: an empty diff.
+    expect(failed.diff).toEqual({ changed: {}, removed: [] });
   });
 
   test("a game without loggerBackends still logs to memory only", () => {

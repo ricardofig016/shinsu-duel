@@ -97,7 +97,7 @@ The tree is fully recursive: `_buildCausationTree` follows `ctx._children` arbit
 In addition to root-event entries (shown above), the Logger writes:
 
 - `InitialState` — the reconstructed construction metadata (decks, first player, RNG seed, RNG position, starting ID counters) plus the full serialized state.
-- `UserAction` / `UserDecision` — one entry per `processAction` / `resolveDecision`, with the input payload, `stateAfter` (full serialization), `ok`, and `error` (for failed inputs). The state before an input is never stored: it is exactly the previous entry's after-state (or the `InitialState` state), so storing it would duplicate half of every replay artifact.
+- `UserAction` / `UserDecision` — one entry per `processAction` / `resolveDecision`, with the input payload, a deep `diff` against the previous recorded state (`{ changed: { "<dotted.path>": value }, removed: ["<dotted.path>"] }`, computed by `utils/stateDiff.js`), `ok`, and `error` (for failed inputs — whose diff is empty, proving no mutation). The artifact never stores a full per-step state: the diff base is the `InitialState` state or the prior entry's, so each change is stored exactly once.
 - `EventFailure` — written via `EventBus.onAbort` when an authoritative handler failure aborts a transaction.
 
 ---
@@ -155,7 +155,7 @@ logger.addBackend(new FileBackend("./logs/game-42.jsonl"));
 
 Each matching session writes one JSONL file into `gameLogDirectory` (default `server/logs/games`), named `<roomCode>.<startedAt>.replay.jsonl`:
 
-- **replay stream** — the `InitialState` entry plus every `UserAction` / `UserDecision` entry (failed inputs included): the exact input `ReplayDriver.replay()` consumes. User-input entries carry the input, `stateAfter`, `ok`, and `error`; the before-state is the previous line's after-state, so it is never duplicated.
+- **replay stream** — the `InitialState` entry plus every `UserAction` / `UserDecision` entry (failed inputs included): the exact input `ReplayDriver.replay()` consumes. User-input entries carry the input, a deep diff against the previous recorded state, `ok`, and `error`; a pass-turn line is typically ~100–200 characters, a full state appears only once (the `InitialState` line).
 
 Root-event and `EventFailure` entries are deliberately **not** persisted: the engine is deterministic, so replaying the artifact regenerates the complete events view (before/after snapshots, diffs, causation trees, authoritative failures) in the reconstructed game's own logger — `replayed.logger.getLogs()`. Persisting them would duplicate information the replay stream already determines.
 
@@ -243,7 +243,7 @@ logger.addBackend(b); // → register custom backend
 
 ## Replay
 
-`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters **and the recorded RNG position** (`initial.meta.rngState`), reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision`, asserting the full state matches after every step.
+`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters **and the recorded RNG position** (`initial.meta.rngState`), reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision` while stepping an in-memory expected state forward with each recorded diff (`utils/stateDiff.js` `applyStateDiff`) — asserting the **full** serialized state matches after every step. The artifact stores only per-step diffs, so verification stays byte-for-byte while the file stays small; legacy artifacts that stored a full `stateAfter` per entry are rejected loudly.
 
 Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`. `gameFactory` turns a room's persisted seed into the seeded first-player roll and shuffled default decks, then passes them explicitly to `GameState`. Deck building consumes RNG draws before the constructor runs, which is why the driver restores `meta.rngState` — the exact `{ seed, calls }` position captured alongside the initial state — before reconstructing, so subsequent draws stay aligned with the log.
 
