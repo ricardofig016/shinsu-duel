@@ -180,6 +180,6 @@ The engine exposes two capture functions to the Logger:
    - Combat slot status, Shinheuh slot status, fire charges
    - Hand/deck/discard sizes, lighthouses, shinsu
 
-2. **`toSerializedState()`** — the complete deterministic serialization for replay. It additionally captures ordered zone contents (deck/hand/discard card ids and runtime fields), the full `ModifierStack` and `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters, and round-tracking sets — all deterministically sorted so identical states serialize to identical JSON.
+2. **`toSerializedState()`** — the complete deterministic serialization for replay. It additionally captures ordered zone contents (deck/hand/discard card ids and runtime fields), the full `ModifierStack` and `AbilityRegistry` dumps, pending-decision metadata, ID/RNG/clock counters, and map-backed round tracking. Identical game histories serialize to identical JSON: zones serialize in game order and map-backed state (`cardsPlayedThisRound`, `repeatPlays`) in engine insertion order — both are functions of the action stream, never of iteration luck. Canonicalizing the map order instead would desynchronize the serialization from the diff-based replay reconstruction, which rebuilds keys in event order.
 
 `_createSnapshot()` is used for state diffs; `toSerializedState()` is used by the `InitialState`, `UserAction`, `UserDecision`, and `EventFailure` log entries and by `ReplayDriver`.

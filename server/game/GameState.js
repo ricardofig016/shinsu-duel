@@ -794,15 +794,19 @@ export default class GameState {
         }
       : null;
 
+    // Map-backed state serializes in the engine's insertion order, which is
+    // itself deterministic (queues are cleared and re-appended in play order).
+    // Canonicalizing the order here would desynchronize the serialization from
+    // the diff-based replay reconstruction, which rebuilds keys in event order.
     const cardsPlayed = {};
-    for (const [username, count] of [...this._cardsPlayedThisRound.entries()].sort()) {
+    for (const [username, count] of this._cardsPlayedThisRound.entries()) {
       cardsPlayed[username] = count;
     }
 
     const repeatPlays = {};
-    for (const username of [...this._repeatPlays.keys()].sort()) {
+    for (const username of this._repeatPlays.keys()) {
       const entries = {};
-      for (const [cardName, count] of [...this._repeatPlays.get(username).entries()].sort()) {
+      for (const [cardName, count] of this._repeatPlays.get(username).entries()) {
         entries[cardName] = count;
       }
       repeatPlays[username] = entries;
