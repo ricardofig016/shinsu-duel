@@ -140,6 +140,19 @@ describe("card-compile parseTrigger", () => {
     expect(parseTrigger("activation")).toEqual({ type: "activation" });
   });
 
+  test("parses a skills-played evolution trigger", () => {
+    expect(parseTrigger("when you have played 7 skills this game"))
+      .toEqual({ type: "skills_played", count: 7 });
+    expect(parseTrigger("when you have played 1 skill this game"))
+      .toEqual({ type: "skills_played", count: 1 });
+  });
+
+  test("rejects malformed skills-played triggers", () => {
+    expect(parseTrigger("when you have played skills this game")).toBeNull();
+    expect(parseTrigger("when you have played 0 skills this game")).toBeNull();
+    expect(parseTrigger("when you have played 7 skills today")).toBeNull();
+  });
+
   test("still parses a bare round start trigger", () => {
     expect(parseTrigger("round start")).toEqual({ type: "round_start" });
   });

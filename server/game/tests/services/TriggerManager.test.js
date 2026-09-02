@@ -163,6 +163,35 @@ describe("TriggerManager trigger subscriptions", () => {
     expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
   });
 
+  test("skills_played trigger fires once the owner's game counter reaches the count", () => {
+    gameState.getSkillsPlayedThisGame = (owner) => (owner === "Alice" ? 3 : 0);
+    register([{ type: "skills_played", count: 3 }]);
+    bus.emit(EVT.SKILL_APPLIED, { owner: "Alice", cardName: "Baang" });
+    expect(LifecycleEngine.transformUnit).toHaveBeenCalledWith(gameState, unit, 99);
+  });
+
+  test("skills_played trigger does not fire below the count", () => {
+    gameState.getSkillsPlayedThisGame = () => 2;
+    register([{ type: "skills_played", count: 3 }]);
+    bus.emit(EVT.SKILL_APPLIED, { owner: "Alice", cardName: "Baang" });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
+  test("skills_played trigger ignores the other player's skills", () => {
+    gameState.getSkillsPlayedThisGame = () => 10;
+    register([{ type: "skills_played", count: 3 }]);
+    bus.emit(EVT.SKILL_APPLIED, { owner: "Bob", cardName: "Baang" });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
+  test("skills_played trigger ignores skills when the bearer is gone", () => {
+    gameState.getSkillsPlayedThisGame = () => 10;
+    gameState._findUnit = () => null;
+    register([{ type: "skills_played", count: 3 }]);
+    bus.emit(EVT.SKILL_APPLIED, { owner: "Alice", cardName: "Baang" });
+    expect(LifecycleEngine.transformUnit).not.toHaveBeenCalled();
+  });
+
   test("ignition transform uses transformEquipment", () => {
     register([{ type: "deploy" }], 50, "ignition");
     bus.emit(EVT.UNIT_SUMMONED, { unitId: "Unit#1" });

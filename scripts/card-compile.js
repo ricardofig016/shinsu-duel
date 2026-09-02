@@ -345,6 +345,14 @@ export function parseTrigger(raw) {
   // "when I use an ability"
   if (/^when i use an ability$/i.test(text)) return { type: "ability_used" };
 
+  // "when you have played N skills this game"
+  const skillsPlayedMatch = /^when you have played (\d+) skills? this game$/i.exec(text);
+  if (skillsPlayedMatch) {
+    const count = Number(skillsPlayedMatch[1]);
+    if (count < 1) return null;
+    return { type: "skills_played", count };
+  }
+
   // "Fisherman: equip with X" / "equip with X" (position-scoped or bare)
   const posEquipMatch = /^(?:([a-z ]+):\s*)?equip with (.+)$/i.exec(text);
   if (posEquipMatch) {

@@ -369,3 +369,29 @@ describe("client state projections", () => {
     expect(game.gameOver.winner).toBe("Bob");
   });
 });
+
+describe("skills-played game counter", () => {
+  let game;
+
+  beforeEach(() => {
+    game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1), cards });
+  });
+
+  test("counts recorded skills per player", () => {
+    game.recordSkillPlayed("Alice");
+    game.recordSkillPlayed("Alice");
+    game.recordSkillPlayed("Bob");
+
+    expect(game.getSkillsPlayedThisGame("Alice")).toBe(2);
+    expect(game.getSkillsPlayedThisGame("Bob")).toBe(1);
+  });
+
+  test("reads as 0 for a player who has not played a skill and is never cleared", () => {
+    expect(game.getSkillsPlayedThisGame("Alice")).toBe(0);
+
+    game.recordSkillPlayed("Alice");
+    game.recordCardPlayed("Alice");
+
+    expect(game.getSkillsPlayedThisGame("Alice")).toBe(1);
+  });
+});

@@ -5,7 +5,8 @@ import EVT from "../EventCatalog.js";
 /**
  * Announce-and-resolve segment shared by every skill play.
  *
- * One definition of "play a skill": emit `SKILL_APPLIED` as
+ * One definition of "play a skill": record the play on the game-long
+ * skills-played counter (evolution triggers read it), emit `SKILL_APPLIED` as
  * `{ owner, cardName, card }`, then resolve the card's effect nodes with the
  * caller's `extra`. The player path (`PlaySkillAction`) and synthetic plays
  * (`PlayJeonsulBaangHandler`) both delegate here, so every `SKILL_APPLIED`
@@ -35,6 +36,9 @@ export default class SkillPlayService {
     }
     if (!owner) throw new Error("SkillPlayService: request.owner is required");
 
+    // The counter is recorded before the announcement so every subscriber —
+    // execute- or post-phase — observes the play it is reacting to.
+    gameState.recordSkillPlayed(owner);
     context.emitChild(EVT.SKILL_APPLIED, { owner, cardName: card.name, card });
     return resolveEffects(effects ?? card.effects, context, gameState, extra);
   }

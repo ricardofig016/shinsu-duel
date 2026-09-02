@@ -29,6 +29,7 @@ The trigger system has two layers:
 | `kill`             | "when i kill a Ranker"                    | `unit:killed`                         |
 | `ally_dies`        | "when an ally dies"                       | `unit:destroyed`                      |
 | `damaged_by`       | "when i am damaged by X"                  | `unit:damage:applied`                 |
+| `skills_played`    | "when you have played N skills this game" | `skill:applied` + game counter check  |
 
 ### AST Object Shape
 

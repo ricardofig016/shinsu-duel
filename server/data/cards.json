@@ -3250,9 +3250,6 @@
     ],
     "traits": [
       {
-        "code": "bloodthirsty"
-      },
-      {
         "code": "taunt"
       }
     ],
@@ -3270,11 +3267,158 @@
         "raw": "deal 4 to an enemy"
       }
     ],
-    "passives": [],
+    "passives": [
+      {
+        "type": "grant_trait",
+        "trait": "bloodthirsty",
+        "amount": 1,
+        "target": {
+          "side": "self"
+        },
+        "trigger": {
+          "type": "evolve"
+        },
+        "raw": "when i evolve: gain Bloodthirsty 1"
+      }
+    ],
+    "evolveInto": {
+      "triggers": [
+        {
+          "type": "skills_played",
+          "count": 7,
+          "raw": "when you have played 7 skills this game"
+        }
+      ],
+      "cardId": 68
+    },
     "artworkPath": "/assets/images/artworks/rak_wraithraiser.png"
   },
   "68": {
     "cardId": 68,
+    "type": "unit",
+    "name": "Rak Wraithraiser II",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 7,
+    "rank": "regular",
+    "kind": "standard",
+    "positions": [
+      "spear-bearer"
+    ],
+    "traits": [
+      {
+        "code": "taunt"
+      }
+    ],
+    "attributes": [],
+    "affiliations": [
+      "team-baam"
+    ],
+    "abilities": [
+      {
+        "type": "sequence",
+        "targets": {
+          "side": "enemy"
+        },
+        "steps": [
+          {
+            "type": "deal_damage",
+            "amount": 7,
+            "target": {
+              "link": "sequence"
+            }
+          },
+          {
+            "type": "give_condition",
+            "condition": "frozen",
+            "target": {
+              "link": "sequence"
+            }
+          }
+        ],
+        "raw": "deal 7 to an enemy and give them Frozen"
+      }
+    ],
+    "passives": [
+      {
+        "type": "grant_trait",
+        "trait": "bloodthirsty",
+        "amount": 1,
+        "target": {
+          "side": "self"
+        },
+        "trigger": {
+          "type": "evolve"
+        },
+        "raw": "when i evolve: gain Bloodthirsty 1"
+      }
+    ],
+    "evolveInto": {
+      "triggers": [
+        {
+          "type": "skills_played",
+          "count": 12,
+          "raw": "when you have played 12 skills this game"
+        }
+      ],
+      "cardId": 69
+    },
+    "evolvedFrom": 67,
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png"
+  },
+  "69": {
+    "cardId": 69,
+    "type": "unit",
+    "name": "Rak Wraithraiser III",
+    "cost": 2,
+    "deckConstraints": [],
+    "hp": 9,
+    "rank": "regular",
+    "kind": "standard",
+    "positions": [
+      "spear-bearer"
+    ],
+    "traits": [
+      {
+        "code": "taunt"
+      }
+    ],
+    "attributes": [],
+    "affiliations": [
+      "team-baam"
+    ],
+    "abilities": [
+      {
+        "type": "sequence",
+        "targets": {
+          "side": "enemy"
+        },
+        "steps": [
+          {
+            "type": "deal_damage",
+            "amount": 9,
+            "target": {
+              "link": "sequence"
+            }
+          },
+          {
+            "type": "give_condition",
+            "condition": "frozen",
+            "target": {
+              "link": "sequence"
+            }
+          }
+        ],
+        "quick": true,
+        "raw": "quick: deal 9 to an enemy and give them Frozen"
+      }
+    ],
+    "passives": [],
+    "evolvedFrom": 68,
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png"
+  },
+  "70": {
+    "cardId": 70,
     "type": "equipment",
     "name": "Red Thryssa",
     "cost": 3,
@@ -3297,8 +3441,8 @@
     ],
     "artworkPath": "/assets/images/artworks/red_thryssa.png"
   },
-  "69": {
-    "cardId": 69,
+  "71": {
+    "cardId": 71,
     "type": "skill",
     "name": "Redan",
     "cost": 1,
@@ -3318,8 +3462,8 @@
       }
     ]
   },
-  "70": {
-    "cardId": 70,
+  "72": {
+    "cardId": 72,
     "type": "equipment",
     "name": "Second Thorn Fragment",
     "series": "thorn-fragment",
@@ -3374,8 +3518,8 @@
       }
     ]
   },
-  "71": {
-    "cardId": 71,
+  "73": {
+    "cardId": 73,
     "type": "skill",
     "name": "Shinwonryu",
     "cost": 4,
@@ -3400,8 +3544,8 @@
     ],
     "artworkPath": "/assets/images/artworks/shinwonryu.png"
   },
-  "72": {
-    "cardId": 72,
+  "74": {
+    "cardId": 74,
     "type": "skill",
     "name": "Static Baang",
     "cost": 1,
@@ -3424,8 +3568,8 @@
       }
     ]
   },
-  "73": {
-    "cardId": 73,
+  "75": {
+    "cardId": 75,
     "type": "equipment",
     "name": "Steel Tree",
     "cost": 3,
@@ -3453,8 +3597,8 @@
       }
     ]
   },
-  "74": {
-    "cardId": 74,
+  "76": {
+    "cardId": 76,
     "type": "unit",
     "name": "Stone Doll",
     "cost": 0,
@@ -3504,8 +3648,8 @@
       }
     ]
   },
-  "75": {
-    "cardId": 75,
+  "77": {
+    "cardId": 77,
     "type": "skill",
     "name": "Submerged Fish",
     "cost": 4,
@@ -3524,8 +3668,8 @@
       }
     ]
   },
-  "76": {
-    "cardId": 76,
+  "78": {
+    "cardId": 78,
     "type": "unit",
     "name": "Sunwoo Nare",
     "cost": 2,
@@ -3578,8 +3722,8 @@
       }
     ]
   },
-  "77": {
-    "cardId": 77,
+  "79": {
+    "cardId": 79,
     "type": "unit",
     "name": "The Hand Of Arlen",
     "cost": 2,
@@ -3614,8 +3758,8 @@
       }
     ]
   },
-  "78": {
-    "cardId": 78,
+  "80": {
+    "cardId": 80,
     "type": "skill",
     "name": "The Workshop",
     "cost": 3,
@@ -3660,8 +3804,8 @@
     ],
     "artworkPath": "/assets/images/artworks/the_workshop.png"
   },
-  "79": {
-    "cardId": 79,
+  "81": {
+    "cardId": 81,
     "type": "equipment",
     "name": "Third Thorn Fragment",
     "series": "thorn-fragment",
@@ -3716,8 +3860,8 @@
       }
     ]
   },
-  "80": {
-    "cardId": 80,
+  "82": {
+    "cardId": 82,
     "type": "skill",
     "name": "Thunder Baang",
     "cost": 1,
@@ -3740,8 +3884,8 @@
       }
     ]
   },
-  "81": {
-    "cardId": 81,
+  "83": {
+    "cardId": 83,
     "type": "unit",
     "name": "Twenty-Fifth Baam",
     "cost": 5,
@@ -3782,12 +3926,12 @@
           "raw": "i am equipped with Enryu's Thorn"
         }
       ],
-      "cardId": 82
+      "cardId": 84
     },
     "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png"
   },
-  "82": {
-    "cardId": 82,
+  "84": {
+    "cardId": 84,
     "type": "unit",
     "name": "Twenty-Fifth Baam II",
     "cost": 5,
@@ -3826,11 +3970,11 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 81,
+    "evolvedFrom": 83,
     "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png"
   },
-  "83": {
-    "cardId": 83,
+  "85": {
+    "cardId": 85,
     "type": "unit",
     "name": "Urek Mazino",
     "cost": 8,
@@ -3911,8 +4055,8 @@
       }
     ]
   },
-  "84": {
-    "cardId": 84,
+  "86": {
+    "cardId": 86,
     "type": "unit",
     "name": "Water Stadium",
     "cost": 2,
@@ -3932,8 +4076,8 @@
     "abilities": [],
     "passives": []
   },
-  "85": {
-    "cardId": 85,
+  "87": {
+    "cardId": 87,
     "type": "skill",
     "name": "Weights",
     "cost": 1,
@@ -3950,8 +4094,8 @@
       }
     ]
   },
-  "86": {
-    "cardId": 86,
+  "88": {
+    "cardId": 88,
     "type": "unit",
     "name": "Wooden Horse",
     "cost": 2,
@@ -3985,8 +4129,8 @@
       }
     ]
   },
-  "87": {
-    "cardId": 87,
+  "89": {
+    "cardId": 89,
     "type": "equipment",
     "name": "Woon's Hammer",
     "cost": 2,
@@ -4006,8 +4150,8 @@
       }
     ]
   },
-  "88": {
-    "cardId": 88,
+  "90": {
+    "cardId": 90,
     "type": "unit",
     "name": "Yeo Goseng",
     "cost": 1,
@@ -4051,8 +4195,8 @@
       }
     ]
   },
-  "89": {
-    "cardId": 89,
+  "91": {
+    "cardId": 91,
     "type": "unit",
     "name": "Yeo Miseng",
     "cost": 2,
@@ -4107,8 +4251,8 @@
       }
     ]
   },
-  "90": {
-    "cardId": 90,
+  "92": {
+    "cardId": 92,
     "type": "unit",
     "name": "Yeon Woon",
     "cost": 5,
@@ -4160,8 +4304,8 @@
       }
     ]
   },
-  "91": {
-    "cardId": 91,
+  "93": {
+    "cardId": 93,
     "type": "unit",
     "name": "Yeon Yihwa",
     "cost": 5,
@@ -4206,8 +4350,8 @@
       }
     ]
   },
-  "92": {
-    "cardId": 92,
+  "94": {
+    "cardId": 94,
     "type": "unit",
     "name": "Yu Han Sung",
     "cost": 6,
@@ -4276,8 +4420,8 @@
       }
     ]
   },
-  "93": {
-    "cardId": 93,
+  "95": {
+    "cardId": 95,
     "type": "unit",
     "name": "Yuga",
     "cost": 4,

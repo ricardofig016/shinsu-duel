@@ -157,6 +157,10 @@ export default class GameState {
     // Track cards played per player per round for "first card" requirements
     this._cardsPlayedThisRound = new Map();
 
+    // Track skills played per player for the whole game (evolution counters).
+    // Game-long and cumulative: it is never cleared mid-game.
+    this._skillsPlayedThisGame = new Map();
+
     // Pending repeat_play queues: username → Map<cardName, remaining plays>.
     // "The next time you play X, play it N more times" (turn-scoped).
     this._repeatPlays = new Map();
@@ -814,6 +818,11 @@ export default class GameState {
       cardsPlayed[username] = count;
     }
 
+    const skillsPlayed = {};
+    for (const [username, count] of this._skillsPlayedThisGame.entries()) {
+      skillsPlayed[username] = count;
+    }
+
     const repeatPlays = {};
     for (const username of this._repeatPlays.keys()) {
       const entries = {};
@@ -845,6 +854,7 @@ export default class GameState {
       barrierUsedThisRound: [...this._barrierUsedThisRound].sort(),
       abilitiesUsedThisRound: [...this._abilitiesUsedThisRound].sort(),
       cardsPlayedThisRound: cardsPlayed,
+      skillsPlayedThisGame: skillsPlayed,
       repeatPlays,
     };
   }
@@ -870,6 +880,37 @@ export default class GameState {
   recordCardPlayed(username) {
     const count = this._cardsPlayedThisRound.get(username) || 0;
     this._cardsPlayedThisRound.set(username, count + 1);
+  }
+
+  /**
+   * Record a skill play for game-long evolution counters.
+   */
+  recordSkillPlayed(username) {
+    const count = this._skillsPlayedThisGame.get(username) || 0;
+    this._skillsPlayedThisGame.set(username, count + 1);
+  }
+
+  /**
+   * Number of skills the player has played this game.
+   */
+  getSkillsPlayedThisGame(username) {
+    return this._skillsPlayedThisGame.get(username) || 0;
+  }
+
+  /**
+   * Record a skill play for game-long evolution counters ("when you have
+   * played N skills this game"). Cumulative across the whole game.
+   */
+  recordSkillPlayed(username) {
+    const count = this._skillsPlayedThisGame.get(username) || 0;
+    this._skillsPlayedThisGame.set(username, count + 1);
+  }
+
+  /**
+   * Number of skills the player has played this game.
+   */
+  getSkillsPlayedThisGame(username) {
+    return this._skillsPlayedThisGame.get(username) || 0;
   }
 
   /**

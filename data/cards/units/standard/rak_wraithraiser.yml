@@ -6,14 +6,20 @@ rank: regular
 positions:
   - spear bearer
 passives:
+  - type: grant_trait
+    trait: bloodthirsty
+    amount: 1
+    target: { side: self }
+    trigger: { type: evolve }
+    raw: "when i evolve: gain Bloodthirsty 1"
 abilities:
   - type: deal_damage
     amount: 4
     target: { side: enemy }
     raw: "deal 4 to an enemy"
 evolve:
+  - "when you have played 7 skills this game"
 traits:
-  - bloodthirsty
   - taunt
 attributes:
 affiliations:

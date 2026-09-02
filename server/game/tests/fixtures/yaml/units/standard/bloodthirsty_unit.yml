@@ -1,0 +1,14 @@
+type: unit
+name: Test Bloodthirsty Unit
+cost: 1
+hp: 5
+rank: regular
+positions:
+  - fisherman
+traits:
+  - bloodthirsty 2
+abilities:
+  - type: deal_damage
+    amount: 4
+    target: { side: enemy }
+    raw: "deal 4 to an enemy"

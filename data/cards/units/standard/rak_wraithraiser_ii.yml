@@ -1,0 +1,32 @@
+type: unit
+name: Rak Wraithraiser II
+cost: 2
+hp: 7
+rank: regular
+positions:
+  - spear bearer
+passives:
+  - type: grant_trait
+    trait: bloodthirsty
+    amount: 1
+    target: { side: self }
+    trigger: { type: evolve }
+    raw: "when i evolve: gain Bloodthirsty 1"
+abilities:
+  - type: sequence
+    targets: { side: enemy }
+    steps:
+      - type: deal_damage
+        amount: 7
+        target: { link: sequence }
+      - type: give_condition
+        condition: frozen
+        target: { link: sequence }
+    raw: "deal 7 to an enemy and give them Frozen"
+evolve:
+  - "when you have played 12 skills this game"
+traits:
+  - taunt
+attributes:
+affiliations:
+  - team baam

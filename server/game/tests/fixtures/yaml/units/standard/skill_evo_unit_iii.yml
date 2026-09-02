@@ -1,0 +1,9 @@
+type: unit
+name: Test Skill Evo Unit III
+cost: 1
+hp: 7
+rank: regular
+positions:
+  - fisherman
+passives:
+evolve:

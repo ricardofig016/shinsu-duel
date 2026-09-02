@@ -1,0 +1,26 @@
+type: unit
+name: Rak Wraithraiser III
+cost: 2
+hp: 9
+rank: regular
+positions:
+  - spear bearer
+passives:
+abilities:
+  - type: sequence
+    targets: { side: enemy }
+    steps:
+      - type: deal_damage
+        amount: 9
+        target: { link: sequence }
+      - type: give_condition
+        condition: frozen
+        target: { link: sequence }
+    quick: true
+    raw: "quick: deal 9 to an enemy and give them Frozen"
+evolve:
+traits:
+  - taunt
+attributes:
+affiliations:
+  - team baam

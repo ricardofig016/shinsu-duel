@@ -71,6 +71,7 @@ Each player state has typed zones:
 | Undying intercepts lethal damage | `unit:death:intent` before `unit:killed`          |
 | Card requirements                | `RequirementValidator` before cost deduction      |
 | First card this round            | `GameState._cardsPlayedThisRound` tracking        |
+| Skills played this game          | `GameState._skillsPlayedThisGame` tracking        |
 | Barrier resets per round         | `GameState` round start handler                   |
 | Shinsu max = round num           | `ShinsuService.reset`                             |
 | Recharged shinsu max 2           | `ShinsuService.reset`                             |
@@ -131,6 +132,10 @@ LifecycleEngine.deployUnit(gameState, username, handIndex, positionCode)
 
 // Destroy a unit (emits unit:destroyed, cleans modifiers)
 LifecycleEngine.destroyUnit(gameState, unit)
+
+// Kill a unit through the lethal pipeline: death intent (Undying) →
+// unit:killed (the killer's Bloodthirsty restores HP here) → destroy.
+LifecycleEngine.killUnit(gameState, unit, { sourceId, sourceOwner })
 
 // Atomic transformation (evolution/ignition)
 LifecycleEngine.transformUnit(gameState, unit, targetCardId)

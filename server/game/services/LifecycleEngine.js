@@ -507,6 +507,24 @@ export default class LifecycleEngine {
       owner: unit.owner,
     });
 
+    // Bloodthirsty: the killer restores x HP (RULES.md). killUnit is the
+    // single death path for both kills and Slays, so Slaying counts as
+    // killing here for free.
+    const killer = gameState._findUnit?.(sourceId) ?? null;
+    const bloodthirsty = killer
+      ? gameState.modifierStack?.getEffective(killer.id, "trait", "bloodthirsty") ?? 0
+      : 0;
+    if (killer?.isAlive() && bloodthirsty > 0) {
+      const { healed } = UnitService.heal(killer, bloodthirsty);
+      if (healed > 0) {
+        emit(EVT.HEAL_APPLIED, {
+          targetId: killer.id,
+          amount: healed,
+          currentHp: killer.currentHp,
+        });
+      }
+    }
+
     // Every production lethal path uses the lifecycle engine so zones,
     // attachments, modifiers, attributes, and trigger subscriptions remain
     // coherent. The fallback keeps this independently testable with a minimal

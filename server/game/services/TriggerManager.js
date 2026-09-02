@@ -15,6 +15,7 @@ import { matchesTriggerSource } from "../utils/triggerSource.js";
  *   given   — unit is given a specific item/skill
  *   kill    — unit kills a specific rank
  *   ally_dies — an allied unit dies
+ *   skills_played — the bearer's owner has played N skills this game
  */
 
 export default class TriggerManager {
@@ -137,6 +138,14 @@ export default class TriggerManager {
       case "ability_used":
         this._subscribeEvent(unitId, EVT.UNIT_ABILITY_USED, targetCardId, transformType, gameState,
           (payload) => payload.unitId === unitId);
+        break;
+      case "skills_played":
+        this._subscribeEvent(unitId, EVT.SKILL_APPLIED, targetCardId, transformType, gameState,
+          (payload) => {
+            const unit = gameState._findUnit(unitId);
+            return Boolean(unit) && payload?.owner === unit.owner &&
+              gameState.getSkillsPlayedThisGame(unit.owner) >= trigger.count;
+          });
         break;
       case "has_all_equipped":
         this._onHasAllEquipped(unitId, trigger, targetCardId, transformType, gameState, equipmentId);

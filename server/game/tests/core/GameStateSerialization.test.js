@@ -130,4 +130,16 @@ describe("GameState.toSerializedState", () => {
       Alice: { "*": 1, baang: 2 },
     });
   });
+
+  test("captures the game-long skills-played counter", () => {
+    IdFactory.resetAll();
+    resetModifierCounter();
+    const game = makeGame();
+
+    game.recordSkillPlayed("Alice");
+    game.recordSkillPlayed("Alice");
+    game.recordSkillPlayed("Bob");
+
+    expect(game.toSerializedState().skillsPlayedThisGame).toEqual({ Alice: 2, Bob: 1 });
+  });
 });

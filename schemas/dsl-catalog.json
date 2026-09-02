@@ -101,6 +101,7 @@
     "quick_ability_used",
     "activation",
     "skill_played",
+    "skills_played",
     "dies",
     "evolve",
     "has_all_equipped"

@@ -107,4 +107,21 @@ describe("SkillPlayService", () => {
     const card = new Card(data.cardId, data, "Alice", game.eventBus);
     expect(() => SkillPlayService.play(game, context(game), { card })).toThrow("owner");
   });
+
+  test("records the play on the game-long skills counter before announcing it", () => {
+    const game = setupGameWithHands({});
+    const data = poisonSkillData();
+    const card = new Card(data.cardId, data, "Alice", game.eventBus);
+
+    let counterAtAnnounce = null;
+    game.eventBus.on(EVT.SKILL_APPLIED, () => {
+      counterAtAnnounce = game.getSkillsPlayedThisGame("Alice");
+    }, { phase: "post" });
+
+    SkillPlayService.play(game, context(game), { card, effects: [], owner: "Alice" });
+
+    expect(counterAtAnnounce).toBe(1);
+    expect(game.getSkillsPlayedThisGame("Alice")).toBe(1);
+    expect(game.getSkillsPlayedThisGame("Bob")).toBe(0);
+  });
 });
