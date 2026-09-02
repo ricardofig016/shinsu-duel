@@ -37,8 +37,16 @@
   flex: 1;
 }
 
+/* The divider's full look lives here so tooltips render identically on
+   every host page, not just pages that style a bare `hr` themselves. */
 .tooltip-frame hr {
+  width: 100%;
   min-height: 2px;
+  margin: 0;
+  padding: 0;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
   border: none;
 }
 

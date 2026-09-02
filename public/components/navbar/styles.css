@@ -22,7 +22,7 @@ nav li {
   margin: 0;
 }
 
-span {
+#username-span {
   color: #b3b3b3;
   margin-right: 1rem;
   font-size: 1rem;
