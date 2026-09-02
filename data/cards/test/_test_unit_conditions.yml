@@ -1,0 +1,112 @@
+type: unit
+name: _Test Unit Conditions
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+  - spear bearer
+  - scout
+  - light bearer
+  - wave controller
+passives:
+  - type: give_condition
+    condition: blinded
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Blinded"
+  - type: give_condition
+    condition: burned
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Burned 2"
+  - type: give_condition
+    condition: cursed
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Cursed 2"
+  - type: give_condition
+    condition: disabled
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Disabled"
+  - type: give_condition
+    condition: doomed
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Doomed"
+  - type: give_condition
+    condition: exhausted
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Exhausted 2"
+  - type: give_condition
+    condition: frozen
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Frozen"
+  - type: give_condition
+    condition: ghost
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Ghost"
+  - type: give_condition
+    condition: heavy
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Heavy 2"
+  - type: give_condition
+    condition: poisoned
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Poisoned 2"
+  - type: give_condition
+    condition: rooted
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Rooted"
+  - type: give_condition
+    condition: stunned
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Stunned"
+  - type: give_condition
+    condition: weak
+    amount: 2
+    target: { side: self }
+    trigger: { type: round_start }
+    raw: "round start: give me Weak 2"
+abilities:
+evolve:
+traits:
+  - barrier
+  - beacon
+  - bloodthirsty
+  - dealer 10
+  - immune
+  - last one standing 10
+  - lethal
+  - pierce 10
+  - reflect 10
+  - regenerate 10
+  - resilient 10
+  - ruthless 10
+  - sharpshooter
+  - strong 10
+  - taunt
+  - undying
+  - vengeful 10
+attributes:
+affiliations:
