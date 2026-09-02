@@ -144,12 +144,28 @@ describe("per-player decision and condition projections", () => {
     alice.emit(EVENTS.GAME_STATE_REQUEST);
     const aliceView = await alice.next(EVENTS.GAME_INIT);
     const projected = aliceView.you.field.frontline.find((unit) => unit.id === scout.id);
-    expect(projected.conditions).toEqual([{ key: "poisoned", magnitude: 2 }]);
+    expect(projected.conditions).toEqual([
+      {
+        key: "poisoned",
+        magnitude: 2,
+        name: "Poisoned",
+        description: "I take x damage when I use an ability",
+        iconPath: "/assets/icons/conditions/poisoned.png",
+      },
+    ]);
 
     bob.emit(EVENTS.GAME_STATE_REQUEST);
     const bobView = await bob.next(EVENTS.GAME_INIT);
     const fromOpponentSide = bobView.opponent.field.frontline.find((unit) => unit.id === scout.id);
-    expect(fromOpponentSide.conditions).toEqual([{ key: "poisoned", magnitude: 2 }]);
+    expect(fromOpponentSide.conditions).toEqual([
+      {
+        key: "poisoned",
+        magnitude: 2,
+        name: "Poisoned",
+        description: "I take x damage when I use an ability",
+        iconPath: "/assets/icons/conditions/poisoned.png",
+      },
+    ]);
   });
 
   test("the pending decision is exposed to its owner only", async () => {
@@ -331,7 +347,7 @@ describe("generate-fire-charge-action: the hwayeomsa core mechanic over the wire
     const deployed = [...update.you.field.frontline, ...update.you.field.backline].find(
       (candidate) => candidate.card.name === "Test Hwayeomsa"
     );
-    expect(deployed.card.attributes).toEqual(["hwayeomsa"]);
+    expect(Object.keys(deployed.card.attributes)).toEqual(["hwayeomsa"]);
   });
 
   test("a player with no hwayeomsa unit is rejected and the revision stays put", async () => {

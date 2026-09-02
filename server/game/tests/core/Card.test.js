@@ -44,4 +44,49 @@ describe("Card", () => {
     const bare = makeCard();
     expect(bare.toSanitizedObject().artworkPath).toBeNull();
   });
+
+  test("serializes rank and the printed requirement, effect, and rule texts", () => {
+    const card = makeCard({
+      rank: "ranker",
+      requirements: ["you control a fisherman"],
+      effects: [{ type: "deal_damage", raw: "deal 2" }, { type: "draw", text: "draw a card" }],
+      rules: [{ type: "disable_passives", raw: "passives have no effect" }],
+    });
+    const view = card.toSanitizedObject();
+
+    expect(view.rank).toBe("ranker");
+    expect(view.requirements).toEqual(["you control a fisherman"]);
+    expect(view.effects).toEqual(["deal 2", "draw a card"]);
+    expect(view.rules).toEqual(["passives have no effect"]);
+  });
+
+  test("serializes evolve and ignition trigger texts, null when absent", () => {
+    const evolving = makeCard({
+      evolveInto: { triggers: [{ type: "deploy", raw: "when i am deployed" }], cardId: 2 },
+      igniteInto: { triggers: [{ type: "slay", raw: "the bearer Slays a unit" }], cardId: 3 },
+    });
+    const view = evolving.toSanitizedObject();
+    expect(view.evolveTriggers).toEqual(["when i am deployed"]);
+    expect(view.igniteTriggers).toEqual(["the bearer Slays a unit"]);
+
+    const bare = makeCard();
+    expect(bare.toSanitizedObject().evolveTriggers).toBeNull();
+    expect(bare.toSanitizedObject().igniteTriggers).toBeNull();
+  });
+
+  test("stamps attribute details with icon paths into a copy, dropping unknown codes", () => {
+    const card = makeCard({ attributes: ["hwayeomsa", "no-such-attribute"] });
+    const view = card.toSanitizedObject();
+
+    expect(view.attributes).toEqual({
+      hwayeomsa: {
+        name: "Hwayeomsa",
+        description: expect.any(String),
+        iconPath: "/assets/icons/attributes/hwayeomsa.png",
+      },
+    });
+
+    view.attributes.hwayeomsa.name = "mutated";
+    expect(card.toSanitizedObject().attributes.hwayeomsa.name).not.toBe("mutated");
+  });
 });

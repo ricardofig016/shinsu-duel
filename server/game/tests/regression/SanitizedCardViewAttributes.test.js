@@ -1,5 +1,6 @@
 /**
- * Regression: the sanitized card view must carry the card's attribute codes.
+ * Regression: the sanitized card view must carry the card's attribute
+ * details.
  *
  * Bug: `Card.toSanitizedObject()` omitted `attributes`, so no client could
  * tell which field units carry `hwayeomsa`; the generate-fire-charge core
@@ -20,15 +21,17 @@ function createGame() {
   }, null, { rng: new SeededRng(1), cards });
 }
 
-test("the sanitized card view carries a copy of the attribute codes", () => {
+test("the sanitized card view carries the stamped attribute details", () => {
   const game = createGame();
   const unit = deployUnit(game, "Alice", "Test Hwayeomsa", "fisherman");
 
   const view = unit.card.toSanitizedObject();
-  expect(view.attributes).toEqual(["hwayeomsa"]);
+  expect(Object.keys(view.attributes)).toEqual(["hwayeomsa"]);
+  expect(view.attributes.hwayeomsa.iconPath).toBe("/assets/icons/attributes/hwayeomsa.png");
+  expect(view.attributes.hwayeomsa.name).toBeTruthy();
 
-  view.attributes.push("anima");
-  expect(unit.card.attributes).toEqual(["hwayeomsa"]);
+  view.attributes.hwayeomsa.name = "mutated";
+  expect(unit.card.toSanitizedObject().attributes.hwayeomsa.name).not.toBe("mutated");
 });
 
 test("both seat projections expose the attributes of field units", () => {
@@ -42,6 +45,6 @@ test("both seat projections expose the attributes of field units", () => {
       (candidate) => candidate.id === unit.id
     );
     expect(deployed).toBeDefined();
-    expect(deployed.card.attributes).toEqual(["hwayeomsa"]);
+    expect(Object.keys(deployed.card.attributes)).toEqual(["hwayeomsa"]);
   }
 });

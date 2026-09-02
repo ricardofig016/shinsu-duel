@@ -321,9 +321,34 @@ describe("client state projections", () => {
     expect(toMagnitudes(ownView.conditions)).toEqual(expected);
     expect(ownView.conditions[0]).toHaveProperty("key");
     expect(ownView.conditions[0]).toHaveProperty("magnitude");
+    expect(ownView.conditions[0]).toMatchObject({
+      key: "poisoned",
+      name: "Poisoned",
+      description: "I take x damage when I use an ability",
+      iconPath: "/assets/icons/conditions/poisoned.png",
+    });
 
     const opponentView = game.getClientState("Bob").opponent.field.frontline.find((u) => u.id === unit.id);
     expect(toMagnitudes(opponentView.conditions)).toEqual(expected);
+  });
+
+  test("conditions missing from the catalog degrade to their raw key", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    game.modifierStack.apply({
+      sourceId: unit.id,
+      sourceType: "unit",
+      targetId: unit.id,
+      type: "condition",
+      key: "no-such-condition",
+      value: 1,
+      operation: "add",
+    });
+
+    const ownView = game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id);
+    expect(ownView.conditions).toEqual([
+      { key: "no-such-condition", magnitude: 1, name: "no-such-condition", description: null, iconPath: null },
+    ]);
   });
 
   test("gameOver is projected as a copy once the game has ended", () => {

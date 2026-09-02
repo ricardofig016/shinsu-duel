@@ -37,7 +37,7 @@ const unitView = {
       light_bearer: { name: "Light Bearer", description: "Back line support.", line: "backline", iconPath: "/assets/icons/positions/light-bearer.png" },
     },
   },
-  conditions: [{ key: "poisoned", magnitude: 2 }],
+  conditions: [{ key: "poisoned", magnitude: 2, name: "Poisoned", description: "Turn end: I take x damage", iconPath: "/assets/icons/conditions/poisoned.png" }],
   equipmentAttachments: ["Test Equipment"],
   grantedAbilities: [
     {
@@ -89,16 +89,76 @@ describe("buildUnitViewModel", () => {
       { code: "scout", name: "Scout", description: "Moves first.", iconPath: "/assets/icons/traits/scout.png" },
     ]);
     expect(model.runtimeTraits).toEqual(["scout", "fearless"]);
-    expect(model.conditions).toEqual([{ key: "poisoned", magnitude: 2 }]);
+    expect(model.conditions).toEqual([
+      {
+        key: "poisoned",
+        magnitude: 2,
+        name: "Poisoned",
+        description: "Turn end: I take x damage",
+        iconPath: "/assets/icons/conditions/poisoned.png",
+      },
+    ]);
   });
 
-  test("carries the card's attributes for attribute-driven mechanics", () => {
+  test("carries the card's attribute details for display and mechanics", () => {
     const model = buildUnitViewModel({
       id: "unit-attr",
-      card: { name: "Yeon Yihwa", attributes: ["hwayeomsa"] },
+      card: {
+        name: "Yeon Yihwa",
+        attributes: {
+          hwayeomsa: {
+            name: "Hwayeomsa",
+            description: "Spend 1, Free: Charge 1 Fire Charge.",
+            iconPath: "/assets/icons/attributes/hwayeomsa.png",
+          },
+        },
+      },
     });
 
-    expect(model.attributes).toEqual(["hwayeomsa"]);
+    expect(model.attributes).toEqual([
+      {
+        code: "hwayeomsa",
+        name: "Hwayeomsa",
+        description: "Spend 1, Free: Charge 1 Fire Charge.",
+        iconPath: "/assets/icons/attributes/hwayeomsa.png",
+      },
+    ]);
+  });
+
+  test("carries the printed card texts and evolve/ignition triggers", () => {
+    const model = buildCardViewModel({
+      cardId: 10003,
+      type: "unit",
+      kind: "standard",
+      name: "Test Ranker",
+      rank: "ranker",
+      requirements: ["you control a fisherman"],
+      effects: [],
+      rules: ["passives have no effect"],
+      evolveTriggers: ["when i am deployed"],
+      igniteTriggers: null,
+      abilities: [],
+      traits: {},
+      affiliations: {},
+      positions: {},
+    });
+
+    expect(model.rank).toBe("ranker");
+    expect(model.requirements).toEqual(["you control a fisherman"]);
+    expect(model.rules).toEqual(["passives have no effect"]);
+    expect(model.evolveTriggers).toEqual(["when i am deployed"]);
+    expect(model.igniteTriggers).toBeNull();
+  });
+
+  test("defaults printed texts to empty and rank to null", () => {
+    const model = buildCardViewModel({ cardId: 10004, name: "Bare", type: "skill" });
+
+    expect(model.rank).toBeNull();
+    expect(model.requirements).toEqual([]);
+    expect(model.effects).toEqual([]);
+    expect(model.rules).toEqual([]);
+    expect(model.evolveTriggers).toBeNull();
+    expect(model.igniteTriggers).toBeNull();
   });
 
   test("carries equipment attachments, granted abilities, and both positions", () => {
@@ -266,7 +326,7 @@ describe("buildFireChargeViewModel", () => {
 
   const hwayeomsaUnit = {
     id: "unit-h",
-    card: { name: "Yeon Yihwa", attributes: ["hwayeomsa"] },
+    card: { name: "Yeon Yihwa", attributes: { hwayeomsa: { name: "Hwayeomsa" } } },
   };
 
   test("counts charges and allows generation with your hwayeomsa unit on your turn", () => {
@@ -285,7 +345,7 @@ describe("buildFireChargeViewModel", () => {
   test("denies generation without a hwayeomsa unit on the field", () => {
     const state = stateWith({
       field: {
-        frontline: [{ id: "unit-x", card: { name: "Scout", attributes: ["anima"] } }],
+        frontline: [{ id: "unit-x", card: { name: "Scout", attributes: { anima: { name: "Anima" } } } }],
         backline: [],
       },
     });

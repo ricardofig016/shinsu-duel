@@ -15,6 +15,7 @@ import AbilityRegistry from "./registries/abilityRegistry.js";
 import * as IdFactory from "./IdFactory.js";
 import EVT from "./EventCatalog.js";
 import cards from "../data/cards.json" with { type: "json" };
+import conditions from "../data/conditions.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import GameClock from "./GameClock.js";
 import EventBus from "./EventBus.js";
@@ -450,12 +451,21 @@ export default class GameState {
   /**
    * Project the conditions active on a unit with their effective magnitude
    * from the ModifierStack, so clients can render stacks (e.g. "Poisoned 3").
+   * Each view carries the condition catalog's name, description, and icon
+   * path; unknown keys degrade to their raw key so a catalog drift surfaces
+   * in the UI instead of crashing the projection.
    */
   #getConditionViews(unitId) {
-    return [...this.modifierStack.getActiveKeys(unitId, "condition")].map((key) => ({
-      key,
-      magnitude: this.modifierStack.getEffective(unitId, "condition", key),
-    }));
+    return [...this.modifierStack.getActiveKeys(unitId, "condition")].map((key) => {
+      const entry = conditions[key];
+      return {
+        key,
+        magnitude: this.modifierStack.getEffective(unitId, "condition", key),
+        name: entry?.name ?? key,
+        description: entry?.description ?? null,
+        iconPath: entry ? `/assets/icons/${entry.iconPath}` : null,
+      };
+    });
   }
 
   #getOpponentUsername(username) {

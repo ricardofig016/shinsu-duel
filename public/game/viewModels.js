@@ -41,7 +41,18 @@ const flattenCard = (card) => ({
     description: trait.description ?? null,
     iconPath: trait.iconPath ?? null,
   })),
-  attributes: [...(card.attributes ?? [])],
+  attributes: Object.entries(card.attributes ?? {}).map(([code, attribute]) => ({
+    code,
+    name: attribute.name,
+    description: attribute.description ?? null,
+    iconPath: attribute.iconPath ?? null,
+  })),
+  rank: card.rank ?? null,
+  requirements: [...(card.requirements ?? [])],
+  effects: [...(card.effects ?? [])],
+  rules: [...(card.rules ?? [])],
+  evolveTriggers: card.evolveTriggers ? [...card.evolveTriggers] : null,
+  igniteTriggers: card.igniteTriggers ? [...card.igniteTriggers] : null,
   affiliations: Object.entries(card.affiliations ?? {}).map(([code, affiliation]) => ({
     code,
     name: affiliation.name,
@@ -79,6 +90,9 @@ export function buildUnitViewModel(unit) {
     conditions: (unit.conditions ?? []).map((condition) => ({
       key: condition.key,
       magnitude: condition.magnitude,
+      name: condition.name ?? condition.key,
+      description: condition.description ?? null,
+      iconPath: condition.iconPath ?? null,
     })),
     equipmentAttachments: [...(unit.equipmentAttachments ?? [])],
     // Granted abilities are addressed by their registry code on the wire
@@ -166,7 +180,7 @@ export function buildFireChargeViewModel(state) {
   }
   const you = state.you;
   const hasHwayeomsaUnit = ["frontline", "backline"].some((line) =>
-    (you?.field?.[line] ?? []).some((unit) => (unit.card?.attributes ?? []).includes("hwayeomsa"))
+    (you?.field?.[line] ?? []).some((unit) => Object.hasOwn(unit.card?.attributes ?? {}, "hwayeomsa"))
   );
   return {
     charges: you?.fireCharges ?? 0,

@@ -1,5 +1,6 @@
 import * as IdFactory from "./IdFactory.js";
 import affiliations from "../data/affiliations.json" with { type: "json" };
+import attributes from "../data/attributes.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traits from "../data/traits.json" with { type: "json" };
 
@@ -91,8 +92,32 @@ export default class Card {
         dict[key].iconPath = `/assets/icons/${type}/${key}.png`;
       }
     }
+    return dict;
   }
 
+  #displayTexts(entries) {
+    return (entries || [])
+      .map((entry) => entry.raw ?? entry.text ?? "")
+      .filter((text) => text !== "");
+  }
+
+  #attributeViews() {
+    const views = Object.fromEntries(
+      this.attributes
+        .filter((code) => attributes[code] !== undefined)
+        .map((code) => [code, { ...attributes[code] }])
+    );
+    return this.#addArtworkPathToDictionary(views, "attributes");
+  }
+
+  /**
+   * Client-facing card view. Printed information a player reads off the card
+   * (rank, requirements, effect/rule texts, evolve/ignition triggers) is
+   * projected into display-ready strings; looked-up metadata (attributes)
+   * is stamped with names, descriptions, and icon paths like the other
+   * code dictionaries. Hidden cards never reach the opponent because the
+   * state projection replaces them with empty views.
+   */
   toSanitizedObject() {
     return {
       id: this.id,
@@ -108,13 +133,19 @@ export default class Card {
       cost: this.cost,
       costReduction: this.costReduction,
       effectiveCost: Math.max(0, this.cost - this.costReduction),
+      rank: this.rank,
       visible: this.visible,
       affiliations: this.affiliations,
       positions: this.positions,
       traits: this.traits,
-      attributes: [...this.attributes],
+      attributes: this.#attributeViews(),
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
+      requirements: [...this.requirements],
+      effects: this.#displayTexts(this.effects),
+      rules: this.#displayTexts(this.rules),
+      evolveTriggers: this.evolveInto ? this.#displayTexts(this.evolveInto.triggers) : null,
+      igniteTriggers: this.igniteInto ? this.#displayTexts(this.igniteInto.triggers) : null,
       owner: this.owner,
       artworkPath: this.artworkPath,
     };

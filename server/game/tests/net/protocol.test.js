@@ -107,7 +107,15 @@ describe("buildStateView", () => {
 
     const view = buildStateView({ game, revision: 1, username: "Alice" });
     const projected = view.you.field.frontline.find((u) => u.id === unit.id);
-    expect(projected.conditions).toEqual([{ key: "poisoned", magnitude: 2 }]);
+    expect(projected.conditions).toEqual([
+      {
+        key: "poisoned",
+        magnitude: 2,
+        name: "Poisoned",
+        description: "I take x damage when I use an ability",
+        iconPath: "/assets/icons/conditions/poisoned.png",
+      },
+    ]);
   });
 
   test("rejects malformed arguments", () => {
