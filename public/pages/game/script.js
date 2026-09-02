@@ -2,7 +2,7 @@ import { loadComponent, addTooltip } from "/utils/component-util.js";
 import { EVENTS } from "/game/protocol.js";
 import { createGameStore } from "/game/store.js";
 import {
-  buildCardViewModel,
+  buildCombatSlotViewModel,
   buildDecisionPromptViewModel,
   buildFireChargeViewModel,
   buildGameOverViewModel,
@@ -26,7 +26,8 @@ import {
 const store = createGameStore();
 
 let draggedCardHandId = null;
-let armedEquipmentHandId = null;
+let draggedSkillHandId = null;
+let draggedEquipmentHandId = null;
 let activeDecisionId = null;
 let selectedDecisionChoices = [];
 let activeDecisionPrompt = null;
@@ -45,9 +46,9 @@ const prepareData = async () => {
   return { positions };
 };
 
-const findYourUnit = (state, unitId) => {
+const findUnit = (state, player, unitId) => {
   for (const line of ["frontline", "backline"]) {
-    const unit = state.you.field[line].find((candidate) => candidate.id === unitId);
+    const unit = state[player].field[line].find((candidate) => candidate.id === unitId);
     if (unit) return unit;
   }
   return null;
@@ -76,13 +77,6 @@ const showPeekReveal = (payload) => {
 
 const hidePositionChooser = () => {
   document.querySelector("#position-chooser").classList.add("hidden");
-};
-
-const setArmedEquipment = (handId) => {
-  armedEquipmentHandId = handId;
-  document
-    .querySelectorAll("#you-container .unit-card-horizontal-component")
-    .forEach((div) => div.classList.toggle("equip-target", handId !== null));
 };
 
 /** Keep the hand cards aligned across the container width. */
@@ -115,7 +109,7 @@ const showGameOver = (gameOver) => {
 
 const renderRound = (state) => {
   const model = buildRoundViewModel(state);
-  document.querySelector("#round-indicator h2").textContent = model.round;
+  document.querySelector("#round-number").textContent = model.round;
 };
 
 const renderCombatSlots = (state, positions) => {
@@ -123,16 +117,22 @@ const renderCombatSlots = (state, positions) => {
     const slotsContainer = document.querySelector(`#${player}-container .combat-slots-container`);
     slotsContainer.innerHTML = "";
     for (let code of state[player].combatSlotCodes) {
-      const newImg = document.createElement("img");
-      newImg.src = `/assets/icons/positions/${code}.png`;
-      newImg.alt = code;
-      slotsContainer.appendChild(newImg);
+      const iconPath = `/assets/icons/positions/${code}.png`;
+      const slot = document.createElement("div");
+      slot.classList.add("combat-slot");
+      slot.classList.toggle("used", buildCombatSlotViewModel(state[player], code).used);
+      slot.dataset.positionCode = code;
+      const icon = document.createElement("div");
+      icon.classList.add("combat-slot-icon");
+      icon.style.backgroundImage = `url(${iconPath})`;
+      slot.appendChild(icon);
+      slotsContainer.appendChild(slot);
       addTooltip(
         slotsContainer,
-        newImg,
+        slot,
         positions[code]?.name ?? code,
         positions[code]?.description ?? "",
-        newImg.src
+        iconPath
       );
     }
   }
@@ -180,7 +180,6 @@ const renderFields = async (state, socket) => {
         const newDiv = document.createElement("div");
         newDiv.classList.add("unit-card-horizontal-component");
         newDiv.dataset.unitId = unitView.id;
-        if (interactive && armedEquipmentHandId !== null) newDiv.classList.add("equip-target");
         lineContainer.prepend(newDiv);
         await loadComponent(newDiv, "unit-card-horizontal", {
           unit: buildUnitViewModel(unitView),
@@ -192,6 +191,88 @@ const renderFields = async (state, socket) => {
       }
     }
   }
+};
+
+/* ── card dragging ────────────────────────────────────────────────────── */
+
+/**
+ * Shared ghost-drag for hand cards. Each card type reveals its own drop
+ * targets and stamps its module-level hand id; the targets themselves own
+ * the mouseup handlers that emit actions (guarded by that hand id).
+ */
+const beginCardDrag = (event, cardDiv, handCard, cardType) => {
+  if (event.button !== 0) return; // left click
+  // create dragging card
+  const cardDrag = cardDiv.cloneNode(true);
+  const innerCard = cardDrag.querySelector(".unit-card-vertical-component");
+  if (innerCard) cardDrag.removeChild(innerCard);
+  cardDrag.classList.add("card-dragging");
+  document.body.appendChild(cardDrag);
+  // position dragging card
+  cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
+  cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
+  document.body.classList.add("no-interaction");
+  // hide original card
+  cardDiv.classList.add("invisible");
+
+  // reveal the drop targets this card type accepts
+  let cleanupDropTargets = () => {};
+  let onWindowResize = null;
+  if (cardType === "unit") {
+    const positionCodes = Object.keys(handCard.card.positions);
+    const dropZones = document.querySelectorAll(".position-drop-zone");
+    dropZones.forEach((zone) => {
+      if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
+    });
+    draggedCardHandId = handCard.index;
+    cleanupDropTargets = () => dropZones.forEach((zone) => zone.classList.add("hidden"));
+  } else if (cardType === "skill") {
+    draggedSkillHandId = handCard.index;
+    const opponentContainer = document.querySelector("#opponent-container");
+    opponentContainer.classList.add("skill-drop-active");
+    // veil over the whole opponent side, sized to its page rect so it floats
+    // above the side's content without touching any tooltip containing blocks
+    const overlay = document.querySelector("#skill-drop-overlay");
+    const positionOverlay = () => {
+      const rect = opponentContainer.getBoundingClientRect();
+      overlay.style.left = `${rect.left}px`;
+      overlay.style.top = `${rect.top}px`;
+      overlay.style.width = `${rect.width}px`;
+      overlay.style.height = `${rect.height}px`;
+    };
+    positionOverlay();
+    overlay.classList.remove("hidden");
+    onWindowResize = positionOverlay;
+    cleanupDropTargets = () => {
+      opponentContainer.classList.remove("skill-drop-active");
+      overlay.classList.add("hidden");
+    };
+  } else {
+    draggedEquipmentHandId = handCard.index;
+    const dropTargets = document.querySelectorAll("#you-container .unit-card-horizontal-component");
+    dropTargets.forEach((target) => target.classList.add("equip-drop-active"));
+    cleanupDropTargets = () =>
+      dropTargets.forEach((target) => target.classList.remove("equip-drop-active"));
+  }
+
+  // events
+  const onMouseMove = (event) => {
+    cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
+    cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
+  };
+  const onMouseUp = () => {
+    // remove dragging card
+    document.body.removeChild(cardDrag);
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+    if (onWindowResize) window.removeEventListener("resize", onWindowResize);
+    document.body.classList.remove("no-interaction");
+    cardDiv.classList.remove("invisible");
+    cleanupDropTargets();
+  };
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+  if (onWindowResize) window.addEventListener("resize", onWindowResize);
 };
 
 const renderHands = async (state, socket) => {
@@ -210,46 +291,13 @@ const renderHands = async (state, socket) => {
         isSmall: true,
       });
 
-      // only your own unit cards deploy by dragging onto a position zone
-      if (player !== "you" || handCard.isHidden || handCard.card.type !== "unit") continue;
+      // your own cards drag: units deploy onto position zones, skills play
+      // onto either board, equipments equip onto one of your deployed units
+      if (player !== "you" || handCard.isHidden) continue;
+      const cardType = handCard.card.type;
+      if (cardType !== "unit" && cardType !== "skill" && cardType !== "equipment") continue;
       newDiv.addEventListener("mousedown", (event) => {
-        if (event.button !== 0) return; // left click
-        // create dragging card
-        const cardDrag = newDiv.cloneNode(true);
-        const innerCard = cardDrag.querySelector(".unit-card-vertical-component");
-        if (innerCard) cardDrag.removeChild(innerCard);
-        cardDrag.classList.add("card-dragging");
-        document.body.appendChild(cardDrag);
-        // position dragging card
-        cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
-        cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
-        document.body.classList.add("no-interaction");
-        // hide original card
-        newDiv.classList.add("invisible");
-        // show drop zones for the positions this card can be placed in
-        const positionCodes = Object.keys(handCard.card.positions);
-        const dropZones = document.querySelectorAll(`.position-drop-zone`);
-        dropZones.forEach((zone) => {
-          if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
-        });
-        draggedCardHandId = handCard.index;
-        // events
-        const onMouseMove = (event) => {
-          cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
-          cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
-        };
-        const onMouseUp = () => {
-          // remove dragging card
-          document.body.removeChild(cardDrag);
-          document.removeEventListener("mousemove", onMouseMove);
-          document.removeEventListener("mouseup", onMouseUp);
-          document.body.classList.remove("no-interaction");
-          newDiv.classList.remove("invisible");
-          // hide drop zones
-          dropZones.forEach((zone) => zone.classList.add("hidden"));
-        };
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
+        beginCardDrag(event, newDiv, handCard, cardType);
       });
     }
   }
@@ -414,6 +462,60 @@ const prepareBoard = async (positionData, socket) => {
     }
   }
 
+  // dropping a skill anywhere on the opponent's side plays it
+  document.querySelector("#opponent-container").addEventListener("mouseup", () => {
+    if (draggedSkillHandId === null) return;
+    socket.emit(EVENTS.GAME_ACTION, buildPlaySkillAction(draggedSkillHandId));
+    draggedSkillHandId = null;
+  });
+
+  // dropping an equipment card on one of your deployed units equips it
+  document.querySelector("#you-container").addEventListener("mouseup", (event) => {
+    if (draggedEquipmentHandId === null) return;
+    const unitDiv = event.target.closest(".unit-card-horizontal-component");
+    if (!unitDiv || !unitDiv.dataset.unitId) return;
+    const state = store.state;
+    const unitView = state ? findUnit(state, "you", unitDiv.dataset.unitId) : null;
+    if (!unitView) return;
+    socket.emit(EVENTS.GAME_ACTION, buildEquipEquipmentAction(draggedEquipmentHandId, unitView.id));
+    draggedEquipmentHandId = null;
+  });
+
+  // hovering a deployed unit highlights its position's combat slot
+  for (let player of ["you", "opponent"]) {
+    const sideContainer = document.querySelector(`#${player}-container`);
+    let highlightedSlot = null;
+    const clearHighlight = () => {
+      highlightedSlot?.classList.remove("highlight-available", "highlight-used");
+      highlightedSlot = null;
+    };
+    sideContainer.addEventListener("mouseover", (event) => {
+      const unitDiv = event.target.closest(".unit-card-horizontal-component");
+      if (!unitDiv || !unitDiv.dataset.unitId) return;
+      const state = store.state;
+      const unitView = state ? findUnit(state, player, unitDiv.dataset.unitId) : null;
+      if (!unitView?.placedPositionCode) return;
+      const slot = sideContainer.querySelector(
+        `.combat-slots-container [data-position-code="${unitView.placedPositionCode}"]`
+      );
+      if (!slot || slot === highlightedSlot) return;
+      clearHighlight();
+      slot.classList.add(
+        buildCombatSlotViewModel(state[player], unitView.placedPositionCode).used
+          ? "highlight-used"
+          : "highlight-available"
+      );
+      highlightedSlot = slot;
+    });
+    sideContainer.addEventListener("mouseout", (event) => {
+      const unitDiv = event.target.closest(".unit-card-horizontal-component");
+      if (!unitDiv) return;
+      const relatedUnitDiv = event.relatedTarget?.closest?.(".unit-card-horizontal-component") ?? null;
+      if (relatedUnitDiv === unitDiv) return; // still inside the same unit
+      clearHighlight();
+    });
+  }
+
   // pass button
   const passButtonFrame = document.querySelector(`#you-container .pass-button-frame`);
   passButtonFrame.addEventListener("click", () => {
@@ -460,25 +562,7 @@ const prepareBoard = async (positionData, socket) => {
   // keep the hands aligned when the window resizes
   window.addEventListener("resize", alignHandCards);
 
-  // hand clicks: play skills, arm equipment for targeting
-  const yourHandContainer = document.querySelector(`#you-container .hand-container`);
-  yourHandContainer.addEventListener("click", (event) => {
-    const cardDiv = event.target.closest(".unit-card-vertical-component");
-    if (!cardDiv || cardDiv.dataset.handId === undefined) return;
-    const state = store.state;
-    const handId = Number(cardDiv.dataset.handId);
-    const handCard = state?.you.hand[handId];
-    if (!handCard) return;
-    const model = buildCardViewModel(handCard);
-    if (state.currentTurn !== state.you.username) return; // player actions need your turn
-    if (model.type === "skill") {
-      socket.emit(EVENTS.GAME_ACTION, buildPlaySkillAction(handId));
-    } else if (model.type === "equipment") {
-      setArmedEquipment(armedEquipmentHandId === handId ? null : handId);
-    }
-  });
-
-  // board clicks on your units: equip the armed card, else switch position
+  // board clicks on your units: switch position
   for (let line of ["frontline", "backline"]) {
     const lineContainer = document.querySelector(`#you-container .${line}-container`);
     lineContainer.addEventListener("click", (event) => {
@@ -488,14 +572,9 @@ const prepareBoard = async (positionData, socket) => {
       if (event.target.closest(".unit-card-vertical-component")) return;
       const state = store.state;
       if (!state) return;
-      const unitView = findYourUnit(state, unitDiv.dataset.unitId);
+      const unitView = findUnit(state, "you", unitDiv.dataset.unitId);
       if (!unitView) return;
       const unit = buildUnitViewModel(unitView);
-      if (armedEquipmentHandId !== null) {
-        socket.emit(EVENTS.GAME_ACTION, buildEquipEquipmentAction(armedEquipmentHandId, unit.id));
-        setArmedEquipment(null);
-        return;
-      }
       if (state.currentTurn !== state.you.username) return;
       const codes = Object.keys(unit.positions).filter((code) => code !== unit.placedPositionCode);
       if (codes.length === 0) return;

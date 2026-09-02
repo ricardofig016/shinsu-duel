@@ -2,6 +2,7 @@ import {
   MAX_NORMAL_SHINSU,
   MAX_RECHARGED_SHINSU,
   buildCardViewModel,
+  buildCombatSlotViewModel,
   buildUnitViewModel,
   buildHandCardViewModel,
   buildShinsuViewModel,
@@ -214,6 +215,41 @@ describe("buildRoundViewModel", () => {
   test("marks your own turn", () => {
     const model = buildRoundViewModel({ round: 2, currentTurn: "Alice", you: { username: "Alice" } });
     expect(model.isYourTurn).toBe(true);
+  });
+});
+
+describe("buildCombatSlotViewModel", () => {
+  test("keeps the position code", () => {
+    const model = buildCombatSlotViewModel({ combatSlots: { scout: { available: true } } }, "scout");
+
+    expect(model.code).toBe("scout");
+    expect(model.used).toBe(false);
+  });
+
+  test("marks a consumed slot as used", () => {
+    const model = buildCombatSlotViewModel({ combatSlots: { scout: { available: false } } }, "scout");
+
+    expect(model.used).toBe(true);
+  });
+
+  test("treats a slot missing from the state as available", () => {
+    const model = buildCombatSlotViewModel({ combatSlots: {} }, "scout");
+
+    expect(model.used).toBe(false);
+  });
+
+  test("treats missing combat slot state as available", () => {
+    const model = buildCombatSlotViewModel({}, "scout");
+
+    expect(model.used).toBe(false);
+  });
+
+  test("rejects a missing player state", () => {
+    expect(() => buildCombatSlotViewModel(null, "scout")).toThrow(TypeError);
+  });
+
+  test("rejects an empty position code", () => {
+    expect(() => buildCombatSlotViewModel({ combatSlots: {} }, "")).toThrow(TypeError);
   });
 });
 

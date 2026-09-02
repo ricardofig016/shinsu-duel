@@ -18,8 +18,10 @@
             <div class="deck-container"></div>
           </div>
           <div class="lighthouse-container container-horizontal">
-            <img src="/assets/images/lighthouses/red3.png" alt="lighthouse" />
-            <h1>0</h1>
+            <div class="lighthouse-token">
+              <img src="/assets/images/lighthouses/red2.png" alt="lighthouse" />
+              <h1>0</h1>
+            </div>
           </div>
         </div>
         <div class="board-container">
@@ -60,18 +62,22 @@
           </div>
         </div>
       </div>
-      <hr />
-      <div id="round-indicator" class="container-horizontal">
-        <h2>Round 1</h2>
+      <div id="round-divider">
+        <hr />
+        <div id="round-indicator" class="container-vertical">
+          <h2 id="round-number">1</h2>
+          <span id="round-label">Round</span>
+        </div>
       </div>
-      <hr />
       <!-- you -->
       <div id="you-container" class="side-container container-horizontal">
         <div class="combat-slots-container container-vertical"></div>
         <div class="deck-lighthouse-container container-vertical">
           <div class="lighthouse-container container-horizontal">
-            <img src="/assets/images/lighthouses/blue3.png" alt="lighthouse" />
-            <h1>0</h1>
+            <div class="lighthouse-token">
+              <img src="/assets/images/lighthouses/blue2.png" alt="lighthouse" />
+              <h1>0</h1>
+            </div>
           </div>
           <div class="deck-outer-container">
             <div class="deck-container"></div>
@@ -158,6 +164,9 @@
         <p id="game-over-detail"></p>
       </div>
     </div>
+
+    <!-- skill drop veil: covers the whole opponent side while dragging a skill -->
+    <div id="skill-drop-overlay" class="hidden"></div>
 
     <!-- socket.io client library -->
     <script src="/socket.io/socket.io.js"></script>

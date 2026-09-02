@@ -139,6 +139,23 @@ export function buildRoundViewModel(state) {
 }
 
 /**
+ * One combat slot icon state. Slots the player state marks unavailable have
+ * been consumed this round; unknown slots count as available.
+ */
+export function buildCombatSlotViewModel(playerState, code) {
+  if (!playerState || typeof playerState !== "object") {
+    throw new TypeError("buildCombatSlotViewModel needs a player state.");
+  }
+  if (typeof code !== "string" || code === "") {
+    throw new TypeError("buildCombatSlotViewModel needs a position code.");
+  }
+  return {
+    code,
+    used: playerState.combatSlots?.[code]?.available === false,
+  };
+}
+
+/**
  * The fire charge panel state. The core Hwayeomsa ability needs one of your
  * field units carrying the `hwayeomsa` attribute; charges accumulate on your
  * player state.
