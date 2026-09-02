@@ -13,7 +13,6 @@ export default class Card {
     this.name = cardData.name;
     this.series = cardData.series ?? null;
     this.sobriquet = cardData.sobriquet || null;
-    this.rarity = cardData.rarity;
     this.maxHp = cardData.hp ?? null;
     this.entryHp = cardData.entryHp ?? null; // unit creation HP; null = enter at maxHp
     this.cost = cardData.cost;
@@ -127,7 +126,6 @@ export default class Card {
       line: this.line,
       name: this.name,
       sobriquet: this.sobriquet,
-      rarity: this.rarity,
       maxHp: this.maxHp,
       entryHp: this.entryHp,
       cost: this.cost,

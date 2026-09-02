@@ -130,7 +130,6 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
         "type",
         "name",
         "sobriquet",
-        "rarity",
         "maxHp",
         "cost",
         "visible",
@@ -145,6 +144,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
       });
       expect(state.you.hand[0]).toHaveProperty("id");
       expect(state.you.hand[0]).toHaveProperty("traits");
+      expect(state.you.hand[0]).not.toHaveProperty("rarity");
     }
 
     // Shinsu structure
