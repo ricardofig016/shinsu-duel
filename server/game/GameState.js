@@ -473,6 +473,7 @@ export default class GameState {
 
     return {
       combatSlotCodes: opponentState.combatSlotCodes,
+      combatSlots: opponentState.combatSlots,
       deckSize: opponentState.deck.length,
       lighthouses: opponentState.lighthouses,
       field: {

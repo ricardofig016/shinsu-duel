@@ -1,4 +1,5 @@
 import GameState from "../../GameState.js";
+import CombatSlotService from "../../services/CombatSlotService.js";
 import SeededRng from "../../utils/SeededRng.js";
 import { advanceToRound, createLegalDeck, deployUnit, expectShinsuState, getCardIdByName, setupGameWithHands, cards } from "../utils.js";
 
@@ -67,6 +68,15 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
     expect(game.getClientState(secondPlayer).opponent.username).toBe(firstPlayer);
   });
 
+  test("opponent view exposes combat slot availability", () => {
+    const opponentUsername = game.getClientState(firstPlayer).opponent.username;
+    CombatSlotService.consume(game.playerStates[opponentUsername], "fisherman");
+
+    const view = game.getClientState(firstPlayer);
+    expect(view.opponent.combatSlots).toEqual(game.playerStates[opponentUsername].combatSlots);
+    expect(view.opponent.combatSlots.fisherman).toEqual({ available: false });
+  });
+
   test("getClientState returns correct structure", () => {
     const state = game.getClientState(firstPlayer);
 
@@ -82,6 +92,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
     // 'you' and 'opponent' should have expected keys
     [
       "combatSlotCodes",
+      "combatSlots",
       "deckSize",
       "lighthouses",
       "field",
