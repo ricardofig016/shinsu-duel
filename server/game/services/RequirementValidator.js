@@ -6,6 +6,13 @@
  * Unknown patterns throw — no silent pass-through.
  *
  * Validation happens BEFORE cost deduction to prevent partial state.
+ *
+ * Target requirements (`target is an ...`) validate in two modes:
+ * - With an explicit `ctx.targetUnit` (equipment attachment), the named unit
+ *   is checked against the source side.
+ * - Without one (skill/ability plays, where no target exists at validation
+ *   time — it is chosen through target resolution after the play), they
+ *   require that a legal target exists on the relevant side.
  */
 
 // ── Field helpers ───────────────────────────────────────────────────────────
@@ -53,10 +60,14 @@ function checkDeployedAs(text, ctx) {
 
 function checkTargetAlly(text, ctx) {
   if (!text.includes("target is an ally")) return false;
-  if (!ctx.targetUnit || !ctx.sourceUnit) {
-    throw new Error("Requirement not met: target must be an ally");
+  if (!ctx.targetUnit) {
+    if (allOwnUnits(ctx.username, ctx.gameState).length === 0) {
+      throw new Error("Requirement not met: need an allied unit on your board");
+    }
+    return true;
   }
-  if (ctx.targetUnit.owner !== ctx.sourceUnit.owner) {
+  const sourceOwner = ctx.sourceUnit?.owner ?? ctx.username;
+  if (ctx.targetUnit.owner !== sourceOwner) {
     throw new Error("Requirement not met: target must be an ally");
   }
   return true;

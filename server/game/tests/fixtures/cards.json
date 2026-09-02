@@ -3367,6 +3367,27 @@
   },
   "10080": {
     "cardId": 10080,
+    "type": "skill",
+    "name": "Test Target Ally Skill",
+    "cost": 1,
+    "deckConstraints": [],
+    "requirements": [
+      "target is an ally"
+    ],
+    "effects": [
+      {
+        "type": "give_condition",
+        "condition": "poisoned",
+        "amount": 1,
+        "target": {
+          "side": "ally"
+        },
+        "raw": "give Poisoned 1"
+      }
+    ]
+  },
+  "10081": {
+    "cardId": 10081,
     "type": "equipment",
     "name": "Test Thorn",
     "cost": 0,
@@ -3415,8 +3436,8 @@
       }
     ]
   },
-  "10081": {
-    "cardId": 10081,
+  "10082": {
+    "cardId": 10082,
     "type": "equipment",
     "name": "Test Thorn Fragment I",
     "series": "thorn-fragment",
@@ -3471,8 +3492,8 @@
       }
     ]
   },
-  "10082": {
-    "cardId": 10082,
+  "10083": {
+    "cardId": 10083,
     "type": "equipment",
     "name": "Test Thorn Fragment II",
     "series": "thorn-fragment",
@@ -3527,8 +3548,8 @@
       }
     ]
   },
-  "10083": {
-    "cardId": 10083,
+  "10084": {
+    "cardId": 10084,
     "type": "equipment",
     "name": "Test Thorn Fragment III",
     "series": "thorn-fragment",
@@ -3583,8 +3604,8 @@
       }
     ]
   },
-  "10084": {
-    "cardId": 10084,
+  "10085": {
+    "cardId": 10085,
     "type": "equipment",
     "name": "Test Thorn Fragment IV",
     "series": "thorn-fragment",
@@ -3639,8 +3660,8 @@
       }
     ]
   },
-  "10085": {
-    "cardId": 10085,
+  "10086": {
+    "cardId": 10086,
     "type": "skill",
     "name": "Test Thunder Baang",
     "cost": 1,
@@ -3663,8 +3684,8 @@
       }
     ]
   },
-  "10086": {
-    "cardId": 10086,
+  "10087": {
+    "cardId": 10087,
     "type": "unit",
     "name": "Test Trait Unit",
     "cost": 1,
@@ -3748,8 +3769,8 @@
     "abilities": [],
     "passives": []
   },
-  "10087": {
-    "cardId": 10087,
+  "10088": {
+    "cardId": 10088,
     "type": "skill",
     "name": "Test Unreachable Skill",
     "cost": 4,
@@ -3773,8 +3794,8 @@
       }
     ]
   },
-  "10088": {
-    "cardId": 10088,
+  "10089": {
+    "cardId": 10089,
     "type": "unit",
     "name": "Test Water Stadium",
     "cost": 2,
@@ -3794,8 +3815,8 @@
     "abilities": [],
     "passives": []
   },
-  "10089": {
-    "cardId": 10089,
+  "10090": {
+    "cardId": 10090,
     "type": "unit",
     "name": "Test Water Stadium Two",
     "cost": 2,
@@ -3815,8 +3836,8 @@
     "abilities": [],
     "passives": []
   },
-  "10090": {
-    "cardId": 10090,
+  "10091": {
+    "cardId": 10091,
     "type": "unit",
     "name": "Test Yeo Goseng",
     "cost": 1,

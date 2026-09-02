@@ -44,6 +44,22 @@ describe("RequirementValidator", () => {
     ).toThrow(/must be an ally/i);
   });
 
+  test("target is an ally — passes without an explicit target when an allied unit is deployed", () => {
+    game.round = 5;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 5, recharged: 0 };
+    game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" } });
+
+    expect(() =>
+      RequirementValidator.validate(["target is an ally"], { gameState: game, username: "Alice" })
+    ).not.toThrow();
+  });
+
+  test("target is an ally — throws without an explicit target when the board is empty", () => {
+    expect(() =>
+      RequirementValidator.validate(["target is an ally"], { gameState: game, username: "Alice" })
+    ).toThrow(/need an allied unit on your board/i);
+  });
+
   // ── New patterns ──────────────────────────────────────────────────────────
 
   test("specific unit name on board — passes when present", () => {
