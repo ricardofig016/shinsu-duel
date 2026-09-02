@@ -83,7 +83,7 @@ const hidePositionChooser = () => {
 const alignHandCards = () => {
   document.querySelectorAll(".hand-container").forEach((handContainer) => {
     const handContainerWidth = window.innerWidth - handContainer.getBoundingClientRect().left;
-    const cards = handContainer.querySelectorAll(".unit-card-vertical-component");
+    const cards = handContainer.querySelectorAll(".card-vertical-component");
     if (cards.length === 0) return;
     const cardWidth = cards[0].offsetWidth;
     if (cards.length * cardWidth < handContainerWidth) handContainer.style.justifyContent = "center";
@@ -149,9 +149,9 @@ const renderDecks = async (state) => {
     const cardAmount = Math.min(state[player].deckSize, maxDeckSize);
     for (let i = 0; i < cardAmount; i++) {
       const newDiv = document.createElement("div");
-      newDiv.classList.add("unit-card-vertical-component", "deck-card");
+      newDiv.classList.add("card-vertical-component", "deck-card");
       deckContainer.appendChild(newDiv);
-      await loadComponent(newDiv, "unit-card-vertical", {});
+      await loadComponent(newDiv, "card-vertical", {});
       newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
       newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
       if (i === cardAmount - 1)
@@ -204,7 +204,7 @@ const beginCardDrag = (event, cardDiv, handCard, cardType) => {
   if (event.button !== 0) return; // left click
   // create dragging card
   const cardDrag = cardDiv.cloneNode(true);
-  const innerCard = cardDrag.querySelector(".unit-card-vertical-component");
+  const innerCard = cardDrag.querySelector(".card-vertical-component");
   if (innerCard) cardDrag.removeChild(innerCard);
   cardDrag.classList.add("card-dragging");
   document.body.appendChild(cardDrag);
@@ -282,11 +282,11 @@ const renderHands = async (state, socket) => {
     for (let i = 0; i < state[player].hand.length; i++) {
       const handCard = buildHandCardViewModel(state[player].hand[i], i);
       const newDiv = document.createElement("div");
-      newDiv.classList.add("unit-card-vertical-component");
+      newDiv.classList.add("card-vertical-component");
       if (handCard.isHidden) newDiv.classList.add("no-focus");
       if (player === "you") newDiv.dataset.handId = i;
       handContainer.appendChild(newDiv);
-      await loadComponent(newDiv, "unit-card-vertical", {
+      await loadComponent(newDiv, "card-vertical", {
         card: handCard.card,
         isSmall: true,
       });
@@ -540,7 +540,7 @@ const prepareBoard = async (positionData, socket) => {
     handContainer.addEventListener("mousemove", (event) => {
       let closestCard = null;
       let closestDistance = Infinity;
-      handContainer.querySelectorAll(".unit-card-vertical-component").forEach((card) => {
+      handContainer.querySelectorAll(".card-vertical-component").forEach((card) => {
         card.classList.remove("focused");
         const cardRect = card.getBoundingClientRect();
         const cardCenterX = cardRect.left + cardRect.width / 2;
@@ -554,7 +554,7 @@ const prepareBoard = async (positionData, socket) => {
     });
     handContainer.addEventListener("mouseleave", () => {
       handContainer
-        .querySelectorAll(".unit-card-vertical-component")
+        .querySelectorAll(".card-vertical-component")
         .forEach((card) => card.classList.remove("focused"));
     });
   }
@@ -569,7 +569,7 @@ const prepareBoard = async (positionData, socket) => {
       const unitDiv = event.target.closest(".unit-card-horizontal-component");
       if (!unitDiv || !unitDiv.dataset.unitId) return;
       // clicks on an expanded card view are not board interactions
-      if (event.target.closest(".unit-card-vertical-component")) return;
+      if (event.target.closest(".card-vertical-component")) return;
       const state = store.state;
       if (!state) return;
       const unitView = findUnit(state, "you", unitDiv.dataset.unitId);

@@ -50,9 +50,9 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   cardElement.addEventListener("contextmenu", async (event) => {
     event.preventDefault();
     const cardComponent = document.createElement("div");
-    cardComponent.classList.add("unit-card-vertical-component");
+    cardComponent.classList.add("card-vertical-component");
     cardElement.appendChild(cardComponent);
-    await loadComponent(cardComponent, "unit-card-vertical", {
+    await loadComponent(cardComponent, "card-vertical", {
       unit,
       isSmall: false,
       onAbilityClick: interactive ? onAbilityClick : null,

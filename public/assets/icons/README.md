@@ -5,7 +5,28 @@ All icons in this folder are from https://www.flaticon.com/
 
 Icons are **512×512 PNG** files with transparent backgrounds.
 
-## Traits (16 total — `traits/`)
+## Card Types (4 total — `types/`)
+
+Letter icons shown before a card's name; landmarks are units but carry their
+own letter.
+
+- equipment
+- landmark
+- skill
+- unit
+
+## Header Icons (5 total — `other/`)
+
+Feature icons rendered in a card's name row; each is hoverable and explains
+itself through a tooltip.
+
+- ellipsis (traits/conditions strip overflow)
+- evolve
+- ignition
+- passive
+- requirements
+
+## Traits (18 total — `traits/`)
 
 Traits are color coded per RULES.md:
 
@@ -21,6 +42,7 @@ Traits are color coded per RULES.md:
 - last-one-standing (yellow)
 - lethal (orange)
 - pierce (orange)
+- placeholder (fallback icon)
 - reflect (yellow)
 - regenerate (blue)
 - resilient (yellow)
@@ -31,7 +53,7 @@ Traits are color coded per RULES.md:
 - undying (yellow)
 - vengeful (orange)
 
-## Conditions (11 total — `conditions/`)
+## Conditions (13 total — `conditions/`)
 
 Conditions are color coded per RULES.md:
 
@@ -52,13 +74,14 @@ Conditions are color coded per RULES.md:
 - stunned (purple)
 - weak (red)
 
-## Positions (8 total — `positions/`)
+## Positions (10 total — `positions/`)
 
 - backline-shinheuh
 - fisherman
 - frontline-shinheuh
 - landmark
 - light-bearer
+- placeholder (fallback icon)
 - scout
 - shinheuh
 - spear-bearer
@@ -75,3 +98,9 @@ Conditions are color coded per RULES.md:
 - living-ignition-weapon
 - red-witch
 - silver-dwarf
+
+## Shinsu States (3 total — `shinsu-states/`)
+
+- available
+- spent
+- unavailable

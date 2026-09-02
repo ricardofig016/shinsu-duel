@@ -1,0 +1,334 @@
+.card-vertical-frame {
+  width: 30em;
+  height: 45em;
+  padding: 0.5em;
+  border-radius: 4px;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  overflow: hidden;
+  cursor: default;
+  transition: scale 0.1s, transform 0.1s;
+  /* Contain positioned descendants (artwork trapezoids, overlays) in this
+     card's stacking context; without it, artworks paint above neighboring
+     cards in the overlapping hand fan. */
+  isolation: isolate;
+}
+
+.card-vertical-frame.card-vertical-big {
+  position: absolute;
+  bottom: 50%;
+  right: 50%;
+  transform: translate(50%, 50%);
+  z-index: 3;
+}
+
+.card-vertical-frame.card-vertical-small {
+  font-size: 0.3rem;
+}
+
+.card-vertical-frame.card-vertical-small:not(.no-hover):hover {
+  scale: 1.6;
+}
+
+#opponent-container .card-vertical-frame.card-vertical-small:not(.no-hover):hover {
+  transform: translateY(3.5rem);
+}
+
+#you-container .card-vertical-frame.card-vertical-small:not(.no-hover):hover {
+  transform: translateY(-3.5rem);
+}
+
+.card-vertical {
+  width: 100%;
+  height: 100%;
+  padding: 1em;
+  gap: 0.5em;
+  border-radius: 4px;
+  justify-content: space-between;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.card-vertical-title {
+  height: 3em;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5em;
+}
+
+.card-vertical-type-letter {
+  height: 1.45em;
+  flex: 0 0 auto;
+}
+
+.card-vertical-name {
+  font-size: 2.4em;
+  margin: 0 0.2em 0 0;
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: top;
+  text-align: left;
+}
+
+.card-vertical-header-icons {
+  height: 100%;
+  gap: 0.3em;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.card-vertical-header-icons img {
+  height: 2.4em;
+  flex: 0 0 auto;
+}
+
+.card-vertical-artwork-frame {
+  width: 100%;
+  flex: 0 0 42.86%;
+  padding: 0.3em;
+  border-radius: 4px;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.card-vertical-artwork {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background-image: url("/assets/images/placeholder.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-vertical-trapezoid {
+  position: absolute;
+  left: 0.3em;
+  width: calc(100% - 0.6em);
+  height: 9%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-vertical-trapezoid span {
+  font-size: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+  text-align: center;
+}
+
+.card-vertical-rank-trapezoid {
+  top: 0.3em;
+  /* wide (base) edge = 2/3 of the artwork, flush with the artwork top;
+     narrow edge = 1/2 of the artwork */
+  clip-path: polygon(16.67% 0, 83.33% 0, 75% 100%, 25% 100%);
+}
+
+.card-vertical-affiliations-trapezoid {
+  bottom: 0.3em;
+  clip-path: polygon(25% 0, 75% 0, 83.33% 100%, 16.67% 100%);
+}
+
+.card-vertical-affiliations-tooltip-frame.tooltip {
+  position: absolute;
+  top: calc(100% - 0.3em);
+  left: 50%;
+  width: 66.67%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 0.3em;
+  border-radius: 4px;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-vertical-affiliations-tooltip {
+  width: 100%;
+  gap: 0;
+}
+
+.card-vertical-affiliations-tooltip p {
+  margin: 0.3em;
+  text-align: center;
+}
+
+.card-vertical-strips {
+  width: 100%;
+  height: 7%;
+  gap: 0.5em;
+}
+
+.card-vertical-traits-frame,
+.card-vertical-conditions-frame {
+  height: 100%;
+  padding: 0.3em;
+  flex: 1;
+  border-radius: 4px;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-vertical-traits,
+.card-vertical-conditions {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 1em;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-vertical-traits img,
+.card-vertical-conditions img {
+  height: 70%;
+}
+
+.card-vertical-traits-tooltip-frame,
+.card-vertical-conditions-tooltip-frame {
+  width: 100%;
+  scale: 1.05;
+  padding: 0.3em;
+  border-radius: 4px;
+  top: 0.5em;
+  background-image: url("/assets/images/card/frame.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-vertical-traits-tooltip,
+.card-vertical-conditions-tooltip {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  padding: 0.3em;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  gap: 0;
+}
+
+.card-vertical-traits-tooltip-row,
+.card-vertical-conditions-tooltip-row {
+  flex: 1;
+  width: 100%;
+  padding: 0.3em 0;
+  gap: 1em;
+  justify-content: center;
+}
+
+.card-vertical-traits-tooltip-row img,
+.card-vertical-conditions-tooltip-row img {
+  height: 1.56em;
+}
+
+.card-vertical-text {
+  width: 100%;
+  flex: 1;
+  gap: 0.5em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Let the flex layout keep this list at its allocated share of the card;
+     without it, min-height: auto pins the list to its content height and
+     the overflow check in loadText can never fire. */
+  min-height: 0;
+}
+
+.card-vertical-text li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  transition: scale 0.1s;
+  /* Keep natural content height: the global `ul li { flex-grow: 1 }` plus
+     flex-shrink would compress the lis to the list box and clip their text
+     while scrollHeight reports no overflow, defeating the font fit. */
+  flex: 0 0 auto;
+}
+
+.card-vertical-text li:first-child {
+  /* Center short content in the text box; auto margins collapse when the
+     content overflows, keeping the clip at the bottom edge only. */
+  margin-top: auto;
+}
+
+.card-vertical-text li:last-child {
+  margin-bottom: auto;
+}
+
+.card-vertical-text li.clickable:hover {
+  scale: 1.08;
+}
+
+.card-vertical-text li.card-vertical-granted-ability {
+  font-style: italic;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+}
+
+.card-vertical-stats {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.card-vertical-shinsu,
+.card-vertical-hp {
+  width: 3em;
+  height: 3em;
+  background-size: contain;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2em;
+}
+
+.card-vertical-shinsu {
+  background-image: url("/assets/images/card/shinsu-frame.png");
+}
+
+.card-vertical-hp {
+  background-image: url("/assets/images/card/hp-frame.png");
+}
+
+.card-vertical-positions {
+  flex: 1;
+  height: 70%;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.card-vertical-positions li {
+  height: 100%;
+  background-image: url("/assets/images/placeholder.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.card-vertical-positions li.chosen-position {
+  outline: 2px solid rgba(255, 255, 160, 0.9);
+  border-radius: 0.4em;
+}

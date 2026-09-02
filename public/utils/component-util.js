@@ -1,13 +1,13 @@
 import loadNavbar from "/components/navbar/script.js";
 import loadTooltip from "/components/tooltip/script.js";
 import loadUnitCardHorizontal from "/components/unit-card-horizontal/script.js";
-import loadUnitCardVertical from "/components/unit-card-vertical/script.js";
+import loadCardVertical from "/components/card-vertical/script.js";
 
 const components = {
   navbar: { load: loadNavbar },
   tooltip: { load: loadTooltip },
   "unit-card-horizontal": { load: loadUnitCardHorizontal },
-  "unit-card-vertical": { load: loadUnitCardVertical },
+  "card-vertical": { load: loadCardVertical },
 };
 
 export const loadComponent = async (container, component, data = null) => {
