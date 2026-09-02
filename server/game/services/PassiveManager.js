@@ -167,9 +167,15 @@ export default class PassiveManager {
    * `Passive#<unitId>#<index>`). Call after unsubscribing the outgoing card's
    * handlers so the revoke events cannot re-trigger them, and before the
    * incoming card re-registers.
+   *
+   * Triggered passives are skipped: their effects are one-shot applications of
+   * a resolved event, not standing grants, so what they applied (conditions,
+   * traits, ...) must survive the swap — RULES.md preserves effects across
+   * evolution.
    */
   revokeGrants(unitId, passives, gameState) {
     for (let index = 0; index < passives.length; index++) {
+      if (this._triggerObjects(passives[index]).length > 0) continue;
       ModifierService.revokeBySource(gameState, IdFactory.passiveSource(unitId, index));
     }
   }

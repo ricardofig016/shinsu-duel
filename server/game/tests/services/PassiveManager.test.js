@@ -380,6 +380,25 @@ describe("PassiveManager", () => {
     expect(unit.card.name).toBe("Test Evolve Unit");
   });
 
+  test("transformUnit keeps what a triggered passive applied during the evolution", () => {
+    const game = createGame();
+    game.round = 10;
+    game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
+    const evo = putInHand(game, "Alice", "Test Skill Evo Unit");
+
+    const handIndex = game.playerStates.Alice.hand.indexOf(evo);
+    const { unit } = LifecycleEngine.deployUnit(game, "Alice", handIndex, "fisherman");
+    expect(game.modifierStack.getEffective(unit.id, "trait", "bloodthirsty")).toBe(0);
+
+    // The base form's on-evolve passive fires on the UNIT_EVOLVING announcement;
+    // its grant must survive the swap to the next stage (RULES.md preserves
+    // effects across evolution).
+    LifecycleEngine.transformUnit(game, unit, getCardIdByName("Test Skill Evo Unit II"));
+
+    expect(unit.card.name).toBe("Test Skill Evo Unit II");
+    expect(game.modifierStack.getEffective(unit.id, "trait", "bloodthirsty")).toBe(1);
+  });
+
   test("destroyUnit revokes always-on grants the source holds on other units", () => {
     const game = createGame();
     game.round = 10;
