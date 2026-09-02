@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shinsu Duel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/pages/cards/styles.css" />
+  </head>
+  <body>
+    <div id="navbar-component"></div>
+
+    <div class="allow-scroll" id="cards-page-container">
+      <div id="cards-toolbar">
+        <input type="search" id="card-search" placeholder="Search cards..." autocomplete="off" />
+        <select id="filter-type">
+          <option value="">All types</option>
+        </select>
+        <select id="filter-kind">
+          <option value="">All kinds</option>
+        </select>
+        <select id="filter-rank">
+          <option value="">All ranks</option>
+        </select>
+        <input type="number" id="cost-min" placeholder="Min cost" min="0" />
+        <input type="number" id="cost-max" placeholder="Max cost" min="0" />
+        <select id="sort-select"></select>
+      </div>
+
+      <div id="cards-facets">
+        <fieldset id="filter-affiliations">
+          <legend>Affiliations</legend>
+          <div class="facet-options"></div>
+        </fieldset>
+        <fieldset id="filter-traits">
+          <legend>Traits</legend>
+          <div class="facet-options"></div>
+        </fieldset>
+        <fieldset id="filter-positions">
+          <legend>Positions</legend>
+          <div class="facet-options"></div>
+        </fieldset>
+      </div>
+
+      <div id="cards-sections">
+        <p id="cards-error" class="hidden"></p>
+
+        <section class="cards-section" id="cards-section">
+          <h2>All cards <span id="cards-count"></span></h2>
+          <div class="cards-grid" id="cards-grid"></div>
+        </section>
+
+        <section class="cards-section hidden" id="test-cards-section">
+          <h2>Test cards <span id="test-cards-count"></span></h2>
+          <div class="cards-grid" id="test-cards-grid"></div>
+        </section>
+
+        <section class="cards-section hidden" id="artworks-section">
+          <h2>Artworks without a card <span id="artworks-count"></span></h2>
+          <div class="cards-grid" id="artworks-grid"></div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="/pages/cards/script.js"></script>
+  </body>
+</html>

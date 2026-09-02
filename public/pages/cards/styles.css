@@ -1,0 +1,106 @@
+#cards-page-container {
+  padding: 0 2rem 6rem 2rem;
+  max-height: 100vh;
+}
+
+#cards-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+
+#cards-toolbar input[type="search"],
+#cards-toolbar input[type="number"],
+#cards-toolbar select {
+  all: unset;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  color: #222222;
+}
+
+#cards-toolbar input[type="search"] {
+  flex: 1 1 16rem;
+}
+
+#cards-toolbar input[type="number"] {
+  width: 6rem;
+}
+
+#sort-select {
+  margin-left: auto;
+}
+
+#cards-facets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+#cards-facets fieldset {
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem;
+  max-width: 24rem;
+}
+
+.facet-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  max-height: 8rem;
+  overflow-y: auto;
+}
+
+.facet-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cards-section {
+  padding-bottom: 2rem;
+}
+
+.cards-section h2 {
+  font-size: 1.6rem;
+  margin: 0 0 0.75rem 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cards-section.collapsed .cards-grid {
+  display: none;
+}
+
+.cards-section h2 span {
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 1rem;
+  color: #555555;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  justify-items: center;
+}
+
+/* The right-click zoom copy is absolutely positioned by the component; on
+   this page it must center on the viewport instead of the scrolled content,
+   which keeps it visible on tall grids. Ancestors stay unpositioned so
+   tooltips (pageX/pageY) keep landing under the pointer. */
+#cards-sections .card-vertical-frame.card-vertical-big {
+  position: fixed;
+}
+
+#cards-error {
+  padding: 2rem 0;
+  color: #a02020;
+}
