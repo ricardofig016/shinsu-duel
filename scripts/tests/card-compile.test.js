@@ -706,3 +706,78 @@ deckConstraints: []
     expect(orphans).toEqual([]);
   });
 });
+
+describe("card-compile evolution stage linking", () => {
+  let tmpDir;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "card-compile-evolve-"));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  function unitYaml(name, evolveEntries) {
+    return `type: unit
+name: ${name}
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives: []
+deckConstraints: []
+evolve:
+${evolveEntries.map((entry) => `  - "${entry}"`).join("\n")}
+`;
+  }
+
+  async function writeChain() {
+    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["when i am deployed"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a_ii.yml"), unitYaml("A Unit II", ["when i am deployed"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a_iii.yml"), unitYaml("A Unit III", []), "utf-8");
+  }
+
+  test("links a 3-card chain: A Unit -> A Unit II -> A Unit III", async () => {
+    await writeChain();
+
+    const { cards } = await compileCards({ cardsDirectory: tmpDir });
+    const byName = Object.fromEntries(Object.values(cards).map((card) => [card.name, card]));
+
+    expect(byName["A Unit"].evolveInto.cardId).toBe(byName["A Unit II"].cardId);
+    expect(byName["A Unit II"].evolvedFrom).toBe(byName["A Unit"].cardId);
+    expect(byName["A Unit II"].evolveInto.cardId).toBe(byName["A Unit III"].cardId);
+    expect(byName["A Unit III"].evolvedFrom).toBe(byName["A Unit II"].cardId);
+    expect(byName["A Unit III"].evolveInto).toBeUndefined();
+    expect(byName["A Unit"].evolvedFrom).toBeUndefined();
+  });
+
+  test("throws naming the expected stage card when the target is missing", async () => {
+    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["when i am deployed"]), "utf-8");
+
+    await expect(compileCards({ cardsDirectory: tmpDir }))
+      .rejects.toThrow(/Evolution target "A Unit II" for "A Unit" does not exist/);
+  });
+
+  test("throws when the stage target exists but is not a unit", async () => {
+    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["when i am deployed"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a_ii.yml"), `type: skill
+name: A Unit II
+cost: 1
+deckConstraints: []
+effects:
+  - type: deal_damage
+    amount: 2
+    target: { side: enemy }
+    raw: "deal 2 to an enemy"
+`, "utf-8");
+
+    await expect(compileCards({ cardsDirectory: tmpDir }))
+      .rejects.toThrow(/must be a unit/);
+  });
+});

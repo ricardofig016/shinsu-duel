@@ -9,7 +9,7 @@ describe("normalizeName (canonical card slug)", () => {
     // These three names pin the artwork contract: "<slug>.png" on disk must
     // equal "<slug>.yml" for the same card.
     expect(normalizeName("Twenty-Fifth Baam")).toBe("twenty_fifth_baam");
-    expect(normalizeName("Karaka - Evolved")).toBe("karaka_evolved");
+    expect(normalizeName("Karaka II")).toBe("karaka_ii");
     expect(normalizeName("Narumada - Ignited")).toBe("narumada_ignited");
   });
 

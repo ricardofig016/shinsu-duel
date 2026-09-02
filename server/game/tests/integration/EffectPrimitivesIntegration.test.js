@@ -80,9 +80,9 @@ describe("effect primitives via real cards", () => {
   });
 
   test("Evan Edrok forces an enemy to switch position", () => {
-    const game = setupGameWithHands({ Alice: ["Test Switch Position Unit"], Bob: ["Test Multi Position - Evolved"] });
+    const game = setupGameWithHands({ Alice: ["Test Switch Position Unit"], Bob: ["Test Multi Position II"] });
     const evan = deployUnit(game, "Alice", "Test Switch Position Unit", "scout");
-    const khunRan = deployUnit(game, "Bob", "Test Multi Position - Evolved", "fisherman");
+    const khunRan = deployUnit(game, "Bob", "Test Multi Position II", "fisherman");
 
     useAbility(game, "Alice", evan.id, "1");
 

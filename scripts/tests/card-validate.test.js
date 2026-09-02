@@ -1,4 +1,4 @@
-import { validateCard } from "../card-validate.js";
+import { validateCard, validateCrossReferences } from "../card-validate.js";
 
 // A schema-clean standard unit, mutated per test to exercise one kind rule.
 function baseUnit(overrides = {}) {
@@ -130,5 +130,61 @@ describe("card-validate kind rules", () => {
       deckConstraints: [{ type: "unreachable", raw: "i am Unreachable" }],
     });
     expect(errorsFor(card)).toEqual([]);
+  });
+});
+
+describe("card-validate cross-references (evolution stages)", () => {
+  function entry(card, filename = `${card.name.toLowerCase().replace(/\s+/g, "_")}.yml`) {
+    return { filename, relativePath: `data/cards/${filename}`, card };
+  }
+
+  function run(allCards) {
+    const failuresByFile = new Map();
+    validateCrossReferences(allCards, failuresByFile);
+    return failuresByFile;
+  }
+
+  test("accepts a unit whose stage target exists", () => {
+    const failures = run([
+      entry({ type: "unit", name: "A Unit", evolve: ["when i am deployed"] }),
+      entry({ type: "unit", name: "A Unit II", evolve: [] }),
+    ]);
+    expect(failures.size).toBe(0);
+  });
+
+  test("rejects an evolve target that does not exist", () => {
+    const failures = run([
+      entry({ type: "unit", name: "A Unit", evolve: ["when i am deployed"] }),
+    ]);
+    const errors = [...failures.values()].flat();
+    expect(errors).toContain(`evolve: target card "A Unit II" does not exist`);
+  });
+
+  test("rejects an evolve target that is not a unit", () => {
+    const failures = run([
+      entry({ type: "unit", name: "A Unit", evolve: ["when i am deployed"] }),
+      entry({ type: "skill", name: "A Unit II", cost: 1, effects: [] }),
+    ]);
+    const errors = [...failures.values()].flat();
+    expect(errors).toContain(`evolve: target card "A Unit II" does not exist`);
+  });
+
+  test("rejects a stage-marked unit whose parent does not exist", () => {
+    const failures = run([
+      entry({ type: "unit", name: "A Unit II", evolve: [] }),
+    ]);
+    const errors = [...failures.values()].flat();
+    expect(errors).toContain(
+      `name: "A Unit II" carries an evolution stage marker but "A Unit" does not exist`
+    );
+  });
+
+  test("rejects duplicate card names", () => {
+    const failures = run([
+      entry({ type: "unit", name: "A Unit", evolve: [] }, "a.yml"),
+      entry({ type: "unit", name: "A Unit", evolve: [] }, "a_copy.yml"),
+    ]);
+    const errors = [...failures.values()].flat();
+    expect(errors.some((e) => e.includes(`duplicate card name "A Unit"`))).toBe(true);
   });
 });

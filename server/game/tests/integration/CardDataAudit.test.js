@@ -12,6 +12,7 @@ import dslCatalog from "../../../../schemas/dsl-catalog.json" with { type: "json
 import { compileCards } from "../../../../scripts/card-compile.js";
 import { normalizeCardForSchema } from "../../../../scripts/card-validate.js";
 import { normalizeName } from "../../../../scripts/lib/normalize-name.js";
+import { MIN_STAGE, parseStage, stageName } from "../../../../scripts/lib/stage-name.js";
 import { MODIFIER_TYPES } from "../../services/ModifierService.js";
 import { RULE_TYPES } from "../../services/GlobalRuleRegistry.js";
 import { initEffectResolver } from "../../EffectResolver.js";
@@ -224,7 +225,10 @@ describe("card data audit (source/artifact identity)", () => {
       // back-references (evolvedFrom/ignitedFrom) are plain cardIds.
       if (card.evolveInto != null) {
         const target = cardsData[String(card.evolveInto.cardId)];
-        if (target?.name !== `${card.name} - Evolved`) {
+        const current = parseStage(card.name);
+        const root = current ? current.root : card.name;
+        const stage = current ? current.stage : 1;
+        if (target?.name !== stageName(root, stage + 1)) {
           violations.push(`"${card.name}".evolveInto.cardId -> ${card.evolveInto.cardId} ("${target?.name}")`);
         }
         if (!Array.isArray(card.evolveInto.triggers) || card.evolveInto.triggers.length === 0) {
@@ -233,7 +237,11 @@ describe("card data audit (source/artifact identity)", () => {
       }
       if (card.evolvedFrom != null) {
         const base = cardsData[String(card.evolvedFrom)];
-        if (base?.name !== card.name.replace(/\s*-\s*evolved\s*/i, "").trim()) {
+        const current = parseStage(card.name);
+        const expectedBaseName = current
+          ? (current.stage === MIN_STAGE ? current.root : stageName(current.root, current.stage - 1))
+          : card.name;
+        if (base?.name !== expectedBaseName) {
           violations.push(`"${card.name}".evolvedFrom -> ${card.evolvedFrom} ("${base?.name}")`);
         }
       }

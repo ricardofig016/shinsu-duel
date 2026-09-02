@@ -10,7 +10,7 @@ import { findCardsByName } from "../utils/cardData.js";
  * `transform` targets the source unit itself (payload.sourceUnit) and swaps
  * its card definition via `LifecycleEngine.transformUnit`, which preserves
  * HP delta, conditions, equipment, and position. Used for reverts (e.g.
- * "Khun Ran - Evolved" reverting to "Khun Ran").
+ * "Khun Ran II" reverting to "Khun Ran").
  *
  * Payload:
  *   { sourceId, sourceUnit, cardName }

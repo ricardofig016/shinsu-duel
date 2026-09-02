@@ -156,7 +156,7 @@ describe("passive triggers via real cards", () => {
     const handId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Evolve Passive Unit");
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId, placedPositionCode: "fisherman" } });
 
-    const unit = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Evolve Passive Unit - Evolved");
+    const unit = game.playerStates.Alice.field.frontline.find((u) => u.card.name === "Test Evolve Passive Unit II");
     expect(unit).toBeDefined();
     expect(game.playerStates.Alice.hand.some((c) => c.name === "Test Filler 1")).toBe(true);
 

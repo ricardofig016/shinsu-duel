@@ -37,7 +37,7 @@
   "1": {
     "cardId": 1,
     "type": "unit",
-    "name": "_Test Deploy Evolve - Evolved",
+    "name": "_Test Deploy Evolve II",
     "cost": 1,
     "deckConstraints": [],
     "hp": 100,
@@ -700,7 +700,7 @@
   "10": {
     "cardId": 10,
     "type": "unit",
-    "name": "Beta - Evolved",
+    "name": "Beta II",
     "cost": 2,
     "deckConstraints": [],
     "hp": 4,
@@ -2192,7 +2192,7 @@
   "47": {
     "cardId": 47,
     "type": "unit",
-    "name": "Karaka - Evolved",
+    "name": "Karaka II",
     "cost": 7,
     "deckConstraints": [],
     "hp": 9,
@@ -2274,7 +2274,7 @@
       }
     ],
     "evolvedFrom": 46,
-    "artworkPath": "/assets/images/artworks/karaka_evolved.png"
+    "artworkPath": "/assets/images/artworks/karaka_ii.png"
   },
   "48": {
     "cardId": 48,
@@ -2352,7 +2352,7 @@
   "50": {
     "cardId": 50,
     "type": "unit",
-    "name": "Khun Aguero Agnis - Evolved",
+    "name": "Khun Aguero Agnis II",
     "cost": 0,
     "deckConstraints": [],
     "hp": 3,
@@ -2475,7 +2475,7 @@
   "52": {
     "cardId": 52,
     "type": "unit",
-    "name": "Khun Ran - Evolved",
+    "name": "Khun Ran II",
     "cost": 3,
     "deckConstraints": [],
     "hp": 5,
@@ -3789,7 +3789,7 @@
   "82": {
     "cardId": 82,
     "type": "unit",
-    "name": "Twenty-Fifth Baam - Evolved",
+    "name": "Twenty-Fifth Baam II",
     "cost": 5,
     "deckConstraints": [],
     "hp": 6,
@@ -3827,7 +3827,7 @@
     ],
     "passives": [],
     "evolvedFrom": 81,
-    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_evolved.png"
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png"
   },
   "83": {
     "cardId": 83,

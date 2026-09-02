@@ -51,7 +51,7 @@ describe("trigger DFS-ordering — equip evolution", () => {
     });
 
     // Test Evolve Unit should have evolved
-    expect(karaka.card.name).toBe("Test Evolve Unit - Evolved");
+    expect(karaka.card.name).toBe("Test Evolve Unit II");
 
     // Equipment effects are resolved by LifecycleEngine.attachEquipment BEFORE
     // equipment:attached is emitted, so the equip trigger in the post phase
@@ -124,7 +124,7 @@ describe("trigger DFS-ordering — deploy", () => {
     // The unit's own deploy trigger subscribed to unit:summoned and fired
     // before the summon event finished resolving, evolving the unit.
     const unit = game.playerStates.Alice.field.frontline[0];
-    expect(unit.card.name).toBe("Test Deploy Evolve - Evolved");
+    expect(unit.card.name).toBe("Test Deploy Evolve II");
 
     // Native traits are wired before the announce events: the barrier trait
     // is granted (modifier:trait:granted) before unit:deployed is emitted.
@@ -251,7 +251,7 @@ describe("trigger DFS-ordering — ally_dies", () => {
 
 describe("trigger DFS-ordering — round_start / round_end", () => {
   test("round_start and round_end triggers fire in post phase of their canonical events", () => {
-    const game = setupGameWithCardsInHand(["Test Evolve Unit - Evolved", "Test Evolve Unit", "Test Evolve Unit", "Test Evolve Unit"]);
+    const game = setupGameWithCardsInHand(["Test Evolve Unit II", "Test Evolve Unit", "Test Evolve Unit", "Test Evolve Unit"]);
     game.round = 15;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
 

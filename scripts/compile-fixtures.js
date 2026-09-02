@@ -115,7 +115,7 @@ export async function compileFixtures() {
   });
 
   // 4. Resolve evolution/ignition cross-references.
-  const allWithIds = compiled.map((c) => ({ name: c.name, cardId: c.cardId }));
+  const allWithIds = compiled.map((c) => ({ name: c.name, cardId: c.cardId, type: c.type }));
   for (const card of compiled) {
     const raw = rawCards.find((r) => r.name === card.name);
     if (!raw) throw new Error(`internal: raw card not found for "${card.name}"`);

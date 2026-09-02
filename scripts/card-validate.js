@@ -7,6 +7,7 @@ import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
+import { MAX_STAGE, MIN_STAGE, parseStage, stageName } from "./lib/stage-name.js";
 import conditions from "../server/data/conditions.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -397,11 +398,18 @@ function validateIgnition(ignitionList, errors) {
 
 // ── Cross-reference validator (runs after all cards loaded) ─────────────────
 
-function validateCrossReferences(allCards, failuresByFile) {
+export function validateCrossReferences(allCards, failuresByFile) {
   // Build map: normalized name → card info
   const nameToFile = new Map();
-  for (const { filename, card } of allCards) {
+  for (const { filename, relativePath, card } of allCards) {
     if (card && card.name) {
+      if (nameToFile.has(card.name)) {
+        const first = nameToFile.get(card.name);
+        const fileErrors = failuresByFile.get(relativePath) || [];
+        fileErrors.push(`name: duplicate card name "${card.name}" (also defined in ${first.filename})`);
+        failuresByFile.set(relativePath, fileErrors);
+        continue;
+      }
       nameToFile.set(card.name, { filename, card });
     }
   }
@@ -410,11 +418,32 @@ function validateCrossReferences(allCards, failuresByFile) {
     if (!card) continue;
     const fileErrors = failuresByFile.get(relativePath) || [];
 
+    // Evolution stage markers are reserved names: a stage-marked unit must
+    // have its parent stage on record.
+    const stage = card.type === "unit" ? parseStage(card.name) : null;
+    if (stage) {
+      const parentName = stage.stage === MIN_STAGE
+        ? stage.root
+        : stageName(stage.root, stage.stage - 1);
+      if (!nameToFile.has(parentName)) {
+        fileErrors.push(`name: "${card.name}" carries an evolution stage marker but "${parentName}" does not exist`);
+      }
+    }
+
     // Check evolve references for units
     if (card.type === "unit" && Array.isArray(card.evolve) && card.evolve.length > 0) {
-      const targetName = `${card.name} - Evolved`;
-      const target = nameToFile.get(targetName);
-      if (!target || target.card.type !== "unit") {
+      const current = parseStage(card.name);
+      const root = current ? current.root : card.name;
+      const stageNumber = current ? current.stage : 1;
+      let targetName;
+      if (stageNumber + 1 > MAX_STAGE) {
+        targetName = null;
+        fileErrors.push(`evolve: "${card.name}" is at the maximum evolution stage (${MAX_STAGE})`);
+      } else {
+        targetName = stageName(root, stageNumber + 1);
+      }
+      const target = targetName ? nameToFile.get(targetName) : null;
+      if (targetName && (!target || target.card.type !== "unit")) {
         fileErrors.push(`evolve: target card "${targetName}" does not exist`);
       }
     }

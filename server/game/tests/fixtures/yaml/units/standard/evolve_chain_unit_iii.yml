@@ -1,0 +1,8 @@
+type: unit
+name: Test Chain Unit III
+cost: 1
+hp: 7
+rank: regular
+positions:
+  - fisherman
+evolve:

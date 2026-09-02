@@ -235,12 +235,15 @@ export default class TriggerManager {
     const unit = gameState._findUnit(unitId);
     if (!unit || !unit.isAlive()) return;
 
+    // Retire the fired trigger's subscriptions before the swap: transformUnit
+    // re-registers the incoming form's evolution triggers, and a cleanup after
+    // the swap would destroy them (breaking chains of 2+ evolutions).
+    this.unregisterAll(unitId, transformType, equipmentId);
+
     if (transformType === "ignition") {
       LifecycleEngine.transformEquipment(gameState, unit, targetCardId, equipmentId);
     } else {
       LifecycleEngine.transformUnit(gameState, unit, targetCardId);
     }
-
-    this.unregisterAll(unitId, transformType, equipmentId);
   }
 }

@@ -77,7 +77,7 @@ describe("landmark rule enforcement", () => {
     const target = deployUnit(game, "Alice", "Test Evolve Unit", "fisherman");
     const armorIndex = game.playerStates.Alice.hand.findIndex((card) => card.name === "Test Armor");
 
-    expect(LifecycleEngine.transformUnit(game, target, getCardIdByName("Test Evolve Unit - Evolved"))).toEqual({
+    expect(LifecycleEngine.transformUnit(game, target, getCardIdByName("Test Evolve Unit II"))).toEqual({
       prevented: true,
       reason: "landmark rule",
     });
@@ -303,7 +303,7 @@ describe("landmark rule enforcement", () => {
     deployUnit(game, "Alice", "Test Prevent Evolve Landmark", "backline");
     const aliceUnit = deployUnit(game, "Alice", "Test Evolve Unit", "fisherman");
     const bobUnit = deployUnit(game, "Bob", "Test Evolve Unit", "scout");
-    const evolved = getCardIdByName("Test Evolve Unit - Evolved");
+    const evolved = getCardIdByName("Test Evolve Unit II");
 
     // Out of scope (fisherman): evolution proceeds on Alice's board.
     expect(game._globalRuleRegistry.hasRule(aliceUnit, "prevent_evolve", game)).toBe(false);
@@ -311,7 +311,7 @@ describe("landmark rule enforcement", () => {
       prevented: true,
       reason: "landmark rule",
     });
-    expect(aliceUnit.card.name).toBe("Test Evolve Unit - Evolved");
+    expect(aliceUnit.card.name).toBe("Test Evolve Unit II");
 
     // In scope (scout): evolution blocked on Bob's board.
     expect(game._globalRuleRegistry.hasRule(bobUnit, "prevent_evolve", game)).toBe(true);
@@ -328,7 +328,7 @@ describe("landmark rule enforcement", () => {
       prevented: true,
       reason: "landmark rule",
     });
-    expect(bobUnit.card.name).toBe("Test Evolve Unit - Evolved");
+    expect(bobUnit.card.name).toBe("Test Evolve Unit II");
   });
 
   test("explicit-position prevent_equip blocks as a continuous scope as the bearer moves", () => {

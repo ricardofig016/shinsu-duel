@@ -1,0 +1,9 @@
+type: unit
+name: Test Chain Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+evolve:
+  - "when i am deployed"

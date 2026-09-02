@@ -28,7 +28,7 @@ describe("PassiveManager", () => {
     const game = createGame();
     game.round = 10;
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
-    const karaka = putInHand(game, "Alice", "Test Evolve Unit - Evolved");
+    const karaka = putInHand(game, "Alice", "Test Evolve Unit II");
     karaka.passiveAbilities = [{
       type: "deal_damage",
       amount: 3,

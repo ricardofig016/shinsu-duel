@@ -19,9 +19,9 @@ function equipFromHand(game, unit, cardName) {
 }
 
 describe("lifecycle and equipment integration", () => {
-  test("Khun Ran - Evolved reverts at round end, creating Redan and reverting to Khun Ran", () => {
-    const game = setupGameWithHands({ Alice: ["Test Multi Position - Evolved"] });
-    const unit = deployUnit(game, "Alice", "Test Multi Position - Evolved", "fisherman");
+  test("Khun Ran II reverts at round end, creating Redan and reverting to Khun Ran", () => {
+    const game = setupGameWithHands({ Alice: ["Test Multi Position II"] });
+    const unit = deployUnit(game, "Alice", "Test Multi Position II", "fisherman");
 
     game.eventBus.emit(EVT.ROUND_END, { round: game.round });
 

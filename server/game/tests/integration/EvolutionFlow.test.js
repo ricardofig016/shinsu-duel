@@ -26,8 +26,8 @@ describe("evolution flow", () => {
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    // Test Evolve Unit should now be Test Evolve Unit - Evolved, HP delta preserved (7→9 max, full HP)
-    expect(karaka.card.name).toBe("Test Evolve Unit - Evolved");
+    // Test Evolve Unit should now be Test Evolve Unit II, HP delta preserved (7→9 max, full HP)
+    expect(karaka.card.name).toBe("Test Evolve Unit II");
     expect(karaka.currentHp).toBe(9);
 
     // Evolved unit should have its new passive (round end: deal 3 to all Rooted enemies)
@@ -81,8 +81,35 @@ describe("evolution flow", () => {
       data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: karaka.id },
     });
 
-    expect(karaka.card.name).toBe("Test Evolve Unit - Evolved");
+    expect(karaka.card.name).toBe("Test Evolve Unit II");
     expect(game.modifierStack.getEffective(karaka.id, "condition", "burned")).toBe(1);
+  });
+
+  test("3-card chain evolves twice: Test Chain Unit -> II -> III", () => {
+    const game = setupGameWithCardsInHand(["Test Chain Unit", "Test Armor"]);
+    game.round = 15;
+    const shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
+
+    game.playerStates.Alice.shinsu = { ...shinsu };
+    game.processAction({
+      type: "deploy-unit-action",
+      data: { source: "player", username: "Alice", handId: 0, placedPositionCode: "fisherman" },
+    });
+    game.currentTurn = "Alice";
+    const unit = game.playerStates.Alice.field.frontline[0];
+    expect(unit.card.name).toBe("Test Chain Unit II");
+    expect(unit.currentHp).toBe(5);
+
+    const equipIdx = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Armor");
+    game.processAction({
+      type: "equip-equipment-action",
+      data: { source: "player", username: "Alice", handId: equipIdx, targetUnitId: unit.id },
+    });
+
+    expect(unit.card.name).toBe("Test Chain Unit III");
+    expect(unit.currentHp).toBe(7);
+    expect(unit.card.evolvedFrom).toBe(getCardIdByName("Test Chain Unit II"));
+    expect(unit.card.evolveInto).toBeNull();
   });
 });
 

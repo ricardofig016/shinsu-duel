@@ -11,8 +11,8 @@ describe("SwitchPositionHandler", () => {
   });
 
   test("forces an enemy to its other printed position", () => {
-    const game = setupGameWithHands({ Bob: ["Test Multi Position - Evolved"] });
-    const unit = deployUnit(game, "Bob", "Test Multi Position - Evolved", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Multi Position II"] });
+    const unit = deployUnit(game, "Bob", "Test Multi Position II", "fisherman");
 
     const result = handler.execute(
       { targetId: unit.id, sourceOwner: "Alice" },
@@ -41,8 +41,8 @@ describe("SwitchPositionHandler", () => {
   });
 
   test("no-op for a Rooted unit", () => {
-    const game = setupGameWithHands({ Bob: ["Test Multi Position - Evolved"] });
-    const unit = deployUnit(game, "Bob", "Test Multi Position - Evolved", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Multi Position II"] });
+    const unit = deployUnit(game, "Bob", "Test Multi Position II", "fisherman");
     game.modifierStack.apply({
       sourceId: "System", sourceType: "system", targetId: unit.id,
       type: "condition", key: "rooted", value: 1,
@@ -54,8 +54,8 @@ describe("SwitchPositionHandler", () => {
   });
 
   test("no-op when the destination line is full", () => {
-    const game = setupGameWithHands({ Bob: ["Test Multi Position - Evolved"] });
-    const unit = deployUnit(game, "Bob", "Test Multi Position - Evolved", "fisherman");
+    const game = setupGameWithHands({ Bob: ["Test Multi Position II"] });
+    const unit = deployUnit(game, "Bob", "Test Multi Position II", "fisherman");
     // Fill Bob's backline (spear-bearer) to capacity so there is no room to switch.
     game.playerStates.Bob.field.backline = [
       { id: "B1", card: { name: "A" }, currentHp: 1 },

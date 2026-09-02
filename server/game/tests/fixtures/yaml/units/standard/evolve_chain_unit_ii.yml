@@ -1,0 +1,9 @@
+type: unit
+name: Test Chain Unit II
+cost: 1
+hp: 5
+rank: regular
+positions:
+  - fisherman
+evolve:
+  - "i am equipped with Test Armor"

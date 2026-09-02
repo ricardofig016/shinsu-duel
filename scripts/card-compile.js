@@ -8,6 +8,7 @@ import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
+import { MAX_STAGE, MIN_STAGE, parseStage, stageName } from "./lib/stage-name.js";
 import dslCatalog from "../schemas/dsl-catalog.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -368,12 +369,21 @@ export function resolveEvolveInto(card, allCards) {
   const evolveTriggers = card.evolve;
   if (!Array.isArray(evolveTriggers) || evolveTriggers.length === 0) return null;
 
-  // Convention: "{name} - Evolved"
-  const expectedEvolvedName = card.name + " - Evolved";
+  const current = parseStage(card.name);
+  const root = current ? current.root : card.name;
+  const stage = current ? current.stage : 1;
+  if (stage + 1 > MAX_STAGE) {
+    throw new Error(`"${card.name}" is at the maximum evolution stage (${MAX_STAGE}).`);
+  }
+
+  const expectedEvolvedName = stageName(root, stage + 1);
   const evolvedCard = allCards.find((c) => c.name === expectedEvolvedName);
 
   if (!evolvedCard) {
-    throw new Error(`Evolution target "${expectedEvolvedName}" for "${card.name}" does not exist or is not a unit.`);
+    throw new Error(`Evolution target "${expectedEvolvedName}" for "${card.name}" does not exist.`);
+  }
+  if (evolvedCard.type !== "unit") {
+    throw new Error(`Evolution target "${expectedEvolvedName}" for "${card.name}" must be a unit, got "${evolvedCard.type}".`);
   }
 
   // Build typed trigger ASTs from evolve list
@@ -398,10 +408,12 @@ export function resolveEvolveInto(card, allCards) {
 
 export function resolveEvolvedFrom(card, allCards) {
   if (card.type !== "unit") return null;
-  // Check if this is an evolved card: name contains " - Evolved"
-  if (!card.name.toLowerCase().includes(" - evolved")) return null;
+  const current = parseStage(card.name);
+  if (!current) return null;
 
-  const baseName = card.name.replace(/\s*-\s*evolved\s*/i, "").trim();
+  const baseName = current.stage === MIN_STAGE
+    ? current.root
+    : stageName(current.root, current.stage - 1);
   const baseCard = allCards.find((c) => c.name === baseName);
   return baseCard ? baseCard.cardId : null;
 }
@@ -803,6 +815,7 @@ export async function compileCards(options = {}) {
     const allWithIds = compiledCards.map((c) => ({
       name: c.name,
       cardId: c.cardId,
+      type: c.type,
     }));
 
     // Evolution

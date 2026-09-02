@@ -521,7 +521,7 @@ Living Ignition Weapons are living beings who were fused with a Weapon by the Wo
 You may equip me as many times as you want with unique equipments.
 ```
 
-"Unique" means different card names and different ignition lines: you can't have both `Green April` and `Green April - Evolved` on me.
+"Unique" means different card names and different ignition lines: you can't have both `Green April` and `Green April II` on me.
 
 **Example Synergies:**
 
@@ -591,13 +591,13 @@ A unit's rank has no direct effect on gameplay, but it can be targeted by abilit
 
 Some units can evolve when a trigger is met. The trigger is specified in the unit's card. Evolution is mandatory and automatic when the trigger is met, and costs no action.
 
-The evolved unit may have different HP, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution. Equipment and position are preserved. An evolved unit can evolve again.
+The evolved unit may have different HP, passives, abilities, traits, attributes, and affiliations. Lost HP, conditions, and any other effects are preserved on evolution. Equipment and position are preserved. An evolved unit can evolve again: a stage-2 unit is named `<base> II`, a stage-3 unit `<base> III`, and so on.
 
 Examples:
 
-- `Khun Aguero Agnis` evolves into `Khun Aguero Agnis - Evolved` when equipped with `Ice Spear`.
-- `Karaka` evolves into `Karaka - Evolved` when equipped with `Karaka's Armor Suit` as a Fisherman, `Steel Tree` as a Wave Controller, or `Purple Dementor` as a Scout.
-- `Khun Ran` evolves into `Khun Ran - Evolved` when `Redan` is played on him.
+- `Khun Aguero Agnis` evolves into `Khun Aguero Agnis II` when equipped with `Ice Spear`.
+- `Karaka` evolves into `Karaka II` when equipped with `Karaka's Armor Suit` as a Fisherman, `Steel Tree` as a Wave Controller, or `Purple Dementor` as a Scout.
+- `Khun Ran` evolves into `Khun Ran II` when `Redan` is played on him.
 
 ## Future Features
 

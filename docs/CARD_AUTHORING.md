@@ -43,12 +43,12 @@ Structural patterns live in the existing cards — read the closest match before
 | Need                                         | Reference                                                                                                                                |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Minimal unit / skill / equipment             | `data/cards/units/standard/rachel.yml`, `data/cards/skills/healing_potion.yml`, `data/cards/equipments/frog_fisher.yml`                  |
-| Evolution pair                               | `data/cards/units/standard/karaka.yml` + `karaka_evolved.yml`                                                                            |
+| Evolution pair                               | `data/cards/units/standard/karaka.yml` + `karaka_ii.yml`                                                                                 |
 | Ignition pair                                | `data/cards/equipments/narumada.yml` + `narumada_ignited.yml`                                                                            |
 | Landmark / Shinheuh / Conduit                | `data/cards/units/landmark/floor_of_death.yml`, `data/cards/units/shinheuh/stone_doll.yml`, `data/cards/units/conduit/conduit.yml`       |
 | Identity keyword with display text           | `data/cards/skills/lightning_baang.yml`                                                                                                  |
 | Deck constraint (`generated_by`)             | `data/cards/skills/incinerate_iv.yml`                                                                                                    |
-| Structured triggers / modifiers              | `data/cards/units/standard/karaka_evolved.yml`, `data/cards/units/landmark/wooden_horse.yml`, `data/cards/units/standard/evan_edrok.yml` |
+| Structured triggers / modifiers              | `data/cards/units/standard/karaka_ii.yml`, `data/cards/units/landmark/wooden_horse.yml`, `data/cards/units/standard/evan_edrok.yml`      |
 | Compound chains (`sequence` / `conditional`) | `data/cards/units/standard/ja_wangnan.yml`, `data/cards/skills/baang.yml`                                                                |
 
 ---
@@ -63,7 +63,7 @@ Structural patterns live in the existing cards — read the closest match before
 
 ## Card artwork
 
-A card's artwork file is `<normalizeName(name)>.png` in [`public/assets/images/artworks/`](../public/assets/images/artworks/) (lowercase snake_case: "Twenty-Fifth Baam" → `twenty_fifth_baam.png`, "Karaka - Evolved" → `karaka_evolved.png`). The slug is the same derivation the filename convention enforces on the YAML source, so one rule binds card name, card file, and artwork file. Target format is a 1200x800 PNG; the image processing pipeline is documented in that folder's README.
+A card's artwork file is `<normalizeName(name)>.png` in [`public/assets/images/artworks/`](../public/assets/images/artworks/) (lowercase snake_case: "Twenty-Fifth Baam" → `twenty_fifth_baam.png`, "Karaka II" → `karaka_ii.png`). The slug is the same derivation the filename convention enforces on the YAML source, so one rule binds card name, card file, and artwork file. Target format is a 1200x800 PNG; the image processing pipeline is documented in that folder's README.
 
 The compiler binds the file at compile time and stamps the resolved path into the compiled card as `artworkPath`; runtime and frontend never derive artwork paths themselves. Two warn-only build notices keep the folder honest:
 
@@ -71,6 +71,20 @@ The compiler binds the file at compile time and stamps the resolved path into th
 - **Unmatched files** — artwork files whose slug matches no card, almost always a typo or a renamed card; rename the file together with the card.
 
 Both are warnings, never build failures: a card without art renders the frontend placeholder until its file lands.
+
+---
+
+## Evolution naming
+
+Evolved units are linked to their base by a Roman-numeral stage marker at the end of the card name: `Karaka` → `Karaka II` → `Karaka III`. The compiler resolves each unit's `evolve:` target as `<root> <next stage>` and writes the reverse `evolvedFrom` link, so stage names are the only link carrier — never append generic suffixes like "- Evolved".
+
+Rules enforced by `npm run validate:cards`:
+
+- A unit whose name ends in a Roman numeral ≥ II must have its parent stage on record (`Karaka III` requires `Karaka II`, which requires `Karaka`).
+- Stage markers are reserved: don't name a base unit with a trailing numeral (use words or Arabic digits instead — the marker parser ignores numerals outside the supported window).
+- Each `evolve:` trigger list must point at an existing unit one stage up.
+
+The supported marker set lives in [`scripts/lib/stage-name.js`](../scripts/lib/stage-name.js).
 
 ---
 

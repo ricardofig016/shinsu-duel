@@ -11,8 +11,8 @@ describe("TransformHandler", () => {
   });
 
   test("reverts a unit, preserving position", () => {
-    const game = setupGameWithHands({ Alice: ["Test Multi Position - Evolved"] });
-    const unit = deployUnit(game, "Alice", "Test Multi Position - Evolved", "fisherman");
+    const game = setupGameWithHands({ Alice: ["Test Multi Position II"] });
+    const unit = deployUnit(game, "Alice", "Test Multi Position II", "fisherman");
 
     const result = handler.execute(
       { sourceUnit: unit, sourceId: unit.id, cardName: "Test Multi Position" },

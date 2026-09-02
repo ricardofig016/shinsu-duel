@@ -87,7 +87,7 @@ Trigger-less **modifier** passives (`modify_stat`/`modify_cost`/`modify_conditio
 
 ---
 
-## Example: Khun Ran - Evolved
+## Example: Khun Ran II
 
 ```yaml
 passives:
