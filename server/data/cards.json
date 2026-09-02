@@ -3270,7 +3270,8 @@
         "raw": "deal 4 to an enemy"
       }
     ],
-    "passives": []
+    "passives": [],
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser.png"
   },
   "68": {
     "cardId": 68,
