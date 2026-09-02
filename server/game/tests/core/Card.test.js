@@ -89,4 +89,11 @@ describe("Card", () => {
     view.attributes.hwayeomsa.name = "mutated";
     expect(card.toSanitizedObject().attributes.hwayeomsa.name).not.toBe("mutated");
   });
+
+  test("orders attribute views by the attribute catalog, not the card's authored order", () => {
+    const card = makeCard({ attributes: ["living-ignition-weapon", "hwayeomsa", "anima"] });
+    const view = card.toSanitizedObject();
+
+    expect(Object.keys(view.attributes)).toEqual(["anima", "hwayeomsa", "living-ignition-weapon"]);
+  });
 });

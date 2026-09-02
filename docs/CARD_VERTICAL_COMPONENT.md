@@ -40,8 +40,9 @@ mutates the view models.
 
 - **Name row:** the type letter (`assets/icons/types/`; landmarks carry
   `landmark.png` despite being units), the name (left-aligned after the
-  letter), and the header icons — requirements, passive abilities, evolve,
-  ignition, and one icon per attribute. Header icons render only when the
+  letter), and the header icons — one icon per attribute (in the canonical
+  attribute order of the card view), evolve, ignition, passive abilities,
+  and requirements. Header icons render only when the
   card has the feature and are hover-only; each explains itself through the
   shared tooltip component.
 - **Artwork:** two opaque trapezoids textured with the card's

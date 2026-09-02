@@ -125,6 +125,25 @@ describe("buildUnitViewModel", () => {
     ]);
   });
 
+  test("keeps the card view's canonical attribute order", () => {
+    const model = buildUnitViewModel({
+      id: "unit-attr-order",
+      card: {
+        name: "Yeon Yihwa",
+        attributes: {
+          anima: { name: "Anima", description: "a", iconPath: "/assets/icons/attributes/anima.png" },
+          hwayeomsa: {
+            name: "Hwayeomsa",
+            description: "Spend 1, Free: Charge 1 Fire Charge.",
+            iconPath: "/assets/icons/attributes/hwayeomsa.png",
+          },
+        },
+      },
+    });
+
+    expect(model.attributes.map((attribute) => attribute.code)).toEqual(["anima", "hwayeomsa"]);
+  });
+
   test("carries the printed card texts and evolve/ignition triggers", () => {
     const model = buildCardViewModel({
       cardId: 10003,

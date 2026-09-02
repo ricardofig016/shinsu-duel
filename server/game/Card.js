@@ -101,9 +101,11 @@ export default class Card {
   }
 
   #attributeViews() {
+    const catalogOrder = new Map(Object.keys(attributes).map((code, index) => [code, index]));
     const views = Object.fromEntries(
       this.attributes
         .filter((code) => attributes[code] !== undefined)
+        .sort((a, b) => catalogOrder.get(a) - catalogOrder.get(b))
         .map((code) => [code, { ...attributes[code] }])
     );
     return this.#addArtworkPathToDictionary(views, "attributes");

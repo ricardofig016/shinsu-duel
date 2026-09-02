@@ -50,23 +50,21 @@ const loadTypeLetter = (container, model) => {
 };
 
 /**
- * Header icons surface the card's printed features: requirements, passive
- * abilities, evolve/ignition triggers, and attributes. Each icon is
- * hover-only and explains itself through the shared tooltip.
+ * Header icons surface the card's printed features: attributes, evolve/ignition
+ * triggers, passive abilities, and requirements. Attributes render in the
+ * canonical order delivered by the card view. Each icon is hover-only and
+ * explains itself through the shared tooltip.
  */
 const loadHeaderIcons = async (container, model) => {
   const headerIcons = container.querySelector(".card-vertical-header-icons");
   headerIcons.replaceChildren();
 
   const entries = [];
-  if (model.requirements?.length > 0) {
-    entries.push({ iconPath: HEADER_ICON_PATHS.requirements, title: "Requirements", texts: model.requirements });
-  }
-  if (model.passiveAbilities?.length > 0) {
+  for (const attribute of model.attributes ?? []) {
     entries.push({
-      iconPath: HEADER_ICON_PATHS.passive,
-      title: "Passive Abilities",
-      texts: model.passiveAbilities.map((passive) => passive.text),
+      iconPath: attribute.iconPath,
+      title: attribute.name,
+      texts: attribute.description ? [attribute.description] : [],
     });
   }
   if (model.evolveTriggers?.length > 0) {
@@ -75,12 +73,15 @@ const loadHeaderIcons = async (container, model) => {
   if (model.igniteTriggers?.length > 0) {
     entries.push({ iconPath: HEADER_ICON_PATHS.ignition, title: "Ignition", texts: model.igniteTriggers });
   }
-  for (const attribute of model.attributes ?? []) {
+  if (model.passiveAbilities?.length > 0) {
     entries.push({
-      iconPath: attribute.iconPath,
-      title: attribute.name,
-      texts: attribute.description ? [attribute.description] : [],
+      iconPath: HEADER_ICON_PATHS.passive,
+      title: "Passive Abilities",
+      texts: model.passiveAbilities.map((passive) => passive.text),
     });
+  }
+  if (model.requirements?.length > 0) {
+    entries.push({ iconPath: HEADER_ICON_PATHS.requirements, title: "Requirements", texts: model.requirements });
   }
 
   for (const { iconPath, title, texts } of entries) {
