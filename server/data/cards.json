@@ -588,7 +588,8 @@
         },
         "raw": "when an ally Regular dies: Light Up 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/apple.png"
   },
   "8": {
     "cardId": 8,
@@ -622,7 +623,8 @@
         },
         "raw": "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/baang.png"
   },
   "9": {
     "cardId": 9,
@@ -768,7 +770,8 @@
         ],
         "raw": "heal the bearer 2 HP and Cleanse the bearer"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/blue_thryssa.png"
   },
   "12": {
     "cardId": 12,
@@ -1593,7 +1596,8 @@
         ],
         "raw": "Cleanse all allies and heal each of them 4 HP"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/healing_flames.png"
   },
   "34": {
     "cardId": 34,
@@ -4157,9 +4161,10 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "i have Strong 3"
+        "raw": "my bearer has Strong 3"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/woons_hammer.png"
   },
   "90": {
     "cardId": 90,
@@ -4313,7 +4318,8 @@
         },
         "raw": "ally yeon family members have resilient"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/yeon_woon.png"
   },
   "93": {
     "cardId": 93,

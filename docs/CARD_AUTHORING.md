@@ -63,7 +63,7 @@ Structural patterns live in the existing cards — read the closest match before
 
 ## Card artwork
 
-A card's artwork file is `<normalizeName(name)>.png` in [`public/assets/images/artworks/`](../public/assets/images/artworks/) (lowercase snake_case: "Twenty-Fifth Baam" → `twenty_fifth_baam.png`, "Karaka II" → `karaka_ii.png`). The slug is the same derivation the filename convention enforces on the YAML source, so one rule binds card name, card file, and artwork file. Target format is a 1200x800 PNG; the image processing pipeline is documented in that folder's README.
+A card's artwork file is `<normalizeName(name)>.png` in [`public/assets/images/artworks/`](../public/assets/images/artworks/) (lowercase snake_case: "Twenty-Fifth Baam" → `twenty_fifth_baam.png`, "Karaka II" → `karaka_ii.png`, "Woon's Hammer" → `woons_hammer.png`; apostrophes are dropped, not turned into underscores). The slug is the same derivation the filename convention enforces on the YAML source, so one rule binds card name, card file, and artwork file. Target format is a 1200x800 PNG; the image processing pipeline is documented in that folder's README.
 
 The compiler binds the file at compile time and stamps the resolved path into the compiled card as `artworkPath`; runtime and frontend never derive artwork paths themselves. Two warn-only build notices keep the folder honest:
 

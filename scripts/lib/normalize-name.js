@@ -9,6 +9,7 @@
  * - card-compile.js matches card artwork files named `<slug>.png`.
  *
  * "Ha Yuri Zahard" → "ha_yuri_zahard"
+ * "Woon's Hammer" → "woons_hammer"
  *
  * @param {string} rawName - card display name, e.g. "Twenty-Fifth Baam"
  * @returns {string} slug, e.g. "twenty_fifth_baam"
@@ -16,6 +17,7 @@
 export function normalizeName(rawName) {
   return rawName
     .toLowerCase()
+    .replace(/['’]/g, "")
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
 }

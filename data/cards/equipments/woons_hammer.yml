@@ -8,5 +8,5 @@ effects:
     trait: strong
     amount: 3
     target: { side: bearer }
-    raw: "i have Strong 3"
+    raw: "my bearer has Strong 3"
 ignition:

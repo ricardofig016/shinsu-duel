@@ -13,8 +13,15 @@ describe("normalizeName (canonical card slug)", () => {
     expect(normalizeName("Narumada - Ignited")).toBe("narumada_ignited");
   });
 
-  test("folds punctuation and apostrophes into separators", () => {
-    expect(normalizeName("Khun's Dagger")).toBe("khun_s_dagger");
+  test("drops apostrophes instead of turning them into separators", () => {
+    // These names pin the artwork contract: the on-disk possessive files
+    // ("woons_hammer.png", "enryus_thorn.png", "karakas_armor_suit.png") must
+    // equal "<slug>.png" for the same card, and "<slug>.yml" for its source.
+    expect(normalizeName("Woon's Hammer")).toBe("woons_hammer");
+    expect(normalizeName("Enryu's Thorn")).toBe("enryus_thorn");
+    expect(normalizeName("Karaka's Armor Suit")).toBe("karakas_armor_suit");
+    expect(normalizeName("Khun's Dagger")).toBe("khuns_dagger");
+    expect(normalizeName("Khun’s Dagger")).toBe("khuns_dagger");
   });
 
   test("trims leading and trailing separators", () => {
