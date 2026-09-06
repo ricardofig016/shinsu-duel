@@ -45,15 +45,16 @@ mutates the view models.
   and requirements. Header icons render only when the
   card has the feature and are hover-only; each explains itself through the
   shared tooltip component.
-- **Artwork:** two opaque trapezoids textured with the card's
+- **Artwork:** up to two opaque trapezoids textured with the card's
   `background.png` overlay the top and
   bottom. Both have a wide (base) edge of 2/3 of the artwork width and a
   narrow edge of 1/2, with a height of 9% of the artwork; the top one is
   flush with the artwork's top edge, the bottom one with its bottom edge.
-  Their text renders at the card's base size (1em). The top one
-  shows the rank of standard-kind units only. The bottom one shows the
-  first affiliation; standard and landmark units keep the "Affiliations"
-  placeholder when empty, other kinds show nothing. With more than one
+  Their text renders at the card's base size (1em). Each trapezoid renders
+  only when it carries information — the top one shows the card's `rank`
+  (authored on standard-kind units), the bottom one shows the first
+  affiliation; cards with neither rank nor affiliations show pure artwork.
+  With more than one
   affiliation, hovering the trapezoid — or the overlay itself — opens a
   textured overlay in the same style (2/3 of the artwork width, centered)
   just below the

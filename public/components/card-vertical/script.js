@@ -101,31 +101,29 @@ const loadName = async (container, name, sobriquet) => {
 };
 
 /**
- * Only standard-kind units carry a rank; the trapezoid stays empty for every
- * other kind and card type.
+ * The rank trapezoid renders only when the card carries a rank; every other
+ * card leaves the artwork uncovered.
  */
 const loadRank = (container, model) => {
-  const rank = container.querySelector(".card-vertical-rank");
-  const visible = model.type === "unit" && model.kind === "standard" && model.rank;
-  rank.innerText = visible ? model.rank : "";
+  const trapezoid = container.querySelector(".card-vertical-rank-trapezoid");
+  trapezoid.classList.toggle("hidden", !model.rank);
+  container.querySelector(".card-vertical-rank").innerText = model.rank ?? "";
 };
 
 /**
- * The affiliations trapezoid shows the first affiliation's name; standard and
- * landmark units keep the "Affiliations" placeholder when empty, the other
- * kinds show nothing. With more than one affiliation, hovering the trapezoid
- * (or the overlay itself) opens the overlay below the artwork listing the
- * rest. mouseenter/mouseleave don't refire on the inner text span, and the
- * short hide delay is cancelled by re-entry, so the overlay can't flicker
- * while the pointer stays inside.
+ * The affiliations trapezoid renders only when the card carries at least one
+ * affiliation and shows the first affiliation's name. With more than one
+ * affiliation, hovering the trapezoid (or the overlay itself) opens the
+ * overlay below the artwork listing the rest. mouseenter/mouseleave don't
+ * refire on the inner text span, and the short hide delay is cancelled by
+ * re-entry, so the overlay can't flicker while the pointer stays inside.
  */
 const loadAffiliations = (container, model) => {
   const affiliations = model.affiliations ?? [];
   const trapezoid = container.querySelector(".card-vertical-affiliations-trapezoid");
+  trapezoid.classList.toggle("hidden", affiliations.length === 0);
   const text = container.querySelector(".card-vertical-affiliation");
-  const placeholder =
-    model.type === "unit" && (model.kind === "standard" || model.kind === "landmark");
-  text.innerText = affiliations.length > 0 ? affiliations[0].name : placeholder ? "Affiliations" : "";
+  text.innerText = affiliations.length > 0 ? affiliations[0].name : "";
   if (affiliations.length <= 1) return;
 
   const tooltipFrame = container.querySelector(".card-vertical-affiliations-tooltip-frame");
