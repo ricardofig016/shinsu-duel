@@ -846,7 +846,8 @@
         },
         "raw": "allied Team Chang members have Resilient 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/chang_blarode.png"
   },
   "14": {
     "cardId": 14,
@@ -932,7 +933,8 @@
         ],
         "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/conduit.png"
   },
   "16": {
     "cardId": 16,
@@ -956,7 +958,8 @@
         },
         "raw": "ability: give me Pierce"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/dionysos_arms.png"
   },
   "17": {
     "cardId": 17,
@@ -980,7 +983,8 @@
         },
         "raw": "ability: quick: deal 3 to an enemy"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/dionysos_legs.png"
   },
   "18": {
     "cardId": 18,
@@ -997,7 +1001,8 @@
         },
         "raw": "the bearer's Quick abilities Charge 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/dionysos_wings.png"
   },
   "19": {
     "cardId": 19,
@@ -1052,7 +1057,8 @@
         },
         "raw": "the first ability i use each round has Free"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/edin_dan.png"
   },
   "20": {
     "cardId": 20,
@@ -1073,7 +1079,8 @@
         },
         "raw": "Reclaim 2 equipments"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/enna_core.png"
   },
   "21": {
     "cardId": 21,
@@ -1123,7 +1130,8 @@
         },
         "raw": "the bearer has Bloodthirsty 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/enryus_thorn.png"
   },
   "22": {
     "cardId": 22,
