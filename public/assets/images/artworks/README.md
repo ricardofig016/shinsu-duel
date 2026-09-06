@@ -15,7 +15,7 @@ Source images went through [Google Gemini](https://gemini.google.com/) to:
 The prompt used was a variation of:
 
 ```plaintext
-Outpaint 3:2 canvas expansion. Keep central character artwork and background elements 100% original and unscaled, do not modify the character in focus. Extend background seamlessly to the edges. Remove all text boxes, Hangul characters, and speech bubbles. do not add elements to the background or to the character artwork except for filling in necessary missing details from the canvas expansion. zoom the original image out to 0.5x. keep faithful to the image and artwork style.
+Outpaint 3:2 canvas expansion. Keep central character artwork and background elements 100% original and unscaled, do not modify the character in focus. Extend background seamlessly to the edges. Remove all text boxes, Hangul characters, and speech bubbles. do not add elements to the background or to the character artwork except for filling in necessary missing details from the canvas expansion. zoom the original image out to 0.5x. keep faithful to the image and artwork style. keep the background simple.
 ```
 
 ## Normalization
