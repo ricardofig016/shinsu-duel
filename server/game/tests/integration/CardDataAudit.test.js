@@ -182,6 +182,22 @@ describe("card data audit (source/artifact identity)", () => {
     expect(failures).toEqual([]);
   });
 
+  test("every card's YAML filename matches its name slug", async () => {
+    // One slug derivation binds card name, YAML source file, and artwork
+    // file (see docs/CARD_AUTHORING.md); a filename that drifts from
+    // `<normalizeName(name)>.yml` breaks the artwork binding and the
+    // card-create/card-validate conventions.
+    const violations = [];
+    for (const { file, card } of await loadSourceCards()) {
+      const filename = path.basename(file);
+      const expected = `${normalizeName(card?.name)}${path.extname(filename)}`;
+      if (filename !== expected) {
+        violations.push(`${path.relative(projectRoot, file)}: name ${JSON.stringify(card?.name)} expects "${expected}"`);
+      }
+    }
+    expect(violations).toEqual([]);
+  });
+
   test("a fresh in-memory compile equals the checked-in artifact", async () => {
     const { output } = await compileCards();
     expect(canonicalize(output)).toEqual(canonicalize(cardsData));
