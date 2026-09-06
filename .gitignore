@@ -6,7 +6,7 @@ dist/
 server/data/rooms.json
 server/data/users.json
 
-public\assets\images\artworks\raw
+public/assets/images/artworks/raw/
 
 logs/
 *.log
