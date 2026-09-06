@@ -511,7 +511,8 @@
         },
         "raw": "round start: give me all traits currently held by an allied Rachel"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/akryung.png"
   },
   "7": {
     "cardId": 7,
@@ -695,7 +696,8 @@
         }
       ],
       "cardId": 10
-    }
+    },
+    "artworkPath": "/assets/images/artworks/beta.png"
   },
   "10": {
     "cardId": 10,
@@ -737,7 +739,8 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 9
+    "evolvedFrom": 9,
+    "artworkPath": "/assets/images/artworks/beta_ii.png"
   },
   "11": {
     "cardId": 11,
@@ -790,7 +793,8 @@
         "raw": "quick: deal 3 to an enemy"
       }
     ],
-    "passives": []
+    "passives": [],
+    "artworkPath": "/assets/images/artworks/bull.png"
   },
   "13": {
     "cardId": 13,
@@ -2607,7 +2611,8 @@
         },
         "raw": "when you reclaim an equipment, Compress 1 from it"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/kurudan.png"
   },
   "54": {
     "cardId": 54,
@@ -2712,7 +2717,8 @@
         },
         "raw": "scout: your backline Shinheuh's abilities give Ghost"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/lo_po_bia_ren.png"
   },
   "56": {
     "cardId": 56,
@@ -4466,6 +4472,7 @@
         },
         "raw": "when I am deployed, summon Bull from your deck or hand"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/yuga.png"
   }
 }
