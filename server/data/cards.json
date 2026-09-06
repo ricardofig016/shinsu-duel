@@ -1868,7 +1868,8 @@
         },
         "raw": "deal 1 to an enemy"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_i.png"
   },
   "41": {
     "cardId": 41,
@@ -1898,7 +1899,8 @@
         },
         "raw": "deal 2 to 2 enemies"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_ii.png"
   },
   "42": {
     "cardId": 42,
@@ -1943,7 +1945,8 @@
         ],
         "raw": "deal 2 to 3 enemies and give them Burn"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_iii.png"
   },
   "43": {
     "cardId": 43,
@@ -1987,7 +1990,8 @@
         ],
         "raw": "deal 3 to all enemies and give them Burn 2"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_iv.png"
   },
   "44": {
     "cardId": 44,
