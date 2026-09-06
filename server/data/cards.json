@@ -1263,7 +1263,8 @@
         },
         "raw": "Compress 1 from a Hwayeomsa in your hand"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/fiery_elephant.png"
   },
   "25": {
     "cardId": 25,
@@ -1289,7 +1290,8 @@
         },
         "raw": "Spend Fire Charges to create the highest affordable Incinerate in your hand"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/fire_core.png"
   },
   "26": {
     "cardId": 26,
@@ -2049,7 +2051,8 @@
         },
         "raw": "i deal +1 damage to Burned units"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/ja_wangnan.png"
   },
   "45": {
     "cardId": 45,
@@ -2351,7 +2354,8 @@
         }
       ],
       "cardId": 50
-    }
+    },
+    "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png"
   },
   "50": {
     "cardId": 50,
@@ -2406,7 +2410,8 @@
         "raw": "i ignore Taunt"
       }
     ],
-    "evolvedFrom": 49
+    "evolvedFrom": 49,
+    "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png"
   },
   "51": {
     "cardId": 51,
