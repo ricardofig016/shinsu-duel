@@ -74,20 +74,33 @@ describe("Card", () => {
     expect(bare.toSanitizedObject().igniteTriggers).toBeNull();
   });
 
-  test("stamps attribute details with icon paths into a copy, dropping unknown codes", () => {
+  test("stamps attribute details with tooltip title, effect lines, and icon path, dropping unknown codes", () => {
     const card = makeCard({ attributes: ["hwayeomsa", "no-such-attribute"] });
     const view = card.toSanitizedObject();
 
     expect(view.attributes).toEqual({
       hwayeomsa: {
         name: "Hwayeomsa",
+        title: "Hwayeomsa",
         description: expect.any(String),
+        effect: expect.any(Array),
         iconPath: "/assets/icons/attributes/hwayeomsa.png",
       },
     });
 
     view.attributes.hwayeomsa.name = "mutated";
     expect(card.toSanitizedObject().attributes.hwayeomsa.name).not.toBe("mutated");
+  });
+
+  test("composes guide attribute tooltip titles with their category and carries the effect lines", () => {
+    const card = makeCard({ attributes: ["silver-dwarf", "hwayeomsa"] });
+    const view = card.toSanitizedObject();
+
+    expect(view.attributes["silver-dwarf"].title).toBe("Guide - Silver Dwarf");
+    expect(view.attributes.hwayeomsa.title).toBe("Hwayeomsa");
+    expect(view.attributes["silver-dwarf"].effect).toEqual([
+      "The first time you draw a card each round, choose the card directly from your deck.",
+    ]);
   });
 
   test("orders attribute views by the attribute catalog, not the card's authored order", () => {

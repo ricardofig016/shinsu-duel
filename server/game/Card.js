@@ -4,6 +4,11 @@ import attributes from "../data/attributes.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traits from "../data/traits.json" with { type: "json" };
 
+// Guide attributes carry their category in the tooltip title (RULES.md §Guide).
+const GUIDE_ATTRIBUTES = new Set(["silver-dwarf", "red-witch"]);
+
+const attributeTitle = (code, data) => (GUIDE_ATTRIBUTES.has(code) ? `Guide - ${data.name}` : data.name);
+
 export default class Card {
   constructor(cardId, cardData, owner, bus) {
     this.id = IdFactory.cardInstance(cardId); // deterministic instance id
@@ -106,7 +111,7 @@ export default class Card {
       this.attributes
         .filter((code) => attributes[code] !== undefined)
         .sort((a, b) => catalogOrder.get(a) - catalogOrder.get(b))
-        .map((code) => [code, { ...attributes[code] }])
+        .map((code) => [code, { ...attributes[code], title: attributeTitle(code, attributes[code]) }])
     );
     return this.#addArtworkPathToDictionary(views, "attributes");
   }
@@ -114,10 +119,10 @@ export default class Card {
   /**
    * Client-facing card view. Printed information a player reads off the card
    * (rank, requirements, effect/rule texts, evolve/ignition triggers) is
-   * projected into display-ready strings; looked-up metadata (attributes)
-   * is stamped with names, descriptions, and icon paths like the other
-   * code dictionaries. Hidden cards never reach the opponent because the
-   * state projection replaces them with empty views.
+   * projected into display-ready strings; looked-up metadata (attributes) is
+   * stamped with tooltip titles, descriptions, effect lines, and icon paths
+   * like the other code dictionaries. Hidden cards never reach the opponent
+   * because the state projection replaces them with empty views.
    */
   toSanitizedObject() {
     return {

@@ -57,7 +57,7 @@
   },
   "pierce": {
     "name": "Pierce",
-    "description": "When I kill a unit, Destroy x",
+    "description": "When I kill a unit, Extinguish x",
     "color": "orange",
     "colorName": "Damage Buff",
     "numeric": true,

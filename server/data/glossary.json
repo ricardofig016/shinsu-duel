@@ -1,0 +1,107 @@
+{
+  "types": {
+    "unit": {
+      "name": "Unit",
+      "description": "Characters, creatures, and locations from Tower of God. Units are deployed to the battlefield, have HP and a shinsu cost to deploy, and occupy one or more of the positions printed on their card."
+    },
+    "skill": {
+      "name": "Skill",
+      "description": "Single-use items, spells, and techniques that provide an immediate effect."
+    },
+    "equipment": {
+      "name": "Equipment",
+      "description": "Equipments are attached to ally deployed units for enhancements. A unit can only hold 1 equipment at a time unless it is a Living Ignition Weapon."
+    }
+  },
+  "kinds": {
+    "standard": {
+      "name": "Unit",
+      "description": "Characters from Tower of God that occupy one of the 5 main battlefield positions."
+    },
+    "shinheuh": {
+      "name": "Shinheuh",
+      "description": "Special units summoned by Animas to attack on their behalf. Using their abilities requires the Shinheuh combat slot only an Anima can create."
+    },
+    "landmark": {
+      "name": "Landmark",
+      "description": "Special units that apply continuous battlefield rules to the entire board. They have no combat slot or abilities, and each player can only have 1 landmark deployed at a time."
+    },
+    "conduit": {
+      "name": "Conduit",
+      "description": "A special construct summoned by Jeonsulsa onto the enemy backline."
+    }
+  },
+  "ranks": {
+    "title": "Rank",
+    "concept": "How the person is ranked in the tower by the Ranking Administration Office.",
+    "regular": {
+      "name": "Regular",
+      "description": "Someone chosen by Headon to climb the tower"
+    },
+    "ranker": {
+      "name": "Ranker",
+      "description": "Someone who has reached the 134th floor of the tower"
+    },
+    "high ranker": {
+      "name": "High Ranker",
+      "description": "Someone at the top 1% of Rankers"
+    }
+  },
+  "concepts": {
+    "passives": {
+      "name": "Passives",
+      "description": "Unit effects that are always active or trigger automatically."
+    },
+    "evolve": {
+      "name": "Evolve",
+      "description": "Some units evolve when a listed trigger is met, becoming stronger and gaining new abilities."
+    },
+    "ignition": {
+      "name": "Ignition",
+      "description": "Some equipment ignite when a listed trigger is met, upgrading their effects. They stay ignited until they leave the board."
+    },
+    "requirements": {
+      "name": "Requirements",
+      "description": "Requirements must all be met for the card to be played."
+    }
+  },
+  "hud": {
+    "shinsuCard": {
+      "name": "Shinsu",
+      "texts": ["The cost of playing this card."]
+    },
+    "shinsuBoard": {
+      "name": "Shinsu",
+      "texts": ["The foundational energy for life within the tower and the main resource of the Shinsu Duel."]
+    },
+    "rechargedShinsu": {
+      "name": "Recharged Shinsu",
+      "texts": ["Shinsu that wasn't used last round."]
+    },
+    "hpCurrent": {
+      "name": "HP",
+      "texts": ["The current hit points of this unit."]
+    },
+    "hpMax": {
+      "name": "HP",
+      "texts": ["The maximum hit points of this unit."]
+    },
+    "lighthouses": {
+      "name": "Lighthouses",
+      "texts": ["Lighthouses are devices used as tactical command centers to gather intelligence and manipulate Shinsu on the battlefield. If you run out of lighthouses, you lose the game."]
+    },
+    "fireCharges": {
+      "name": "Fire Charges",
+      "texts": ["Gained by your Hwayeomsa units and consumed by Fire Core to create Incinerate cards."]
+    },
+    "deck": {
+      "name": "Deck",
+      "textTemplate": "{count} cards remaining"
+    },
+    "chosenSuffix": "(chosen)"
+  },
+  "lines": {
+    "frontline": { "label": "Frontline" },
+    "backline": { "label": "Backline" }
+  }
+}

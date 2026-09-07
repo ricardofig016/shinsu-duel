@@ -55,3 +55,21 @@
   padding: 0.5rem 0;
   font-size: 1rem;
 }
+
+/* Styled entries: descriptions and concepts read as context (italic, muted),
+   emphasis marks the card's own rank, labels name the battlefield line. */
+.tooltip-frame p.tooltip-text-italic {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.tooltip-frame p.tooltip-text-strong {
+  font-weight: 700;
+}
+
+.tooltip-frame p.tooltip-text-label {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.75);
+}

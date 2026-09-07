@@ -1,4 +1,11 @@
 import { loadComponent, addTooltip, fitFontSize } from "/utils/component-util.js";
+import { getGlossary } from "/utils/glossary.js";
+import {
+  buildAttributeTooltipEntries,
+  buildPositionTooltipEntries,
+  buildRankTooltip,
+  buildTypeLetterTooltip,
+} from "/utils/tooltip-entries.js";
 
 const TYPE_LETTER_ICONS = Object.freeze({
   skill: "/assets/icons/types/skill.png",
@@ -71,9 +78,10 @@ const displayCardBack = (container) => {
 
 /**
  * The type letter is the card type's own icon; landmarks are units but carry
- * their dedicated letter.
+ * their dedicated letter. Its tooltip is the type's (or, for units, the
+ * kind's) server-owned summary.
  */
-const loadTypeLetter = async (container, model) => {
+const loadTypeLetter = async (container, model, glossary) => {
   const letter = container.querySelector(".card-vertical-type-letter");
   const icon =
     model.type === "unit" && model.kind === "landmark"
@@ -85,6 +93,8 @@ const loadTypeLetter = async (container, model) => {
   }
   letter.classList.remove("hidden");
   letter.src = icon;
+  const tooltip = buildTypeLetterTooltip(model, glossary);
+  if (tooltip) await addTooltip(container, letter, tooltip.title, tooltip.texts);
   // The name's fit measurement depends on the letter's rendered width; an
   // undecoded image has none. A broken icon resolves the wait instead of
   // blocking.
@@ -94,39 +104,52 @@ const loadTypeLetter = async (container, model) => {
 /**
  * Header icons surface the card's printed features: attributes, evolve/ignition
  * triggers, passive abilities, and requirements. Attributes render in the
- * canonical order delivered by the card view. Each icon is hover-only and
- * explains itself through the shared tooltip.
+ * canonical order delivered by the card view and are explained by the
+ * server-composed tooltip title plus the italic description and effect lines;
+ * the other features lead with the glossary concept description. Each icon is
+ * hover-only and explains itself through the shared tooltip.
  */
-const loadHeaderIcons = async (container, model) => {
+const loadHeaderIcons = async (container, model, glossary) => {
   const headerIcons = container.querySelector(".card-vertical-header-icons");
   headerIcons.replaceChildren();
 
+  const concepts = glossary?.concepts ?? null;
   const entries = [];
   for (const attribute of model.attributes ?? []) {
     entries.push({
       iconPath: attribute.iconPath,
-      title: attribute.name,
-      texts: attribute.description ? [attribute.description] : [],
+      title: attribute.title ?? attribute.name,
+      texts: buildAttributeTooltipEntries(attribute),
     });
   }
+  const conceptEntry = (key, iconPath, texts) =>
+    concepts && texts.length > 0
+      ? {
+          iconPath,
+          title: concepts[key].name,
+          texts: [{ text: concepts[key].description, style: "italic" }, ...texts],
+        }
+      : null;
   if (model.evolveTriggers?.length > 0) {
-    entries.push({ iconPath: HEADER_ICON_PATHS.evolve, title: "Evolve", texts: model.evolveTriggers });
+    entries.push(conceptEntry("evolve", HEADER_ICON_PATHS.evolve, model.evolveTriggers));
   }
   if (model.igniteTriggers?.length > 0) {
-    entries.push({ iconPath: HEADER_ICON_PATHS.ignition, title: "Ignition", texts: model.igniteTriggers });
+    entries.push(conceptEntry("ignition", HEADER_ICON_PATHS.ignition, model.igniteTriggers));
   }
   if (model.passiveAbilities?.length > 0) {
-    entries.push({
-      iconPath: HEADER_ICON_PATHS.passive,
-      title: "Passive Abilities",
-      texts: model.passiveAbilities.map((passive) => passive.text),
-    });
+    entries.push(
+      conceptEntry(
+        "passives",
+        HEADER_ICON_PATHS.passive,
+        model.passiveAbilities.map((passive) => passive.text)
+      )
+    );
   }
   if (model.requirements?.length > 0) {
-    entries.push({ iconPath: HEADER_ICON_PATHS.requirements, title: "Requirements", texts: model.requirements });
+    entries.push(conceptEntry("requirements", HEADER_ICON_PATHS.requirements, model.requirements));
   }
 
-  for (const { iconPath, title, texts } of entries) {
+  for (const { iconPath, title, texts } of entries.filter(Boolean)) {
     const icon = safePath(iconPath);
     if (!icon) continue;
     const img = document.createElement("img");
@@ -159,12 +182,16 @@ const loadName = async (container, name, sobriquet) => {
 
 /**
  * The rank trapezoid renders only when the card carries a rank; every other
- * card leaves the artwork uncovered.
+ * card leaves the artwork uncovered. The tooltip lists every rank with its
+ * cost range and description, the card's own rank emphasized.
  */
-const loadRank = (container, model) => {
+const loadRank = async (container, model, glossary) => {
   const trapezoid = container.querySelector(".card-vertical-rank-trapezoid");
   trapezoid.classList.toggle("hidden", !model.rank);
   container.querySelector(".card-vertical-rank").innerText = model.rank ?? "";
+  if (!model.rank) return;
+  const tooltip = buildRankTooltip(model.rank, glossary?.ranks ?? null);
+  if (tooltip) await addTooltip(container, trapezoid, tooltip.title, tooltip.texts);
 };
 
 /**
@@ -306,7 +333,7 @@ const loadText = (container, model, unit, onAbilityClick) => {
   fitFontSize(listItems, () => list.clientHeight > 0 && list.scrollHeight > list.clientHeight + 1);
 };
 
-const loadPositions = async (container, model, unit) => {
+const loadPositions = async (container, model, unit, glossary) => {
   const positionsList = container.querySelector(".card-vertical-positions");
   positionsList.innerHTML = "";
   const entries = [];
@@ -332,7 +359,7 @@ const loadPositions = async (container, model, unit) => {
       container,
       li,
       position.name,
-      position.description + (chosen ? " (chosen)" : ""),
+      buildPositionTooltipEntries(position, glossary, { chosen }),
       posIcon
     );
     positionsList.appendChild(li);
@@ -354,6 +381,13 @@ const load = async (container, {
 
   // hidden card
   if (model.cardId == null) return displayCardBack(container);
+
+  // Tooltip copy lives on the server (card views + glossary); without the
+  // glossary the tooltips degrade to the data the card views still carry.
+  const glossary = await getGlossary().catch((error) => {
+    console.error(`Tooltip glossary unavailable: ${error.message}`);
+    return null;
+  });
 
   // The text fits below (name and text area) must measure against the final
   // font metrics or a late webfont swap re-overflows the fitted text. This
@@ -405,16 +439,16 @@ const load = async (container, {
   }
 
   // type letter
-  await loadTypeLetter(container, model);
+  await loadTypeLetter(container, model, glossary);
   // header icons
-  await loadHeaderIcons(container, model);
+  await loadHeaderIcons(container, model, glossary);
   // name
   await loadName(container, model.name, model.sobriquet);
   // artwork (use fallback when missing)
   const artworkPath = safePath(model.artworkPath, DEFAULT_ARTWORK);
   container.querySelector(".card-vertical-artwork").style.backgroundImage = `url("${artworkPath}")`;
   // rank trapezoid
-  loadRank(container, model);
+  await loadRank(container, model, glossary);
   // affiliations trapezoid
   loadAffiliations(container, model);
 
@@ -452,20 +486,23 @@ const load = async (container, {
   // shinsu
   const shinsuContainer = container.querySelector(".card-vertical-shinsu");
   shinsuContainer.innerText = model.cost;
-  await addTooltip(container, shinsuContainer, "Shinsu", "The cost of playing this card");
+  const shinsuTooltip = glossary?.hud?.shinsuCard;
+  if (shinsuTooltip) {
+    await addTooltip(container, shinsuContainer, shinsuTooltip.name, shinsuTooltip.texts);
+  }
 
   // positions and hp exist for units only
   container.querySelector(".card-vertical-positions").classList.toggle("hidden", !isUnitCard);
   const hpContainer = container.querySelector(".card-vertical-hp");
   hpContainer.classList.toggle("hidden", !isUnitCard);
-  await loadPositions(container, model, unit);
+  await loadPositions(container, model, unit, glossary);
 
   // hp
   hpContainer.innerText = unit ? unit.currentHp : model.maxHp ?? "";
-  const hpText = unit
-    ? "The current hit points of this unit card"
-    : "The maximum hit points of this unit card";
-  await addTooltip(container, hpContainer, "HP", hpText);
+  const hpTooltip = glossary?.hud?.[unit ? "hpCurrent" : "hpMax"];
+  if (hpTooltip) {
+    await addTooltip(container, hpContainer, hpTooltip.name, hpTooltip.texts);
+  }
 
   // entrance: with content rendered, reveal and grow from the source card;
   // a source click that closed the card mid-load detaches the container and

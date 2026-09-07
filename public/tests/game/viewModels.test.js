@@ -108,7 +108,9 @@ describe("buildUnitViewModel", () => {
         attributes: {
           hwayeomsa: {
             name: "Hwayeomsa",
-            description: "Spend 1, Free: Charge 1 Fire Charge.",
+            title: "Hwayeomsa",
+            description: "Hwayeomsa are flame users who are able to convert shinsu into fire.",
+            effect: ["spend 1, Free: gain 1 Fire Charge and create Fire Core in your hand if you don't already have one"],
             iconPath: "/assets/icons/attributes/hwayeomsa.png",
           },
         },
@@ -119,10 +121,24 @@ describe("buildUnitViewModel", () => {
       {
         code: "hwayeomsa",
         name: "Hwayeomsa",
-        description: "Spend 1, Free: Charge 1 Fire Charge.",
+        title: "Hwayeomsa",
+        description: "Hwayeomsa are flame users who are able to convert shinsu into fire.",
+        effect: ["spend 1, Free: gain 1 Fire Charge and create Fire Core in your hand if you don't already have one"],
         iconPath: "/assets/icons/attributes/hwayeomsa.png",
       },
     ]);
+  });
+
+  test("defaults the attribute tooltip title to the attribute name when the view carries none", () => {
+    const model = buildCardViewModel({
+      cardId: 1,
+      name: "Evan Edrok",
+      attributes: {
+        "silver-dwarf": { name: "Silver Dwarf", description: "d", iconPath: "/assets/icons/attributes/silver-dwarf.png" },
+      },
+    });
+
+    expect(model.attributes[0].title).toBe("Silver Dwarf");
   });
 
   test("keeps the card view's canonical attribute order", () => {
@@ -134,7 +150,7 @@ describe("buildUnitViewModel", () => {
           anima: { name: "Anima", description: "a", iconPath: "/assets/icons/attributes/anima.png" },
           hwayeomsa: {
             name: "Hwayeomsa",
-            description: "Spend 1, Free: Charge 1 Fire Charge.",
+            description: "Hwayeomsa are flame users who are able to convert shinsu into fire.",
             iconPath: "/assets/icons/attributes/hwayeomsa.png",
           },
         },

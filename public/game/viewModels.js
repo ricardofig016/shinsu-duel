@@ -44,7 +44,9 @@ const flattenCard = (card) => ({
   attributes: Object.entries(card.attributes ?? {}).map(([code, attribute]) => ({
     code,
     name: attribute.name,
+    title: attribute.title ?? attribute.name,
     description: attribute.description ?? null,
+    effect: [...(attribute.effect ?? [])],
     iconPath: attribute.iconPath ?? null,
   })),
   rank: card.rank ?? null,

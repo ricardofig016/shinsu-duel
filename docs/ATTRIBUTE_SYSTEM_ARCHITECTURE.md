@@ -111,7 +111,7 @@ hwayeomsaEngine.getAvailableLevels(username, gameState)
 
 **Core mechanic (RULES.md):**
 
-> When I'm deployed, grant the enemy Conduit +2 HP or summon a Conduit on the enemy backline.
+> when i'm deployed, heal 2 HP from or summon Conduit on the enemy backline
 
 ### State
 
