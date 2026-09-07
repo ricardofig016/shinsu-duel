@@ -1,7 +1,7 @@
 {
   "blinded": {
     "name": "Blinded",
-    "description": "My targets are chosen at random",
+    "description": "My targets are chosen at random among legal targets",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": false,

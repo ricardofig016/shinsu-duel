@@ -1,30 +1,51 @@
 {
   "anima": {
     "name": "Anima",
-    "description": "Round start: gain a single-use Shinheuh combat slot if you don't already have one."
+    "description": "Anima summon and control special creatures called Shinheuh to fight for them.",
+    "effect": [
+      "Round start: gain a single-use Shinheuh combat slot if you don't already have one."
+    ]
   },
   "silver-dwarf": {
     "name": "Silver Dwarf",
-    "description": "The first time you draw a card each round, choose the card directly from your deck."
+    "description": "Guides are support units that help their team by providing information. They can tell what's the best move and predict the future. Silver dwarves specialize in navigating the immediate physical crossroads and obstacles right in front of them.",
+    "effect": [
+      "The first time you draw a card each round, choose the card directly from your deck."
+    ]
   },
   "red-witch": {
     "name": "Red Witch",
-    "description": "You can always see your opponent's hand and the top card of both players' decks."
+    "description": "Guides are support units that help their team by providing information. They can tell what's the best move and predict the future. Red witches specialize in reading long-term destiny and the overarching threads of fate.",
+    "effect": [
+      "You can always see your opponent's hand and the top card of both players' decks."
+    ]
   },
   "hwayeomsa": {
     "name": "Hwayeomsa",
-    "description": "Spend 1, Free: Charge 1 Fire Charge and create Fire Core in your hand if you don't already have it."
+    "description": "Hwayeomsa are flame users who are able to convert shinsu into fire. They deal team-wide massive fire damage.",
+    "effect": [
+      "spend 1, Free: gain 1 Fire Charge and create Fire Core in your hand if you don't already have one"
+    ]
   },
   "jeonsulsa": {
     "name": "Jeonsulsa",
-    "description": "When I'm deployed, heal 2 HP from or summon Conduit on the enemy backline."
+    "description": "Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units.",
+    "effect": [
+      "when i'm deployed, heal 2 HP from or summon Conduit on the enemy backline"
+    ]
   },
   "irregular": {
     "name": "Irregular",
-    "description": "Unit passives and landmarks have no effect on me."
+    "description": "Irregulars are powerful individuals who were not selected by Headon and came from outside the Tower. They don't follow the rules of the Tower and so are unaltered by many card effects.",
+    "effect": [
+      "Unit passives and landmark rules have no effect on me."
+    ]
   },
   "living-ignition-weapon": {
     "name": "Living Ignition Weapon",
-    "description": "You may equip me as many times as you want with unique equipments."
+    "description": "Living Ignition Weapons are living beings who were fused with a Weapon by the Workshop. They can use a plethora of equipments to adapt to any circumstance.",
+    "effect": [
+      "You may equip me as many times as you want with unique equipments."
+    ]
   }
 }

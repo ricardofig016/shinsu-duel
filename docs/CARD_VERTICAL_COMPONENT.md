@@ -30,8 +30,12 @@ The component consumes only the flattened view models from
   `effects`, `rules`, `evolveTriggers`, `igniteTriggers`.
 - Looked-up metadata arrives as code-keyed dictionaries stamped with
   `name`, `description`, and `iconPath`: traits, positions, affiliations,
-  attributes. Runtime conditions are stamped the same way by the GameState
-  projections.
+  attributes. Attribute views additionally carry the server-composed tooltip
+  `title` (guide attributes get "Guide - <name>") and their `effect` lines.
+  Runtime conditions are stamped the same way by the GameState projections.
+- Tooltip copy outside the card views (type/kind summaries, rank entries,
+  header concept descriptions, HUD strings) comes from the glossary route —
+  see `docs/TOOLTIP_SYSTEM.md` for the copy map and the styled entry contract.
 
 The component renders placeholders for missing artwork/icons but never
 mutates the view models.
@@ -39,7 +43,8 @@ mutates the view models.
 ## Layout per card type
 
 - **Name row:** the type letter (`assets/icons/types/`; landmarks carry
-  `landmark.png` despite being units), the name (left-aligned after the
+  `landmark.png` despite being units) with its own tooltip (the type's, or for
+  units the kind's, server-owned summary), the name (left-aligned after the
   letter), and the header icons — one icon per attribute (in the canonical
   attribute order of the card view), evolve, ignition, passive abilities,
   and requirements. Header icons render only when the
@@ -52,7 +57,9 @@ mutates the view models.
   flush with the artwork's top edge, the bottom one with its bottom edge.
   Their text renders at the card's base size (1em). Each trapezoid renders
   only when it carries information — the top one shows the card's `rank`
-  (authored on standard-kind units), the bottom one shows the first
+  (authored on standard-kind units) and carries the rank tooltip listing
+  every rank with its cost range, the card's own rank emphasized; the bottom
+  one shows the first
   affiliation; cards with neither rank nor affiliations show pure artwork.
   With more than one
   affiliation, hovering the trapezoid — or the overlay itself — opens a

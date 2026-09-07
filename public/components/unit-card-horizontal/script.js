@@ -1,4 +1,6 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
+import { getGlossary } from "/utils/glossary.js";
+import { buildPositionTooltipEntries } from "/utils/tooltip-entries.js";
 
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
 const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
@@ -45,6 +47,13 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
     return;
   }
 
+  // Tooltip copy lives on the server (card views + glossary); without the
+  // glossary the tooltips degrade to the data the card views still carry.
+  const glossary = await getGlossary().catch((error) => {
+    console.error(`Tooltip glossary unavailable: ${error.message}`);
+    return null;
+  });
+
   // expand to the full card on right-click; ability clicks are wired for your
   // own units only
   cardElement.addEventListener("contextmenu", async (event) => {
@@ -81,7 +90,13 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   if (placedPosition) {
     const positionIcon = safePath(placedPosition.iconPath, DEFAULT_POSITION_ICON);
     positionContainer.style.backgroundImage = `url("${positionIcon}")`;
-    await addTooltip(container, positionContainer, placedPosition.name, placedPosition.description, positionIcon);
+    await addTooltip(
+      container,
+      positionContainer,
+      placedPosition.name,
+      buildPositionTooltipEntries(placedPosition, glossary),
+      positionIcon
+    );
   } else {
     positionContainer.style.backgroundImage = `url("${DEFAULT_POSITION_ICON}")`;
   }
@@ -93,7 +108,7 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
       container,
       chosenContainer,
       chosenPosition.name,
-      chosenPosition.description + " (chosen)",
+      buildPositionTooltipEntries(chosenPosition, glossary, { chosen: true }),
       chosenIcon
     );
   } else {
@@ -104,7 +119,10 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   const hpContainer = container.querySelector(".unit-card-horizontal-hp");
   const hpHeader = hpContainer.querySelector("h1");
   if (hpHeader) hpHeader.innerText = unit.currentHp ?? 0;
-  await addTooltip(container, hpContainer, "HP", "The current hit points of this unit card");
+  const hpTooltip = glossary?.hud?.hpCurrent;
+  if (hpTooltip) {
+    await addTooltip(container, hpContainer, hpTooltip.name, hpTooltip.texts);
+  }
 };
 
 export default load;

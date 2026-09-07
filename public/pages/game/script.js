@@ -22,6 +22,11 @@ import {
   buildSwitchPositionAction,
   buildUseAbilityAction,
 } from "/game/actions.js";
+import { getGlossary } from "/utils/glossary.js";
+import {
+  buildDeckTooltipText,
+  buildPositionTooltipEntries,
+} from "/utils/tooltip-entries.js";
 
 const store = createGameStore();
 
@@ -43,7 +48,12 @@ const fetchFromPath = async (path) => {
 
 const prepareData = async () => {
   const positions = await fetchFromPath("positions");
-  return { positions };
+  // Tooltip copy is server-owned; the HUD tooltips degrade silently without it.
+  const glossary = await getGlossary().catch((error) => {
+    console.error(`Tooltip glossary unavailable: ${error.message}`);
+    return null;
+  });
+  return { positions, glossary };
 };
 
 const findUnit = (state, player, unitId) => {
@@ -112,12 +122,13 @@ const renderRound = (state) => {
   document.querySelector("#round-number").textContent = model.round;
 };
 
-const renderCombatSlots = (state, positions) => {
+const renderCombatSlots = (state, positions, glossary) => {
   for (let player of ["you", "opponent"]) {
     const slotsContainer = document.querySelector(`#${player}-container .combat-slots-container`);
     slotsContainer.innerHTML = "";
     for (let code of state[player].combatSlotCodes) {
-      const iconPath = `/assets/icons/positions/${code}.png`;
+      const position = positions[code];
+      const iconPath = position?.iconPath ?? `/assets/icons/positions/${code}.png`;
       const slot = document.createElement("div");
       slot.classList.add("combat-slot");
       slot.classList.toggle("used", buildCombatSlotViewModel(state[player], code).used);
@@ -130,18 +141,19 @@ const renderCombatSlots = (state, positions) => {
       addTooltip(
         slotsContainer,
         slot,
-        positions[code]?.name ?? code,
-        positions[code]?.description ?? "",
+        position?.name ?? code,
+        buildPositionTooltipEntries(position, glossary),
         iconPath
       );
     }
   }
 };
 
-const renderDecks = async (state) => {
+const renderDecks = async (state, glossary) => {
   const basePosition = [0, 50];
   const positionOffset = 0.2;
   const maxDeckSize = 20;
+  const deckTooltip = glossary?.hud?.deck ?? null;
   for (let player of ["you", "opponent"]) {
     const outerDiv = document.querySelector(`#${player}-container .deck-outer-container`);
     const deckContainer = outerDiv.querySelector(`.deck-container`);
@@ -154,8 +166,10 @@ const renderDecks = async (state) => {
       await loadComponent(newDiv, "card-vertical", {});
       newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
       newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
-      if (i === cardAmount - 1)
-        await addTooltip(outerDiv, newDiv, "Deck", `${state[player].deckSize} cards remaining`);
+      if (i === cardAmount - 1 && deckTooltip) {
+        const text = buildDeckTooltipText(state[player].deckSize, deckTooltip);
+        if (text) await addTooltip(outerDiv, newDiv, deckTooltip.name, text);
+      }
     }
   }
 };
@@ -388,8 +402,8 @@ const render = async (state, data, socket) => {
   store.set(state);
   const positions = data.positions ?? {};
   renderRound(state);
-  renderCombatSlots(state, positions);
-  await renderDecks(state);
+  renderCombatSlots(state, positions, data.glossary);
+  await renderDecks(state, data.glossary);
   renderLighthouses(state);
   await renderFields(state, socket);
   await renderHands(state, socket);
@@ -403,33 +417,30 @@ const render = async (state, data, socket) => {
 
 /* ── one-time board setup ─────────────────────────────────────────────── */
 
-const prepareBoard = async (positionData, socket) => {
+const prepareBoard = async (positionData, glossary, socket) => {
   for (let player of ["you", "opponent"]) {
     // lighthouses
-    const lighthouseContainer = document.querySelector(`#${player}-container .lighthouse-container`);
-    await addTooltip(
-      lighthouseContainer,
-      lighthouseContainer.querySelector("img"),
-      "Lighthouses",
-      "If you run out of lighthouses, you lose the game"
-    );
+    const lighthouseTooltip = glossary?.hud?.lighthouses;
+    if (lighthouseTooltip) {
+      const lighthouseContainer = document.querySelector(`#${player}-container .lighthouse-container`);
+      await addTooltip(
+        lighthouseContainer,
+        lighthouseContainer.querySelector("img"),
+        lighthouseTooltip.name,
+        lighthouseTooltip.texts
+      );
+    }
 
     // shinsu
-    const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
-    const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
-    await addTooltip(
-      shinsuContainer,
-      normalContainer,
-      "Shinsu",
-      "The resource that lets you play cards and use certain abilities"
-    );
-    const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
-    await addTooltip(
-      shinsuContainer,
-      rechargedContainer,
-      "Recharged Shinsu",
-      "The shinsu that wasn't used last turn"
-    );
+    const shinsuTooltip = glossary?.hud?.shinsuBoard;
+    const rechargedTooltip = glossary?.hud?.rechargedShinsu;
+    if (shinsuTooltip && rechargedTooltip) {
+      const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
+      const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
+      await addTooltip(shinsuContainer, normalContainer, shinsuTooltip.name, shinsuTooltip.texts);
+      const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
+      await addTooltip(shinsuContainer, rechargedContainer, rechargedTooltip.name, rechargedTooltip.texts);
+    }
   }
 
   // position drop zones
@@ -523,13 +534,16 @@ const prepareBoard = async (positionData, socket) => {
   });
 
   // fire charges: the Hwayeomsa core ability
-  const fireChargeContainer = document.querySelector("#fire-charge-container");
-  await addTooltip(
-    fireChargeContainer,
-    fireChargeContainer.querySelector("h2"),
-    "Fire Charges",
-    "Gained by your Hwayeomsa units; Fire Core consumes them to create Incinerate cards"
-  );
+  const fireChargeTooltip = glossary?.hud?.fireCharges;
+  if (fireChargeTooltip) {
+    const fireChargeContainer = document.querySelector("#fire-charge-container");
+    await addTooltip(
+      fireChargeContainer,
+      fireChargeContainer.querySelector("h2"),
+      fireChargeTooltip.name,
+      fireChargeTooltip.texts
+    );
+  }
   document.querySelector("#fire-charge-generate").addEventListener("click", () => {
     socket.emit(EVENTS.GAME_ACTION, buildGenerateFireChargeAction());
   });
@@ -657,5 +671,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   // for the current state view
   socket.on("connect", () => socket.emit(EVENTS.GAME_STATE_REQUEST));
 
-  await prepareBoard(data.positions ?? {}, socket);
+  await prepareBoard(data.positions ?? {}, data.glossary, socket);
 });

@@ -8,6 +8,7 @@ import Ajv from "ajv";
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
 import { MAX_STAGE, MIN_STAGE, parseStage, stageName } from "./lib/stage-name.js";
+import { RANKS } from "../server/game/ranks.js";
 import conditions from "../server/data/conditions.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -26,11 +27,11 @@ const schemaPath = path.join(projectRoot, "schemas", "card.schema.json");
 
 // ── Domain data (mirrors RULES.md) ──────────────────────────────────────────
 
-const rankCostRanges = {
-  regular: [0, 5],
-  ranker: [3, 7],
-  "high ranker": [5, 10],
-};
+// Rank cost ranges come from the shared canonical rank catalog, which the
+// glossary route also reads for display.
+const rankCostRanges = Object.fromEntries(
+  Object.entries(RANKS).map(([code, rank]) => [code, [rank.minCost, rank.maxCost]])
+);
 
 const traitNames = new Set([
   "barrier", "beacon", "bloodthirsty", "dealer", "immune",

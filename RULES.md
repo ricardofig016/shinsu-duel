@@ -480,14 +480,14 @@ Jeonsulsa are lightning users who have the ability to give electrical properties
 **Core in-game mechanic:**
 
 ```md
-when i'm deployed, grant the enemy Conduit +2 HP or summon a Conduit on the enemy backline
+when i'm deployed, heal 2 HP from or summon Conduit on the enemy backline
 Conduit: No position. 8 max HP. Deployed with 2 HP. round start: give me Ghost. round start or activation: if there is no Jeonsulsa on the enemy team, Slay me. round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally
 Lightning Baang: give Burned 1 to a unit
 Thunder Baang: give Exhausted 1 to a unit
 Static Baang: give Weak 1 to a unit
 ```
 
-"When I'm deployed, grant the enemy Conduit +2 HP or summon Conduit": grant +2 HP (raising both max and current HP) to the enemy Conduit if one exists, otherwise summon a Conduit on the enemy backline. Granting HP to the Conduit always raises both its max and current HP. The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
+"When I'm deployed, heal 2 HP from or summon Conduit": heal the enemy Conduit 2 HP if one exists, otherwise summon a Conduit on the enemy backline. The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
 
 **Example Synergies:**
 

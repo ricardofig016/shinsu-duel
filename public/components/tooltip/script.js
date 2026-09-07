@@ -1,3 +1,5 @@
+import { normalizeTooltipEntries } from "/utils/tooltip-entries.js";
+
 const load = async (container, { hoverContainer, title, textList, iconPath = null }) => {
   const iconEl = container.querySelector(".tooltip-icon");
   const sanitizePath = (p) => {
@@ -17,17 +19,15 @@ const load = async (container, { hoverContainer, title, textList, iconPath = nul
   container.querySelector(".tooltip-title").innerText = title;
 
   // Payload text is rendered as text content only, so card names and ability
-  // text can never inject markup.
+  // text can never inject markup; styled entries only ever add a class.
   const tooltipTextContainer = container.querySelector(".tooltip-text");
-  const entries = typeof textList === "string" ? [textList] : textList ?? [];
   tooltipTextContainer.replaceChildren(
-    ...entries
-      .filter((text) => typeof text === "string" && text.trim() !== "")
-      .map((text) => {
-        const p = document.createElement("p");
-        p.textContent = text;
-        return p;
-      })
+    ...normalizeTooltipEntries(textList).map(({ text, style }) => {
+      const p = document.createElement("p");
+      p.textContent = text;
+      if (style) p.classList.add(`tooltip-text-${style}`);
+      return p;
+    })
   );
 
   const tooltipFrame = container.querySelector(".tooltip-frame");
