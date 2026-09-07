@@ -1,6 +1,7 @@
 #cards-page-container {
   padding: 0 2rem 6rem 2rem;
   max-height: 100vh;
+  overflow-x: clip;
 }
 
 #cards-toolbar {
@@ -92,10 +93,10 @@
   justify-items: center;
 }
 
-/* The right-click zoom copy is absolutely positioned by the component; on
-   this page it must center on the viewport instead of the scrolled content,
-   which keeps it visible on tall grids. Ancestors stay unpositioned so
-   tooltips (pageX/pageY) keep landing under the pointer. */
+.cards-grid > .card-vertical-component:hover {
+  z-index: 1;
+}
+
 #cards-sections .card-vertical-frame.card-vertical-big {
   position: fixed;
 }
