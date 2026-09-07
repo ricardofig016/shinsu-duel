@@ -1199,7 +1199,8 @@
         },
         "raw": "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/evan_edrok.png"
   },
   "23": {
     "cardId": 23,
@@ -1358,7 +1359,8 @@
         },
         "raw": "the bearer's damage-dealing abilities deal +1 damage"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/first_thorn_fragment.png"
   },
   "27": {
     "cardId": 27,
@@ -1456,7 +1458,8 @@
         },
         "raw": "the bearer has Bloodthirsty 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png"
   },
   "30": {
     "cardId": 30,
@@ -1473,7 +1476,8 @@
         },
         "raw": "the bearer has Barrier"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/frog_fisher.png"
   },
   "31": {
     "cardId": 31,
@@ -3198,7 +3202,8 @@
         },
         "raw": "Baang gives Burned 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/quaetro_blitz.png"
   },
   "66": {
     "cardId": 66,
@@ -3543,7 +3548,8 @@
         },
         "raw": "the bearer's healing abilities heal +1 HP"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/second_thorn_fragment.png"
   },
   "73": {
     "cardId": 73,
@@ -3885,7 +3891,8 @@
         },
         "raw": "the bearer has +1 HP"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/third_thorn_fragment.png"
   },
   "82": {
     "cardId": 82,
@@ -4080,7 +4087,8 @@
         },
         "raw": "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/urek_mazino.png"
   },
   "86": {
     "cardId": 86,
