@@ -22,10 +22,44 @@ const STRIP_ROW_SIZE = 4;
 // the fits must measure the final metrics, and fonts.ready alone is not
 // enough because a face first requested by this card is not in flight yet.
 const CARD_FONT_FAMILIES = Object.freeze(["Roboto", "New Rocker"]);
+// Entrance/exit zoom of the big card between its centered position and the
+// source card it was opened from.
+const BIG_CARD_MOTION_MS = 100;
+const BIG_CARD_BASE_TRANSFORM = "translate(50%, 50%)";
 
 const safePath = (p, fallback = null) => {
   if (typeof p === "string" && p.trim() !== "" && p !== "undefined" && p !== "null") return p;
   return fallback;
+};
+
+/**
+ * FLIP zoom between the big card's centered position and the source card it
+ * was opened from. Both rects are viewport coordinates, so every page's
+ * positioning context (absolute overlay, fixed grid zoom) is irrelevant.
+ * Returns the motion, or null when there is nothing to animate: reduced
+ * motion requested, the source gone or hidden, or no animation support.
+ * The caller owns what happens on finish (reveal the card / remove it).
+ */
+const animateBigCard = (frame, source, direction) => {
+  const sourceRect = source?.isConnected ? source.getBoundingClientRect() : null;
+  if (
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    !sourceRect ||
+    sourceRect.width === 0 ||
+    typeof frame.animate !== "function"
+  ) {
+    return null;
+  }
+  const frameRect = frame.getBoundingClientRect();
+  const dx = sourceRect.left + sourceRect.width / 2 - (frameRect.left + frameRect.width / 2);
+  const dy = sourceRect.top + sourceRect.height / 2 - (frameRect.top + frameRect.height / 2);
+  const scale = sourceRect.width / frameRect.width;
+  const fromTransform = `${BIG_CARD_BASE_TRANSFORM} translate(${dx}px, ${dy}px) scale(${scale})`;
+  const keyframes =
+    direction === "open"
+      ? [{ transform: fromTransform }, { transform: BIG_CARD_BASE_TRANSFORM }]
+      : [{ transform: BIG_CARD_BASE_TRANSFORM }, { transform: fromTransform }];
+  return frame.animate(keyframes, { duration: BIG_CARD_MOTION_MS, easing: "ease-out" });
 };
 
 const displayCardBack = (container) => {
@@ -306,7 +340,15 @@ const loadPositions = async (container, model, unit) => {
 };
 
 // Need either unit or card, but not both; both are flattened view models.
-const load = async (container, { card = null, unit = null, isSmall = false, onAbilityClick = null }) => {
+// `source` is the element the big card was opened from; it anchors the
+// entrance/exit zoom and is ignored on small (card back) renders.
+const load = async (container, {
+  card = null,
+  unit = null,
+  isSmall = false,
+  onAbilityClick = null,
+  source = null,
+}) => {
   if ((unit && card) || (!unit && !card)) return displayCardBack(container);
   const model = unit ?? card;
 
@@ -334,10 +376,17 @@ const load = async (container, { card = null, unit = null, isSmall = false, onAb
         card: unit ? null : model,
         isSmall: false,
         onAbilityClick: unit ? onAbilityClick : null,
+        source: cardFrame,
       });
     });
   } else {
+    if (source) {
+      // hold the big card invisible until the source-anchored entrance runs;
+      // visibility (unlike display) keeps layout measurable for the fits
+      cardFrame.style.visibility = "hidden";
+    }
     // close the big card when clicking outside; the listener removes itself
+    let closing = false;
     const closeOnClickOutside = (event) => {
       if (!container.isConnected) {
         document.removeEventListener("mousedown", closeOnClickOutside);
@@ -345,7 +394,11 @@ const load = async (container, { card = null, unit = null, isSmall = false, onAb
       }
       if (event.target !== cardFrame && !cardFrame.contains(event.target)) {
         document.removeEventListener("mousedown", closeOnClickOutside);
-        container.remove();
+        if (closing) return;
+        closing = true;
+        const motion = animateBigCard(cardFrame, source, "close");
+        if (motion) motion.finished.finally(() => container.remove());
+        else container.remove();
       }
     };
     document.addEventListener("mousedown", closeOnClickOutside);
@@ -413,6 +466,14 @@ const load = async (container, { card = null, unit = null, isSmall = false, onAb
     ? "The current hit points of this unit card"
     : "The maximum hit points of this unit card";
   await addTooltip(container, hpContainer, "HP", hpText);
+
+  // entrance: with content rendered, reveal and grow from the source card;
+  // a source click that closed the card mid-load detaches the container and
+  // skips the motion entirely
+  if (source && container.isConnected) {
+    cardFrame.style.visibility = "visible";
+    animateBigCard(cardFrame, source, "open");
+  }
 };
 
 export default load;

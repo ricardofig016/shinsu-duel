@@ -56,6 +56,7 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
       unit,
       isSmall: false,
       onAbilityClick: interactive ? onAbilityClick : null,
+      source: cardElement,
     });
   });
 
