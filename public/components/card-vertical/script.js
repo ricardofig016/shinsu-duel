@@ -1,4 +1,4 @@
-import { loadComponent, addTooltip } from "/utils/component-util.js";
+import { loadComponent, addTooltip, fitFontSize } from "/utils/component-util.js";
 
 const TYPE_LETTER_ICONS = Object.freeze({
   skill: "/assets/icons/types/skill.png",
@@ -18,6 +18,10 @@ const DEFAULT_CONDITION_ICON = "/assets/icons/conditions/placeholder.png";
 const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
 const OVERFLOW_ICON = "/assets/icons/other/ellipsis.png";
 const STRIP_ROW_SIZE = 4;
+// The faces the card's fitted text renders with (global.css declarations):
+// the fits must measure the final metrics, and fonts.ready alone is not
+// enough because a face first requested by this card is not in flight yet.
+const CARD_FONT_FAMILIES = Object.freeze(["Roboto", "New Rocker"]);
 
 const safePath = (p, fallback = null) => {
   if (typeof p === "string" && p.trim() !== "" && p !== "undefined" && p !== "null") return p;
@@ -35,7 +39,7 @@ const displayCardBack = (container) => {
  * The type letter is the card type's own icon; landmarks are units but carry
  * their dedicated letter.
  */
-const loadTypeLetter = (container, model) => {
+const loadTypeLetter = async (container, model) => {
   const letter = container.querySelector(".card-vertical-type-letter");
   const icon =
     model.type === "unit" && model.kind === "landmark"
@@ -47,6 +51,10 @@ const loadTypeLetter = (container, model) => {
   }
   letter.classList.remove("hidden");
   letter.src = icon;
+  // The name's fit measurement depends on the letter's rendered width; an
+  // undecoded image has none. A broken icon resolves the wait instead of
+  // blocking.
+  await letter.decode().catch(() => {});
 };
 
 /**
@@ -89,6 +97,10 @@ const loadHeaderIcons = async (container, model) => {
     if (!icon) continue;
     const img = document.createElement("img");
     img.src = icon;
+    // The name's fit measurement depends on the icons' rendered widths;
+    // an undecoded image has none, so each icon must be ready before the
+    // name is fitted. A broken icon resolves the wait instead of blocking.
+    await img.decode().catch(() => {});
     await addTooltip(container, img, title, texts, icon);
     headerIcons.appendChild(img);
   }
@@ -97,6 +109,17 @@ const loadHeaderIcons = async (container, model) => {
 const loadName = async (container, name, sobriquet) => {
   const nameContainer = container.querySelector(".card-vertical-name");
   nameContainer.innerText = name;
+  // The name is the only flexible element in the header: it shrinks until it
+  // fits the space left by the type letter and the header icons, falling back
+  // to the CSS ellipsis for pathological names that overflow even at the floor.
+  // Content and box are measured fractionally through a Range: scrollWidth/
+  // clientWidth are integer-rounded, which erases sub-pixel overflow on the
+  // small card scale and leaves the ellipsis painted on a "fits" verdict.
+  const range = document.createRange();
+  range.selectNodeContents(nameContainer);
+  const nameOverflows = () =>
+    range.getBoundingClientRect().width > nameContainer.getBoundingClientRect().width + 0.25;
+  fitFontSize([nameContainer], nameOverflows, { max: 2.4, min: 1.2 });
   await addTooltip(container, nameContainer, name, sobriquet ? sobriquet : "");
 };
 
@@ -214,8 +237,8 @@ const loadIconStrip = async (
  * landmark rules, and skill/equipment effects. Abilities stay clickable
  * where the page wired them (your own units); effects and rules render as
  * plain paragraphs. The text box owns a fixed flex share of the card, so
- * the fit loop only has to make the content fit its own box: it shrinks
- * the font until the content height matches the box height.
+ * the shared fit util only has to make the content fit its own box: it
+ * shrinks the font until the content height matches the box height.
  */
 const loadText = (container, model, unit, onAbilityClick) => {
   const list = container.querySelector(".card-vertical-text");
@@ -246,13 +269,7 @@ const loadText = (container, model, unit, onAbilityClick) => {
   const paragraphs = isLandmark ? model.rules : isUnit ? [] : model.effects;
   for (const text of paragraphs) addItem(text);
 
-  const contentOverflows = () => list.scrollHeight > list.clientHeight + 1;
-  for (const item of listItems) item.style.fontSize = "2em";
-  while (list.clientHeight > 0 && contentOverflows()) {
-    const fontSize = parseFloat(listItems[0].style.fontSize) - 0.2;
-    if (fontSize < 0.8) break;
-    for (const item of listItems) item.style.fontSize = `${fontSize}em`;
-  }
+  fitFontSize(listItems, () => list.clientHeight > 0 && list.scrollHeight > list.clientHeight + 1);
 };
 
 const loadPositions = async (container, model, unit) => {
@@ -296,6 +313,12 @@ const load = async (container, { card = null, unit = null, isSmall = false, onAb
   // hidden card
   if (model.cardId == null) return displayCardBack(container);
 
+  // The text fits below (name and text area) must measure against the final
+  // font metrics or a late webfont swap re-overflows the fitted text. This
+  // container must also be attached to the document: detached elements have
+  // no layout and every fit would measure zero and never shrink.
+  await Promise.all(CARD_FONT_FAMILIES.map((family) => document.fonts.load(`1em "${family}"`)));
+
   // size
   const cardFrame = container.querySelector(".card-vertical-frame");
   cardFrame.classList.remove("card-vertical-small", "card-vertical-big", "no-hover");
@@ -329,7 +352,7 @@ const load = async (container, { card = null, unit = null, isSmall = false, onAb
   }
 
   // type letter
-  loadTypeLetter(container, model);
+  await loadTypeLetter(container, model);
   // header icons
   await loadHeaderIcons(container, model);
   // name

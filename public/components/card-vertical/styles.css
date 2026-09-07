@@ -58,6 +58,10 @@
   width: 100%;
   justify-content: flex-start;
   gap: 0.5em;
+  /* The header is a fixed-height single row: nothing may paint below it
+     onto the artwork. The name shrinks to the leftover width; anything
+     wider than the row (pathological icon counts) is clipped here. */
+  overflow: hidden;
 }
 
 .card-vertical-type-letter {
@@ -81,7 +85,9 @@
   height: 100%;
   gap: 0.3em;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  /* Icons never shrink or wrap: each takes its exact size on the single
+     header row, and extras past the row's width are clipped by the title. */
+  flex-wrap: nowrap;
 }
 
 .card-vertical-header-icons img {

@@ -36,11 +36,14 @@ const showFailure = (message) => {
   error.classList.remove("hidden");
 };
 
-/** Build one mounted card component; the wrapper stays unpositioned so
- * tooltips (document-relative) and the fixed zoom copy behave on this page. */
-const createCardElement = async (view) => {
+/** Build one mounted card component. The element is appended to its grid
+ * before loading: the component measures its own layout while rendering
+ * (the text fits), which requires it to be attached to the document. The
+ * final ordering is deterministic anyway — render() re-appends sorted. */
+const createCardElement = async (section, view) => {
   const element = document.createElement("div");
   element.classList.add("card-vertical-component");
+  section.grid.appendChild(element);
   await loadComponent(element, "card-vertical", { card: view, isSmall: true });
   return { view, element };
 };
@@ -81,9 +84,8 @@ const populateSections = async ({ cards, testCards = [], orphanArtworks = [] }) 
   for (const section of sections) {
     for (const view of section.views) {
       mounts.push(
-        createCardElement(view).then((mounted) => {
+        createCardElement(section, view).then((mounted) => {
           section.byCardId.set(view.cardId, mounted);
-          section.grid.appendChild(mounted.element);
         })
       );
     }
