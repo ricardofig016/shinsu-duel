@@ -9,6 +9,7 @@
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`
 - [ ] cards: dynamically mark all cards in `data\cards\test` as unreachable
 - [ ] ui: add numbers to numeric traits and conditions
+- [ ] jeonsulsa: make the engine heal instead of granting hp
 
 ## In Progress
 
