@@ -6,6 +6,15 @@ All agents must strictly follow the instructions and guidelines in this file.
 
 Treat every change as part of the long-term resurrection and evolution of this project. Preserve the project's rules, architectural integrity, and ability to support increasingly complex cards, interactions, and game mechanics.
 
+## Docs-First Exploration
+
+`docs/` is the complete, authoritative map of this codebase. Start every task from `docs/` and trust it fully: work from what the docs state without reading source to confirm them. Open source code only when the docs lack a fact you need.
+
+- System behavior or architecture: read the matching doc in `docs/` (one exists for every major system), then open only the source files that doc names.
+- Card or rule work: `docs/CARD_AUTHORING.md` first.
+- Test or fixture work: `docs/TESTING.md` first (test layout, the `compile:fixtures` pipeline, and fixture conventions).
+- Needed fact missing from the docs: read the narrowest source that answers it, nothing more, and tell the user about the doc gap.
+
 ## Engineering Principles
 
 - Prefer correct, clean architecture over backward compatibility with obsolete or flawed implementations.
@@ -20,9 +29,6 @@ Treat every change as part of the long-term resurrection and evolution of this p
 ## Rules and Project Context
 
 - Treat `RULES.md` as the authoritative source for game behavior unless the user explicitly overrides it.
-- Read the relevant architecture documents in `docs/` before making any changes to the codebase.
-- For any card or rule work — adding/editing cards, or adding/editing rules — first read `docs/CARD_AUTHORING.md`.
-- For any test or fixture work — writing tests or creating/editing test fixtures — first read `docs/TESTING.md` (test layout, the `compile:fixtures` pipeline, and fixture conventions live there).
 - Respect compiler/runtime boundaries: card YAML is source data, compiled card data is a build artifact, and runtime code must use the compiled contract.
 - Always use the canonical event-name constants from `server/game/EventCatalog.js` (`EVT`) when emitting or subscribing to events — never hardcode event-name strings.
 - Preserve event ordering, lifecycle phases, ownership rules, targeting rules, and service boundaries.
@@ -36,7 +42,7 @@ Treat every change as part of the long-term resurrection and evolution of this p
 Before implementing a non-trivial change:
 
 1. Identify the purpose of the change and its role in the project's broader goals.
-2. Inspect existing implementations, contracts, tests, and documentation.
+2. Gather context from `docs/` first; open only the source the docs point to.
 3. Identify gaps, risks, invariants, edge cases, and interactions with future mechanics.
 4. Define clear acceptance criteria for the work.
 
@@ -56,7 +62,6 @@ During implementation:
 - Before changing documentation, review all relevant files in `docs/`; update only the sections affected by the current contract or architecture, and add a new document only when an important complex component is not adequately covered.
 - Keep documentation concise and include only what is needed, no more.
 - Avoid unecessary comments in code.
-- Do not waste tokens reading files when all you need is already documented in docs/. Trust the documentation.
 - Treat `docs/` as a single documentation center: every piece of information should be documented at most once across all doc files, in a single file.
 
 ## Testing and Bug Discipline
