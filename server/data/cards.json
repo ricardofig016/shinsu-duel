@@ -1380,32 +1380,11 @@
     "attributes": [],
     "affiliations": [],
     "abilities": [],
-    "passives": []
+    "passives": [],
+    "artworkPath": "/assets/images/artworks/floor_of_death.png"
   },
   "28": {
     "cardId": 28,
-    "type": "skill",
-    "name": "Flower of Zygaena",
-    "cost": 4,
-    "deckConstraints": [],
-    "effects": [
-      {
-        "type": "grant_trait",
-        "trait": "strong",
-        "amount": 2,
-        "target": {
-          "side": "ally",
-          "affiliation": [
-            "wolhaiksong",
-            "team-sweet-and-sour"
-          ]
-        },
-        "raw": "give ally wolhaiksong and team sweet and sour members strong 2"
-      }
-    ]
-  },
-  "29": {
-    "cardId": 29,
     "type": "equipment",
     "name": "Fourth Thorn Fragment",
     "series": "thorn-fragment",
@@ -1461,8 +1440,8 @@
     ],
     "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png"
   },
-  "30": {
-    "cardId": 30,
+  "29": {
+    "cardId": 29,
     "type": "equipment",
     "name": "Frog Fisher",
     "cost": 1,
@@ -1479,8 +1458,8 @@
     ],
     "artworkPath": "/assets/images/artworks/frog_fisher.png"
   },
-  "31": {
-    "cardId": 31,
+  "30": {
+    "cardId": 30,
     "type": "unit",
     "name": "Gyetang",
     "cost": 1,
@@ -1508,8 +1487,8 @@
     ],
     "passives": []
   },
-  "32": {
-    "cardId": 32,
+  "31": {
+    "cardId": 31,
     "type": "unit",
     "name": "Ha Yuri Zahard",
     "cost": 6,
@@ -1577,8 +1556,8 @@
       }
     ]
   },
-  "33": {
-    "cardId": 33,
+  "32": {
+    "cardId": 32,
     "type": "skill",
     "name": "Healing Flames",
     "cost": 5,
@@ -1611,8 +1590,8 @@
     ],
     "artworkPath": "/assets/images/artworks/healing_flames.png"
   },
-  "34": {
-    "cardId": 34,
+  "33": {
+    "cardId": 33,
     "type": "skill",
     "name": "Healing Potion",
     "cost": 2,
@@ -1628,8 +1607,8 @@
       }
     ]
   },
-  "35": {
-    "cardId": 35,
+  "34": {
+    "cardId": 34,
     "type": "unit",
     "name": "Hell Express",
     "cost": 1,
@@ -1657,10 +1636,11 @@
         },
         "raw": "round start: give Ghost to all Ranker and High Ranker units"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/hell_express.png"
   },
-  "36": {
-    "cardId": 36,
+  "35": {
+    "cardId": 35,
     "type": "unit",
     "name": "Hon Akraptor",
     "cost": 2,
@@ -1708,8 +1688,8 @@
       }
     ]
   },
-  "37": {
-    "cardId": 37,
+  "36": {
+    "cardId": 36,
     "type": "unit",
     "name": "Hong Chunhwa",
     "cost": 1,
@@ -1744,8 +1724,8 @@
     ],
     "passives": []
   },
-  "38": {
-    "cardId": 38,
+  "37": {
+    "cardId": 37,
     "type": "unit",
     "name": "Hwa Ryun",
     "cost": 3,
@@ -1809,8 +1789,8 @@
       }
     ]
   },
-  "39": {
-    "cardId": 39,
+  "38": {
+    "cardId": 38,
     "type": "equipment",
     "name": "Ice Spear",
     "cost": 3,
@@ -1845,8 +1825,8 @@
       }
     ]
   },
-  "40": {
-    "cardId": 40,
+  "39": {
+    "cardId": 39,
     "type": "skill",
     "name": "Incinerate I",
     "series": "incinerate",
@@ -1875,8 +1855,8 @@
     ],
     "artworkPath": "/assets/images/artworks/incinerate_i.png"
   },
-  "41": {
-    "cardId": 41,
+  "40": {
+    "cardId": 40,
     "type": "skill",
     "name": "Incinerate II",
     "series": "incinerate",
@@ -1906,8 +1886,8 @@
     ],
     "artworkPath": "/assets/images/artworks/incinerate_ii.png"
   },
-  "42": {
-    "cardId": 42,
+  "41": {
+    "cardId": 41,
     "type": "skill",
     "name": "Incinerate III",
     "series": "incinerate",
@@ -1952,8 +1932,8 @@
     ],
     "artworkPath": "/assets/images/artworks/incinerate_iii.png"
   },
-  "43": {
-    "cardId": 43,
+  "42": {
+    "cardId": 42,
     "type": "skill",
     "name": "Incinerate IV",
     "series": "incinerate",
@@ -1997,8 +1977,8 @@
     ],
     "artworkPath": "/assets/images/artworks/incinerate_iv.png"
   },
-  "44": {
-    "cardId": 44,
+  "43": {
+    "cardId": 43,
     "type": "unit",
     "name": "Ja Wangnan",
     "cost": 3,
@@ -2074,8 +2054,8 @@
     ],
     "artworkPath": "/assets/images/artworks/ja_wangnan.png"
   },
-  "45": {
-    "cardId": 45,
+  "44": {
+    "cardId": 44,
     "type": "unit",
     "name": "Jyu Viole Grace",
     "cost": 4,
@@ -2120,8 +2100,8 @@
     "passives": [],
     "artworkPath": "/assets/images/artworks/jyu_viole_grace.png"
   },
-  "46": {
-    "cardId": 46,
+  "45": {
+    "cardId": 45,
     "type": "unit",
     "name": "Karaka",
     "cost": 7,
@@ -2212,12 +2192,12 @@
           "raw": "Scout: equip with Purple Dementor"
         }
       ],
-      "cardId": 47
+      "cardId": 46
     },
     "artworkPath": "/assets/images/artworks/karaka.png"
   },
-  "47": {
-    "cardId": 47,
+  "46": {
+    "cardId": 46,
     "type": "unit",
     "name": "Karaka II",
     "cost": 7,
@@ -2300,11 +2280,11 @@
         "raw": "round end: deal 3 to all Rooted enemies"
       }
     ],
-    "evolvedFrom": 46,
+    "evolvedFrom": 45,
     "artworkPath": "/assets/images/artworks/karaka_ii.png"
   },
-  "48": {
-    "cardId": 48,
+  "47": {
+    "cardId": 47,
     "type": "equipment",
     "name": "Karaka's Armor Suit",
     "cost": 4,
@@ -2332,8 +2312,8 @@
       }
     ]
   },
-  "49": {
-    "cardId": 49,
+  "48": {
+    "cardId": 48,
     "type": "unit",
     "name": "Khun Aguero Agnis",
     "cost": 0,
@@ -2373,12 +2353,12 @@
           "raw": "i am equipped with Ice Spear"
         }
       ],
-      "cardId": 50
+      "cardId": 49
     },
     "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png"
   },
-  "50": {
-    "cardId": 50,
+  "49": {
+    "cardId": 49,
     "type": "unit",
     "name": "Khun Aguero Agnis II",
     "cost": 0,
@@ -2430,11 +2410,11 @@
         "raw": "i ignore Taunt"
       }
     ],
-    "evolvedFrom": 49,
+    "evolvedFrom": 48,
     "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png"
   },
-  "51": {
-    "cardId": 51,
+  "50": {
+    "cardId": 50,
     "type": "unit",
     "name": "Khun Ran",
     "cost": 3,
@@ -2498,11 +2478,11 @@
           "raw": "Redan is played on me"
         }
       ],
-      "cardId": 52
+      "cardId": 51
     }
   },
-  "52": {
-    "cardId": 52,
+  "51": {
+    "cardId": 51,
     "type": "unit",
     "name": "Khun Ran II",
     "cost": 3,
@@ -2577,10 +2557,10 @@
         "raw": "round end: create Redan in your hand and revert me to Khun Ran"
       }
     ],
-    "evolvedFrom": 51
+    "evolvedFrom": 50
   },
-  "53": {
-    "cardId": 53,
+  "52": {
+    "cardId": 52,
     "type": "unit",
     "name": "Kurudan",
     "cost": 4,
@@ -2639,8 +2619,8 @@
     ],
     "artworkPath": "/assets/images/artworks/kurudan.png"
   },
-  "54": {
-    "cardId": 54,
+  "53": {
+    "cardId": 53,
     "type": "skill",
     "name": "Lightning Baang",
     "cost": 1,
@@ -2663,8 +2643,8 @@
       }
     ]
   },
-  "55": {
-    "cardId": 55,
+  "54": {
+    "cardId": 54,
     "type": "unit",
     "name": "Lo Po Bia Ren",
     "cost": 6,
@@ -2745,8 +2725,8 @@
     ],
     "artworkPath": "/assets/images/artworks/lo_po_bia_ren.png"
   },
-  "56": {
-    "cardId": 56,
+  "55": {
+    "cardId": 55,
     "type": "unit",
     "name": "Michael",
     "cost": 4,
@@ -2820,8 +2800,8 @@
       }
     ]
   },
-  "57": {
-    "cardId": 57,
+  "56": {
+    "cardId": 56,
     "type": "unit",
     "name": "Monkeyman",
     "cost": 1,
@@ -2858,8 +2838,8 @@
     ],
     "passives": []
   },
-  "58": {
-    "cardId": 58,
+  "57": {
+    "cardId": 57,
     "type": "unit",
     "name": "Name Hunt Station",
     "cost": 4,
@@ -2899,8 +2879,8 @@
     ],
     "artworkPath": "/assets/images/artworks/name_hunt_station.png"
   },
-  "59": {
-    "cardId": 59,
+  "58": {
+    "cardId": 58,
     "type": "equipment",
     "name": "Narumada",
     "cost": 2,
@@ -2924,12 +2904,12 @@
           "raw": "the bearer Slays a unit"
         }
       ],
-      "cardId": 60
+      "cardId": 59
     },
     "artworkPath": "/assets/images/artworks/narumada.png"
   },
-  "60": {
-    "cardId": 60,
+  "59": {
+    "cardId": 59,
     "type": "equipment",
     "name": "Narumada - Ignited",
     "cost": 2,
@@ -2957,11 +2937,11 @@
         "raw": "the bearer's damage-dealing abilities give Exhausted 1"
       }
     ],
-    "ignitedFrom": 59,
+    "ignitedFrom": 58,
     "artworkPath": "/assets/images/artworks/narumada_ignited.png"
   },
-  "61": {
-    "cardId": 61,
+  "60": {
+    "cardId": 60,
     "type": "unit",
     "name": "Novick",
     "cost": 5,
@@ -3045,8 +3025,8 @@
       }
     ]
   },
-  "62": {
-    "cardId": 62,
+  "61": {
+    "cardId": 61,
     "type": "unit",
     "name": "Pedro",
     "cost": 3,
@@ -3092,8 +3072,8 @@
       }
     ]
   },
-  "63": {
-    "cardId": 63,
+  "62": {
+    "cardId": 62,
     "type": "equipment",
     "name": "Phobos",
     "cost": 0,
@@ -3115,8 +3095,8 @@
     ],
     "artworkPath": "/assets/images/artworks/phobos.png"
   },
-  "64": {
-    "cardId": 64,
+  "63": {
+    "cardId": 63,
     "type": "equipment",
     "name": "Purple Dementor",
     "cost": 3,
@@ -3151,8 +3131,8 @@
       }
     ]
   },
-  "65": {
-    "cardId": 65,
+  "64": {
+    "cardId": 64,
     "type": "unit",
     "name": "Quaetro Blitz",
     "cost": 2,
@@ -3206,8 +3186,8 @@
     ],
     "artworkPath": "/assets/images/artworks/quaetro_blitz.png"
   },
-  "66": {
-    "cardId": 66,
+  "65": {
+    "cardId": 65,
     "type": "unit",
     "name": "Rachel",
     "cost": 1,
@@ -3269,8 +3249,8 @@
     ],
     "passives": []
   },
-  "67": {
-    "cardId": 67,
+  "66": {
+    "cardId": 66,
     "type": "unit",
     "name": "Rak Wraithraiser",
     "cost": 2,
@@ -3322,12 +3302,12 @@
           "raw": "when you have played 7 skills this game"
         }
       ],
-      "cardId": 68
+      "cardId": 67
     },
     "artworkPath": "/assets/images/artworks/rak_wraithraiser.png"
   },
-  "68": {
-    "cardId": 68,
+  "67": {
+    "cardId": 67,
     "type": "unit",
     "name": "Rak Wraithraiser II",
     "cost": 2,
@@ -3394,13 +3374,13 @@
           "raw": "when you have played 12 skills this game"
         }
       ],
-      "cardId": 69
+      "cardId": 68
     },
-    "evolvedFrom": 67,
+    "evolvedFrom": 66,
     "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png"
   },
-  "69": {
-    "cardId": 69,
+  "68": {
+    "cardId": 68,
     "type": "unit",
     "name": "Rak Wraithraiser III",
     "cost": 2,
@@ -3447,11 +3427,11 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 68,
+    "evolvedFrom": 67,
     "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png"
   },
-  "70": {
-    "cardId": 70,
+  "69": {
+    "cardId": 69,
     "type": "equipment",
     "name": "Red Thryssa",
     "cost": 3,
@@ -3474,8 +3454,8 @@
     ],
     "artworkPath": "/assets/images/artworks/red_thryssa.png"
   },
-  "71": {
-    "cardId": 71,
+  "70": {
+    "cardId": 70,
     "type": "skill",
     "name": "Redan",
     "cost": 1,
@@ -3495,8 +3475,8 @@
       }
     ]
   },
-  "72": {
-    "cardId": 72,
+  "71": {
+    "cardId": 71,
     "type": "equipment",
     "name": "Second Thorn Fragment",
     "series": "thorn-fragment",
@@ -3552,8 +3532,8 @@
     ],
     "artworkPath": "/assets/images/artworks/second_thorn_fragment.png"
   },
-  "73": {
-    "cardId": 73,
+  "72": {
+    "cardId": 72,
     "type": "skill",
     "name": "Shinwonryu",
     "cost": 4,
@@ -3578,8 +3558,8 @@
     ],
     "artworkPath": "/assets/images/artworks/shinwonryu.png"
   },
-  "74": {
-    "cardId": 74,
+  "73": {
+    "cardId": 73,
     "type": "skill",
     "name": "Static Baang",
     "cost": 1,
@@ -3602,8 +3582,8 @@
       }
     ]
   },
-  "75": {
-    "cardId": 75,
+  "74": {
+    "cardId": 74,
     "type": "equipment",
     "name": "Steel Tree",
     "cost": 3,
@@ -3631,8 +3611,8 @@
       }
     ]
   },
-  "76": {
-    "cardId": 76,
+  "75": {
+    "cardId": 75,
     "type": "unit",
     "name": "Stone Doll",
     "cost": 0,
@@ -3682,8 +3662,8 @@
       }
     ]
   },
-  "77": {
-    "cardId": 77,
+  "76": {
+    "cardId": 76,
     "type": "skill",
     "name": "Submerged Fish",
     "cost": 4,
@@ -3702,8 +3682,8 @@
       }
     ]
   },
-  "78": {
-    "cardId": 78,
+  "77": {
+    "cardId": 77,
     "type": "unit",
     "name": "Sunwoo Nare",
     "cost": 2,
@@ -3756,8 +3736,8 @@
       }
     ]
   },
-  "79": {
-    "cardId": 79,
+  "78": {
+    "cardId": 78,
     "type": "unit",
     "name": "The Hand Of Arlen",
     "cost": 2,
@@ -3792,8 +3772,8 @@
       }
     ]
   },
-  "80": {
-    "cardId": 80,
+  "79": {
+    "cardId": 79,
     "type": "skill",
     "name": "The Workshop",
     "cost": 3,
@@ -3838,8 +3818,8 @@
     ],
     "artworkPath": "/assets/images/artworks/the_workshop.png"
   },
-  "81": {
-    "cardId": 81,
+  "80": {
+    "cardId": 80,
     "type": "equipment",
     "name": "Third Thorn Fragment",
     "series": "thorn-fragment",
@@ -3895,8 +3875,8 @@
     ],
     "artworkPath": "/assets/images/artworks/third_thorn_fragment.png"
   },
-  "82": {
-    "cardId": 82,
+  "81": {
+    "cardId": 81,
     "type": "skill",
     "name": "Thunder Baang",
     "cost": 1,
@@ -3919,8 +3899,8 @@
       }
     ]
   },
-  "83": {
-    "cardId": 83,
+  "82": {
+    "cardId": 82,
     "type": "unit",
     "name": "Twenty-Fifth Baam",
     "cost": 5,
@@ -3961,12 +3941,12 @@
           "raw": "i am equipped with Enryu's Thorn"
         }
       ],
-      "cardId": 84
+      "cardId": 83
     },
     "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png"
   },
-  "84": {
-    "cardId": 84,
+  "83": {
+    "cardId": 83,
     "type": "unit",
     "name": "Twenty-Fifth Baam II",
     "cost": 5,
@@ -4005,11 +3985,11 @@
       }
     ],
     "passives": [],
-    "evolvedFrom": 83,
+    "evolvedFrom": 82,
     "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png"
   },
-  "85": {
-    "cardId": 85,
+  "84": {
+    "cardId": 84,
     "type": "unit",
     "name": "Urek Mazino",
     "cost": 8,
@@ -4091,8 +4071,8 @@
     ],
     "artworkPath": "/assets/images/artworks/urek_mazino.png"
   },
-  "86": {
-    "cardId": 86,
+  "85": {
+    "cardId": 85,
     "type": "unit",
     "name": "Water Stadium",
     "cost": 2,
@@ -4112,8 +4092,8 @@
     "abilities": [],
     "passives": []
   },
-  "87": {
-    "cardId": 87,
+  "86": {
+    "cardId": 86,
     "type": "skill",
     "name": "Weights",
     "cost": 1,
@@ -4130,8 +4110,8 @@
       }
     ]
   },
-  "88": {
-    "cardId": 88,
+  "87": {
+    "cardId": 87,
     "type": "unit",
     "name": "Wooden Horse",
     "cost": 2,
@@ -4165,8 +4145,8 @@
       }
     ]
   },
-  "89": {
-    "cardId": 89,
+  "88": {
+    "cardId": 88,
     "type": "equipment",
     "name": "Woon's Hammer",
     "cost": 2,
@@ -4187,8 +4167,8 @@
     ],
     "artworkPath": "/assets/images/artworks/woons_hammer.png"
   },
-  "90": {
-    "cardId": 90,
+  "89": {
+    "cardId": 89,
     "type": "unit",
     "name": "Yeo Goseng",
     "cost": 1,
@@ -4232,8 +4212,8 @@
       }
     ]
   },
-  "91": {
-    "cardId": 91,
+  "90": {
+    "cardId": 90,
     "type": "unit",
     "name": "Yeo Miseng",
     "cost": 2,
@@ -4288,8 +4268,8 @@
       }
     ]
   },
-  "92": {
-    "cardId": 92,
+  "91": {
+    "cardId": 91,
     "type": "unit",
     "name": "Yeon Woon",
     "cost": 5,
@@ -4342,8 +4322,8 @@
     ],
     "artworkPath": "/assets/images/artworks/yeon_woon.png"
   },
-  "93": {
-    "cardId": 93,
+  "92": {
+    "cardId": 92,
     "type": "unit",
     "name": "Yeon Yihwa",
     "cost": 5,
@@ -4389,8 +4369,8 @@
     ],
     "artworkPath": "/assets/images/artworks/yeon_yihwa.png"
   },
-  "94": {
-    "cardId": 94,
+  "93": {
+    "cardId": 93,
     "type": "unit",
     "name": "Yu Han Sung",
     "cost": 6,
@@ -4459,8 +4439,8 @@
       }
     ]
   },
-  "95": {
-    "cardId": 95,
+  "94": {
+    "cardId": 94,
     "type": "unit",
     "name": "Yuga",
     "cost": 4,
@@ -4507,5 +4487,28 @@
       }
     ],
     "artworkPath": "/assets/images/artworks/yuga.png"
+  },
+  "95": {
+    "cardId": 95,
+    "type": "skill",
+    "name": "Zygaena's Flower",
+    "cost": 4,
+    "deckConstraints": [],
+    "effects": [
+      {
+        "type": "grant_trait",
+        "trait": "strong",
+        "amount": 2,
+        "target": {
+          "side": "ally",
+          "affiliation": [
+            "wolhaiksong",
+            "team-sweet-and-sour"
+          ]
+        },
+        "raw": "give ally wolhaiksong and team sweet and sour members strong 2"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/zygaenas_flower.png"
   }
 }
