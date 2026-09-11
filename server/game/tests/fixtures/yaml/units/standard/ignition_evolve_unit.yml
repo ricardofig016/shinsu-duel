@@ -6,4 +6,5 @@ rank: high ranker
 positions:
   - fisherman
 evolve:
-  - "when my equipment ignites"
+  - type: equipment_ignited
+    raw: "when my equipment ignites"

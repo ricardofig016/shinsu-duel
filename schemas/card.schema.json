@@ -155,6 +155,7 @@
         "item": { "type": "string", "minLength": 1 },
         "position": { "type": "string", "minLength": 1 },
         "cardType": { "enum": ["unit", "skill", "equipment"] },
+        "count": { "type": "integer", "minimum": 1 },
         "amount": { "type": "integer", "minimum": 1 }
       },
       "additionalProperties": false
@@ -360,13 +361,29 @@
     "rules": { "type": "array", "items": { "$ref": "#/definitions/ruleNode" } },
     "passives": { "type": "array", "items": { "$ref": "#/definitions/passiveEntry" } },
     "abilities": { "type": "array", "items": { "$ref": "#/definitions/effectEntry" } },
-    "evolve": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "evolve": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/trigger" },
+          { "required": ["raw"] }
+        ]
+      }
+    },
     "traits": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "attributes": { "type": "array", "items": { "enum": ["anima", "silver dwarf", "red witch", "hwayeomsa", "jeonsulsa", "irregular", "living ignition weapon"] } },
     "affiliations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "requirements": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "effects": { "type": "array", "items": { "$ref": "#/definitions/effectEntry" } },
-    "ignition": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "ignition": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/definitions/trigger" },
+          { "required": ["raw"] }
+        ]
+      }
+    },
     "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
     "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
   },

@@ -8,12 +8,12 @@ This document describes the compile-time trigger AST system and runtime trigger 
 
 The trigger system has two layers:
 
-| Layer        | Location                                   | Purpose                                                 |
-| ------------ | ------------------------------------------ | ------------------------------------------------------- |
-| **Compiler** | `scripts/card-compile.js` `parseTrigger()` | Converts raw trigger text to typed ASTs at compile time |
-| **Runtime**  | `server/game/services/TriggerManager.js`   | Maps typed ASTs to EventBus subscriptions               |
+| Layer        | Location                                        | Purpose                                                          |
+| ------------ | ----------------------------------------------- | ---------------------------------------------------------------- |
+| **Compiler** | `scripts/card-compile.js` `resolveEvolveInto()` / `resolveIgniteInto()` | Validates structured trigger objects and resolves the stage target |
+| **Runtime**  | `server/game/services/TriggerManager.js`        | Maps typed trigger objects to EventBus subscriptions              |
 
-**Critical design constraint:** The runtime never parses raw trigger text. If a trigger pattern is not recognized by `parseTrigger()`, compilation fails. This forces explicit modeling of every trigger type.
+**Critical design constraint:** triggers are authored as structured objects in YAML (the same grammar passives use — see the trigger grammar in `docs/COMPILED_CARD_DSL.md`); no layer parses prose. An unknown trigger `type` fails compilation at its own source path, which forces explicit modeling of every trigger type.
 
 ---
 
@@ -89,14 +89,13 @@ This ordering is verified by the DFS-ordering tests in `server/game/tests/integr
 
 ## Compiler Integration
 
-`parseTrigger(raw)` is called during `resolveEvolveInto()` and `resolveIgniteInto()` in `scripts/card-compile.js`. It parses the string `evolve:` / `ignition:` trigger text (e.g. "when i am deployed") into typed ASTs, failing compilation on an unsupported pattern. Passive and effect triggers are authored as structured `trigger` objects in YAML, not parsed.
+`resolveEvolveInto()` and `resolveIgniteInto()` in `scripts/card-compile.js` consume the structured `evolve:` / `ignition:` trigger objects, validating each `type` against the DSL catalog and normalizing code-bearing fields (display positions, filters). Evolution triggers additionally require an `evolve:` field whose entries carry display `raw` text.
 
-**Adding a new trigger pattern:**
+**Adding a new transformation trigger:**
 
-1. Add the regex match to `parseTrigger()` in `scripts/card-compile.js`
-2. Add an AST type constant
-3. Add a handler method to `TriggerManager._subscribeTrigger()`
-4. Recompile: `npm run compile:cards`
+1. Add the `type` to the trigger catalog (`schemas/dsl-catalog.json`) and both card schemas
+2. Add a case to `TriggerManager._subscribeTrigger()`
+3. Recompile: `npm run compile:cards`
 
 ---
 

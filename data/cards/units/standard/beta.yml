@@ -27,7 +27,9 @@ abilities:
     quick: true
     raw: "quick: return me to hand"
 evolve:
-  - "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+  - type: has_all_equipped
+    cardNames: ["Dionysos: Arms", "Dionysos: Legs", "Dionysos: Wings"]
+    raw: "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
 traits:
 attributes:
   - living ignition weapon

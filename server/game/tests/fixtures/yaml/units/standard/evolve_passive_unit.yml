@@ -6,7 +6,8 @@ rank: regular
 positions:
   - fisherman
 evolve:
-  - "when i am deployed"
+  - type: deploy
+    raw: "when i am deployed"
 passives:
   - type: create_card
     card: { name: "Test Filler 1" }

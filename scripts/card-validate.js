@@ -375,27 +375,9 @@ function validateRankAndCost(card, errors, kind) {
   }
 }
 
-function validateEvolve(evolveList, errors) {
-  if (!Array.isArray(evolveList)) return;
-  if (evolveList.length === 0) return; // empty means no evolution, valid
-
-  evolveList.forEach((trigger, index) => {
-    if (typeof trigger !== "string" || trigger.trim().length === 0) {
-      addError(errors, `evolve[${index}]`, "evolution trigger must be a non-empty string");
-    }
-  });
-}
-
-function validateIgnition(ignitionList, errors) {
-  if (!Array.isArray(ignitionList)) return;
-  if (ignitionList.length === 0) return; // empty means no ignition, valid
-
-  ignitionList.forEach((trigger, index) => {
-    if (typeof trigger !== "string" || trigger.trim().length === 0) {
-      addError(errors, `ignition[${index}]`, "ignition trigger must be a non-empty string");
-    }
-  });
-}
+// Evolution and ignition trigger shape is enforced by the source schema
+// (structured trigger objects with a cataloged `type` and display `raw`);
+// the cross-reference validator below checks that the stage targets exist.
 
 // ── Cross-reference validator (runs after all cards loaded) ─────────────────
 
@@ -552,7 +534,6 @@ function validateUnit(card) {
   if (kind !== "standard" && evolve.length > 0) {
     addError(errors, "evolve", `${kind} units cannot evolve`);
   }
-  validateEvolve(evolve, errors);
 
   const rules = ensureArray(card.rules);
   if (kind !== "landmark" && rules.length > 0) {
@@ -622,9 +603,6 @@ function validateEquipment(card) {
   if (effects.length === 0) {
     addError(errors, "effects", "must be a non-empty array");
   }
-
-  const ignition = ensureArray(card.ignition);
-  validateIgnition(ignition, errors);
 
   errors.push(...warnings);
   return errors;

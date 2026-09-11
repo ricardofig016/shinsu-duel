@@ -13,7 +13,6 @@ import {
   normalizeEffectObject,
   normalizeKeyword,
   normalizeList,
-  parseTrigger,
 } from "../card-compile.js";
 
 describe("card-compile normalization helpers", () => {
@@ -130,35 +129,81 @@ describe("card-compile normalization helpers", () => {
   });
 });
 
-describe("card-compile parseTrigger", () => {
-  test("parses an all-equipped evolution trigger", () => {
-    expect(parseTrigger("i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"))
-      .toEqual({ type: "has_all_equipped", cardNames: ["Dionysos: Arms", "Dionysos: Legs", "Dionysos: Wings"] });
+describe("card-compile transformation triggers", () => {
+  let tmpDir;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "card-compile-triggers-"));
   });
 
-  test("parses an activation trigger", () => {
-    expect(parseTrigger("activation")).toEqual({ type: "activation" });
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
-  test("parses a skills-played evolution trigger", () => {
-    expect(parseTrigger("when you have played 7 skills this game"))
-      .toEqual({ type: "skills_played", count: 7 });
-    expect(parseTrigger("when you have played 1 skill this game"))
-      .toEqual({ type: "skills_played", count: 1 });
+  async function writeEvolvingUnit(evolveYaml) {
+    await fs.writeFile(path.join(tmpDir, "a.yml"), `type: unit
+name: A Unit
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives: []
+deckConstraints: []
+evolve:
+${evolveYaml}
+`, "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a_ii.yml"), `type: unit
+name: A Unit II
+cost: 1
+hp: 3
+rank: regular
+positions:
+  - fisherman
+traits: []
+attributes: []
+affiliations: []
+abilities: []
+passives: []
+deckConstraints: []
+evolve: []
+`, "utf-8");
+  }
+
+  test("compiles structured evolution triggers into typed ASTs with normalized fields", async () => {
+    await writeEvolvingUnit(`  - type: equip
+    cardName: Test Armor
+    position: Fisherman
+    raw: "Fisherman: equip with Test Armor"
+`);
+
+    const { cards } = await compileCards({ cardsDirectory: tmpDir });
+    const unit = cards.find((card) => card.name === "A Unit");
+
+    expect(unit.evolveInto.triggers).toEqual([
+      { type: "equip", cardName: "Test Armor", position: "fisherman", raw: "Fisherman: equip with Test Armor" },
+    ]);
   });
 
-  test("rejects malformed skills-played triggers", () => {
-    expect(parseTrigger("when you have played skills this game")).toBeNull();
-    expect(parseTrigger("when you have played 0 skills this game")).toBeNull();
-    expect(parseTrigger("when you have played 7 skills today")).toBeNull();
+  test("rejects a non-object evolution trigger entry", async () => {
+    await writeEvolvingUnit(`  - "when i am deployed"
+`);
+
+    await expect(compileCards({ cardsDirectory: tmpDir }))
+      .rejects.toThrow('A Unit.evolve[0]: expected a structured trigger object with a "type" and "raw"');
   });
 
-  test("still parses a bare round start trigger", () => {
-    expect(parseTrigger("round start")).toEqual({ type: "round_start" });
-  });
+  test("rejects an evolution trigger type outside the catalog", async () => {
+    await writeEvolvingUnit(`  - type: banana
+    raw: "mystery trigger"
+`);
 
-  test("rejects the removed compound round-start-or-activation prose", () => {
-    expect(parseTrigger("round start or activation")).toBeNull();
+    await expect(compileCards({ cardsDirectory: tmpDir }))
+      .rejects.toThrow('A Unit.evolve[0]: unknown trigger type "banana"');
   });
 });
 
@@ -731,7 +776,10 @@ describe("card-compile evolution stage linking", () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
-  function unitYaml(name, evolveEntries) {
+  function unitYaml(name, evolveTriggers = []) {
+    const entries = evolveTriggers
+      .map((trigger) => `  - type: ${trigger}\n    raw: "trigger"`)
+      .join("\n");
     return `type: unit
 name: ${name}
 cost: 1
@@ -746,13 +794,13 @@ abilities: []
 passives: []
 deckConstraints: []
 evolve:
-${evolveEntries.map((entry) => `  - "${entry}"`).join("\n")}
+${entries}
 `;
   }
 
   async function writeChain() {
-    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["when i am deployed"]), "utf-8");
-    await fs.writeFile(path.join(tmpDir, "a_ii.yml"), unitYaml("A Unit II", ["when i am deployed"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["deploy"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a_ii.yml"), unitYaml("A Unit II", ["deploy"]), "utf-8");
     await fs.writeFile(path.join(tmpDir, "a_iii.yml"), unitYaml("A Unit III", []), "utf-8");
   }
 
@@ -771,14 +819,14 @@ ${evolveEntries.map((entry) => `  - "${entry}"`).join("\n")}
   });
 
   test("throws naming the expected stage card when the target is missing", async () => {
-    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["when i am deployed"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["deploy"]), "utf-8");
 
     await expect(compileCards({ cardsDirectory: tmpDir }))
       .rejects.toThrow(/Evolution target "A Unit II" for "A Unit" does not exist/);
   });
 
   test("throws when the stage target exists but is not a unit", async () => {
-    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["when i am deployed"]), "utf-8");
+    await fs.writeFile(path.join(tmpDir, "a.yml"), unitYaml("A Unit", ["deploy"]), "utf-8");
     await fs.writeFile(path.join(tmpDir, "a_ii.yml"), `type: skill
 name: A Unit II
 cost: 1

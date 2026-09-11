@@ -78,7 +78,7 @@ Fixtures are **authored as YAML** in `tests/fixtures/yaml/{units,skills,equipmen
 
 - positions/attributes/affiliations in display form (`"spear bearer"`, `"red witch"`, `"team sweet and sour"`).
 - traits as strings with optional value (`strong 10`, `taunt`).
-- `evolve:` / `ignition:` as raw trigger strings, exactly like real cards.
+- `evolve:` / `ignition:` as structured trigger objects with display `raw`, exactly like real cards.
 
 Run `npm run compile:fixtures` to normalize and schema-validate them through the real compiler (`scripts/compile-fixtures.js` reuses `compileCard`/`cleanCompiled`/`resolveEvolve*`/`resolveIgnite*` from `card-compile.js`) and regenerate `tests/fixtures/cards.json`. **Never hand-edit the compiled JSON** — the compiler is the single path from YAML source to artifact.
 

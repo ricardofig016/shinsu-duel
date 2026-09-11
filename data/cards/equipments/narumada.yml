@@ -9,4 +9,6 @@ effects:
     target: { side: bearer }
     raw: "the bearer's damage-dealing abilities deal +3 damage"
 ignition:
-  - the bearer Slays a unit
+  - type: slay
+    target: unit
+    raw: "the bearer Slays a unit"

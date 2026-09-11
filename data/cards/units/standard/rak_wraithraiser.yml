@@ -18,7 +18,9 @@ abilities:
     target: { side: enemy }
     raw: "deal 4 to an enemy"
 evolve:
-  - "when you have played 7 skills this game"
+  - type: skills_played
+    count: 7
+    raw: "when you have played 7 skills this game"
 traits:
   - taunt
 attributes:

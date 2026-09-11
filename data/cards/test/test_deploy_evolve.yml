@@ -12,7 +12,8 @@ positions:
 passives:
 abilities:
 evolve:
-  - when i am deployed
+  - type: deploy
+    raw: "when i am deployed"
 traits:
   - barrier
 attributes:

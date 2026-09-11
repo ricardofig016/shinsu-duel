@@ -9,4 +9,6 @@ effects:
     trigger: { type: deal_damage, amount: 7 }
     raw: "when my bearer deals 7+ damage to a single target, Disarm it"
 ignition:
-  - "the bearer deals 10+ damage to a single target"
+  - type: deal_damage
+    amount: 10
+    raw: "the bearer deals 10+ damage to a single target"

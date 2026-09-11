@@ -263,122 +263,28 @@ export function compileEntries(entries, context) {
   return (entries || []).map((entry, i) => compileNode(entry, `${context}[${i}]`));
 }
 
-// ── Trigger parsing ─────────────────────────────────────────────────────────
-// Converts raw trigger text into typed ASTs so the runtime never parses raw.
-// Unsupported triggers fail compilation until the pattern is modeled here.
+// ── Transformation trigger compilation ──────────────────────────────────────
+// Evolution and ignition triggers are authored as the same structured trigger
+// objects passives use (see docs/COMPILED_CARD_DSL.md). The compiler validates
+// each entry's `type` against the catalog at its own source path and
+// normalizes code-bearing fields; the runtime never sees authoring syntax.
 
-export function parseTrigger(raw) {
-  const text = String(raw).trim();
-  if (!text) return null;
-
-  // "i am equipped with X"
-  const equipMatch = /^i am equipped with (.+)$/i.exec(text);
-  if (equipMatch) {
-    return { type: "equip", cardName: equipMatch[1].trim() };
-  }
-
-  // "i have X, Y and Z equipped" (all-equipped evolution/ignition trigger)
-  const allEquipMatch = /^i have (.+?) equipped$/i.exec(text);
-  if (allEquipMatch) {
-    const cardNames = allEquipMatch[1]
-      .split(/\s+and\s+|\s*,\s*/i)
-      .map((name) => name.trim())
-      .filter(Boolean);
-    return { type: "has_all_equipped", cardNames };
-  }
-
-  // "the bearer Slays a unit"
-  const slayMatch = /^the bearer slays (?:a |an )?(.+)$/i.exec(text);
-  if (slayMatch) {
-    return { type: "slay", target: slayMatch[1].trim().toLowerCase() };
-  }
-
-  // "when i am deployed"
-  if (/^when i am deployed$/i.test(text)) {
-    return { type: "deploy" };
-  }
-
-  // "when i kill a <rank>"
-  const killRankMatch = /^when i kill (?:a |an )(.+)$/i.exec(text);
-  if (killRankMatch) {
-    return { type: "kill", rank: killRankMatch[1].trim().toLowerCase() };
-  }
-
-  // "when i kill a unit"
-  if (/^when i kill (?:a |an )?unit$/i.test(text)) {
-    return { type: "kill", target: "unit" };
-  }
-
-  // "when an ally dies"
-  if (/^when (?:another )?ally dies$/i.test(text)) {
-    return { type: "ally_dies" };
-  }
-
-  // "when i am damaged by X"
-  const damagedByMatch = /^when i am damaged by (.+)$/i.exec(text);
-  if (damagedByMatch) {
-    return { type: "damaged_by", source: damagedByMatch[1].trim().toLowerCase() };
-  }
-
-  // "when I am given X" / "X is played on me"
-  const givenMatch = /^when i am given (.+)$/i.exec(text);
-  if (givenMatch) {
-    return { type: "given", item: givenMatch[1].trim() };
-  }
-  const playedOnMeMatch = /^(.+?) is played on me$/i.exec(text);
-  if (playedOnMeMatch) {
-    return { type: "given", item: playedOnMeMatch[1].trim() };
-  }
-
-  // "round start" 
-  if (/^round start$/i.test(text)) return { type: "round_start" };
-
-  // "activation"
-  if (/^activation$/i.test(text)) return { type: "activation" };
-  
-  // "round end"
-  if (/^round end$/i.test(text)) return { type: "round_end" };
-
-  // "when i deal damage"
-  if (/^when i deal damage$/i.test(text)) return { type: "deal_damage" };
-
-  // "when my equipment ignites" (evolution: the unit's own equipment ignites)
-  if (/^when my equipment ignites$/i.test(text)) return { type: "equipment_ignited" };
-
-  // "the bearer deals 10+ damage to a single target" (ignition threshold)
-  const bearerDamageMatch = /^the bearer deals (\d+)\+ damage to a single target$/i.exec(text);
-  if (bearerDamageMatch) {
-    const amount = Number(bearerDamageMatch[1]);
-    if (amount < 1) return null;
-    return { type: "deal_damage", amount };
-  }
-
-  // "when I use an ability"
-  if (/^when i use an ability$/i.test(text)) return { type: "ability_used" };
-
-  // "when you have played N skills this game"
-  const skillsPlayedMatch = /^when you have played (\d+) skills? this game$/i.exec(text);
-  if (skillsPlayedMatch) {
-    const count = Number(skillsPlayedMatch[1]);
-    if (count < 1) return null;
-    return { type: "skills_played", count };
-  }
-
-  // "Fisherman: equip with X" / "equip with X" (position-scoped or bare)
-  const posEquipMatch = /^(?:([a-z ]+):\s*)?equip with (.+)$/i.exec(text);
-  if (posEquipMatch) {
-    const result = { type: "equip", cardName: posEquipMatch[2].trim() };
-    if (posEquipMatch[1]) {
-      const posName = posEquipMatch[1].trim().toLowerCase();
-      if (positionCodeMap[posName]) {
-        result.position = positionCodeMap[posName];
+function compileTransformationTriggers(entries, cardName, kind) {
+  return (entries || [])
+    .filter((entry) => entry !== null && entry !== undefined)
+    .map((entry, index) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        throw new Error(
+          `${cardName}.${kind}[${index}]: expected a structured trigger object with a "type" and "raw"`
+        );
       }
-    }
-    return result;
-  }
-
-  // Unknown trigger — fail compilation so it gets modeled
-  return null;
+      if (typeof entry.type !== "string" || !CATALOG_TRIGGER_TYPES.has(entry.type)) {
+        throw new Error(
+          `${cardName}.${kind}[${index}]: unknown trigger type "${entry.type}" — list it in schemas/dsl-catalog.json and both card schemas`
+        );
+      }
+      return normalizeEffectObject(entry, `${cardName}.${kind}[${index}]`);
+    });
 }
 
 // ── Cross-reference resolution ──────────────────────────────────────────────
@@ -405,19 +311,8 @@ export function resolveEvolveInto(card, allCards) {
     throw new Error(`Evolution target "${expectedEvolvedName}" for "${card.name}" must be a unit, got "${evolvedCard.type}".`);
   }
 
-  // Build typed trigger ASTs from evolve list
-  const triggers = evolveTriggers
-    .filter((t) => typeof t === "string" && t.trim().length > 0)
-    .map((t) => {
-      const parsed = parseTrigger(t);
-      if (!parsed) {
-        throw new Error(
-          `Unsupported evolution trigger "${t}" on card "${card.name}". ` +
-          `Add its pattern to parseTrigger() in card-compile.js.`
-        );
-      }
-      return { ...parsed, raw: t };
-    });
+  // Structured trigger objects, validated and normalized
+  const triggers = compileTransformationTriggers(evolveTriggers, card.name, "evolve");
 
   return {
     triggers,
@@ -450,19 +345,8 @@ export function resolveIgniteInto(card, allCards) {
     throw new Error(`Ignition target "${expectedIgnitedName}" for "${card.name}" does not exist or is not equipment.`);
   }
 
-  // Build typed trigger ASTs from ignition list
-  const triggers = ignitionTriggers
-    .filter((t) => typeof t === "string" && t.trim().length > 0)
-    .map((t) => {
-      const parsed = parseTrigger(t);
-      if (!parsed) {
-        throw new Error(
-          `Unsupported ignition trigger "${t}" on card "${card.name}". ` +
-          `Add its pattern to parseTrigger() in card-compile.js.`
-        );
-      }
-      return { ...parsed, raw: t };
-    });
+  // Structured trigger objects, validated and normalized
+  const triggers = compileTransformationTriggers(ignitionTriggers, card.name, "ignition");
 
   return {
     triggers,

@@ -32,9 +32,18 @@ abilities:
           target: { side: enemy, scope: all, condition: rooted }
     raw: "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
 evolve:
-  - "Fisherman: equip with Karaka's Armor Suit"
-  - "Wave Controller: equip with Steel Tree"
-  - "Scout: equip with Purple Dementor"
+  - type: equip
+    cardName: "Karaka's Armor Suit"
+    position: fisherman
+    raw: "Fisherman: equip with Karaka's Armor Suit"
+  - type: equip
+    cardName: Steel Tree
+    position: wave controller
+    raw: "Wave Controller: equip with Steel Tree"
+  - type: equip
+    cardName: Purple Dementor
+    position: scout
+    raw: "Scout: equip with Purple Dementor"
 traits:
   - reflect
 attributes:

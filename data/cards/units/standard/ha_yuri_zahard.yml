@@ -28,7 +28,8 @@ abilities:
     target: { side: self }
     raw: "give me Strong 1"
 evolve:
-  - "when my equipment ignites"
+  - type: equipment_ignited
+    raw: "when my equipment ignites"
 traits:
   - resilient 3
 attributes:

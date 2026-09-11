@@ -8,4 +8,6 @@ effects:
     target: { side: bearer }
     raw: "the bearer's damage-dealing abilities deal +2 damage"
 ignition:
-  - "the bearer deals 10+ damage to a single target"
+  - type: deal_damage
+    amount: 10
+    raw: "the bearer deals 10+ damage to a single target"

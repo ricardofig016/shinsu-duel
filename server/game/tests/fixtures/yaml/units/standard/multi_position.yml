@@ -20,4 +20,6 @@ abilities:
     target: { side: enemy, name: Conduit }
     raw: "heal enemy Conduit 2 HP"
 evolve:
-  - "Test Poison Skill is played on me"
+  - type: given
+    item: Test Poison Skill
+    raw: "Test Poison Skill is played on me"

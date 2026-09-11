@@ -13,4 +13,6 @@ passives:
     trigger: { type: evolve }
     raw: "when i evolve: gain Bloodthirsty 1"
 evolve:
-  - "when you have played 6 skills this game"
+  - type: skills_played
+    count: 6
+    raw: "when you have played 6 skills this game"

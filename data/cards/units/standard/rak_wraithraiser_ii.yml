@@ -27,7 +27,9 @@ abilities:
         target: { link: sequence }
     raw: "deal 7 to an enemy and give them Frozen"
 evolve:
-  - "when you have played 12 skills this game"
+  - type: skills_played
+    count: 12
+    raw: "when you have played 12 skills this game"
 traits:
   - taunt
 attributes:

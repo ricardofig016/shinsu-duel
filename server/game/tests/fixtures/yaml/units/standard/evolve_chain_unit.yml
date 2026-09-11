@@ -6,4 +6,5 @@ rank: regular
 positions:
   - fisherman
 evolve:
-  - "when i am deployed"
+  - type: deploy
+    raw: "when i am deployed"

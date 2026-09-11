@@ -6,4 +6,6 @@ rank: regular
 positions:
   - fisherman
 evolve:
-  - "i am equipped with Test Armor"
+  - type: equip
+    cardName: Test Armor
+    raw: "i am equipped with Test Armor"

@@ -11,7 +11,9 @@ abilities:
     amount: 1
     raw: "Light Up 1"
 evolve:
-  - i am equipped with Ice Spear
+  - type: equip
+    cardName: Ice Spear
+    raw: "i am equipped with Ice Spear"
 traits:
   - beacon 1
 attributes:

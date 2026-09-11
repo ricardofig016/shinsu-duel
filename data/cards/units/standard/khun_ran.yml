@@ -26,7 +26,9 @@ abilities:
           name: Conduit
     raw: "heal enemy Conduit 2 HP and activate it"
 evolve:
-  - Redan is played on me
+  - type: given
+    item: Redan
+    raw: "Redan is played on me"
 traits:
 attributes:
   - jeonsulsa
