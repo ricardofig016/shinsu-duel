@@ -27,6 +27,10 @@ Tests live in `server/game/tests/`, mirroring the source tree under `server/game
 | `replay/`      | `ReplayDriver` determinism                                                                               |
 | `utils/`       | `SeededRng` and other shared utilities                                                                   |
 
+### Server modules outside the engine
+
+Tests for server modules that are not part of the engine live beside their source, as `server/utils/card-catalog.test.js` does: `server/decks/*.test.js` for the deck collection and `server/routes/*.test.js` for the routes. Route tests mount the router under test with injected storage, so they never read or write the runtime data files; the shipped-data audits they contain (`StarterDeckAudit`) are the same class of exception as `CardDataAudit`.
+
 The shared helper `tests/utils.js` lives at the tests root; subfolder tests import it as `../utils.js` and source modules as `../../…`. Use `git mv` for renames to preserve history.
 
 ### Shared helpers (`tests/utils.js`)

@@ -5,6 +5,7 @@ dist/
 
 server/data/rooms.json
 server/data/users.json
+server/data/decks.json
 
 public/assets/images/artworks/raw/
 

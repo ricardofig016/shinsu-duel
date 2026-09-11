@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import winston from "winston";
 import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 import { generateSeed } from "../game/utils/SeededRng.js";
+import { isAuthenticated } from "./authentication.js";
 
 const router = express.Router();
 export const roomsFilePath = path.resolve("server/data/rooms.json");
@@ -17,19 +18,6 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: "server/logs/combined.log" }),
   ],
 });
-
-let flag = false;
-const isAuthenticated = (req, res, next) => {
-  if (req.session.username) return next();
-  // TODO: remove this else statement (for testing purposes only)
-  else {
-    const usernames = ["tester1", "tester2"];
-    req.session.username = usernames[flag ? 1 : 0];
-    flag = !flag;
-    return next();
-  }
-  return res.status(403).send("Access denied, please login.");
-};
 
 // routes
 router.get("/", (req, res) => {
