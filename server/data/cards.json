@@ -2479,7 +2479,8 @@
         }
       ],
       "cardId": 51
-    }
+    },
+    "artworkPath": "/assets/images/artworks/khun_ran.png"
   },
   "51": {
     "cardId": 51,
@@ -2557,7 +2558,8 @@
         "raw": "round end: create Redan in your hand and revert me to Khun Ran"
       }
     ],
-    "evolvedFrom": 50
+    "evolvedFrom": 50,
+    "artworkPath": "/assets/images/artworks/khun_ran_ii.png"
   },
   "52": {
     "cardId": 52,
@@ -3473,7 +3475,8 @@
         },
         "raw": "give Poisoned 1"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/redan.png"
   },
   "71": {
     "cardId": 71,
@@ -4437,7 +4440,8 @@
         ],
         "raw": "Baang gives Weak 2 and Cursed"
       }
-    ]
+    ],
+    "artworkPath": "/assets/images/artworks/yu_han_sung.png"
   },
   "94": {
     "cardId": 94,
