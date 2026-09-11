@@ -32,7 +32,8 @@
         }
       ],
       "cardId": 1
-    }
+    },
+    "slug": "test_deploy_evolve"
   },
   "1": {
     "cardId": 1,
@@ -55,7 +56,8 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 0
+    "evolvedFrom": 0,
+    "slug": "test_deploy_evolve_ii"
   },
   "2": {
     "cardId": 2,
@@ -68,7 +70,8 @@
         "type": "noop",
         "raw": "test"
       }
-    ]
+    ],
+    "slug": "test_equipment"
   },
   "3": {
     "cardId": 3,
@@ -81,7 +84,8 @@
         "type": "noop",
         "raw": "test"
       }
-    ]
+    ],
+    "slug": "test_skill"
   },
   "4": {
     "cardId": 4,
@@ -212,7 +216,8 @@
       "prince-of-the-redlight-district"
     ],
     "abilities": [],
-    "passives": []
+    "passives": [],
+    "slug": "test_unit"
   },
   "5": {
     "cardId": 5,
@@ -452,7 +457,8 @@
         },
         "raw": "round start: give me Weak 2"
       }
-    ]
+    ],
+    "slug": "test_unit_conditions"
   },
   "6": {
     "cardId": 6,
@@ -512,7 +518,8 @@
         "raw": "round start: give me all traits currently held by an allied Rachel"
       }
     ],
-    "artworkPath": "/assets/images/artworks/akryung.png"
+    "artworkPath": "/assets/images/artworks/akryung.png",
+    "slug": "akryung"
   },
   "7": {
     "cardId": 7,
@@ -589,7 +596,8 @@
         "raw": "when an ally Regular dies: Light Up 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/apple.png"
+    "artworkPath": "/assets/images/artworks/apple.png",
+    "slug": "apple"
   },
   "8": {
     "cardId": 8,
@@ -624,7 +632,8 @@
         "raw": "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/baang.png"
+    "artworkPath": "/assets/images/artworks/baang.png",
+    "slug": "baang"
   },
   "9": {
     "cardId": 9,
@@ -699,7 +708,8 @@
       ],
       "cardId": 10
     },
-    "artworkPath": "/assets/images/artworks/beta.png"
+    "artworkPath": "/assets/images/artworks/beta.png",
+    "slug": "beta"
   },
   "10": {
     "cardId": 10,
@@ -742,7 +752,8 @@
     ],
     "passives": [],
     "evolvedFrom": 9,
-    "artworkPath": "/assets/images/artworks/beta_ii.png"
+    "artworkPath": "/assets/images/artworks/beta_ii.png",
+    "slug": "beta_ii"
   },
   "11": {
     "cardId": 11,
@@ -771,7 +782,8 @@
         "raw": "heal the bearer 2 HP and Cleanse the bearer"
       }
     ],
-    "artworkPath": "/assets/images/artworks/blue_thryssa.png"
+    "artworkPath": "/assets/images/artworks/blue_thryssa.png",
+    "slug": "blue_thryssa"
   },
   "12": {
     "cardId": 12,
@@ -797,7 +809,8 @@
       }
     ],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/bull.png"
+    "artworkPath": "/assets/images/artworks/bull.png",
+    "slug": "bull"
   },
   "13": {
     "cardId": 13,
@@ -847,7 +860,8 @@
         "raw": "allied Team Chang members have Resilient 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/chang_blarode.png"
+    "artworkPath": "/assets/images/artworks/chang_blarode.png",
+    "slug": "chang_blarode"
   },
   "14": {
     "cardId": 14,
@@ -863,7 +877,8 @@
         },
         "raw": "Cleanse an ally"
       }
-    ]
+    ],
+    "slug": "cleanse_spell"
   },
   "15": {
     "cardId": 15,
@@ -934,7 +949,8 @@
         "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
       }
     ],
-    "artworkPath": "/assets/images/artworks/conduit.png"
+    "artworkPath": "/assets/images/artworks/conduit.png",
+    "slug": "conduit"
   },
   "16": {
     "cardId": 16,
@@ -959,7 +975,8 @@
         "raw": "ability: give me Pierce"
       }
     ],
-    "artworkPath": "/assets/images/artworks/dionysos_arms.png"
+    "artworkPath": "/assets/images/artworks/dionysos_arms.png",
+    "slug": "dionysos_arms"
   },
   "17": {
     "cardId": 17,
@@ -984,7 +1001,8 @@
         "raw": "ability: quick: deal 3 to an enemy"
       }
     ],
-    "artworkPath": "/assets/images/artworks/dionysos_legs.png"
+    "artworkPath": "/assets/images/artworks/dionysos_legs.png",
+    "slug": "dionysos_legs"
   },
   "18": {
     "cardId": 18,
@@ -1002,7 +1020,8 @@
         "raw": "the bearer's Quick abilities Charge 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/dionysos_wings.png"
+    "artworkPath": "/assets/images/artworks/dionysos_wings.png",
+    "slug": "dionysos_wings"
   },
   "19": {
     "cardId": 19,
@@ -1058,7 +1077,8 @@
         "raw": "the first ability i use each round has Free"
       }
     ],
-    "artworkPath": "/assets/images/artworks/edin_dan.png"
+    "artworkPath": "/assets/images/artworks/edin_dan.png",
+    "slug": "edin_dan"
   },
   "20": {
     "cardId": 20,
@@ -1080,7 +1100,8 @@
         "raw": "Reclaim 2 equipments"
       }
     ],
-    "artworkPath": "/assets/images/artworks/enna_core.png"
+    "artworkPath": "/assets/images/artworks/enna_core.png",
+    "slug": "enna_core"
   },
   "21": {
     "cardId": 21,
@@ -1131,7 +1152,8 @@
         "raw": "the bearer has Bloodthirsty 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/enryus_thorn.png"
+    "artworkPath": "/assets/images/artworks/enryus_thorn.png",
+    "slug": "enryus_thorn"
   },
   "22": {
     "cardId": 22,
@@ -1200,7 +1222,8 @@
         "raw": "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
       }
     ],
-    "artworkPath": "/assets/images/artworks/evan_edrok.png"
+    "artworkPath": "/assets/images/artworks/evan_edrok.png",
+    "slug": "evan_edrok"
   },
   "23": {
     "cardId": 23,
@@ -1249,7 +1272,8 @@
         "raw": "round end: Slay all enemies with Burned 3+"
       }
     ],
-    "artworkPath": "/assets/images/artworks/evankhell.png"
+    "artworkPath": "/assets/images/artworks/evankhell.png",
+    "slug": "evankhell"
   },
   "24": {
     "cardId": 24,
@@ -1276,7 +1300,8 @@
         "raw": "Compress 1 from a Hwayeomsa in your hand"
       }
     ],
-    "artworkPath": "/assets/images/artworks/fiery_elephant.png"
+    "artworkPath": "/assets/images/artworks/fiery_elephant.png",
+    "slug": "fiery_elephant"
   },
   "25": {
     "cardId": 25,
@@ -1303,7 +1328,8 @@
         "raw": "Spend Fire Charges to create the highest affordable Incinerate in your hand"
       }
     ],
-    "artworkPath": "/assets/images/artworks/fire_core.png"
+    "artworkPath": "/assets/images/artworks/fire_core.png",
+    "slug": "fire_core"
   },
   "26": {
     "cardId": 26,
@@ -1360,7 +1386,8 @@
         "raw": "the bearer's damage-dealing abilities deal +1 damage"
       }
     ],
-    "artworkPath": "/assets/images/artworks/first_thorn_fragment.png"
+    "artworkPath": "/assets/images/artworks/first_thorn_fragment.png",
+    "slug": "first_thorn_fragment"
   },
   "27": {
     "cardId": 27,
@@ -1381,7 +1408,8 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/floor_of_death.png"
+    "artworkPath": "/assets/images/artworks/floor_of_death.png",
+    "slug": "floor_of_death"
   },
   "28": {
     "cardId": 28,
@@ -1438,7 +1466,8 @@
         "raw": "the bearer has Bloodthirsty 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png"
+    "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png",
+    "slug": "fourth_thorn_fragment"
   },
   "29": {
     "cardId": 29,
@@ -1456,7 +1485,8 @@
         "raw": "the bearer has Barrier"
       }
     ],
-    "artworkPath": "/assets/images/artworks/frog_fisher.png"
+    "artworkPath": "/assets/images/artworks/frog_fisher.png",
+    "slug": "frog_fisher"
   },
   "30": {
     "cardId": 30,
@@ -1485,7 +1515,8 @@
         "raw": "deal 5 to an enemy"
       }
     ],
-    "passives": []
+    "passives": [],
+    "slug": "gyetang"
   },
   "31": {
     "cardId": 31,
@@ -1554,7 +1585,8 @@
         },
         "raw": "if i have an allied Guide, i have Taunt"
       }
-    ]
+    ],
+    "slug": "ha_yuri_zahard"
   },
   "32": {
     "cardId": 32,
@@ -1588,7 +1620,8 @@
         "raw": "Cleanse all allies and heal each of them 4 HP"
       }
     ],
-    "artworkPath": "/assets/images/artworks/healing_flames.png"
+    "artworkPath": "/assets/images/artworks/healing_flames.png",
+    "slug": "healing_flames"
   },
   "33": {
     "cardId": 33,
@@ -1605,7 +1638,8 @@
         },
         "raw": "heal an ally 5 HP"
       }
-    ]
+    ],
+    "slug": "healing_potion"
   },
   "34": {
     "cardId": 34,
@@ -1637,7 +1671,8 @@
         "raw": "round start: give Ghost to all Ranker and High Ranker units"
       }
     ],
-    "artworkPath": "/assets/images/artworks/hell_express.png"
+    "artworkPath": "/assets/images/artworks/hell_express.png",
+    "slug": "hell_express"
   },
   "35": {
     "cardId": 35,
@@ -1686,7 +1721,8 @@
         },
         "raw": "if I have an allied Yeo Miseng, I have Strong 1"
       }
-    ]
+    ],
+    "slug": "hon_akraptor"
   },
   "36": {
     "cardId": 36,
@@ -1722,7 +1758,8 @@
         "raw": "deal 3 to an enemy with Exhausted"
       }
     ],
-    "passives": []
+    "passives": [],
+    "slug": "hong_chunhwa"
   },
   "37": {
     "cardId": 37,
@@ -1787,7 +1824,8 @@
         },
         "raw": "while i have an ally team baam or team fug member, opponents skills cost 1 more"
       }
-    ]
+    ],
+    "slug": "hwa_ryun"
   },
   "38": {
     "cardId": 38,
@@ -1823,7 +1861,8 @@
         },
         "raw": "the bearer has Pierce 1"
       }
-    ]
+    ],
+    "slug": "ice_spear"
   },
   "39": {
     "cardId": 39,
@@ -1853,7 +1892,8 @@
         "raw": "deal 1 to an enemy"
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_i.png"
+    "artworkPath": "/assets/images/artworks/incinerate_i.png",
+    "slug": "incinerate_i"
   },
   "40": {
     "cardId": 40,
@@ -1884,7 +1924,8 @@
         "raw": "deal 2 to 2 enemies"
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_ii.png"
+    "artworkPath": "/assets/images/artworks/incinerate_ii.png",
+    "slug": "incinerate_ii"
   },
   "41": {
     "cardId": 41,
@@ -1930,7 +1971,8 @@
         "raw": "deal 2 to 3 enemies and give them Burn"
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_iii.png"
+    "artworkPath": "/assets/images/artworks/incinerate_iii.png",
+    "slug": "incinerate_iii"
   },
   "42": {
     "cardId": 42,
@@ -1975,7 +2017,8 @@
         "raw": "deal 3 to all enemies and give them Burn 2"
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_iv.png"
+    "artworkPath": "/assets/images/artworks/incinerate_iv.png",
+    "slug": "incinerate_iv"
   },
   "43": {
     "cardId": 43,
@@ -2052,7 +2095,8 @@
         "raw": "i deal +1 damage to Burned units"
       }
     ],
-    "artworkPath": "/assets/images/artworks/ja_wangnan.png"
+    "artworkPath": "/assets/images/artworks/ja_wangnan.png",
+    "slug": "ja_wangnan"
   },
   "44": {
     "cardId": 44,
@@ -2098,7 +2142,8 @@
       }
     ],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/jyu_viole_grace.png"
+    "artworkPath": "/assets/images/artworks/jyu_viole_grace.png",
+    "slug": "jyu_viole_grace"
   },
   "45": {
     "cardId": 45,
@@ -2194,7 +2239,8 @@
       ],
       "cardId": 46
     },
-    "artworkPath": "/assets/images/artworks/karaka.png"
+    "artworkPath": "/assets/images/artworks/karaka.png",
+    "slug": "karaka"
   },
   "46": {
     "cardId": 46,
@@ -2281,7 +2327,8 @@
       }
     ],
     "evolvedFrom": 45,
-    "artworkPath": "/assets/images/artworks/karaka_ii.png"
+    "artworkPath": "/assets/images/artworks/karaka_ii.png",
+    "slug": "karaka_ii"
   },
   "47": {
     "cardId": 47,
@@ -2310,7 +2357,8 @@
         },
         "raw": "the bearer has Barrier"
       }
-    ]
+    ],
+    "slug": "karakas_armor_suit"
   },
   "48": {
     "cardId": 48,
@@ -2355,7 +2403,8 @@
       ],
       "cardId": 49
     },
-    "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png"
+    "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png",
+    "slug": "khun_aguero_agnis"
   },
   "49": {
     "cardId": 49,
@@ -2411,7 +2460,8 @@
       }
     ],
     "evolvedFrom": 48,
-    "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png"
+    "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png",
+    "slug": "khun_aguero_agnis_ii"
   },
   "50": {
     "cardId": 50,
@@ -2480,7 +2530,8 @@
       ],
       "cardId": 51
     },
-    "artworkPath": "/assets/images/artworks/khun_ran.png"
+    "artworkPath": "/assets/images/artworks/khun_ran.png",
+    "slug": "khun_ran"
   },
   "51": {
     "cardId": 51,
@@ -2559,7 +2610,8 @@
       }
     ],
     "evolvedFrom": 50,
-    "artworkPath": "/assets/images/artworks/khun_ran_ii.png"
+    "artworkPath": "/assets/images/artworks/khun_ran_ii.png",
+    "slug": "khun_ran_ii"
   },
   "52": {
     "cardId": 52,
@@ -2619,7 +2671,8 @@
         "raw": "when you reclaim an equipment, Compress 1 from it"
       }
     ],
-    "artworkPath": "/assets/images/artworks/kurudan.png"
+    "artworkPath": "/assets/images/artworks/kurudan.png",
+    "slug": "kurudan"
   },
   "53": {
     "cardId": 53,
@@ -2643,7 +2696,8 @@
         },
         "raw": "give Burned 1 to a unit"
       }
-    ]
+    ],
+    "slug": "lightning_baang"
   },
   "54": {
     "cardId": 54,
@@ -2725,7 +2779,8 @@
         "raw": "scout: your backline Shinheuh's abilities give Ghost"
       }
     ],
-    "artworkPath": "/assets/images/artworks/lo_po_bia_ren.png"
+    "artworkPath": "/assets/images/artworks/lo_po_bia_ren.png",
+    "slug": "lo_po_bia_ren"
   },
   "55": {
     "cardId": 55,
@@ -2800,7 +2855,8 @@
         },
         "raw": "round start: heal all ally members of my affiliations 1 HP"
       }
-    ]
+    ],
+    "slug": "michael"
   },
   "56": {
     "cardId": 56,
@@ -2838,7 +2894,8 @@
         "raw": "fisherman: deal 1 to an enemy"
       }
     ],
-    "passives": []
+    "passives": [],
+    "slug": "monkeyman"
   },
   "57": {
     "cardId": 57,
@@ -2879,7 +2936,8 @@
         "raw": "deploy: choose a position"
       }
     ],
-    "artworkPath": "/assets/images/artworks/name_hunt_station.png"
+    "artworkPath": "/assets/images/artworks/name_hunt_station.png",
+    "slug": "name_hunt_station"
   },
   "58": {
     "cardId": 58,
@@ -2908,7 +2966,8 @@
       ],
       "cardId": 59
     },
-    "artworkPath": "/assets/images/artworks/narumada.png"
+    "artworkPath": "/assets/images/artworks/narumada.png",
+    "slug": "narumada"
   },
   "59": {
     "cardId": 59,
@@ -2940,7 +2999,8 @@
       }
     ],
     "ignitedFrom": 58,
-    "artworkPath": "/assets/images/artworks/narumada_ignited.png"
+    "artworkPath": "/assets/images/artworks/narumada_ignited.png",
+    "slug": "narumada_ignited"
   },
   "60": {
     "cardId": 60,
@@ -3025,7 +3085,8 @@
         },
         "raw": "when i am deployed: give Barrier to an ally"
       }
-    ]
+    ],
+    "slug": "novick"
   },
   "61": {
     "cardId": 61,
@@ -3072,7 +3133,8 @@
         },
         "raw": "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
       }
-    ]
+    ],
+    "slug": "pedro"
   },
   "62": {
     "cardId": 62,
@@ -3095,7 +3157,8 @@
         "raw": "the bearer's abilities trigger twice"
       }
     ],
-    "artworkPath": "/assets/images/artworks/phobos.png"
+    "artworkPath": "/assets/images/artworks/phobos.png",
+    "slug": "phobos"
   },
   "63": {
     "cardId": 63,
@@ -3131,7 +3194,8 @@
         },
         "raw": "ability: give Poisoned 4 to an enemy"
       }
-    ]
+    ],
+    "slug": "purple_dementor"
   },
   "64": {
     "cardId": 64,
@@ -3186,7 +3250,8 @@
         "raw": "Baang gives Burned 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/quaetro_blitz.png"
+    "artworkPath": "/assets/images/artworks/quaetro_blitz.png",
+    "slug": "quaetro_blitz"
   },
   "65": {
     "cardId": 65,
@@ -3249,7 +3314,8 @@
         "raw": "spend 3: summon Akryung from your deck or hand"
       }
     ],
-    "passives": []
+    "passives": [],
+    "slug": "rachel"
   },
   "66": {
     "cardId": 66,
@@ -3306,7 +3372,8 @@
       ],
       "cardId": 67
     },
-    "artworkPath": "/assets/images/artworks/rak_wraithraiser.png"
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser.png",
+    "slug": "rak_wraithraiser"
   },
   "67": {
     "cardId": 67,
@@ -3379,7 +3446,8 @@
       "cardId": 68
     },
     "evolvedFrom": 66,
-    "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png"
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png",
+    "slug": "rak_wraithraiser_ii"
   },
   "68": {
     "cardId": 68,
@@ -3430,7 +3498,8 @@
     ],
     "passives": [],
     "evolvedFrom": 67,
-    "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png"
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png",
+    "slug": "rak_wraithraiser_iii"
   },
   "69": {
     "cardId": 69,
@@ -3454,7 +3523,8 @@
         "raw": "ability: deal 5 to an enemy"
       }
     ],
-    "artworkPath": "/assets/images/artworks/red_thryssa.png"
+    "artworkPath": "/assets/images/artworks/red_thryssa.png",
+    "slug": "red_thryssa"
   },
   "70": {
     "cardId": 70,
@@ -3476,7 +3546,8 @@
         "raw": "give Poisoned 1"
       }
     ],
-    "artworkPath": "/assets/images/artworks/redan.png"
+    "artworkPath": "/assets/images/artworks/redan.png",
+    "slug": "redan"
   },
   "71": {
     "cardId": 71,
@@ -3533,7 +3604,8 @@
         "raw": "the bearer's healing abilities heal +1 HP"
       }
     ],
-    "artworkPath": "/assets/images/artworks/second_thorn_fragment.png"
+    "artworkPath": "/assets/images/artworks/second_thorn_fragment.png",
+    "slug": "second_thorn_fragment"
   },
   "72": {
     "cardId": 72,
@@ -3559,7 +3631,8 @@
         "raw": "give an enemy Doomed"
       }
     ],
-    "artworkPath": "/assets/images/artworks/shinwonryu.png"
+    "artworkPath": "/assets/images/artworks/shinwonryu.png",
+    "slug": "shinwonryu"
   },
   "73": {
     "cardId": 73,
@@ -3583,7 +3656,8 @@
         },
         "raw": "give Weak 1 to a unit"
       }
-    ]
+    ],
+    "slug": "static_baang"
   },
   "74": {
     "cardId": 74,
@@ -3612,7 +3686,8 @@
         },
         "raw": "the bearer has Pierce 1"
       }
-    ]
+    ],
+    "slug": "steel_tree"
   },
   "75": {
     "cardId": 75,
@@ -3663,7 +3738,8 @@
         },
         "raw": "Spear bearers deal +4 damage to me"
       }
-    ]
+    ],
+    "slug": "stone_doll"
   },
   "76": {
     "cardId": 76,
@@ -3683,7 +3759,8 @@
         },
         "raw": "Slay an enemy Regular or Ranker"
       }
-    ]
+    ],
+    "slug": "submerged_fish"
   },
   "77": {
     "cardId": 77,
@@ -3737,7 +3814,8 @@
         },
         "raw": "when you summon a Shinheuh, Charge 1"
       }
-    ]
+    ],
+    "slug": "sunwoo_nare"
   },
   "78": {
     "cardId": 78,
@@ -3773,7 +3851,8 @@
         },
         "raw": "when i die, summon Stone Doll on both players' fields"
       }
-    ]
+    ],
+    "slug": "the_hand_of_arlen"
   },
   "79": {
     "cardId": 79,
@@ -3819,7 +3898,8 @@
         "raw": "Silence an enemy"
       }
     ],
-    "artworkPath": "/assets/images/artworks/the_workshop.png"
+    "artworkPath": "/assets/images/artworks/the_workshop.png",
+    "slug": "the_workshop"
   },
   "80": {
     "cardId": 80,
@@ -3876,7 +3956,8 @@
         "raw": "the bearer has +1 HP"
       }
     ],
-    "artworkPath": "/assets/images/artworks/third_thorn_fragment.png"
+    "artworkPath": "/assets/images/artworks/third_thorn_fragment.png",
+    "slug": "third_thorn_fragment"
   },
   "81": {
     "cardId": 81,
@@ -3900,7 +3981,8 @@
         },
         "raw": "give Exhausted 1 to a unit"
       }
-    ]
+    ],
+    "slug": "thunder_baang"
   },
   "82": {
     "cardId": 82,
@@ -3946,7 +4028,8 @@
       ],
       "cardId": 83
     },
-    "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png"
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png",
+    "slug": "twenty_fifth_baam"
   },
   "83": {
     "cardId": 83,
@@ -3989,7 +4072,8 @@
     ],
     "passives": [],
     "evolvedFrom": 82,
-    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png"
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png",
+    "slug": "twenty_fifth_baam_ii"
   },
   "84": {
     "cardId": 84,
@@ -4072,7 +4156,8 @@
         "raw": "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
       }
     ],
-    "artworkPath": "/assets/images/artworks/urek_mazino.png"
+    "artworkPath": "/assets/images/artworks/urek_mazino.png",
+    "slug": "urek_mazino"
   },
   "85": {
     "cardId": 85,
@@ -4093,7 +4178,8 @@
     "attributes": [],
     "affiliations": [],
     "abilities": [],
-    "passives": []
+    "passives": [],
+    "slug": "water_stadium"
   },
   "86": {
     "cardId": 86,
@@ -4111,7 +4197,8 @@
         },
         "raw": "give Heavy 1 to an enemy"
       }
-    ]
+    ],
+    "slug": "weights"
   },
   "87": {
     "cardId": 87,
@@ -4146,7 +4233,8 @@
         ],
         "raw": "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
       }
-    ]
+    ],
+    "slug": "wooden_horse"
   },
   "88": {
     "cardId": 88,
@@ -4168,7 +4256,8 @@
         "raw": "my bearer has Strong 3"
       }
     ],
-    "artworkPath": "/assets/images/artworks/woons_hammer.png"
+    "artworkPath": "/assets/images/artworks/woons_hammer.png",
+    "slug": "woons_hammer"
   },
   "89": {
     "cardId": 89,
@@ -4213,7 +4302,8 @@
         },
         "raw": "team sweet and sour members cost one less"
       }
-    ]
+    ],
+    "slug": "yeo_goseng"
   },
   "90": {
     "cardId": 90,
@@ -4269,7 +4359,8 @@
         },
         "raw": "round end: Silence me"
       }
-    ]
+    ],
+    "slug": "yeo_miseng"
   },
   "91": {
     "cardId": 91,
@@ -4323,7 +4414,8 @@
         "raw": "ally yeon family members have resilient"
       }
     ],
-    "artworkPath": "/assets/images/artworks/yeon_woon.png"
+    "artworkPath": "/assets/images/artworks/yeon_woon.png",
+    "slug": "yeon_woon"
   },
   "92": {
     "cardId": 92,
@@ -4370,7 +4462,8 @@
         "raw": "units with Burned 3+ can't target me"
       }
     ],
-    "artworkPath": "/assets/images/artworks/yeon_yihwa.png"
+    "artworkPath": "/assets/images/artworks/yeon_yihwa.png",
+    "slug": "yeon_yihwa"
   },
   "93": {
     "cardId": 93,
@@ -4441,7 +4534,8 @@
         "raw": "Baang gives Weak 2 and Cursed"
       }
     ],
-    "artworkPath": "/assets/images/artworks/yu_han_sung.png"
+    "artworkPath": "/assets/images/artworks/yu_han_sung.png",
+    "slug": "yu_han_sung"
   },
   "94": {
     "cardId": 94,
@@ -4490,7 +4584,8 @@
         "raw": "when I am deployed, summon Bull from your deck or hand"
       }
     ],
-    "artworkPath": "/assets/images/artworks/yuga.png"
+    "artworkPath": "/assets/images/artworks/yuga.png",
+    "slug": "yuga"
   },
   "95": {
     "cardId": 95,
@@ -4513,6 +4608,7 @@
         "raw": "give ally wolhaiksong and team sweet and sour members strong 2"
       }
     ],
-    "artworkPath": "/assets/images/artworks/zygaenas_flower.png"
+    "artworkPath": "/assets/images/artworks/zygaenas_flower.png",
+    "slug": "zygaenas_flower"
   }
 }

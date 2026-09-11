@@ -23,6 +23,7 @@ import ModifierStack, { getModifierCounter } from "./ModifierStack.js";
 import createActionRegistry from "./registries/actionRegistry.js";
 import Logger from "./Logger.js";
 import Card from "./Card.js";
+import { isTestCard } from "../utils/test-card.js";
 
 /**
  * Explicit lifecycle state for the game engine.
@@ -50,6 +51,7 @@ export default class GameState {
   // game settings
   static INIT_HAND_SIZE = 5;
   static INIT_DECK_SIZE = 30;
+  static MAX_CARD_COPIES = 3;
   static INIT_LIGHTHOUSE_AMOUNT = 20;
   static PER_ROUND_DRAW_AMOUNT = 1;
   static MAX_NORMAL_SHINSU = 10;
@@ -320,8 +322,8 @@ export default class GameState {
       combatSlots: Object.fromEntries(combatSlotCodes.map((code) => [code, { available: true }])),
       deck: builtDeck,
       // Immutable record of the starting deck composition, used by the
-      // `started_with_card` predicate. Card names suffice: deck construction
-      // already forbids repeated cards, so presence equals copy count.
+      // `started_with_card` predicate. Card names suffice: a name is present
+      // exactly when the starting deck held at least one copy of that card.
       startingDeck: builtDeck.map((card) => card.name),
       discard: [],
       lighthouses: { amount: GameState.INIT_LIGHTHOUSE_AMOUNT, max: 40 },
@@ -336,6 +338,8 @@ export default class GameState {
 
   /**
    * Build a deck from an array of card ids.
+   * A deck holds exactly `INIT_DECK_SIZE` cards and up to `MAX_CARD_COPIES`
+   * copies of each card (RULES.md).
    * @param {Array<number>} cardIds array of card ids
    * @returns {Array<Card>} Array of Card objects
    */
@@ -344,17 +348,23 @@ export default class GameState {
       throw new Error(`deck must be an array of ${GameState.INIT_DECK_SIZE} cardIds.`);
 
     const deck = [];
-    const seenCardIds = new Set();
+    const copyCounts = new Map();
     cardIds.forEach((cardId) => {
-      if (seenCardIds.has(cardId)) {
-        throw new Error(`Card with cardId ${cardId} appears more than once; decks cannot contain repeated cards.`);
-      }
-      seenCardIds.add(cardId);
       const cardData = this.cards[cardId];
       if (cardData === undefined) throw new Error(`Card with cardId ${cardId} does not exist`);
       if ((cardData.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) {
         throw new Error(`Card "${cardData.name}" is unreachable and cannot be included in a deck.`);
       }
+      if (isTestCard(cardData)) {
+        throw new Error(`Card "${cardData.name}" is a test card and cannot be included in a deck.`);
+      }
+      const copies = (copyCounts.get(cardId) || 0) + 1;
+      if (copies > GameState.MAX_CARD_COPIES) {
+        throw new Error(
+          `Card "${cardData.name}" appears ${copies} times; a deck may contain up to ${GameState.MAX_CARD_COPIES} copies of each card.`
+        );
+      }
+      copyCounts.set(cardId, copies);
       deck.push(new Card(cardId, cardData, username, this.eventBus));
     });
     return deck;
@@ -362,13 +372,30 @@ export default class GameState {
 
   /**
    * Card ids eligible for deck construction (excludes `unreachable` cards).
-   * Single source of truth shared by the default-deck fallback and gameFactory.
+   * Single source of truth shared by the default-deck fallbacks.
    * @returns {Array<number>}
    */
   static getEligibleCardIds(cards = GameState.cards) {
     return Object.values(cards)
       .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
       .map((card) => card.cardId);
+  }
+
+  /**
+   * The default-deck pool: every deck-legal card repeated up to
+   * `MAX_CARD_COPIES` times, so a legal deck can be drawn from the pool by
+   * taking `INIT_DECK_SIZE` entries. Test cards are excluded: they never
+   * belong in a dealt deck.
+   * @returns {Array<number>}
+   */
+  static getDeckPoolCardIds(cards = GameState.cards) {
+    const pool = [];
+    for (const card of Object.values(cards)) {
+      if ((card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) continue;
+      if (isTestCard(card)) continue;
+      for (let copy = 0; copy < GameState.MAX_CARD_COPIES; copy++) pool.push(card.cardId);
+    }
+    return pool;
   }
 
   /**
@@ -379,11 +406,11 @@ export default class GameState {
    * @returns {Array<number>} Array of cardIds
    */
   #defaultDeckOfCardIds() {
-    const eligible = GameState.getEligibleCardIds(this.cards);
-    if (eligible.length < GameState.INIT_DECK_SIZE) {
+    const pool = GameState.getDeckPoolCardIds(this.cards);
+    if (pool.length < GameState.INIT_DECK_SIZE) {
       throw new Error("Not enough eligible cards to generate a legal deck.");
     }
-    return eligible.slice(0, GameState.INIT_DECK_SIZE);
+    return pool.slice(0, GameState.INIT_DECK_SIZE);
   }
 
   #filterYouState(username) {

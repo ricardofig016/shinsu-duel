@@ -50,6 +50,9 @@ export default class Card {
     this.ignitedFrom = cardData.ignitedFrom ?? null;
 
     this.owner = owner; // player username
+    // The persistent card identifier, stamped by the compiler; the runtime
+    // cardId is a compile-time index that shifts when the catalog changes.
+    this.slug = cardData.slug ?? null;
     // Resolved by the compiler from the card slug (`<normalizeName(name)>.png`);
     // null for cards without artwork, which the frontend renders as placeholder.
     this.artworkPath = cardData.artworkPath ?? null;
@@ -128,6 +131,7 @@ export default class Card {
     return {
       id: this.id,
       cardId: this.cardId,
+      slug: this.slug,
       type: this.type,
       kind: this.kind,
       line: this.line,

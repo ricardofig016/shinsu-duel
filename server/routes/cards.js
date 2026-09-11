@@ -2,7 +2,8 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import cardsData from "../data/cards.json" with { type: "json" };
-import { buildCatalogViews, findOrphanArtworks, isTestCard } from "../utils/card-catalog.js";
+import { buildCatalogViews, findOrphanArtworks } from "../utils/card-catalog.js";
+import { isTestCard } from "../utils/test-card.js";
 
 const router = express.Router();
 

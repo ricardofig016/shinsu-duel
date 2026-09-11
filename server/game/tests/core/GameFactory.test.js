@@ -58,8 +58,10 @@ describe("createSeededGame", () => {
     for (const username of players) {
       const deck = fullDeck(game.playerStates[username]);
       expect(deck).toHaveLength(30);
-      expect(new Set(deck).size).toBe(30);
       expect(deck.every((id) => eligible.has(id))).toBe(true);
+      for (const cardId of eligible) {
+        expect(deck.filter((id) => id === cardId).length).toBeLessThanOrEqual(GameState.MAX_CARD_COPIES);
+      }
     }
   });
 

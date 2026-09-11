@@ -6,6 +6,7 @@ import yaml from "js-yaml";
 import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
+import { normalizeName } from "./lib/normalize-name.js";
 import {
   compileCard,
   cleanCompiled,
@@ -133,6 +134,12 @@ export async function compileFixtures() {
 
   // 5. Clean up temporary/empty fields to the sparse compiled contract.
   const finalCards = compiled.map(cleanCompiled);
+
+  // 5b. Stamp slugs, mirroring the shipped compiler: the slug is the
+  //     persistent card identifier, so fixtures carry it too.
+  for (const card of finalCards) {
+    card.slug = normalizeName(card.name);
+  }
 
   // 6. Validate against the compiled schema.
   const output = {};

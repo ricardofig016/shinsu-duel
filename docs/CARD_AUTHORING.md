@@ -74,6 +74,15 @@ Both are warnings, never build failures: a card without art renders the frontend
 
 ---
 
+## Card identity: slug versus cardId
+
+A card carries two identifiers with different lifetimes:
+
+- **slug** (`normalizeName(name)`) — the persistent identifier. The compiler stamps it into every compiled card as `slug` and refuses a compile when two names produce the same slug. Everything persisted outside a running game — deck collections, starter decks — references cards by slug, so adding or reordering cards never corrupts stored decks. A rename changes the slug by definition: the file, artwork, and slug move together in one commit, and stored decks referencing the old slug fail loudly instead of pointing at the wrong card.
+- **cardId** — the runtime identifier: a name-sorted compile-time index. `GameState`, handlers, instance ids (`Card#<cardId>#<seq>`), and every in-memory structure consume cardIds; nothing outside the runtime may persist them. When a stored slug list meets the engine (for example when a deck starts a game), the boundary resolves slugs to cardIds through the compiled catalog.
+
+---
+
 ## Evolution naming
 
 Evolved units are linked to their base by a Roman-numeral stage marker at the end of the card name: `Karaka` → `Karaka II` → `Karaka III`. The compiler resolves each unit's `evolve:` target as `<root> <next stage>` and writes the reverse `evolvedFrom` link, so stage names are the only link carrier — never append generic suffixes like "- Evolved".

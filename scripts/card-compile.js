@@ -867,6 +867,23 @@ export async function compileCards(options = {}) {
     }
   }
 
+  // 7b. Stamp slugs. The slug is a card's persistent identifier: the runtime
+  //     cardId is a name-sorted compile-time index that shifts whenever cards
+  //     are added or renamed, so everything persisted outside a running game
+  //     (deck collections, starter decks) references cards by slug. A slug
+  //     collision would silently merge two cards, so it fails the compile the
+  //     same way a duplicate name does.
+  const seenSlugs = new Map();
+  for (const card of finalCards) {
+    const slug = normalizeName(card.name);
+    const owner = seenSlugs.get(slug);
+    if (owner !== undefined) {
+      throw new Error(`Duplicate card slugs: "${slug}" ("${owner}" and "${card.name}")`);
+    }
+    seenSlugs.set(slug, card.name);
+    card.slug = slug;
+  }
+
   // 8. Convert to keyed object (by cardId as string), failing on any
   //    identity collision instead of silently shadowing an entry.
   const output = {};

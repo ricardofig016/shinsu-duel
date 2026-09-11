@@ -36,23 +36,37 @@ export function expectShinsuState(playerState, normalSpent, normalAvailable, rec
   expect(playerState.shinsu.recharged).toBe(recharged);
 }
 
-export function createLegalDeck(preferredCardIds = []) {
-  const eligible = Object.values(cards)
-    .filter((card) => !(card.deckConstraints || []).some((constraint) => constraint.type === "unreachable"))
-    .map((card) => card.cardId);
-  const preferred = [...new Set(preferredCardIds)];
-  const fillers = eligible.filter((id) => !preferred.includes(id));
-  return [...fillers.slice(0, 30 - preferred.length), ...preferred];
+// Cap repeated requests at the rules' copy limit (RULES.md) so helpers always
+// build decks the engine accepts.
+function limitCopies(cardIds) {
+  const counts = new Map();
+  const limited = [];
+  for (const cardId of cardIds) {
+    const copies = (counts.get(cardId) || 0) + 1;
+    if (copies > GameState.MAX_CARD_COPIES) continue;
+    counts.set(cardId, copies);
+    limited.push(cardId);
+  }
+  return limited;
 }
 
-// Helper to create a game with specific cards in hand.
-// Deck construction remains legal even when tests request repeated display cards.
+export function createLegalDeck(preferredCardIds = []) {
+  const eligible = GameState.getEligibleCardIds(cards);
+  const preferred = limitCopies(preferredCardIds);
+  const excluded = new Set(preferred);
+  const fillers = eligible.filter((id) => !excluded.has(id));
+  return [...fillers.slice(0, GameState.INIT_DECK_SIZE - preferred.length), ...preferred];
+}
+
+// Helper to create a game with specific cards in hand. Repeated names request
+// that many copies, up to the rules' copy limit.
 export function setupGameWithCardsInHand(cardsInHand) {
   const cardIds = cardsInHand.map((c) => typeof c === "string" ? getCardIdByName(c) : c);
-  const preferred = [...new Set(cardIds)];
+  const preferred = limitCopies(cardIds);
   const base = createLegalDeck(preferred);
   const requestedInDrawOrder = [...preferred].reverse();
-  const remaining = base.filter((id) => !preferred.includes(id));
+  const excluded = new Set(preferred);
+  const remaining = base.filter((id) => !excluded.has(id));
   const decks = {
     Alice: [...remaining, ...requestedInDrawOrder],
     Bob: createLegalDeck(),
@@ -69,10 +83,11 @@ export function createTestGame() {
 // card names, so both players can be seeded with specific cards in hand.
 function deckWith(names) {
   const cardIds = (names || []).map((c) => (typeof c === "string" ? getCardIdByName(c) : c));
-  const preferred = [...new Set(cardIds)];
+  const preferred = limitCopies(cardIds);
   const base = createLegalDeck(preferred);
   const requestedInDrawOrder = [...preferred].reverse();
-  const remaining = base.filter((id) => !preferred.includes(id));
+  const excluded = new Set(preferred);
+  const remaining = base.filter((id) => !excluded.has(id));
   return [...remaining, ...requestedInDrawOrder];
 }
 

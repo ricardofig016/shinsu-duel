@@ -244,6 +244,65 @@ describe("deck behavior", () => {
     expect(() => new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1) })).toThrow(/does not exist/);
   });
 
+  test("accepts a deck holding the maximum number of copies of a card", () => {
+    const cardId = getCardIdByName("Test Spear Bearer");
+    const copies = Array.from({ length: GameState.MAX_CARD_COPIES }, () => cardId);
+    const decks = { Alice: createLegalDeck(copies), Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });
+
+    const deckCardIds = [...game.playerStates.Alice.deck, ...game.playerStates.Alice.hand].map((c) => c.cardId);
+    expect(deckCardIds.filter((id) => id === cardId)).toHaveLength(GameState.MAX_CARD_COPIES);
+  });
+
+  test("constructor throws when a deck exceeds the copy limit", () => {
+    const cardId = getCardIdByName("Test Spear Bearer");
+    const atLimit = createLegalDeck([cardId, cardId, cardId]);
+    // Replace a filler with a fourth copy, keeping the deck at 30 cards.
+    const overLimitDeck = [cardId, ...atLimit.slice(1)];
+    const decks = { Alice: overLimitDeck, Bob: createLegalDeck() };
+    expect(() => new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards })).toThrow(/up to 3 copies/);
+  });
+
+  test("accepts a deck holding two copies of a card", () => {
+    const cardId = getCardIdByName("Test Spear Bearer");
+    const decks = { Alice: createLegalDeck([cardId, cardId]), Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });
+
+    const deckCardIds = [...game.playerStates.Alice.deck, ...game.playerStates.Alice.hand].map((c) => c.cardId);
+    expect(deckCardIds.filter((id) => id === cardId)).toHaveLength(2);
+  });
+
+  test("constructor rejects an unreachable card", () => {
+    const unreachableId = Number(
+      Object.values(cards).find((card) => (card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")).cardId
+    );
+    const deck = createLegalDeck();
+    deck[0] = unreachableId;
+    const decks = { Alice: deck, Bob: createLegalDeck() };
+    expect(() => new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards })).toThrow(/unreachable/);
+  });
+
+  test("constructor rejects a test card", () => {
+    const catalogWithTestCard = { ...cards, 999999: { cardId: 999999, name: "_Test Engine Card", deckConstraints: [] } };
+    const deck = createLegalDeck();
+    deck[0] = 999999;
+    const decks = { Alice: deck, Bob: createLegalDeck() };
+    expect(() =>
+      new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards: catalogWithTestCard })
+    ).toThrow(/test card/);
+  });
+
+  test("default decks never contain test cards", () => {
+    const catalogWithTestCard = { ...cards, 999999: { cardId: 999999, name: "_Test Engine Card", deckConstraints: [] } };
+    const game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1), cards: catalogWithTestCard });
+
+    for (const username of USERNAMES) {
+      const deckCardIds = [...game.playerStates[username].deck, ...game.playerStates[username].hand].map((c) => c.cardId);
+      expect(deckCardIds).toHaveLength(GameState.INIT_DECK_SIZE);
+      expect(deckCardIds).not.toContain(999999);
+    }
+  });
+
   test("drawing when deck is empty does not crash and does not increase hand", () => {
     const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
     const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });

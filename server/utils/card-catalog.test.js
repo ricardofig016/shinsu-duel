@@ -1,6 +1,8 @@
 import { createGameServer } from "../createGameServer.js";
 import cardsData from "../data/cards.json" with { type: "json" };
-import { buildCatalogViews, findOrphanArtworks, isTestCard } from "./card-catalog.js";
+import GameState from "../game/GameState.js";
+import { buildCatalogViews, findOrphanArtworks } from "./card-catalog.js";
+import { isTestCard } from "./test-card.js";
 
 const unitEntry = {
   cardId: 10,
@@ -104,6 +106,26 @@ describe("buildCatalogViews", () => {
   });
 });
 
+describe("deckEligible", () => {
+  const unreachable = {
+    cardId: 20,
+    type: "unit",
+    name: "Conduit Form",
+    cost: 1,
+    hp: 5,
+    deckConstraints: [{ type: "unreachable" }],
+  };
+  const pickable = { cardId: 21, type: "unit", name: "Pickable", cost: 1, hp: 5, deckConstraints: [] };
+
+  test("marks Unreachable cards ineligible and leaves the rest eligible", () => {
+    const views = buildCatalogViews({ 20: unreachable, 21: pickable });
+    expect(views.map((view) => [view.cardId, view.deckEligible])).toEqual([
+      [20, false],
+      [21, true],
+    ]);
+  });
+});
+
 describe("findOrphanArtworks", () => {
   const views = [
     { name: "Ashen Knight", artworkPath: "/assets/images/artworks/ashen_knight.png" },
@@ -158,6 +180,19 @@ describe("cards route", () => {
       expect(typeof view.name).toBe("string");
       expect(typeof view.cardId).toBe("number");
     }
+  });
+
+  test("GET /cards/data marks deck eligibility from the engine's own rule", async () => {
+    const eligible = new Set(GameState.getEligibleCardIds(cardsData));
+    const payload = await (await fetch(`${baseUrl}/cards/data`)).json();
+
+    for (const view of payload.cards) {
+      expect({ cardId: view.cardId, deckEligible: view.deckEligible }).toEqual({
+        cardId: view.cardId,
+        deckEligible: eligible.has(view.cardId),
+      });
+    }
+    expect(payload.cards.some((view) => view.deckEligible === false)).toBe(true);
   });
 
   test("GET /cards/data?dev=true adds test cards and orphan artworks", async () => {

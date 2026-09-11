@@ -378,6 +378,8 @@ The compiler normalizes human-readable vocab into codes before emitting `cards.j
 
 The compiled schema is **closed**: `type` must be a known node type, unknown fields are rejected, and there is no `custom` type and no `handler` field. The compiler additionally refuses any `type` outside `schemas/dsl-catalog.json` at the source path that introduced it.
 
+Identity: every compiled card carries `cardId` (the runtime identifier, assigned name-sorted) and `slug` (`normalizeName(name)`, the persistent identifier the compiler stamps and refuses to duplicate). Card data outside the runtime references cards by slug; see the identity section in [`CARD_AUTHORING.md`](./CARD_AUTHORING.md).
+
 Artwork is resolved at compile time: for each card the compiler looks for `<normalizeName(name)>.png` in `public/assets/images/artworks/` (the same slug that names the YAML source) and stamps the public path into the compiled card as `artworkPath`. The field is present only when the file exists — cards without artwork carry no `artworkPath` at all, and the frontend renders its placeholder for them. The authoring rules for artwork files live in [`CARD_AUTHORING.md`](./CARD_AUTHORING.md).
 
 ---
@@ -389,7 +391,7 @@ Artwork is resolved at compile time: for each card the compiler looks for `<norm
 - a fresh in-memory compile (`compileCards()` in `scripts/card-compile.js`) must equal the checked-in `server/data/cards.json` exactly — same content, same stable name-sorted `cardId`s;
 - every node, trigger, and predicate type in the compiled data must be cataloged;
 - every dispatchable effect type must have a registered handler;
-- identity is unique (names and `cardId`s) and evolution/ignition cross-references point at their conventioned counterparts;
+- identity is unique (names, `cardId`s, and slugs) and evolution/ignition cross-references point at their conventioned counterparts;
 - every compiled `artworkPath` is absent or exactly `/assets/images/artworks/<normalizeName(name)>.png` (the artwork slug contract).
 
 The audit is read-only: it never rewrites the artifact. If it fails after editing cards, run `npm run compile:cards` to refresh `server/data/cards.json`.

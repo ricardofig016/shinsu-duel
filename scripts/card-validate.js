@@ -402,6 +402,7 @@ function validateIgnition(ignitionList, errors) {
 export function validateCrossReferences(allCards, failuresByFile) {
   // Build map: normalized name → card info
   const nameToFile = new Map();
+  const slugToFile = new Map();
   for (const { filename, relativePath, card } of allCards) {
     if (card && card.name) {
       if (nameToFile.has(card.name)) {
@@ -412,6 +413,18 @@ export function validateCrossReferences(allCards, failuresByFile) {
         continue;
       }
       nameToFile.set(card.name, { filename, card });
+
+      // A slug colliding across two names would persist as one identifier for
+      // two cards; the compile fails on it, so name it here too.
+      const slug = normalizeName(card.name);
+      if (slugToFile.has(slug)) {
+        const first = slugToFile.get(slug);
+        const fileErrors = failuresByFile.get(relativePath) || [];
+        fileErrors.push(`name: card slug "${slug}" collides with "${first.card.name}" (also defined in ${first.filename})`);
+        failuresByFile.set(relativePath, fileErrors);
+        continue;
+      }
+      slugToFile.set(slug, { filename, card });
     }
   }
 

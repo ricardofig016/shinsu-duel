@@ -1,29 +1,27 @@
 import Card from "../game/Card.js";
-
-const TEST_NAME_PATTERN = /^_test/i;
-
-/**
- * Test cards are the `_Test*` entries authored under `data/cards/test/`; the
- * name prefix is the only marker they carry in the compiled catalog.
- */
-export function isTestCard(card) {
-  return typeof card?.name === "string" && TEST_NAME_PATTERN.test(card.name);
-}
+import GameState from "../game/GameState.js";
+import { isTestCard } from "./test-card.js";
 
 /**
  * Project the compiled catalog into client card views. Views are built
  * through `Card.toSanitizedObject()` — the single client card-view contract —
  * so a browse page consumes exactly the shape the game sends over the wire.
+ * Each view carries `deckEligible`, the engine's own deck-construction
+ * eligibility, so a deck builder can mark pickable cards without re-deriving
+ * the rule.
  *
  * @param {object} cards keyed compiled catalog (`server/data/cards.json`)
  * @param {{ includeTest?: boolean }} [options] include the `_Test*` cards
  * @returns {object[]} card views in catalog order
  */
 export function buildCatalogViews(cards, { includeTest = false } = {}) {
+  const eligible = new Set(GameState.getEligibleCardIds(cards));
   const views = [];
   for (const [key, entry] of Object.entries(cards)) {
     if (!includeTest && isTestCard(entry)) continue;
-    views.push(new Card(Number(key), entry, null, null).toSanitizedObject());
+    const view = new Card(Number(key), entry, null, null).toSanitizedObject();
+    view.deckEligible = eligible.has(view.cardId);
+    views.push(view);
   }
   return views;
 }

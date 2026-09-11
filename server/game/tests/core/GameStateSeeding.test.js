@@ -63,7 +63,7 @@ describe("GameState seeded RNG enforcement", () => {
     expect(game.currentTurn).toBe(players[0]);
   });
 
-  test("generates a deterministic default deck of 30 unique eligible cards", () => {
+  test("generates a deterministic default deck of 30 eligible cards within the copy limit", () => {
     const a = new GameState("S", players, {}, null, { rng: new SeededRng(1), cards });
     const b = new GameState("S", players, {}, null, { rng: new SeededRng(1), cards });
     const eligible = new Set(GameState.getEligibleCardIds(cards));
@@ -71,8 +71,10 @@ describe("GameState seeded RNG enforcement", () => {
     for (const game of [a, b]) {
       const deck = fullDeck(game.playerStates.Alice);
       expect(deck).toHaveLength(30);
-      expect(new Set(deck).size).toBe(30);
       expect(deck.every((id) => eligible.has(id))).toBe(true);
+      for (const cardId of eligible) {
+        expect(deck.filter((id) => id === cardId).length).toBeLessThanOrEqual(GameState.MAX_CARD_COPIES);
+      }
     }
 
     expect(fullDeck(a.playerStates.Alice)).toEqual(fullDeck(b.playerStates.Alice));
