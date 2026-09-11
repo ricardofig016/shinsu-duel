@@ -20,6 +20,7 @@ const unitView = {
   chosenPositionCode: "light_bearer",
   card: {
     cardId: 10001,
+    slug: "test_scout",
     type: "unit",
     kind: "standard",
     name: "Test Scout",
@@ -57,6 +58,7 @@ describe("buildUnitViewModel", () => {
     expect(model.owner).toBe("Alice");
     expect(model.currentHp).toBe(3);
     expect(model.name).toBe("Test Scout");
+    expect(model.slug).toBe("test_scout");
     expect(model.sobriquet).toBe("The Lookout");
     expect(model.effectiveCost).toBe(1);
     expect(model.passiveAbilities).toEqual([{ text: "Always watching." }]);

@@ -17,6 +17,9 @@ export const SORT_KEYS = Object.freeze([
 
 const collator = new Intl.Collator(undefined, { sensitivity: "base", numeric: true });
 
+/** Name comparison shared by every sort that orders cards or decks by name. */
+export const nameCollator = collator;
+
 /**
  * Human card name for an artwork file stem, following the artwork contract
  * where the stem is the card slug: `twenty_fifth_baam` becomes `Twenty Fifth Baam`.
@@ -142,6 +145,18 @@ export function deriveFacetOptions(views) {
     traits: distinctSorted(views.flatMap((view) => (view.printedTraits ?? []).map((entry) => entry.name))),
     positions: distinctSorted(views.flatMap((view) => Object.values(view.positions ?? {}).map((entry) => entry.name))),
   };
+}
+
+/**
+ * Pure sync plan for a card grid: the visible views in display order.
+ * Criteria filter first, then the optional predicate (page-local toggles),
+ * then ordering: a caller-supplied comparator wins, otherwise
+ * `fixedSortKey ?? sortKey` picks a standard `sortCards` key.
+ */
+export function planGrid(views, { criteria = null, sortKey = null, fixedSortKey = null, compare = null, predicate = null } = {}) {
+  const filtered = filterCards(views, criteria).filter((view) => (predicate ? predicate(view) : true));
+  if (compare) return [...filtered].sort(compare);
+  return sortCards(filtered, fixedSortKey ?? sortKey);
 }
 
 /**

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shinsu Duel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/pages/decks/styles.css" />
+  </head>
+  <body>
+    <div id="navbar-component"></div>
+
+    <div class="allow-scroll" id="decks-page-container">
+      <p id="decks-message" class="hidden"></p>
+
+      <section id="decks-list-view">
+        <div class="decks-header">
+          <h1>Decks</h1>
+          <button type="button" id="new-deck-btn">New deck</button>
+        </div>
+
+        <div id="decks-toolbar">
+          <input type="search" id="deck-search" placeholder="Search decks..." autocomplete="off" />
+          <select id="deck-legality">
+            <option value="all">All decks</option>
+            <option value="legal">Legal only</option>
+            <option value="not-legal">Not legal only</option>
+          </select>
+          <select id="deck-sort"></select>
+        </div>
+
+        <fieldset id="decks-card-filter">
+          <legend>Containing cards</legend>
+          <div class="decks-card-filter-controls">
+            <input type="search" id="deck-card-search" placeholder="Card text..." autocomplete="off" />
+            <select id="deck-card-type">
+              <option value="">All types</option>
+            </select>
+            <fieldset id="deck-card-affiliations">
+              <legend>Affiliations</legend>
+              <div class="facet-options"></div>
+            </fieldset>
+          </div>
+        </fieldset>
+
+        <p id="decks-empty" class="hidden">You have no decks yet. Start a new deck to build one.</p>
+        <p id="decks-no-match" class="hidden">No decks match the filters.</p>
+
+        <table id="decks-table">
+          <thead>
+            <tr id="decks-table-header-row"></tr>
+          </thead>
+          <tbody id="decks-table-body"></tbody>
+        </table>
+      </section>
+
+      <section id="builder-view" class="hidden">
+        <div class="decks-header">
+          <h1 id="builder-title">New deck</h1>
+          <button type="button" id="back-to-decks-btn">Back to decks</button>
+        </div>
+
+        <div id="builder-toolbar">
+          <input type="text" id="deck-name" placeholder="Deck name" autocomplete="off" />
+          <span id="deck-size"></span>
+          <span id="deck-legal"></span>
+          <span id="save-hint"></span>
+          <button type="button" id="save-deck-btn">Save deck</button>
+        </div>
+
+        <div id="builder-panels">
+          <section id="deck-contents-panel">
+            <h2>In this deck</h2>
+            <ul id="deck-problems"></ul>
+            <p id="deck-contents-empty">No cards picked yet.</p>
+            <ul id="deck-contents"></ul>
+          </section>
+
+          <section id="deck-pool-panel">
+            <h2>Card pool <span id="pool-count"></span></h2>
+
+            <div id="pool-toolbar">
+              <input type="search" id="pool-card-search" placeholder="Search cards..." autocomplete="off" />
+              <select id="pool-filter-type">
+                <option value="">All types</option>
+              </select>
+              <select id="pool-filter-kind">
+                <option value="">All kinds</option>
+              </select>
+              <select id="pool-filter-rank">
+                <option value="">All ranks</option>
+              </select>
+              <input type="number" id="pool-cost-min" placeholder="Min cost" min="0" />
+              <input type="number" id="pool-cost-max" placeholder="Max cost" min="0" />
+              <select id="pool-sort"></select>
+              <label class="pool-toggle">
+                <input type="checkbox" id="pool-show-illegal" />
+                Show illegal
+              </label>
+              <label class="pool-toggle">
+                <input type="checkbox" id="pool-in-deck-only" />
+                In deck only
+              </label>
+            </div>
+
+            <div id="pool-facets">
+              <fieldset id="pool-facet-affiliations">
+                <legend>Affiliations</legend>
+                <div class="facet-options"></div>
+              </fieldset>
+              <fieldset id="pool-facet-traits">
+                <legend>Traits</legend>
+                <div class="facet-options"></div>
+              </fieldset>
+              <fieldset id="pool-facet-positions">
+                <legend>Positions</legend>
+                <div class="facet-options"></div>
+              </fieldset>
+            </div>
+
+            <p id="pool-empty" class="hidden">No cards match the filters.</p>
+            <div class="cards-grid" id="pool-grid"></div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/pages/decks/script.js"></script>
+  </body>
+</html>

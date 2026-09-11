@@ -1,23 +1,20 @@
 import { loadComponent } from "/utils/component-util.js";
 import { buildCardViewModel } from "/game/viewModels.js";
+import { mountCardGrid } from "/utils/card-grid.js";
+import { wireCatalogToolbar } from "/utils/catalog-toolbar.js";
 import {
   DEFAULT_SORT_KEY,
-  SORT_KEYS,
   artworkDisplayName,
   decodeState,
-  deriveFacetOptions,
   encodeState,
-  filterCards,
   normalizeCriteria,
-  sortCards,
 } from "/utils/card-browse.js";
 
-const SEARCH_DEBOUNCE_MS = 150;
 const ORPHAN_SORT_KEY = DEFAULT_SORT_KEY; // artworks have no cost; always sort by name
 
 const state = {
   dev: false,
-  sections: [], // [{ grid, count, sortKey, byCardId: Map<cardId, { view, element }> }]
+  grids: [], // [{ views, show({ criteria, sortKey }) }] — one per section
   criteria: normalizeCriteria(null),
   sortKey: DEFAULT_SORT_KEY,
 };
@@ -36,27 +33,6 @@ const showFailure = (message) => {
   error.classList.remove("hidden");
 };
 
-/** Build one mounted card component. The element is appended to its grid
- * before loading: the component measures its own layout while rendering
- * (the text fits), which requires it to be attached to the document. The
- * final ordering is deterministic anyway — render() re-appends sorted. */
-const createCardElement = async (section, view) => {
-  const element = document.createElement("div");
-  element.classList.add("card-vertical-component");
-  section.grid.appendChild(element);
-  await loadComponent(element, "card-vertical", { card: view, isSmall: true });
-  return { view, element };
-};
-
-const createSection = (gridId, countId, views, { fixedSortKey = null } = {}) => {
-  const grid = document.getElementById(gridId);
-  const count = document.getElementById(countId);
-  const byCardId = new Map();
-  return { grid, count, fixedSortKey, byCardId, views };
-};
-
-const sectionSortKey = (section) => section.fixedSortKey ?? state.sortKey;
-
 const populateSections = async ({ cards, testCards = [], orphanArtworks = [] }) => {
   const orphanViews = orphanArtworks.map((orphan) =>
     buildCardViewModel({
@@ -70,114 +46,30 @@ const populateSections = async ({ cards, testCards = [], orphanArtworks = [] }) 
     })
   );
 
-  const sections = [createSection("cards-grid", "cards-count", cards)];
+  const specs = [{ gridId: "cards-grid", countId: "cards-count", views: cards }];
   if (state.dev) {
-    sections.push(createSection("test-cards-grid", "test-cards-count", testCards));
-    sections.push(
-      createSection("artworks-grid", "artworks-count", orphanViews, { fixedSortKey: ORPHAN_SORT_KEY })
-    );
+    specs.push({ gridId: "test-cards-grid", countId: "test-cards-count", views: testCards });
+    specs.push({
+      gridId: "artworks-grid",
+      countId: "artworks-count",
+      views: orphanViews,
+      fixedSortKey: ORPHAN_SORT_KEY,
+    });
     document.getElementById("test-cards-section").classList.remove("hidden");
     document.getElementById("artworks-section").classList.remove("hidden");
   }
 
-  const mounts = [];
-  for (const section of sections) {
-    for (const view of section.views) {
-      mounts.push(
-        createCardElement(section, view).then((mounted) => {
-          section.byCardId.set(view.cardId, mounted);
-        })
-      );
-    }
+  state.grids = [];
+  for (const spec of specs) {
+    state.grids.push(
+      await mountCardGrid({
+        gridElement: document.getElementById(spec.gridId),
+        countElement: document.getElementById(spec.countId),
+        views: spec.views,
+        fixedSortKey: spec.fixedSortKey ?? null,
+      })
+    );
   }
-  await Promise.all(mounts);
-  state.sections = sections;
-};
-
-const populateSelect = (select, values, anyLabel) => {
-  for (const value of values) {
-    const option = document.createElement("option");
-    option.value = value;
-    option.innerText = value;
-    select.appendChild(option);
-  }
-};
-
-const populateFacetGroup = (fieldsetId, values) => {
-  const container = document.querySelector(`#${fieldsetId} .facet-options`);
-  container.replaceChildren(
-    ...values.map((value) => {
-      const label = document.createElement("label");
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.value = value;
-      label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(value));
-      return label;
-    })
-  );
-  container.closest("fieldset").classList.toggle("hidden", values.length === 0);
-};
-
-const populateToolbar = () => {
-  const options = deriveFacetOptions(state.sections.flatMap((section) => section.views));
-  populateSelect(document.getElementById("filter-type"), options.types, "All types");
-  populateSelect(document.getElementById("filter-kind"), options.kinds, "All kinds");
-  populateSelect(document.getElementById("filter-rank"), options.ranks, "All ranks");
-  populateFacetGroup("filter-affiliations", options.affiliations);
-  populateFacetGroup("filter-traits", options.traits);
-  populateFacetGroup("filter-positions", options.positions);
-
-  const sortSelect = document.getElementById("sort-select");
-  sortSelect.replaceChildren(
-    ...SORT_KEYS.map((entry) => {
-      const option = document.createElement("option");
-      option.value = entry.key;
-      option.innerText = entry.label;
-      return option;
-    })
-  );
-};
-
-const checkedValues = (fieldsetId) =>
-  [...document.querySelectorAll(`#${fieldsetId} input:checked`)].map((checkbox) => checkbox.value);
-
-const parseCost = (id) => {
-  const value = document.getElementById(id).value.trim();
-  if (value === "") return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-};
-
-const readCriteriaFromControls = () => ({
-  text: document.getElementById("card-search").value,
-  type: document.getElementById("filter-type").value || null,
-  kind: document.getElementById("filter-kind").value || null,
-  rank: document.getElementById("filter-rank").value || null,
-  affiliations: checkedValues("filter-affiliations"),
-  traits: checkedValues("filter-traits"),
-  positions: checkedValues("filter-positions"),
-  costMin: parseCost("cost-min"),
-  costMax: parseCost("cost-max"),
-});
-
-const applyStateToControls = () => {
-  document.getElementById("card-search").value = state.criteria.text;
-  document.getElementById("filter-type").value = state.criteria.type ?? "";
-  document.getElementById("filter-kind").value = state.criteria.kind ?? "";
-  document.getElementById("filter-rank").value = state.criteria.rank ?? "";
-  for (const checkbox of document.querySelectorAll("#filter-affiliations input")) {
-    checkbox.checked = state.criteria.affiliations.includes(checkbox.value);
-  }
-  for (const checkbox of document.querySelectorAll("#filter-traits input")) {
-    checkbox.checked = state.criteria.traits.includes(checkbox.value);
-  }
-  for (const checkbox of document.querySelectorAll("#filter-positions input")) {
-    checkbox.checked = state.criteria.positions.includes(checkbox.value);
-  }
-  document.getElementById("cost-min").value = state.criteria.costMin ?? "";
-  document.getElementById("cost-max").value = state.criteria.costMax ?? "";
-  document.getElementById("sort-select").value = state.sortKey;
 };
 
 const syncUrl = () => {
@@ -188,26 +80,35 @@ const syncUrl = () => {
 };
 
 const render = () => {
-  for (const section of state.sections) {
-    const visible = sortCards(filterCards(section.views, state.criteria), sectionSortKey(section));
-    const visibleIds = new Set(visible.map((view) => view.cardId));
-    for (const view of section.views) {
-      const mounted = section.byCardId.get(view.cardId);
-      mounted.element.classList.toggle("hidden", !visibleIds.has(view.cardId));
-    }
-    for (const view of visible) {
-      section.grid.appendChild(section.byCardId.get(view.cardId).element); // reorder
-    }
-    section.count.innerText = `${visible.length} shown`;
+  for (const grid of state.grids) {
+    grid.show({ criteria: state.criteria, sortKey: state.sortKey });
   }
 };
 
 const onControlChange = () => {
-  state.criteria = normalizeCriteria(readCriteriaFromControls());
-  state.sortKey = document.getElementById("sort-select").value;
+  state.criteria = toolbar.readCriteria();
+  state.sortKey = toolbar.readSortKey() ?? state.sortKey;
   syncUrl();
   render();
 };
+
+const toolbar = wireCatalogToolbar({
+  elements: {
+    search: document.getElementById("card-search"),
+    type: document.getElementById("filter-type"),
+    kind: document.getElementById("filter-kind"),
+    rank: document.getElementById("filter-rank"),
+    costMin: document.getElementById("cost-min"),
+    costMax: document.getElementById("cost-max"),
+    sort: document.getElementById("sort-select"),
+    facets: {
+      affiliations: document.getElementById("filter-affiliations"),
+      traits: document.getElementById("filter-traits"),
+      positions: document.getElementById("filter-positions"),
+    },
+  },
+  onChange: onControlChange,
+});
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadComponent(document.getElementById("navbar-component"), "navbar");
@@ -234,19 +135,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     testCards: (payload.testCards ?? []).map(buildCardViewModel),
     orphanArtworks: payload.orphanArtworks ?? [],
   });
-  populateToolbar();
-  applyStateToControls();
+  toolbar.populateFacetOptions(state.grids.flatMap((grid) => grid.views));
+  toolbar.populateSortOptions();
+  toolbar.applyState({ criteria: state.criteria, sortKey: state.sortKey });
 
-  const debouncedChange = debounce(onControlChange, SEARCH_DEBOUNCE_MS);
-  document.getElementById("card-search").addEventListener("input", debouncedChange);
-  document.getElementById("cost-min").addEventListener("input", debouncedChange);
-  document.getElementById("cost-max").addEventListener("input", debouncedChange);
-  for (const id of ["filter-type", "filter-kind", "filter-rank", "sort-select"]) {
-    document.getElementById(id).addEventListener("change", onControlChange);
-  }
-  for (const fieldsetId of ["filter-affiliations", "filter-traits", "filter-positions"]) {
-    document.getElementById(fieldsetId).addEventListener("change", onControlChange);
-  }
   for (const section of document.querySelectorAll(".cards-section")) {
     section.querySelector("h2").addEventListener("click", () => section.classList.toggle("collapsed"));
   }

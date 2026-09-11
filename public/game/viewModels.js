@@ -18,6 +18,9 @@ const DECISION_TITLES = Object.freeze({
 
 const flattenCard = (card) => ({
   cardId: card.cardId ?? null,
+  // The persistent card identifier, stamped into every compiled card view;
+  // hidden/empty views carry none.
+  slug: card.slug ?? null,
   type: card.type ?? null,
   kind: card.kind ?? null,
   name: card.name ?? "",

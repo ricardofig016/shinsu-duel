@@ -1,0 +1,436 @@
+#decks-page-container {
+  padding: 0 2rem 4rem 2rem;
+  max-height: 100vh;
+  overflow-x: clip;
+}
+
+.decks-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.decks-header h1 {
+  font-size: 2.2rem;
+}
+
+#decks-message {
+  margin: 1rem 0 0 0;
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-left: 4px solid #a02020;
+  border-radius: 5px;
+  color: #a02020;
+  white-space: pre-line;
+}
+
+/* Deck list */
+
+#decks-toolbar,
+#pool-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+}
+
+#decks-toolbar input[type="search"],
+#decks-toolbar select,
+#pool-toolbar input[type="search"],
+#pool-toolbar input[type="number"],
+#pool-toolbar select,
+#decks-card-filter input[type="search"],
+#decks-card-filter select {
+  all: unset;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  color: #222222;
+}
+
+#pool-toolbar input[type="search"] {
+  flex: 1 1 14rem;
+}
+
+#decks-toolbar input[type="search"] {
+  flex: 0 1 16rem;
+}
+
+#deck-sort,
+#pool-sort {
+  margin-left: auto;
+}
+
+#decks-card-filter {
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem 0.75rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+#decks-card-filter legend {
+  padding: 0 0.4rem;
+  color: #555555;
+  font-size: 0.9rem;
+}
+
+.decks-card-filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#decks-card-filter fieldset {
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  padding: 0.35rem 0.6rem;
+  max-width: 30rem;
+}
+
+#decks-card-filter fieldset legend {
+  color: #555555;
+  font-size: 0.8rem;
+}
+
+#decks-empty,
+#decks-no-match {
+  padding: 1rem 0;
+  color: #555555;
+}
+
+#decks-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+}
+
+#decks-table th {
+  text-align: left;
+  font-size: 0.9rem;
+  color: #555555;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid #bbbbbb;
+}
+
+#decks-table td {
+  padding: 0.9rem 0.75rem;
+  border-bottom: 1px solid #eeeeee;
+  vertical-align: middle;
+}
+
+#decks-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+#decks-table tbody tr.deck-row {
+  cursor: pointer;
+}
+
+#decks-table tbody tr.deck-row:hover {
+  background-color: #f6f9ff;
+}
+
+.deck-fan-column {
+  width: 14rem;
+}
+
+.deck-fan-cell {
+  position: relative;
+  height: 10.5rem;
+  width: 13rem;
+}
+
+.deck-fan-cell:empty::after {
+  content: "No units";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #999999;
+  font-size: 0.9rem;
+}
+
+.deck-fan-card {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform-origin: 50% 115%;
+}
+
+/* The fan's scale comes from deckFanTransforms, shrinking the shared small
+   frame enough to stay inside the row. */
+
+.deck-name {
+  font-size: 1.15rem;
+}
+
+.deck-size-cell {
+  white-space: nowrap;
+}
+
+.deck-flag {
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.deck-flag.legal {
+  background-color: #e2f4e5;
+  color: #1c7a32;
+}
+
+.deck-flag.problems {
+  background-color: #fbe3e3;
+  color: #a02020;
+}
+
+.deck-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.small-button {
+  padding: 4px 10px;
+  font-size: 0.9rem;
+}
+
+.small-button:disabled,
+button:disabled {
+  background-color: #999999;
+  cursor: default;
+}
+
+/* Builder */
+
+#builder-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+}
+
+#deck-name {
+  all: unset;
+  flex: 1 1 14rem;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  color: #222222;
+}
+
+#deck-size {
+  font-size: 1.1rem;
+}
+
+#deck-size.over {
+  color: #a02020;
+}
+
+#deck-legal {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background-color: #e2f4e5;
+  color: #1c7a32;
+  font-size: 0.85rem;
+}
+
+#deck-legal.problems {
+  background-color: #fbe3e3;
+  color: #a02020;
+}
+
+#save-hint {
+  flex: 1 1 12rem;
+  color: #a02020;
+}
+
+#builder-panels {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+  align-items: stretch;
+  gap: 1.5rem;
+  height: calc(100vh - 13rem);
+}
+
+#deck-contents-panel,
+#deck-pool-panel {
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  overflow-y: auto;
+}
+
+#deck-contents-panel {
+  min-height: 0;
+}
+
+#deck-pool-panel {
+  min-height: 0;
+}
+
+#deck-contents-panel h2,
+#deck-pool-panel h2 {
+  font-size: 1.3rem;
+  margin: 0 0 0.5rem 0;
+}
+
+#deck-pool-panel h2 span {
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 1rem;
+  color: #555555;
+}
+
+#deck-contents-empty {
+  color: #555555;
+}
+
+.pool-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+#pool-facets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+}
+
+#pool-facets fieldset {
+  border: 1px solid #bbbbbb;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem;
+  max-width: 24rem;
+}
+
+#pool-empty {
+  padding: 1rem 0;
+  color: #555555;
+}
+
+#deck-pool-panel .card-vertical-frame.card-vertical-big {
+  position: fixed;
+}
+
+/* One pool card: the face plus its control bar. */
+
+.pool-card-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0 0.6rem 0;
+}
+
+.pool-card-bar button {
+  padding: 2px 10px;
+  font-size: 0.95rem;
+}
+
+.pool-copy-badge {
+  min-width: 2.6rem;
+  text-align: center;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background-color: #eeeeee;
+  color: #555555;
+}
+
+.pool-copy-badge.has-copies {
+  background-color: #e2f4e5;
+  color: #1c7a32;
+}
+
+/* Contents panel */
+
+#deck-problems {
+  color: #a02020;
+}
+
+#deck-problems li {
+  padding: 1px 0;
+}
+
+.contents-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.contents-row:last-child {
+  border-bottom: none;
+}
+
+.contents-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.contents-cost {
+  color: #555555;
+}
+
+.contents-count {
+  color: #555555;
+  font-size: 0.9rem;
+}
+
+.mark {
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.mark-unreachable {
+  background-color: #fdf1d8;
+  color: #8a5a00;
+}
+
+.mark-test {
+  background-color: #e3e9fb;
+  color: #2a3f8f;
+}
+
+.mark-unknown {
+  background-color: #fbe3e3;
+  color: #a02020;
+}
+
+.deck-card-button {
+  padding: 2px 8px;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  #builder-panels {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  #deck-pool-panel {
+    max-height: none;
+  }
+}
