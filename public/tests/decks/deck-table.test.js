@@ -5,14 +5,11 @@ import {
   buildDeckFan,
   buildDeckTableRow,
   compareDecks,
-  compareInDeckFirst,
   deckAverageCost,
   deckFanTransforms,
   deckMatchesCardCriteria,
   DECK_SORT_KEYS,
   DECK_TABLE_COLUMNS,
-  POOL_IN_DECK_SORT_KEY,
-  POOL_SORT_KEYS,
 } from "../../pages/decks/deck-view-models.js";
 
 const entry = (slug, name, cost, type, affiliations = []) => {
@@ -96,17 +93,6 @@ describe("deckMatchesCardCriteria", () => {
   });
 });
 
-describe("compareInDeckFirst", () => {
-  test("orders by copy count descending, then name, then slug", () => {
-    const copyCountOf = (slug) => ({ ashen_knight: 2, brawn_idol: 1, cinder_skill: 0, dusty_armor: 0 })[slug] ?? 0;
-    const compare = compareInDeckFirst(copyCountOf);
-    const ordered = ["cinder_skill", "ashen_knight", "dusty_armor", "brawn_idol"]
-      .map((slug) => entriesBySlug.get(slug))
-      .sort(compare);
-    expect(ordered.map((entry) => entry.slug)).toEqual(["ashen_knight", "brawn_idol", "cinder_skill", "dusty_armor"]);
-  });
-});
-
 describe("compareDecks", () => {
   const decks = [
     { id: "b", name: "Beta", cardCount: 30 },
@@ -127,14 +113,6 @@ describe("compareDecks", () => {
 
   test("exposes its keys with name ascending as the first entry", () => {
     expect(DECK_SORT_KEYS[0]).toEqual({ key: "name-asc", label: "Name A-Z" });
-  });
-});
-
-describe("pool sort keys", () => {
-  test("lead with the in-deck-first order", () => {
-    expect(POOL_IN_DECK_SORT_KEY).toBe("in-deck-first");
-    expect(POOL_SORT_KEYS[0].key).toBe("in-deck-first");
-    expect(POOL_SORT_KEYS.map((entry) => entry.key)).toContain("name-asc");
   });
 });
 

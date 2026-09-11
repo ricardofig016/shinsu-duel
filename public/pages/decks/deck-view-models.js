@@ -12,7 +12,7 @@
  */
 
 import { buildCardViewModel } from "../../game/viewModels.js";
-import { SORT_KEYS, buildSearchableText, nameCollator, normalizeCriteria } from "../../utils/card-browse.js";
+import { buildSearchableText, nameCollator, normalizeCriteria } from "../../utils/card-browse.js";
 
 /**
  * Deck-construction numbers for the page to display and cap input with. They
@@ -273,31 +273,6 @@ export function buildSaveState({ name, cards = [], knownSlugs, limits } = {}) {
     return { name: normalizedName, cards: [...cards], unknownSlugs, enabled: false, blockedReason: CARD_POOL_PROBLEM };
   }
   return { name: normalizedName, cards: [...cards], unknownSlugs, enabled: true, blockedReason: null };
-}
-
-/**
- * The pool's sort choices: the deck-aware default first, then the standard
- * catalog orders.
- */
-export const POOL_IN_DECK_SORT_KEY = "in-deck-first";
-export const POOL_SORT_KEYS = [
-  { key: POOL_IN_DECK_SORT_KEY, label: "In-deck first" },
-  ...SORT_KEYS,
-];
-
-/**
- * Comparator for the in-deck-first pool order: more copies first, ties broken
- * by name, then slug.
- * @param {(slug: string) => number} copyCountOf
- */
-export function compareInDeckFirst(copyCountOf) {
-  return (a, b) => {
-    const delta = (copyCountOf(b.slug) ?? 0) - (copyCountOf(a.slug) ?? 0);
-    if (delta !== 0) return delta;
-    const byName = nameCollator.compare(a.name ?? "", b.name ?? "");
-    if (byName !== 0) return byName;
-    return (a.slug ?? "").localeCompare(b.slug ?? "");
-  };
 }
 
 /**

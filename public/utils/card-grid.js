@@ -25,7 +25,7 @@ import { planGrid } from "./card-browse.js";
  *   mounted and is the seam for per-card extras (badges, buttons); extras live
  *   inside the wrapper because the wrapper is what syncing hides and moves.
  * @returns {Promise<{ views: object[], byCardId: Map<string|number, { view: object, element: HTMLElement }>, show: (options?: object) => object[] }>}
- *   `show({ criteria, sortKey, predicate, compare })` syncs the grid and
+ *   `show({ criteria, sortKey, predicate })` syncs the grid and
  *   returns the visible views in display order.
  */
 export async function mountCardGrid({ gridElement, countElement = null, views, fixedSortKey = null, decorate = null }) {
@@ -45,8 +45,8 @@ export async function mountCardGrid({ gridElement, countElement = null, views, f
   return {
     views,
     byCardId,
-    show({ criteria = null, sortKey = null, predicate = null, compare = null } = {}) {
-      const visible = planGrid(views, { criteria, sortKey, fixedSortKey, compare, predicate });
+    show({ criteria = null, sortKey = null, predicate = null } = {}) {
+      const visible = planGrid(views, { criteria, sortKey, fixedSortKey, predicate });
       const visibleIds = new Set(visible.map((view) => view.cardId));
       for (const view of views) {
         byCardId.get(view.cardId).element.classList.toggle("hidden", !visibleIds.has(view.cardId));

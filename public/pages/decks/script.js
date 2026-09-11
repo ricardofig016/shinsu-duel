@@ -1,7 +1,7 @@
 import { loadComponent } from "/utils/component-util.js";
 import { mountCardGrid } from "/utils/card-grid.js";
 import { wireCatalogToolbar } from "/utils/catalog-toolbar.js";
-import { normalizeCriteria } from "/utils/card-browse.js";
+import { DEFAULT_SORT_KEY, normalizeCriteria, SORT_KEYS } from "/utils/card-browse.js";
 import {
   buildDeckContents,
   buildDeckTableRow,
@@ -9,7 +9,6 @@ import {
   buildSaveState,
   buildValidationView,
   compareDecks,
-  compareInDeckFirst,
   copyLimitView,
   DECK_SORT_KEYS,
   DEFAULT_DECK_LIMITS,
@@ -18,8 +17,6 @@ import {
   deckFanTransforms,
   DECK_TABLE_COLUMNS,
   duplicateDeckName,
-  POOL_IN_DECK_SORT_KEY,
-  POOL_SORT_KEYS,
   withCardCopyAdded,
   withCardCopyRemoved,
 } from "/pages/decks/deck-view-models.js";
@@ -61,7 +58,7 @@ const state = {
   // card pool
   showIllegal: false,
   inDeckOnly: false,
-  poolSortKey: POOL_IN_DECK_SORT_KEY,
+  poolSortKey: DEFAULT_SORT_KEY,
   poolCriteria: normalizeCriteria(null),
   pool: { grid: null, cards: new Map() },
 };
@@ -166,9 +163,7 @@ const renderPool = () => {
       if (state.inDeckOnly && copyCount(view.slug) === 0) return false;
       return true;
     },
-    ...(state.poolSortKey === POOL_IN_DECK_SORT_KEY
-      ? { compare: compareInDeckFirst((slug) => copyCount(slug)) }
-      : { sortKey: state.poolSortKey }),
+    sortKey: state.poolSortKey,
   });
   byId("pool-empty").classList.toggle("hidden", visible.length > 0);
   refreshPoolCards();
@@ -195,7 +190,7 @@ const poolToolbar = wireCatalogToolbar({
     if (sortKey) state.poolSortKey = sortKey;
     renderPool();
   },
-  sortKeys: POOL_SORT_KEYS,
+  sortKeys: SORT_KEYS,
 });
 
 /* Builder draft */

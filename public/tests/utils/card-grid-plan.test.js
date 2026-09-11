@@ -19,14 +19,6 @@ describe("planGrid", () => {
     expect(visible.map((entry) => entry.cardId)).toEqual([1, 2]);
   });
 
-  test("a caller comparator wins over the sort key", () => {
-    const visible = planGrid(views, {
-      sortKey: "name-asc",
-      compare: (a, b) => b.cost - a.cost,
-    });
-    expect(visible.map((entry) => entry.cardId)).toEqual([1, 2, 3]);
-  });
-
   test("a fixed sort key overrides the incoming sort key", () => {
     const visible = planGrid(views, { sortKey: "cost-asc", fixedSortKey: "cost-desc" });
     expect(visible.map((entry) => entry.cardId)).toEqual([1, 2, 3]);
