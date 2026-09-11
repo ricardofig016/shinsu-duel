@@ -107,7 +107,8 @@ Each player's side is divided into the following zones:
 
 1. A deck must have exactly 30 cards
 2. A deck may contain up to 3 copies of each card
-3. If at any point a player tries to draw and their deck is empty, they lose the game
+3. [Unreachable](#keywords) cards can't be included in a deck
+4. If at any point a player tries to draw and their deck is empty, they lose the game
 
 ### Hand
 

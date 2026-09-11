@@ -1,6 +1,9 @@
 type: equipment
 name: Narumada - Ignited
 cost: 2
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 requirements:
 effects:
   - type: modify_stat

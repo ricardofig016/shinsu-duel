@@ -1,6 +1,9 @@
 type: unit
 name: Khun Ran II
 cost: 3
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 5
 rank: regular
 positions:

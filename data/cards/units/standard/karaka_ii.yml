@@ -1,6 +1,9 @@
 type: unit
 name: Karaka II
 cost: 7
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 9
 rank: high ranker
 positions:

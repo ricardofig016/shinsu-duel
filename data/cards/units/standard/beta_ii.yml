@@ -1,6 +1,9 @@
 type: unit
 name: Beta II
 cost: 2
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 4
 rank: regular
 positions:

@@ -1,6 +1,9 @@
 type: unit
 name: Twenty-Fifth Baam II
 cost: 5
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 6
 rank: regular
 positions:

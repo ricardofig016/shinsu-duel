@@ -10,13 +10,13 @@
 - [ ] cards: dynamically mark all cards in `data\cards\test` as unreachable
 - [ ] ui: add numbers to numeric traits and conditions
 - [ ] jeonsulsa: make the engine heal instead of granting hp
-- [ ] cards: add unreachable to all evolved and ignited cards
 
 ## In Progress
 
 
 ## Completed
 
+- [x] cards: add unreachable to all evolved and ignited cards
 - [x] plan: audit phase 2 again
 - [x] public: plan how image artworks should be matched to cards
 - [x] rules: create a `HOW_TO_PLAY.md` that are the default rules shown in the rules page

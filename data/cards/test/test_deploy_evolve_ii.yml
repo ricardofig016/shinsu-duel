@@ -1,6 +1,9 @@
 type: unit
 name: _Test Deploy Evolve II
 cost: 1
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 100
 rank: regular
 positions:

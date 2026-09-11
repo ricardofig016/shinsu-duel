@@ -48,6 +48,7 @@ Structural patterns live in the existing cards — read the closest match before
 | Landmark / Shinheuh / Conduit                | `data/cards/units/landmark/floor_of_death.yml`, `data/cards/units/shinheuh/stone_doll.yml`, `data/cards/units/conduit/conduit.yml`       |
 | Identity keyword with display text           | `data/cards/skills/lightning_baang.yml`                                                                                                  |
 | Deck constraint (`generated_by`)             | `data/cards/skills/incinerate_iv.yml`                                                                                                    |
+| Deck constraint (`unreachable`)              | `data/cards/equipments/narumada_ignited.yml`                                                                                             |
 | Structured triggers / modifiers              | `data/cards/units/standard/karaka_ii.yml`, `data/cards/units/landmark/wooden_horse.yml`, `data/cards/units/standard/evan_edrok.yml`      |
 | Compound chains (`sequence` / `conditional`) | `data/cards/units/standard/ja_wangnan.yml`, `data/cards/skills/baang.yml`                                                                |
 
@@ -94,6 +95,8 @@ Rules enforced by `npm run validate:cards`:
 - Each `evolve:` trigger list must point at an existing unit one stage up.
 
 The supported marker set lives in [`scripts/lib/stage-name.js`](../scripts/lib/stage-name.js).
+
+The same applies to ignition targets (`<name> - Ignited`): a transformed card — any evolution or ignition target — is authored [Unreachable](./COMPILED_CARD_DSL.md#deck-constraints) (`deckConstraints: [{ type: unreachable }]`), because it enters play only through its base card's trigger and can never be included in a deck. Author the constraint in the target card's own YAML; nothing derives it.
 
 ---
 

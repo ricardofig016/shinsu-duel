@@ -1,6 +1,9 @@
 type: unit
 name: Rak Wraithraiser II
 cost: 2
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 7
 rank: regular
 positions:

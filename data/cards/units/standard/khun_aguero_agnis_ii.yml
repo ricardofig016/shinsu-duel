@@ -1,6 +1,9 @@
 type: unit
 name: Khun Aguero Agnis II
 cost: 0
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"
 hp: 3
 rank: regular
 positions:

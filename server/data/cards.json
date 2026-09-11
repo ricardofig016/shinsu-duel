@@ -40,7 +40,12 @@
     "type": "unit",
     "name": "_Test Deploy Evolve II",
     "cost": 1,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 100,
     "rank": "regular",
     "kind": "standard",
@@ -716,7 +721,12 @@
     "type": "unit",
     "name": "Beta II",
     "cost": 2,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 4,
     "rank": "regular",
     "kind": "standard",
@@ -2247,7 +2257,12 @@
     "type": "unit",
     "name": "Karaka II",
     "cost": 7,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 9,
     "rank": "high ranker",
     "kind": "standard",
@@ -2411,7 +2426,12 @@
     "type": "unit",
     "name": "Khun Aguero Agnis II",
     "cost": 0,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 3,
     "rank": "regular",
     "kind": "standard",
@@ -2538,7 +2558,12 @@
     "type": "unit",
     "name": "Khun Ran II",
     "cost": 3,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 5,
     "rank": "regular",
     "kind": "standard",
@@ -2974,7 +2999,12 @@
     "type": "equipment",
     "name": "Narumada - Ignited",
     "cost": 2,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "effects": [
       {
         "type": "modify_stat",
@@ -3380,7 +3410,12 @@
     "type": "unit",
     "name": "Rak Wraithraiser II",
     "cost": 2,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 7,
     "rank": "regular",
     "kind": "standard",
@@ -3454,7 +3489,12 @@
     "type": "unit",
     "name": "Rak Wraithraiser III",
     "cost": 2,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 9,
     "rank": "regular",
     "kind": "standard",
@@ -4036,7 +4076,12 @@
     "type": "unit",
     "name": "Twenty-Fifth Baam II",
     "cost": 5,
-    "deckConstraints": [],
+    "deckConstraints": [
+      {
+        "type": "unreachable",
+        "raw": "i am Unreachable"
+      }
+    ],
     "hp": 6,
     "rank": "regular",
     "kind": "standard",
