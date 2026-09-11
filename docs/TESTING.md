@@ -7,8 +7,9 @@ This document is the **entry point** for writing tests and creating test fixture
 ## Run the tests
 
 - **Full suite:** `npm run test` (wraps Jest with the required Node flags). Never use bare `npx jest` — it breaks ESM.
+- **Quiet by default:** `npm run test` prints only the final totals line plus failure details, and collects no coverage. Use the HTML report in `reports/test-report.html` for full results.
+- **Full visibility:** `npm run test:loud` runs the same suite with the default reporter, per-test lines, and a coverage table.
 - **Focused:** `npm run test -- <pattern>` (e.g. `npm run test -- ModifierRuntimeIntegration`).
-- Coverage is collected automatically to `coverage/`.
 
 ## Test layout
 

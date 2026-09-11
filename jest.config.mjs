@@ -18,7 +18,8 @@ const config = {
   clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: true,
+  // Disabled: the default `test` run is quiet. `npm run test:loud` re-enables coverage.
+  // collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
@@ -44,9 +45,7 @@ const config = {
   //   "text",
   //   "lcov",
   //   "clover"
-  // ],
-
-  // An object that configures minimum threshold enforcement for coverage results
+  // ],  // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: undefined,
 
   // A path to a custom dependency extractor
@@ -113,8 +112,13 @@ const config = {
   // projects: undefined,
 
   // Use this configuration option to add custom reporters to Jest
+  // The default `test` run is quiet: the `summary` reporter prints only the
+  // final totals line plus failure details, and `silent` hides console output.
+  // `npm run test:loud` overrides both with the default reporter, coverage,
+  // and console output restored.
+  silent: true,
   reporters: [
-    "default",
+    "summary",
     [
       "jest-html-reporters",
       {
