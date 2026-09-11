@@ -169,7 +169,7 @@ describe("buildUnitViewModel", () => {
       kind: "standard",
       name: "Test Ranker",
       rank: "ranker",
-      requirements: ["you control a fisherman"],
+      requirements: [{ type: "target_side", side: "ally", raw: "you control a fisherman" }],
       effects: [],
       rules: ["passives have no effect"],
       evolveTriggers: ["when i am deployed"],

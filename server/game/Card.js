@@ -150,7 +150,7 @@ export default class Card {
       attributes: this.#attributeViews(),
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
-      requirements: [...this.requirements],
+      requirements: this.#displayTexts(this.requirements),
       effects: this.#displayTexts(this.effects),
       rules: this.#displayTexts(this.rules),
       evolveTriggers: this.evolveInto ? this.#displayTexts(this.evolveInto.triggers) : null,

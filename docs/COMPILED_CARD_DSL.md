@@ -281,6 +281,23 @@ card:
 
 ---
 
+## Requirements grammar
+
+Skills and equipments may declare a `requirements` list of structured check objects, evaluated by `RequirementValidator` before the card is played (or the equipment attached). Each entry carries display `raw` text plus the fields its `type` needs:
+
+| `type`                  | Fields                       | Check                                                                                                                       |
+| ----------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `deployed_as`           | `position`                   | The source unit (the equipment's bearer) stands in `position`.                                                               |
+| `target_side`           | `side` (`ally`\|`enemy`)     | The play's target unit belongs to the stated side. Without a resolved target, `ally` requires one allied unit on the board.   |
+| `bearer_has`            | `affiliation`?, `attribute`? | The source unit (the equipment's bearer) itself carries the stated affiliation and/or attribute; both fields OR together. Other allied units don't satisfy this check. |
+| `unit_on_board`         | `name`                       | A unit named `name` is on your board.                                                                                       |
+| `first_card_this_round` | —                            | You have played no other card this round.                                                                                   |
+| `has_ally`              | `affiliation`?, `attribute`? | An allied unit with the stated affiliation and/or attribute exists; both fields OR together.                                 |
+
+The compiler validates each `type` against the catalog, normalizes `position`/`affiliation`/`attribute` into codes, and stamps `raw` through to the client view.
+
+---
+
 ## Predicate grammar
 
 Predicates are the conditions a `conditional` node (or an always-on modifier) evaluates. Each has a `type` discriminator:

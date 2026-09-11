@@ -2,7 +2,9 @@ type: equipment
 name: Woon's Hammer
 cost: 2
 requirements:
-  - Yeon Woon is in your board
+  - type: unit_on_board
+    name: Yeon Woon
+    raw: "Yeon Woon is in your board"
 effects:
   - type: grant_trait
     trait: strong

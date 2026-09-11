@@ -53,7 +53,7 @@ const flattenCard = (card) => ({
     iconPath: attribute.iconPath ?? null,
   })),
   rank: card.rank ?? null,
-  requirements: [...(card.requirements ?? [])],
+  requirements: (card.requirements ?? []).map((requirement) => requirement.raw),
   effects: [...(card.effects ?? [])],
   rules: [...(card.rules ?? [])],
   evolveTriggers: card.evolveTriggers ? [...card.evolveTriggers] : null,

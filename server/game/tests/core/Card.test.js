@@ -48,7 +48,7 @@ describe("Card", () => {
   test("serializes rank and the printed requirement, effect, and rule texts", () => {
     const card = makeCard({
       rank: "ranker",
-      requirements: ["you control a fisherman"],
+      requirements: [{ type: "target_side", side: "ally", raw: "you control a fisherman" }],
       effects: [{ type: "deal_damage", raw: "deal 2" }, { type: "draw", text: "draw a card" }],
       rules: [{ type: "disable_passives", raw: "passives have no effect" }],
     });

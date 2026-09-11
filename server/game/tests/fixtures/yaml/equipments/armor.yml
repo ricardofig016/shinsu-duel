@@ -2,7 +2,9 @@ type: equipment
 name: Test Armor
 cost: 4
 requirements:
-  - deployed as Fisherman
+  - type: deployed_as
+    position: fisherman
+    raw: "deployed as Fisherman"
 effects:
   - type: modify_cost
     amount: -2

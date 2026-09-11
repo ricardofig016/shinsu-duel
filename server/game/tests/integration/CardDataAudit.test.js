@@ -151,13 +151,13 @@ describe("card data audit (zero custom/handler invariant)", () => {
     expect(valid).toBe(true);
   });
 
-  test("all YAML abilities/effects/passives are structured objects (no prose)", async () => {
+  test("all YAML abilities/effects/passives/requirements are structured objects (no prose)", async () => {
     for (const { card } of await loadSourceCards()) {
-      // `requirements` is a string list (not DSL nodes) — excluded here.
       const entries = [
         ...(card.abilities || []),
         ...(card.effects || []),
         ...(card.passives || []),
+        ...(card.requirements || []),
       ];
       for (const entry of entries) {
         expect(entry).not.toBeNull();

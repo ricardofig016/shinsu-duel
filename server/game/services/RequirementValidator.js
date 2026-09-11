@@ -1,18 +1,18 @@
 /**
  * Validates skill/equipment/ability requirements before card play or use.
  *
- * Requirements are raw strings from compiled card data.
- * All 9 requirement patterns in the current card set are enforced.
- * Unknown patterns throw — no silent pass-through.
+ * Requirements are structured check objects from compiled card data (see the
+ * requirements grammar in docs/COMPILED_CARD_DSL.md). Each `type` is evaluated
+ * against the play context; unknown types throw — no silent pass-through.
  *
  * Validation happens BEFORE cost deduction to prevent partial state.
  *
- * Target requirements (`target is an ...`) validate in two modes:
+ * `target_side` validates in two modes:
  * - With an explicit `ctx.targetUnit` (equipment attachment), the named unit
  *   is checked against the source side.
  * - Without one (skill/ability plays, where no target exists at validation
- *   time — it is chosen through target resolution after the play), they
- *   require that a legal target exists on the relevant side.
+ *   time — it is chosen through target resolution after the play), `ally`
+ *   requires that a legal allied target exists on the board.
  */
 
 // ── Field helpers ───────────────────────────────────────────────────────────
@@ -46,154 +46,97 @@ function hasAttributeOnBoard(units, attrCode, gameState) {
   return units.some((u) => hasAttribute(u, attrCode, gameState));
 }
 
-// ── Single-requirement resolvers ────────────────────────────────────────────
-
-function checkDeployedAs(text, ctx) {
-  const deployedMatch = /^deployed as (.+)$/.exec(text);
-  if (!deployedMatch) return false;
-  const requiredPos = deployedMatch[1].trim();
-  if (!ctx.sourceUnit || ctx.sourceUnit.placedPositionCode !== requiredPos) {
-    throw new Error(`Requirement not met: must be deployed as ${requiredPos}`);
-  }
-  return true;
+function hasGrantedAffiliation(unit, affCode, gameState) {
+  return hasAffiliation(unit, affCode) ||
+    gameState.modifierStack?.has(unit.id, "affiliation", affCode);
 }
 
-function checkTargetAlly(text, ctx) {
-  if (!text.includes("target is an ally")) return false;
-  if (!ctx.targetUnit) {
-    if (allOwnUnits(ctx.username, ctx.gameState).length === 0) {
-      throw new Error("Requirement not met: need an allied unit on your board");
+// ── Single-requirement checks ───────────────────────────────────────────────
+
+const REQUIREMENT_CHECKS = {
+  deployed_as(req, ctx) {
+    if (!ctx.sourceUnit || ctx.sourceUnit.placedPositionCode !== req.position) {
+      throw new Error(`Requirement not met: must be deployed as ${req.position.replace(/-/g, " ")}`);
     }
-    return true;
-  }
-  const sourceOwner = ctx.sourceUnit?.owner ?? ctx.username;
-  if (ctx.targetUnit.owner !== sourceOwner) {
-    throw new Error("Requirement not met: target must be an ally");
-  }
-  return true;
-}
+  },
 
-function checkTargetEnemy(text, ctx) {
-  if (!text.includes("target is an enemy")) return false;
-  if (!ctx.targetUnit || !ctx.sourceUnit) {
-    throw new Error("Requirement not met: target must be an enemy");
-  }
-  if (ctx.targetUnit.owner === ctx.sourceUnit.owner) {
-    throw new Error("Requirement not met: target must be an enemy");
-  }
-  return true;
-}
+  target_side(req, ctx) {
+    if (req.side === "enemy") {
+      if (!ctx.targetUnit || !ctx.sourceUnit) {
+        throw new Error("Requirement not met: target must be an enemy");
+      }
+      if (ctx.targetUnit.owner === ctx.sourceUnit.owner) {
+        throw new Error("Requirement not met: target must be an enemy");
+      }
+      return;
+    }
+    if (!ctx.targetUnit) {
+      if (allOwnUnits(ctx.username, ctx.gameState).length === 0) {
+        throw new Error("Requirement not met: need an allied unit on your board");
+      }
+      return;
+    }
+    const sourceOwner = ctx.sourceUnit?.owner ?? ctx.username;
+    if (ctx.targetUnit.owner !== sourceOwner) {
+      throw new Error("Requirement not met: target must be an ally");
+    }
+  },
 
-function checkTargetRank(text, ctx) {
-  const rankMatch = /^target is (?:a |an )?(regular|ranker|high ranker)$/.exec(text);
-  if (!rankMatch) return false;
-  if (!ctx.targetUnit || ctx.targetUnit.card?.rank !== rankMatch[1]) {
-    throw new Error(`Requirement not met: target must be a ${rankMatch[1]}`);
-  }
-  return true;
-}
+  bearer_has(req, ctx) {
+    // The source unit itself (the equipment's bearer) must carry the stated
+    // affiliation and/or attribute — other allied units on the board don't
+    // satisfy this check.
+    const unit = ctx.sourceUnit;
+    const hasAff = unit && req.affiliation && hasGrantedAffiliation(unit, req.affiliation, ctx.gameState);
+    const hasAttr = unit && req.attribute && hasAttribute(unit, req.attribute, ctx.gameState);
+    if (!hasAff && !hasAttr) {
+      throw new Error(`Requirement not met: ${req.raw}`);
+    }
+  },
 
-function checkSpecificName(text, ctx) {
-  const nameMatch = /^(.+?) is in your board$/.exec(text);
-  if (!nameMatch) return false;
-  const requiredName = nameMatch[1].trim();
-  const units = allOwnUnits(ctx.username, ctx.gameState);
-  if (!units.some((u) => u.card?.name?.toLowerCase() === requiredName.toLowerCase())) {
-    throw new Error(`Requirement not met: ${requiredName} must be deployed on your board`);
-  }
-  return true;
-}
+  unit_on_board(req, ctx) {
+    const units = allOwnUnits(ctx.username, ctx.gameState);
+    if (!units.some((u) => u.card?.name?.toLowerCase() === req.name.toLowerCase())) {
+      throw new Error(`Requirement not met: ${req.name} must be deployed on your board`);
+    }
+  },
 
-function checkFirstCardOfRound(text, ctx) {
-  if (text !== "i'm the first card you play this round") return false;
-  const count = ctx.gameState._cardsPlayedThisRound?.get(ctx.username) || 0;
-  if (count > 0) {
-    throw new Error("Requirement not met: must be the first card you play this round");
-  }
-  return true;
-}
+  first_card_this_round(req, ctx) {
+    const count = ctx.gameState._cardsPlayedThisRound?.get(ctx.username) || 0;
+    if (count > 0) {
+      throw new Error("Requirement not met: must be the first card you play this round");
+    }
+  },
 
-function checkAffiliation(text, ctx) {
-  // "khun family member" (bare affiliation)
-  const affMatch = /^([a-z ]+ family) member$/.exec(text);
-  if (!affMatch) return false;
-  const requiredAff = affMatch[1].trim().replace(/\s+/g, "-");
-  const units = allOwnUnits(ctx.username, ctx.gameState);
-  if (!hasAffiliationOnBoard(units, requiredAff, ctx.gameState)) {
-    throw new Error(`Requirement not met: need an allied ${affMatch[1].trim()} on your board`);
-  }
-  return true;
-}
-
-function checkAffiliationOrAttribute(text, ctx) {
-  // "you have an ally yeon family member or Hwayeomsa"
-  const match = /^you have an ally (.+?) or (.+)$/.exec(text);
-  if (!match) return false;
-
-  const partA = match[1].trim().replace(/\s+/g, "-");
-  const partB = match[2].trim().toLowerCase();
-
-  // Try part A as affiliation, part B as attribute
-  const affCode = partA.replace(/-/g, " "); // "yeon-family" → "yeon family"
-  const isAff = affCode.endsWith("family");
-  const isAttrB = ["anima", "silver dwarf", "red witch", "hwayeomsa",
-    "jeonsulsa", "irregular", "living ignition weapon"].includes(
-      partB.replace(/-/g, " ")
-    );
-  const attrCodeB = partB.replace(/\s+/g, "-");
-
-  const units = allOwnUnits(ctx.username, ctx.gameState);
-  const hasAff = isAff && hasAffiliationOnBoard(units, partA, ctx.gameState);
-  const hasAttr = isAttrB && hasAttributeOnBoard(units, attrCodeB, ctx.gameState);
-
-  if (!hasAff && !hasAttr) {
-    throw new Error(`Requirement not met: need an allied ${match[1]} or ${match[2]} on your board`);
-  }
-  return true;
-}
-
-function checkAllyWithAttribute(text, ctx) {
-  // "have an ally Irregular"
-  const match = /^have an ally (.+)$/.exec(text);
-  if (!match) return false;
-  const attrName = match[1].trim().toLowerCase();
-  const attrCode = attrName.replace(/\s+/g, "-");
-  const units = allOwnUnits(ctx.username, ctx.gameState);
-  if (!hasAttributeOnBoard(units, attrCode, ctx.gameState)) {
-    throw new Error(`Requirement not met: need an allied ${attrName} on your board`);
-  }
-  return true;
-}
+  has_ally(req, ctx) {
+    const units = allOwnUnits(ctx.username, ctx.gameState);
+    const hasAff = req.affiliation && hasAffiliationOnBoard(units, req.affiliation, ctx.gameState);
+    const hasAttr = req.attribute && hasAttributeOnBoard(units, req.attribute, ctx.gameState);
+    if (!hasAff && !hasAttr) {
+      throw new Error(`Requirement not met: ${req.raw}`);
+    }
+  },
+};
 
 // ── Main validator ──────────────────────────────────────────────────────────
 
 export default class RequirementValidator {
   /**
-   * @param {string[]} requirements
+   * @param {object[]} requirements — compiled requirement check objects
    * @param {object} ctx — { gameState, username, sourceUnit?, targetUnit?, card? }
    */
   static validate(requirements, ctx) {
     if (!requirements || requirements.length === 0) return;
     if (!ctx.username) throw new Error("RequirementValidator: ctx.username is required");
 
-    const { gameState } = ctx;
-
     for (const req of requirements) {
-      const text = String(req).trim().toLowerCase();
-
-      if (checkDeployedAs(text, ctx)) continue;
-      if (checkTargetAlly(text, ctx)) continue;
-      if (checkTargetEnemy(text, ctx)) continue;
-      if (checkTargetRank(text, ctx)) continue;
-      if (checkSpecificName(text, ctx)) continue;
-      if (checkFirstCardOfRound(text, ctx)) continue;
-      if (checkAffiliationOrAttribute(text, ctx)) continue;
-      if (checkAffiliation(text, ctx)) continue;
-      if (checkAllyWithAttribute(text, ctx)) continue;
-
-      throw new Error(
-        `Unsupported requirement: "${req}". Add a check to RequirementValidator.`
-      );
+      const check = REQUIREMENT_CHECKS[req?.type];
+      if (!check) {
+        throw new Error(
+          `Unsupported requirement type: "${req?.type}". List it in schemas/dsl-catalog.json and implement it in RequirementValidator.`
+        );
+      }
+      check(req, ctx);
     }
   }
 }

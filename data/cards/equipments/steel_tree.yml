@@ -2,7 +2,9 @@ type: equipment
 name: Steel Tree
 cost: 3
 requirements:
-  - deployed as Wave Controller
+  - type: deployed_as
+    position: wave controller
+    raw: "deployed as Wave Controller"
 effects:
   - type: grant_trait
     trait: immune

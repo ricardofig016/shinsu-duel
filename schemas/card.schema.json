@@ -173,6 +173,16 @@
         }
       ]
     },
+    "requirementNode": {
+      "oneOf": [
+        { "type": "object", "required": ["type", "position", "raw"], "properties": { "type": { "const": "deployed_as" }, "position": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "side", "raw"], "properties": { "type": { "const": "target_side" }, "side": { "enum": ["ally", "enemy"] }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "bearer_has" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] },
+        { "type": "object", "required": ["type", "name", "raw"], "properties": { "type": { "const": "unit_on_board" }, "name": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "first_card_this_round" }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "has_ally" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] }
+      ]
+    },
     "effectNode": {
       "type": "object",
       "required": ["type"],
@@ -373,7 +383,7 @@
     "traits": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "attributes": { "type": "array", "items": { "enum": ["anima", "silver dwarf", "red witch", "hwayeomsa", "jeonsulsa", "irregular", "living ignition weapon"] } },
     "affiliations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-    "requirements": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "requirements": { "type": "array", "items": { "$ref": "#/definitions/requirementNode" } },
     "effects": { "type": "array", "items": { "$ref": "#/definitions/effectEntry" } },
     "ignition": {
       "type": "array",

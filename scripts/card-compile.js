@@ -84,6 +84,7 @@ const CATALOG_NODE_TYPES = new Set([
 ]);
 const CATALOG_TRIGGER_TYPES = new Set(dslCatalog.triggers);
 const CATALOG_PREDICATE_TYPES = new Set(dslCatalog.predicates);
+const CATALOG_REQUIREMENT_TYPES = new Set(dslCatalog.requirements);
 
 function normalizeCondition(value) {
   return String(value).trim().toLowerCase();
@@ -287,6 +288,28 @@ function compileTransformationTriggers(entries, cardName, kind) {
     });
 }
 
+// ── Requirement compilation ─────────────────────────────────────────────────
+// Play/attach requirements are structured check objects (see the requirements
+// grammar in docs/COMPILED_CARD_DSL.md). The compiler validates each `type`
+// against the catalog and normalizes code-bearing fields; RequirementValidator
+// consumes the compiled objects.
+
+function compileRequirements(entries, cardName) {
+  return (entries || []).map((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      throw new Error(
+        `${cardName}.requirements[${index}]: expected a structured requirement object with a "type" and "raw"`
+      );
+    }
+    if (typeof entry.type !== "string" || !CATALOG_REQUIREMENT_TYPES.has(entry.type)) {
+      throw new Error(
+        `${cardName}.requirements[${index}]: unknown requirement type "${entry.type}" — list it in schemas/dsl-catalog.json and both card schemas`
+      );
+    }
+    return normalizeEffectObject(entry, `${cardName}.requirements[${index}]`);
+  });
+}
+
 // ── Cross-reference resolution ──────────────────────────────────────────────
 
 export function resolveEvolveInto(card, allCards) {
@@ -438,7 +461,7 @@ export function compileCard(rawCard, allCards) {
   }
 
   if (type === "skill") {
-    compiled.requirements = rawCard.requirements || [];
+    compiled.requirements = compileRequirements(rawCard.requirements, cardName);
     compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`);
 
     // Not applicable to skills
@@ -457,7 +480,7 @@ export function compileCard(rawCard, allCards) {
   }
 
   if (type === "equipment") {
-    compiled.requirements = rawCard.requirements || [];
+    compiled.requirements = compileRequirements(rawCard.requirements, cardName);
     compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`);
 
     // Ignition (computed after all cards have cardIds)

@@ -157,6 +157,16 @@
         }
       ]
     },
+    "requirementNode": {
+      "oneOf": [
+        { "type": "object", "required": ["type", "position", "raw"], "properties": { "type": { "const": "deployed_as" }, "position": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "side", "raw"], "properties": { "type": { "const": "target_side" }, "side": { "enum": ["ally", "enemy"] }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "bearer_has" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] },
+        { "type": "object", "required": ["type", "name", "raw"], "properties": { "type": { "const": "unit_on_board" }, "name": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "first_card_this_round" }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "has_ally" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] }
+      ]
+    },
     "effectNode": {
       "type": "object",
       "required": ["type"],
@@ -412,7 +422,7 @@
           "series": { "type": "string", "minLength": 1 },
           "sobriquet": { "type": "string", "minLength": 1 },
           "cost": { "type": "integer", "minimum": 0 },
-          "requirements": { "type": "array", "items": { "type": "string" } },
+          "requirements": { "type": "array", "items": { "$ref": "#/definitions/requirementNode" } },
           "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
           "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/effectEntry" } },
           "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
@@ -431,7 +441,7 @@
           "series": { "type": "string", "minLength": 1 },
           "sobriquet": { "type": "string", "minLength": 1 },
           "cost": { "type": "integer", "minimum": 0 },
-          "requirements": { "type": "array", "items": { "type": "string" } },
+          "requirements": { "type": "array", "items": { "$ref": "#/definitions/requirementNode" } },
           "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
           "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/effectEntry" } },
           "igniteInto": { "$ref": "#/definitions/transformation" },

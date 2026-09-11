@@ -10,6 +10,7 @@
     "rules": "Landmark battlefield rules registered and revoked through GlobalRuleRegistry.",
     "predicates": "Conditional and modifier gates evaluated by PredicateEvaluator.",
     "triggers": "Typed trigger ASTs subscribed by TriggerManager (transformations) and PassiveManager (triggered passives).",
+    "requirements": "Structured play/attach requirement checks evaluated by RequirementValidator.",
     "deckConstraints": "Deck-construction validation over the compiled card's deckConstraints list."
   },
   "structural": [
@@ -107,6 +108,14 @@
     "has_all_equipped",
     "equipment_ignited",
     "silenced"
+  ],
+  "requirements": [
+    "deployed_as",
+    "target_side",
+    "bearer_has",
+    "unit_on_board",
+    "first_card_this_round",
+    "has_ally"
   ],
   "deckConstraints": [
     "unreachable",

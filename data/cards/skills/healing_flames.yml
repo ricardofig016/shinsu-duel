@@ -2,7 +2,10 @@ type: skill
 name: Healing Flames
 cost: 5
 requirements:
-  - you have an ally yeon family member or Hwayeomsa
+  - type: has_ally
+    affiliation: yeon family
+    attribute: hwayeomsa
+    raw: "you have an ally yeon family member or Hwayeomsa"
 effects:
   - type: sequence
     steps:

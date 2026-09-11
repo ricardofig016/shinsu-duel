@@ -5,7 +5,9 @@ deckConstraints:
   - type: unreachable
     raw: "i am Unreachable"
 requirements:
-  - have an ally Irregular
+  - type: has_ally
+    attribute: irregular
+    raw: "have an ally Irregular"
 effects:
   - type: give_condition
     condition: doomed

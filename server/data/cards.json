@@ -1710,7 +1710,12 @@
     "cost": 5,
     "deckConstraints": [],
     "requirements": [
-      "you have an ally yeon family member or Hwayeomsa"
+      {
+        "type": "has_ally",
+        "affiliation": "yeon-family",
+        "attribute": "hwayeomsa",
+        "raw": "you have an ally yeon family member or Hwayeomsa"
+      }
     ],
     "effects": [
       {
@@ -1949,7 +1954,11 @@
     "cost": 3,
     "deckConstraints": [],
     "requirements": [
-      "khun family member"
+      {
+        "type": "bearer_has",
+        "affiliation": "khun-family",
+        "raw": "khun family member"
+      }
     ],
     "effects": [
       {
@@ -2457,7 +2466,11 @@
     "cost": 4,
     "deckConstraints": [],
     "requirements": [
-      "deployed as Fisherman"
+      {
+        "type": "deployed_as",
+        "position": "fisherman",
+        "raw": "deployed as Fisherman"
+      }
     ],
     "effects": [
       {
@@ -3382,7 +3395,11 @@
     "cost": 3,
     "deckConstraints": [],
     "requirements": [
-      "deployed as Scout"
+      {
+        "type": "deployed_as",
+        "position": "scout",
+        "raw": "deployed as Scout"
+      }
     ],
     "effects": [
       {
@@ -3758,7 +3775,11 @@
     "cost": 1,
     "deckConstraints": [],
     "requirements": [
-      "target is an ally"
+      {
+        "type": "target_side",
+        "side": "ally",
+        "raw": "target is an ally"
+      }
     ],
     "effects": [
       {
@@ -3844,7 +3865,11 @@
       }
     ],
     "requirements": [
-      "have an ally Irregular"
+      {
+        "type": "has_ally",
+        "attribute": "irregular",
+        "raw": "have an ally Irregular"
+      }
     ],
     "effects": [
       {
@@ -3891,7 +3916,11 @@
     "cost": 3,
     "deckConstraints": [],
     "requirements": [
-      "deployed as Wave Controller"
+      {
+        "type": "deployed_as",
+        "position": "wave-controller",
+        "raw": "deployed as Wave Controller"
+      }
     ],
     "effects": [
       {
@@ -4086,7 +4115,10 @@
     "cost": 3,
     "deckConstraints": [],
     "requirements": [
-      "I'm the first card you play this round"
+      {
+        "type": "first_card_this_round",
+        "raw": "I'm the first card you play this round"
+      }
     ],
     "effects": [
       {
@@ -4473,7 +4505,11 @@
     "cost": 2,
     "deckConstraints": [],
     "requirements": [
-      "Yeon Woon is in your board"
+      {
+        "type": "unit_on_board",
+        "name": "Yeon Woon",
+        "raw": "Yeon Woon is in your board"
+      }
     ],
     "effects": [
       {

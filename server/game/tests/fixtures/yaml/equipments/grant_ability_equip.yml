@@ -2,7 +2,9 @@ type: equipment
 name: Test Grant Ability Equip
 cost: 3
 requirements:
-  - deployed as Scout
+  - type: deployed_as
+    position: scout
+    raw: "deployed as Scout"
 effects:
   - type: grant_trait
     trait: resilient

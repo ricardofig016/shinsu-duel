@@ -2,7 +2,8 @@ type: skill
 name: Test Expensive Skill
 cost: 3
 requirements:
-  - "I'm the first card you play this round"
+  - type: first_card_this_round
+    raw: "I'm the first card you play this round"
 effects:
   - type: extinguish
     amount: 1

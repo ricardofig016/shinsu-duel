@@ -21,6 +21,9 @@ const enumOf = (schema, definition, property = "type") =>
 const predicateTypes = (schema) =>
   schema.definitions.predicate.oneOf.map((branch) => branch.properties.type.const);
 
+const requirementTypes = (schema) =>
+  schema.definitions.requirementNode.oneOf.map((branch) => branch.properties.type.const);
+
 /**
  * Set equality with a diff that names the two sides, so a drift failure says
  * which contract is stale and which values went missing or appeared.
@@ -41,7 +44,7 @@ function expectSameSet(actual, expected, message) {
 describe("DSL catalog contract", () => {
   test("every catalog category is a non-empty list of unique strings", () => {
     const problems = [];
-    for (const category of [...NODE_CATEGORIES, "predicates", "triggers", "deckConstraints"]) {
+    for (const category of [...NODE_CATEGORIES, "predicates", "triggers", "requirements", "deckConstraints"]) {
       const types = catalog(category);
       if (!Array.isArray(types) || types.length === 0) {
         problems.push(`${category} must be a non-empty array`);
@@ -72,7 +75,7 @@ describe("DSL catalog contract", () => {
   });
 
   test("catalog ownership descriptions cover every category", () => {
-    const missing = [...NODE_CATEGORIES, "predicates", "triggers", "deckConstraints"]
+    const missing = [...NODE_CATEGORIES, "predicates", "triggers", "requirements", "deckConstraints"]
       .filter((category) => typeof dslCatalog.ownership[category] !== "string"
         || dslCatalog.ownership[category].length === 0);
     expect(missing).toEqual([]);
@@ -162,6 +165,19 @@ describe("DSL catalog contract", () => {
       predicateTypes(compiledSchema),
       catalog("predicates"),
       "compiled schema predicate branches disagree with the catalog predicates"
+    );
+  });
+
+  test("both schemas agree with the catalog on the requirement vocabulary", () => {
+    expectSameSet(
+      requirementTypes(sourceSchema),
+      catalog("requirements"),
+      "source schema requirementNode branches disagree with the catalog requirements"
+    );
+    expectSameSet(
+      requirementTypes(compiledSchema),
+      catalog("requirements"),
+      "compiled schema requirementNode branches disagree with the catalog requirements"
     );
   });
 

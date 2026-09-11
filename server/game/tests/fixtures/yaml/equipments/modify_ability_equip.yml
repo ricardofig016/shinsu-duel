@@ -2,7 +2,9 @@ type: equipment
 name: Test Modify Ability Equip
 cost: 3
 requirements:
-  - khun family member
+  - type: bearer_has
+    affiliation: khun family
+    raw: "khun family member"
 effects:
   - type: modify_ability
     target: { side: bearer }

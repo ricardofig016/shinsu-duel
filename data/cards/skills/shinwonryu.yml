@@ -2,7 +2,9 @@ type: skill
 name: Shinwonryu
 cost: 4
 requirements:
-  - have an ally Irregular
+  - type: has_ally
+    attribute: irregular
+    raw: "have an ally Irregular"
 deckConstraints:
   - type: unreachable
     raw: "i am Unreachable"
