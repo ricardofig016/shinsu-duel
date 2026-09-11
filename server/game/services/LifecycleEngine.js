@@ -16,6 +16,7 @@ import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
 import { resolveEffect, resolveEffects } from "../EffectResolver.js";
 import ModifierService from "./ModifierService.js";
+import { meetsDamageThreshold } from "../utils/damageThreshold.js";
 
 export default class LifecycleEngine {
   /**
@@ -733,6 +734,10 @@ export default class LifecycleEngine {
 
     const oldEquipment = attachments[attachmentIndex];
     ModifierService.revokeBySource(gameState, oldEquipment.id);
+    // The outgoing form's triggered-effect subscription dies with it: the
+    // ignited form registers its own, and a surviving base subscription would
+    // keep firing for a card no longer on the board.
+    gameState.unregisterEquipmentTriggers(oldEquipment.id);
     const ignited = new Card(targetCardId, targetCard, unit.owner, gameState.eventBus);
     attachments[attachmentIndex] = ignited;
     LifecycleEngine._syncEquipment(unit, attachments);
@@ -964,7 +969,7 @@ export default class LifecycleEngine {
       gameState.registerEquipmentTriggeredEffect(
         equipment.id,
         EVT.DAMAGE_APPLIED,
-        (payload) => payload.sourceId === unit.id,
+        (payload) => payload.sourceId === unit.id && meetsDamageThreshold(trigger, payload),
         (payload) => resolveEffect(effect, context, gameState, { ...extra, targetId: payload.targetId })
       );
       return;

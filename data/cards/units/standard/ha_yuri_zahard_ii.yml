@@ -1,7 +1,7 @@
 type: unit
-name: Ha Yuri Zahard
+name: Ha Yuri Zahard II
 cost: 6
-hp: 8
+hp: 9
 rank: high ranker
 positions:
   - fisherman
@@ -17,18 +17,25 @@ passives:
       trait: taunt
       target: { side: self }
     raw: "if i have an allied Guide, i have Taunt"
+  - type: copy_traits
+    target: { side: self }
+    source: { side: enemy }
+    trigger:
+      type: silenced
+      target: { side: enemy }
+      source: { side: ally }
+    raw: "when you silence an enemy, give me its traits"
 abilities:
   - type: deal_damage
-    amount: 6
+    amount: 7
     target: { side: enemy }
-    raw: "deal 6 to an enemy"
+    raw: "deal 7 to an enemy"
   - type: grant_trait
     trait: strong
     amount: 1
     target: { side: self }
     raw: "give me Strong 1"
 evolve:
-  - "when my equipment ignites"
 traits:
   - resilient 3
 attributes:
@@ -38,3 +45,6 @@ affiliations:
   - ari family
   - ha family
   - wolhaiksong
+deckConstraints:
+  - type: unreachable
+    raw: "i am Unreachable"

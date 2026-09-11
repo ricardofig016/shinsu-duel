@@ -1,0 +1,16 @@
+type: unit
+name: Test Big Hitter
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+abilities:
+  - type: deal_damage
+    amount: 6
+    target: { side: enemy }
+    raw: "deal 6 to an enemy"
+  - type: deal_damage
+    amount: 12
+    target: { side: enemy }
+    raw: "deal 12 to an enemy"

@@ -10,6 +10,14 @@ import EVT from "../EventCatalog.js";
  * Silence removes traits at the moment it is applied — traits granted later
  * are unaffected, so this REMOVES (not disables) trait modifiers.
  *
+ * The `unit:silenced` event carries `sourceOwner` — the player whose effect
+ * caused the silence — so "when you silence an enemy" triggers can check
+ * who caused it. Effects that resolve without an acting player attribute
+ * the silence to nobody (`sourceOwner: null`). Each `removed` entry carries
+ * the trait's `value` and whether it was `disabled`: the traits no longer
+ * exist on the stack when listeners run, so the payload is the only record
+ * of what the unit had at the silence moment.
+ *
  * Payload:
  *   { targetId, trait? }
  */
@@ -25,7 +33,7 @@ export default class RemoveTraitsHandler extends BaseHandler {
     const removed = modStack
       .getModifiers(targetId, "trait")
       .filter((m) => (trait === undefined || m.key === trait))
-      .map((m) => ({ trait: m.key, sourceId: m.sourceId }));
+      .map((m) => ({ trait: m.key, value: m.value, disabled: m.disabledCount > 0, sourceId: m.sourceId }));
 
     modStack.removeWhere(
       (m) =>
@@ -35,7 +43,11 @@ export default class RemoveTraitsHandler extends BaseHandler {
     );
 
     if (removed.length > 0) {
-      context.emitChild(EVT.UNIT_SILENCED, { targetId, removed });
+      context.emitChild(EVT.UNIT_SILENCED, {
+        targetId,
+        removed,
+        sourceOwner: payload.sourceOwner || payload.owner || null,
+      });
     }
 
     return { removed };

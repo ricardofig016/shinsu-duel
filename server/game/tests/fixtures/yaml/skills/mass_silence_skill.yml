@@ -1,0 +1,7 @@
+type: skill
+name: Test Mass Silence Skill
+cost: 0
+effects:
+  - type: remove_traits
+    target: { side: enemy, scope: all }
+    raw: "Silence all enemies"

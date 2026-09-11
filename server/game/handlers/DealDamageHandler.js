@@ -10,6 +10,10 @@ import EVT from "../EventCatalog.js";
  *   { sourceId, targetId, amount, sourceOwner, targetOwner }
  *
  * targetId is always pre-resolved by EffectResolver before this handler runs.
+ * The `unit:damage:applied` event carries both the damage actually applied
+ * (`amount`, clamped to the target's remaining HP) and the hit's full
+ * post-modifier amount (`hitAmount`, before the clamp) so triggers like
+ * "deals 7+ damage to a single target" can count overkill.
  */
 export default class DealDamageHandler extends BaseHandler {
   validate(payload) {
@@ -86,6 +90,7 @@ export default class DealDamageHandler extends BaseHandler {
       sourceId: payload.sourceId,
       targetId,
       amount: actualDamage,
+      hitAmount: damage,
       remainingHp: unit.currentHp,
     });
 

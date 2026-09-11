@@ -24,8 +24,11 @@ export default class DisarmHandler extends BaseHandler {
 
   execute(payload, context, gameState) {
     const { targetId, to, sourceOwner } = payload;
+    // Board presence, not HP: a unit sitting at 0 HP during its own damage
+    // event (Undying save still pending) is still on the field and remains a
+    // legal Disarm target when the kill check saves it.
     const unit = gameState._findUnit(targetId);
-    if (!unit || !unit.isAlive()) return { disarmed: false };
+    if (!unit) return { disarmed: false };
 
     const destOwner = to.owner === "you" ? sourceOwner : unit.owner;
     const detached = LifecycleEngine.disarmUnit(gameState, unit, {

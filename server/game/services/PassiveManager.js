@@ -3,6 +3,18 @@ import { resolveEffect } from "../EffectResolver.js";
 import ModifierService from "./ModifierService.js";
 import EVT from "../EventCatalog.js";
 import { matchesTriggerSource } from "../utils/triggerSource.js";
+import { meetsDamageThreshold } from "../utils/damageThreshold.js";
+
+/**
+ * Whether `otherOwner` satisfies a trigger's side descriptor relative to the
+ * passive owner. `ally` = same side, `enemy` = the opposing side, `any` = no
+ * constraint. An undefined side means the trigger authored no descriptor.
+ */
+function sideMatchesRelative(side, owner, otherOwner) {
+  if (!side || side === "any") return true;
+  if (otherOwner === undefined || otherOwner === null) return false;
+  return side === "ally" ? otherOwner === owner : otherOwner !== owner;
+}
 
 /**
  * Registers compiled, event-driven passives for a unit while it is on field.
@@ -207,7 +219,19 @@ export default class PassiveManager {
       return { eventName: EVT.SKILL_APPLIED, effect: passive, type: trigger.type, cardName: trigger.cardName };
     }
     if (trigger.type === "deal_damage") {
-      return { eventName: EVT.DAMAGE_APPLIED, effect: passive, type: trigger.type };
+      return { eventName: EVT.DAMAGE_APPLIED, effect: passive, type: trigger.type, amount: trigger.amount };
+    }
+    if (trigger.type === "equipment_ignited") {
+      return { eventName: EVT.EQUIPMENT_IGNITED, effect: passive, type: trigger.type };
+    }
+    if (trigger.type === "silenced") {
+      return {
+        eventName: EVT.UNIT_SILENCED,
+        effect: passive,
+        type: trigger.type,
+        targetSide: trigger.target?.side,
+        sourceSide: trigger.source?.side,
+      };
     }
     if (trigger.type === "quick_ability_used") {
       return { eventName: EVT.UNIT_ABILITY_USED, effect: passive, type: trigger.type };
@@ -267,6 +291,17 @@ export default class PassiveManager {
       if (payload?.owner !== unit.owner) return false;
     }
     if (trigger.type === "deal_damage" && payload?.sourceId !== unit.id) return false;
+    if (trigger.type === "deal_damage" && !meetsDamageThreshold(trigger, payload)) return false;
+    if (trigger.type === "equipment_ignited" && payload?.unitId !== unit.id) return false;
+    if (trigger.type === "silenced") {
+      // "when you silence an enemy" — the silenced unit matches the authored
+      // `target` side (relative to the passive owner), and the silence's
+      // acting player matches the authored `source` side. An unattributed
+      // silence matches neither ally nor enemy sources.
+      const silencedUnit = gameState._findUnit(payload?.targetId);
+      if (!sideMatchesRelative(trigger.targetSide, unit.owner, silencedUnit?.owner)) return false;
+      if (!sideMatchesRelative(trigger.sourceSide, unit.owner, payload?.sourceOwner)) return false;
+    }
     if (trigger.type === "quick_ability_used" && payload?.quick !== true) return false;
     if (trigger.type === "summon") {
       // "when you summon a Shinheuh" — only the passive owner's own summons,
@@ -323,6 +358,12 @@ export default class PassiveManager {
     };
     if (trigger.type === "deal_damage") {
       extra.targetId = payload.targetId;
+    } else if (trigger.type === "silenced") {
+      // "give me its traits" — the silenced unit is the copy source, and the
+      // copy reads the silenced-moment snapshot from the event payload: the
+      // traits are already off the stack when this effect resolves.
+      extra.sourceUnitId = payload.targetId;
+      extra.sourceTraits = payload.removed;
     } else if (trigger.type === "quick_ability_used") {
       extra.owner = payload.username;
     } else if (trigger.type === "free_ability_played") {

@@ -1,0 +1,9 @@
+type: unit
+name: Test Overkill Dummy
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+traits:
+  - undying

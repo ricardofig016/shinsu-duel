@@ -1,0 +1,18 @@
+type: unit
+name: Test Trait Thief
+cost: 5
+hp: 8
+rank: high ranker
+positions:
+  - fisherman
+traits:
+  - strong 2
+passives:
+  - type: copy_traits
+    target: { side: self }
+    source: { side: enemy }
+    trigger:
+      type: silenced
+      target: { side: enemy }
+      source: { side: ally }
+    raw: "when you silence an enemy, give me its traits"

@@ -1,0 +1,10 @@
+type: unit
+name: Test Trait Dummy
+cost: 1
+hp: 100
+rank: regular
+positions:
+  - fisherman
+traits:
+  - taunt
+  - pierce 3

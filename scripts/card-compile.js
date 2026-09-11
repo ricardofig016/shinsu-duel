@@ -342,6 +342,17 @@ export function parseTrigger(raw) {
   // "when i deal damage"
   if (/^when i deal damage$/i.test(text)) return { type: "deal_damage" };
 
+  // "when my equipment ignites" (evolution: the unit's own equipment ignites)
+  if (/^when my equipment ignites$/i.test(text)) return { type: "equipment_ignited" };
+
+  // "the bearer deals 10+ damage to a single target" (ignition threshold)
+  const bearerDamageMatch = /^the bearer deals (\d+)\+ damage to a single target$/i.exec(text);
+  if (bearerDamageMatch) {
+    const amount = Number(bearerDamageMatch[1]);
+    if (amount < 1) return null;
+    return { type: "deal_damage", amount };
+  }
+
   // "when I use an ability"
   if (/^when i use an ability$/i.test(text)) return { type: "ability_used" };
 

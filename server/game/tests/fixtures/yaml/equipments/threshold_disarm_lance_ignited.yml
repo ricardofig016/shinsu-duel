@@ -1,0 +1,14 @@
+type: equipment
+name: Test Disarm Lance - Ignited
+cost: 4
+effects:
+  - type: sequence
+    target: { side: any }
+    steps:
+      - type: disarm
+        target: { side: any }
+        to: { zone: hand, owner: equipment_owner }
+      - type: remove_traits
+        target: { side: any }
+    trigger: { type: deal_damage, amount: 7 }
+    raw: "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"

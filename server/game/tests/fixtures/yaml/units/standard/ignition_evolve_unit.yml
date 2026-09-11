@@ -1,0 +1,9 @@
+type: unit
+name: Test Ignition Evolver
+cost: 5
+hp: 8
+rank: high ranker
+positions:
+  - fisherman
+evolve:
+  - "when my equipment ignites"

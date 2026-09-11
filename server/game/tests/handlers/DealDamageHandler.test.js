@@ -164,4 +164,29 @@ describe("DealDamageHandler", () => {
 
     expect(gameState._units["Unit#1"].currentHp).toBe(0);
   });
+
+  test("unit:damage:applied carries the full post-modifier hit and the clamped applied amount", () => {
+    const applied = [];
+    bus.on(EVT.DAMAGE_APPLIED, (p) => applied.push(p), { phase: "post" });
+
+    stack.apply({
+      sourceId: "Card#1", sourceType: "unit",
+      targetId: "Unit#2", type: "trait", key: "resilient", value: 1,
+    });
+
+    bus.on("Test", (p, ctx) => {
+      handler.execute({
+        sourceId: "Unit#Enemy",
+        targetId: "Unit#2", // has 2 HP
+        amount: 5,
+      }, ctx, gameState);
+    }, { phase: "execute" });
+
+    bus.emit("Test");
+
+    expect(applied).toHaveLength(1);
+    // 5 - 1 Resilient = 4 hit; only 2 of it fit into the target's HP.
+    expect(applied[0].hitAmount).toBe(4);
+    expect(applied[0].amount).toBe(2);
+  });
 });

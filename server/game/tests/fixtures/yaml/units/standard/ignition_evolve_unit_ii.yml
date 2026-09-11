@@ -1,0 +1,9 @@
+type: unit
+name: Test Ignition Evolver II
+cost: 5
+hp: 9
+rank: high ranker
+positions:
+  - fisherman
+traits:
+  - reflect

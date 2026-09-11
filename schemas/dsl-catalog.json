@@ -104,7 +104,9 @@
     "skills_played",
     "dies",
     "evolve",
-    "has_all_equipped"
+    "has_all_equipped",
+    "equipment_ignited",
+    "silenced"
   ],
   "deckConstraints": [
     "unreachable",

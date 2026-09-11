@@ -1,6 +1,7 @@
 import LifecycleEngine from "./LifecycleEngine.js";
 import EVT from "../EventCatalog.js";
 import { matchesTriggerSource } from "../utils/triggerSource.js";
+import { meetsDamageThreshold } from "../utils/damageThreshold.js";
 
 /**
  * Maps typed trigger ASTs (from compiler) to runtime event subscriptions.
@@ -133,7 +134,13 @@ export default class TriggerManager {
         break;
       case "deal_damage":
         this._subscribeEvent(unitId, EVT.DAMAGE_APPLIED, targetCardId, transformType, gameState,
-          (payload) => payload.sourceId === unitId);
+          (payload) => payload.sourceId === unitId && meetsDamageThreshold(trigger, payload));
+        break;
+      case "equipment_ignited":
+        // "when my equipment ignites" — only the bearer of the ignited
+        // equipment transforms.
+        this._subscribeEvent(unitId, EVT.EQUIPMENT_IGNITED, targetCardId, transformType, gameState,
+          (payload) => payload.unitId === unitId);
         break;
       case "ability_used":
         this._subscribeEvent(unitId, EVT.UNIT_ABILITY_USED, targetCardId, transformType, gameState,

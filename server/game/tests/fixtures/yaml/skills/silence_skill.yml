@@ -1,0 +1,7 @@
+type: skill
+name: Test Silence Skill
+cost: 0
+effects:
+  - type: remove_traits
+    target: { side: enemy }
+    raw: "Silence an enemy"

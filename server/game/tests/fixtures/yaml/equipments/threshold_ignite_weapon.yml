@@ -1,0 +1,11 @@
+type: equipment
+name: Test Threshold Igniter
+cost: 2
+effects:
+  - type: modify_stat
+    stat: damage
+    amount: 2
+    target: { side: bearer }
+    raw: "the bearer's damage-dealing abilities deal +2 damage"
+ignition:
+  - "the bearer deals 10+ damage to a single target"
