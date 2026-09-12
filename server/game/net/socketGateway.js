@@ -57,6 +57,10 @@ export default class SocketGateway {
   #logger;
   /** roomCode → unsubscribe function of the event bridge for its started game */
   #bridgeUnsubscribes = new Map();
+
+  /** Sessions with a start resolution in flight, so one start runs per session. */
+  #starting = new Set();
+
   /** roomCode → connections parked while the room's second player has not joined */
   #waitingRoom = new Map();
 
@@ -355,8 +359,15 @@ export default class SocketGateway {
    * still valid at start time. A seat whose deck was deleted, became
    * unbuildable, or (in a normal room) became illegal between pick and start
    * has its pick cleared and the room stays in the selection phase.
+   *
+   * Two picks landing together, and a pick racing the second connection, can
+   * both ask to start the same session. Starting resolves picks
+   * asynchronously, so the started flag is not yet visible when the second
+   * caller enters: the in-flight guard keeps one resolution per session.
    */
   #tryStartGame(session) {
+    if (this.#starting.has(session) || session.isStarted) return;
+    this.#starting.add(session);
     void this.#tryStartGameAsync(session);
   }
 
@@ -367,12 +378,16 @@ export default class SocketGateway {
    * started session never receives a deck-status broadcast.
    */
   async #tryStartGameAsync(session) {
-    const start = await this.#resolveStart(session);
-    if (!start) {
-      if (!session.isStarted) this.#broadcastDeckStatus(session);
-      return;
+    try {
+      const start = await this.#resolveStart(session);
+      if (!start) {
+        if (!session.isStarted) this.#broadcastDeckStatus(session);
+        return;
+      }
+      this.#startGame(session, start);
+    } finally {
+      this.#starting.delete(session);
     }
-    this.#startGame(session, start);
   }
 
   /**
