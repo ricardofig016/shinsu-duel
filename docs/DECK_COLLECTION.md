@@ -37,7 +37,7 @@ The pre-game deck-selection phase on the game page is owned by the net gateway; 
 
 ## REST surface
 
-`server/routes/decks.js` mirrors the cards route split: `GET /decks` serves the page, the JSON API lives beside it. All API routes require a session (`isAuthenticated`, shared from `server/routes/authentication.js`) and are scoped to the session user.
+`server/routes/decks.js` mirrors the cards route split: `GET /decks` serves the page, the JSON API lives beside it. All API routes require a session and are scoped to the session user, and the page itself requires one too (see `AUTHENTICATION.md`).
 
 | Route | Behavior |
 | ----- | -------- |

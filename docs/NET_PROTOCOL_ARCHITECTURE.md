@@ -58,7 +58,7 @@ All names come from `EVENTS` in `protocol.js`; the net layer contains no raw eve
 Every payload is built in `protocol.js` and builders return the exact object on the wire:
 
 - `buildStateView({ game, revision, username })` wraps `GameState.getClientState(username)` with the session revision. The shape of that per-username view (hidden opponent hand, owner-only pending decision, condition magnitudes, runtime traits, equipment, granted abilities, positions) is documented in `GAMESTATE_ARCHITECTURE.md`.
-- `buildError(message)` returns `{ message }`.
+- `buildError(message, code)` returns `{ message }`, plus `code` when the rejection carries one. `code` is validated against `ERROR_CODES`, so a client can act on the reason instead of on the message text; an identity failure (`unauthenticated`) is the only coded rejection today (see `AUTHENTICATION.md`).
 - `buildGameOverResult(gameOver)` returns `{ winner, reason }`.
 - `buildWaitingPayload()` returns the fixed waiting message.
 - `buildHandPeek(peek)` returns an independent copy of the reveal.
@@ -108,18 +108,20 @@ Both inbound paths funnel through the gateway before anything reaches the engine
 
 Accepted actions and decisions broadcast a `game-update` per seat, preceded by `game-over` when the move ended the game.
 
-Identity comes from the express-session username. `createGameServer` shares its session middleware with the Socket.IO engine (`io.engine.use`), so the handshake cookie authenticates the socket; the room record must list that username as a participant. Room creation and joining stay on the existing REST endpoints.
+Identity comes from the express-session username, and only a name that still has an account is accepted, the same rule the HTTP gate applies (see `AUTHENTICATION.md`). `createGameServer` shares its session middleware with the Socket.IO engine (`io.engine.use`), so the handshake cookie authenticates the socket; the room record must list that username as a participant. Room creation and joining stay on the existing REST endpoints.
 
 ---
 
 ## Connection Lifecycle and Reconnect
 
-On connect the gateway validates the room code and the authenticated username against the room registry, then:
+On connect the gateway validates the room code, the session username, and that the username still has an account, then:
 
 - registers the inbound handlers for that socket,
 - parks the connection with `game-waiting` when the room has only one player, absorbing it into the session once the room completes,
 - otherwise ensures the session exists, attaches the connection to its seat, and enters the [deck-selection phase](#deck-selection): once both seats are connected, each picks a deck, and the game starts — with those decks — when both selections are valid (broadcast `game-init`),
 - answers a rejoin to a started session with the current `game-init` view, and a rejoin during selection with the current `game-deck-status`.
+
+A connection that fails validation is answered with `game-error` and closed. A missing room code carries no code field; a missing username or a vanished account carries `unauthenticated`, which is how the client knows to log in again.
 
 On disconnect the socket is detached from its seat and nothing else changes: the session, game, revision, and any open decision survive. Rejoining repeats the connect flow, and a started session answers with the current view instead of starting a new game. Two tabs are two connections on one seat and both receive every broadcast.
 
