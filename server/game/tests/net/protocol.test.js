@@ -158,6 +158,17 @@ describe("payload builders", () => {
     expect(() => buildError("Not your turn.", "made-up")).toThrow(TypeError);
   });
 
+  test("buildError names the query a refusal answers, and nothing else", () => {
+    // A dev-console query is refused with its own request id, so the console
+    // settles that query and leaves the others in flight.
+    expect(buildError("Unit u1 is not on the field.", null, "q7")).toEqual({
+      message: "Unit u1 is not on the field.",
+      requestId: "q7",
+    });
+    expect(buildError("Not your turn.")).not.toHaveProperty("requestId");
+    expect(() => buildError("Not your turn.", null, "")).toThrow(TypeError);
+  });
+
   test("buildGameOverResult returns only winner and reason", () => {
     expect(buildGameOverResult({ winner: "Alice", reason: "deck exhausted" })).toEqual({
       winner: "Alice",

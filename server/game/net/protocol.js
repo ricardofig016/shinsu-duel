@@ -82,17 +82,26 @@ export function buildStateView({ game, revision, username }) {
 }
 
 /**
- * Build the payload for a rejected action, decision, or connection. `code` is
- * optional and must come from `ERROR_CODES`, so a client can act on the reason
- * instead of on the message text.
+ * Build the payload for a rejected action, decision, connection, or
+ * dev-console message. `code` is optional and must come from `ERROR_CODES`, so
+ * a client can act on the reason instead of on the message text. `requestId`
+ * is present only when the refusal answers a dev-console query, so the console
+ * settles exactly the query being answered and leaves the others alone: a
+ * refusal that names no request answers no query.
  */
-export function buildError(message, code = null) {
+export function buildError(message, code = null, requestId = null) {
   assertNonEmptyString(message, "error message");
-  if (code === null) return { message };
-  if (!Object.values(ERROR_CODES).includes(code)) {
+  if (code !== null && !Object.values(ERROR_CODES).includes(code)) {
     throw new TypeError(`Unknown error code "${code}".`);
   }
-  return { message, code };
+
+  const payload = { message };
+  if (code !== null) payload.code = code;
+  if (requestId !== null) {
+    assertNonEmptyString(requestId, "requestId");
+    payload.requestId = requestId;
+  }
+  return payload;
 }
 
 /**

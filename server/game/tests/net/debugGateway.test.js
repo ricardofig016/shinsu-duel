@@ -84,6 +84,10 @@ describe("debug action intake", () => {
 
     expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(4);
     expect(alice.lastPayloadOf(EVENTS.GAME_ERROR).message).toContain("only available in dev rooms");
+    // The refused query carries its request id; the other refusals answer no
+    // query and name none.
+    expect(alice.payloadsOf(EVENTS.GAME_ERROR)[1].requestId).toBe("q1");
+    expect(alice.payloadsOf(EVENTS.GAME_ERROR)[0]).not.toHaveProperty("requestId");
     expect(alice.payloadsOf(EVENTS.GAME_DEBUG_RESULT)).toEqual([]);
     expect(session.game.playerStates.Alice.hand).toHaveLength(5);
     expect(session.revision).toBe(revisionBefore);
@@ -233,6 +237,26 @@ describe("debug query intake", () => {
     await alice.trigger(EVENTS.GAME_DEBUG_QUERY, { kind: "hand", requestId: "q3", username: "Mallory" });
     expect(alice.lastPayloadOf(EVENTS.GAME_ERROR).message).toBe("Room not found or you are not a participant.");
     expect(alice.payloadsOf(EVENTS.GAME_DEBUG_RESULT)).toEqual([]);
+  });
+
+  // The console settles a query when the refusal names it. A refusal of
+  // anything else (a rejected mutation) names no query, so it can never fail a
+  // query the server is still answering.
+  test("a refused query names its request, a refused mutation names none", async () => {
+    const { registry, alice } = await devHarness();
+
+    await alice.trigger(EVENTS.GAME_DEBUG_QUERY, { kind: "everything", requestId: "q4" });
+    expect(alice.lastPayloadOf(EVENTS.GAME_ERROR)).toEqual({
+      message: expect.stringContaining('Unknown debug query "everything"'),
+      requestId: "q4",
+    });
+
+    await alice.trigger(
+      EVENTS.GAME_DEBUG_ACTION,
+      command("debug-draw-action", { username: "Alice", amount: -1 })
+    );
+    expect(alice.lastPayloadOf(EVENTS.GAME_ERROR)).not.toHaveProperty("requestId");
+    expect(registry.get(DEV_ROOM).revision).toBe(1);
   });
 });
 

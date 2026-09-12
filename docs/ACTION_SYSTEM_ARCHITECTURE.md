@@ -68,12 +68,12 @@ export default class ActionHandler {
 
 ### Debug actions
 
-The dev console's mutations are actions too: one class per command under `server/game/actions/debug/`, all extending `DebugAction`, registered under a `debug-*` type, and all admitting `source: "debug"` only. They delegate to the same services player actions use (`ZoneService`, `ShinsuService`, `LifecycleEngine`, `UnitService`, `LighthouseService`), and they never mutate state fields directly. Two differences from a player action:
+The dev console's mutations are actions too: one class per command under `server/game/actions/debug/`, all extending `DebugAction`, registered under a `debug-*` type, and all admitting `source: "debug"` only. They delegate to the same services player actions use (`ZoneService`, `ShinsuService`, `LifecycleEngine`, `UnitService`), and they never mutate state fields directly. Two differences from a player action:
 
 - their `username` is the seat the command acts on rather than the actor, and `requestedBy` carries the player who issued it;
 - their schema declares only the arguments that command takes, so a command with no target seat carries no `username` field at all.
 
-The command surface, the arguments each type takes, and what a mutation records are documented in `DEV_CONSOLE.md`. Commands that need behavior the game owns (ending a round, forcing a turn, setting the round counter) call the narrow `GameState` methods for it instead of writing those fields.
+The command surface, the arguments each type takes, and what a mutation records are documented in `DEV_CONSOLE.md`. Commands that need behavior the game owns (ending a round, forcing a turn, setting the round counter, changing a seat's lighthouse count) call the narrow `GameState` methods for it instead of writing those fields.
 
 ### Ability resolution
 

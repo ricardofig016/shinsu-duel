@@ -30,6 +30,15 @@ describe("room addresses read back", () => {
     expect(roomCodeFromPath("/game/TESTROOM01/deck")).toBe("TESTROOM01");
   });
 
+  // Express serves a room address that carries a trailing slash too, so every
+  // reader of the page address — each step page and the dev console — must
+  // resolve the same room from it.
+  test("a trailing slash names the same room", () => {
+    expect(roomCodeFromPath("/game/AB12CD/")).toBe("AB12CD");
+    expect(roomCodeFromPath("/game/TESTROOM01/deck/")).toBe("TESTROOM01");
+    expect(stepFromPath("/game/AB12CD/")).toBe(STEP.BOARD);
+  });
+
   test("a path that is not a room address has no room code", () => {
     expect(roomCodeFromPath("/play")).toBeNull();
     expect(roomCodeFromPath("/decks")).toBeNull();

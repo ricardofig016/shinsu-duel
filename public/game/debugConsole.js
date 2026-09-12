@@ -15,6 +15,8 @@ import {
   formatHelp,
   formatUnitAbilities,
 } from "/game/debugOutput.js";
+import { roomCodeFromPath } from "/game/steps.js";
+import { createQueryTracker } from "/game/debugRequests.js";
 
 /**
  * The dev console: `window.debug` on the game page.
@@ -33,16 +35,19 @@ import {
 const SEAT_TIMEOUT_MS = 5000;
 const QUERY_TIMEOUT_MS = 10000;
 
-const roomCode = window.location.pathname.split("/").pop();
+/**
+ * The room this page plays in. The address is resolved by the same shared rule
+ * every page uses, so the console and the page always agree on the room.
+ */
+const roomCode = roomCodeFromPath(window.location.pathname);
 const socket = io("/game", { query: { roomCode } });
 
 let cardIndex = buildCardIndex([]);
 let seat = null;
 let firehoseEnabled = true;
-let queryCounter = 0;
 
-/** requestId → { resolve, reject, timer } for queries in flight */
-const inFlight = new Map();
+/** The queries in flight, each settled by its own result, refusal, or timeout. */
+const queries = createQueryTracker({ timeoutMs: QUERY_TIMEOUT_MS });
 const seatWaiters = [];
 
 /* ── connection ─────────────────────────────────────────────────────────── */
@@ -80,51 +85,27 @@ const sendMutation = (type, data) => {
 };
 
 /**
- * Send one query and resolve with its result. A query settles exactly once:
- * with the matching `debug-result`, when the server refuses, or on its own
- * timeout, so a lost message can never leave a promise pending forever.
+ * Send one query and resolve with its result. A query settles exactly once —
+ * with the result that names it, with the refusal that names it, or on its own
+ * timeout — so a lost message can never leave a promise pending forever.
  */
 const ask = (kind, args) => {
-  queryCounter += 1;
-  const requestId = `q${queryCounter}`;
-
-  return new Promise((resolve, reject) => {
-    const settle = (fn, value) => {
-      clearTimeout(inFlight.get(requestId)?.timer);
-      inFlight.delete(requestId);
-      fn(value);
-    };
-    const timer = setTimeout(
-      () => settle(reject, new Error(`Query ${requestId} (${kind}) was never answered.`)),
-      QUERY_TIMEOUT_MS
-    );
-
-    inFlight.set(requestId, {
-      timer,
-      resolve: (data) => settle(resolve, data),
-      reject: (error) => settle(reject, error),
-    });
-    socket.emit(EVENTS.GAME_DEBUG_QUERY, buildDebugQuery(kind, requestId, args));
-  });
+  const { requestId, promise } = queries.begin(kind);
+  socket.emit(EVENTS.GAME_DEBUG_QUERY, buildDebugQuery(kind, requestId, args));
+  return promise;
 };
 
-/** A rejection answers the sender only and never names a query, so it fails
- *  every request in flight: the console issues commands one at a time. */
-const failInFlight = (message) => {
-  for (const { reject } of [...inFlight.values()]) reject(new Error(message));
-  inFlight.clear();
-};
-
-socket.on(EVENTS.GAME_DEBUG_RESULT, (result) => {
-  inFlight.get(result.requestId)?.resolve(result.data);
-});
+socket.on(EVENTS.GAME_DEBUG_RESULT, (result) => queries.resolve(result?.requestId, result?.data));
 
 socket.on(EVENTS.GAME_DEBUG_EVENT, (line) => console.log(formatDebugEvent(line)));
 
 socket.on(EVENTS.GAME_ERROR, (payload) => {
   const message = payload?.message ?? "The dev console command was refused.";
   console.error(`[dev] ${message}`);
-  failInFlight(message);
+  // A refusal of a query names it. A refusal that names no query belongs to
+  // another command (a rejected mutation, say) and leaves the queries in
+  // flight alone: they are still being answered.
+  queries.refuse(payload?.requestId, message);
 });
 
 socket.on(EVENTS.GAME_INIT, (payload) => setSeat(payload?.you?.username));

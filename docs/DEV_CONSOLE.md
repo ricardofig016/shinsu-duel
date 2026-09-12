@@ -71,6 +71,8 @@ The firehose prints one line per engine event, named the way the engine names it
 
 Reading a chain is easier than reading a tree: children of a root event do not print their own line, and the logger dump has the full causation tree when you need it.
 
+The stream covers the game from its first event. A game announces its own start from inside its constructor, before any streamer can attach, so the console opens on the events the game already recorded and then follows live; a console that connects to a game in progress receives the lines it missed first, with the numbering the seats see.
+
 The stream is toggled with `debug.firehose(false)` and `debug.firehose(true)`. In a normal room the toggle is refused like every other console message.
 
 ## Restart
@@ -83,7 +85,7 @@ The board hands the browser over to the deck step as soon as the selection progr
 
 The console runs on its own socket connection and reads three things from it: the answer to a query, the firehose lines, and a `game-error` when the server refuses a command. The message names, directions, and payload shapes are in the [Dev Console section of the network architecture](NET_PROTOCOL_ARCHITECTURE.md#dev-console); nothing here redefines them.
 
-A query promise settles exactly once: with its result, with the refusal, or on a ten second timeout, so a lost message cannot leave a command pending forever.
+A query promise settles exactly once: with its result, with the refusal that names it, or on a ten second timeout. A refusal that names no query — a rejected mutation — is not a query's answer and leaves the queries in flight untouched, so a lost message cannot leave a command pending forever and a refused command cannot fail an unrelated query.
 
 ## Files
 
@@ -96,3 +98,4 @@ A query promise settles exactly once: with its result, with the refusal, or on a
 | `server/game/net/socketGateway.js`            | Gating, identity stamping, and the console's inbound paths.      |
 | `public/game/debugConsole.js`                 | `window.debug` and its socket connection.                        |
 | `public/game/debugOutput.js`                  | Output formatting and the card index behind `debug.card`.        |
+| `public/game/debugRequests.js`                | Query bookkeeping: request ids, settle-once, and the timeout.     |

@@ -61,14 +61,14 @@ All names come from `EVENTS` in `protocol.js`; the net layer contains no raw eve
 | `game-deck-status`    | server → client  | selection progress, redacted to the receiving seat                               |
 | `game-deck-reveal`    | server → client  | both picks are locked and the game is about to be created, just before `game-init` |
 | `debug-result`        | server → client  | the answer to one `debug-query`, delivered to the sender only                   |
-| `debug-event`         | server → client  | one root engine event, broadcast to both seats of a dev room                    |
+| `debug-event`         | server → client  | one root engine event of a dev room's game                                      |
 
 ### Payloads
 
 Every payload is built in `protocol.js` and builders return the exact object on the wire:
 
 - `buildStateView({ game, revision, username })` wraps `GameState.getClientState(username)` with the session revision. The shape of that per-username view (hidden opponent hand, owner-only pending decision, condition magnitudes, runtime traits, equipment, granted abilities, positions) is documented in `GAMESTATE_ARCHITECTURE.md`.
-- `buildError(message, code)` returns `{ message }`, plus `code` when the rejection carries one. `code` is validated against `ERROR_CODES`, so a client can act on the reason instead of on the message text; an identity failure (`unauthenticated`) is the only coded rejection today (see `AUTHENTICATION.md`).
+- `buildError(message, code, requestId)` returns `{ message }`, plus `code` when the rejection carries one, plus `requestId` when the refusal answers a dev-console query, so the console settles exactly that query. A refusal that answers no query carries no `requestId`, and the console leaves its queries in flight when it sees one. `code` is validated against `ERROR_CODES`, so a client can act on the reason instead of on the message text; an identity failure (`unauthenticated`) is the only coded rejection today (see `AUTHENTICATION.md`).
 - `buildGameOverResult(gameOver)` returns `{ winner, reason }`.
 - `buildWaitingPayload()` returns the fixed waiting message.
 - `buildHandPeek(peek)` returns an independent copy of the reveal.
@@ -143,8 +143,8 @@ Identity comes from the express-session username, and only a name that still has
 The four `debug-*` inbound messages are refused in any room whose code is not a dev room (`isDevRoomCode`), before the session is read. In a dev room they move through the same seat and state guards as player input, then diverge by intent:
 
 - **Mutations** (`debug-action`) are stamped `source: "debug"` and `requestedBy` and run through `processAction`, so the revision, the per-seat broadcast, the Logger, and the replay artifact all see them as engine actions. The seat a command acts on travels in `data.username` and is validated against the session's seats before the engine sees it; a command with no target seat carries no `username` field, and the action's own schema refuses one that is missing.
-- **Queries** (`debug-query`) call a read-only projection from `debugQueries.js` and answer the sender with `debug-result`, echoing the request id. They bump nothing and record nothing, which is what keeps a replay artifact the length of the mutations actually applied. A refused query is answered with `game-error`, not with a result.
-- **The firehose toggle** (`debug-firehose`) flips a session flag. A dev room's `eventFirehose.js` subscription streams one compact `debug-event` line per root engine event to both seats while the flag is on; it is on by default and carries no game state.
+- **Queries** (`debug-query`) call a read-only projection from `debugQueries.js` and answer the sender with `debug-result`, echoing the request id. They bump nothing and record nothing, which is what keeps a replay artifact the length of the mutations actually applied. A refused query is answered with `game-error`, not with a result, and the refusal echoes the request id it refuses so the console settles that query alone.
+- **The firehose toggle** (`debug-firehose`) flips a session flag. A dev room's `eventFirehose.js` subscription streams one compact `debug-event` line per root engine event to both seats while the flag is on; it is on by default and carries no game state. The stream belongs to the game: it opens with the root events the game emitted before the subscription could exist (the engine announces its own start from inside its constructor), and a connection that attaches while the stream is running is sent the lines produced so far before it follows live.
 - **The restart** (`debug-restart`) replaces the game rather than mutating it: the gateway unsubscribes the session's streamers, cancels a start still resolving for it, takes its connections away, drops it through `SessionRegistry.remove`, and attaches every connection to a fresh session for the same room, which broadcasts the deck-selection progress. The abandoned session keeps no connections and can never create a game, so it cannot broadcast into the room that replaced it.
 
 The command surface the console exposes for these messages, and what each command records, is documented in `DEV_CONSOLE.md`.

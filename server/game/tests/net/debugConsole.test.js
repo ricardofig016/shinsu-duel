@@ -1,9 +1,11 @@
 import { EVENTS } from "../../net/protocol.js";
+import EVT from "../../EventCatalog.js";
 import { createNetHarness } from "./harness.js";
 
 /**
  * The dev console over the real transport: a TESTROOM room streams engine
- * events to both seats from the moment its game starts, a normal room streams
+ * events to both seats from the game's first event — a console socket that
+ * joins later is caught up with what it missed — a normal room streams
  * nothing, the toggle stops delivery, and a restart returns both seats to the
  * deck-selection phase for a fresh game.
  *
@@ -39,26 +41,45 @@ describe("dev console over the real transport", () => {
     client.emit(EVENTS.GAME_ACTION, { type: "pass-turn-action", data: {} });
   };
 
-  test("a TESTROOM game streams its engine events to both seats", async () => {
+  /** The stream lines one client has received so far. */
+  const streamedLines = (client) => client.payloadsOf(EVENTS.GAME_DEBUG_EVENT);
+
+  /**
+   * Wait until every named client has received at least `count` stream lines.
+   * A dev room streams the game's opening events the moment its game starts, so
+   * "the stream is not empty" no longer means the action under test landed.
+   */
+  const waitForLines = (clients, count) =>
+    harness.waitFor(
+      () => clients.every((client) => streamedLines(client).length >= count),
+      `the engine stream never reached ${count} lines on every seat.`
+    );
+
+  test("a TESTROOM game streams its engine events to both seats from its first one", async () => {
     harness = await createNetHarness();
     const { alice, bob } = await startRoom(DEV_ROOM);
     // The console's own socket: a second connection on a seat that already has
-    // one, exactly like the page's debug module.
+    // one, exactly like the page's debug module. It arrives after the game
+    // started, so the game's own events reach it as a catch-up.
     const consoleSocket = await harness.connectPlayer({ username: "Alice", roomCode: DEV_ROOM });
 
     passFrom(DEV_ROOM, consoleSocket);
 
-    await harness.waitFor(
-      () => consoleSocket.payloadsOf(EVENTS.GAME_DEBUG_EVENT).length > 0,
-      "the dev room never streamed an engine event."
-    );
-    const lines = consoleSocket.payloadsOf(EVENTS.GAME_DEBUG_EVENT);
-    expect(lines.map((line) => line.name)).toEqual(["turn:ended", "turn:started"]);
-    expect(lines[0].sequence).toBe(1);
-    expect(lines[0].fields.username).toBe("Alice");
-    // Both seats see the stream, and the page's own connection is untouched.
-    expect(bob.payloadsOf(EVENTS.GAME_DEBUG_EVENT)).toEqual(lines);
-    expect(alice.payloadsOf(EVENTS.GAME_DEBUG_EVENT)).toEqual(lines);
+    await waitForLines([consoleSocket, bob, alice], 5);
+    const lines = streamedLines(consoleSocket);
+    expect(lines.map((line) => line.name)).toEqual([
+      EVT.GAME_STARTED,
+      EVT.ROUND_START,
+      EVT.TURN_START,
+      EVT.TURN_END,
+      EVT.TURN_START,
+    ]);
+    expect(lines.map((line) => line.sequence)).toEqual([1, 2, 3, 4, 5]);
+    expect(lines.find((line) => line.name === EVT.TURN_END).fields.username).toBe("Alice");
+    // Both seats see the stream: the page's own connection has been attached
+    // since the game started, and the console's later one is caught up.
+    expect(streamedLines(bob)).toEqual(lines);
+    expect(streamedLines(alice)).toEqual(lines);
   });
 
   test("a normal room never streams, and the console is refused there", async () => {
@@ -88,12 +109,9 @@ describe("dev console over the real transport", () => {
     const { alice, bob } = await startRoom(DEV_ROOM);
 
     passFrom(DEV_ROOM, alice);
-    await harness.waitFor(
-      () => alice.payloadsOf(EVENTS.GAME_DEBUG_EVENT).length > 0,
-      "the dev room never streamed an engine event."
-    );
-    const streamed = alice.payloadsOf(EVENTS.GAME_DEBUG_EVENT).length;
-    expect(bob.payloadsOf(EVENTS.GAME_DEBUG_EVENT)).toHaveLength(streamed);
+    await waitForLines([alice, bob], 5);
+    const streamed = streamedLines(alice).length;
+    expect(streamedLines(bob)).toHaveLength(streamed);
 
     alice.emit(EVENTS.GAME_DEBUG_FIREHOSE, { enabled: false });
     await harness.waitFor(
@@ -102,7 +120,7 @@ describe("dev console over the real transport", () => {
     );
     passFrom(DEV_ROOM, bob);
     await bob.next(EVENTS.GAME_UPDATE);
-    expect(alice.payloadsOf(EVENTS.GAME_DEBUG_EVENT)).toHaveLength(streamed);
+    expect(streamedLines(alice)).toHaveLength(streamed);
 
     alice.emit(EVENTS.GAME_DEBUG_FIREHOSE, { enabled: true });
     await harness.waitFor(
@@ -112,7 +130,7 @@ describe("dev console over the real transport", () => {
     passFrom(DEV_ROOM, alice);
     await alice.next(EVENTS.GAME_UPDATE);
     await harness.waitFor(
-      () => alice.payloadsOf(EVENTS.GAME_DEBUG_EVENT).length > streamed,
+      () => streamedLines(alice).length > streamed,
       "the resumed firehose delivered nothing."
     );
   });
@@ -176,7 +194,7 @@ describe("dev console over the real transport", () => {
     // The restarted game's own subscriptions are attached: it streams too.
     passFrom(DEV_ROOM, alice);
     await harness.waitFor(
-      () => bob.payloadsOf(EVENTS.GAME_DEBUG_EVENT).some((line) => line.name === "turn:ended"),
+      () => bob.payloadsOf(EVENTS.GAME_DEBUG_EVENT).some((line) => line.name === EVT.TURN_END),
       "the restarted game never streamed an engine event."
     );
   });

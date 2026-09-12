@@ -1,6 +1,7 @@
 import EventFirehose from "../../net/eventFirehose.js";
 import GameSession from "../../net/GameSession.js";
 import { EVENTS } from "../../net/protocol.js";
+import EVT from "../../EventCatalog.js";
 import { createTestGame } from "../utils.js";
 
 /**
@@ -8,6 +9,12 @@ import { createTestGame } from "../utils.js";
  * hands compact lines to a session, so it is driven here through a real
  * `GameSession` whose game is a fixture-catalog game.
  */
+
+/**
+ * The root events a game emits while it is constructed, before any streamer can
+ * attach to its bus. The stream opens with them.
+ */
+const OPENING_EVENTS = [EVT.GAME_STARTED, EVT.ROUND_START, EVT.TURN_START];
 
 const makeSession = ({ roomCode = "TESTROOM01" } = {}) => {
   const session = new GameSession({
@@ -40,10 +47,11 @@ describe("EventFirehose", () => {
     const bob = linesOf(received, "Bob");
     expect(alice.length).toBeGreaterThan(0);
     expect(alice).toEqual(bob);
-    expect(alice.map((line) => line.name)).toEqual(["turn:ended", "turn:started"]);
-    expect(alice[0].sequence).toBe(1);
-    expect(alice[1].sequence).toBe(2);
-    expect(alice[0].fields.username).toBe("Alice");
+    // The stream opens with the events the game emitted while it was being
+    // built, then follows the action it just resolved.
+    expect(alice.map((line) => line.name)).toEqual([...OPENING_EVENTS, EVT.TURN_END, EVT.TURN_START]);
+    expect(alice.map((line) => line.sequence)).toEqual([1, 2, 3, 4, 5]);
+    expect(alice.at(-2).fields.username).toBe("Alice");
 
     unsubscribe();
   });
@@ -60,8 +68,8 @@ describe("EventFirehose", () => {
     game.eventBus.emit("test:root", { username: "Bob" });
 
     const lines = linesOf(received, "Alice");
-    expect(lines.map((line) => line.name)).toEqual(["test:root"]);
-    expect(lines[0].fields).toEqual({ username: "Bob" });
+    expect(lines.map((line) => line.name)).toEqual([...OPENING_EVENTS, "test:root"]);
+    expect(lines.at(-1).fields).toEqual({ username: "Bob" });
 
     unsubscribe();
   });
@@ -76,9 +84,12 @@ describe("EventFirehose", () => {
     session.setFirehoseEnabled(true);
     game.eventBus.emit("test:again", {});
 
-    expect(linesOf(received, "Alice").map((line) => line.name)).toEqual(["test:first", "test:again"]);
+    const expected = [...OPENING_EVENTS, "test:first", "test:again"];
+    expect(linesOf(received, "Alice").map((line) => line.name)).toEqual(expected);
     // Sequence numbers count streamed lines only.
-    expect(linesOf(received, "Alice").map((line) => line.sequence)).toEqual([1, 2]);
+    expect(linesOf(received, "Alice").map((line) => line.sequence)).toEqual(
+      expected.map((_, index) => index + 1)
+    );
 
     unsubscribe();
   });
@@ -91,7 +102,50 @@ describe("EventFirehose", () => {
     unsubscribe();
     game.eventBus.emit("test:after", {});
 
-    expect(linesOf(received, "Alice").map((line) => line.name)).toEqual(["test:before"]);
+    expect(linesOf(received, "Alice").map((line) => line.name)).toEqual([
+      ...OPENING_EVENTS,
+      "test:before",
+    ]);
+  });
+
+  test("a connection joining a running game catches up with the whole stream", () => {
+    const { session, received, game } = makeSession();
+    const streamer = new EventFirehose({ session });
+    const unsubscribe = streamer.subscribe();
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });
+
+    // The console's own socket: a connection that attaches after the game and
+    // one action have already happened.
+    const caughtUp = [];
+    streamer.catchUp({ send: (event, payload) => caughtUp.push({ event, payload }) });
+
+    const lines = caughtUp
+      .filter((entry) => entry.event === EVENTS.GAME_DEBUG_EVENT)
+      .map((entry) => entry.payload);
+    expect(lines).toEqual(linesOf(received, "Alice"));
+    expect(lines.map((line) => line.name)).toEqual([...OPENING_EVENTS, EVT.TURN_END, EVT.TURN_START]);
+    expect(lines.map((line) => line.sequence)).toEqual([1, 2, 3, 4, 5]);
+
+    // A silenced stream catches a connection up with nothing, and the live
+    // lines keep numbering where the stream left off.
+    session.setFirehoseEnabled(false);
+    const silent = [];
+    streamer.catchUp({ send: (event, payload) => silent.push(payload) });
+    expect(silent).toEqual([]);
+
+    session.setFirehoseEnabled(true);
+    game.eventBus.emit("test:later", {});
+    const after = [];
+    streamer.catchUp({ send: (event, payload) => after.push(payload) });
+    expect(after.map((line) => line.name)).toEqual([
+      ...OPENING_EVENTS,
+      EVT.TURN_END,
+      EVT.TURN_START,
+      "test:later",
+    ]);
+    expect(after.at(-1).sequence).toBe(6);
+
+    unsubscribe();
   });
 
   test("a subscriber never consumes a game clock tick", () => {
@@ -106,6 +160,7 @@ describe("EventFirehose", () => {
   test("needs a started game and a session that can broadcast", () => {
     expect(() => new EventFirehose({})).toThrow(TypeError);
     expect(() => new EventFirehose({ session: {} })).toThrow(TypeError);
+    expect(() => new EventFirehose({ session: { broadcast() {} } }).catchUp({})).toThrow(TypeError);
 
     const session = new GameSession({
       roomCode: "TESTROOM01",

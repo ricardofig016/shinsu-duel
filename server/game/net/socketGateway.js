@@ -70,8 +70,10 @@ export default class SocketGateway {
   #logger;
   /**
    * roomCode → the net-layer subscriptions attached to its started game (the
-   * event bridge, and in a dev room the event firehose), so a dropped session
-   * can be unsubscribed from the game it is leaving behind.
+   * event bridge, and in a dev room the event firehose with the streamer that
+   * produced it, so a connection joining later can be caught up). Their
+   * unsubscribes let a dropped session leave nothing behind on the game it
+   * abandons.
    */
   #subscriptions = new Map();
 
@@ -199,6 +201,11 @@ export default class SocketGateway {
         else connection.send(EVENTS.GAME_DECK_STATUS, this.#deckStatusPayload(session, username));
       } else {
         this.#sendStateView(session, username, connection);
+        // The stream belongs to the game rather than to this connection, so a
+        // dev-room console that attaches mid-game is caught up with the events
+        // the game already produced, after its state view and before the live
+        // lines that follow.
+        this.#subscriptions.get(session.roomCode)?.streamer?.catchUp(connection);
       }
     } catch (error) {
       this.#log("error", `SocketGateway: connection to room ${roomCode} failed`, { error: error.message });
@@ -380,22 +387,29 @@ export default class SocketGateway {
    * replay artifact stays exactly as long as the mutations actually applied.
    * The answer is targeted at the sender, and `requestId` is echoed so the
    * console can resolve the matching promise.
+   *
+   * Every refusal of a query echoes the request id it refuses, so the console
+   * settles exactly the query being answered. A refusal that names no request
+   * (a rejected action, for instance) is never a query's answer, and the
+   * console leaves its queries in flight when it sees one.
    */
   submitDebugQuery({ session, username, connection, query }) {
-    if (!isPlainObject(query) || !isNonEmptyString(query.requestId) || !isNonEmptyString(query.kind)) {
-      connection.send(EVENTS.GAME_ERROR, buildError("Malformed debug query payload."));
+    const requestId = isNonEmptyString(query?.requestId) ? query.requestId : null;
+
+    if (!isPlainObject(query) || requestId === null || !isNonEmptyString(query.kind)) {
+      connection.send(EVENTS.GAME_ERROR, buildError("Malformed debug query payload.", null, requestId));
       return;
     }
-    if (!this.#isDevRoom(session, connection)) return;
-    if (!this.#isPlaying(session, username, connection)) return;
+    if (!this.#isDevRoom(session, connection, requestId)) return;
+    if (!this.#isPlaying(session, username, connection, requestId)) return;
     if (!session.isStarted) {
-      connection.send(EVENTS.GAME_ERROR, buildError(WAITING_ROOM_MESSAGE));
+      connection.send(EVENTS.GAME_ERROR, buildError(WAITING_ROOM_MESSAGE, null, requestId));
       return;
     }
 
     const target = query.username === undefined ? username : query.username;
     if (!session.hasSeat(target)) {
-      connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_PARTICIPANT_MESSAGE));
+      connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_PARTICIPANT_MESSAGE, null, requestId));
       return;
     }
 
@@ -408,13 +422,13 @@ export default class SocketGateway {
         unitId: query.unitId ?? null,
       });
     } catch (error) {
-      connection.send(EVENTS.GAME_ERROR, buildError(error.message));
+      connection.send(EVENTS.GAME_ERROR, buildError(error.message, null, requestId));
       return;
     }
 
     connection.send(
       EVENTS.GAME_DEBUG_RESULT,
-      buildDebugResult({ requestId: query.requestId, kind: query.kind, data })
+      buildDebugResult({ requestId, kind: query.kind, data })
     );
   }
 
@@ -495,15 +509,19 @@ export default class SocketGateway {
     });
   }
 
-  #isPlaying(session, username, connection) {
-    // A validated connection without a session is parked in a room whose
-    // second player has not joined yet.
+  /**
+   * Seat and session guard for player input and dev-console paths. A validated
+   * connection without a session is parked in a room whose second player has
+   * not joined yet. `requestId` names the dev-console query a refusal answers,
+   * when the caller is one.
+   */
+  #isPlaying(session, username, connection, requestId = null) {
     if (!session) {
-      connection.send(EVENTS.GAME_ERROR, buildError(WAITING_ROOM_MESSAGE));
+      connection.send(EVENTS.GAME_ERROR, buildError(WAITING_ROOM_MESSAGE, null, requestId));
       return false;
     }
     if (!session.hasSeat(username)) {
-      connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_PARTICIPANT_MESSAGE));
+      connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_PARTICIPANT_MESSAGE, null, requestId));
       return false;
     }
     return true;
@@ -512,11 +530,12 @@ export default class SocketGateway {
   /**
    * Gate for every dev-console path. A normal room is refused before its
    * session is read: the console is a dev-room tool and the room code is the
-   * only thing that decides it (see `isDevRoomCode`).
+   * only thing that decides it (see `isDevRoomCode`). `requestId` names the
+   * query a refusal answers, when the path is a query.
    */
-  #isDevRoom(session, connection) {
+  #isDevRoom(session, connection, requestId = null) {
     if (session && isDevRoomCode(session.roomCode)) return true;
-    connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_DEV_ROOM_MESSAGE));
+    connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_DEV_ROOM_MESSAGE, null, requestId));
     return false;
   }
 
@@ -735,15 +754,17 @@ export default class SocketGateway {
    * Attach the net layer's observers to a session's freshly created game: the
    * event bridge always, and in a dev room the event firehose too. Their
    * unsubscribes are kept so a dropped session leaves nothing subscribed to
-   * the game it abandons.
+   * the game it abandons, and the streamer itself is kept so a connection that
+   * joins the running game can be caught up with the stream it missed.
    */
   #subscribeSession(session) {
     if (this.#subscriptions.has(session.roomCode)) return;
 
-    const firehose = isDevRoomCode(session.roomCode) ? new EventFirehose({ session }) : null;
+    const streamer = isDevRoomCode(session.roomCode) ? new EventFirehose({ session }) : null;
     this.#subscriptions.set(session.roomCode, {
       bridge: new EventBridge({ session }).subscribe(),
-      firehose: firehose ? firehose.subscribe() : null,
+      firehose: streamer?.subscribe() ?? null,
+      streamer,
     });
   }
 
