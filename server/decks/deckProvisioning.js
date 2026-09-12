@@ -1,5 +1,5 @@
 import deckLibrary from "./deckLibrary.js";
-import { starterDecks } from "./starterDecks.js";
+import { loadStarterDecks } from "./starterDecks.js";
 
 /**
  * Copy the starter decks into a new account's collection. Runs once, at
@@ -13,10 +13,11 @@ import { starterDecks } from "./starterDecks.js";
  * @param {{ library?: object, decks?: object[] }} [options]
  * @returns {Promise<object[]>} the created deck records
  */
-export async function provisionStarterDecks(username, { library = deckLibrary, decks = starterDecks } = {}) {
+export async function provisionStarterDecks(username, { library = deckLibrary, decks } = {}) {
+  const templates = decks ?? (await loadStarterDecks());
   const created = [];
   try {
-    for (const template of decks) {
+    for (const template of templates) {
       created.push(await library.createDeck({ owner: username, name: template.name, cards: template.cards }));
     }
   } catch (error) {
