@@ -9,6 +9,8 @@ import {
   buildHandPeek,
   buildDeckSelect,
   buildDeckStatus,
+  buildDebugEvent,
+  buildDebugResult,
 } from "../../net/protocol.js";
 import { advanceToRound, createTestGame, setupGameWithHands, deployUnit } from "../utils.js";
 
@@ -18,6 +20,10 @@ describe("protocol event names", () => {
     expect(EVENTS.GAME_DECISION).toBe("game-decision");
     expect(EVENTS.GAME_STATE_REQUEST).toBe("game-state-request");
     expect(EVENTS.GAME_DECK_SELECT).toBe("game-deck-select");
+    expect(EVENTS.GAME_DEBUG_ACTION).toBe("debug-action");
+    expect(EVENTS.GAME_DEBUG_QUERY).toBe("debug-query");
+    expect(EVENTS.GAME_DEBUG_FIREHOSE).toBe("debug-firehose");
+    expect(EVENTS.GAME_DEBUG_RESTART).toBe("debug-restart");
     expect(EVENTS.GAME_INIT).toBe("game-init");
     expect(EVENTS.GAME_UPDATE).toBe("game-update");
     expect(EVENTS.GAME_ERROR).toBe("game-error");
@@ -25,6 +31,8 @@ describe("protocol event names", () => {
     expect(EVENTS.GAME_WAITING).toBe("game-waiting");
     expect(EVENTS.GAME_HAND_PEEK).toBe("game-hand-peek");
     expect(EVENTS.GAME_DECK_STATUS).toBe("game-deck-status");
+    expect(EVENTS.GAME_DEBUG_RESULT).toBe("debug-result");
+    expect(EVENTS.GAME_DEBUG_EVENT).toBe("debug-event");
   });
 
   test("every event name is a unique non-empty string", () => {
@@ -226,5 +234,60 @@ describe("payload builders", () => {
         seats: [{ username: "Bob", deckChosen: false, deckId: null, deckName: "X", illegal: false }],
       })
     ).toThrow(TypeError);
+  });
+
+  test("buildDebugResult echoes the request and carries the query's data", () => {
+    const data = { username: "Alice", cards: [{ cardId: 7, instanceId: "Card#7#1", name: "Test Scout" }] };
+    expect(buildDebugResult({ requestId: "q1", kind: "hand", data })).toEqual({
+      requestId: "q1",
+      kind: "hand",
+      data,
+    });
+    expect(() => buildDebugResult({ requestId: "", kind: "hand", data })).toThrow(TypeError);
+    expect(() => buildDebugResult({ requestId: "q1", kind: "", data })).toThrow(TypeError);
+    expect(() => buildDebugResult({ requestId: "q1", kind: "hand", data: null })).toThrow(TypeError);
+  });
+
+  test("buildDebugEvent projects the root event's scalar payload fields", () => {
+    const unit = { id: "unit-1", card: { name: "Test Scout" } };
+    const line = buildDebugEvent({
+      sequence: 3,
+      eventName: "unit:deployed",
+      payload: {
+        username: "Alice",
+        unitId: "unit-1",
+        unit,
+        tags: ["a", "b"],
+        nested: [{ id: "x" }],
+        count: 2,
+        quick: false,
+        nothing: null,
+        playerStates: { Alice: {} },
+      },
+    });
+
+    expect(line).toEqual({
+      sequence: 3,
+      name: "unit:deployed",
+      fields: {
+        username: "Alice",
+        unitId: "unit-1",
+        tags: ["a", "b"],
+        count: 2,
+        quick: false,
+        nothing: null,
+      },
+    });
+    // Live engine objects alias game state, so they never reach the wire.
+    expect(line.fields).not.toHaveProperty("unit");
+    expect(line.fields).not.toHaveProperty("playerStates");
+  });
+
+  test("buildDebugEvent rejects a bad sequence or an empty name, and survives odd payloads", () => {
+    expect(() => buildDebugEvent({ sequence: 0, eventName: "x", payload: {} })).toThrow(TypeError);
+    expect(() => buildDebugEvent({ sequence: 1.5, eventName: "x", payload: {} })).toThrow(TypeError);
+    expect(() => buildDebugEvent({ sequence: 1, eventName: "", payload: {} })).toThrow(TypeError);
+    expect(buildDebugEvent({ sequence: 1, eventName: "turn:started", payload: null }).fields).toEqual({});
+    expect(buildDebugEvent({ sequence: 2, eventName: "turn:started", payload: 7 }).fields).toEqual({});
   });
 });

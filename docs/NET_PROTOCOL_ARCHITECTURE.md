@@ -11,10 +11,12 @@ The layer lives in `server/game/net/` and has one job per module:
 | Module                | Responsibility                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------ |
 | `GameSession.js`      | One live game: two seats, the players' connections, the `GameState`, revision counter |
-| `SessionRegistry.js`  | Maps room codes to sessions; sessions live until the process exits                   |
+| `SessionRegistry.js`  | Maps room codes to sessions; sessions live until the process exits or a dev-room restart replaces them |
 | `protocol.js`         | Owns every event name and payload builder; builders are pure                          |
 | `socketGateway.js`    | Binds Socket.IO to sessions; validates every inbound message                          |
 | `eventBridge.js`      | Forwards engine events that must reach a player outside the action cycle              |
+| `eventFirehose.js`    | Streams compact engine event lines to a dev room's seats                              |
+| `debugQueries.js`     | The dev console's read-only queries and their projections                             |
 
 `server/createGameServer.js` assembles the express app, the HTTP server, Socket.IO, and the gateway. Its collaborators (session registry, room lookup, game factory, file logging) are injectable; `server/app.js` is the production entry that calls it with defaults, and the test harness boots the same factory with test doubles.
 
@@ -31,7 +33,7 @@ A `GameSession` is created on demand when a seat connects to a two-player room (
 
 A **seat** holds that player's current connections in a set. A **connection** is anything with `send(event, payload)` (sockets also get `close`). One player can play from several tabs because every tab is just another connection on the same seat, and a future bot controller occupies a seat the same way without a socket (see [Bot Seam](#bot-seam)). `attach`/`detach` are idempotent, and `isFull()`/`isEmpty()` describe seat occupancy.
 
-Sessions are never deleted on disconnect. They live until the process exits, so a dropped player rejoins the exact game, open decision included. This matches the express-session memory store, which also does not survive a restart.
+Sessions are never deleted on disconnect. They live until the process exits, so a dropped player rejoins the exact game, open decision included. This matches the express-session memory store, which also does not survive a restart. The one thing that does drop a session is a dev-room restart, which replaces it with a fresh one and moves the connections over (see [Dev Console](#dev-console)).
 
 ---
 
@@ -45,6 +47,10 @@ All names come from `EVENTS` in `protocol.js`; the net layer contains no raw eve
 | `game-action`         | client → server  | player action (deploy, pass, ability, skill, equipment, position switch, ...)   |
 | `game-decision`       | client → server  | resolving a pending decision                                                    |
 | `game-state-request`  | client → server  | asking for the current view (transport reconnect, manual refresh)               |
+| `debug-action`        | client → server  | dev-console mutation, refused outside a dev room                                |
+| `debug-query`         | client → server  | dev-console read, refused outside a dev room                                    |
+| `debug-firehose`      | client → server  | dev-console firehose toggle, refused outside a dev room                         |
+| `debug-restart`       | client → server  | dev-console restart, refused outside a dev room                                 |
 | `game-init`           | server → client  | game start, rejoin to a started session, answer to a state request              |
 | `game-update`         | server → client  | after each accepted action or decision, broadcast to every seat                 |
 | `game-error`          | server → client  | a rejected message; delivered to the sender only                                |
@@ -52,6 +58,8 @@ All names come from `EVENTS` in `protocol.js`; the net layer contains no raw eve
 | `game-waiting`        | server → client  | a lone player in an unfinished room (no session can exist yet)                  |
 | `game-hand-peek`      | server → client  | a hand-peek reveal, delivered to the peeking player's connections only          |
 | `game-deck-status`    | server → client  | per-seat selection progress during the pre-game deck-selection phase            |
+| `debug-result`        | server → client  | the answer to one `debug-query`, delivered to the sender only                   |
+| `debug-event`         | server → client  | one root engine event, broadcast to both seats of a dev room                    |
 
 ### Payloads
 
@@ -68,6 +76,8 @@ Every payload is built in `protocol.js` and builders return the exact object on 
   the room's dev-room flag (`isDevRoomCode`), so the client knows whether
   illegal decks are selectable there, and `deckId` lets each seat recognize its
   own pick in the list.
+- `buildDebugResult({ requestId, kind, data })` returns the query's own data with the request id it answers, so the console resolves the matching request. It is only ever built for an accepted query; a refusal is a `game-error`.
+- `buildDebugEvent({ sequence, eventName, payload })` returns `{ sequence, name, fields }`, where `fields` holds the payload's scalar entries and scalar arrays. Engine payloads carry live objects that alias game state and are not JSON-safe, so a line never includes them.
 
 The client mirrors the event names in `public/game/protocol.js` and builds its outbound payloads through `public/game/actions.js`; client and server ship together, so there is no wire compatibility layer.
 
@@ -79,9 +89,10 @@ The revision counter starts at 0 and is bumped:
 
 - by 1 when the session's game is created,
 - by 1 for each accepted player action,
+- by 1 for each accepted debug action (a dev-console mutation is an engine action),
 - by 1 for each accepted decision.
 
-Rejected input never bumps the counter, so a client comparing revisions can tell whether it has missed a snapshot. Every outbound snapshot (`game-init` and `game-update`) carries the session's current revision. Deck selections happen before any game state exists, so they never touch the counter.
+Rejected input never bumps the counter, so a client comparing revisions can tell whether it has missed a snapshot. Every outbound snapshot (`game-init` and `game-update`) carries the session's current revision. Deck selections happen before any game state exists, so they never touch the counter, and neither do dev-console queries, their results, the firehose, or the firehose toggle.
 
 ---
 
@@ -101,7 +112,7 @@ The game page renders this phase as its pre-game deck step (see `DECK_COLLECTION
 
 Both inbound paths funnel through the gateway before anything reaches the engine (the deck-selection path is covered in [Deck Selection](#deck-selection)):
 
-1. **Shape validation.** Actions must be `{ type, data }` with a non-empty string type and a plain-object data payload; decisions must be `{ decisionId, choices }` with a non-empty string id and an array of choices. Anything else is answered with a `game-error` ("Malformed action/decision payload.") and never reaches the engine.
+1. **Shape validation.** Actions must be `{ type, data }` with a non-empty string type and a plain-object data payload; decisions must be `{ decisionId, choices }` with a non-empty string id and an array of choices; dev-console queries must be `{ kind, requestId, username?, unitId? }` with non-empty string kind and request id, and the firehose toggle must be `{ enabled }` with a boolean. Anything else is answered with a `game-error` ("Malformed action/decision payload.") and never reaches the engine.
 2. **Identity stamping.** The connection's authenticated username is written onto the action; a payload claiming another player is ignored.
 3. **State guards.** Actions or decisions sent before the game starts are answered with a `game-error` ("Game has not started yet."); after game over they are answered with the `game-over` result and leave the state untouched. `game-waiting` is reserved for parked lone players and for state requests that arrive before the game exists.
 4. **Engine rejection.** Engine throws (unknown action type, wrong turn, invalid choices, foreign decision id, ...) are forwarded as `game-error` to the sender; the revision and state stay unchanged.
@@ -109,6 +120,19 @@ Both inbound paths funnel through the gateway before anything reaches the engine
 Accepted actions and decisions broadcast a `game-update` per seat, preceded by `game-over` when the move ended the game.
 
 Identity comes from the express-session username, and only a name that still has an account is accepted, the same rule the HTTP gate applies (see `AUTHENTICATION.md`). `createGameServer` shares its session middleware with the Socket.IO engine (`io.engine.use`), so the handshake cookie authenticates the socket; the room record must list that username as a participant. Room creation and joining stay on the existing REST endpoints.
+
+---
+
+## Dev Console
+
+The four `debug-*` inbound messages are refused in any room whose code is not a dev room (`isDevRoomCode`), before the session is read. In a dev room they move through the same seat and state guards as player input, then diverge by intent:
+
+- **Mutations** (`debug-action`) are stamped `source: "debug"` and `requestedBy` and run through `processAction`, so the revision, the per-seat broadcast, the Logger, and the replay artifact all see them as engine actions. The seat a command acts on travels in `data.username` and is validated against the session's seats before the engine sees it; a command with no target seat carries no `username` field, and the action's own schema refuses one that is missing.
+- **Queries** (`debug-query`) call a read-only projection from `debugQueries.js` and answer the sender with `debug-result`, echoing the request id. They bump nothing and record nothing, which is what keeps a replay artifact the length of the mutations actually applied. A refused query is answered with `game-error`, not with a result.
+- **The firehose toggle** (`debug-firehose`) flips a session flag. A dev room's `eventFirehose.js` subscription streams one compact `debug-event` line per root engine event to both seats while the flag is on; it is on by default and carries no game state.
+- **The restart** (`debug-restart`) replaces the game rather than mutating it: the gateway unsubscribes the session's streamers, cancels a start still resolving for it, takes its connections away, drops it through `SessionRegistry.remove`, and attaches every connection to a fresh session for the same room, which broadcasts the deck-selection progress. The abandoned session keeps no connections and can never create a game, so it cannot broadcast into the room that replaced it.
+
+The command surface the console exposes for these messages, and what each command records, is documented in `DEV_CONSOLE.md`.
 
 ---
 

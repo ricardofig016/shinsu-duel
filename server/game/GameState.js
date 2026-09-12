@@ -587,6 +587,44 @@ export default class GameState {
   }
 
   /**
+   * End the current round now, without flipping the turn. Runs the same
+   * processing a round-ending pass does: conditions are removed, shinsu
+   * resets to the new round, both players draw, and the round-start phase
+   * runs. The pending pass flag is cleared, so the next turn belongs to the
+   * new round.
+   *
+   * The game-over and pending-decision guards make this safe to call outside
+   * an action when a caller resolved its own preconditions.
+   */
+  endRoundNow() {
+    if (this.gameOver) throw new Error("The game is over.");
+    if (this._resolutionState !== ResolutionState.IDLE) {
+      throw new Error("A player decision must be resolved before the round can end.");
+    }
+    this.#endRound();
+  }
+
+  /**
+   * Hand the turn to the other player. Reuses the turn lifecycle, so the
+   * turn-end and turn-start phases run exactly as they do after a player
+   * action. The pass flag is cleared, so a forced switch never ends the round.
+   */
+  forceTurn() {
+    this.endTurn(false);
+  }
+
+  /**
+   * Set the round counter directly. No round processing runs: conditions,
+   * shinsu, and the per-round draw are left exactly as they are.
+   */
+  setRound(round) {
+    if (!Number.isInteger(round) || round < 1) {
+      throw new Error("round must be a positive integer.");
+    }
+    this.round = round;
+  }
+
+  /**
    * End the current round. This method does not flip the turn.
    */
   #endRound() {

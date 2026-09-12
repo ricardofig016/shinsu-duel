@@ -17,7 +17,7 @@ Tests live in `server/game/tests/`, mirroring the source tree under `server/game
 
 | Folder         | Holds                                                                                                    |
 | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `actions/`     | One test per action (`DeployUnitAction`, `PlaySkillAction`, …)                                           |
+| `actions/`     | One test per action (`DeployUnitAction`, `PlaySkillAction`, …); `debug/` mirrors the dev console's `actions/debug/` |
 | `attributes/`  | Attribute engine tests (`AnimaEngine`, `HwayeomsaEngine`, …)                                             |
 | `handlers/`    | One test per handler class                                                                               |
 | `services/`    | Service unit tests (`PassiveManager`, `ModifierService`, `RequirementValidator`, …)                      |
@@ -50,8 +50,8 @@ Tests for browser modules live in `public/tests/`, mirroring `public/` (e.g. `pu
 
 Two layers, both owned by the net test folder:
 
-- **Unit suites** (`GameSession`, `protocol`, `socketGateway`, `SessionRegistry`, `eventBridge`) drive the net modules with fake sockets and never open a port.
-- **Real-transport suites** (`protocolContract`, `reconnect`, `deckSelection`, `DevRoomLogging`, `glossaryContract`) drive `harness.js`, which boots the express app plus Socket.IO on an ephemeral port through `server/createGameServer.js`, keeps room records in an injected in-memory store, authenticates both players through the real `/auth/login` endpoint, and connects them with `socket.io-client` (a devDependency). Games, accounts, and decks all belong to the harness: the fixture catalog, in-memory accounts, and a temporary deck library, so net tests never read or write `server/data`. The harness snapshots that directory when it is created and checks it on `close()`, so a wiring mistake that lets a suite reach the runtime files fails the suite that caused it (`data-isolation.js`).
+- **Unit suites** (`GameSession`, `protocol`, `socketGateway`, `SessionRegistry`, `eventBridge`, `eventFirehose`, `debugGateway`, `debugQueries`, `debugContract`) drive the net modules with fake sockets and never open a port. `debugContract` builds its messages with the client's own builders (`public/game/actions.js`), the way `protocolParity` compares the two protocol vocabularies.
+- **Real-transport suites** (`protocolContract`, `reconnect`, `deckSelection`, `DevRoomLogging`, `debugConsole`, `glossaryContract`) drive `harness.js`, which boots the express app plus Socket.IO on an ephemeral port through `server/createGameServer.js`, keeps room records in an injected in-memory store, authenticates both players through the real `/auth/login` endpoint, and connects them with `socket.io-client` (a devDependency). Games, accounts, and decks all belong to the harness: the fixture catalog, in-memory accounts, and a temporary deck library, so net tests never read or write `server/data`. The harness snapshots that directory when it is created and checks it on `close()`, so a wiring mistake that lets a suite reach the runtime files fails the suite that caused it (`data-isolation.js`).
 
 Each test creates its own harness and `afterEach` disconnects every client and closes the io server and HTTP server; the seats are always Alice and Bob, matching the fixture helpers.
 

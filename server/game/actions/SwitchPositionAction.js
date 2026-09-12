@@ -10,7 +10,7 @@ export default class SwitchPositionAction extends ActionHandler {
     unitId: "string",
     positionCode: "string",
   };
-  static sourceAccess = { player: true, system: false };
+  static sourceAccess = { player: true, debug: false, system: false };
 
   validate(data, gameState) {
     super.validate(data);

@@ -25,11 +25,17 @@ export default class ActionHandler {
     return true;
   }
 
+  /**
+   * Source access is checked before the payload: a message stamped with a
+   * source this action does not admit is refused outright, whatever it
+   * carries, so no disallowed caller ever reaches game logic or learns a
+   * schema error.
+   */
   validate(data, gameState) {
-    this.validateSchema(data);
     if (!this.constructor.sourceAccess[data.source]) {
       throw new Error(`Source ${data.source} is not allowed to perform this action.`);
     }
+    this.validateSchema(data);
     return true;
   }
 

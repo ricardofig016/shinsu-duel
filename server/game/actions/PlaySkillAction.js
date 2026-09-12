@@ -12,7 +12,7 @@ export default class PlaySkillAction extends ActionHandler {
     username: "string",
     handId: "number",
   };
-  static sourceAccess = { player: true, system: false };
+  static sourceAccess = { player: true, debug: false, system: false };
 
   validate(data, gameState) {
     super.validate(data);

@@ -6,7 +6,7 @@ export default class GenerateFireChargeAction extends ActionHandler {
     source: "string",
     username: "string",
   };
-  static sourceAccess = { player: true, system: false };
+  static sourceAccess = { player: true, debug: false, system: false };
 
   validate(data, gameState) {
     super.validate(data);

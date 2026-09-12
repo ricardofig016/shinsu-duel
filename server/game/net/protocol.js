@@ -15,6 +15,10 @@ export const EVENTS = {
   GAME_DECISION: "game-decision",
   GAME_STATE_REQUEST: "game-state-request",
   GAME_DECK_SELECT: "game-deck-select",
+  GAME_DEBUG_ACTION: "debug-action",
+  GAME_DEBUG_QUERY: "debug-query",
+  GAME_DEBUG_FIREHOSE: "debug-firehose",
+  GAME_DEBUG_RESTART: "debug-restart",
 
   // Outbound (server → client)
   GAME_INIT: "game-init",
@@ -24,6 +28,8 @@ export const EVENTS = {
   GAME_WAITING: "game-waiting",
   GAME_HAND_PEEK: "game-hand-peek",
   GAME_DECK_STATUS: "game-deck-status",
+  GAME_DEBUG_RESULT: "debug-result",
+  GAME_DEBUG_EVENT: "debug-event",
 };
 
 /**
@@ -183,4 +189,55 @@ export function buildDeckStatus({ dev, seats }) {
       };
     }),
   };
+}
+
+/**
+ * Scalar payload fields a debug event line carries. Engine payloads hold live
+ * objects (units, cards, player states) that alias game state and are not
+ * JSON-safe: `Unit.card.bus` closes a cycle back to the event bus. A line
+ * therefore carries only the scalars and scalar arrays, which is enough to
+ * follow an event chain in the console.
+ */
+function compactFields(payload) {
+  const isScalar = (value) =>
+    value === null || ["string", "number", "boolean"].includes(typeof value);
+  const fields = {};
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return fields;
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (isScalar(value)) fields[key] = value;
+    else if (Array.isArray(value) && value.every(isScalar)) fields[key] = [...value];
+  }
+  return fields;
+}
+
+/**
+ * Build one line of the dev-room event firehose: the stream's own sequence
+ * number, the root event's name, and its scalar payload fields. The firehose
+ * is a diagnostic stream in the net layer, never recorded and never part of
+ * the replay artifact.
+ */
+export function buildDebugEvent({ sequence, eventName, payload }) {
+  if (!Number.isInteger(sequence) || sequence < 1) {
+    throw new TypeError("sequence must be a positive integer.");
+  }
+  assertNonEmptyString(eventName, "eventName");
+
+  return { sequence, name: eventName, fields: compactFields(payload) };
+}
+
+/**
+ * Build the answer to one dev-console query. `data` is the query's own
+ * product, shaped by the query itself; `requestId` is echoed so the console
+ * can resolve the matching promise. Rejections never use this payload: a
+ * refused query is answered with `game-error`, like every other rejection.
+ */
+export function buildDebugResult({ requestId, kind, data }) {
+  assertNonEmptyString(requestId, "requestId");
+  assertNonEmptyString(kind, "kind");
+  if (!data || typeof data !== "object") {
+    throw new TypeError("data must be the query's result object.");
+  }
+
+  return { requestId, kind, data };
 }

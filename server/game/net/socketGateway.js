@@ -1,4 +1,6 @@
 import EventBridge from "./eventBridge.js";
+import EventFirehose from "./eventFirehose.js";
+import { resolveDebugQuery } from "./debugQueries.js";
 import {
   EVENTS,
   TRANSPORT_EVENTS,
@@ -8,6 +10,7 @@ import {
   buildGameOverResult,
   buildWaitingPayload,
   buildDeckStatus,
+  buildDebugResult,
 } from "./protocol.js";
 import { isDevRoomCode } from "../devRooms.js";
 import { validateDeckCards } from "../../decks/deckValidation.js";
@@ -17,6 +20,7 @@ const GAME_NAMESPACE = "/game";
 const WAITING_ROOM_MESSAGE = "Game has not started yet.";
 const NOT_A_PARTICIPANT_MESSAGE = "Room not found or you are not a participant.";
 const ALREADY_STARTED_MESSAGE = "The game has already started.";
+const NOT_A_DEV_ROOM_MESSAGE = "The dev console is only available in dev rooms (TESTROOMxx).";
 
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim() !== "";
@@ -46,6 +50,12 @@ function isPlainObject(value) {
  * before anything reaches the deck library or the engine. A bot controller
  * occupies a seat through the same connection interface and calls the same
  * entry points, without a socket.
+ *
+ * Dev rooms (see `isDevRoomCode`) additionally accept the console paths —
+ * `debug-action`, `debug-query`, `debug-firehose`, and `debug-restart` — all
+ * gated on the room code and refused everywhere else. Mutations flow through
+ * the engine like player actions; queries only read; the restart replaces the
+ * session.
  */
 export default class SocketGateway {
   #registry;
@@ -55,11 +65,19 @@ export default class SocketGateway {
   #catalog;
   #isAccountActive;
   #logger;
-  /** roomCode → unsubscribe function of the event bridge for its started game */
-  #bridgeUnsubscribes = new Map();
+  /**
+   * roomCode → the net-layer subscriptions attached to its started game (the
+   * event bridge, and in a dev room the event firehose), so a dropped session
+   * can be unsubscribed from the game it is leaving behind.
+   */
+  #subscriptions = new Map();
 
-  /** Sessions with a start resolution in flight, so one start runs per session. */
-  #starting = new Set();
+  /**
+   * roomCode → the session whose start resolution is in flight, so one start
+   * runs per room. Keyed by room code rather than by session object: a dev-room
+   * restart replaces the session, and the replacement must be able to start.
+   */
+  #starting = new Map();
 
   /** roomCode → connections parked while the room's second player has not joined */
   #waitingRoom = new Map();
@@ -284,6 +302,139 @@ export default class SocketGateway {
     this.#broadcastState(session, game);
   }
 
+  /**
+   * Validated inbound path for dev-console mutations. Same contract as
+   * `submitAction` — the payload's identity is never trusted, the engine
+   * decides — with two additions:
+   *
+   *  - the room must be a dev room, checked before the session is touched;
+   *  - the message is stamped `source: "debug"` and `requestedBy`, so only
+   *    debug actions accept it and the replay artifact records who issued it.
+   */
+  submitDebugAction({ session, username, connection, action }) {
+    if (!isPlainObject(action) || !isNonEmptyString(action.type) || !isPlainObject(action.data)) {
+      connection.send(EVENTS.GAME_ERROR, buildError("Malformed debug action payload."));
+      return;
+    }
+    if (!this.#isDevRoom(session, connection)) return;
+    if (!this.#isPlaying(session, username, connection)) return;
+    if (!session.isStarted) {
+      connection.send(EVENTS.GAME_ERROR, buildError(WAITING_ROOM_MESSAGE));
+      return;
+    }
+
+    const game = session.game;
+    if (game.gameOver) {
+      connection.send(EVENTS.GAME_OVER, buildGameOverResult(game.gameOver));
+      return;
+    }
+
+    // The seat a command acts on is part of the payload and is validated
+    // against the session; the identity of the player issuing it is not.
+    if (action.data.username !== undefined && !session.hasSeat(action.data.username)) {
+      connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_PARTICIPANT_MESSAGE));
+      return;
+    }
+    action.data.requestedBy = username;
+    action.data.source = "debug";
+
+    try {
+      session.applyAction(action);
+    } catch (error) {
+      connection.send(EVENTS.GAME_ERROR, buildError(error.message));
+      return;
+    }
+
+    this.#broadcastState(session, game);
+  }
+
+  /**
+   * Validated inbound path for dev-console queries. A query only reads: it
+   * never touches the revision counter and never reaches the Logger, so the
+   * replay artifact stays exactly as long as the mutations actually applied.
+   * The answer is targeted at the sender, and `requestId` is echoed so the
+   * console can resolve the matching promise.
+   */
+  submitDebugQuery({ session, username, connection, query }) {
+    if (!isPlainObject(query) || !isNonEmptyString(query.requestId) || !isNonEmptyString(query.kind)) {
+      connection.send(EVENTS.GAME_ERROR, buildError("Malformed debug query payload."));
+      return;
+    }
+    if (!this.#isDevRoom(session, connection)) return;
+    if (!this.#isPlaying(session, username, connection)) return;
+    if (!session.isStarted) {
+      connection.send(EVENTS.GAME_ERROR, buildError(WAITING_ROOM_MESSAGE));
+      return;
+    }
+
+    const target = query.username === undefined ? username : query.username;
+    if (!session.hasSeat(target)) {
+      connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_PARTICIPANT_MESSAGE));
+      return;
+    }
+
+    let data;
+    try {
+      data = resolveDebugQuery({
+        game: session.game,
+        kind: query.kind,
+        username: target,
+        unitId: query.unitId ?? null,
+      });
+    } catch (error) {
+      connection.send(EVENTS.GAME_ERROR, buildError(error.message));
+      return;
+    }
+
+    connection.send(
+      EVENTS.GAME_DEBUG_RESULT,
+      buildDebugResult({ requestId: query.requestId, kind: query.kind, data })
+    );
+  }
+
+  /**
+   * Toggle the dev-room event firehose for this session. The firehose carries
+   * no game state: the switch lives on the session, the toggle is never
+   * recorded, and only dev rooms ever have a firehose to toggle.
+   */
+  submitDebugFirehose({ session, username, connection, payload }) {
+    if (!isPlainObject(payload) || typeof payload.enabled !== "boolean") {
+      connection.send(EVENTS.GAME_ERROR, buildError("Malformed firehose payload."));
+      return;
+    }
+    if (!this.#isDevRoom(session, connection)) return;
+    if (!this.#isPlaying(session, username, connection)) return;
+
+    session.setFirehoseEnabled(payload.enabled);
+  }
+
+  /**
+   * Restart a dev room: drop the session and hand every connection to a fresh
+   * one, which puts both seats back in the pre-game deck-selection phase. A
+   * restart is deliberately not an engine action — it replaces the game rather
+   * than mutating it — so the dropped session's replay artifact ends where it
+   * ended and the new game records its own.
+   */
+  submitDebugRestart({ session, username, connection }) {
+    if (!this.#isDevRoom(session, connection)) return;
+    if (!this.#isPlaying(session, username, connection)) return;
+
+    const { roomCode, usernames, seed } = session;
+    const seats = session.connections();
+
+    this.#dropSession(session);
+
+    const restarted = this.#registry.ensureSession({
+      roomCode,
+      usernames,
+      seed,
+      createGame: this.#createGame,
+    });
+    for (const { username: seat, connection: attached } of seats) restarted.attach(seat, attached);
+
+    this.#broadcastDeckStatus(restarted);
+  }
+
   #registerInboundHandlers(socket, roomCode, username, connection) {
     socket.on(EVENTS.GAME_DECK_SELECT, (payload) =>
       this.submitDeckSelect({ session: this.#registry.get(roomCode), username, connection, payload })
@@ -296,6 +447,18 @@ export default class SocketGateway {
     );
     socket.on(EVENTS.GAME_STATE_REQUEST, () =>
       this.#sendStateView(this.#registry.get(roomCode), username, connection)
+    );
+    socket.on(EVENTS.GAME_DEBUG_ACTION, (action) =>
+      this.submitDebugAction({ session: this.#registry.get(roomCode), username, connection, action })
+    );
+    socket.on(EVENTS.GAME_DEBUG_QUERY, (query) =>
+      this.submitDebugQuery({ session: this.#registry.get(roomCode), username, connection, query })
+    );
+    socket.on(EVENTS.GAME_DEBUG_FIREHOSE, (payload) =>
+      this.submitDebugFirehose({ session: this.#registry.get(roomCode), username, connection, payload })
+    );
+    socket.on(EVENTS.GAME_DEBUG_RESTART, () =>
+      this.submitDebugRestart({ session: this.#registry.get(roomCode), username, connection })
     );
     socket.on(TRANSPORT_EVENTS.DISCONNECT, () => {
       this.#registry.get(roomCode)?.detach(username, connection);
@@ -316,6 +479,17 @@ export default class SocketGateway {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Gate for every dev-console path. A normal room is refused before its
+   * session is read: the console is a dev-room tool and the room code is the
+   * only thing that decides it (see `isDevRoomCode`).
+   */
+  #isDevRoom(session, connection) {
+    if (session && isDevRoomCode(session.roomCode)) return true;
+    connection.send(EVENTS.GAME_ERROR, buildError(NOT_A_DEV_ROOM_MESSAGE));
+    return false;
   }
 
   #sendStateView(session, username, connection) {
@@ -363,11 +537,11 @@ export default class SocketGateway {
    * Two picks landing together, and a pick racing the second connection, can
    * both ask to start the same session. Starting resolves picks
    * asynchronously, so the started flag is not yet visible when the second
-   * caller enters: the in-flight guard keeps one resolution per session.
+   * caller enters: the in-flight guard keeps one resolution per room.
    */
   #tryStartGame(session) {
-    if (this.#starting.has(session) || session.isStarted) return;
-    this.#starting.add(session);
+    if (this.#starting.has(session.roomCode) || session.isStarted) return;
+    this.#starting.set(session.roomCode, session);
     void this.#tryStartGameAsync(session);
   }
 
@@ -380,14 +554,28 @@ export default class SocketGateway {
   async #tryStartGameAsync(session) {
     try {
       const start = await this.#resolveStart(session);
+      // The registry may have replaced this session while its picks were being
+      // resolved: a dev-room restart cancels the room's start and moves the
+      // connections to a fresh session, so the dropped one must neither create
+      // a game, nor claim the room's subscriptions, nor broadcast to sockets it
+      // no longer owns.
+      if (!this.#isCurrentSession(session)) return;
       if (!start) {
         if (!session.isStarted) this.#broadcastDeckStatus(session);
         return;
       }
       this.#startGame(session, start);
     } finally {
-      this.#starting.delete(session);
+      // Only the session that registered the guard clears it: a restart may
+      // already have handed the room to a successor that is resolving its own
+      // start under the same room code.
+      if (this.#starting.get(session.roomCode) === session) this.#starting.delete(session.roomCode);
     }
+  }
+
+  /** Whether the session is still the registry's session for its room. */
+  #isCurrentSession(session) {
+    return this.#registry.get(session.roomCode) === session;
   }
 
   /**
@@ -432,13 +620,14 @@ export default class SocketGateway {
   }
 
   #startGame(session, { decks, enforceDeckRules }) {
-    if (session.isStarted) return;
+    // A session the registry no longer serves is abandoned: its connections
+    // belong to its replacement, so creating a game on it would broadcast a
+    // state view into a room that has moved on.
+    if (session.isStarted || !this.#isCurrentSession(session)) return;
     try {
       const game = session.ensureGame({ decks, enforceDeckRules });
       session.clearDeckPicks();
-      if (!this.#bridgeUnsubscribes.has(session.roomCode)) {
-        this.#bridgeUnsubscribes.set(session.roomCode, new EventBridge({ session }).subscribe());
-      }
+      this.#subscribeSession(session);
       session.broadcast(EVENTS.GAME_INIT, (username) =>
         buildStateView({ game, revision: session.revision, username })
       );
@@ -446,6 +635,52 @@ export default class SocketGateway {
       this.#log("error", `SocketGateway: game creation for room ${session.roomCode} failed`, { error: error.message });
       session.broadcast(EVENTS.GAME_ERROR, () => buildError(error.message));
     }
+  }
+
+  /**
+   * Attach the net layer's observers to a session's freshly created game: the
+   * event bridge always, and in a dev room the event firehose too. Their
+   * unsubscribes are kept so a dropped session leaves nothing subscribed to
+   * the game it abandons.
+   */
+  #subscribeSession(session) {
+    if (this.#subscriptions.has(session.roomCode)) return;
+
+    const firehose = isDevRoomCode(session.roomCode) ? new EventFirehose({ session }) : null;
+    this.#subscriptions.set(session.roomCode, {
+      bridge: new EventBridge({ session }).subscribe(),
+      firehose: firehose ? firehose.subscribe() : null,
+    });
+  }
+
+  /**
+   * Drop a room's session: detach the net layer's subscriptions from the game
+   * it is leaving behind, cancel a start still resolving for it, take its
+   * connections away, and remove it from the registry. The next
+   * `ensureSession` for the room builds a fresh one.
+   */
+  #dropSession(session) {
+    const { roomCode } = session;
+
+    const subscriptions = this.#subscriptions.get(roomCode);
+    if (subscriptions) {
+      subscriptions.bridge();
+      subscriptions.firehose?.();
+      this.#subscriptions.delete(roomCode);
+    }
+
+    // A start awaiting the deck library for the dropped session is cancelled:
+    // it may not create a game on it, and the room's replacement must be free
+    // to resolve its own picks.
+    if (this.#starting.get(roomCode) === session) this.#starting.delete(roomCode);
+
+    // An abandoned session keeps no connections: without this it could still
+    // broadcast into live sockets.
+    for (const { username, connection } of session.connections()) {
+      session.detach(username, connection);
+    }
+
+    this.#registry.remove(roomCode);
   }
 
   /** Move parked connections into the freshly created session. */

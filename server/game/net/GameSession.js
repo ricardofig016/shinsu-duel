@@ -71,6 +71,8 @@ export default class GameSession {
   #revision = 0;
   /** username → pending pre-game deck pick, cleared at game start */
   #deckPicks = new Map();
+  /** whether the dev-room event firehose delivers to this session's seats */
+  #firehoseEnabled = true;
 
   /**
    * @param {object} args
@@ -158,6 +160,35 @@ export default class GameSession {
   /** No seat holds any connection. */
   isEmpty() {
     return this.#usernames.every((username) => this.#seats.get(username).size === 0);
+  }
+
+  /**
+   * Every connection currently attached, with the seat it plays for. The
+   * caller owns nothing here — this is how a session's connections move to a
+   * replacement session, as a dev-room restart does.
+   *
+   * @returns {Array<{ username: string, connection: object }>}
+   */
+  connections() {
+    const attached = [];
+    for (const username of this.#usernames) {
+      this.#seats.get(username).forEach((connection) => attached.push({ username, connection }));
+    }
+    return attached;
+  }
+
+  /**
+   * Whether the dev-room event firehose currently delivers. It is a
+   * session-scoped diagnostic switch: it carries no game state, so nothing
+   * about it reaches the engine, the Logger, or a replay artifact.
+   */
+  get isFirehoseEnabled() {
+    return this.#firehoseEnabled;
+  }
+
+  setFirehoseEnabled(enabled) {
+    if (typeof enabled !== "boolean") throw new TypeError("enabled must be a boolean.");
+    this.#firehoseEnabled = enabled;
   }
 
   /**

@@ -86,3 +86,70 @@ export function buildDeckSelect(deckId) {
   assertNonEmptyString(deckId, "deckId");
   return { deckId };
 }
+
+/* ── dev console ────────────────────────────────────────────────────────── */
+
+/**
+ * Dev-console mutation types. They mirror the debug actions the engine
+ * registers, which accept `source: "debug"` only: the gateway stamps that
+ * source, so a player action can never carry one of these types.
+ */
+export const DEBUG_ACTION_TYPES = Object.freeze({
+  DRAW: "debug-draw-action",
+  ADD_TO_HAND: "debug-add-to-hand-action",
+  ADD_TO_DECK: "debug-add-to-deck-action",
+  SHUFFLE_DECK: "debug-shuffle-deck-action",
+  MULLIGAN: "debug-mulligan-action",
+  GRANT_SHINSU: "debug-grant-shinsu-action",
+  END_ROUND: "debug-end-round-action",
+  FORCE_TURN: "debug-force-turn-action",
+  SET_ROUND: "debug-set-round-action",
+  SPAWN_UNIT: "debug-spawn-unit-action",
+  UNIT_HP: "debug-unit-hp-action",
+  DESTROY_UNIT: "debug-destroy-unit-action",
+  LIGHTHOUSES: "debug-lighthouses-action",
+});
+
+/** The read-only queries the server answers with a targeted `debug-result`. */
+export const DEBUG_QUERY_KINDS = Object.freeze({
+  HAND: "hand",
+  DECK: "deck",
+  UNIT_ABILITIES: "unit-abilities",
+  STATE: "state",
+  LOGS: "logs",
+});
+
+/**
+ * Build a dev-console mutation. The target seat is part of `data`; the server
+ * stamps the identity of the player who issued the command.
+ */
+export function buildDebugAction(type, data = {}) {
+  assertNonEmptyString(type, "debug action type");
+  return buildAction(type, { ...data });
+}
+
+/**
+ * Build a dev-console query. `requestId` is echoed on the matching
+ * `debug-result`; the server answers with `game-error` instead when it
+ * refuses, so the console can drop the pending request.
+ */
+export function buildDebugQuery(kind, requestId, { username = null, unitId = null } = {}) {
+  assertNonEmptyString(kind, "debug query kind");
+  assertNonEmptyString(requestId, "requestId");
+
+  const query = { kind, requestId };
+  if (username !== null) query.username = username;
+  if (unitId !== null) query.unitId = unitId;
+  return query;
+}
+
+/** Build the dev-console firehose toggle payload. */
+export function buildDebugFirehose(enabled) {
+  if (typeof enabled !== "boolean") throw new TypeError("enabled must be a boolean.");
+  return { enabled };
+}
+
+/** Build the dev-console restart message. It carries no arguments. */
+export function buildDebugRestart() {
+  return {};
+}

@@ -15,7 +15,7 @@ export default class UseAbilityAction extends ActionHandler {
     unitId: "string",
     abilityCode: "string",
   };
-  static sourceAccess = { player: true, system: false };
+  static sourceAccess = { player: true, debug: false, system: false };
 
   /**
    * Resolve an abilityCode into its DSL and provenance.

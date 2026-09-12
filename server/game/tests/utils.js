@@ -18,6 +18,15 @@ export function getCardIdByName(name) {
   return id;
 }
 
+/**
+ * Build a dev-console action payload. Debug actions carry the identity of the
+ * player who issued them (`requestedBy`, stamped by the gateway in
+ * production) alongside the seat the command acts on.
+ */
+export function debugAction(type, data = {}) {
+  return { type, data: { source: "debug", requestedBy: data.requestedBy ?? "Bob", ...data } };
+}
+
 export function advanceToRound(game, round) {
   const firstPlayer = game.currentTurn;
   const secondPlayer = firstPlayer === "Alice" ? "Bob" : "Alice";

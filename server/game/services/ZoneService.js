@@ -93,6 +93,25 @@ export default class ZoneService {
   }
 
   /**
+   * Add a card to a player's deck. The deck's top is its last element, so
+   * `placement: "top"` is the next card drawn and `"bottom"` the last.
+   * A card entering the deck loses any cost reduction it carried in hand.
+   *
+   * @param {object} playerState
+   * @param {Card} card
+   * @param {"top"|"bottom"} [placement]
+   */
+  static addToDeck(playerState, card, placement = "top") {
+    if (placement !== "top" && placement !== "bottom") {
+      throw new Error(`ZoneService: unknown deck placement "${placement}".`);
+    }
+    if (!Array.isArray(playerState.deck)) playerState.deck = [];
+    CompressionService.clearReduction(card);
+    if (placement === "top") playerState.deck.push(card);
+    else playerState.deck.unshift(card);
+  }
+
+  /**
    * Find and remove a card from a player's hand by index.
    * @returns {Card|null}
    */

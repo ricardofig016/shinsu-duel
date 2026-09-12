@@ -33,10 +33,10 @@ export default class ActionHandler {
   static schema = {
     /* field name → expected typeof */
   };
-  static sourceAccess = { player: boolean, system: boolean };
+  static sourceAccess = { player: boolean, debug: boolean, system: boolean };
 
   validate(data, gameState) {
-    /* schema + game-rule checks; throw on failure */
+    /* source access, schema, then game-rule checks; throw on failure */
   }
   execute(data, gameState) {
     /* perform the mutation */
@@ -44,12 +44,11 @@ export default class ActionHandler {
 }
 ```
 
-`super.validate(data)` runs two layers before any game-rule check:
+`super.validate(data)` runs three layers before any game-rule check:
 
-1. **Schema validation** (`validateSchema`) — every field in `schema` must be present with the declared `typeof`; any field outside the schema is rejected (`Unexpected field`). This prevents malformed or tampered payloads from reaching game logic.
-2. **Source access** — `sourceAccess[data.source]` must be truthy. `player` is the normal entry point; `system` is reserved for server-internal actions when one is required. Resource mutations that are not player choices, bypass the action layer.
-
-Subclass `validate()` then adds **game-rule checks**: the actor exists, it is their turn, the card/unit exists, costs are affordable, and requirements are met (via `RequirementValidator`). These checks run before any state change, so a failed action leaves the game untouched.
+1. **Source access** — `sourceAccess[data.source]` must be truthy. A message stamped with a source the action does not admit is refused before the payload is examined, so a disallowed caller never reaches game logic and never learns a schema error. `player` is the normal entry point (the gateway stamps it on `game-action`), `debug` belongs to the dev console (see `DEV_CONSOLE.md`), and `system` is reserved for server-internal actions when one is required. Resource mutations that are not player choices bypass the action layer.
+2. **Schema validation** (`validateSchema`) — every field in `schema` must be present with the declared `typeof`; any field outside the schema is rejected (`Unexpected field`). This prevents malformed or tampered payloads from reaching game logic.
+3. **Game rules** — subclass `validate()` then adds the checks: the actor exists, it is their turn, the card/unit exists, costs are affordable, and requirements are met (via `RequirementValidator`). These run before any state change, so a failed action leaves the game untouched.
 
 ---
 
@@ -66,6 +65,15 @@ Subclass `validate()` then adds **game-rule checks**: the actor exists, it is th
 | `pass-turn-action`            | `PassTurnAction`           | `source, username`                             | Yes                        |
 | `switch-position-action`      | `SwitchPositionAction`     | `source, username, unitId, positionCode`       | Yes                        |
 | `generate-fire-charge-action` | `GenerateFireChargeAction` | `source, username`                             | No                         |
+
+### Debug actions
+
+The dev console's mutations are actions too: one class per command under `server/game/actions/debug/`, all extending `DebugAction`, registered under a `debug-*` type, and all admitting `source: "debug"` only. They delegate to the same services player actions use (`ZoneService`, `ShinsuService`, `LifecycleEngine`, `UnitService`, `LighthouseService`), and they never mutate state fields directly. Two differences from a player action:
+
+- their `username` is the seat the command acts on rather than the actor, and `requestedBy` carries the player who issued it;
+- their schema declares only the arguments that command takes, so a command with no target seat carries no `username` field at all.
+
+The command surface, the arguments each type takes, and what a mutation records are documented in `DEV_CONSOLE.md`. Commands that need behavior the game owns (ending a round, forcing a turn, setting the round counter) call the narrow `GameState` methods for it instead of writing those fields.
 
 ### Ability resolution
 

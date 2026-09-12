@@ -1,5 +1,7 @@
 import {
   ACTION_TYPES,
+  DEBUG_ACTION_TYPES,
+  DEBUG_QUERY_KINDS,
   buildDeployUnitAction,
   buildPlaySkillAction,
   buildEquipEquipmentAction,
@@ -9,6 +11,10 @@ import {
   buildPassTurnAction,
   buildDecision,
   buildDeckSelect,
+  buildDebugAction,
+  buildDebugQuery,
+  buildDebugFirehose,
+  buildDebugRestart,
 } from "../../game/actions.js";
 
 describe("outbound action builders", () => {
@@ -78,5 +84,67 @@ describe("outbound action builders", () => {
     expect(buildDeckSelect("deck-abc")).toEqual({ deckId: "deck-abc" });
     expect(() => buildDeckSelect("")).toThrow(TypeError);
     expect(() => buildDeckSelect(null)).toThrow(TypeError);
+  });
+});
+
+describe("outbound dev console builders", () => {
+  test("every debug action type keeps its wire name", () => {
+    expect(DEBUG_ACTION_TYPES.DRAW).toBe("debug-draw-action");
+    expect(DEBUG_ACTION_TYPES.ADD_TO_HAND).toBe("debug-add-to-hand-action");
+    expect(DEBUG_ACTION_TYPES.ADD_TO_DECK).toBe("debug-add-to-deck-action");
+    expect(DEBUG_ACTION_TYPES.SHUFFLE_DECK).toBe("debug-shuffle-deck-action");
+    expect(DEBUG_ACTION_TYPES.MULLIGAN).toBe("debug-mulligan-action");
+    expect(DEBUG_ACTION_TYPES.GRANT_SHINSU).toBe("debug-grant-shinsu-action");
+    expect(DEBUG_ACTION_TYPES.END_ROUND).toBe("debug-end-round-action");
+    expect(DEBUG_ACTION_TYPES.FORCE_TURN).toBe("debug-force-turn-action");
+    expect(DEBUG_ACTION_TYPES.SET_ROUND).toBe("debug-set-round-action");
+    expect(DEBUG_ACTION_TYPES.SPAWN_UNIT).toBe("debug-spawn-unit-action");
+    expect(DEBUG_ACTION_TYPES.UNIT_HP).toBe("debug-unit-hp-action");
+    expect(DEBUG_ACTION_TYPES.DESTROY_UNIT).toBe("debug-destroy-unit-action");
+    expect(DEBUG_ACTION_TYPES.LIGHTHOUSES).toBe("debug-lighthouses-action");
+  });
+
+  test("the query kinds keep their wire names", () => {
+    expect(DEBUG_QUERY_KINDS).toEqual({
+      HAND: "hand",
+      DECK: "deck",
+      UNIT_ABILITIES: "unit-abilities",
+      STATE: "state",
+      LOGS: "logs",
+    });
+  });
+
+  test("buildDebugAction copies the arguments and never stamps an identity", () => {
+    const data = { username: "Bob", amount: 2 };
+    const action = buildDebugAction(DEBUG_ACTION_TYPES.DRAW, data);
+
+    expect(action).toEqual({ type: "debug-draw-action", data: { username: "Bob", amount: 2 } });
+    expect(action.data).not.toBe(data);
+    expect(action.data.source).toBeUndefined();
+    expect(action.data.requestedBy).toBeUndefined();
+    expect(() => buildDebugAction("")).toThrow(TypeError);
+  });
+
+  test("buildDebugQuery carries the request id and only the arguments it has", () => {
+    expect(buildDebugQuery("hand", "q1", { username: "Bob" })).toEqual({
+      kind: "hand",
+      requestId: "q1",
+      username: "Bob",
+    });
+    expect(buildDebugQuery("state", "q2")).toEqual({ kind: "state", requestId: "q2" });
+    expect(buildDebugQuery("unit-abilities", "q3", { unitId: "unit-1" })).toEqual({
+      kind: "unit-abilities",
+      requestId: "q3",
+      unitId: "unit-1",
+    });
+    expect(() => buildDebugQuery("", "q1")).toThrow(TypeError);
+    expect(() => buildDebugQuery("hand", "")).toThrow(TypeError);
+  });
+
+  test("buildDebugFirehose and buildDebugRestart return the exact payloads", () => {
+    expect(buildDebugFirehose(true)).toEqual({ enabled: true });
+    expect(buildDebugFirehose(false)).toEqual({ enabled: false });
+    expect(() => buildDebugFirehose("on")).toThrow(TypeError);
+    expect(buildDebugRestart()).toEqual({});
   });
 });

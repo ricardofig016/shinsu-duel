@@ -38,6 +38,17 @@ export default class SessionRegistry {
     return this.#sessions.get(roomCode) ?? null;
   }
 
+  /**
+   * Drop a room's session. The next `ensureSession` for that room builds a
+   * fresh one, which is what a dev-room restart needs: the game, its revision,
+   * and its deck picks all start over while the room record stays as it is.
+   *
+   * @returns {boolean} whether a session was dropped
+   */
+  remove(roomCode) {
+    return this.#sessions.delete(roomCode);
+  }
+
   get size() {
     return this.#sessions.size;
   }

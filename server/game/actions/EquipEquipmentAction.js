@@ -12,7 +12,7 @@ export default class EquipEquipmentAction extends ActionHandler {
     handId: "number",
     targetUnitId: "string",
   };
-  static sourceAccess = { player: true, system: false };
+  static sourceAccess = { player: true, debug: false, system: false };
 
   validate(data, gameState) {
     super.validate(data);
