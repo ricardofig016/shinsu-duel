@@ -64,6 +64,24 @@ describe("redirectToLogin", () => {
     expect(navigate).toHaveBeenCalledWith("/login?next=%2Fplay");
     expect(settled).toBe(false);
   });
+
+  // The game page calls redirectToLogin() with no arguments when the socket
+  // rejects its identity, so the browser location is what carries the room the
+  // player must return to.
+  test("carries the current browser location when the caller passes none", () => {
+    const navigate = jest.fn();
+    const original = globalThis.window;
+    globalThis.window = { location: { pathname: "/game/ABC123", search: "?spectate=1" } };
+
+    try {
+      redirectToLogin({ navigate });
+    } finally {
+      if (original === undefined) delete globalThis.window;
+      else globalThis.window = original;
+    }
+
+    expect(navigate).toHaveBeenCalledWith("/login?next=%2Fgame%2FABC123%3Fspectate%3D1");
+  });
 });
 
 describe("authFetch", () => {

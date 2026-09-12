@@ -7,7 +7,7 @@
  *
  *   { changed: { "<dotted.path>": value }, removed: ["<dotted.path>"] }
  *
- * Paths are dotted (`players.Alice.deck.3.cardId`); array indices are
+ * Paths are dotted (`players.<username>.deck.3.cardId`); array indices are
  * positions, so array comparison is positional and removals are always the
  * trailing indices. A key that only exists in `after` is stored whole under
  * its path. The serialized state's key set is stable across a game, so
