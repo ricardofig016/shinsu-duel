@@ -25,6 +25,7 @@ import {
   buildUseAbilityAction,
 } from "/game/actions.js";
 import { buildDeckStepViewModel } from "/pages/game/deckStep.js";
+import { beginDeckStepTracking, shouldReloadDecks } from "/pages/game/deckStepCache.js";
 import { getGlossary } from "/utils/glossary.js";
 import {
   buildDeckTooltipText,
@@ -97,7 +98,8 @@ const loadDeckStepUsername = async () => {
   return deckStepState.username;
 };
 
-const loadDeckStepDecks = async () => {
+const loadDeckStepDecks = async ({ reload = false } = {}) => {
+  if (reload) deckStepState.decks = null;
   if (!deckStepState.decks) {
     try {
       const response = await authFetch("/decks/data");
@@ -114,7 +116,10 @@ const renderDeckStep = async (socket, status) => {
   // overlay would hide the selection phase entirely.
   document.querySelector("#waiting-overlay").classList.add("hidden");
   const username = await loadDeckStepUsername();
-  const decks = await loadDeckStepDecks();
+  // A status that clears this seat's pick means the server re-validated it (the
+  // deck was deleted, became unbuildable, or became illegal), so the list it
+  // came from is stale: fetching again is what shows the seat why.
+  const decks = await loadDeckStepDecks({ reload: shouldReloadDecks(status, username) });
   const model = buildDeckStepViewModel({ status, decks, username });
   if (!model) return;
 
@@ -739,6 +744,7 @@ const prepareBoard = async (positionData, glossary, socket) => {
 /* ── boot ─────────────────────────────────────────────────────────────── */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  beginDeckStepTracking();
   const data = await prepareData();
 
   const roomCode = window.location.pathname.split("/").pop();
