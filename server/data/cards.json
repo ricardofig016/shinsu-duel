@@ -1526,6 +1526,7 @@
       }
     ],
     "passives": [],
+    "artworkPath": "/assets/images/artworks/gyetang.png",
     "slug": "gyetang"
   },
   "31": {
@@ -1843,6 +1844,7 @@
         "raw": "if I have an allied Yeo Miseng, I have Strong 1"
       }
     ],
+    "artworkPath": "/assets/images/artworks/hon_akraptor.png",
     "slug": "hon_akraptor"
   },
   "37": {
@@ -1880,6 +1882,7 @@
       }
     ],
     "passives": [],
+    "artworkPath": "/assets/images/artworks/hong_chunhwa.png",
     "slug": "hong_chunhwa"
   },
   "38": {
@@ -1946,6 +1949,7 @@
         "raw": "while i have an ally team baam or team fug member, opponents skills cost 1 more"
       }
     ],
+    "artworkPath": "/assets/images/artworks/hwa_ryun.png",
     "slug": "hwa_ryun"
   },
   "39": {
