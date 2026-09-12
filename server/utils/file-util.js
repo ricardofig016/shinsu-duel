@@ -3,10 +3,19 @@ import path from "path";
 
 const placeholderImagePath = "/assets/images/placeholder.png";
 
+/**
+ * Read a JSON runtime file. A missing file is created as `{}` so first-run
+ * calls see an empty store.
+ *
+ * A leading byte-order mark is stripped: an editor or a shell that writes UTF-8
+ * with a mark (PowerShell's `Set-Content -Encoding utf8`, for one) would
+ * otherwise turn every later read of a runtime file into a parse error, which
+ * surfaces far from the write that caused it.
+ */
 export const readJsonFile = async (filePath) => {
   try {
     const data = await fs.readFile(filePath, "utf8");
-    return JSON.parse(data);
+    return JSON.parse(data.replace(/^\uFEFF/, ""));
   } catch (error) {
     if (error.code === "ENOENT") {
       await writeJsonFile(filePath, {});
