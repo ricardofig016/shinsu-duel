@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shinsu Duel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/pages/game/pregame.css" />
+    <link rel="stylesheet" href="/pages/game/waiting/styles.css" />
+  </head>
+  <body>
+    <div id="navbar-component"></div>
+
+    <main class="pregame-container">
+      <section class="pregame-panel">
+        <h1>Waiting room</h1>
+
+        <div class="pregame-room-code">
+          <code id="waiting-room-code"></code>
+          <button type="button" id="waiting-copy-link">Copy invite link</button>
+        </div>
+        <p id="waiting-copy-hint" class="pregame-hint">Send the link to your opponent so they can take the other seat.</p>
+
+        <div class="pregame-seats">
+          <div class="pregame-seat">
+            <span>You</span>
+            <span class="pregame-seat-name" id="waiting-you">-</span>
+          </div>
+          <div class="pregame-seat">
+            <span>Opponent</span>
+            <span class="pregame-seat-name" id="waiting-opponent">No one yet</span>
+          </div>
+        </div>
+
+        <p id="waiting-message" class="pregame-hint">Deck selection starts as soon as your opponent arrives.</p>
+        <p id="waiting-dev-notice" class="pregame-notice hidden"></p>
+
+        <div class="pregame-links">
+          <a href="/play" id="waiting-leave">Leave room</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/pages/game/waiting/script.js"></script>
+  </body>
+</html>

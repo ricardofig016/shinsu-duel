@@ -1,0 +1,80 @@
+/* Shared shell of the two pre-game steps: the waiting room and the deck step.
+   The board is a full-screen page of its own and links none of this. */
+
+.pregame-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 2rem;
+}
+
+.pregame-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  width: min(48rem, 100%);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 0.5rem;
+}
+
+.pregame-panel h1 {
+  margin: 0;
+}
+
+.pregame-room-code {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.pregame-room-code code {
+  font-size: 1.75rem;
+  letter-spacing: 0.25rem;
+}
+
+.pregame-seats {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.pregame-seat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.pregame-seat span:first-child {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.pregame-seat-name {
+  font-weight: bold;
+}
+
+.pregame-hint {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.pregame-notice {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--accent-color, #b58900);
+  border-radius: 0.5rem;
+}
+
+.pregame-links {
+  display: flex;
+  gap: 1rem;
+}

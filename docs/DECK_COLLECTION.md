@@ -25,12 +25,12 @@ Decks may be **saved with rule violations** (they are flagged with per-violation
 
 ## Starting a game with a deck
 
-The pre-game deck-selection phase on the game page is owned by the net gateway; its flow, gating, and `game-deck-select` / `game-deck-status` messages are documented in `NET_PROTOCOL_ARCHITECTURE.md`. The page's data comes from this collection:
+The pre-game steps of a room, the addresses that serve them, joining, and the `game-deck-select` / `game-deck-status` / `game-deck-reveal` messages are owned by [NET_PROTOCOL_ARCHITECTURE.md](./NET_PROTOCOL_ARCHITECTURE.md#deck-selection); this file owns only where the deck step's data comes from. `public/pages/game/deck/` is that step's page:
 
-- the picker lists the caller's decks from `GET /decks/data`, so each option already carries `legal` and `problems`; illegal decks are disabled in normal rooms and selectable behind a warning marker in dev rooms (`dev` in the selection status, from `isDevRoomCode`),
-- the picker fetches that list once per page and fetches again when a status clears this seat's own pick, which is what a start-time re-validation does (the pure rule lives in `public/pages/game/deckStepCache.js`),
-- the pure view models behind the picker live in `public/pages/game/deckStep.js` (see its header doc),
-- at start the gateway resolves the picks through the deck library and the compiled catalog and hands the engine `{ decks, enforceDeckRules }` (see the buildable-versus-legal contract above).
+- it lists the caller's decks from `GET /decks/data`, so each row already carries `legal`, `buildable` and `problems`; illegal decks are not selectable in a normal room and are selectable in a dev room (`dev` in the selection status, from `isDevRoomCode`), while a deck the engine cannot build is never selectable,
+- it renders the shared deck table (`public/utils/deck-table.js` and `public/styles/deck-table.css`) with the deck list's columns minus `updatedAt` and `actions`, and draws each row's fan from the catalog entries of `GET /cards/data`, fetched with `?dev=true` in a dev room so a test card in a fan still resolves,
+- it fetches the deck list again when a status clears this seat's own pick, which is what a start-time re-validation produces, and the reloaded list is what shows the seat why the pick no longer stands (see the buildable-versus-legal contract above),
+- the pure view models behind the page live in `public/pages/game/deck/view-model.js` (row selectability, the opponent line, the versus view, and the "pick cleared" rule); the page owns the DOM and the socket.
 
 ## Starter decks
 
@@ -55,6 +55,8 @@ The name-limit message is worded from `MAX_DECK_NAME_LENGTH` in `deckValidation.
 `public/pages/decks/` has two views.
 
 **Deck list** — a table with one row per deck: a fan of the deck's three most expensive distinct units (cheapest left, most expensive right and frontmost, rendered as the shared card component; right-click opens the big card), name, size, composition (units / skills / equipment), average card cost, legality flag (hover shows the problems), last update, and Edit / Duplicate / Delete actions. Clicking the row opens the deck. Filters: name search, legality (all / legal / not legal), sorting (name and size, both directions), and a "containing cards" filter — text, type, and affiliation criteria applied to the deck's contents where each active facet is satisfied independently by some card in the deck.
+
+The table is a shared component: `public/utils/deck-model.js` holds the pure deck model behind it (deck-construction numbers, rows, fans) and `public/utils/deck-table.js` owns the table DOM, styled by `public/styles/deck-table.css`. A page passes the columns it renders and the cells for column keys the shared module does not build — this page adds the Edit / Duplicate / Delete cell.
 
 **Builder** — the deck contents panel (names, +/-, live problems from `/decks/validate`, size counter, save state) beside the catalog pool: the same card grid the cards page renders, through the shared modules `public/utils/card-grid.js` and `public/utils/catalog-toolbar.js` (see their header docs for the mount-once / update-in-place contract). Each pool card carries a copy-count badge and +/- buttons; left-click adds a copy, right-click opens the big card. "Show illegal" reveals Unreachable cards; "In deck only" narrows the pool to picked cards. The pool sorts by the standard catalog orders (name or cost, both directions), with name ascending as the default, so adding or removing copies never reorders the grid. With `?dev=true` test cards join the pool inline and the copy cap disappears — the server still flags whatever breaks the rules. Leaving the builder with unsaved edits asks for confirmation.
 

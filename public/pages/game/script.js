@@ -1,5 +1,5 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
-import { authFetch, redirectToLogin } from "/utils/auth-redirect.js";
+import { redirectToLogin } from "/utils/auth-redirect.js";
 import { EVENTS, ERROR_CODES } from "/game/protocol.js";
 import { createGameStore } from "/game/store.js";
 import {
@@ -16,7 +16,6 @@ import {
 import {
   buildDeployUnitAction,
   buildDecision,
-  buildDeckSelect,
   buildEquipEquipmentAction,
   buildGenerateFireChargeAction,
   buildPassTurnAction,
@@ -24,8 +23,7 @@ import {
   buildSwitchPositionAction,
   buildUseAbilityAction,
 } from "/game/actions.js";
-import { buildDeckStepViewModel } from "/pages/game/deckStep.js";
-import { beginDeckStepTracking, shouldReloadDecks } from "/pages/game/deckStepCache.js";
+import { STEP, roomCodeFromPath, followRoomStep } from "/game/steps.js";
 import { getGlossary } from "/utils/glossary.js";
 import {
   buildDeckTooltipText,
@@ -66,115 +64,6 @@ const findUnit = (state, player, unitId) => {
     if (unit) return unit;
   }
   return null;
-};
-
-/* ── overlays ─────────────────────────────────────────────────────────── */
-
-const showWaiting = (payload) => {
-  hideDeckSelect();
-  const overlay = document.querySelector("#waiting-overlay");
-  document.querySelector("#waiting-overlay-message").textContent = payload?.message ?? "";
-  overlay.classList.remove("hidden");
-};
-
-/* ── pre-game deck selection ──────────────────────────────────────────── */
-
-const deckStepState = { username: null, decks: null };
-
-const hideDeckSelect = () => {
-  document.querySelector("#deck-select-overlay").classList.add("hidden");
-};
-
-const loadDeckStepUsername = async () => {
-  if (!deckStepState.username) {
-    try {
-      const response = await fetch("/auth/status");
-      const payload = await response.json();
-      deckStepState.username = payload.isAuthenticated ? payload.username : null;
-    } catch {
-      deckStepState.username = null;
-    }
-  }
-  return deckStepState.username;
-};
-
-const loadDeckStepDecks = async ({ reload = false } = {}) => {
-  if (reload) deckStepState.decks = null;
-  if (!deckStepState.decks) {
-    try {
-      const response = await authFetch("/decks/data");
-      deckStepState.decks = response.ok ? (await response.json()).decks ?? [] : [];
-    } catch {
-      deckStepState.decks = [];
-    }
-  }
-  return deckStepState.decks;
-};
-
-const renderDeckStep = async (socket, status) => {
-  // Replace the parking overlay before anything can fail: a stuck "Waiting"
-  // overlay would hide the selection phase entirely.
-  document.querySelector("#waiting-overlay").classList.add("hidden");
-  const username = await loadDeckStepUsername();
-  // A status that clears this seat's pick means the server re-validated it (the
-  // deck was deleted, became unbuildable, or became illegal), so the list it
-  // came from is stale: fetching again is what shows the seat why.
-  const decks = await loadDeckStepDecks({ reload: shouldReloadDecks(status, username) });
-  const model = buildDeckStepViewModel({ status, decks, username });
-  if (!model) return;
-
-  const overlay = document.querySelector("#deck-select-overlay");
-  overlay.classList.remove("hidden");
-
-  const list = document.querySelector("#deck-select-list");
-  list.replaceChildren(
-    ...model.options.map((option) => {
-      const row = document.createElement("div");
-      row.className = "deck-select-option";
-
-      const label = document.createElement("div");
-      label.className = "deck-select-option-label";
-
-      const name = document.createElement("strong");
-      const mine = option.id === model.myDeckId;
-      name.textContent = option.warning ? `${option.name} (not legal)` : option.name;
-      if (mine) name.textContent += " — selected";
-      label.appendChild(name);
-
-      const meta = document.createElement("span");
-      meta.textContent = ` ${option.size} cards`;
-      if (!option.legal) meta.textContent += ` — ${option.problems.join(" ")}`;
-      label.appendChild(meta);
-
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = mine ? "Re-pick" : "Select";
-      button.disabled = !option.selectable;
-      button.addEventListener("click", () => socket.emit(EVENTS.GAME_DECK_SELECT, buildDeckSelect(option.id)));
-
-      row.appendChild(label);
-      row.appendChild(button);
-      return row;
-    })
-  );
-
-  const yoursLine = document.querySelector("#deck-select-yours");
-  const mySeat = model.mySeat;
-  yoursLine.classList.remove("hidden");
-  yoursLine.textContent = mySeat?.deckChosen ? `Your deck: ${mySeat.deckName}${mySeat.illegal ? " (not legal)" : ""}` : "Pick a deck to ready up.";
-
-  const opponentLine = document.querySelector("#deck-select-opponent");
-  const opponent = model.opponentSeat;
-  opponentLine.classList.remove("hidden");
-  opponentLine.textContent = !opponent
-    ? "Waiting for the opponent to connect."
-    : opponent.deckChosen
-      ? `Opponent ready: ${opponent.deckName}`
-      : "Waiting for the opponent to choose a deck.";
-
-  const warning = document.querySelector("#deck-select-warning");
-  warning.classList.toggle("hidden", !model.dev);
-  warning.textContent = model.dev ? "Dev room: illegal decks start the game with rule enforcement disabled." : "";
 };
 
 /* ── reveals ──────────────────────────────────────────────────────────── */
@@ -518,8 +407,6 @@ const render = async (state, data, socket) => {
   renderFireCharge(state);
   renderDecisionPrompt(state, socket);
   showGameOver(state.gameOver);
-  document.querySelector("#waiting-overlay").classList.add("hidden");
-  hideDeckSelect();
 };
 
 /* ── one-time board setup ─────────────────────────────────────────────── */
@@ -744,13 +631,10 @@ const prepareBoard = async (positionData, glossary, socket) => {
 /* ── boot ─────────────────────────────────────────────────────────────── */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  beginDeckStepTracking();
   const data = await prepareData();
 
-  const roomCode = window.location.pathname.split("/").pop();
-  const isValidRoomCode = (code) =>
-    typeof code === "string" && code.trim() !== "" && code !== "undefined" && code !== "null";
-  if (!isValidRoomCode(roomCode)) {
+  const roomCode = roomCodeFromPath(window.location.pathname);
+  if (roomCode === null) {
     alert("Invalid or missing room code. Redirecting to Play page.");
     window.location.href = "/play";
     return;
@@ -759,6 +643,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = io("/game", {
     query: { roomCode },
   });
+
+  // The room moves back to the deck step when a dev room restarts, so the
+  // board hands the browser over to whichever step the server names.
+  followRoomStep(socket, roomCode, STEP.BOARD, { ignore: [EVENTS.GAME_INIT] });
 
   // Renders are serialized: each snapshot rebuilds the whole page, so
   // overlapping deliveries must not interleave half-finished rebuilds.
@@ -782,8 +670,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert(payload?.message ?? "Something went wrong.");
   });
   socket.on(EVENTS.GAME_OVER, (payload) => showGameOver(payload));
-  socket.on(EVENTS.GAME_WAITING, (payload) => showWaiting(payload));
-  socket.on(EVENTS.GAME_DECK_STATUS, (payload) => void renderDeckStep(socket, payload));
   socket.on(EVENTS.GAME_HAND_PEEK, (payload) => showPeekReveal(payload));
   // after a transport reconnect the server treats the socket as new, so ask
   // for the current state view

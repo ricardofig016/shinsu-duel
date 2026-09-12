@@ -97,7 +97,7 @@ export function createGameServer({ registry = new SessionRegistry(), loadRoom, c
   });
 
   app.use(express.static(path.resolve("public")));
-  app.use("/", createRouter({ accounts, deckLibrary, catalog, ...(authRouter ? { authRouter } : {}) }));
+  app.use("/", createRouter({ accounts, deckLibrary, catalog, registry, ...(authRouter ? { authRouter } : {}) }));
 
   const gameGateway = new SocketGateway({
     registry,

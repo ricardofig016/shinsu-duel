@@ -25,11 +25,12 @@ import { createPlayRouter } from "./play.js";
  * The content routes hold no runtime state, so they stay module singletons.
  *
  * @param {{ accounts?: object, deckLibrary?: object, catalog?: object,
- *   authRouter?: object }} [options] `authRouter` replaces the whole `/auth`
- *   router, for a boot that needs its own login behavior rather than its own
- *   storage.
+ *   registry?: object, authRouter?: object }} [options] `registry` is the
+ *   session registry the game routes read to resolve a room's current step;
+ *   `authRouter` replaces the whole `/auth` router, for a boot that needs its
+ *   own login behavior rather than its own storage.
  */
-export function createRouter({ accounts = createAccountStore(), deckLibrary, catalog, authRouter } = {}) {
+export function createRouter({ accounts = createAccountStore(), deckLibrary, catalog, registry, authRouter } = {}) {
   const router = express.Router();
 
   const decksOptions = { accounts, ...(deckLibrary ? { library: deckLibrary } : {}), ...(catalog ? { catalog } : {}) };
@@ -38,7 +39,7 @@ export function createRouter({ accounts = createAccountStore(), deckLibrary, cat
   router.use("/auth", authRouter ?? createAuthRouter({ accounts }));
   router.use("/cards", cards);
   router.use("/decks", createDecksRouter(decksOptions));
-  router.use("/game", createGameRouter({ accounts }));
+  router.use("/game", createGameRouter({ accounts, registry }));
   router.use("/glossary", glossary);
   router.use("/login", login);
   router.use("/play", createPlayRouter({ accounts }));

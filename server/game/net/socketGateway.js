@@ -10,10 +10,12 @@ import {
   buildGameOverResult,
   buildWaitingPayload,
   buildDeckStatus,
+  buildDeckReveal,
   buildDebugResult,
 } from "./protocol.js";
 import { isDevRoomCode } from "../devRooms.js";
 import { validateDeckCards } from "../../decks/deckValidation.js";
+import { buildDeckFanSlugs } from "../../decks/deckFan.js";
 import { buildSlugIndex } from "../../utils/card-catalog.js";
 
 const GAME_NAMESPACE = "/game";
@@ -21,6 +23,7 @@ const WAITING_ROOM_MESSAGE = "Game has not started yet.";
 const NOT_A_PARTICIPANT_MESSAGE = "Room not found or you are not a participant.";
 const ALREADY_STARTED_MESSAGE = "The game has already started.";
 const NOT_A_DEV_ROOM_MESSAGE = "The dev console is only available in dev rooms (TESTROOMxx).";
+const DEFAULT_PRESENCE_GRACE_MS = 3000;
 
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim() !== "";
@@ -82,7 +85,26 @@ export default class SocketGateway {
   /** roomCode → connections parked while the room's second player has not joined */
   #waitingRoom = new Map();
 
-  constructor({ registry, loadRoom, createGame, deckLibrary, catalog, isAccountActive, logger = null }) {
+  /**
+   * How long a seat holding no connections still counts as present. Every step
+   * of the pre-game pages detaches and re-attaches a socket, so reporting a
+   * departure the moment a socket closes would report one on every step change.
+   */
+  #presenceGraceMs;
+
+  /** roomCode → username → pending presence-expiry timer */
+  #presenceTimers = new Map();
+
+  constructor({
+    registry,
+    loadRoom,
+    createGame,
+    deckLibrary,
+    catalog,
+    isAccountActive,
+    logger = null,
+    presenceGraceMs = DEFAULT_PRESENCE_GRACE_MS,
+  }) {
     if (!registry || typeof registry.ensureSession !== "function" || typeof registry.get !== "function") {
       throw new TypeError("SocketGateway needs a registry exposing ensureSession and get.");
     }
@@ -96,6 +118,9 @@ export default class SocketGateway {
       throw new TypeError("SocketGateway needs an isAccountActive predicate.");
     }
     if (logger !== null && typeof logger !== "object") throw new TypeError("logger must be an object or null.");
+    if (typeof presenceGraceMs !== "number" || !Number.isFinite(presenceGraceMs) || presenceGraceMs < 0) {
+      throw new TypeError("presenceGraceMs must be a non-negative number.");
+    }
 
     this.#registry = registry;
     this.#loadRoom = loadRoom;
@@ -104,6 +129,7 @@ export default class SocketGateway {
     this.#catalog = catalog;
     this.#isAccountActive = isAccountActive;
     this.#logger = logger;
+    this.#presenceGraceMs = presenceGraceMs;
   }
 
   attach(io) {
@@ -166,11 +192,11 @@ export default class SocketGateway {
       }
 
       this.#absorbWaiting(session);
-      session.attach(username, connection);
+      this.#attachConnection(session, username, connection);
 
       if (!session.isStarted) {
         if (session.isFull()) this.#tryStartGame(session);
-        else connection.send(EVENTS.GAME_DECK_STATUS, this.#deckStatusPayload(session));
+        else connection.send(EVENTS.GAME_DECK_STATUS, this.#deckStatusPayload(session, username));
       } else {
         this.#sendStateView(session, username, connection);
       }
@@ -430,7 +456,7 @@ export default class SocketGateway {
       seed,
       createGame: this.#createGame,
     });
-    for (const { username: seat, connection: attached } of seats) restarted.attach(seat, attached);
+    for (const { username: seat, connection: attached } of seats) this.#attachConnection(restarted, seat, attached);
 
     this.#broadcastDeckStatus(restarted);
   }
@@ -461,7 +487,9 @@ export default class SocketGateway {
       this.submitDebugRestart({ session: this.#registry.get(roomCode), username, connection })
     );
     socket.on(TRANSPORT_EVENTS.DISCONNECT, () => {
-      this.#registry.get(roomCode)?.detach(username, connection);
+      const session = this.#registry.get(roomCode);
+      session?.detach(username, connection);
+      if (session && session.connectionCount(username) === 0) this.#markSeatGone(session, username);
       const parked = this.#waitingRoom.get(roomCode);
       if (parked) this.#waitingRoom.set(roomCode, parked.filter((entry) => entry.connection !== connection));
     });
@@ -498,7 +526,7 @@ export default class SocketGateway {
       return;
     }
     if (!session.isStarted) {
-      connection.send(EVENTS.GAME_DECK_STATUS, this.#deckStatusPayload(session));
+      connection.send(EVENTS.GAME_DECK_STATUS, this.#deckStatusPayload(session, username));
       return;
     }
 
@@ -507,15 +535,21 @@ export default class SocketGateway {
     if (game.gameOver) connection.send(EVENTS.GAME_OVER, buildGameOverResult(game.gameOver));
   }
 
-  /** The per-seat selection progress payload for one session. */
-  #deckStatusPayload(session) {
+  /**
+   * The selection progress payload for one viewer. It carries every seat's
+   * progress, but the protocol builder is what keeps the other seat's deck
+   * identity out of it (see `buildDeckStatus`).
+   */
+  #deckStatusPayload(session, viewer) {
     return buildDeckStatus({
       dev: isDevRoomCode(session.roomCode),
+      viewer,
       seats: session.usernames.map((username) => {
         const pick = session.getDeckPick(username);
         return {
           username,
           deckChosen: pick !== null,
+          connected: this.#seatPresent(session, username),
           deckId: pick?.deckId ?? null,
           deckName: pick?.name ?? null,
           illegal: pick?.illegal ?? false,
@@ -525,7 +559,58 @@ export default class SocketGateway {
   }
 
   #broadcastDeckStatus(session) {
-    session.broadcast(EVENTS.GAME_DECK_STATUS, () => this.#deckStatusPayload(session));
+    session.broadcast(EVENTS.GAME_DECK_STATUS, (username) => this.#deckStatusPayload(session, username));
+  }
+
+  /**
+   * Whether a seat counts as present: it holds a connection, or it is inside
+   * the grace window that absorbs a step change or a reload.
+   */
+  #seatPresent(session, username) {
+    return session.connectionCount(username) > 0 || this.#presenceTimers.get(session.roomCode)?.has(username) === true;
+  }
+
+  /** Cancel a seat's pending absence: a connection came back. */
+  #markSeatPresent(session, username) {
+    const timers = this.#presenceTimers.get(session.roomCode);
+    const timer = timers?.get(username);
+    if (timer === undefined) return;
+    clearTimeout(timer);
+    timers.delete(username);
+  }
+
+  /**
+   * Start a seat's grace window. When it expires without a connection, the
+   * selection progress is broadcast again and the seat reads as gone.
+   */
+  #markSeatGone(session, username) {
+    if (session.isStarted) return;
+    const timers = this.#presenceTimers.get(session.roomCode) ?? new Map();
+    this.#presenceTimers.set(session.roomCode, timers);
+    if (timers.has(username)) return;
+
+    const timer = setTimeout(() => {
+      timers.delete(username);
+      const current = this.#registry.get(session.roomCode);
+      if (!current || current.isStarted || current.connectionCount(username) > 0) return;
+      this.#broadcastDeckStatus(current);
+    }, this.#presenceGraceMs);
+    timer.unref?.();
+    timers.set(username, timer);
+  }
+
+  /** Drop a room's presence windows; the room they describe is gone. */
+  #clearPresence(roomCode) {
+    const timers = this.#presenceTimers.get(roomCode);
+    if (!timers) return;
+    for (const timer of timers.values()) clearTimeout(timer);
+    this.#presenceTimers.delete(roomCode);
+  }
+
+  /** Attach a connection to its seat and cancel that seat's absence window. */
+  #attachConnection(session, username, connection) {
+    this.#markSeatPresent(session, username);
+    session.attach(username, connection);
   }
 
   /**
@@ -579,14 +664,15 @@ export default class SocketGateway {
   }
 
   /**
-   * Re-validate every pending pick against the live deck library and resolve
-   * the stored slugs to the engine's cardIds. Returns the start arguments,
-   * or null when a seat has no valid pick.
+   * Re-validate every pending pick against the live deck library, resolve the
+   * stored slugs to the engine's cardIds, and build the versus reveal. Returns
+   * the start arguments, or null when a seat has no valid pick.
    */
   async #resolveStart(session) {
     const dev = isDevRoomCode(session.roomCode);
     const bySlug = buildSlugIndex(this.#catalog);
     const decks = {};
+    const reveal = [];
     let enforceDeckRules = true;
 
     for (const username of session.usernames) {
@@ -606,10 +692,14 @@ export default class SocketGateway {
         return null;
       }
       decks[username] = cardIds;
+      // The reveal describes the deck that is dealt, which is the re-read
+      // record, not the snapshot the seat picked: a seat that edited the deck
+      // in another tab between picking and the start plays the edited deck.
+      reveal.push({ username, deckName: deck.name, fan: buildDeckFanSlugs(deck.cards, this.#catalog) });
       if (!validation.legal) enforceDeckRules = false;
     }
 
-    return { decks, enforceDeckRules };
+    return { decks, enforceDeckRules, reveal };
   }
 
   #broadcastState(session, game) {
@@ -619,7 +709,7 @@ export default class SocketGateway {
     );
   }
 
-  #startGame(session, { decks, enforceDeckRules }) {
+  #startGame(session, { decks, enforceDeckRules, reveal }) {
     // A session the registry no longer serves is abandoned: its connections
     // belong to its replacement, so creating a game on it would broadcast a
     // state view into a room that has moved on.
@@ -627,7 +717,11 @@ export default class SocketGateway {
     try {
       const game = session.ensureGame({ decks, enforceDeckRules });
       session.clearDeckPicks();
+      this.#clearPresence(session.roomCode);
       this.#subscribeSession(session);
+      // Both picks are locked at this point, so the decks stop being secret:
+      // the versus reveal goes out before the board it introduces.
+      session.broadcast(EVENTS.GAME_DECK_REVEAL, () => buildDeckReveal({ seats: reveal }));
       session.broadcast(EVENTS.GAME_INIT, (username) =>
         buildStateView({ game, revision: session.revision, username })
       );
@@ -674,6 +768,8 @@ export default class SocketGateway {
     // to resolve its own picks.
     if (this.#starting.get(roomCode) === session) this.#starting.delete(roomCode);
 
+    this.#clearPresence(roomCode);
+
     // An abandoned session keeps no connections: without this it could still
     // broadcast into live sockets.
     for (const { username, connection } of session.connections()) {
@@ -690,7 +786,7 @@ export default class SocketGateway {
     this.#waitingRoom.delete(session.roomCode);
 
     for (const { username, connection } of parked) {
-      if (session.hasSeat(username)) session.attach(username, connection);
+      if (session.hasSeat(username)) this.#attachConnection(session, username, connection);
     }
   }
 

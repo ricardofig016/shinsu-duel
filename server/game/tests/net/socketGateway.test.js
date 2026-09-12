@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import SocketGateway from "../../net/socketGateway.js";
 import SessionRegistry from "../../net/SessionRegistry.js";
 import { EVENTS, TRANSPORT_EVENTS, ERROR_CODES, buildWaitingPayload, buildDeckStatus } from "../../net/protocol.js";
@@ -144,9 +145,10 @@ describe("deck selection phase", () => {
     expect(alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS)).toEqual(
       buildDeckStatus({
         dev: false,
+        viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: false, deckId: null, deckName: null, illegal: false },
-          { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+          { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );
@@ -165,12 +167,56 @@ describe("deck selection phase", () => {
     expect(alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS)).toEqual(
       buildDeckStatus({
         dev: false,
+        viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Alice's deck", illegal: false },
-          { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Alice's deck", illegal: false },
+          { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );
+  });
+
+  test("a pick reaches the other seat as a fact, never as the picker's deck identity", async () => {
+    const { deckLibrary, connect } = makeHarness({ rooms: fullRoom() });
+    const alice = await connect({ roomCode: ROOM, username: "Alice" });
+    const bob = await connect({ roomCode: ROOM, username: "Bob" });
+    const deck = deckLibrary.createDeck({ owner: "Alice", name: "Alice's deck", cards: legalSlugs() });
+
+    await alice.trigger(EVENTS.GAME_DECK_SELECT, { deckId: deck.id });
+
+    // Bob sees that Alice picked, and nothing about what she picked: a seat
+    // holding the opponent's deck identity could counter-pick it.
+    const bobStatus = bob.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
+    expect(bobStatus.seats[0]).toEqual({
+      username: "Alice",
+      deckChosen: true,
+      connected: true,
+      deckId: null,
+      deckName: null,
+      illegal: false,
+    });
+    const bobWire = JSON.stringify(bobStatus);
+    expect(bobWire).not.toContain("Alice's deck");
+    expect(bobWire).not.toContain(deck.id);
+
+    // The viewer's own seat keeps its deck, and the other seat stays redacted.
+    const aliceStatus = alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
+    expect(aliceStatus.seats[0]).toEqual({
+      username: "Alice",
+      deckChosen: true,
+      connected: true,
+      deckId: deck.id,
+      deckName: "Alice's deck",
+      illegal: false,
+    });
+    expect(aliceStatus.seats[1]).toEqual({
+      username: "Bob",
+      deckChosen: false,
+      connected: true,
+      deckId: null,
+      deckName: null,
+      illegal: false,
+    });
   });
 
   test("a re-pick replaces the earlier pick", async () => {
@@ -239,15 +285,21 @@ describe("deck selection phase", () => {
 
     expect(alice.lastPayloadOf(EVENTS.GAME_ERROR)).toBeNull();
     expect(registry.get(DEV_ROOM).getDeckPick("Alice").illegal).toBe(true);
-    expect(bob.lastPayloadOf(EVENTS.GAME_DECK_STATUS)).toEqual(
-      buildDeckStatus({
-        dev: true,
-        seats: [
-          { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Illegal", illegal: true },
-          { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
-        ],
-      })
-    );
+    // The illegal flag is the owner's own warning, so it survives only in her
+    // view of the progress.
+    expect(alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS).seats[0]).toEqual({
+      username: "Alice",
+      deckChosen: true,
+      connected: true,
+      deckId: illegal.id,
+      deckName: "Illegal",
+      illegal: true,
+    });
+    // Bob sees the pick and none of its identity, dev room or not.
+    expect(bob.lastPayloadOf(EVENTS.GAME_DECK_STATUS).seats).toEqual([
+      { username: "Alice", deckChosen: true, connected: true, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+    ]);
   });
 
   test("rejects a malformed payload", async () => {
@@ -483,13 +535,76 @@ describe("game-state-request", () => {
     expect(status).toEqual(
       buildDeckStatus({
         dev: false,
+        viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: false, deckId: null, deckName: null, illegal: false },
-          { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+          { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );
     expect(registry.get(ROOM).isStarted).toBe(false);
+  });
+});
+
+describe("seat presence", () => {
+  // The grace window is driven with fake timers so its expiry is exact; the
+  // harness flushes its asynchronous lookups with setImmediate, which stays
+  // real.
+  const GRACE_MS = 50;
+  const seatOf = (socket, username) =>
+    socket.lastPayloadOf(EVENTS.GAME_DECK_STATUS).seats.find((seat) => seat.username === username);
+  const askForStatus = (socket) => socket.trigger(EVENTS.GAME_STATE_REQUEST);
+
+  beforeEach(() => {
+    jest.useFakeTimers({ doNotFake: ["setImmediate"] });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test("a disconnected seat reads as present inside the grace window and as gone once it expires", async () => {
+    const { registry, connect } = makeHarness({ rooms: fullRoom(), presenceGraceMs: GRACE_MS });
+    const alice = await connect({ roomCode: ROOM, username: "Alice" });
+    const bob = await connect({ roomCode: ROOM, username: "Bob" });
+
+    await alice.trigger(TRANSPORT_EVENTS.DISCONNECT);
+    expect(registry.get(ROOM).connectionCount("Alice")).toBe(0);
+
+    // Every step of the pre-game pages detaches and re-attaches a socket, so a
+    // closed socket is not yet a departure.
+    await askForStatus(bob);
+    expect(seatOf(bob, "Alice").connected).toBe(true);
+
+    const statusesInside = bob.payloadsOf(EVENTS.GAME_DECK_STATUS).length;
+    jest.advanceTimersByTime(GRACE_MS);
+
+    // The expired window broadcasts the progress once, with the seat gone.
+    expect(bob.payloadsOf(EVENTS.GAME_DECK_STATUS)).toHaveLength(statusesInside + 1);
+    expect(seatOf(bob, "Alice").connected).toBe(false);
+  });
+
+  test("a reconnection inside the window cancels it and no further broadcast follows", async () => {
+    const { registry, connect } = makeHarness({ rooms: fullRoom(), presenceGraceMs: GRACE_MS });
+    const alice = await connect({ roomCode: ROOM, username: "Alice" });
+    const bob = await connect({ roomCode: ROOM, username: "Bob" });
+
+    await alice.trigger(TRANSPORT_EVENTS.DISCONNECT);
+    const rejoined = await connect({ roomCode: ROOM, username: "Alice" });
+
+    expect(registry.get(ROOM).connectionCount("Alice")).toBe(1);
+    expect(rejoined.lastPayloadOf(EVENTS.GAME_ERROR)).toBeNull();
+
+    await askForStatus(bob);
+    expect(seatOf(bob, "Alice").connected).toBe(true);
+
+    // The cancelled window never fires: the seat stays present and the room is
+    // not told about a departure that did not happen.
+    const statusesAfterReconnect = bob.payloadsOf(EVENTS.GAME_DECK_STATUS).length;
+    jest.advanceTimersByTime(GRACE_MS);
+
+    expect(bob.payloadsOf(EVENTS.GAME_DECK_STATUS)).toHaveLength(statusesAfterReconnect);
+    expect(seatOf(bob, "Alice").connected).toBe(true);
   });
 });
 

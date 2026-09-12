@@ -17,7 +17,8 @@ import { buildSlugIndex } from "../../../../server/utils/card-catalog.js";
  *
  * Rooms are named by the suite: `fullRoom`/`devRoom` build a two-player room
  * under the given code, and `makeStartedHarness` drives both seats through the
- * pre-game deck selection so the game is running.
+ * pre-game deck selection so the game is running. `presenceGraceMs` is
+ * forwarded to the gateway, so a suite can drive the seat-presence window.
  */
 
 export const ROOM = "ROOM1";
@@ -83,7 +84,12 @@ export const makeDeckLibrary = () => {
   };
 };
 
-export const makeHarness = ({ rooms, logger = null, isAccountActive = async () => true } = {}) => {
+export const makeHarness = ({
+  rooms,
+  logger = null,
+  isAccountActive = async () => true,
+  presenceGraceMs,
+} = {}) => {
   const registry = new SessionRegistry();
   const createdGames = [];
   const createGame = jest.fn(() => {
@@ -100,6 +106,7 @@ export const makeHarness = ({ rooms, logger = null, isAccountActive = async () =
     catalog: cards,
     isAccountActive,
     logger,
+    ...(presenceGraceMs === undefined ? {} : { presenceGraceMs }),
   });
 
   let connectionHandler = null;

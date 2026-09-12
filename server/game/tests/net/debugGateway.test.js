@@ -266,9 +266,10 @@ describe("debug firehose and restart", () => {
     expect(status).toEqual(
       buildDeckStatus({
         dev: true,
+        viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: false, deckId: null, deckName: null, illegal: false },
-          { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+          { username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
         ],
       })
     );

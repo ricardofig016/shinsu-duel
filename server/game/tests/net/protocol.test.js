@@ -9,6 +9,7 @@ import {
   buildHandPeek,
   buildDeckSelect,
   buildDeckStatus,
+  buildDeckReveal,
   buildDebugEvent,
   buildDebugResult,
 } from "../../net/protocol.js";
@@ -31,6 +32,7 @@ describe("protocol event names", () => {
     expect(EVENTS.GAME_WAITING).toBe("game-waiting");
     expect(EVENTS.GAME_HAND_PEEK).toBe("game-hand-peek");
     expect(EVENTS.GAME_DECK_STATUS).toBe("game-deck-status");
+    expect(EVENTS.GAME_DECK_REVEAL).toBe("game-deck-reveal");
     expect(EVENTS.GAME_DEBUG_RESULT).toBe("debug-result");
     expect(EVENTS.GAME_DEBUG_EVENT).toBe("debug-event");
   });
@@ -201,39 +203,86 @@ describe("payload builders", () => {
     expect(() => buildDeckSelect({})).toThrow(TypeError);
   });
 
-  test("buildDeckStatus returns the exact per-seat progress", () => {
+  test("buildDeckStatus returns the exact per-seat progress, redacted for every viewer", () => {
     const seats = [
-      { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Starter", illegal: false },
-      { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Starter", illegal: true },
+      { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
     ];
-    const payload = buildDeckStatus({ dev: false, seats });
 
-    expect(payload).toEqual({
+    const ownView = buildDeckStatus({ dev: false, viewer: "Alice", seats });
+
+    expect(ownView).toEqual({
       dev: false,
       seats: [
-        { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Starter", illegal: false },
-        { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+        { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Starter", illegal: true },
+        { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+      ],
+    });
+    expect(ownView.seats[0]).not.toBe(seats[0]);
+
+    // The other seat's pick is visible as a fact, never as an identity: a seat
+    // that could read the opponent's deck could counter-pick it.
+    expect(buildDeckStatus({ dev: false, viewer: "Bob", seats }).seats).toEqual([
+      { username: "Alice", deckChosen: true, connected: true, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+    ]);
+  });
+
+  test("buildDeckReveal copies each seat's name and fan in seat order", () => {
+    const seats = [
+      { username: "Alice", deckName: "Starter", fan: ["test_filler_3", "test_filler_7"] },
+      { username: "Bob", deckName: "Plain deck", fan: [] },
+    ];
+    const payload = buildDeckReveal({ seats });
+
+    // The payload carries the fan alone: a deck's full card list never goes
+    // out on the reveal.
+    expect(payload).toEqual({
+      seats: [
+        { username: "Alice", deckName: "Starter", fan: ["test_filler_3", "test_filler_7"] },
+        { username: "Bob", deckName: "Plain deck", fan: [] },
       ],
     });
     expect(payload.seats[0]).not.toBe(seats[0]);
+    expect(payload.seats[0].fan).not.toBe(seats[0].fan);
+
+    expect(() => buildDeckReveal({ seats: [] })).toThrow(TypeError);
+    expect(() => buildDeckReveal({ seats: null })).toThrow(TypeError);
+    expect(() => buildDeckReveal({ seats: [{ username: "", deckName: "Starter", fan: [] }] })).toThrow(TypeError);
+    expect(() => buildDeckReveal({ seats: [{ username: "Alice", deckName: "", fan: [] }] })).toThrow(TypeError);
+    expect(() => buildDeckReveal({ seats: [{ username: "Alice", deckName: "Starter", fan: "slug" }] })).toThrow(TypeError);
+    expect(() => buildDeckReveal({ seats: [{ username: "Alice", deckName: "Starter", fan: [""] }] })).toThrow(TypeError);
   });
 
   test("buildDeckStatus rejects malformed progress", () => {
-    const seat = { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Starter", illegal: false };
-    expect(() => buildDeckStatus({ dev: "yes", seats: [seat] })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: [] })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: null })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, username: "" }] })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, deckChosen: null }] })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, deckName: null }] })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, deckId: null }] })).toThrow(TypeError);
-    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, illegal: 1 }] })).toThrow(TypeError);
+    const seat = { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Starter", illegal: false };
+    expect(() => buildDeckStatus({ dev: "yes", viewer: "Alice", seats: [seat] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: null })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [{ ...seat, username: "" }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [{ ...seat, deckChosen: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [{ ...seat, connected: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [{ ...seat, deckName: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [{ ...seat, deckId: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [{ ...seat, illegal: 1 }] })).toThrow(TypeError);
     expect(() =>
       buildDeckStatus({
         dev: false,
-        seats: [{ username: "Bob", deckChosen: false, deckId: null, deckName: "X", illegal: false }],
+        viewer: "Alice",
+        seats: [{ username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: "X", illegal: false }],
       })
     ).toThrow(TypeError);
+    // The viewer's own seat has to be among the entries, and the viewer itself
+    // is not optional.
+    expect(() =>
+      buildDeckStatus({
+        dev: false,
+        viewer: "Alice",
+        seats: [{ username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false }],
+      })
+    ).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [seat] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, viewer: "", seats: [seat] })).toThrow(TypeError);
   });
 
   test("buildDebugResult echoes the request and carries the query's data", () => {

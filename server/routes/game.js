@@ -6,6 +6,7 @@ import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 import { generateSeed } from "../game/utils/SeededRng.js";
 import { createAccountStore } from "../accounts/accountStore.js";
 import { createAuthGate } from "./authentication.js";
+import { STEP, roomStep, stepPath, stepDocument, deniedDocument } from "../game/net/roomSteps.js";
 
 export const roomsFilePath = path.resolve("server/data/rooms.json");
 
@@ -23,11 +24,17 @@ const logger = winston.createLogger({
  * Game routes with injectable storage, so tests can drive room creation and
  * joining against a temporary rooms file.
  *
- * @param {{ roomsFilePath?: string, accounts?: object }} [options] `accounts`
- *   is the account store the session gate reads, injectable so a server boot
- *   shares one store across the login routes, the gate, and the socket.
+ * @param {{ roomsFilePath?: string, accounts?: object, registry?: object }} [options]
+ *   `accounts` is the account store the session gate reads, injectable so a
+ *   server boot shares one store across the login routes, the gate, and the
+ *   socket. `registry` is the session registry the room pages read to resolve
+ *   which step a room is in; without it every room reads as waiting.
  */
-export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath, accounts = createAccountStore() } = {}) {
+export function createGameRouter({
+  roomsFilePath: roomsFile = roomsFilePath,
+  accounts = createAccountStore(),
+  registry = null,
+} = {}) {
   const router = express.Router();
   const { requireApiSession, requirePageSession } = createAuthGate({ accounts });
 
@@ -76,26 +83,49 @@ export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath, acc
       .catch(next);
   });
 
-  router.get("/:roomCode", requirePageSession, async (req, res) => {
+  /**
+   * Serve the step the room is in, wherever the request asked to be.
+   *
+   * Every room address resolves to the same answer, so a shared or stale link
+   * always lands a player at the step the room has reached; a request for
+   * another step is redirected to the canonical address for the current one.
+   * A visitor who is not in the room's player list is seated by the waiting
+   * room itself (`POST /:roomCode/join`) when a seat is free, and gets the
+   * denied page when the room is unknown or full.
+   */
+  const serveRoomStep = (requested) => async (req, res, next) => {
     const { roomCode } = req.params;
     const username = req.session.username;
-    const rooms = await readJsonFile(roomsFile);
-    if (!roomCode || !rooms[roomCode]) {
-      logger.warn(`Invalid access attempt to inexistant room: ${roomCode} by user: ${username}`);
-      // Add request context to help track where malformed requests originate from
-      logger.warn(
-        `Request details: originalUrl=${req.originalUrl}, referer=${req.headers.referer || "none"}, method=${
-          req.method
-        }, ip=${req.ip}, params=${JSON.stringify(req.params)}, query=${JSON.stringify(req.query)}`
-      );
-      return res.status(404).send("Invalid room code");
+    try {
+      const rooms = await readJsonFile(roomsFile);
+      const room = roomCode ? rooms[roomCode] : undefined;
+      if (!room) {
+        logger.warn(`Invalid access attempt to inexistant room: ${roomCode} by user: ${username}`);
+        // Add request context to help track where malformed requests originate from
+        logger.warn(
+          `Request details: originalUrl=${req.originalUrl}, referer=${req.headers.referer || "none"}, method=${
+            req.method
+          }, ip=${req.ip}, params=${JSON.stringify(req.params)}, query=${JSON.stringify(req.query)}`
+        );
+        return res.status(404).sendFile(deniedDocument());
+      }
+      if (!room.players.includes(username) && room.players.length >= 2) {
+        logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
+        return res.status(403).sendFile(deniedDocument());
+      }
+
+      const step = roomStep({ session: registry?.get(roomCode) ?? null });
+      if (step !== requested) return res.redirect(stepPath(roomCode, step));
+      return res.sendFile(stepDocument(step));
+    } catch (error) {
+      return next(error);
     }
-    if (!rooms[roomCode].players.includes(username)) {
-      logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
-      return res.status(403).send("Access denied");
-    }
-    return res.sendFile(path.resolve("public/pages/game/index.html"));
-  });
+  };
+
+  // The board keeps the bare room address; the two pre-game steps are named.
+  router.get("/:roomCode", requirePageSession, serveRoomStep(STEP.BOARD));
+  router.get("/:roomCode/waiting", requirePageSession, serveRoomStep(STEP.WAITING));
+  router.get("/:roomCode/deck", requirePageSession, serveRoomStep(STEP.DECK));
 
   router.post("/:roomCode/join", requireApiSession, (req, res, next) => {
     const { roomCode } = req.params;

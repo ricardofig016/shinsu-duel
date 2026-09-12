@@ -28,6 +28,7 @@ export const EVENTS = {
   GAME_WAITING: "game-waiting",
   GAME_HAND_PEEK: "game-hand-peek",
   GAME_DECK_STATUS: "game-deck-status",
+  GAME_DECK_REVEAL: "game-deck-reveal",
   GAME_DEBUG_RESULT: "debug-result",
   GAME_DEBUG_EVENT: "debug-event",
 };
@@ -142,51 +143,101 @@ export function buildDeckSelect({ deckId }) {
 }
 
 /**
- * Build the per-seat deck-selection progress payload broadcast during the
- * pre-game selection phase.
+ * Build one seat's view of the pre-game selection progress.
+ *
+ * A seat's deck is its own secret until the game starts: a seat receives its
+ * own `deckId`, `deckName`, and `illegal` flag, and for every other seat only
+ * the fact that a pick exists. Knowing the opponent's deck before both picks
+ * are locked would let a player pick a counter-deck, so the redaction lives
+ * here, in the single place that shapes the wire payload.
  *
  * @param {object} args
  * @param {boolean} args.dev whether the room is a dev room (illegal decks
  *   are selectable there, so the client shows a warning instead of disabling)
- * @param {Array<{ username: string, deckChosen: boolean, deckId: string|null,
- *   deckName: string|null, illegal: boolean }>} args.seats one entry per seat,
- *   in seat order; the id lets each seat recognize its own pick
+ * @param {string} args.viewer the seat the payload is built for
+ * @param {Array<{ username: string, deckChosen: boolean, connected: boolean,
+ *   deckId: string|null, deckName: string|null, illegal: boolean }>} args.seats
+ *   the full per-seat progress, in seat order; the viewer's own entry is the
+ *   only one whose deck identity survives
  */
-export function buildDeckStatus({ dev, seats }) {
+export function buildDeckStatus({ dev, viewer, seats }) {
   if (typeof dev !== "boolean") {
     throw new TypeError("dev must be a boolean.");
   }
+  assertNonEmptyString(viewer, "viewer");
   if (!Array.isArray(seats) || seats.length === 0) {
     throw new TypeError("seats must be a non-empty array of seat entries.");
   }
 
+  const entries = seats.map((seat) => {
+    if (!seat || typeof seat !== "object") {
+      throw new TypeError("each seat entry must be an object.");
+    }
+    assertNonEmptyString(seat.username, "seat.username");
+    if (typeof seat.deckChosen !== "boolean") {
+      throw new TypeError("seat.deckChosen must be a boolean.");
+    }
+    if (typeof seat.connected !== "boolean") {
+      throw new TypeError("seat.connected must be a boolean.");
+    }
+    if (seat.deckChosen) {
+      assertNonEmptyString(seat.deckId, "seat.deckId");
+      assertNonEmptyString(seat.deckName, "seat.deckName");
+    } else if (seat.deckId !== null || seat.deckName !== null) {
+      throw new TypeError("seat.deckId and seat.deckName must be null when no deck is chosen.");
+    }
+    if (typeof seat.illegal !== "boolean") {
+      throw new TypeError("seat.illegal must be a boolean.");
+    }
+
+    const own = seat.username === viewer;
+    return {
+      username: seat.username,
+      deckChosen: seat.deckChosen,
+      connected: seat.connected,
+      deckId: own ? seat.deckId : null,
+      deckName: own ? seat.deckName : null,
+      illegal: own ? seat.illegal : false,
+    };
+  });
+
+  if (!entries.some((seat) => seat.username === viewer)) {
+    throw new TypeError("seats must include the viewer's own seat.");
+  }
+
+  return { dev, seats: entries };
+}
+
+/**
+ * Build the versus reveal broadcast once both seats hold a valid pick and the
+ * game is about to be created. Both picks are locked at this point, so the
+ * decks stop being secret.
+ *
+ * The payload carries each deck's name and the slugs of the cards in its fan,
+ * never the deck's full card list: the fan is all the versus screen shows, and
+ * a client renders those cards from its own catalog.
+ *
+ * @param {object} args
+ * @param {Array<{ username: string, deckName: string, fan: string[] }>} args.seats
+ *   one entry per seat, in seat order
+ */
+export function buildDeckReveal({ seats }) {
+  if (!Array.isArray(seats) || seats.length === 0) {
+    throw new TypeError("seats must be a non-empty array of revealed seats.");
+  }
+
   return {
-    dev,
     seats: seats.map((seat) => {
       if (!seat || typeof seat !== "object") {
-        throw new TypeError("each seat entry must be an object.");
+        throw new TypeError("each revealed seat must be an object.");
       }
       assertNonEmptyString(seat.username, "seat.username");
-      if (typeof seat.deckChosen !== "boolean") {
-        throw new TypeError("seat.deckChosen must be a boolean.");
-      }
-      if (seat.deckChosen) {
-        assertNonEmptyString(seat.deckId, "seat.deckId");
-        assertNonEmptyString(seat.deckName, "seat.deckName");
-      } else if (seat.deckId !== null || seat.deckName !== null) {
-        throw new TypeError("seat.deckId and seat.deckName must be null when no deck is chosen.");
-      }
-      if (typeof seat.illegal !== "boolean") {
-        throw new TypeError("seat.illegal must be a boolean.");
+      assertNonEmptyString(seat.deckName, "seat.deckName");
+      if (!Array.isArray(seat.fan) || seat.fan.some((slug) => typeof slug !== "string" || slug === "")) {
+        throw new TypeError("seat.fan must be an array of card slugs.");
       }
 
-      return {
-        username: seat.username,
-        deckChosen: seat.deckChosen,
-        deckId: seat.deckId,
-        deckName: seat.deckName,
-        illegal: seat.illegal,
-      };
+      return { username: seat.username, deckName: seat.deckName, fan: [...seat.fan] };
     }),
   };
 }

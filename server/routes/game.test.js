@@ -11,11 +11,12 @@ import { createAccountStore } from "../accounts/accountStore.js";
 // gate never reads the runtime accounts of the machine running the tests.
 const TEST_ACCOUNTS = { Alice: {}, Bob: {}, Mallory: {} };
 
-function startApp() {
+function startApp({ rooms = {}, sessions = {} } = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "shinsu-game-route-"));
   const roomsPath = path.join(directory, "rooms.json");
   const accountsPath = path.join(directory, "users.json");
   fs.writeFileSync(accountsPath, JSON.stringify(TEST_ACCOUNTS, null, 2));
+  fs.writeFileSync(roomsPath, JSON.stringify(rooms, null, 2));
   const accounts = createAccountStore({ filePath: accountsPath });
   const app = express();
   app.use(express.json());
@@ -24,11 +25,14 @@ function startApp() {
     if (req.headers["x-test-user"]) req.session.username = req.headers["x-test-user"];
     next();
   });
-  app.use("/game", createGameRouter({ roomsFilePath: roomsPath, accounts }));
+  const registry = { get: (roomCode) => sessions[roomCode] ?? null };
+  app.use("/game", createGameRouter({ roomsFilePath: roomsPath, accounts, registry }));
 
   const server = app.listen(0);
   return new Promise((resolve) => {
-    server.once("listening", () => resolve({ server, roomsPath, baseUrl: `http://127.0.0.1:${server.address().port}` }));
+    server.once("listening", () =>
+      resolve({ server, roomsPath, baseUrl: `http://127.0.0.1:${server.address().port}` })
+    );
   });
 }
 
@@ -111,5 +115,111 @@ describe("game room routes", () => {
     });
 
     expect(response.status).toBe(401);
+  });
+});
+
+// Markers unique to each step document, so a test can tell which page a room
+// address actually served.
+const WAITING_PAGE = "waiting-room-code";
+const DECK_PAGE = "deck-table-body";
+const BOARD_PAGE = "round-indicator";
+const DENIED_PAGE = "This room is not available";
+
+const ROOM_RECORD = (players) => ({ players, opponent: "friend", difficulty: null, seed: 1 });
+
+describe("room step routing", () => {
+  let app;
+
+  const start = async (options) => {
+    app = await startApp(options);
+  };
+
+  afterEach(async () => {
+    await new Promise((resolve) => app.server.close(resolve));
+    fs.rmSync(path.dirname(app.roomsPath), { recursive: true, force: true });
+  });
+
+  const get = (path, user = "Alice") =>
+    fetch(`${app.baseUrl}${path}`, { redirect: "manual", headers: { "x-test-user": user } });
+
+  test("a room with no session sends every address to the waiting room", async () => {
+    await start({ rooms: { AB12CD: ROOM_RECORD(["Alice", "Bob"]) } });
+
+    for (const address of ["/game/AB12CD", "/game/AB12CD/deck"]) {
+      const response = await get(address);
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toBe("/game/AB12CD/waiting");
+    }
+
+    const waiting = await get("/game/AB12CD/waiting");
+    expect(waiting.status).toBe(200);
+    expect(await waiting.text()).toContain(WAITING_PAGE);
+  });
+
+  test("an unstarted session sends every address to the deck step", async () => {
+    await start({
+      rooms: { AB12CD: ROOM_RECORD(["Alice", "Bob"]) },
+      sessions: { AB12CD: { isStarted: false } },
+    });
+
+    for (const address of ["/game/AB12CD", "/game/AB12CD/waiting"]) {
+      const response = await get(address);
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toBe("/game/AB12CD/deck");
+    }
+
+    const deck = await get("/game/AB12CD/deck");
+    expect(deck.status).toBe(200);
+    expect(await deck.text()).toContain(DECK_PAGE);
+  });
+
+  test("a started session sends every address to the board", async () => {
+    await start({
+      rooms: { AB12CD: ROOM_RECORD(["Alice", "Bob"]) },
+      sessions: { AB12CD: { isStarted: true } },
+    });
+
+    const deck = await get("/game/AB12CD/deck");
+    expect(deck.status).toBe(302);
+    expect(deck.headers.get("location")).toBe("/game/AB12CD");
+
+    const board = await get("/game/AB12CD");
+    expect(board.status).toBe(200);
+    expect(await board.text()).toContain(BOARD_PAGE);
+  });
+
+  test("a visitor with a free seat reaches the waiting room without taking the seat", async () => {
+    await start({ rooms: { AB12CD: ROOM_RECORD(["Alice"]) } });
+
+    const response = await get("/game/AB12CD/deck", "Bob");
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/game/AB12CD/waiting");
+    const waiting = await get("/game/AB12CD/waiting", "Bob");
+    expect(waiting.status).toBe(200);
+    expect(await waiting.text()).toContain(WAITING_PAGE);
+
+    // Reading a room address never seats anyone: the waiting room page claims
+    // the seat through the join route, so a link preview cannot fill the room.
+    const rooms = JSON.parse(fs.readFileSync(app.roomsPath, "utf8"));
+    expect(rooms.AB12CD.players).toEqual(["Alice"]);
+  });
+
+  test("a visitor with no seat left gets the denied page", async () => {
+    await start({ rooms: { AB12CD: ROOM_RECORD(["Alice", "Bob"]) } });
+
+    const response = await get("/game/AB12CD", "Mallory");
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toContain(DENIED_PAGE);
+  });
+
+  test("an unknown room code gets the denied page", async () => {
+    await start({});
+
+    const response = await get("/game/NOPE99");
+
+    expect(response.status).toBe(404);
+    expect(await response.text()).toContain(DENIED_PAGE);
   });
 });

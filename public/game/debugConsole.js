@@ -130,12 +130,9 @@ socket.on(EVENTS.GAME_ERROR, (payload) => {
 socket.on(EVENTS.GAME_INIT, (payload) => setSeat(payload?.you?.username));
 socket.on(EVENTS.GAME_UPDATE, (payload) => setSeat(payload?.you?.username));
 
-// A restart puts the room back in the deck-selection phase. The page renders
-// that step itself; the game-over overlay is the one panel it never clears, so
-// the console clears it here to leave the selection visible.
-socket.on(EVENTS.GAME_DECK_STATUS, () => {
-  document.querySelector("#game-over-overlay")?.classList.add("hidden");
-});
+// A restart returns the room to the deck step, which is a page of its own:
+// the console only reports it, the board hands the browser over.
+socket.on(EVENTS.GAME_DECK_STATUS, () => console.log("[dev] back at the deck step"));
 
 /** The card catalog behind `debug.card`, fetched once and cached. */
 const loadCards = async () => {
@@ -270,7 +267,7 @@ window.debug = {
 
   restart() {
     socket.emit(EVENTS.GAME_DEBUG_RESTART, buildDebugRestart());
-    console.log("[dev] restarting: both seats return to the deck-selection step");
+    console.log("[dev] restarting: both seats return to the deck step");
   },
 
   card(reference) {

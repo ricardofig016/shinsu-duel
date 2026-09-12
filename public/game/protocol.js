@@ -23,6 +23,7 @@ export const EVENTS = Object.freeze({
   GAME_WAITING: "game-waiting",
   GAME_HAND_PEEK: "game-hand-peek",
   GAME_DECK_STATUS: "game-deck-status",
+  GAME_DECK_REVEAL: "game-deck-reveal",
   GAME_DEBUG_RESULT: "debug-result",
   GAME_DEBUG_EVENT: "debug-event",
 });

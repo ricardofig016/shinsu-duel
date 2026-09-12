@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shinsu Duel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/styles/deck-table.css" />
+    <link rel="stylesheet" href="/pages/game/pregame.css" />
+    <link rel="stylesheet" href="/pages/game/deck/styles.css" />
+  </head>
+  <body>
+    <div id="navbar-component"></div>
+
+    <main class="pregame-container">
+      <section class="pregame-panel">
+        <h1>Choose your deck</h1>
+
+        <div class="pregame-seats">
+          <div class="pregame-seat">
+            <span>You</span>
+            <span class="pregame-seat-name" id="deck-you">-</span>
+          </div>
+          <div class="pregame-seat">
+            <span>Opponent</span>
+            <span class="pregame-seat-name" id="deck-opponent">No one yet</span>
+          </div>
+        </div>
+
+        <p id="deck-opponent-status" class="pregame-hint"></p>
+        <p id="deck-message" class="pregame-hint">Click a deck to lock it in.</p>
+
+        <div id="deck-toolbar">
+          <input type="search" id="deck-search" placeholder="Search decks..." autocomplete="off" />
+          <select id="deck-legality">
+            <option value="all">All decks</option>
+            <option value="legal">Legal only</option>
+            <option value="not-legal">Not legal only</option>
+          </select>
+        </div>
+
+        <p id="deck-empty" class="hidden">You have no decks yet. Build one, then come back to this page.</p>
+        <p id="deck-no-match" class="hidden">No decks match the filters.</p>
+
+        <table id="deck-table" class="deck-table">
+          <thead>
+            <tr id="deck-table-header-row"></tr>
+          </thead>
+          <tbody id="deck-table-body"></tbody>
+        </table>
+
+        <p id="deck-dev-notice" class="pregame-notice hidden"></p>
+
+        <div class="pregame-links">
+          <a href="/decks/" target="_blank" rel="noopener" id="deck-manage">Manage your decks</a>
+          <a href="/play" id="deck-leave">Leave room</a>
+        </div>
+      </section>
+    </main>
+
+    <div id="versus-overlay" class="versus-overlay hidden">
+      <div id="versus-panel" class="container-vertical">
+        <h2>Both players are ready</h2>
+        <div id="versus-seats" class="container-horizontal"></div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/pages/game/deck/script.js"></script>
+  </body>
+</html>

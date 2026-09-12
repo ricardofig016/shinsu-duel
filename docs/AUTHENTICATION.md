@@ -34,7 +34,7 @@ Route contracts:
 
 | Contract | Routes |
 | -------- | ------ |
-| `requirePageSession` | `GET /play`, `GET /decks`, `GET /game/:roomCode` |
+| `requirePageSession` | `GET /play`, `GET /decks`, `GET /game/:roomCode`, `GET /game/:roomCode/waiting`, `GET /game/:roomCode/deck` |
 | `requireApiSession` | `GET /decks/data`, `POST /decks/validate`, `POST /decks`, `PUT /decks/:id`, `DELETE /decks/:id`, `POST /game/createRoom`, `POST /game/:roomCode/join` |
 | No gate | `GET /login`, all `/auth/*`, and the read-only content surface: the home page, the cards page and its data route, the rules page and its content routes, plus the glossary, affiliation, position, and trait data routes |
 

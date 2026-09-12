@@ -1,0 +1,10 @@
+/* Waiting room: the panel shell is shared (pregame.css), this sizes the
+   invite line for the room code it holds. */
+
+.pregame-room-code code {
+  font-family: monospace;
+}
+
+#waiting-copy-hint {
+  font-size: 0.9rem;
+}

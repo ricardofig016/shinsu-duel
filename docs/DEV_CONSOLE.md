@@ -39,7 +39,7 @@ Every command that acts on a seat takes an optional seat argument that defaults 
 | `debug.setUnitHp(unitId, value)`            | unit instance id, integer >= 0 | Writes a deployed unit's HP.                                                                    |
 | `debug.destroyUnit(unitId)`                 | unit instance id               | Destroys a deployed unit through the lifecycle engine.                                          |
 | `debug.modifyLighthouses(delta, seat?)`     | integer                        | Changes the seat's lighthouse count. The 0-40 clamp and the loss at 0 are unchanged.            |
-| `debug.restart()`                           |                                | Returns the room to the deck-selection step (see Restart below).                                |
+| `debug.restart()`                           |                                | Returns the room to the deck step (see Restart below).                                          |
 | `debug.firehose(enabled?)`                  | boolean, defaults to a toggle  | Turns the engine event stream on or off for the session.                                        |
 
 `debug.setUnitHp` is a raw write through `UnitService`: it is neither damage nor healing, so no damage or heal trigger fires from it. Setting 0 leaves a unit on the field at 0 HP; destroy it with `debug.destroyUnit` to run the destruction pipeline.
@@ -75,9 +75,9 @@ The stream is toggled with `debug.firehose(false)` and `debug.firehose(true)`. I
 
 ## Restart
 
-`debug.restart()` puts the room back at the deck step: both seats pick again and a new game starts. The game you were playing, its revision, and its deck picks are gone; room records and player accounts are untouched.
+`debug.restart()` returns the room to the deck step: both seats pick again and a new game starts. The game you were playing, its revision, and its deck picks are gone; room records and player accounts are untouched.
 
-The page renders the deck step on its own when it comes back. The console module also clears the game-over overlay, which the page itself never resets.
+The board hands the browser over to the deck step as soon as the selection progress arrives, so the console only reports the restart.
 
 ## Talking to the server
 

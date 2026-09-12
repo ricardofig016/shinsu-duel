@@ -258,6 +258,15 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     return created;
   };
 
+  /** Edit a deck in the harness library, the way the builder page would. */
+  const updateDeck = (id, owner, changes) => {
+    const updated = deckQueue.then(() =>
+      deckLibrary.updateDeck(id, owner, changes).then((deck) => (deck ? indexDeck(deck) : null))
+    );
+    deckQueue = updated.catch(() => {});
+    return updated;
+  };
+
   /** Each seat's auto-created legal deck, for tests that don't care which. */
   const seatDeckIds = new Map();
   const defaultSeatDeckId = async (username) => {
@@ -336,6 +345,7 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     login,
     connectPlayer,
     createDeck,
+    updateDeck,
     selectDeck,
     pickDecks,
     selectDecks,

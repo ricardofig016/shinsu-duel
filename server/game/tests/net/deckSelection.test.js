@@ -59,16 +59,123 @@ describe("deck selection over the wire", () => {
     const initial = alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
     expect(initial.dev).toBe(false);
     expect(initial.seats).toEqual([
-      { username: "Alice", deckChosen: false, deckId: null, deckName: null, illegal: false },
-      { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
     ]);
 
     const deck = await harness.createDeck("Alice", "Scout deck", deckWithTripleScout());
     harness.selectDeck(alice, deck.id);
 
     const status = await alice.next(EVENTS.GAME_DECK_STATUS);
-    expect(status.seats[0]).toEqual({ username: "Alice", deckChosen: true, deckId: deck.id, deckName: "Scout deck", illegal: false });
+    expect(status.seats[0]).toEqual({
+      username: "Alice",
+      deckChosen: true,
+      connected: true,
+      deckId: deck.id,
+      deckName: "Scout deck",
+      illegal: false,
+    });
     expect(harness.registry.get(roomCode).isStarted).toBe(false);
+  });
+
+  test("the status broadcast keeps the picker's deck identity away from the other seat", async () => {
+    await bootHarness();
+    const roomCode = harness.createRoom();
+    harness.joinRoom(roomCode, "Alice");
+    harness.joinRoom(roomCode, "Bob");
+    const alice = await harness.connectPlayer({ username: "Alice", roomCode });
+    const bob = await harness.connectPlayer({ username: "Bob", roomCode });
+
+    const deck = await harness.createDeck("Alice", "Scout deck", deckWithTripleScout());
+    harness.selectDeck(alice, deck.id);
+
+    await harness.waitFor(
+      () => bob.lastPayloadOf(EVENTS.GAME_DECK_STATUS)?.seats[0].deckChosen === true,
+      "the other seat never saw the pick."
+    );
+
+    // The other seat learns that a pick landed, and nothing about it: knowing
+    // the opponent's deck before both picks are locked allows a counter-pick.
+    const bobStatus = bob.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
+    expect(bobStatus.seats[0]).toEqual({
+      username: "Alice",
+      deckChosen: true,
+      connected: true,
+      deckId: null,
+      deckName: null,
+      illegal: false,
+    });
+    const bobWire = JSON.stringify(bobStatus);
+    expect(bobWire).not.toContain("Scout deck");
+    expect(bobWire).not.toContain(deck.id);
+
+    // The picker keeps her own identity, and the other seat stays redacted.
+    const aliceStatus = alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
+    expect(aliceStatus.seats[0]).toEqual({
+      username: "Alice",
+      deckChosen: true,
+      connected: true,
+      deckId: deck.id,
+      deckName: "Scout deck",
+      illegal: false,
+    });
+    expect(aliceStatus.seats[1]).toEqual({
+      username: "Bob",
+      deckChosen: false,
+      connected: true,
+      deckId: null,
+      deckName: null,
+      illegal: false,
+    });
+  });
+
+  test("both picks reveal the two decks on the wire, before the board arrives", async () => {
+    await bootHarness();
+    const roomCode = harness.createRoom();
+    harness.joinRoom(roomCode, "Alice");
+    harness.joinRoom(roomCode, "Bob");
+    const alice = await harness.connectPlayer({ username: "Alice", roomCode });
+    const bob = await harness.connectPlayer({ username: "Bob", roomCode });
+
+    const aliceDeck = await harness.createDeck("Alice", "Scout deck", deckWithTripleScout());
+    const bobDeck = await harness.createDeck("Bob", "Plain deck", harness.legalDeckSlugs());
+
+    // The reveal precedes the board it introduces, so the two messages are
+    // recorded off each seat's own wire, in arrival order.
+    const boardEvents = [EVENTS.GAME_DECK_REVEAL, EVENTS.GAME_INIT];
+    const orderFor = (client) => {
+      const seen = [];
+      client.socket.onAny((event) => {
+        if (boardEvents.includes(event)) seen.push(event);
+      });
+      return seen;
+    };
+    const aliceOrder = orderFor(alice);
+    const bobOrder = orderFor(bob);
+
+    await harness.selectDecks({ alice, bob }, { Alice: aliceDeck.id, Bob: bobDeck.id });
+
+    expect(aliceOrder).toEqual([EVENTS.GAME_DECK_REVEAL, EVENTS.GAME_INIT]);
+    expect(bobOrder).toEqual([EVENTS.GAME_DECK_REVEAL, EVENTS.GAME_INIT]);
+
+    const reveal = alice.lastPayloadOf(EVENTS.GAME_DECK_REVEAL);
+    expect(reveal).toEqual(bob.lastPayloadOf(EVENTS.GAME_DECK_REVEAL));
+    expect(reveal.seats.map((seat) => seat.username)).toEqual(["Alice", "Bob"]);
+    expect(reveal.seats.map((seat) => seat.deckName)).toEqual(["Scout deck", "Plain deck"]);
+
+    const decks = { Alice: aliceDeck, Bob: bobDeck };
+    for (const seat of reveal.seats) {
+      // The fan is a few cards of the deck picked, and the deck's full list
+      // never goes out.
+      expect(Object.keys(seat)).toEqual(["username", "deckName", "fan"]);
+      expect(seat.fan.length).toBeGreaterThan(0);
+      expect(seat.fan.length).toBeLessThanOrEqual(3);
+      expect(new Set(seat.fan).size).toBe(seat.fan.length);
+      for (const slug of seat.fan) {
+        expect(cardIdBySlug.has(slug)).toBe(true);
+        expect(decks[seat.username].cards).toContain(slug);
+      }
+    }
   });
 
   test("an illegal deck is rejected in a normal room over the wire", async () => {
@@ -86,6 +193,42 @@ describe("deck selection over the wire", () => {
     const session = harness.registry.get(roomCode);
     expect(session.isStarted).toBe(false);
     expect(session.getDeckPick("Alice")).toBeNull();
+  });
+
+  test("a deck edited between pick and start reveals the deck that is dealt", async () => {
+    await bootHarness();
+    const roomCode = harness.createRoom();
+    harness.joinRoom(roomCode, "Alice");
+    harness.joinRoom(roomCode, "Bob");
+    const alice = await harness.connectPlayer({ username: "Alice", roomCode });
+    const bob = await harness.connectPlayer({ username: "Bob", roomCode });
+
+    const picked = await harness.createDeck("Alice", "Picked name", harness.legalDeckSlugs());
+    harness.selectDeck(alice, picked.id);
+    await alice.next(EVENTS.GAME_DECK_STATUS);
+
+    // Alice edits the deck in another tab between picking it and the start: the
+    // start re-reads the library, so the game deals the edited deck, and the
+    // reveal has to describe that deck rather than the pick's snapshot.
+    const edited = await harness.updateDeck(picked.id, "Alice", {
+      name: "Edited name",
+      cards: deckWithTripleScout(),
+    });
+
+    const bobDeck = await harness.createDeck("Bob", "Bob deck", harness.legalDeckSlugs());
+    harness.selectDeck(bob, bobDeck.id);
+
+    const reveal = await alice.next(EVENTS.GAME_DECK_REVEAL);
+    const session = harness.registry.get(roomCode);
+    const dealt = [...session.game.playerStates.Alice.deck, ...session.game.playerStates.Alice.hand].map((card) =>
+      slugByCardId.get(card.cardId)
+    );
+
+    expect(slugKey(dealt)).toBe(slugKey(edited.cards));
+    const aliceSeat = reveal.seats.find((seat) => seat.username === "Alice");
+    expect(aliceSeat.deckName).toBe("Edited name");
+    expect(aliceSeat.fan.length).toBeGreaterThan(0);
+    for (const slug of aliceSeat.fan) expect(edited.cards).toContain(slug);
   });
 
   test("both picks start the game and the dealt decks match the selected decks", async () => {
