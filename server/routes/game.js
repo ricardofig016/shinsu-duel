@@ -6,7 +6,6 @@ import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 import { generateSeed } from "../game/utils/SeededRng.js";
 import { isAuthenticated } from "./authentication.js";
 
-const router = express.Router();
 export const roomsFilePath = path.resolve("server/data/rooms.json");
 
 // middleware
@@ -19,78 +18,113 @@ const logger = winston.createLogger({
   ],
 });
 
-// routes
-router.get("/", (req, res) => {
-  res.redirect("/play");
-});
+/**
+ * Auth routes with injectable storage, so tests can drive room creation and
+ * joining against a temporary rooms file.
+ *
+ * @param {{ roomsFilePath?: string }} [options]
+ */
+export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath } = {}) {
+  const router = express.Router();
 
-router.post("/createRoom", isAuthenticated, async (req, res) => {
-  const { opponent, difficulty } = req.body;
-  if (!["bot", "friend"].includes(opponent))
-    return res.status(400).send("Invalid opponent type. Must be 'bot' or 'friend'");
-  if (opponent === "bot" && !["easy", "hard"].includes(difficulty))
-    return res.status(400).send("Invalid difficulty. Must be 'easy' or 'hard'");
-
-  const rooms = await readJsonFile(roomsFilePath);
-  let roomCode;
-  do roomCode = crypto.randomInt(0, 36 ** 6).toString(36).toUpperCase().padStart(6, "0");
-  while (rooms[roomCode]);
-  rooms[roomCode] = {
-    players: [],
-    opponent,
-    difficulty: opponent === "bot" ? difficulty : null,
-    seed: generateSeed(),
+  /**
+   * Serialized read-modify-write over the rooms runtime file. The JSON file has
+   * no atomic compare-and-swap, so two concurrent joins would each read the
+   * same player list and the last write would silently drop the other join
+   * (leaving a seat locked out of its own room). Every mutation queues behind
+   * the previous one.
+   */
+  let roomFileQueue = Promise.resolve();
+  const withRoomFileLock = (task) => {
+    const run = roomFileQueue.then(task);
+    roomFileQueue = run.catch(() => {});
+    return run;
   };
 
-  await writeJsonFile(roomsFilePath, rooms);
-  logger.info(`Room created with code: ${roomCode}, opponent: ${opponent}, difficulty: ${difficulty}`);
-  res.send(roomCode);
-});
+  router.get("/", (req, res) => {
+    res.redirect("/play");
+  });
 
-router.get("/:roomCode", isAuthenticated, async (req, res) => {
-  const { roomCode } = req.params;
-  const username = req.session.username;
-  const rooms = await readJsonFile(roomsFilePath);
-  if (!roomCode || !rooms[roomCode]) {
-    logger.warn(`Invalid access attempt to inexistant room: ${roomCode} by user: ${username}`);
-    // Add request context to help track where malformed requests originate from
-    logger.warn(
-      `Request details: originalUrl=${req.originalUrl}, referer=${req.headers.referer || "none"}, method=${
-        req.method
-      }, ip=${req.ip}, params=${JSON.stringify(req.params)}, query=${JSON.stringify(req.query)}`
-    );
-    return res.status(404).send("Invalid room code");
-  }
-  if (!rooms[roomCode].players.includes(username)) {
-    // return res.sendFile(path.resolve("public/pages/game/index.html")); // TODO: remove this line (for testing purposes only)
-    logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
-    return res.status(403).send("Access denied");
-  }
-  return res.sendFile(path.resolve("public/pages/game/index.html"));
-});
+  router.post("/createRoom", isAuthenticated, (req, res, next) => {
+    const { opponent, difficulty } = req.body;
+    if (!["bot", "friend"].includes(opponent))
+      return res.status(400).send("Invalid opponent type. Must be 'bot' or 'friend'");
+    if (opponent === "bot" && !["easy", "hard"].includes(difficulty))
+      return res.status(400).send("Invalid difficulty. Must be 'easy' or 'hard'");
 
-router.post("/:roomCode/join", isAuthenticated, async (req, res) => {
-  const { roomCode } = req.params;
-  const username = req.session.username;
-  const rooms = await readJsonFile(roomsFilePath);
-  if (!rooms[roomCode]) {
-    logger.warn(`Attempt to join invalid room code: ${roomCode}`);
-    return res.status(404).send("Invalid room code");
-  }
-  if (rooms[roomCode].players.length >= 2) {
-    if (rooms[roomCode].players.includes(username))
-      return res.status(200).send(`Player ${username} already in room: ${roomCode}`);
-    logger.warn(`Attempt to join full room: ${roomCode}`);
-    return res.status(403).send("Room is full");
-  }
-  if (rooms[roomCode].players.includes(username)) {
-    logger.info(`Player ${username} already in room: ${roomCode}`);
-    return res.status(200).send(`Player ${username} already in room: ${roomCode}`);
-  }
-  rooms[roomCode].players.push(username);
-  await writeJsonFile(roomsFilePath, rooms);
-  logger.info(`Player ${username} joined room: ${roomCode}`);
-  return res.status(200).send(`Player ${username} joined room: ${roomCode}`);
-});
+    withRoomFileLock(async () => {
+      const rooms = await readJsonFile(roomsFile);
+      let roomCode;
+      do roomCode = crypto.randomInt(0, 36 ** 6).toString(36).toUpperCase().padStart(6, "0");
+      while (rooms[roomCode]);
+      rooms[roomCode] = {
+        players: [],
+        opponent,
+        difficulty: opponent === "bot" ? difficulty : null,
+        seed: generateSeed(),
+      };
 
-export default router;
+      await writeJsonFile(roomsFile, rooms);
+      logger.info(`Room created with code: ${roomCode}, opponent: ${opponent}, difficulty: ${difficulty}`);
+      return roomCode;
+    })
+      .then((roomCode) => res.send(roomCode))
+      .catch(next);
+  });
+
+  router.get("/:roomCode", isAuthenticated, async (req, res) => {
+    const { roomCode } = req.params;
+    const username = req.session.username;
+    const rooms = await readJsonFile(roomsFile);
+    if (!roomCode || !rooms[roomCode]) {
+      logger.warn(`Invalid access attempt to inexistant room: ${roomCode} by user: ${username}`);
+      // Add request context to help track where malformed requests originate from
+      logger.warn(
+        `Request details: originalUrl=${req.originalUrl}, referer=${req.headers.referer || "none"}, method=${
+          req.method
+        }, ip=${req.ip}, params=${JSON.stringify(req.params)}, query=${JSON.stringify(req.query)}`
+      );
+      return res.status(404).send("Invalid room code");
+    }
+    if (!rooms[roomCode].players.includes(username)) {
+      logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
+      return res.status(403).send("Access denied");
+    }
+    return res.sendFile(path.resolve("public/pages/game/index.html"));
+  });
+
+  router.post("/:roomCode/join", isAuthenticated, (req, res, next) => {
+    const { roomCode } = req.params;
+    const username = req.session.username;
+
+    withRoomFileLock(async () => {
+      const rooms = await readJsonFile(roomsFile);
+      if (!rooms[roomCode]) {
+        logger.warn(`Attempt to join invalid room code: ${roomCode}`);
+        return { status: 404, body: "Invalid room code" };
+      }
+      if (rooms[roomCode].players.length >= 2) {
+        if (rooms[roomCode].players.includes(username)) {
+          logger.info(`Player ${username} already in room: ${roomCode}`);
+          return { status: 200, body: `Player ${username} already in room: ${roomCode}` };
+        }
+        logger.warn(`Attempt to join full room: ${roomCode}`);
+        return { status: 403, body: "Room is full" };
+      }
+      if (rooms[roomCode].players.includes(username)) {
+        logger.info(`Player ${username} already in room: ${roomCode}`);
+        return { status: 200, body: `Player ${username} already in room: ${roomCode}` };
+      }
+      rooms[roomCode].players.push(username);
+      await writeJsonFile(roomsFile, rooms);
+      logger.info(`Player ${username} joined room: ${roomCode}`);
+      return { status: 200, body: `Player ${username} joined room: ${roomCode}` };
+    })
+      .then(({ status, body }) => res.status(status).send(body))
+      .catch(next);
+  });
+
+  return router;
+}
+
+export default createGameRouter();
