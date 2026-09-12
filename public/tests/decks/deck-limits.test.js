@@ -5,7 +5,7 @@ import {
   duplicateDeckName,
   normalizeDeckName,
   withCardCopyAdded,
-} from "../../pages/decks/deck-view-models.js";
+} from "../../utils/deck-model.js";
 
 /**
  * The page renders with the limits the deck API reports, so a rules change on

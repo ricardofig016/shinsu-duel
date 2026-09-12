@@ -10,7 +10,7 @@ import {
   deckMatchesCardCriteria,
   DECK_SORT_KEYS,
   DECK_TABLE_COLUMNS,
-} from "../../pages/decks/deck-view-models.js";
+} from "../../utils/deck-model.js";
 
 const entry = (slug, name, cost, type, affiliations = []) => {
   const view = { cardId: 1, slug, name, cost, type, affiliations: affiliations.map((code) => ({ name: code })) };

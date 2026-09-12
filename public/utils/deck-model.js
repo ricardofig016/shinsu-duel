@@ -1,18 +1,20 @@
 /**
- * Pure view models for the deck collection page.
+ * Pure deck model shared by the decks page and the pre-game deck step.
  *
  * Decks reference cards by **slug** (the persistent card identifier stamped
  * into the compiled catalog); the runtime cardId shifts whenever the catalog
  * changes and is never persisted here.
  *
  * The deck rules stay on the server: `POST /decks/validate` owns what makes a
- * deck legal, and the page renders whatever problems it returns. These helpers
- * only shape what the page displays — collection rows, the card pool, copy
- * counts against the picker cap, and the save-button state. No DOM access here.
+ * deck legal, and the pages render whatever problems it returns. These helpers
+ * only shape what the pages display — deck construction against the limits,
+ * the deck list's rows and fans, and the builder's view models for the
+ * contents panel, the card pool, copy counts, and the save-button state. No
+ * DOM access here; `deck-table.js` owns the table's cells.
  */
 
-import { buildCardViewModel } from "../../game/viewModels.js";
-import { buildSearchableText, nameCollator, normalizeCriteria } from "../../utils/card-browse.js";
+import { buildCardViewModel } from "../game/viewModels.js";
+import { buildSearchableText, nameCollator, normalizeCriteria } from "./card-browse.js";
 
 /**
  * Deck-construction numbers for the page to display and cap input with. They

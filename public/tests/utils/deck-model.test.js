@@ -18,7 +18,7 @@ import {
   normalizeDeckName,
   withCardCopyAdded,
   withCardCopyRemoved,
-} from "../../pages/decks/deck-view-models.js";
+} from "../../utils/deck-model.js";
 
 /** Catalog card view shaped like `GET /cards/data` output; the slug mirrors
  *  the compiled contract (`normalizeName(name)`). */

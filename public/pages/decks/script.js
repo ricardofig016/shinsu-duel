@@ -3,6 +3,7 @@ import { loadComponent } from "/utils/component-util.js";
 import { mountCardGrid } from "/utils/card-grid.js";
 import { wireCatalogToolbar } from "/utils/catalog-toolbar.js";
 import { DEFAULT_SORT_KEY, normalizeCriteria, SORT_KEYS } from "/utils/card-browse.js";
+import { buildDeckRowElement, buildDeckTableHeader, mountDeckFan } from "/utils/deck-table.js";
 import {
   buildDeckContents,
   buildDeckTableRow,
@@ -15,12 +16,11 @@ import {
   DEFAULT_DECK_LIMITS,
   deckMatchesCardCriteria,
   deckSizeView,
-  deckFanTransforms,
   DECK_TABLE_COLUMNS,
   duplicateDeckName,
   withCardCopyAdded,
   withCardCopyRemoved,
-} from "/pages/decks/deck-view-models.js";
+} from "/utils/deck-model.js";
 
 const SEARCH_DEBOUNCE_MS = 150;
 const VALIDATE_DEBOUNCE_MS = 200;
@@ -398,18 +398,18 @@ const loadCatalog = async () => {
   return true;
 };
 
-const fillFan = async (cell, fanEntries) => {
-  const transforms = deckFanTransforms(fanEntries.length);
-  await Promise.all(
-    fanEntries.map(async (entry, index) => {
-      const element = document.createElement("div");
-      element.classList.add("card-vertical-component", "deck-fan-card");
-      element.style.transform = transforms[index].transform;
-      element.style.zIndex = String(transforms[index].zIndex);
-      cell.appendChild(element);
-      await loadComponent(element, "card-vertical", { card: entry.view, isSmall: true });
-    })
+/** The `actions` column, which the shared table leaves to this page. */
+const buildActionsCell = ({ deck }) => {
+  const cell = document.createElement("td");
+  const actions = document.createElement("div");
+  actions.classList.add("deck-row-actions");
+  actions.append(
+    createSmallButton("Edit", () => openBuilder(deck)),
+    createSmallButton("Duplicate", () => duplicateDeck(deck)),
+    createSmallButton("Delete", () => deleteDeck(deck))
   );
+  cell.appendChild(actions);
+  return cell;
 };
 
 const buildDeckRowElements = async () => {
@@ -420,58 +420,13 @@ const buildDeckRowElements = async () => {
   const mounts = [];
   for (const deck of state.decks) {
     const row = buildDeckTableRow(deck, { entriesBySlug: state.entriesBySlug, limits: state.limits });
-    const tr = document.createElement("tr");
-    tr.classList.add("deck-row");
+    const { element: tr, cells } = buildDeckRowElement({
+      row,
+      deck,
+      columns: DECK_TABLE_COLUMNS,
+      extraCells: { actions: buildActionsCell },
+    });
 
-    const fanCell = document.createElement("td");
-    fanCell.classList.add("deck-fan-cell");
-
-    const nameCell = document.createElement("td");
-    nameCell.innerText = row.name;
-
-    const sizeCell = document.createElement("td");
-    sizeCell.classList.add("deck-size-cell");
-    sizeCell.innerText = row.sizeLabel;
-
-    const compositionCell = document.createElement("td");
-    compositionCell.innerText = row.compositionLabel;
-
-    const costCell = document.createElement("td");
-    costCell.innerText = row.averageCostLabel;
-
-    const statusCell = document.createElement("td");
-    const flag = document.createElement("span");
-    flag.classList.add("deck-flag", row.isLegal ? "legal" : "problems");
-    flag.innerText = row.isLegal ? row.label : `${row.label}: ${row.problemLabel}`;
-    flag.title = row.problems.join("\n");
-    statusCell.appendChild(flag);
-
-    const updatedCell = document.createElement("td");
-    updatedCell.innerText = row.updatedAtLabel;
-
-    const actionsCell = document.createElement("td");
-    const actions = document.createElement("div");
-    actions.classList.add("deck-row-actions");
-    actions.append(
-      createSmallButton("Edit", () => openBuilder(deck)),
-      createSmallButton("Duplicate", () => duplicateDeck(deck)),
-      createSmallButton("Delete", () => deleteDeck(deck))
-    );
-    actionsCell.appendChild(actions);
-
-    // One cell per declared column, in order: the header is generated from the
-    // same list, so rows and header cannot drift apart.
-    const cells = {
-      fan: fanCell,
-      name: nameCell,
-      size: sizeCell,
-      composition: compositionCell,
-      averageCost: costCell,
-      status: statusCell,
-      updatedAt: updatedCell,
-      actions: actionsCell,
-    };
-    tr.append(...DECK_TABLE_COLUMNS.map((column) => cells[column.key]));
     tr.addEventListener("click", (event) => {
       if (event.target.closest("button")) return;
       openBuilder(deck);
@@ -479,7 +434,7 @@ const buildDeckRowElements = async () => {
 
     tbody.appendChild(tr);
     state.deckRows.set(deck.id, { deck, tr });
-    mounts.push(fillFan(fanCell, row.fan));
+    mounts.push(mountDeckFan(cells.get("fan"), row.fan));
   }
   await Promise.all(mounts);
   syncDeckTable();
@@ -587,14 +542,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   byId("deck-sort").value = state.deckSortKey;
 
-  byId("decks-table-header-row").replaceChildren(
-    ...DECK_TABLE_COLUMNS.map((column) => {
-      const th = document.createElement("th");
-      th.innerText = column.label;
-      if (column.key === "fan") th.classList.add("deck-fan-column");
-      return th;
-    })
-  );
+  buildDeckTableHeader(byId("decks-table-header-row"), DECK_TABLE_COLUMNS);
 
   byId("deck-search").addEventListener(
     "input",
