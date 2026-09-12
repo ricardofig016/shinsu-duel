@@ -171,15 +171,23 @@ describe("decks route", () => {
   });
 
   test("refuses every deck API request without a session", async () => {
+    const owned = await app.library.createDeck({ owner: "Alice", name: "Alice Deck", cards: ["ashen_knight"] });
+
     const listed = await get(null, "/decks/data");
     const created = await send(null, "/decks", "POST", { name: "Anon", cards: legalDeck() });
     const validated = await send(null, "/decks/validate", "POST", { cards: legalDeck() });
+    const updated = await send(null, `/decks/${owned.id}`, "PUT", { name: "Stolen", cards: legalDeck() });
+    const deleted = await send(null, `/decks/${owned.id}`, "DELETE", undefined);
 
     expect(listed.status).toBe(401);
     expect(created.status).toBe(401);
     expect(validated.status).toBe(401);
+    expect(updated.status).toBe(401);
+    expect(deleted.status).toBe(401);
     expect(await created.json()).toEqual({ message: "Authentication required." });
-    expect(await app.library.listDecks("Alice")).toEqual([]);
+    expect(await updated.json()).toEqual({ message: "Authentication required." });
+    expect(await deleted.json()).toEqual({ message: "Authentication required." });
+    expect(await app.library.listDecks("Alice")).toEqual([owned]);
   });
 
   test("redirects an anonymous visitor away from the decks page", async () => {
