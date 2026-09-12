@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import {
   EVENTS,
+  ERROR_CODES,
   buildStateView,
   buildError,
   buildGameOverResult,
@@ -136,6 +137,15 @@ describe("payload builders", () => {
     expect(buildError("Not your turn.")).toEqual({ message: "Not your turn." });
     expect(() => buildError("")).toThrow(TypeError);
     expect(() => buildError(null)).toThrow(TypeError);
+  });
+
+  test("buildError carries a known code and omits the field otherwise", () => {
+    expect(buildError("Session ended.", ERROR_CODES.UNAUTHENTICATED)).toEqual({
+      message: "Session ended.",
+      code: "unauthenticated",
+    });
+    expect(buildError("Not your turn.")).not.toHaveProperty("code");
+    expect(() => buildError("Not your turn.", "made-up")).toThrow(TypeError);
   });
 
   test("buildGameOverResult returns only winner and reason", () => {

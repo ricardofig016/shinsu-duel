@@ -20,3 +20,11 @@ export const EVENTS = Object.freeze({
   GAME_HAND_PEEK: "game-hand-peek",
   GAME_DECK_STATUS: "game-deck-status",
 });
+
+/**
+ * Reasons a rejection can carry, mirroring the server's codes. The client
+ * branches on these instead of on message text.
+ */
+export const ERROR_CODES = Object.freeze({
+  UNAUTHENTICATED: "unauthenticated",
+});

@@ -1,4 +1,5 @@
 import { loadComponent } from "/utils/component-util.js";
+import { authFetch } from "/utils/auth-redirect.js";
 
 const isValidRoomCode = (code) => {
   return typeof code === "string" && code.trim() !== "" && code !== "undefined" && code !== "null";
@@ -49,7 +50,7 @@ const setupPvP = () => {
 
 const createRoom = async (opponent, difficulty = null) => {
   try {
-    const response = await fetch("/game/createRoom", {
+    const response = await authFetch("/game/createRoom", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ opponent, difficulty }),
@@ -69,7 +70,7 @@ const createRoom = async (opponent, difficulty = null) => {
 const joinRoom = async (roomCode) => {
   try {
     if (isValidRoomCode(roomCode)) {
-      const response = await fetch(`/game/${roomCode}/join`, { method: "POST" });
+      const response = await authFetch(`/game/${roomCode}/join`, { method: "POST" });
       if (response.status !== 200) {
         alert(await response.text());
       } else {

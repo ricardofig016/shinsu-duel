@@ -1,43 +1,36 @@
 import express from "express";
-import path from "path";
-import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
+import { createAccountStore, usersFilePath } from "../accounts/accountStore.js";
 import { provisionStarterDecks } from "../decks/deckProvisioning.js";
-
-export const usersFilePath = path.resolve("server/data/users.json");
 
 /**
  * Auth routes with injectable storage, so tests can drive login against a
- * temporary user file and deck library.
+ * temporary accounts file and deck library.
  *
  * @param {{ usersFilePath?: string, provisionDecks?: Function }} [options]
  */
 export function createAuthRouter({ usersFilePath: userFile = usersFilePath, provisionDecks = provisionStarterDecks } = {}) {
   const router = express.Router();
+  const accounts = createAccountStore({ filePath: userFile });
 
   // A newly created account receives one copy of every starter deck. An
   // existing record is never provisioned again, so deleted decks stay deleted.
   // A failed provisioning rolls the account record back: the next login
   // retries from scratch, so no account can get stuck without its decks.
   const createUser = async (username) => {
-    const users = await readJsonFile(userFile);
-    if (users[username]) return;
-    users[username] = {};
-    await writeJsonFile(userFile, users);
+    if (!(await accounts.createAccountIfMissing(username))) return;
     try {
       await provisionDecks(username);
     } catch (error) {
-      const retry = await readJsonFile(userFile);
-      delete retry[username];
-      await writeJsonFile(userFile, retry);
+      await accounts.removeAccount(username);
       throw error;
     }
   };
 
   router.get("/status", async (req, res) => {
     if (!req.session.username) return res.json({ isAuthenticated: false });
-    const users = await readJsonFile(userFile);
-    const user = users[req.session.username];
-    if (user) return res.json({ isAuthenticated: true, username: req.session.username });
+    if (await accounts.hasAccount(req.session.username)) {
+      return res.json({ isAuthenticated: true, username: req.session.username });
+    }
     return res.json({ isAuthenticated: false });
   });
 
@@ -54,8 +47,7 @@ export function createAuthRouter({ usersFilePath: userFile = usersFilePath, prov
         );
 
     try {
-      const users = await readJsonFile(userFile);
-      if (!users[username]) await createUser(username);
+      await createUser(username);
     } catch (error) {
       return next(error);
     }

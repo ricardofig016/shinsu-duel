@@ -3,7 +3,7 @@ import path from "node:path";
 import cardsData from "../data/cards.json" with { type: "json" };
 import deckLibrary from "../decks/deckLibrary.js";
 import { DECK_NAME_PROBLEM, deckLimits, normalizeDeckName, validateDeckCards } from "../decks/deckValidation.js";
-import { isAuthenticated } from "./authentication.js";
+import authGate from "./authentication.js";
 
 /**
  * Deck collection routes. Storage is owner-scoped, so a request can only ever
@@ -14,10 +14,13 @@ import { isAuthenticated } from "./authentication.js";
  * engine cannot build such a deck in any room. Legality is recomputed on every
  * read, because the catalog can change between saves.
  *
- * @param {{ library?: object, catalog?: object }} [options]
+ * @param {{ library?: object, catalog?: object, gate?: object }} [options]
+ *   `gate` is the session gate, injectable so tests can point it at a
+ *   temporary accounts file.
  */
-export function createDecksRouter({ library = deckLibrary, catalog = cardsData } = {}) {
+export function createDecksRouter({ library = deckLibrary, catalog = cardsData, gate = authGate } = {}) {
   const router = express.Router();
+  const { requireApiSession, requirePageSession } = gate;
 
   const present = (deck) => ({
     id: deck.id,
@@ -31,26 +34,26 @@ export function createDecksRouter({ library = deckLibrary, catalog = cardsData }
   // leaving the request hanging on an unhandled rejection.
   const route = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
-  router.get("/", (req, res) => {
+  router.get("/", requirePageSession, (req, res) => {
     res.sendFile(path.resolve("public", "pages", "decks", "index.html"));
   });
 
   router.get(
     "/data",
-    isAuthenticated,
+    requireApiSession,
     route(async (req, res) => {
       const decks = await library.listDecks(req.session.username);
       res.json({ decks: decks.map(present), limits: deckLimits() });
     })
   );
 
-  router.post("/validate", isAuthenticated, (req, res) => {
+  router.post("/validate", requireApiSession, (req, res) => {
     res.json(validateDeckCards(req.body?.cards, catalog));
   });
 
   router.post(
     "/",
-    isAuthenticated,
+    requireApiSession,
     route(async (req, res) => {
       const name = normalizeDeckName(req.body?.name);
       if (!name) return res.status(400).json({ message: DECK_NAME_PROBLEM });
@@ -67,7 +70,7 @@ export function createDecksRouter({ library = deckLibrary, catalog = cardsData }
 
   router.put(
     "/:id",
-    isAuthenticated,
+    requireApiSession,
     route(async (req, res) => {
       const name = normalizeDeckName(req.body?.name);
       if (!name) return res.status(400).json({ message: DECK_NAME_PROBLEM });
@@ -85,7 +88,7 @@ export function createDecksRouter({ library = deckLibrary, catalog = cardsData }
 
   router.delete(
     "/:id",
-    isAuthenticated,
+    requireApiSession,
     route(async (req, res) => {
       const deleted = await library.deleteDeck(req.params.id, req.session.username);
       if (!deleted) return res.status(404).json({ message: "Deck not found." });

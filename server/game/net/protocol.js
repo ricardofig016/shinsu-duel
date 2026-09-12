@@ -36,6 +36,14 @@ export const TRANSPORT_EVENTS = Object.freeze({
   DISCONNECT: "disconnect",
 });
 
+/**
+ * Reasons a rejection can carry. A payload omits `code` when the client has
+ * nothing to branch on; an identity failure is the case that needs one.
+ */
+export const ERROR_CODES = Object.freeze({
+  UNAUTHENTICATED: "unauthenticated",
+});
+
 const WAITING_MESSAGE = "Waiting for the other player to join.";
 
 function assertNonEmptyString(value, label) {
@@ -67,11 +75,17 @@ export function buildStateView({ game, revision, username }) {
 }
 
 /**
- * Build the payload for a rejected action, decision, or connection.
+ * Build the payload for a rejected action, decision, or connection. `code` is
+ * optional and must come from `ERROR_CODES`, so a client can act on the reason
+ * instead of on the message text.
  */
-export function buildError(message) {
+export function buildError(message, code = null) {
   assertNonEmptyString(message, "error message");
-  return { message };
+  if (code === null) return { message };
+  if (!Object.values(ERROR_CODES).includes(code)) {
+    throw new TypeError(`Unknown error code "${code}".`);
+  }
+  return { message, code };
 }
 
 /**

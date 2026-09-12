@@ -5,6 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import { createDecksRouter } from "./decks.js";
 import { createDeckLibrary } from "../decks/deckLibrary.js";
+import { createAccountStore } from "../accounts/accountStore.js";
+import { createAuthGate } from "./authentication.js";
 import GameState from "../game/GameState.js";
 import { cards } from "../game/tests/fixtures/cards.js";
 
@@ -12,10 +14,16 @@ const eligibleSlugs = GameState.getEligibleCardIds(cards).map((cardId) => cards[
 const legalDeck = () => eligibleSlugs.slice(0, GameState.INIT_DECK_SIZE);
 
 // The session username comes from a test header, so each request can act as
-// any user without juggling cookies.
+// any user without juggling cookies. Accounts live in a temporary file, so the
+// gate never reads the runtime accounts of the machine running the tests.
+const TEST_ACCOUNTS = { Alice: {}, Bob: {} };
+
 function startApp() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "shinsu-decks-route-"));
   const library = createDeckLibrary({ filePath: path.join(directory, "decks.json") });
+  const accountsPath = path.join(directory, "users.json");
+  fs.writeFileSync(accountsPath, JSON.stringify(TEST_ACCOUNTS, null, 2));
+  const gate = createAuthGate({ accounts: createAccountStore({ filePath: accountsPath }) });
   const app = express();
   app.use(express.json());
   app.use(session({ secret: "test", resave: false, saveUninitialized: true }));
@@ -23,7 +31,7 @@ function startApp() {
     if (req.headers["x-test-user"]) req.session.username = req.headers["x-test-user"];
     next();
   });
-  app.use("/decks", createDecksRouter({ library, catalog: cards }));
+  app.use("/decks", createDecksRouter({ library, catalog: cards, gate }));
 
   const server = app.listen(0);
   return new Promise((resolve) => {
@@ -43,7 +51,7 @@ describe("decks route", () => {
     app = null;
   });
 
-  const as = (user) => ({ "Content-Type": "application/json", "x-test-user": user });
+  const as = (user) => ({ "Content-Type": "application/json", ...(user ? { "x-test-user": user } : {}) });
   const get = (user, url) => fetch(`${app.baseUrl}${url}`, { headers: as(user) });
   const send = (user, url, method, body) =>
     fetch(`${app.baseUrl}${url}`, { method, headers: as(user), body: JSON.stringify(body) });
@@ -161,5 +169,30 @@ describe("decks route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ buildable: true, legal: true, problems: [] });
     expect(await app.library.listDecks("Alice")).toEqual([]);
+  });
+
+  test("refuses every deck API request without a session", async () => {
+    const listed = await get(null, "/decks/data");
+    const created = await send(null, "/decks", "POST", { name: "Anon", cards: legalDeck() });
+    const validated = await send(null, "/decks/validate", "POST", { cards: legalDeck() });
+
+    expect(listed.status).toBe(401);
+    expect(created.status).toBe(401);
+    expect(validated.status).toBe(401);
+    expect(await created.json()).toEqual({ message: "Authentication required." });
+    expect(await app.library.listDecks("Alice")).toEqual([]);
+  });
+
+  test("redirects an anonymous visitor away from the decks page", async () => {
+    const response = await fetch(`${app.baseUrl}/decks`, { redirect: "manual" });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/login?next=%2Fdecks");
+  });
+
+  test("refuses a request from a session whose account is gone", async () => {
+    const response = await get("Nobody", "/decks/data");
+
+    expect(response.status).toBe(401);
   });
 });

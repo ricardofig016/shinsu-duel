@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 import winston from "winston";
 import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 import { generateSeed } from "../game/utils/SeededRng.js";
-import { isAuthenticated } from "./authentication.js";
+import authGate from "./authentication.js";
 
 export const roomsFilePath = path.resolve("server/data/rooms.json");
 
@@ -19,13 +19,15 @@ const logger = winston.createLogger({
 });
 
 /**
- * Auth routes with injectable storage, so tests can drive room creation and
+ * Game routes with injectable storage, so tests can drive room creation and
  * joining against a temporary rooms file.
  *
- * @param {{ roomsFilePath?: string }} [options]
+ * @param {{ roomsFilePath?: string, gate?: object }} [options] `gate` is the
+ *   session gate, injectable so tests can point it at a temporary accounts file.
  */
-export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath } = {}) {
+export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath, gate = authGate } = {}) {
   const router = express.Router();
+  const { requireApiSession, requirePageSession } = gate;
 
   /**
    * Serialized read-modify-write over the rooms runtime file. The JSON file has
@@ -45,7 +47,7 @@ export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath } = 
     res.redirect("/play");
   });
 
-  router.post("/createRoom", isAuthenticated, (req, res, next) => {
+  router.post("/createRoom", requireApiSession, (req, res, next) => {
     const { opponent, difficulty } = req.body;
     if (!["bot", "friend"].includes(opponent))
       return res.status(400).send("Invalid opponent type. Must be 'bot' or 'friend'");
@@ -72,7 +74,7 @@ export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath } = 
       .catch(next);
   });
 
-  router.get("/:roomCode", isAuthenticated, async (req, res) => {
+  router.get("/:roomCode", requirePageSession, async (req, res) => {
     const { roomCode } = req.params;
     const username = req.session.username;
     const rooms = await readJsonFile(roomsFile);
@@ -93,7 +95,7 @@ export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath } = 
     return res.sendFile(path.resolve("public/pages/game/index.html"));
   });
 
-  router.post("/:roomCode/join", isAuthenticated, (req, res, next) => {
+  router.post("/:roomCode/join", requireApiSession, (req, res, next) => {
     const { roomCode } = req.params;
     const username = req.session.username;
 

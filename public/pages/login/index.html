@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shinsu Duel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/pages/login/styles.css" />
+  </head>
+  <body>
+    <div id="navbar-component"></div>
+    <div id="login-page-container" class="container-vertical">
+      <h1>Log In</h1>
+
+      <form id="login-form" class="container-vertical">
+        <input
+          id="login-username"
+          name="username"
+          type="text"
+          placeholder="Username"
+          autocomplete="username"
+          maxlength="18"
+          autofocus
+          required
+        />
+        <button type="submit" id="login-submit-btn">Log In</button>
+      </form>
+
+      <p id="login-error" class="hidden"></p>
+
+      <p id="login-hint">
+        Any username works. A name that has never been used creates that account and gives it the starter decks.
+        There is no password.
+      </p>
+    </div>
+
+    <script type="module" src="/pages/login/script.js"></script>
+  </body>
+</html>

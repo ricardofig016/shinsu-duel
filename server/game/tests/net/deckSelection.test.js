@@ -52,6 +52,10 @@ describe("deck selection over the wire", () => {
     harness.joinRoom(roomCode, "Bob");
     const alice = await harness.connectPlayer({ username: "Alice", roomCode });
 
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS) !== null,
+      "the lone seat never received the deck status."
+    );
     const initial = alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
     expect(initial.dev).toBe(false);
     expect(initial.seats).toEqual([

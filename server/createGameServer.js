@@ -14,6 +14,7 @@ import { createSeededGame } from "./game/gameFactory.js";
 import { devRoomLoggingBackends } from "./game/logging/GameFileLogger.js";
 import SessionRegistry from "./game/net/SessionRegistry.js";
 import SocketGateway from "./game/net/socketGateway.js";
+import { createAccountStore } from "./accounts/accountStore.js";
 import defaultDeckLibrary from "./decks/deckLibrary.js";
 import cardsData from "./data/cards.json" with { type: "json" };
 
@@ -41,6 +42,8 @@ async function readFileRoom(code) {
  * @param {object} [args.catalog] compiled card catalog used for deck
  *   validation and the slug → cardId conversion (defaults to the production
  *   compiled catalog)
+ * @param {object} [args.accounts] account store the socket identity check
+ *   consults (defaults to the production accounts file)
  * @param {boolean} [args.logToFile=true] when false, no file logging is
  *   configured (embedded and test boots)
  * @param {string} [args.gameLogDirectory="server/logs/games"] directory for
@@ -50,7 +53,7 @@ async function readFileRoom(code) {
  *   io: import("socket.io").Server, gateway: SocketGateway,
  *   registry: SessionRegistry }}
  */
-export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
+export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, accounts = createAccountStore(), logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
   const app = express();
   const server = createServer(app);
   const io = new Server(server);
@@ -107,6 +110,7 @@ export function createGameServer({ registry = new SessionRegistry(), loadRoom, c
       })),
     deckLibrary,
     catalog,
+    isAccountActive: (username) => accounts.hasAccount(username),
     logger,
   });
   gameGateway.attach(io);

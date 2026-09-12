@@ -4,12 +4,20 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createGameRouter } from "./game.js";
+import { createAccountStore } from "../accounts/accountStore.js";
+import { createAuthGate } from "./authentication.js";
 
 // The session username comes from a test header, so each request can act as
-// any user without juggling cookies.
+// any user without juggling cookies. Accounts live in a temporary file, so the
+// gate never reads the runtime accounts of the machine running the tests.
+const TEST_ACCOUNTS = { Alice: {}, Bob: {}, Mallory: {} };
+
 function startApp() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "shinsu-game-route-"));
   const roomsPath = path.join(directory, "rooms.json");
+  const accountsPath = path.join(directory, "users.json");
+  fs.writeFileSync(accountsPath, JSON.stringify(TEST_ACCOUNTS, null, 2));
+  const gate = createAuthGate({ accounts: createAccountStore({ filePath: accountsPath }) });
   const app = express();
   app.use(express.json());
   app.use(session({ secret: "test", resave: false, saveUninitialized: true }));
@@ -17,7 +25,7 @@ function startApp() {
     if (req.headers["x-test-user"]) req.session.username = req.headers["x-test-user"];
     next();
   });
-  app.use("/game", createGameRouter({ roomsFilePath: roomsPath }));
+  app.use("/game", createGameRouter({ roomsFilePath: roomsPath, gate }));
 
   const server = app.listen(0);
   return new Promise((resolve) => {
@@ -40,7 +48,7 @@ describe("game room routes", () => {
   const post = (path, user, body) =>
     fetch(`${app.baseUrl}${path}`, {
       method: "POST",
-      headers: { "content-type": "application/json", "x-test-user": user },
+      headers: { "content-type": "application/json", ...(user ? { "x-test-user": user } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
 
@@ -78,5 +86,31 @@ describe("game room routes", () => {
 
     const third = await post(`/game/${roomCode}/join`, "Mallory");
     expect(third.status).toBe(403);
+  });
+
+  test("refuses room creation and joining without a session", async () => {
+    const created = await post("/game/createRoom", null, { opponent: "friend" });
+    const joined = await post("/game/ABCDEF/join", null);
+
+    expect(created.status).toBe(401);
+    expect(await created.json()).toEqual({ message: "Authentication required." });
+    expect(joined.status).toBe(401);
+  });
+
+  test("redirects an anonymous visitor away from the game page", async () => {
+    const response = await fetch(`${app.baseUrl}/game/ABCDEF`, { redirect: "manual" });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/login?next=%2Fgame%2FABCDEF");
+  });
+
+  test("refuses a request from a session whose account is gone", async () => {
+    const response = await fetch(`${app.baseUrl}/game/createRoom`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-test-user": "Nobody" },
+      body: JSON.stringify({ opponent: "friend" }),
+    });
+
+    expect(response.status).toBe(401);
   });
 });

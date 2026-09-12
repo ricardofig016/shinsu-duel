@@ -1,5 +1,6 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
-import { EVENTS } from "/game/protocol.js";
+import { authFetch, redirectToLogin } from "/utils/auth-redirect.js";
+import { EVENTS, ERROR_CODES } from "/game/protocol.js";
 import { createGameStore } from "/game/store.js";
 import {
   buildCombatSlotViewModel,
@@ -99,7 +100,7 @@ const loadDeckStepUsername = async () => {
 const loadDeckStepDecks = async () => {
   if (!deckStepState.decks) {
     try {
-      const response = await fetch("/decks/data");
+      const response = await authFetch("/decks/data");
       deckStepState.decks = response.ok ? (await response.json()).decks ?? [] : [];
     } catch {
       deckStepState.decks = [];
@@ -764,7 +765,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   socket.on(EVENTS.GAME_INIT, scheduleRender);
   socket.on(EVENTS.GAME_UPDATE, scheduleRender);
-  socket.on(EVENTS.GAME_ERROR, (payload) => alert(payload?.message ?? "Something went wrong."));
+  socket.on(EVENTS.GAME_ERROR, (payload) => {
+    // A connection rejected for identity means the session is gone, which the
+    // login page can fix; every other rejection is the player's to read.
+    if (payload?.code === ERROR_CODES.UNAUTHENTICATED) {
+      socket.disconnect();
+      redirectToLogin();
+      return;
+    }
+    alert(payload?.message ?? "Something went wrong.");
+  });
   socket.on(EVENTS.GAME_OVER, (payload) => showGameOver(payload));
   socket.on(EVENTS.GAME_WAITING, (payload) => showWaiting(payload));
   socket.on(EVENTS.GAME_DECK_STATUS, (payload) => void renderDeckStep(socket, payload));

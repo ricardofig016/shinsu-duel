@@ -1,3 +1,4 @@
+import { authFetch } from "/utils/auth-redirect.js";
 import { loadComponent } from "/utils/component-util.js";
 import { mountCardGrid } from "/utils/card-grid.js";
 import { wireCatalogToolbar } from "/utils/catalog-toolbar.js";
@@ -297,7 +298,7 @@ const renderValidation = () => {
 const validateDeck = async () => {
   const requestId = ++state.validationRequest;
   try {
-    const response = await fetch("/decks/validate", {
+    const response = await authFetch("/decks/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cards: state.cards }),
@@ -360,7 +361,7 @@ const saveDeck = async () => {
   const save = buildSaveState({ name: state.name, cards: state.cards, knownSlugs: state.knownSlugs, limits: state.limits });
   if (!save.enabled) return;
   try {
-    const response = await fetch(state.deckId ? `/decks/${state.deckId}` : "/decks", {
+    const response = await authFetch(state.deckId ? `/decks/${state.deckId}` : "/decks", {
       method: state.deckId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: save.name, cards: save.cards }),
@@ -505,7 +506,7 @@ const syncDeckTable = () => {
 
 const duplicateDeck = async (deck) => {
   try {
-    const response = await fetch("/decks", {
+    const response = await authFetch("/decks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: duplicateDeckName(deck.name, state.limits), cards: deck.cards }),
@@ -521,7 +522,7 @@ const duplicateDeck = async (deck) => {
 const deleteDeck = async (deck) => {
   if (!window.confirm(`Delete deck "${deck.name}"?`)) return;
   try {
-    const response = await fetch(`/decks/${deck.id}`, { method: "DELETE" });
+    const response = await authFetch(`/decks/${deck.id}`, { method: "DELETE" });
     if (!response.ok) throw new Error(`/decks/${deck.id} responded ${response.status}`);
     await loadDecks();
   } catch (error) {
@@ -532,7 +533,7 @@ const deleteDeck = async (deck) => {
 
 const loadDecks = async () => {
   try {
-    const response = await fetch("/decks/data");
+    const response = await authFetch("/decks/data");
     if (!response.ok) throw new Error(`/decks/data responded ${response.status}`);
     const payload = await response.json();
     state.decks = payload.decks ?? [];

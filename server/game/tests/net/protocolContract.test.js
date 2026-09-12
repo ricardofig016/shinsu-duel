@@ -369,6 +369,10 @@ describe("game-waiting: the lone player is not left in silence", () => {
     harness.joinRoom(roomCode, "Alice");
     const alice = await harness.connectPlayer({ username: "Alice", roomCode });
 
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_WAITING) !== null,
+      "the lone player never received the waiting payload."
+    );
     expect(alice.lastPayloadOf(EVENTS.GAME_WAITING)).toEqual(WAITING_PAYLOAD);
     expect(alice.payloadsOf(EVENTS.GAME_INIT)).toEqual([]);
     expect(harness.registry.get(roomCode)).toBeNull();

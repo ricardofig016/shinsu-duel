@@ -1,7 +1,7 @@
-﻿import { jest } from "@jest/globals";
+import { jest } from "@jest/globals";
 import SocketGateway from "../../net/socketGateway.js";
 import SessionRegistry from "../../net/SessionRegistry.js";
-import { EVENTS, TRANSPORT_EVENTS, buildWaitingPayload, buildDeckStatus } from "../../net/protocol.js";
+import { EVENTS, TRANSPORT_EVENTS, ERROR_CODES, buildWaitingPayload, buildDeckStatus } from "../../net/protocol.js";
 import { createTestGame, createLegalDeck } from "../utils.js";
 import { cards } from "../fixtures/cards.js";
 import { buildSlugIndex } from "../../../../server/utils/card-catalog.js";
@@ -69,7 +69,7 @@ const makeDeckLibrary = () => {
   };
 };
 
-const makeHarness = ({ rooms, logger = null } = {}) => {
+const makeHarness = ({ rooms, logger = null, isAccountActive = async () => true } = {}) => {
   const registry = new SessionRegistry();
   const createdGames = [];
   const createGame = jest.fn(() => {
@@ -84,6 +84,7 @@ const makeHarness = ({ rooms, logger = null } = {}) => {
     createGame,
     deckLibrary,
     catalog: cards,
+    isAccountActive,
     logger,
   });
 
@@ -93,6 +94,9 @@ const makeHarness = ({ rooms, logger = null } = {}) => {
   const connect = async ({ roomCode, username }) => {
     const socket = makeSocket({ roomCode, username });
     await connectionHandler(socket);
+    // The gateway resolves its account and room lookups asynchronously, so
+    // flush the microtask queue before the caller inspects the socket.
+    await new Promise((resolve) => setImmediate(resolve));
     return socket;
   };
 
@@ -125,6 +129,16 @@ describe("SocketGateway construction", () => {
     ["createGame", { registry: new SessionRegistry(), loadRoom: async () => null }],
     ["deckLibrary", { registry: new SessionRegistry(), loadRoom: async () => null, createGame: () => {}, catalog: cards }],
     ["catalog", { registry: new SessionRegistry(), loadRoom: async () => null, createGame: () => {}, deckLibrary: makeDeckLibrary() }],
+    [
+      "isAccountActive",
+      {
+        registry: new SessionRegistry(),
+        loadRoom: async () => null,
+        createGame: () => {},
+        deckLibrary: makeDeckLibrary(),
+        catalog: cards,
+      },
+    ],
   ])("rejects a missing %s", (_label, partial) => {
     expect(() => new SocketGateway(partial)).toThrow(TypeError);
   });
@@ -154,6 +168,32 @@ describe("connection validation", () => {
     const { registry, connect } = makeHarness({ rooms: fullRoom() });
 
     const socket = await connect({ roomCode: ROOM, username: undefined });
+
+    expect(socket.lastPayloadOf(EVENTS.GAME_ERROR)).toEqual({
+      message: expect.any(String),
+      code: ERROR_CODES.UNAUTHENTICATED,
+    });
+    expect(socket.closed).toBe(true);
+    expect(registry.size).toBe(0);
+  });
+
+  test("rejects a connection whose account no longer exists", async () => {
+    const { registry, connect } = makeHarness({ rooms: fullRoom(), isAccountActive: async () => false });
+
+    const socket = await connect({ roomCode: ROOM, username: "Alice" });
+
+    expect(socket.lastPayloadOf(EVENTS.GAME_ERROR)).toEqual({
+      message: expect.any(String),
+      code: ERROR_CODES.UNAUTHENTICATED,
+    });
+    expect(socket.closed).toBe(true);
+    expect(registry.size).toBe(0);
+  });
+
+  test("rejects a connection without a room code, without an identity code", async () => {
+    const { registry, connect } = makeHarness({ rooms: fullRoom() });
+
+    const socket = await connect({ roomCode: undefined, username: "Alice" });
 
     expect(socket.lastPayloadOf(EVENTS.GAME_ERROR)).toEqual({ message: expect.any(String) });
     expect(socket.closed).toBe(true);

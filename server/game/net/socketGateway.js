@@ -2,6 +2,7 @@ import EventBridge from "./eventBridge.js";
 import {
   EVENTS,
   TRANSPORT_EVENTS,
+  ERROR_CODES,
   buildStateView,
   buildError,
   buildGameOverResult,
@@ -29,9 +30,10 @@ function isPlainObject(value) {
  * Binds the Socket.IO transport to the session layer.
  *
  * Every connection is validated against the room registry (the express-session
- * username must be a participant of the room it connects to), then attached to
- * its player's seat. Seats hold many connections, so one player can play from
- * several tabs. Connecting both seats opens the pre-game deck-selection phase:
+ * username must have an account and be a participant of the room it connects
+ * to), then attached to its player's seat. Seats hold many connections, so one
+ * player can play from several tabs. Connecting both seats opens the pre-game
+ * deck-selection phase:
  * each seat picks a deck from its own collection through `submitDeckSelect`,
  * and the game is created — with those decks — once both seats hold a valid
  * selection. The session — game and revision included — outlives every
@@ -51,13 +53,14 @@ export default class SocketGateway {
   #createGame;
   #deckLibrary;
   #catalog;
+  #isAccountActive;
   #logger;
   /** roomCode → unsubscribe function of the event bridge for its started game */
   #bridgeUnsubscribes = new Map();
   /** roomCode → connections parked while the room's second player has not joined */
   #waitingRoom = new Map();
 
-  constructor({ registry, loadRoom, createGame, deckLibrary, catalog, logger = null }) {
+  constructor({ registry, loadRoom, createGame, deckLibrary, catalog, isAccountActive, logger = null }) {
     if (!registry || typeof registry.ensureSession !== "function" || typeof registry.get !== "function") {
       throw new TypeError("SocketGateway needs a registry exposing ensureSession and get.");
     }
@@ -67,6 +70,9 @@ export default class SocketGateway {
       throw new TypeError("SocketGateway needs a deck library exposing getOwnedDeck.");
     }
     if (!isPlainObject(catalog)) throw new TypeError("SocketGateway needs a compiled card catalog.");
+    if (typeof isAccountActive !== "function") {
+      throw new TypeError("SocketGateway needs an isAccountActive predicate.");
+    }
     if (logger !== null && typeof logger !== "object") throw new TypeError("logger must be an object or null.");
 
     this.#registry = registry;
@@ -74,6 +80,7 @@ export default class SocketGateway {
     this.#createGame = createGame;
     this.#deckLibrary = deckLibrary;
     this.#catalog = catalog;
+    this.#isAccountActive = isAccountActive;
     this.#logger = logger;
   }
 
@@ -92,8 +99,16 @@ export default class SocketGateway {
     };
 
     try {
-      if (!isNonEmptyString(roomCode) || !isNonEmptyString(username)) {
-        connection.send(EVENTS.GAME_ERROR, buildError("A game connection needs a room code and an authenticated username."));
+      if (!isNonEmptyString(roomCode)) {
+        connection.send(EVENTS.GAME_ERROR, buildError("A game connection needs a room code."));
+        connection.close();
+        return;
+      }
+      if (!isNonEmptyString(username) || !(await this.#isAccountActive(username))) {
+        connection.send(
+          EVENTS.GAME_ERROR,
+          buildError("A game connection needs an account that still exists.", ERROR_CODES.UNAUTHENTICATED)
+        );
         connection.close();
         return;
       }

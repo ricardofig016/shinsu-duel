@@ -18,22 +18,6 @@ const load = async (container) => {
   } else {
     container.querySelector("#loggedin-container").classList.add("hidden");
     container.querySelector("#loggedout-container").classList.remove("hidden");
-
-    container.querySelector("#login-btn").addEventListener("click", async () => {
-      const username = prompt("Enter Your Username:");
-      if (username) {
-        const response = await fetch("/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username }),
-        });
-        if (response.status === 200) {
-          window.location.reload();
-        } else {
-          alert(await response.text());
-        }
-      }
-    });
   }
 };
 
