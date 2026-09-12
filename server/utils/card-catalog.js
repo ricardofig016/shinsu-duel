@@ -20,15 +20,6 @@ export function buildSlugIndex(cards) {
 }
 
 /**
- * @param {object} cards keyed compiled catalog
- * @param {string} slug
- * @returns {number|undefined} the cardId, or undefined for an unknown slug
- */
-export function getCardIdBySlug(cards, slug) {
-  return buildSlugIndex(cards).get(slug)?.cardId;
-}
-
-/**
  * Project the compiled catalog into client card views. Views are built
  * through `Card.toSanitizedObject()` — the single client card-view contract —
  * so a browse page consumes exactly the shape the game sends over the wire.
