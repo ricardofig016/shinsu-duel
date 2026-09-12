@@ -89,6 +89,42 @@ describe("auth login provisioning", () => {
     expect(await app.library.listDecks("Alice")).toHaveLength(1);
   });
 
+  test("a failed provisioning rolls the account back so a later login retries it", async () => {
+    const users = makeTemp("users");
+    const library = createDeckLibrary({ filePath: makeTemp("decks") });
+    let fail = true;
+    const expressApp = express();
+    expressApp.use(express.json());
+    expressApp.use(session({ secret: "test", resave: false, saveUninitialized: true }));
+    expressApp.use(
+      "/auth",
+      createAuthRouter({
+        usersFilePath: users,
+        provisionDecks: (username) => {
+          if (fail) throw new Error("deck store unavailable");
+          return provisionStarterDecks(username, { library, decks: TEMPLATES });
+        },
+      })
+    );
+    expressApp.use((error, req, res, next) => res.status(500).send("Login failed"));
+    const server = expressApp.listen(0);
+    await new Promise((resolve) => server.once("listening", resolve));
+    const baseUrl = `http://127.0.0.1:${server.address().port}`;
+    app = { server, baseUrl, library, usersPath: users };
+
+    const failed = await login(baseUrl, "Alice");
+    expect(failed.status).toBe(500);
+    // The account record is gone, so the failure is not remembered anywhere.
+    expect(JSON.parse(fs.readFileSync(users, "utf8"))).not.toHaveProperty("Alice");
+    expect(await library.listDecks("Alice")).toEqual([]);
+
+    fail = false;
+    const retried = await login(baseUrl, "Alice");
+    expect(retried.status).toBe(200);
+    expect(JSON.parse(fs.readFileSync(users, "utf8"))).toHaveProperty("Alice");
+    expect((await library.listDecks("Alice")).map((deck) => deck.name)).toEqual(["Starter Deck"]);
+  });
+
   test("rejects invalid usernames without creating anything", async () => {
     app = await startApp();
 

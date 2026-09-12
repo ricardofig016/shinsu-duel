@@ -3,6 +3,32 @@ import GameState from "../game/GameState.js";
 import { isTestCard } from "./test-card.js";
 
 /**
+ * Build the slug → card index over a compiled catalog. This is the deck
+ * collection's conversion into the engine's runtime identifiers: stored
+ * decks reference cards by slug, the engine consumes cardIds, and this index
+ * is the single conversion point (see docs/DECK_COLLECTION.md).
+ *
+ * @param {object} cards keyed compiled catalog (`server/data/cards.json`)
+ * @returns {Map<string, object>} slug → compiled card entry
+ */
+export function buildSlugIndex(cards) {
+  return new Map(
+    Object.values(cards ?? {})
+      .filter((card) => typeof card?.slug === "string")
+      .map((card) => [card.slug, card])
+  );
+}
+
+/**
+ * @param {object} cards keyed compiled catalog
+ * @param {string} slug
+ * @returns {number|undefined} the cardId, or undefined for an unknown slug
+ */
+export function getCardIdBySlug(cards, slug) {
+  return buildSlugIndex(cards).get(slug)?.cardId;
+}
+
+/**
  * Project the compiled catalog into client card views. Views are built
  * through `Card.toSanitizedObject()` — the single client card-view contract —
  * so a browse page consumes exactly the shape the game sends over the wire.

@@ -9,6 +9,7 @@ export const EVENTS = Object.freeze({
   GAME_ACTION: "game-action",
   GAME_DECISION: "game-decision",
   GAME_STATE_REQUEST: "game-state-request",
+  GAME_DECK_SELECT: "game-deck-select",
 
   // Inbound (server → client)
   GAME_INIT: "game-init",
@@ -17,4 +18,5 @@ export const EVENTS = Object.freeze({
   GAME_OVER: "game-over",
   GAME_WAITING: "game-waiting",
   GAME_HAND_PEEK: "game-hand-peek",
+  GAME_DECK_STATUS: "game-deck-status",
 });

@@ -374,15 +374,21 @@ describe("game-waiting: the lone player is not left in silence", () => {
     expect(harness.registry.get(roomCode)).toBeNull();
   });
 
-  test("the parked player receives game-init once the room completes", async () => {
+  test("the parked player reaches the selection phase and then game-init once the room completes", async () => {
     const roomCode = harness.createRoom();
     harness.joinRoom(roomCode, "Alice");
     const alice = await harness.connectPlayer({ username: "Alice", roomCode });
 
     harness.joinRoom(roomCode, "Bob");
-    await harness.connectPlayer({ username: "Bob", roomCode });
+    const bob = await harness.connectPlayer({ username: "Bob", roomCode });
 
-    await harness.waitFor(() => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null, "parked player never received game-init.");
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS) !== null,
+      "parked player never entered the deck-selection phase."
+    );
+    expect(harness.registry.get(roomCode).isStarted).toBe(false);
+
+    await harness.selectDecks({ alice, bob });
     expect(harness.registry.get(roomCode).isStarted).toBe(true);
   });
 });

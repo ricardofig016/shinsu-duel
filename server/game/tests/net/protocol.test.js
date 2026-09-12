@@ -6,6 +6,8 @@ import {
   buildGameOverResult,
   buildWaitingPayload,
   buildHandPeek,
+  buildDeckSelect,
+  buildDeckStatus,
 } from "../../net/protocol.js";
 import { advanceToRound, createTestGame, setupGameWithHands, deployUnit } from "../utils.js";
 
@@ -14,12 +16,14 @@ describe("protocol event names", () => {
     expect(EVENTS.GAME_ACTION).toBe("game-action");
     expect(EVENTS.GAME_DECISION).toBe("game-decision");
     expect(EVENTS.GAME_STATE_REQUEST).toBe("game-state-request");
+    expect(EVENTS.GAME_DECK_SELECT).toBe("game-deck-select");
     expect(EVENTS.GAME_INIT).toBe("game-init");
     expect(EVENTS.GAME_UPDATE).toBe("game-update");
     expect(EVENTS.GAME_ERROR).toBe("game-error");
     expect(EVENTS.GAME_OVER).toBe("game-over");
     expect(EVENTS.GAME_WAITING).toBe("game-waiting");
     expect(EVENTS.GAME_HAND_PEEK).toBe("game-hand-peek");
+    expect(EVENTS.GAME_DECK_STATUS).toBe("game-deck-status");
   });
 
   test("every event name is a unique non-empty string", () => {
@@ -170,5 +174,47 @@ describe("payload builders", () => {
     expect(() => buildHandPeek(null)).toThrow(TypeError);
     expect(() => buildHandPeek({ owner: "Bob", observer: "", cards: [] })).toThrow(TypeError);
     expect(() => buildHandPeek({ owner: "Bob", observer: "Alice" })).toThrow(TypeError);
+  });
+
+  test("buildDeckSelect returns the exact payload", () => {
+    expect(buildDeckSelect({ deckId: "deck-abc" })).toEqual({ deckId: "deck-abc" });
+    expect(() => buildDeckSelect({ deckId: "" })).toThrow(TypeError);
+    expect(() => buildDeckSelect({ deckId: null })).toThrow(TypeError);
+    expect(() => buildDeckSelect({})).toThrow(TypeError);
+  });
+
+  test("buildDeckStatus returns the exact per-seat progress", () => {
+    const seats = [
+      { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Starter", illegal: false },
+      { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+    ];
+    const payload = buildDeckStatus({ dev: false, seats });
+
+    expect(payload).toEqual({
+      dev: false,
+      seats: [
+        { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Starter", illegal: false },
+        { username: "Bob", deckChosen: false, deckId: null, deckName: null, illegal: false },
+      ],
+    });
+    expect(payload.seats[0]).not.toBe(seats[0]);
+  });
+
+  test("buildDeckStatus rejects malformed progress", () => {
+    const seat = { username: "Alice", deckChosen: true, deckId: "deck-1", deckName: "Starter", illegal: false };
+    expect(() => buildDeckStatus({ dev: "yes", seats: [seat] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: null })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, username: "" }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, deckChosen: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, deckName: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, deckId: null }] })).toThrow(TypeError);
+    expect(() => buildDeckStatus({ dev: false, seats: [{ ...seat, illegal: 1 }] })).toThrow(TypeError);
+    expect(() =>
+      buildDeckStatus({
+        dev: false,
+        seats: [{ username: "Bob", deckChosen: false, deckId: null, deckName: "X", illegal: false }],
+      })
+    ).toThrow(TypeError);
   });
 });

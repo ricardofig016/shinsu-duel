@@ -1,8 +1,8 @@
 /**
  * Live on-disk replay capture for development stress-test rooms.
  *
- * A room whose code matches `DEV_ROOM_CODE_PATTERN` ("TESTROOM" followed by
- * digits) records one JSONL file under the configured log directory:
+ * A dev room (see `isDevRoomCode`: "TESTROOM" followed by digits) records
+ * one JSONL file under the configured log directory:
  *
  *   `<roomCode>.<startedAt>.replay.jsonl` — one line per replay entry:
  *   the `InitialState` entry plus every `UserAction` / `UserDecision`
@@ -26,9 +26,7 @@
 import fs from "fs";
 import path from "path";
 import { REPLAY_ENTRY_TYPES } from "../Logger.js";
-
-/** The only switch for live game logging: the room code itself. */
-export const DEV_ROOM_CODE_PATTERN = /^TESTROOM\d+$/;
+import { isDevRoomCode } from "../devRooms.js";
 
 export class GameFileLogger {
   /**
@@ -114,6 +112,6 @@ export class GameFileLogger {
  * @returns {Array<GameFileLogger>}
  */
 export function devRoomLoggingBackends(roomCode, { directory }) {
-  if (typeof roomCode !== "string" || !DEV_ROOM_CODE_PATTERN.test(roomCode)) return [];
+  if (!isDevRoomCode(roomCode)) return [];
   return [new GameFileLogger({ roomCode, directory })];
 }

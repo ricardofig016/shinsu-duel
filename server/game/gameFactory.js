@@ -25,14 +25,19 @@ import shuffle from "./utils/shuffle.js";
  * @param {Array<string>} args.usernames exactly 2 usernames
  * @param {number} args.seed 32-bit unsigned integer seed
  * @param {Object} [args.decks] optional map of username → cardIds; omitted
- *   usernames receive a seeded shuffled default deck
+ *   usernames receive a seeded shuffled default deck. Explicit decks are
+ *   shuffled with the same seed before construction: the stored order is the
+ *   builder's order, and the deal must not leak it to the player.
+ * @param {boolean} [args.enforceDeckRules] whether the engine enforces the
+ *   RULES.md deck rules on the dealt decks (default true); dev rooms pass
+ *   false to deal decks that only satisfy the buildable contract
  * @param {string} [args.firstPlayer] optional first-turn username; when
  *   omitted, the first player is rolled deterministically from the seed
  * @param {Array} [args.loggerBackends] extra Logger backends attached at game
  *   construction so they observe every entry, including InitialState
  * @returns {GameState}
  */
-export function createSeededGame({ roomCode, usernames, seed, decks = null, firstPlayer = null, cards = null, loggerBackends = [] }) {
+export function createSeededGame({ roomCode, usernames, seed, decks = null, enforceDeckRules = true, firstPlayer = null, cards = null, loggerBackends = [] }) {
   if (typeof seed !== "number" || !Number.isFinite(seed)) {
     throw new Error("createSeededGame requires a numeric seed.");
   }
@@ -46,10 +51,16 @@ export function createSeededGame({ roomCode, usernames, seed, decks = null, firs
 
   const resolvedDecks = {};
   for (const username of usernames) {
-    resolvedDecks[username] = decks?.[username] ?? buildDefaultDeck(rng, cards);
+    const explicit = decks?.[username];
+    resolvedDecks[username] = explicit ? shuffle([...explicit], rng) : buildDefaultDeck(rng, cards);
   }
 
-  return new GameState(roomCode, usernames, resolvedDecks, resolvedFirstPlayer, { rng, cards, loggerBackends });
+  return new GameState(roomCode, usernames, resolvedDecks, resolvedFirstPlayer, {
+    rng,
+    cards,
+    enforceDeckRules,
+    loggerBackends,
+  });
 }
 
 /**

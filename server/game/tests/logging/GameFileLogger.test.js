@@ -2,7 +2,8 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { jest } from "@jest/globals";
-import { DEV_ROOM_CODE_PATTERN, GameFileLogger, devRoomLoggingBackends } from "../../logging/GameFileLogger.js";
+import { GameFileLogger, devRoomLoggingBackends } from "../../logging/GameFileLogger.js";
+import { DEV_ROOM_CODE_PATTERN, isDevRoomCode } from "../../devRooms.js";
 
 describe("GameFileLogger", () => {
   let tmpRoot;

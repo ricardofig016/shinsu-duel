@@ -69,13 +69,15 @@ export default class GameSession {
   #seats;
   #game = null;
   #revision = 0;
+  /** username → pending pre-game deck pick, cleared at game start */
+  #deckPicks = new Map();
 
   /**
    * @param {object} args
    * @param {string} args.roomCode unique room code this session serves
    * @param {Array<string>} args.usernames exactly 2 distinct seat usernames
    * @param {number} args.seed seed handed to the game factory on start
-   * @param {Function} args.createGame `({ roomCode, usernames, seed }) => GameState`
+   * @param {Function} args.createGame `({ roomCode, usernames, seed, decks, enforceDeckRules }) => GameState`
    */
   constructor({ roomCode, usernames, seed, createGame }) {
     assertNonEmptyString(roomCode, "roomCode");
@@ -160,12 +162,26 @@ export default class GameSession {
 
   /**
    * Create the session's game exactly once and count its creation as the
-   * first state change. Later calls return the existing game.
+   * first state change. Later calls return the existing game. The start
+   * arguments (dealt decks and the deck-rule enforcement mode) come from the
+   * resolved pre-game deck selections.
+   *
+   * @param {object} [startArgs]
+   * @param {object|null} [startArgs.decks] username → dealt cardIds; a seat
+   *   without an entry receives the factory's default deck
+   * @param {boolean} [startArgs.enforceDeckRules] whether the engine enforces
+   *   the RULES.md deck rules on the dealt decks (default true)
    */
-  ensureGame() {
+  ensureGame({ decks = null, enforceDeckRules = true } = {}) {
     if (this.#game) return this.#game;
 
-    const game = this.#createGame({ roomCode: this.#roomCode, usernames: this.#usernames, seed: this.#seed });
+    const game = this.#createGame({
+      roomCode: this.#roomCode,
+      usernames: this.#usernames,
+      seed: this.#seed,
+      decks,
+      enforceDeckRules,
+    });
     const missingMethod = game
       ? REQUIRED_GAME_METHODS.find((method) => typeof game[method] !== "function")
       : "a game object";
@@ -178,6 +194,51 @@ export default class GameSession {
     this.#game = game;
     this.#revision += 1;
     return game;
+  }
+
+  /**
+   * Store a seat's pre-game deck pick, replacing any earlier pick. The pick
+   * holds the deck-library record the seat selected; it survives
+   * disconnects and is cleared when the game starts.
+   *
+   * @param {string} username seat owner
+   * @param {{ deckId: string, name: string, cards: string[], illegal: boolean }} pick
+   */
+  setDeckPick(username, pick) {
+    this.#seat(username);
+    if (!pick || typeof pick !== "object") {
+      throw new TypeError("A deck pick must be an object.");
+    }
+    assertNonEmptyString(pick.deckId, "pick.deckId");
+    assertNonEmptyString(pick.name, "pick.name");
+    if (!Array.isArray(pick.cards) || pick.cards.some((slug) => typeof slug !== "string")) {
+      throw new TypeError("pick.cards must be an array of card slugs.");
+    }
+    if (typeof pick.illegal !== "boolean") {
+      throw new TypeError("pick.illegal must be a boolean.");
+    }
+
+    this.#deckPicks.set(username, {
+      deckId: pick.deckId,
+      name: pick.name,
+      cards: [...pick.cards],
+      illegal: pick.illegal,
+    });
+  }
+
+  /** @returns {object|null} the seat's pending pick, or null */
+  getDeckPick(username) {
+    return this.#deckPicks.get(username) ?? null;
+  }
+
+  /** Drop one seat's pick (its deck became invalid before the start). */
+  clearDeckPick(username) {
+    this.#deckPicks.delete(username);
+  }
+
+  /** Drop every pending pick; called when the game starts. */
+  clearDeckPicks() {
+    this.#deckPicks.clear();
   }
 
   /**

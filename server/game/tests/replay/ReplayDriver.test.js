@@ -148,4 +148,28 @@ describe("ReplayDriver", () => {
       expect(JSON.stringify(ReplayDriver.replay(replayLog, { cards }).toSerializedState())).toBe(first);
     }
   });
+
+  test("replays a dev game dealt an illegal deck with enforcement disabled", () => {
+    // Dev rooms may deal decks that violate the RULES.md deck rules; the
+    // enforcement mode is recorded in the artifact so the reconstruction
+    // deals the same deck under the same mode.
+    const unreachableId = Number(
+      Object.values(cards).find((card) => (card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")).cardId
+    );
+    const illegalDeck = [...createLegalDeck()];
+    illegalDeck[0] = unreachableId;
+    illegalDeck.push(...Array.from({ length: 5 }, () => illegalDeck[1])); // 35 cards, over the size rule
+    const game = new GameState("TESTROOM42", players, { Alice: illegalDeck, Bob: createLegalDeck() }, "Alice", {
+      rng: new SeededRng(77),
+      cards,
+      enforceDeckRules: false,
+    });
+
+    game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Alice" } });
+    const replayLog = game.logger.getReplayLog();
+    expect(replayLog.initial.meta.enforceDeckRules).toBe(false);
+
+    const replayed = ReplayDriver.replay(replayLog, { cards });
+    expect(replayed.toSerializedState()).toEqual(game.toSerializedState());
+  });
 });

@@ -3,11 +3,16 @@ import os from "os";
 import path from "path";
 import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "./harness.js";
+import { createSeededGame } from "../../gameFactory.js";
+import { devRoomLoggingBackends } from "../../logging/GameFileLogger.js";
+import { cards } from "../fixtures/cards.js";
 
 /**
- * Boots the production default game factory (createGameServer's own closure)
- * against an in-memory room store, so the TESTROOM dev-logging wiring is
- * exercised exactly as in production — only through the room code pattern.
+ * Boots the production dev-room logging wiring (the default factory's
+ * `devRoomLoggingBackends` closure, threaded through the gateway's deferred
+ * start) against an in-memory room store, with the test-owned fixture
+ * catalog, so the TESTROOM wiring is exercised exactly as in production —
+ * only through the room code pattern.
  */
 
 const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", difficulty: null, seed });
@@ -15,9 +20,13 @@ const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", difficulty: nu
 describe("dev-room live logging (production wiring)", () => {
   let tmpRoot;
   let harness;
+  // The directory the production wiring's logging backends write to; each
+  // test points it where its scenario needs it.
+  let logDirectory;
 
   beforeEach(() => {
     tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dsh-devroom-"));
+    logDirectory = tmpRoot;
   });
 
   afterEach(async () => {
@@ -31,8 +40,22 @@ describe("dev-room live logging (production wiring)", () => {
       .split("\n")
       .filter((line) => line !== "");
 
+  // The production default factory with the fixture catalog: the deck-rule
+  // enforcement flag and the dealt decks thread through exactly as in
+  // production.
+  const productionWiringFactory = ({ roomCode, usernames, seed, decks, enforceDeckRules }) =>
+    createSeededGame({
+      roomCode,
+      usernames,
+      seed,
+      decks,
+      enforceDeckRules,
+      cards,
+      loggerBackends: devRoomLoggingBackends(roomCode, { directory: logDirectory }),
+    });
+
   test("a TESTROOM room logs its replay stream; a normal room logs nothing", async () => {
-    harness = await createNetHarness({ gameLogDirectory: tmpRoot });
+    harness = await createNetHarness({ createGame: productionWiringFactory, gameLogDirectory: tmpRoot });
 
     // Registered exactly like a hand-edited server/data/rooms.json record.
     harness.rooms["TESTROOM01"] = ROOM_RECORD(1);
@@ -46,6 +69,9 @@ describe("dev-room live logging (production wiring)", () => {
     const devBob = await harness.connectPlayer({ username: "Bob", roomCode: "TESTROOM01" });
     const plainAlice = await harness.connectPlayer({ username: "Alice", roomCode: "ABC123" });
     const plainBob = await harness.connectPlayer({ username: "Bob", roomCode: "ABC123" });
+
+    await harness.selectDecks({ alice: devAlice, bob: devBob });
+    await harness.selectDecks({ alice: plainAlice, bob: plainBob });
 
     await harness.waitFor(
       () => devAlice.lastPayloadOf(EVENTS.GAME_INIT) !== null && devBob.lastPayloadOf(EVENTS.GAME_INIT) !== null,
@@ -101,7 +127,8 @@ describe("dev-room live logging (production wiring)", () => {
     // documented contract (see GameFileLogger).
     const blocker = path.join(tmpRoot, "occupied");
     fs.writeFileSync(blocker, "not a directory");
-    harness = await createNetHarness({ gameLogDirectory: blocker });
+    logDirectory = blocker;
+    harness = await createNetHarness({ createGame: productionWiringFactory });
 
     harness.rooms["TESTROOM02"] = ROOM_RECORD(1);
     harness.joinRoom("TESTROOM02", "Alice");
@@ -109,9 +136,10 @@ describe("dev-room live logging (production wiring)", () => {
     const alice = await harness.connectPlayer({ username: "Alice", roomCode: "TESTROOM02" });
     const bob = await harness.connectPlayer({ username: "Bob", roomCode: "TESTROOM02" });
 
-    // The game starts when both seats are connected; its creation fails
+    // The game starts once both seats selected decks; its creation fails
     // because the logger cannot create its directory, and the failure is
     // broadcast to both seats.
+    await harness.pickDecks({ alice, bob });
     await harness.waitFor(
       () => alice.lastPayloadOf(EVENTS.GAME_ERROR) !== null || bob.lastPayloadOf(EVENTS.GAME_ERROR) !== null,
       "game creation failure was never reported to the players."

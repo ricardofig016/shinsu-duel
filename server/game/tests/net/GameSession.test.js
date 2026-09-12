@@ -112,7 +112,7 @@ describe("GameSession game lifecycle", () => {
     expect(session.game).toBe(game);
     expect(session.revision).toBe(1);
     expect(createGame).toHaveBeenCalledTimes(1);
-    expect(createGame).toHaveBeenCalledWith({ roomCode: ROOM_CODE, usernames: USERNAMES, seed: 42 });
+    expect(createGame).toHaveBeenCalledWith({ roomCode: ROOM_CODE, usernames: USERNAMES, seed: 42, decks: null, enforceDeckRules: true });
 
     expect(session.ensureGame()).toBe(game);
     expect(createGame).toHaveBeenCalledTimes(1);
@@ -188,6 +188,80 @@ describe("GameSession game lifecycle", () => {
     expect(() => session.applyDecision({ decisionId: "d1", choices: [] })).toThrow(
       /has not started yet/
     );
+  });
+});
+
+describe("GameSession deck picks", () => {
+  const pick = (over = {}) => ({ deckId: "deck-1", name: "Deck", cards: ["slug_a", "slug_b"], illegal: false, ...over });
+
+  test("stores, replaces, and reads a seat's pick", () => {
+    const session = makeSession();
+
+    expect(session.getDeckPick("Alice")).toBeNull();
+
+    session.setDeckPick("Alice", pick());
+    session.setDeckPick("Alice", pick({ deckId: "deck-2", name: "Other" }));
+
+    expect(session.getDeckPick("Alice")).toEqual({
+      deckId: "deck-2",
+      name: "Other",
+      cards: ["slug_a", "slug_b"],
+      illegal: false,
+    });
+    expect(session.getDeckPick("Bob")).toBeNull();
+  });
+
+  test("the stored pick is a copy of the given record", () => {
+    const session = makeSession();
+    const given = pick();
+
+    session.setDeckPick("Alice", given);
+    given.cards.push("slug_c");
+    given.name = "tampered";
+
+    expect(session.getDeckPick("Alice").cards).toEqual(["slug_a", "slug_b"]);
+    expect(session.getDeckPick("Alice").name).toBe("Deck");
+  });
+
+  test("rejects picks for unknown seats and malformed records", () => {
+    const session = makeSession();
+
+    expect(() => session.setDeckPick("Mallory", pick())).toThrow(/no seat/);
+    expect(() => session.setDeckPick("Alice", null)).toThrow(TypeError);
+    expect(() => session.setDeckPick("Alice", pick({ deckId: "" }))).toThrow(TypeError);
+    expect(() => session.setDeckPick("Alice", pick({ name: "" }))).toThrow(TypeError);
+    expect(() => session.setDeckPick("Alice", pick({ cards: "slug_a" }))).toThrow(TypeError);
+    expect(() => session.setDeckPick("Alice", pick({ cards: [7] }))).toThrow(TypeError);
+    expect(() => session.setDeckPick("Alice", pick({ illegal: "yes" }))).toThrow(TypeError);
+  });
+
+  test("clearing one pick leaves the other; clearing all empties the phase", () => {
+    const session = makeSession();
+    session.setDeckPick("Alice", pick());
+    session.setDeckPick("Bob", pick({ deckId: "deck-2" }));
+
+    session.clearDeckPick("Alice");
+    expect(session.getDeckPick("Alice")).toBeNull();
+    expect(session.getDeckPick("Bob")).not.toBeNull();
+
+    session.clearDeckPicks();
+    expect(session.getDeckPick("Bob")).toBeNull();
+  });
+
+  test("ensureGame forwards the start arguments to the factory", () => {
+    const createGame = jest.fn(() => createTestGame());
+    const session = makeSession({ createGame });
+    const decks = { Alice: [1, 2, 3], Bob: [4, 5, 6] };
+
+    session.ensureGame({ decks, enforceDeckRules: false });
+
+    expect(createGame).toHaveBeenCalledWith({
+      roomCode: ROOM_CODE,
+      usernames: USERNAMES,
+      seed: 42,
+      decks,
+      enforceDeckRules: false,
+    });
   });
 });
 

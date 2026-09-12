@@ -1,4 +1,5 @@
 import GameState from "../game/GameState.js";
+import { buildSlugIndex } from "../utils/card-catalog.js";
 import { isTestCard } from "../utils/test-card.js";
 
 /**
@@ -36,7 +37,7 @@ export function validateDeckCards(cardSlugs, catalog) {
     return { buildable: false, legal: false, problems: ["Deck cards must be an array of card slugs."] };
   }
 
-  const bySlug = new Map(Object.values(catalog ?? {}).map((card) => [card.slug, card]));
+  const bySlug = buildSlugIndex(catalog);
   const eligibleSlugs = new Set(
     GameState.getEligibleCardIds(catalog)
       .map((cardId) => catalog?.[cardId]?.slug)

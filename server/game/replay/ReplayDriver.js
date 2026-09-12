@@ -51,7 +51,7 @@ export default class ReplayDriver {
     const { initial, actions } = replayLog || {};
     if (!initial) throw new Error("Replay log is missing its initial state.");
 
-    const { roomCode, usernames, decks, firstPlayer, rngSeed, rngState, startingCounters, startingModifierCounter } = initial.meta;
+    const { roomCode, usernames, decks, firstPlayer, rngSeed, rngState, enforceDeckRules, startingCounters, startingModifierCounter } = initial.meta;
     if (rngSeed === null || rngSeed === undefined) {
       throw new Error("Replay requires a seeded RNG (rngSeed is missing from the log).");
     }
@@ -70,6 +70,9 @@ export default class ReplayDriver {
     const game = new GameState(roomCode, usernames, decks, firstPlayer, {
       rng,
       cards,
+      // Artifacts recorded before deck-rule enforcement was an option default
+      // to the strict mode their decks were dealt under.
+      enforceDeckRules: enforceDeckRules !== false,
     });
 
     assertEqual(game.toSerializedState(), initial.state, "initial state");

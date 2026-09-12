@@ -17,9 +17,19 @@ RULES.md fixes the deck contract: exactly 30 cards, up to 3 copies of each card,
 - **Buildable** — every slug resolves in the compiled catalog, so the engine could construct the cards at all.
 - **Legal** — buildable, exactly 30 cards, at most 3 copies per card, no Unreachable cards, no test cards.
 
-The engine is the single enforcement point: `GameState.#buildDeckFromCardIds` rejects anything illegal when a game is constructed, and `GameState.getDeckPoolCardIds` (the pool dealt decks are built from) contains only deck-legal cards, so default decks always satisfy the full contract. `server/decks/deckValidation.js` (`validateDeckCards`) computes the same contract for the collection, reading `GameState.INIT_DECK_SIZE` and `GameState.MAX_CARD_COPIES` instead of copying them.
+The engine enforces the rules when a game is constructed. `GameState.#buildDeckFromCardIds` rejects anything illegal under the default strict mode, and `GameState.getDeckPoolCardIds` (the pool dealt decks are built from) contains only deck-legal cards, so default decks always satisfy the full contract. A game constructed with the `enforceDeckRules` option set to false applies only the buildable contract — size, copy limit, Unreachable, and test-card checks are skipped — which is how a dev room starts with an illegal deck. The mode is recorded in the replay artifact's `InitialState` metadata (`meta.enforceDeckRules`) and restored by `ReplayDriver`, so a dev game reconstructs byte-for-byte. `server/decks/deckValidation.js` (`validateDeckCards`) computes the same contract for the collection, reading `GameState.INIT_DECK_SIZE` and `GameState.MAX_CARD_COPIES` instead of copying them.
 
-Decks may be **saved with rule violations** (they are flagged with per-violation problems and stay out of non-dev games), but never with unbuildable card lists: no room type can start a game with them. Legality is recomputed on every read, because the compiled catalog can change between saves.
+Decks may be **saved with rule violations** (they are flagged with per-violation problems and stay out of non-dev games), but never with unbuildable card lists: no room type can start a game with them. Legality is recomputed on every read, because the compiled catalog can change between saves. The deck-to-engine boundary lives in `server/utils/card-catalog.js` (`buildSlugIndex` / `getCardIdBySlug`): the gateway converts the stored slugs to runtime cardIds when a game is created, and re-checks buildability and legality there, so a deck edited or deleted between pick and start cannot reach the engine.
+
+**Stored order is not the draw order.** A deck's card list is kept exactly as the builder saved it (so editing a deck never reshuffles it), and `createSeededGame` shuffles every dealt deck — explicit and default alike — with the room seed before construction. A player therefore cannot control their own draw order by arranging their list, and a fixed seed reproduces the same deal deterministically.
+
+## Starting a game with a deck
+
+The pre-game deck-selection phase on the game page is owned by the net gateway; its flow, gating, and `game-deck-select` / `game-deck-status` messages are documented in `NET_PROTOCOL_ARCHITECTURE.md`. The page's data comes from this collection:
+
+- the picker lists the caller's decks from `GET /decks/data`, so each option already carries `legal` and `problems`; illegal decks are disabled in normal rooms and selectable behind a warning marker in dev rooms (`dev` in the selection status, from `isDevRoomCode`),
+- the pure helpers behind the picker live in `public/pages/game/deckStep.js` (see its header doc),
+- at start the gateway resolves the picks through the deck library and the compiled catalog and hands the engine `{ decks, enforceDeckRules }` (see the buildable-versus-legal contract above).
 
 ## Starter decks
 

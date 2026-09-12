@@ -15,6 +15,7 @@ import {
 import {
   buildDeployUnitAction,
   buildDecision,
+  buildDeckSelect,
   buildEquipEquipmentAction,
   buildGenerateFireChargeAction,
   buildPassTurnAction,
@@ -22,6 +23,7 @@ import {
   buildSwitchPositionAction,
   buildUseAbilityAction,
 } from "/game/actions.js";
+import { buildDeckStepViewModel } from "/pages/game/deckStep.js";
 import { getGlossary } from "/utils/glossary.js";
 import {
   buildDeckTooltipText,
@@ -67,13 +69,111 @@ const findUnit = (state, player, unitId) => {
 /* ── overlays ─────────────────────────────────────────────────────────── */
 
 const showWaiting = (payload) => {
+  hideDeckSelect();
   const overlay = document.querySelector("#waiting-overlay");
   document.querySelector("#waiting-overlay-message").textContent = payload?.message ?? "";
   overlay.classList.remove("hidden");
 };
 
-const showPeekReveal = (payload) => {
-  const overlay = document.querySelector("#peek-overlay");
+/* ── pre-game deck selection ──────────────────────────────────────────── */
+
+const deckStepState = { username: null, decks: null };
+
+const hideDeckSelect = () => {
+  document.querySelector("#deck-select-overlay").classList.add("hidden");
+};
+
+const loadDeckStepUsername = async () => {
+  if (!deckStepState.username) {
+    try {
+      const response = await fetch("/auth/status");
+      const payload = await response.json();
+      deckStepState.username = payload.isAuthenticated ? payload.username : null;
+    } catch {
+      deckStepState.username = null;
+    }
+  }
+  return deckStepState.username;
+};
+
+const loadDeckStepDecks = async () => {
+  if (!deckStepState.decks) {
+    try {
+      const response = await fetch("/decks/data");
+      deckStepState.decks = response.ok ? (await response.json()).decks ?? [] : [];
+    } catch {
+      deckStepState.decks = [];
+    }
+  }
+  return deckStepState.decks;
+};
+
+const renderDeckStep = async (socket, status) => {
+  // Replace the parking overlay before anything can fail: a stuck "Waiting"
+  // overlay would hide the selection phase entirely.
+  document.querySelector("#waiting-overlay").classList.add("hidden");
+  const username = await loadDeckStepUsername();
+  const decks = await loadDeckStepDecks();
+  const model = buildDeckStepViewModel({ status, decks, username });
+  if (!model) return;
+
+  const overlay = document.querySelector("#deck-select-overlay");
+  overlay.classList.remove("hidden");
+
+  const list = document.querySelector("#deck-select-list");
+  list.replaceChildren(
+    ...model.options.map((option) => {
+      const row = document.createElement("div");
+      row.className = "deck-select-option";
+
+      const label = document.createElement("div");
+      label.className = "deck-select-option-label";
+
+      const name = document.createElement("strong");
+      const mine = option.id === model.myDeckId;
+      name.textContent = option.warning ? `${option.name} (not legal)` : option.name;
+      if (mine) name.textContent += " — selected";
+      label.appendChild(name);
+
+      const meta = document.createElement("span");
+      meta.textContent = ` ${option.size} cards`;
+      if (!option.legal) meta.textContent += ` — ${option.problems.join(" ")}`;
+      label.appendChild(meta);
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = mine ? "Re-pick" : "Select";
+      button.disabled = !option.selectable;
+      button.addEventListener("click", () => socket.emit(EVENTS.GAME_DECK_SELECT, buildDeckSelect(option.id)));
+
+      row.appendChild(label);
+      row.appendChild(button);
+      return row;
+    })
+  );
+
+  const yoursLine = document.querySelector("#deck-select-yours");
+  const mySeat = model.mySeat;
+  yoursLine.classList.remove("hidden");
+  yoursLine.textContent = mySeat?.deckChosen ? `Your deck: ${mySeat.deckName}${mySeat.illegal ? " (not legal)" : ""}` : "Pick a deck to ready up.";
+
+  const opponentLine = document.querySelector("#deck-select-opponent");
+  const opponent = model.opponentSeat;
+  opponentLine.classList.remove("hidden");
+  opponentLine.textContent = !opponent
+    ? "Waiting for the opponent to connect."
+    : opponent.deckChosen
+      ? `Opponent ready: ${opponent.deckName}`
+      : "Waiting for the opponent to choose a deck.";
+
+  const warning = document.querySelector("#deck-select-warning");
+  warning.classList.toggle("hidden", !model.dev);
+  warning.textContent = model.dev ? "Dev room: illegal decks start the game with rule enforcement disabled." : "";
+};
+
+/* ── reveals ──────────────────────────────────────────────────────────── */
+
+const showPeekReveal = (payload) => {  const overlay = document.querySelector("#peek-overlay");
   const cards = document.querySelector("#peek-overlay-cards");
   cards.replaceChildren(
     ...(payload?.cards ?? []).map((card) => {
@@ -413,6 +513,7 @@ const render = async (state, data, socket) => {
   renderDecisionPrompt(state, socket);
   showGameOver(state.gameOver);
   document.querySelector("#waiting-overlay").classList.add("hidden");
+  hideDeckSelect();
 };
 
 /* ── one-time board setup ─────────────────────────────────────────────── */
@@ -666,6 +767,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   socket.on(EVENTS.GAME_ERROR, (payload) => alert(payload?.message ?? "Something went wrong."));
   socket.on(EVENTS.GAME_OVER, (payload) => showGameOver(payload));
   socket.on(EVENTS.GAME_WAITING, (payload) => showWaiting(payload));
+  socket.on(EVENTS.GAME_DECK_STATUS, (payload) => void renderDeckStep(socket, payload));
   socket.on(EVENTS.GAME_HAND_PEEK, (payload) => showPeekReveal(payload));
   // after a transport reconnect the server treats the socket as new, so ask
   // for the current state view

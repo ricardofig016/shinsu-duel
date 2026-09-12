@@ -14,6 +14,8 @@ import { createSeededGame } from "./game/gameFactory.js";
 import { devRoomLoggingBackends } from "./game/logging/GameFileLogger.js";
 import SessionRegistry from "./game/net/SessionRegistry.js";
 import SocketGateway from "./game/net/socketGateway.js";
+import defaultDeckLibrary from "./decks/deckLibrary.js";
+import cardsData from "./data/cards.json" with { type: "json" };
 
 async function readFileRoom(code) {
   return (await readJsonFile(roomsFilePath))[code] ?? null;
@@ -33,7 +35,12 @@ async function readFileRoom(code) {
  *   session registry backing the gateway
  * @param {(roomCode: string) => Promise<object|null>} [args.loadRoom]
  *   room lookup by code
- * @param {Function} [args.createGame] `({ roomCode, usernames, seed }) => GameState`
+ * @param {Function} [args.createGame] `({ roomCode, usernames, seed, decks, enforceDeckRules }) => GameState`
+ * @param {object} [args.deckLibrary] deck collection the pre-game deck
+ *   selection resolves picks against (defaults to the production library)
+ * @param {object} [args.catalog] compiled card catalog used for deck
+ *   validation and the slug → cardId conversion (defaults to the production
+ *   compiled catalog)
  * @param {boolean} [args.logToFile=true] when false, no file logging is
  *   configured (embedded and test boots)
  * @param {string} [args.gameLogDirectory="server/logs/games"] directory for
@@ -43,7 +50,7 @@ async function readFileRoom(code) {
  *   io: import("socket.io").Server, gateway: SocketGateway,
  *   registry: SessionRegistry }}
  */
-export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
+export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
   const app = express();
   const server = createServer(app);
   const io = new Server(server);
@@ -89,13 +96,17 @@ export function createGameServer({ registry = new SessionRegistry(), loadRoom, c
   const gameGateway = new SocketGateway({
     registry,
     loadRoom: loadRoom ?? readFileRoom,
-    createGame: createGame ?? (({ roomCode, usernames, seed }) =>
+    createGame: createGame ?? (({ roomCode, usernames, seed, decks, enforceDeckRules }) =>
       createSeededGame({
         roomCode,
         usernames,
         seed,
+        decks,
+        enforceDeckRules,
         loggerBackends: devRoomLoggingBackends(roomCode, { directory: gameLogDirectory }),
       })),
+    deckLibrary,
+    catalog,
     logger,
   });
   gameGateway.attach(io);

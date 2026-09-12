@@ -77,3 +77,12 @@ export function buildDecision(decisionId, choices) {
   if (!Array.isArray(choices)) throw new TypeError("choices must be an array.");
   return { decisionId, choices: [...choices] };
 }
+
+/**
+ * Build the pre-game deck-selection payload. `deckId` is the id of one of
+ * the sender's own decks in the deck collection.
+ */
+export function buildDeckSelect(deckId) {
+  assertNonEmptyString(deckId, "deckId");
+  return { deckId };
+}

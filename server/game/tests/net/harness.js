@@ -1,21 +1,32 @@
 import { io as createClient } from "socket.io-client";
+import fs from "fs";
+import os from "os";
+import path from "path";
 import { createGameServer } from "../../../../server/createGameServer.js";
+import { createDeckLibrary } from "../../../../server/decks/deckLibrary.js";
 import { EVENTS } from "../../net/protocol.js";
-import { createTestGame, setupGameWithHands } from "../utils.js";
+import { createTestGame, setupGameWithHands, createLegalDeck } from "../utils.js";
+import { cards } from "../fixtures/cards.js";
 
 /**
  * Real-transport test harness for the game net layer.
  *
  * Boots the express app and Socket.IO from `createGameServer` on an ephemeral
- * port, with an in-memory room store and the test-owned fixture catalog.
- * Players authenticate through the real `/auth/login` endpoint and connect
- * with `socket.io-client`, so the tests exercise the same path as the
- * browser: session cookie → socket handshake → gateway.
+ * port, with an in-memory room store, a temp-file deck library, and the
+ * test-owned fixture catalog. Players authenticate through the real
+ * `/auth/login` endpoint and connect with `socket.io-client`, so the tests
+ * exercise the same path as the browser: session cookie → socket handshake →
+ * gateway.
  *
  * Seats are always Alice and Bob (the fixture helpers' usernames). Room
  * records support a `hands` spec `{ Alice: [...], Bob: [...] }` that seeds
  * the players' opening hands with named fixture cards; without it both
  * players draw from legal fixture decks.
+ *
+ * A game starts only once both seats selected a deck (the pre-game
+ * deck-selection phase). `seatPlayers` selects an auto-created legal deck
+ * per seat; tests that need specific decks create them through the harness
+ * deck helpers and select them explicitly.
  */
 
 const SEAT_USERNAMES = ["Alice", "Bob"];
@@ -87,8 +98,13 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
         ? undefined
         : handsGameFactory;
 
+  const decksFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "dsh-net-decks-")), "decks.json");
+  const deckLibrary = createDeckLibrary({ filePath: decksFile });
+
   const { server, io, registry } = createGameServer({
     loadRoom: async (roomCode) => rooms[roomCode] ?? null,
+    deckLibrary,
+    catalog: cards,
     ...(createGame !== undefined ? { createGame } : {}),
     ...(gameLogDirectory !== undefined ? { gameLogDirectory } : {}),
     logToFile: false,
@@ -99,6 +115,11 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     server.listen(0, "127.0.0.1", resolve);
   });
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
+
+  const slugByCardId = new Map(Object.values(cards).map((card) => [card.cardId, card.slug]));
+
+  /** A legal 30-card deck as card slugs, from the fixture catalog. */
+  const legalDeckSlugs = () => createLegalDeck().map((cardId) => slugByCardId.get(cardId));
 
   /** Add a room to the store and return its code. */
   const createRoom = ({ hands } = {}) => {
@@ -161,17 +182,58 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     return client;
   };
 
-  /** Create a full two-player room and connect both authenticated seats. */
+  /**
+   * Create a deck in the harness library; returns the deck record. Creations
+   * are serialized: the library does read-modify-write on its JSON file, so
+   * concurrent creates would clobber each other.
+   */
+  let deckQueue = Promise.resolve();
+  const createDeck = (username, name, cardSlugs) => {
+    const created = deckQueue.then(() => deckLibrary.createDeck({ owner: username, name, cards: cardSlugs }));
+    deckQueue = created.catch(() => {});
+    return created;
+  };
+
+  /** Each seat's auto-created legal deck, for tests that don't care which. */
+  const seatDeckIds = new Map();
+  const defaultSeatDeckId = async (username) => {
+    if (!seatDeckIds.has(username)) {
+      const deck = await createDeck(username, `${username}'s deck`, legalDeckSlugs());
+      seatDeckIds.set(username, deck.id);
+    }
+    return seatDeckIds.get(username);
+  };
+
+  /** Emit the deck-selection message for one seat. */
+  const selectDeck = (client, deckId) => client.emit(EVENTS.GAME_DECK_SELECT, { deckId });
+
+  /** Emit deck selections for both seats without waiting for the start. */
+  const pickDecks = async ({ alice, bob }, deckIds = {}) => {
+    const [aliceDeckId, bobDeckId] = await Promise.all([
+      deckIds.Alice ?? defaultSeatDeckId("Alice"),
+      deckIds.Bob ?? defaultSeatDeckId("Bob"),
+    ]);
+    selectDeck(alice, aliceDeckId);
+    selectDeck(bob, bobDeckId);
+  };
+
+  /** Select decks for both seats and await the game-init broadcast. */
+  const selectDecks = async ({ alice, bob }, deckIds = {}) => {
+    await pickDecks({ alice, bob }, deckIds);
+    await waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null && bob.lastPayloadOf(EVENTS.GAME_INIT) !== null,
+      "game-init never arrived for both seats."
+    );
+  };
+
+  /** Create a full two-player room, connect both seats, and select decks. */
   const seatPlayers = async ({ hands } = {}) => {
     const roomCode = createRoom({ hands });
     joinRoom(roomCode, "Alice");
     joinRoom(roomCode, "Bob");
     const alice = await connectPlayer({ username: "Alice", roomCode });
     const bob = await connectPlayer({ username: "Bob", roomCode });
-    await waitFor(
-      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null && bob.lastPayloadOf(EVENTS.GAME_INIT) !== null,
-      "game-init never arrived for both seats."
-    );
+    await selectDecks({ alice, bob });
     return { roomCode, alice, bob };
   };
 
@@ -190,6 +252,7 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     for (const client of clients) client.disconnect();
     await new Promise((resolve) => io.close(resolve));
     server.closeAllConnections?.();
+    fs.rmSync(path.dirname(decksFile), { recursive: true, force: true });
   };
 
   return {
@@ -197,6 +260,8 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     rooms,
     registry,
     io,
+    deckLibrary,
+    legalDeckSlugs,
     get createGameCalls() {
       return createGameCalls;
     },
@@ -204,6 +269,10 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     joinRoom,
     login,
     connectPlayer,
+    createDeck,
+    selectDeck,
+    pickDecks,
+    selectDecks,
     seatPlayers,
     waitFor,
     close,

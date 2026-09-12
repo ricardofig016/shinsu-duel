@@ -3,17 +3,20 @@ import os from "os";
 import path from "path";
 import ReplayDriver from "../../replay/ReplayDriver.js";
 import { applyStateDiff } from "../../utils/stateDiff.js";
+import { createSeededGame } from "../../gameFactory.js";
+import { devRoomLoggingBackends } from "../../logging/GameFileLogger.js";
 import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "../net/harness.js";
+import { cards } from "../fixtures/cards.js";
 
 /**
  * Proves that the on-disk replay stream written by the dev-room logger is a
  * faithful artifact: read it back from disk, rebuild the replay log exactly
  * as a debugging session would, and reconstruct the game with ReplayDriver.
  *
- * The game is created by the production default factory (compiled card
- * catalog), so the replay runs without a cards override — the same way a
- * real crash artifact would be replayed.
+ * The game is created through the production wiring (dealt decks threaded
+ * through the gateway's deferred start, dev-room logging backends) with the
+ * test-owned fixture catalog, and the replay restores it the same way.
  */
 
 const ROOM_CODE = "TESTROOM42";
@@ -32,7 +35,18 @@ describe("GameFileLogger replay round-trip", () => {
   });
 
   test("a replay stream read back from disk reconstructs the game byte-for-byte", async () => {
-    harness = await createNetHarness({ gameLogDirectory: tmpRoot });
+    harness = await createNetHarness({
+      createGame: ({ roomCode, usernames, seed, decks, enforceDeckRules }) =>
+        createSeededGame({
+          roomCode,
+          usernames,
+          seed,
+          decks,
+          enforceDeckRules,
+          cards,
+          loggerBackends: devRoomLoggingBackends(roomCode, { directory: tmpRoot }),
+        }),
+    });
     harness.rooms[ROOM_CODE] = { players: [], opponent: "friend", difficulty: null, seed: 42 };
     harness.joinRoom(ROOM_CODE, "Alice");
     harness.joinRoom(ROOM_CODE, "Bob");
@@ -41,6 +55,7 @@ describe("GameFileLogger replay round-trip", () => {
       Alice: await harness.connectPlayer({ username: "Alice", roomCode: ROOM_CODE }),
       Bob: await harness.connectPlayer({ username: "Bob", roomCode: ROOM_CODE }),
     };
+    await harness.pickDecks({ alice: seats.Alice, bob: seats.Bob });
     await harness.waitFor(
       () => seats.Alice.lastPayloadOf(EVENTS.GAME_INIT) !== null && seats.Bob.lastPayloadOf(EVENTS.GAME_INIT) !== null,
       "game-init never arrived."
@@ -91,8 +106,9 @@ describe("GameFileLogger replay round-trip", () => {
     // The failed first action changed nothing: an empty diff.
     expect(actions[0].diff).toEqual({ changed: {}, removed: [] });
 
-    // Replay exactly the way a crash artifact is replayed: no options.
-    const replayed = ReplayDriver.replay({ initial, actions });
+    // Replay exactly the way a crash artifact is replayed: the catalog the
+    // game was created with.
+    const replayed = ReplayDriver.replay({ initial, actions }, { cards });
 
     // Independent end-to-end check: applying the recorded diffs to the
     // initial state must land on the same final state the driver produced.

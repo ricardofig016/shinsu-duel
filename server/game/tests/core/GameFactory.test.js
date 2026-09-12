@@ -44,12 +44,35 @@ describe("createSeededGame", () => {
     expect(players).toContain(game.currentTurn);
   });
 
-  test("honors explicit decks without reordering", () => {
-    const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
-    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, decks, cards });
+  test("shuffles an explicit deck so the stored order never becomes the draw order", () => {
+    const stored = createLegalDeck();
+    const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, decks: { Alice: stored, Bob: stored }, cards });
+
     for (const username of players) {
-      expect(fullDeck(game.playerStates[username])).toEqual(decks[username]);
+      const dealt = fullDeck(game.playerStates[username]);
+      expect(dealt).not.toEqual(stored);
+      // Every card survives the shuffle: same multiset, different order.
+      expect([...dealt].sort((a, b) => a - b)).toEqual([...stored].sort((a, b) => a - b));
     }
+  });
+
+  test("the explicit-deck shuffle is deterministic for a fixed seed", () => {
+    const stored = createLegalDeck();
+    const deals = [];
+    for (let i = 0; i < 3; i++) {
+      IdFactory.resetAll();
+      resetModifierCounter();
+      const game = createSeededGame({ roomCode: "R", usernames: players, seed: 42, decks: { Alice: stored, Bob: stored }, cards });
+      deals.push(JSON.stringify(fullDeck(game.playerStates.Alice)));
+    }
+    expect(deals.every((deal) => deal === deals[0])).toBe(true);
+  });
+
+  test("a different seed shuffles the same explicit deck differently", () => {
+    const stored = createLegalDeck();
+    const first = createSeededGame({ roomCode: "R", usernames: players, seed: 42, decks: { Alice: stored, Bob: stored }, cards });
+    const second = createSeededGame({ roomCode: "R", usernames: players, seed: 43, decks: { Alice: stored, Bob: stored }, cards });
+    expect(fullDeck(first.playerStates.Alice)).not.toEqual(fullDeck(second.playerStates.Alice));
   });
 
   test("generates a legal 30-card default deck for each player", () => {

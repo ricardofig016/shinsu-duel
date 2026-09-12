@@ -69,6 +69,7 @@ export default class GameState {
    * @param {string} firstPlayer (optional) username of the player to take the first turn. If omitted, the first username is chosen deterministically.
    * @param {Object} options (optional) additional configuration options.
    * @param {SeededRng} options.rng required seeded RNG (implementing next() and getState()) for deterministic random events (Blinded targeting, etc.). There is no Math.random fallback.
+   * @param {boolean} [options.enforceDeckRules] whether deck construction enforces the RULES.md deck rules (default true); dev rooms pass false to deal anything buildable
    * @param {Array} [options.loggerBackends] extra Logger backends attached at construction so they observe every entry, including InitialState.
    */
   constructor(roomCode, usernames, decks = {}, firstPlayer = null, options = {}) {
@@ -91,6 +92,12 @@ export default class GameState {
     // Injectable card catalog: tests supply a stable fixture set; production
     // falls back to the compiled static catalog.
     this.cards = options.cards ?? GameState.cards;
+
+    // Deck-rule enforcement mode. Default (and replay default for artifacts
+    // recorded before the option existed) is strict RULES.md enforcement;
+    // dev rooms deal player decks that only satisfy the buildable contract,
+    // so they construct their games with `enforceDeckRules: false`.
+    this._enforceDeckRules = options.enforceDeckRules !== false;
 
     // Trigger and passive managers own event subscriptions for field units.
     this._triggerManager = new TriggerManager(this.eventBus);
@@ -221,6 +228,7 @@ export default class GameState {
       firstPlayer: this.currentTurn,
       rngSeed,
       rngState,
+      enforceDeckRules: this._enforceDeckRules,
       startingCounters: this._startingCounters,
       startingModifierCounter: this._startingModifierCounter,
     });
@@ -338,13 +346,17 @@ export default class GameState {
 
   /**
    * Build a deck from an array of card ids.
-   * A deck holds exactly `INIT_DECK_SIZE` cards and up to `MAX_CARD_COPIES`
-   * copies of each card (RULES.md).
+   * Under strict enforcement (default) a deck holds exactly
+   * `INIT_DECK_SIZE` cards and up to `MAX_CARD_COPIES` copies of each card,
+   * with no Unreachable and no test cards (RULES.md). When rule enforcement
+   * is off (dev rooms), only the buildable contract applies: every id must
+   * resolve in the catalog.
    * @param {Array<number>} cardIds array of card ids
    * @returns {Array<Card>} Array of Card objects
    */
   #buildDeckFromCardIds(cardIds, username) {
-    if (!Array.isArray(cardIds) || cardIds.length !== GameState.INIT_DECK_SIZE)
+    if (!Array.isArray(cardIds)) throw new Error("deck must be an array of cardIds.");
+    if (this._enforceDeckRules && cardIds.length !== GameState.INIT_DECK_SIZE)
       throw new Error(`deck must be an array of ${GameState.INIT_DECK_SIZE} cardIds.`);
 
     const deck = [];
@@ -352,6 +364,10 @@ export default class GameState {
     cardIds.forEach((cardId) => {
       const cardData = this.cards[cardId];
       if (cardData === undefined) throw new Error(`Card with cardId ${cardId} does not exist`);
+      if (!this._enforceDeckRules) {
+        deck.push(new Card(cardId, cardData, username, this.eventBus));
+        return;
+      }
       if ((cardData.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) {
         throw new Error(`Card "${cardData.name}" is unreachable and cannot be included in a deck.`);
       }

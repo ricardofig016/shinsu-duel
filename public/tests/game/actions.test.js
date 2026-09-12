@@ -8,6 +8,7 @@ import {
   buildGenerateFireChargeAction,
   buildPassTurnAction,
   buildDecision,
+  buildDeckSelect,
 } from "../../game/actions.js";
 
 describe("outbound action builders", () => {
@@ -71,5 +72,11 @@ describe("outbound action builders", () => {
   test("buildDecision returns the exact payload", () => {
     expect(buildDecision("decision-1", [77])).toEqual({ decisionId: "decision-1", choices: [77] });
     expect(() => buildDecision("decision-1", null)).toThrow(TypeError);
+  });
+
+  test("buildDeckSelect returns the exact payload", () => {
+    expect(buildDeckSelect("deck-abc")).toEqual({ deckId: "deck-abc" });
+    expect(() => buildDeckSelect("")).toThrow(TypeError);
+    expect(() => buildDeckSelect(null)).toThrow(TypeError);
   });
 });

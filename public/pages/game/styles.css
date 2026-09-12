@@ -490,3 +490,30 @@ hr {
 body.no-interaction .tooltip-frame {
   display: none !important;
 }
+
+/* pre-game deck selection */
+#deck-select-overlay {
+  z-index: 3;
+}
+
+#deck-select-list {
+  min-width: 320px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.deck-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.deck-select-option-label {
+  text-align: left;
+}
+
+#deck-select-warning {
+  color: #c88a00;
+}

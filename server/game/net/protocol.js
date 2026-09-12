@@ -14,6 +14,7 @@ export const EVENTS = {
   GAME_ACTION: "game-action",
   GAME_DECISION: "game-decision",
   GAME_STATE_REQUEST: "game-state-request",
+  GAME_DECK_SELECT: "game-deck-select",
 
   // Outbound (server → client)
   GAME_INIT: "game-init",
@@ -22,6 +23,7 @@ export const EVENTS = {
   GAME_OVER: "game-over",
   GAME_WAITING: "game-waiting",
   GAME_HAND_PEEK: "game-hand-peek",
+  GAME_DECK_STATUS: "game-deck-status",
 };
 
 /**
@@ -108,4 +110,63 @@ export function buildHandPeek(peek) {
   }
 
   return { owner: peek.owner, observer: peek.observer, cards: peek.cards.map((card) => ({ ...card })) };
+}
+
+/**
+ * Build the inbound pre-game deck-selection payload. `deckId` is the id of
+ * one of the sender's own decks in the deck collection.
+ */
+export function buildDeckSelect({ deckId }) {
+  assertNonEmptyString(deckId, "deckId");
+  return { deckId };
+}
+
+/**
+ * Build the per-seat deck-selection progress payload broadcast during the
+ * pre-game selection phase.
+ *
+ * @param {object} args
+ * @param {boolean} args.dev whether the room is a dev room (illegal decks
+ *   are selectable there, so the client shows a warning instead of disabling)
+ * @param {Array<{ username: string, deckChosen: boolean, deckId: string|null,
+ *   deckName: string|null, illegal: boolean }>} args.seats one entry per seat,
+ *   in seat order; the id lets each seat recognize its own pick
+ */
+export function buildDeckStatus({ dev, seats }) {
+  if (typeof dev !== "boolean") {
+    throw new TypeError("dev must be a boolean.");
+  }
+  if (!Array.isArray(seats) || seats.length === 0) {
+    throw new TypeError("seats must be a non-empty array of seat entries.");
+  }
+
+  return {
+    dev,
+    seats: seats.map((seat) => {
+      if (!seat || typeof seat !== "object") {
+        throw new TypeError("each seat entry must be an object.");
+      }
+      assertNonEmptyString(seat.username, "seat.username");
+      if (typeof seat.deckChosen !== "boolean") {
+        throw new TypeError("seat.deckChosen must be a boolean.");
+      }
+      if (seat.deckChosen) {
+        assertNonEmptyString(seat.deckId, "seat.deckId");
+        assertNonEmptyString(seat.deckName, "seat.deckName");
+      } else if (seat.deckId !== null || seat.deckName !== null) {
+        throw new TypeError("seat.deckId and seat.deckName must be null when no deck is chosen.");
+      }
+      if (typeof seat.illegal !== "boolean") {
+        throw new TypeError("seat.illegal must be a boolean.");
+      }
+
+      return {
+        username: seat.username,
+        deckChosen: seat.deckChosen,
+        deckId: seat.deckId,
+        deckName: seat.deckName,
+        illegal: seat.illegal,
+      };
+    }),
+  };
 }

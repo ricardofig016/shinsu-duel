@@ -16,12 +16,21 @@ export function createAuthRouter({ usersFilePath: userFile = usersFilePath, prov
 
   // A newly created account receives one copy of every starter deck. An
   // existing record is never provisioned again, so deleted decks stay deleted.
+  // A failed provisioning rolls the account record back: the next login
+  // retries from scratch, so no account can get stuck without its decks.
   const createUser = async (username) => {
     const users = await readJsonFile(userFile);
     if (users[username]) return;
     users[username] = {};
     await writeJsonFile(userFile, users);
-    await provisionDecks(username);
+    try {
+      await provisionDecks(username);
+    } catch (error) {
+      const retry = await readJsonFile(userFile);
+      delete retry[username];
+      await writeJsonFile(userFile, retry);
+      throw error;
+    }
   };
 
   router.get("/status", async (req, res) => {
@@ -32,7 +41,7 @@ export function createAuthRouter({ usersFilePath: userFile = usersFilePath, prov
     return res.json({ isAuthenticated: false });
   });
 
-  router.post("/login", async (req, res) => {
+  router.post("/login", async (req, res, next) => {
     const { username } = req.body;
     if (!username) return res.status(400).send("Username is required");
 
@@ -44,8 +53,12 @@ export function createAuthRouter({ usersFilePath: userFile = usersFilePath, prov
           "Invalid username, must be 3-18 characters long and contain only letters, numbers, and underscores"
         );
 
-    const users = await readJsonFile(userFile);
-    if (!users[username]) await createUser(username);
+    try {
+      const users = await readJsonFile(userFile);
+      if (!users[username]) await createUser(username);
+    } catch (error) {
+      return next(error);
+    }
     req.session.username = username;
     return res.status(200).send("Login successful");
   });

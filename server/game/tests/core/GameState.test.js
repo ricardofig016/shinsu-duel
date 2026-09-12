@@ -323,6 +323,72 @@ describe("deck behavior", () => {
   });
 });
 
+describe("deck-rule enforcement option", () => {
+  test("is strict by default and recorded in the initial-state metadata", () => {
+    const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards });
+    expect(game.logger.getReplayLog().initial.meta.enforceDeckRules).toBe(true);
+  });
+
+  test("records a disabled enforcement mode in the initial-state metadata", () => {
+    const decks = { Alice: createLegalDeck(), Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards, enforceDeckRules: false });
+    expect(game.logger.getReplayLog().initial.meta.enforceDeckRules).toBe(false);
+  });
+
+  test("accepts a deck of the wrong size when enforcement is off", () => {
+    const decks = { Alice: createLegalDeck().slice(0, 29), Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards, enforceDeckRules: false });
+    expect(game.playerStates.Alice.deck.length + game.playerStates.Alice.hand.length).toBe(29);
+  });
+
+  test("accepts a deck exceeding the copy limit when enforcement is off", () => {
+    const cardId = getCardIdByName("Test Spear Bearer");
+    const overLimit = [cardId, cardId, cardId, cardId, ...createLegalDeck().slice(4)];
+    const decks = { Alice: overLimit, Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards, enforceDeckRules: false });
+
+    const dealt = [...game.playerStates.Alice.deck, ...game.playerStates.Alice.hand].map((c) => c.cardId);
+    expect(dealt.filter((id) => id === cardId)).toHaveLength(4);
+  });
+
+  test("accepts an unreachable card when enforcement is off", () => {
+    const unreachableId = Number(
+      Object.values(cards).find((card) => (card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")).cardId
+    );
+    const deck = createLegalDeck();
+    deck[0] = unreachableId;
+    const decks = { Alice: deck, Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards, enforceDeckRules: false });
+
+    const dealt = [...game.playerStates.Alice.deck, ...game.playerStates.Alice.hand].map((c) => c.cardId);
+    expect(dealt).toContain(unreachableId);
+  });
+
+  test("accepts a test card when enforcement is off", () => {
+    const catalogWithTestCard = { ...cards, 999999: { cardId: 999999, name: "_Test Engine Card", deckConstraints: [] } };
+    const deck = createLegalDeck();
+    deck[0] = 999999;
+    const decks = { Alice: deck, Bob: createLegalDeck() };
+    const game = new GameState(ROOM_CODE, USERNAMES, decks, null, {
+      rng: new SeededRng(1),
+      cards: catalogWithTestCard,
+      enforceDeckRules: false,
+    });
+
+    const dealt = [...game.playerStates.Alice.deck, ...game.playerStates.Alice.hand].map((c) => c.cardId);
+    expect(dealt).toContain(999999);
+  });
+
+  test("still rejects an unknown card id when enforcement is off (buildable contract)", () => {
+    const badDeck = Array.from({ length: 30 }, () => 999999);
+    const decks = { Alice: badDeck, Bob: createLegalDeck() };
+    expect(() =>
+      new GameState(ROOM_CODE, USERNAMES, decks, null, { rng: new SeededRng(1), cards, enforceDeckRules: false })
+    ).toThrow(/does not exist/);
+  });
+});
+
 describe("startedWithCard", () => {
   test("reflects the immutable starting deck composition per player", () => {
     const rachelId = getCardIdByName("Test Light Bearer");
