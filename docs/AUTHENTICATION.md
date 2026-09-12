@@ -4,7 +4,7 @@ A player is a username. Identity lives in the express-session, and a session is 
 
 ## Accounts
 
-`server/accounts/accountStore.js` owns `server/data/users.json` and its record shape: one empty object per username. It is the single declaration of that path, and both the gate and `server/routes/auth.js` go through it.
+`server/accounts/accountStore.js` owns `server/data/users.json` and its record shape: one empty object per username. It is the single declaration of that path, and the HTTP surface and `server/routes/auth.js` both go through it: `createRouter({ accounts })` builds one store per boot and hands it to the login routes, every gated route, and the socket identity check.
 
 - `hasAccount(username)` answers whether a name exists. A blank or missing name is never an account, and an absent file reads as no accounts at all.
 - `createAccountIfMissing(username)` returns whether it created the record, so the caller provisions exactly once per account.
@@ -38,7 +38,7 @@ Route contracts:
 | `requireApiSession` | `GET /decks/data`, `POST /decks/validate`, `POST /decks`, `PUT /decks/:id`, `DELETE /decks/:id`, `POST /game/createRoom`, `POST /game/:roomCode/join` |
 | No gate | `GET /login`, all `/auth/*`, and the read-only content surface: the home page, the cards page and its data route, the rules page and its content routes, plus the glossary, affiliation, position, and trait data routes |
 
-Both route factories (`createGameRouter`, `createDecksRouter`) take a `gate` option defaulting to the shared instance, so a test can inject a gate over its own accounts file.
+Each route factory takes an `accounts` option defaulting to the production store, so a boot that injects its own accounts (a test harness, an embedded server) injects them into the login routes, the gate, and the socket at once.
 
 ## The return path
 
@@ -53,4 +53,4 @@ Both route factories (`createGameRouter`, `createDecksRouter`) take a `gate` opt
 
 ## Tests
 
-Route suites inject an identity through an `x-test-user` header and inject `createAuthGate({ accounts: createAccountStore({ filePath }) })` over a temporary accounts file, so no route test reads the accounts of the machine running it. `server/routes/authentication.test.js` covers both contracts and both rejection reasons, `server/routes/login.test.js` covers the page, and `server/game/tests/net/protocolParity.test.js` keeps `EVENTS` and `ERROR_CODES` equal between the two protocol copies. The net harness logs in for real (see `TESTING.md`), so those suites write `Alice` and `Bob` into `server/data/users.json`.
+Route suites inject an identity through an `x-test-user` header and inject an account store over a temporary accounts file, so no route test reads the accounts of the machine running it. `server/routes/authentication.test.js` covers both contracts and both rejection reasons, `server/routes/login.test.js` covers the page, and `server/game/tests/net/protocolParity.test.js` keeps `EVENTS` and `ERROR_CODES` equal between the two protocol copies. The net harness logs in for real (see `TESTING.md`) against in-memory accounts and a temporary deck library, so those suites leave `server/data/users.json` and `server/data/decks.json` untouched.

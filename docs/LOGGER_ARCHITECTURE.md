@@ -96,7 +96,7 @@ The tree is fully recursive: `_buildCausationTree` follows `ctx._children` arbit
 
 In addition to root-event entries (shown above), the Logger writes:
 
-- `InitialState` — the reconstructed construction metadata (decks, first player, RNG seed, RNG position, starting ID counters) plus the full serialized state.
+- `InitialState` — the reconstructed construction metadata (`roomCode`, `usernames`, `decks`, `firstPlayer`, `rngSeed`, `rngState`, `enforceDeckRules`, `startingCounters`, `startingModifierCounter`) plus the full serialized state.
 - `UserAction` / `UserDecision` — one entry per `processAction` / `resolveDecision`, with the input payload, a deep `diff` against the previous recorded state (`{ changed: { "<dotted.path>": value }, removed: ["<dotted.path>"] }`, computed by `utils/stateDiff.js`), `ok`, and `error` (for failed inputs — whose diff is empty, proving no mutation). The artifact never stores a full per-step state: the diff base is the `InitialState` state or the prior entry's, so each change is stored exactly once.
 - `EventFailure` — written via `EventBus.onAbort` when an authoritative handler failure aborts a transaction.
 
@@ -243,7 +243,7 @@ logger.addBackend(b); // → register custom backend
 
 ## Replay
 
-`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters **and the recorded RNG position** (`initial.meta.rngState`), reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision` while stepping an in-memory expected state forward with each recorded diff (`utils/stateDiff.js` `applyStateDiff`) — asserting the **full** serialized state matches after every step. The artifact stores only per-step diffs, so verification stays byte-for-byte while the file stays small; legacy artifacts that stored a full `stateAfter` per entry are rejected loudly.
+`ReplayDriver.replay(replayLog)` restores the recorded ID/modifier counters **and the recorded RNG position** (`initial.meta.rngState`), reconstructs `GameState` from the `InitialState` metadata (decks, first player, seeded RNG, and the recorded `enforceDeckRules` mode, so a dev game that started with an illegal deck rebuilds under the same enforcement), verifies the initial serialization, then re-applies each `UserAction`/`UserDecision` while stepping an in-memory expected state forward with each recorded diff (`utils/stateDiff.js` `applyStateDiff`) — asserting the **full** serialized state matches after every step. The artifact stores only per-step diffs, so verification stays byte-for-byte while the file stays small; legacy artifacts that stored a full `stateAfter` per entry are rejected loudly.
 
 Replay requires a **seeded RNG**. Every game is constructed with a `SeededRng`. `gameFactory` turns a room's persisted seed into the seeded first-player roll and shuffled default decks, then passes them explicitly to `GameState`. Deck building consumes RNG draws before the constructor runs, which is why the driver restores `meta.rngState` — the exact `{ seed, calls }` position captured alongside the initial state — before reconstructing, so subsequent draws stay aligned with the log.
 
