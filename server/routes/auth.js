@@ -1,16 +1,18 @@
 import express from "express";
-import { createAccountStore, usersFilePath } from "../accounts/accountStore.js";
+import { createAccountStore } from "../accounts/accountStore.js";
 import { provisionStarterDecks } from "../decks/deckProvisioning.js";
 
 /**
  * Auth routes with injectable storage, so tests can drive login against a
  * temporary accounts file and deck library.
  *
- * @param {{ usersFilePath?: string, provisionDecks?: Function }} [options]
+ * @param {{ accounts?: object, provisionDecks?: Function }} [options]
+ *   `accounts` is the account store the routes read and write, injectable so a
+ *   server boot uses one store for the login routes, the session gate, and the
+ *   socket identity check.
  */
-export function createAuthRouter({ usersFilePath: userFile = usersFilePath, provisionDecks = provisionStarterDecks } = {}) {
+export function createAuthRouter({ accounts = createAccountStore(), provisionDecks = provisionStarterDecks } = {}) {
   const router = express.Router();
-  const accounts = createAccountStore({ filePath: userFile });
 
   // A newly created account receives one copy of every starter deck. An
   // existing record is never provisioned again, so deleted decks stay deleted.
@@ -66,5 +68,3 @@ export function createAuthRouter({ usersFilePath: userFile = usersFilePath, prov
 
   return router;
 }
-
-export default createAuthRouter();

@@ -6,7 +6,6 @@ import path from "node:path";
 import { createDecksRouter } from "./decks.js";
 import { createDeckLibrary } from "../decks/deckLibrary.js";
 import { createAccountStore } from "../accounts/accountStore.js";
-import { createAuthGate } from "./authentication.js";
 import GameState from "../game/GameState.js";
 import { cards } from "../game/tests/fixtures/cards.js";
 
@@ -23,7 +22,7 @@ function startApp() {
   const library = createDeckLibrary({ filePath: path.join(directory, "decks.json") });
   const accountsPath = path.join(directory, "users.json");
   fs.writeFileSync(accountsPath, JSON.stringify(TEST_ACCOUNTS, null, 2));
-  const gate = createAuthGate({ accounts: createAccountStore({ filePath: accountsPath }) });
+  const accounts = createAccountStore({ filePath: accountsPath });
   const app = express();
   app.use(express.json());
   app.use(session({ secret: "test", resave: false, saveUninitialized: true }));
@@ -31,7 +30,7 @@ function startApp() {
     if (req.headers["x-test-user"]) req.session.username = req.headers["x-test-user"];
     next();
   });
-  app.use("/decks", createDecksRouter({ library, catalog: cards, gate }));
+  app.use("/decks", createDecksRouter({ library, catalog: cards, accounts }));
 
   const server = app.listen(0);
   return new Promise((resolve) => {

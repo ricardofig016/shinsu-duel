@@ -5,7 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { createGameRouter } from "./game.js";
 import { createAccountStore } from "../accounts/accountStore.js";
-import { createAuthGate } from "./authentication.js";
 
 // The session username comes from a test header, so each request can act as
 // any user without juggling cookies. Accounts live in a temporary file, so the
@@ -17,7 +16,7 @@ function startApp() {
   const roomsPath = path.join(directory, "rooms.json");
   const accountsPath = path.join(directory, "users.json");
   fs.writeFileSync(accountsPath, JSON.stringify(TEST_ACCOUNTS, null, 2));
-  const gate = createAuthGate({ accounts: createAccountStore({ filePath: accountsPath }) });
+  const accounts = createAccountStore({ filePath: accountsPath });
   const app = express();
   app.use(express.json());
   app.use(session({ secret: "test", resave: false, saveUninitialized: true }));
@@ -25,7 +24,7 @@ function startApp() {
     if (req.headers["x-test-user"]) req.session.username = req.headers["x-test-user"];
     next();
   });
-  app.use("/game", createGameRouter({ roomsFilePath: roomsPath, gate }));
+  app.use("/game", createGameRouter({ roomsFilePath: roomsPath, accounts }));
 
   const server = app.listen(0);
   return new Promise((resolve) => {

@@ -4,7 +4,8 @@ import crypto from "node:crypto";
 import winston from "winston";
 import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 import { generateSeed } from "../game/utils/SeededRng.js";
-import authGate from "./authentication.js";
+import { createAccountStore } from "../accounts/accountStore.js";
+import { createAuthGate } from "./authentication.js";
 
 export const roomsFilePath = path.resolve("server/data/rooms.json");
 
@@ -22,12 +23,13 @@ const logger = winston.createLogger({
  * Game routes with injectable storage, so tests can drive room creation and
  * joining against a temporary rooms file.
  *
- * @param {{ roomsFilePath?: string, gate?: object }} [options] `gate` is the
- *   session gate, injectable so tests can point it at a temporary accounts file.
+ * @param {{ roomsFilePath?: string, accounts?: object }} [options] `accounts`
+ *   is the account store the session gate reads, injectable so a server boot
+ *   shares one store across the login routes, the gate, and the socket.
  */
-export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath, gate = authGate } = {}) {
+export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath, accounts = createAccountStore() } = {}) {
   const router = express.Router();
-  const { requireApiSession, requirePageSession } = gate;
+  const { requireApiSession, requirePageSession } = createAuthGate({ accounts });
 
   /**
    * Serialized read-modify-write over the rooms runtime file. The JSON file has
@@ -128,5 +130,3 @@ export function createGameRouter({ roomsFilePath: roomsFile = roomsFilePath, gat
 
   return router;
 }
-
-export default createGameRouter();

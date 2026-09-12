@@ -51,5 +51,3 @@ export function createAuthGate({ accounts = createAccountStore() } = {}) {
 
   return { requireApiSession, requirePageSession };
 }
-
-export default createAuthGate();

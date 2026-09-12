@@ -2,8 +2,9 @@ import express from "express";
 import path from "node:path";
 import cardsData from "../data/cards.json" with { type: "json" };
 import deckLibrary from "../decks/deckLibrary.js";
+import { createAccountStore } from "../accounts/accountStore.js";
 import { DECK_NAME_PROBLEM, deckLimits, normalizeDeckName, validateDeckCards } from "../decks/deckValidation.js";
-import authGate from "./authentication.js";
+import { createAuthGate } from "./authentication.js";
 
 /**
  * Deck collection routes. Storage is owner-scoped, so a request can only ever
@@ -14,13 +15,14 @@ import authGate from "./authentication.js";
  * engine cannot build such a deck in any room. Legality is recomputed on every
  * read, because the catalog can change between saves.
  *
- * @param {{ library?: object, catalog?: object, gate?: object }} [options]
- *   `gate` is the session gate, injectable so tests can point it at a
- *   temporary accounts file.
+ * @param {{ library?: object, catalog?: object, accounts?: object }} [options]
+ *   `accounts` is the account store the session gate reads, injectable so a
+ *   server boot shares one store across the login routes, the gate, and the
+ *   socket.
  */
-export function createDecksRouter({ library = deckLibrary, catalog = cardsData, gate = authGate } = {}) {
+export function createDecksRouter({ library = deckLibrary, catalog = cardsData, accounts = createAccountStore() } = {}) {
   const router = express.Router();
-  const { requireApiSession, requirePageSession } = gate;
+  const { requireApiSession, requirePageSession } = createAuthGate({ accounts });
 
   const present = (deck) => ({
     id: deck.id,
@@ -98,5 +100,3 @@ export function createDecksRouter({ library = deckLibrary, catalog = cardsData, 
 
   return router;
 }
-
-export default createDecksRouter();

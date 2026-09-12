@@ -7,7 +7,7 @@ import morgan from "morgan";
 import winston from "winston";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import router from "./routes/router.js";
+import { createRouter } from "./routes/router.js";
 import { roomsFilePath } from "./routes/game.js";
 import { readJsonFile } from "./utils/file-util.js";
 import { createSeededGame } from "./game/gameFactory.js";
@@ -42,8 +42,11 @@ async function readFileRoom(code) {
  * @param {object} [args.catalog] compiled card catalog used for deck
  *   validation and the slug → cardId conversion (defaults to the production
  *   compiled catalog)
- * @param {object} [args.accounts] account store the socket identity check
- *   consults (defaults to the production accounts file)
+ * @param {object} [args.accounts] account store the HTTP gate, the login
+ *   routes, and the socket identity check share (defaults to the production
+ *   accounts file)
+ * @param {object} [args.authRouter] the `/auth` router, for a boot that needs
+ *   its own login behavior; defaults to the real login routes over `accounts`
  * @param {boolean} [args.logToFile=true] when false, no file logging is
  *   configured (embedded and test boots)
  * @param {string} [args.gameLogDirectory="server/logs/games"] directory for
@@ -53,7 +56,7 @@ async function readFileRoom(code) {
  *   io: import("socket.io").Server, gateway: SocketGateway,
  *   registry: SessionRegistry }}
  */
-export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, accounts = createAccountStore(), logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
+export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, accounts = createAccountStore(), authRouter, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
   const app = express();
   const server = createServer(app);
   const io = new Server(server);
@@ -94,7 +97,7 @@ export function createGameServer({ registry = new SessionRegistry(), loadRoom, c
   });
 
   app.use(express.static(path.resolve("public")));
-  app.use("/", router);
+  app.use("/", createRouter({ accounts, deckLibrary, catalog, ...(authRouter ? { authRouter } : {}) }));
 
   const gameGateway = new SocketGateway({
     registry,

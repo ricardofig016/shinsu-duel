@@ -4,19 +4,28 @@ import os from "os";
 import path from "path";
 import { createGameServer } from "../../../../server/createGameServer.js";
 import { createDeckLibrary } from "../../../../server/decks/deckLibrary.js";
+import { createAuthRouter } from "../../../../server/routes/auth.js";
 import { EVENTS } from "../../net/protocol.js";
 import { createTestGame, setupGameWithHands, createLegalDeck } from "../utils.js";
 import { cards } from "../fixtures/cards.js";
+import { expectRuntimeDataUnchanged, snapshotRuntimeData } from "./data-isolation.js";
 
 /**
  * Real-transport test harness for the game net layer.
  *
  * Boots the express app and Socket.IO from `createGameServer` on an ephemeral
- * port, with an in-memory room store, a temp-file deck library, and the
- * test-owned fixture catalog. Players authenticate through the real
- * `/auth/login` endpoint and connect with `socket.io-client`, so the tests
- * exercise the same path as the browser: session cookie → socket handshake →
- * gateway.
+ * port, with an in-memory room store, a temp-file deck library, an in-memory
+ * account store, and the test-owned fixture catalog. Players authenticate
+ * through the real `/auth/login` endpoint and connect with `socket.io-client`,
+ * so the tests exercise the same path as the browser: session cookie → socket
+ * handshake → gateway.
+ *
+ * Every store the suite writes to belongs to the harness, and the shipped
+ * starter decks are replaced by a fixture template: nothing here reads or
+ * writes the runtime data under `server/data`. The harness snapshots that
+ * directory on creation and checks it on `close()`, so a wiring mistake that
+ * lets a suite reach the machine's own accounts or decks fails the suite
+ * instead of leaving an untracked file behind.
  *
  * Seats are always Alice and Bob (the fixture helpers' usernames). Room
  * records support a `hands` spec `{ Alice: [...], Bob: [...] }` that seeds
@@ -30,8 +39,8 @@ import { cards } from "../fixtures/cards.js";
  */
 
 const SEAT_USERNAMES = ["Alice", "Bob"];
-const CONNECT_TIMEOUT_MS = 4000;
-const EVENT_TIMEOUT_MS = 2000;
+const CONNECT_TIMEOUT_MS = 8000;
+const EVENT_TIMEOUT_MS = 4000;
 const POLL_INTERVAL_MS = 10;
 
 /** Wrap a raw client socket with event capture and awaiting helpers. */
@@ -78,6 +87,7 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
   const rooms = {};
   let createGameCalls = 0;
   const clients = [];
+  const runtimeDataBefore = snapshotRuntimeData();
 
   const handsGameFactory = ({ roomCode }) => {
     createGameCalls += 1;
@@ -98,13 +108,72 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
         ? undefined
         : handsGameFactory;
 
-  const decksFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "dsh-net-decks-")), "decks.json");
+  const decksDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "dsh-net-decks-"));
+  const decksFile = path.join(decksDirectory, "decks.json");
   const deckLibrary = createDeckLibrary({ filePath: decksFile });
+
+  /**
+   * Deck records are also held in memory: the library answers a lookup by
+   * reading its whole JSON file, which the real store does from page cache.
+   * The gateway resolves one pick per seat concurrently, and a resolution that
+   * straddles the moment the other seat's pick lands would start the game from
+   * the picks it already holds. Writes still go through the library, which
+   * stays the source of truth on disk; this index keeps the gateway's lookups
+   * off it.
+   */
+  const seatDecks = new Map();
+  const indexDeck = (deck) => {
+    if (!seatDecks.has(deck.owner)) seatDecks.set(deck.owner, new Map());
+    seatDecks.get(deck.owner).set(deck.id, deck);
+    return deck;
+  };
+  const deckStore = {
+    ...deckLibrary,
+    async getOwnedDeck(id, owner) {
+      return seatDecks.get(owner)?.get(id) ?? null;
+    },
+    deleteDeck(id, owner) {
+      seatDecks.get(owner)?.delete(id);
+      return deckLibrary.deleteDeck(id, owner);
+    },
+  };
+
+  /**
+   * Accounts for the seats, seeded so the real login flow finds them and takes
+   * its provisioning-free path: the harness needs working identities, not
+   * starter decks, and pre-seeding keeps a temp users file from being written
+   * on every connection. Only `filePath` is disk-shaped; nothing writes it.
+   */
+  const accountsFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "dsh-net-accounts-")), "users.json");
+  const storedAccounts = Object.fromEntries(SEAT_USERNAMES.map((username) => [username, {}]));
+  const accounts = {
+    filePath: accountsFile,
+    async hasAccount(username) {
+      return typeof username === "string" && Object.prototype.hasOwnProperty.call(storedAccounts, username);
+    },
+    async createAccountIfMissing(username) {
+      if (await accounts.hasAccount(username)) return false;
+      storedAccounts[username] = {};
+      return true;
+    },
+    async removeAccount(username) {
+      return delete storedAccounts[username];
+    },
+  };
+
+  const slugByCardId = new Map(Object.values(cards).map((card) => [card.cardId, card.slug]));
+
+  /** A legal 30-card deck as card slugs, from the fixture catalog. */
+  const legalDeckSlugs = () => createLegalDeck().map((cardId) => slugByCardId.get(cardId));
+
+  const authRouter = createAuthRouter({ accounts });
 
   const { server, io, registry } = createGameServer({
     loadRoom: async (roomCode) => rooms[roomCode] ?? null,
-    deckLibrary,
+    deckLibrary: deckStore,
     catalog: cards,
+    accounts,
+    authRouter,
     ...(createGame !== undefined ? { createGame } : {}),
     ...(gameLogDirectory !== undefined ? { gameLogDirectory } : {}),
     logToFile: false,
@@ -115,11 +184,6 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     server.listen(0, "127.0.0.1", resolve);
   });
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
-
-  const slugByCardId = new Map(Object.values(cards).map((card) => [card.cardId, card.slug]));
-
-  /** A legal 30-card deck as card slugs, from the fixture catalog. */
-  const legalDeckSlugs = () => createLegalDeck().map((cardId) => slugByCardId.get(cardId));
 
   /** Add a room to the store and return its code. */
   const createRoom = ({ hands } = {}) => {
@@ -189,7 +253,7 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
    */
   let deckQueue = Promise.resolve();
   const createDeck = (username, name, cardSlugs) => {
-    const created = deckQueue.then(() => deckLibrary.createDeck({ owner: username, name, cards: cardSlugs }));
+    const created = deckQueue.then(() => deckLibrary.createDeck({ owner: username, name, cards: cardSlugs }).then(indexDeck));
     deckQueue = created.catch(() => {});
     return created;
   };
@@ -252,7 +316,8 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     for (const client of clients) client.disconnect();
     await new Promise((resolve) => io.close(resolve));
     server.closeAllConnections?.();
-    fs.rmSync(path.dirname(decksFile), { recursive: true, force: true });
+    fs.rmSync(decksDirectory, { recursive: true, force: true });
+    expectRuntimeDataUnchanged(runtimeDataBefore);
   };
 
   return {
@@ -261,6 +326,7 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     registry,
     io,
     deckLibrary,
+    accounts,
     legalDeckSlugs,
     get createGameCalls() {
       return createGameCalls;
