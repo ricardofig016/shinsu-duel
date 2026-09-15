@@ -3,7 +3,7 @@
 ## Tasks
 
 - [ ] decision engine: remove auto decisions when there's only 1 choice - the player should still actively make it
-- [ ] game: add random bot and pass bot
+- [x] game: add random bot and pass bot
 - [ ] ui: add numbers to numeric traits and conditions
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`

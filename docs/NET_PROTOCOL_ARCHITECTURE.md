@@ -32,7 +32,7 @@ A `GameSession` is created on demand when a seat connects to a two-player room (
 - one `GameState`, created exactly once through the injected `createGame` factory once both seats are connected and both hold a valid deck selection,
 - a monotonic revision counter (see below).
 
-A **seat** holds that player's current connections in a set. A **connection** is anything with `send(event, payload)` (sockets also get `close`). One player can play from several tabs because every tab is just another connection on the same seat, and a future bot controller occupies a seat the same way without a socket (see [Bot Seam](#bot-seam)). `attach`/`detach` are idempotent, and `isFull()`/`isEmpty()` describe seat occupancy.
+A **seat** holds that player's current connections in a set. A **connection** is anything with `send(event, payload)` (sockets also get `close`). One player can play from several tabs because every tab is just another connection on the same seat, and a bot opponent occupies a seat the same way without a socket (see [Bot Seats](#bot-seats)). `attach`/`detach` are idempotent, and `isFull()`/`isEmpty()` describe seat occupancy.
 
 Sessions are never deleted on disconnect. They live until the process exits, so a dropped player rejoins the exact game, open decision included. This matches the express-session memory store, which also does not survive a restart. The one thing that does drop a session is a dev-room restart, which replaces it with a fresh one and moves the connections over (see [Dev Console](#dev-console)).
 
@@ -74,10 +74,11 @@ Every payload is built in `protocol.js` and builders return the exact object on 
 - `buildHandPeek(peek)` returns an independent copy of the reveal.
 - `buildDeckSelect({ deckId })` returns `{ deckId }` for the inbound selection.
 - `buildDeckStatus({ dev, viewer, seats })` returns `{ dev, seats }`, one entry per
-  seat in seat order: `{ username, deckChosen, connected, deckId, deckName, illegal }`.
+  seat in seat order: `{ username, deckChosen, connected, bot, deckId, deckName, illegal }`.
   `dev` is the room's dev-room flag (`isDevRoomCode`), so the client knows whether
-  illegal decks are selectable there; `connected` is that seat's presence (see
-  [Deck Selection](#deck-selection)). A seat's deck is its own secret until both
+  illegal decks are selectable there; `connected` is that seat's presence, and
+  `bot` marks a bot seat, which holds no pick of its own (see
+  [Deck Selection](#deck-selection) and [Bot Seats](#bot-seats)). A seat's deck is its own secret until both
   picks are locked, because a player who knows the opponent's deck in time can
   counter-pick, so the builder redacts every seat but `viewer`: only the viewer's
   own entry carries `deckId`, `deckName` and `illegal`, and every other entry
@@ -119,7 +120,7 @@ A room is in exactly one of three steps: `waiting` (no session, so the second pl
 - **Presence.** A seat reads as `connected` while it holds a connection or while it is inside a grace window (the gateway's `presenceGraceMs` option, 3000 by default). A reconnection cancels the window, and the window expiring with no connections re-broadcasts the selection progress, so the other seat learns the departure then. Every step change and reload detaches and re-attaches a socket, so without the window a navigation would read as a disconnect.
 - **Progress.** A state request on an unstarted session answers with `game-deck-status` instead of `game-waiting`, so a seat that reconnects during selection sees the current progress and its earlier pick. `game-waiting` is reserved for rooms whose second player has not joined.
 
-Where the deck step's own data comes from is documented in `DECK_COLLECTION.md`. The deferred-start seam is also where a future bot controller would inject its pick instead of going through `submitDeckSelect`.
+Where the deck step's own data comes from is documented in `DECK_COLLECTION.md`. A bot seat injects no pick here at all: its deck method resolves the deck inside the start resolution (see [Bot Seats](#bot-seats)).
 
 ---
 
@@ -172,15 +173,15 @@ On disconnect the socket is detached from its seat and nothing else changes: the
 
 ---
 
-## Bot Seam
+## Bot Seats
 
-A bot controller is a future occupant of a seat and needs no socket:
+A bot opponent occupies a seat like any other occupant and needs no socket. The bot system lives in `server/bots/` and is documented in [BOTS](BOTS.md); the net layer's part of the contract:
 
-- implement the connection interface (`send(event, payload)`),
-- `session.attach(username, botConnection)` to occupy the seat,
-- submit moves through the gateway's validated paths (`submitDeckSelect` for the pre-game pick, `submitAction` / `submitDecision` once started), which stamp identity, validate shape, and deliver rejections back through the bot's own `send`.
+- the gateway assembles one bot seat per bot room (`createBotSeat`) and attaches its controller — a `send(event, payload)` connection — to the bot's seat,
+- the controller submits every move through the gateway's validated paths (`submitAction` / `submitDecision`), which stamp identity, validate shape, and deliver rejections back through the bot's own `send`,
+- the bot's deck is never a stored pick: `#resolveStart` resolves it through the room's deck method at start time, against the human seat's pick.
 
-Because delivery is connection-agnostic in `GameSession`, a seat can hold a browser tab and a bot connection at the same time. No bot controller exists yet: `POST /game/createRoom` records the requested opponent and difficulty, and nothing reads them, so a room created for a bot holds one player and stays in the [waiting step](#deck-selection).
+Because delivery is connection-agnostic in `GameSession`, a seat can hold a browser tab and a bot connection at the same time. A room record declares its opponent (`opponent: "bot"` with a `bot` spec naming the playstyle and deck method); a bot room is full once its creator has joined, and a bot room's session forms on the human's connection with both usernames already known.
 
 ---
 
