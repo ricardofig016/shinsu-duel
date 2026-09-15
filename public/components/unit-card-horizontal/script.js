@@ -1,6 +1,6 @@
 import { loadComponent, addTooltip } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
-import { buildPositionTooltipEntries } from "/utils/tooltip-entries.js";
+import { buildPositionTooltipEntries, buildUnitAbilityTooltipEntries } from "/utils/tooltip-entries.js";
 
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
 const DEFAULT_POSITION_ICON = "/assets/icons/positions/placeholder.png";
@@ -72,7 +72,7 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   // artwork (use fallback if missing)
   const artworkContainer = container.querySelector(".unit-card-horizontal-artwork");
   artworkContainer.style.backgroundImage = `url("${safePath(unit.artworkPath, DEFAULT_ARTWORK)}")`;
-  await addTooltip(container, artworkContainer, unit.name, unit.abilities.map((ability) => ability.text));
+  await addTooltip(container, artworkContainer, unit.name, buildUnitAbilityTooltipEntries(unit));
 
   // status badges
   loadStatus(container, unit);

@@ -64,6 +64,22 @@ export const buildAttributeTooltipEntries = (attribute) => {
 };
 
 /**
+ * Deployed-unit ability tooltip entries: the unit's own abilities as plain
+ * entries, then the abilities granted by equipment in italic — their display
+ * text is the granted ability's server-owned `raw`, nothing is authored here.
+ */
+export const buildUnitAbilityTooltipEntries = (unit) => {
+  const entries = [];
+  for (const ability of unit?.abilities ?? []) {
+    if (ability?.text) entries.push({ text: ability.text });
+  }
+  for (const granted of unit?.grantedAbilities ?? []) {
+    if (granted?.text) entries.push({ text: granted.text, style: "italic" });
+  }
+  return entries;
+};
+
+/**
  * Rank tooltip: the title plus the italic concept line, then one entry per
  * rank with its cost range and description; the card's own rank is strong.
  * Returns null when the glossary carries no ranks.

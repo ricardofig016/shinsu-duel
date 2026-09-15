@@ -34,7 +34,7 @@ entries. An entry is a plain string, or `{ text, style }` with one of:
 
 | Style    | Used for                                              |
 | -------- | ----------------------------------------------------- |
-| `italic` | Descriptions and concept lines (context, muted)       |
+| `italic` | Descriptions and concept lines (context, muted); equipment-granted ability lines on a deployed unit |
 | `strong` | Emphasis (the card's own rank in the rank tooltip)    |
 | `label`  | The battlefield line label (uppercase, small)         |
 
@@ -60,6 +60,7 @@ from the enforced ones.
 | Tooltip                            | Title                       | Text                                                        |
 | ---------------------------------- | --------------------------- | ----------------------------------------------------------- |
 | Board combat slot, card positions  | Position name               | Line label, description, italic verbose description; the chosen variant appends the glossary chosen suffix |
+| Deployed unit artwork (`unit-card-horizontal`) | Unit name | The unit's own abilities as plain entries, then its equipment-granted abilities (the granted ability's server-owned `raw`) in italic |
 | Type letter (card-vertical)        | Kind name (standard shows "Unit") or type name | Kind or type summary from the glossary  |
 | Rank trapezoid                     | "Rank"                      | Italic concept, then every rank with cost range and description; the card's own rank is strong |
 | Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | Italic prose description, then the attribute's effect lines (the RULES.md core-mechanic block) |
