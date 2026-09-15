@@ -18,5 +18,6 @@ effects:
       condition: poisoned
       amount: 4
       target: { side: enemy }
+      raw: "give Poisoned 4 to an enemy"
     raw: "ability: give Poisoned 4 to an enemy"
 ignition:

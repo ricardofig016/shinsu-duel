@@ -980,7 +980,8 @@
           "amount": 1,
           "target": {
             "side": "self"
-          }
+          },
+          "raw": "give me Pierce"
         },
         "raw": "ability: give me Pierce"
       }
@@ -1006,7 +1007,8 @@
           "target": {
             "side": "enemy"
           },
-          "quick": true
+          "quick": true,
+          "raw": "quick: deal 3 to an enemy"
         },
         "raw": "ability: quick: deal 3 to an enemy"
       }
@@ -3427,7 +3429,8 @@
           "amount": 4,
           "target": {
             "side": "enemy"
-          }
+          },
+          "raw": "give Poisoned 4 to an enemy"
         },
         "raw": "ability: give Poisoned 4 to an enemy"
       }
@@ -3765,7 +3768,8 @@
           "amount": 5,
           "target": {
             "side": "enemy"
-          }
+          },
+          "raw": "deal 5 to an enemy"
         },
         "raw": "ability: deal 5 to an enemy"
       }

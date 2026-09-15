@@ -13,5 +13,10 @@ effects:
     raw: "the bearer has Resilient 2"
   - type: grant_ability
     target: { side: bearer }
-    ability: { type: give_condition, condition: poisoned, amount: 4, target: { side: enemy } }
+    ability:
+      type: give_condition
+      condition: poisoned
+      amount: 4
+      target: { side: enemy }
+      raw: "give Poisoned 4 to an enemy"
     raw: "ability: give Poisoned 4 to an enemy"

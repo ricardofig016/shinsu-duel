@@ -236,7 +236,7 @@
         { "if": { "properties": { "type": { "const": "grant_random_trait" } } }, "then": { "required": ["target"] } },
         { "if": { "properties": { "type": { "const": "slay" } } }, "then": { "required": ["target"] } },
         { "if": { "properties": { "type": { "const": "transform" } } }, "then": { "required": ["cardName"] } },
-        { "if": { "properties": { "type": { "const": "grant_ability" } } }, "then": { "required": ["ability", "target"] } },
+        { "if": { "properties": { "type": { "const": "grant_ability" } } }, "then": { "required": ["ability", "target"], "properties": { "ability": { "required": ["raw"] } } } },
         { "if": { "properties": { "type": { "const": "copy_ability" } } }, "then": { "required": ["source"] } },
         { "if": { "properties": { "type": { "const": "peek_hand" } } }, "then": { "required": ["owner"] } },
         { "if": { "properties": { "type": { "const": "sequence" } } }, "then": { "required": ["steps"] } },

@@ -75,14 +75,14 @@ Every node is an object with a discriminator `type` and a field set that depends
 | Field      | Scope                        | Description                                    |
 | ---------- | ---------------------------- | ---------------------------------------------- |
 | `type`     | every node                   | One of the node types in the catalog below.    |
-| `raw`      | top-level entries (required) | Authored display text. Never parsed.           |
+| `raw`      | every node                   | Authored display text. Never parsed. Required on top-level entries and on `grant_ability.ability`. |
 | `quick`    | abilities, effects           | `true` if the entry has the Quick keyword.     |
 | `free`     | abilities, effects           | `true` if the entry has the Free keyword.      |
 | `position` | abilities, passives          | Position code if position-scoped, else `null`. |
 | `trigger`  | passives                     | The event that activates a triggered passive.  |
 | `triggers` | passives                     | Multiple single-event triggers; each entry is wired independently to its own event (no compound trigger types). |
 
-Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) require `raw`. Nested nodes (`sequence.steps[]`, `spend_shinsu.effect`, `grant_ability.ability`, `conditional.then/otherwise`) omit `raw`.
+Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) require `raw`. Nested nodes (`sequence.steps[]`, `spend_shinsu.effect`, `conditional.then/otherwise`) omit `raw`; the exception is `grant_ability.ability`, which requires it — the registry stores the inner node verbatim, so its `raw` is the display text for the granted ability on the deployed unit card.
 
 ### Card metadata
 

@@ -117,7 +117,8 @@ export function decisionId() {
  * Create a code for a granted ability.
  * Format: granted:<sourceId>:<abilityType>
  *
- * Example: "granted:Equip#17:deal_damage"
+ * Example: "granted:Card#16#117:deal_damage" (sourceId is the granting card's
+ * instance id)
  */
 export function grantedAbilityCode(sourceId, ability) {
   const type = ability?.type || "unknown";

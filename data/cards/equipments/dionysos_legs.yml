@@ -10,5 +10,6 @@ effects:
       amount: 3
       target: { side: enemy }
       quick: true
+      raw: "quick: deal 3 to an enemy"
     raw: "ability: quick: deal 3 to an enemy"
 ignition:

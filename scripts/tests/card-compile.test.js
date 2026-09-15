@@ -469,6 +469,56 @@ passives:
     expect(cards).toHaveLength(1);
   });
 
+  test("keeps the granted ability's own raw display text in the compiled artifact", async () => {
+    await fs.writeFile(path.join(tmpDir, "equipment.yml"), `type: equipment
+name: Test Arms
+cost: 1
+requirements:
+effects:
+  - type: grant_ability
+    target: { side: bearer }
+    ability:
+      type: grant_trait
+      trait: pierce
+      amount: 1
+      target: { side: self }
+      raw: "give me Pierce"
+    raw: "ability: give me Pierce"
+`, "utf-8");
+
+    const cards = await compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    });
+
+    const effect = cards[0].effects[0];
+    expect(effect.raw).toBe("ability: give me Pierce");
+    expect(effect.ability.raw).toBe("give me Pierce");
+  });
+
+  test("rejects a grant_ability whose inner ability carries no raw", async () => {
+    await fs.writeFile(path.join(tmpDir, "equipment.yml"), `type: equipment
+name: Test Legs
+cost: 1
+requirements:
+effects:
+  - type: grant_ability
+    target: { side: bearer }
+    ability:
+      type: deal_damage
+      amount: 3
+      target: { side: enemy }
+    raw: "ability: deal 3 to an enemy"
+`, "utf-8");
+
+    await expect(compileAll({
+      cardsDirectory: tmpDir,
+      outputPath: path.join(tmpDir, "cards.json"),
+      runValidate: false,
+    })).rejects.toThrow("Compiled card data failed");
+  });
+
   test("rejects a remove_conditions with mode random/choose but no amount", async () => {
     await fs.writeFile(path.join(tmpDir, "skill.yml"), `type: skill
 name: Test Cleanse
