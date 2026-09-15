@@ -59,8 +59,8 @@ describe("deck selection over the wire", () => {
     const initial = alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS);
     expect(initial.dev).toBe(false);
     expect(initial.seats).toEqual([
-      { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
-      { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
     ]);
 
     const deck = await harness.createDeck("Alice", "Scout deck", deckWithTripleScout());
@@ -71,6 +71,7 @@ describe("deck selection over the wire", () => {
       username: "Alice",
       deckChosen: true,
       connected: true,
+      bot: false,
       deckId: deck.id,
       deckName: "Scout deck",
       illegal: false,
@@ -101,6 +102,7 @@ describe("deck selection over the wire", () => {
       username: "Alice",
       deckChosen: true,
       connected: true,
+      bot: false,
       deckId: null,
       deckName: null,
       illegal: false,
@@ -115,6 +117,7 @@ describe("deck selection over the wire", () => {
       username: "Alice",
       deckChosen: true,
       connected: true,
+      bot: false,
       deckId: deck.id,
       deckName: "Scout deck",
       illegal: false,
@@ -123,6 +126,7 @@ describe("deck selection over the wire", () => {
       username: "Bob",
       deckChosen: false,
       connected: true,
+      bot: false,
       deckId: null,
       deckName: null,
       illegal: false,
@@ -261,7 +265,7 @@ describe("deck selection over the wire", () => {
   test("a dev room starts with an illegal deck and enforcement disabled", async () => {
     await bootHarness();
     const roomCode = "TESTROOM99";
-    harness.rooms[roomCode] = { players: [], opponent: "friend", difficulty: null, seed: 1 };
+    harness.rooms[roomCode] = { players: [], opponent: "friend", seed: 1 };
     harness.joinRoom(roomCode, "Alice");
     harness.joinRoom(roomCode, "Bob");
     const alice = await harness.connectPlayer({ username: "Alice", roomCode });

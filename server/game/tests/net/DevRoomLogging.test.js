@@ -15,7 +15,7 @@ import { cards } from "../fixtures/cards.js";
  * only through the room code pattern.
  */
 
-const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", difficulty: null, seed });
+const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", seed });
 
 describe("dev-room live logging (production wiring)", () => {
   let tmpRoot;

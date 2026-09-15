@@ -14,7 +14,7 @@ import { createNetHarness } from "./harness.js";
  */
 
 const DEV_ROOM = "TESTROOM01";
-const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", difficulty: null, seed });
+const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", seed });
 
 describe("dev console over the real transport", () => {
   let harness;
@@ -178,8 +178,8 @@ describe("dev console over the real transport", () => {
     const restarted = harness.registry.get(DEV_ROOM);
     expect(restarted.isStarted).toBe(false);
     expect(alice.lastPayloadOf(EVENTS.GAME_DECK_STATUS).seats).toEqual([
-      { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
-      { username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
     ]);
 
     await harness.selectDecks({ alice, bob });

@@ -292,8 +292,8 @@ describe("debug firehose and restart", () => {
         dev: true,
         viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
-          { username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+          { username: "Bob", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );

@@ -91,6 +91,48 @@ describe("game room routes", () => {
     expect(third.status).toBe(403);
   });
 
+  test("createRoom records a bot room with its bot spec", async () => {
+    const created = await post("/game/createRoom", "Alice", { opponent: "bot", bot: "whatever", deckMethod: "mirror" });
+    const roomCode = await created.text();
+
+    expect(created.status).toBe(200);
+    const rooms = JSON.parse(fs.readFileSync(app.roomsPath, "utf8"));
+    expect(rooms[roomCode]).toMatchObject({
+      players: [],
+      opponent: "bot",
+      bot: { bot: "whatever", deckMethod: "mirror" },
+    });
+    expect(typeof rooms[roomCode].seed).toBe("number");
+    expect(rooms[roomCode].difficulty).toBeUndefined();
+  });
+
+  test("createRoom refuses a bot room with an unknown bot, deck method, or missing spec", async () => {
+    for (const body of [
+      { opponent: "bot", bot: "easy", deckMethod: "mirror" },
+      { opponent: "bot", bot: "whatever", deckMethod: "random" },
+      { opponent: "bot", deckMethod: "mirror" },
+      { opponent: "bot", bot: "whatever" },
+      { opponent: "bot" },
+    ]) {
+      const response = await post("/game/createRoom", "Alice", body);
+      expect(response.status).toBe(400);
+      const rooms = JSON.parse(fs.readFileSync(app.roomsPath, "utf8"));
+      expect(Object.keys(rooms)).toHaveLength(0);
+    }
+  });
+
+  test("a bot room is full once its creator has joined", async () => {
+    const created = await post("/game/createRoom", "Alice", { opponent: "bot", bot: "drunk", deckMethod: "generated" });
+    const roomCode = await created.text();
+
+    expect((await post(`/game/${roomCode}/join`, "Alice")).status).toBe(200);
+    const second = await post(`/game/${roomCode}/join`, "Bob");
+    expect(second.status).toBe(403);
+
+    const rooms = JSON.parse(fs.readFileSync(app.roomsPath, "utf8"));
+    expect(rooms[roomCode].players).toEqual(["Alice"]);
+  });
+
   test("refuses room creation and joining without a session", async () => {
     const created = await post("/game/createRoom", null, { opponent: "friend" });
     const joined = await post("/game/ABCDEF/join", null);
@@ -125,7 +167,9 @@ const DECK_PAGE = "deck-table-body";
 const BOARD_PAGE = "round-indicator";
 const DENIED_PAGE = "This room is not available";
 
-const ROOM_RECORD = (players) => ({ players, opponent: "friend", difficulty: null, seed: 1 });
+const ROOM_RECORD = (players, opponent = "friend") => ({ players, opponent, seed: 1 });
+
+const BOT_ROOM_RECORD = (players) => ROOM_RECORD(players, "bot");
 
 describe("room step routing", () => {
   let app;
@@ -212,6 +256,21 @@ describe("room step routing", () => {
 
     expect(response.status).toBe(403);
     expect(await response.text()).toContain(DENIED_PAGE);
+  });
+
+  test("a bot room that has seated its creator denies every other visitor", async () => {
+    await start({ rooms: { AB12CD: BOT_ROOM_RECORD(["Alice"]) } });
+
+    for (const user of ["Bob", "Mallory"]) {
+      const response = await get("/game/AB12CD/waiting", user);
+      expect(response.status).toBe(403);
+      expect(await response.text()).toContain(DENIED_PAGE);
+    }
+
+    // The creator still reaches the room's own step.
+    const own = await get("/game/AB12CD/waiting", "Alice");
+    expect(own.status).toBe(200);
+    expect(await own.text()).toContain(WAITING_PAGE);
   });
 
   test("an unknown room code gets the denied page", async () => {

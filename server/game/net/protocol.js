@@ -198,12 +198,16 @@ export function buildDeckStatus({ dev, viewer, seats }) {
     if (typeof seat.illegal !== "boolean") {
       throw new TypeError("seat.illegal must be a boolean.");
     }
+    if (seat.bot !== undefined && typeof seat.bot !== "boolean") {
+      throw new TypeError("seat.bot must be a boolean.");
+    }
 
     const own = seat.username === viewer;
     return {
       username: seat.username,
       deckChosen: seat.deckChosen,
       connected: seat.connected,
+      bot: Boolean(seat.bot),
       deckId: own ? seat.deckId : null,
       deckName: own ? seat.deckName : null,
       illegal: own ? seat.illegal : false,

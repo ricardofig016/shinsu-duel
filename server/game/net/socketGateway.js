@@ -24,7 +24,6 @@ const NOT_A_PARTICIPANT_MESSAGE = "Room not found or you are not a participant."
 const ALREADY_STARTED_MESSAGE = "The game has already started.";
 const NOT_A_DEV_ROOM_MESSAGE = "The dev console is only available in dev rooms (TESTROOMxx).";
 const DEFAULT_PRESENCE_GRACE_MS = 3000;
-
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim() !== "";
 }
@@ -67,6 +66,7 @@ export default class SocketGateway {
   #deckLibrary;
   #catalog;
   #isAccountActive;
+  #createBotSeat;
   #logger;
   /**
    * roomCode → the net-layer subscriptions attached to its started game (the
@@ -88,6 +88,14 @@ export default class SocketGateway {
   #waitingRoom = new Map();
 
   /**
+   * roomCode → the bot seat assembled for a bot room. One bot seat lives per
+   * room for the process lifetime: its controller keeps reacting across
+   * reconnects and across a dev-room restart's replacement session, while
+   * every submission resolves the registry's current session fresh.
+   */
+  #botSeats = new Map();
+
+  /**
    * How long a seat holding no connections still counts as present. Every step
    * of the pre-game pages detaches and re-attaches a socket, so reporting a
    * departure the moment a socket closes would report one on every step change.
@@ -104,6 +112,7 @@ export default class SocketGateway {
     deckLibrary,
     catalog,
     isAccountActive,
+    createBotSeat = null,
     logger = null,
     presenceGraceMs = DEFAULT_PRESENCE_GRACE_MS,
   }) {
@@ -119,6 +128,9 @@ export default class SocketGateway {
     if (typeof isAccountActive !== "function") {
       throw new TypeError("SocketGateway needs an isAccountActive predicate.");
     }
+    if (createBotSeat !== null && typeof createBotSeat !== "function") {
+      throw new TypeError("createBotSeat must be a function or null.");
+    }
     if (logger !== null && typeof logger !== "object") throw new TypeError("logger must be an object or null.");
     if (typeof presenceGraceMs !== "number" || !Number.isFinite(presenceGraceMs) || presenceGraceMs < 0) {
       throw new TypeError("presenceGraceMs must be a non-negative number.");
@@ -130,6 +142,7 @@ export default class SocketGateway {
     this.#deckLibrary = deckLibrary;
     this.#catalog = catalog;
     this.#isAccountActive = isAccountActive;
+    this.#createBotSeat = createBotSeat;
     this.#logger = logger;
     this.#presenceGraceMs = presenceGraceMs;
   }
@@ -172,7 +185,29 @@ export default class SocketGateway {
 
       this.#registerInboundHandlers(socket, roomCode, username, connection);
 
-      if (room.players.length !== 2) {
+      let botSeat = null;
+      if (room.opponent === "bot") {
+        if (!this.#createBotSeat) {
+          connection.send(EVENTS.GAME_ERROR, buildError("Bot opponents are not available on this server."));
+          connection.close();
+          return;
+        }
+        if (room.players.length !== 1) {
+          connection.send(EVENTS.GAME_ERROR, buildError("A bot room holds exactly one player."));
+          connection.close();
+          return;
+        }
+        try {
+          botSeat = this.#botSeatFor(roomCode, room, username);
+        } catch (error) {
+          this.#log("warn", `SocketGateway: bot seat for room ${roomCode} failed to assemble`, { error: error.message });
+          connection.send(EVENTS.GAME_ERROR, buildError("This room's bot configuration is invalid."));
+          connection.close();
+          return;
+        }
+      }
+
+      if (!botSeat && room.players.length !== 2) {
         // The room's second player has not joined yet, so no session can
         // exist. Park the connection; it joins the session when the room is
         // completed by a later connection.
@@ -183,7 +218,7 @@ export default class SocketGateway {
 
       const session = this.#registry.ensureSession({
         roomCode,
-        usernames: room.players,
+        usernames: botSeat ? [username, botSeat.seatName] : room.players,
         seed: room.seed,
         createGame: this.#createGame,
       });
@@ -195,6 +230,11 @@ export default class SocketGateway {
 
       this.#absorbWaiting(session);
       this.#attachConnection(session, username, connection);
+      if (botSeat) {
+        // Idempotent: the controller connection persists across reconnects
+        // and across a dev-room restart's connection move.
+        session.attach(botSeat.seatName, botSeat.controller.connection);
+      }
 
       if (!session.isStarted) {
         if (session.isFull()) this.#tryStartGame(session);
@@ -212,6 +252,30 @@ export default class SocketGateway {
       connection.send(EVENTS.GAME_ERROR, buildError("The game connection failed."));
       connection.close();
     }
+  }
+
+  /**
+   * The room's bot seat, assembled on the first connection and reused for the
+   * process lifetime. Assembling validates the room's bot spec and throws on
+   * a record this server cannot honor; the caller refuses the connection.
+   *
+   * @param {string} roomCode the room code
+   * @param {object} room the room record
+   * @param {string} opponentName the human seat the bot plays against
+   */
+  #botSeatFor(roomCode, room, opponentName) {
+    const existing = this.#botSeats.get(roomCode);
+    if (existing) return existing;
+    const seat = this.#createBotSeat({
+      roomCode,
+      spec: room.bot,
+      seed: room.seed,
+      opponentName,
+      registry: this.#registry,
+      submitter: this,
+    });
+    this.#botSeats.set(roomCode, seat);
+    return seat;
   }
 
   /**
@@ -560,15 +624,18 @@ export default class SocketGateway {
    * identity out of it (see `buildDeckStatus`).
    */
   #deckStatusPayload(session, viewer) {
+    const botSeat = this.#botSeats.get(session.roomCode) ?? null;
     return buildDeckStatus({
       dev: isDevRoomCode(session.roomCode),
       viewer,
       seats: session.usernames.map((username) => {
         const pick = session.getDeckPick(username);
+        const isBot = botSeat !== null && username === botSeat.seatName;
         return {
           username,
           deckChosen: pick !== null,
           connected: this.#seatPresent(session, username),
+          bot: isBot,
           deckId: pick?.deckId ?? null,
           deckName: pick?.name ?? null,
           illegal: pick?.illegal ?? false,
@@ -684,17 +751,31 @@ export default class SocketGateway {
 
   /**
    * Re-validate every pending pick against the live deck library, resolve the
-   * stored slugs to the engine's cardIds, and build the versus reveal. Returns
-   * the start arguments, or null when a seat has no valid pick.
+   * stored slugs to the engine's cardIds, and build the versus reveal. The
+   * bot seat has no stored pick: its deck method resolves a fresh deck at
+   * start time from the human seat's pick. Returns the start arguments, or
+   * null when a seat has no valid deck.
    */
   async #resolveStart(session) {
     const dev = isDevRoomCode(session.roomCode);
     const bySlug = buildSlugIndex(this.#catalog);
+    const botSeat = this.#botSeats.get(session.roomCode) ?? null;
     const decks = {};
     const reveal = [];
     let enforceDeckRules = true;
 
     for (const username of session.usernames) {
+      if (botSeat && username === botSeat.seatName) {
+        const resolved = await this.#resolveBotDeck(session, botSeat, dev);
+        if (!resolved) return null;
+        const cardIds = resolved.cards.map((slug) => bySlug.get(slug)?.cardId);
+        if (cardIds.some((cardId) => cardId === undefined)) return null;
+        decks[username] = cardIds;
+        reveal.push({ username, deckName: resolved.name, fan: buildDeckFanSlugs(resolved.cards, this.#catalog) });
+        if (!resolved.legal) enforceDeckRules = false;
+        continue;
+      }
+
       const pick = session.getDeckPick(username);
       if (!pick) return null;
 
@@ -719,6 +800,42 @@ export default class SocketGateway {
     }
 
     return { decks, enforceDeckRules, reveal };
+  }
+
+  /**
+   * Resolve the bot seat's deck through its deck method at start time. A
+   * method that fails, or a deck that is not buildable (or not legal outside
+   * a dev room), aborts the start without a stored pick to clear — the room
+   * stays in selection until the method produces a deck.
+   *
+   * @returns {Promise<{ name: string, cards: string[], illegal: boolean }|null>}
+   */
+  async #resolveBotDeck(session, botSeat, dev) {
+    try {
+      const pick = await botSeat.deckMethod.resolve({
+        catalog: this.#catalog,
+        deckLibrary: this.#deckLibrary,
+        ownerUsername: botSeat.opponentName,
+        humanPick: session.getDeckPick(botSeat.opponentName),
+        rng: botSeat.rng,
+        dev,
+      });
+      const validation = validateDeckCards(pick.cards, this.#catalog);
+      if (!validation.buildable || (!validation.legal && !dev)) {
+        this.#log("warn", `SocketGateway: bot deck for room ${session.roomCode} is not playable`, {
+          method: botSeat.deckMethodId,
+          problems: validation.problems.join(" "),
+        });
+        return null;
+      }
+      return { name: pick.name, cards: pick.cards, illegal: !validation.legal };
+    } catch (error) {
+      this.#log("warn", `SocketGateway: bot deck resolution for room ${session.roomCode} failed`, {
+        method: botSeat.deckMethodId,
+        error: error.message,
+      });
+      return null;
+    }
   }
 
   #broadcastState(session, game) {

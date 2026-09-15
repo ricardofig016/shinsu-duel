@@ -186,10 +186,16 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
   /** Add a room to the store and return its code. */
-  const createRoom = ({ hands } = {}) => {
-    const roomCode = `R${Object.keys(rooms).length + 1}`.padEnd(6, "0");
-    rooms[roomCode] = { players: [], opponent: "friend", difficulty: null, seed: 1, ...(hands ? { hands } : {}) };
-    return roomCode;
+  const createRoom = ({ roomCode, hands, opponent = "friend", bot, deckMethod } = {}) => {
+    const code = roomCode ?? `R${Object.keys(rooms).length + 1}`.padEnd(6, "0");
+    rooms[code] = {
+      players: [],
+      opponent,
+      ...(opponent === "bot" ? { bot: { bot, deckMethod } } : {}),
+      seed: 1,
+      ...(hands ? { hands } : {}),
+    };
+    return code;
   };
 
   /** Add a seat username to a room's players. */

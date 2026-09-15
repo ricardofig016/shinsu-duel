@@ -14,6 +14,7 @@ import { createSeededGame } from "./game/gameFactory.js";
 import { devRoomLoggingBackends } from "./game/logging/GameFileLogger.js";
 import SessionRegistry from "./game/net/SessionRegistry.js";
 import SocketGateway from "./game/net/socketGateway.js";
+import { createBotSeat } from "./bots/botSeat.js";
 import { createAccountStore } from "./accounts/accountStore.js";
 import defaultDeckLibrary from "./decks/deckLibrary.js";
 import cardsData from "./data/cards.json" with { type: "json" };
@@ -114,6 +115,7 @@ export function createGameServer({ registry = new SessionRegistry(), loadRoom, c
     deckLibrary,
     catalog,
     isAccountActive: (username) => accounts.hasAccount(username),
+    createBotSeat,
     logger,
   });
   gameGateway.attach(io);

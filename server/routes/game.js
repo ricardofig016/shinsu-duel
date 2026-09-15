@@ -6,6 +6,7 @@ import { readJsonFile, writeJsonFile } from "../utils/file-util.js";
 import { generateSeed } from "../game/utils/SeededRng.js";
 import { createAccountStore } from "../accounts/accountStore.js";
 import { createAuthGate } from "./authentication.js";
+import { botPlaystyles, botDeckMethods } from "../bots/botSeat.js";
 import { STEP, roomStep, stepPath, stepDocument, deniedDocument } from "../game/net/roomSteps.js";
 
 export const roomsFilePath = path.resolve("server/data/rooms.json");
@@ -57,11 +58,18 @@ export function createGameRouter({
   });
 
   router.post("/createRoom", requireApiSession, (req, res, next) => {
-    const { opponent, difficulty } = req.body;
+    const { opponent, bot, deckMethod } = req.body;
     if (!["bot", "friend"].includes(opponent))
       return res.status(400).send("Invalid opponent type. Must be 'bot' or 'friend'");
-    if (opponent === "bot" && !["easy", "hard"].includes(difficulty))
-      return res.status(400).send("Invalid difficulty. Must be 'easy' or 'hard'");
+
+    let botSpec = null;
+    if (opponent === "bot") {
+      if (typeof bot !== "string" || !botPlaystyles.has(bot))
+        return res.status(400).send("Unknown bot.");
+      if (typeof deckMethod !== "string" || !botDeckMethods.has(deckMethod))
+        return res.status(400).send("Unknown deck method.");
+      botSpec = { bot, deckMethod };
+    }
 
     withRoomFileLock(async () => {
       const rooms = await readJsonFile(roomsFile);
@@ -71,17 +79,27 @@ export function createGameRouter({
       rooms[roomCode] = {
         players: [],
         opponent,
-        difficulty: opponent === "bot" ? difficulty : null,
+        ...(botSpec ? { bot: botSpec } : {}),
         seed: generateSeed(),
       };
 
       await writeJsonFile(roomsFile, rooms);
-      logger.info(`Room created with code: ${roomCode}, opponent: ${opponent}, difficulty: ${difficulty}`);
+      logger.info(
+        `Room created with code: ${roomCode}, opponent: ${opponent}${botSpec ? `, bot: ${botSpec.bot}/${botSpec.deckMethod}` : ""}`
+      );
       return roomCode;
     })
       .then((roomCode) => res.send(roomCode))
       .catch(next);
   });
+
+  /**
+   * Whether a room's human seats are all taken. A bot room is full once its
+   * creator has claimed the seat: the other seat belongs to the bot and no
+   * second human can join.
+   * @param {object} room a room record
+   */
+  const isRoomFull = (room) => room.players.length >= 2 || (room.opponent === "bot" && room.players.length >= 1);
 
   /**
    * Serve the step the room is in, wherever the request asked to be.
@@ -109,7 +127,7 @@ export function createGameRouter({
         );
         return res.status(404).sendFile(deniedDocument());
       }
-      if (!room.players.includes(username) && room.players.length >= 2) {
+      if (!room.players.includes(username) && isRoomFull(room)) {
         logger.warn(`Invalid access attempt to room: ${roomCode} by user: ${username}`);
         return res.status(403).sendFile(deniedDocument());
       }
@@ -137,17 +155,13 @@ export function createGameRouter({
         logger.warn(`Attempt to join invalid room code: ${roomCode}`);
         return { status: 404, body: "Invalid room code" };
       }
-      if (rooms[roomCode].players.length >= 2) {
-        if (rooms[roomCode].players.includes(username)) {
-          logger.info(`Player ${username} already in room: ${roomCode}`);
-          return { status: 200, body: `Player ${username} already in room: ${roomCode}` };
-        }
-        logger.warn(`Attempt to join full room: ${roomCode}`);
-        return { status: 403, body: "Room is full" };
-      }
       if (rooms[roomCode].players.includes(username)) {
         logger.info(`Player ${username} already in room: ${roomCode}`);
         return { status: 200, body: `Player ${username} already in room: ${roomCode}` };
+      }
+      if (isRoomFull(rooms[roomCode])) {
+        logger.warn(`Attempt to join full room: ${roomCode}`);
+        return { status: 403, body: "Room is full" };
       }
       rooms[roomCode].players.push(username);
       await writeJsonFile(roomsFile, rooms);

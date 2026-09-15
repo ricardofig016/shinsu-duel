@@ -147,8 +147,8 @@ describe("deck selection phase", () => {
         dev: false,
         viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
-          { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+          { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );
@@ -169,8 +169,8 @@ describe("deck selection phase", () => {
         dev: false,
         viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Alice's deck", illegal: false },
-          { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: true, connected: true, bot: false, deckId: "deck-1", deckName: "Alice's deck", illegal: false },
+          { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );
@@ -191,6 +191,7 @@ describe("deck selection phase", () => {
       username: "Alice",
       deckChosen: true,
       connected: true,
+      bot: false,
       deckId: null,
       deckName: null,
       illegal: false,
@@ -205,6 +206,7 @@ describe("deck selection phase", () => {
       username: "Alice",
       deckChosen: true,
       connected: true,
+      bot: false,
       deckId: deck.id,
       deckName: "Alice's deck",
       illegal: false,
@@ -213,6 +215,7 @@ describe("deck selection phase", () => {
       username: "Bob",
       deckChosen: false,
       connected: true,
+      bot: false,
       deckId: null,
       deckName: null,
       illegal: false,
@@ -291,14 +294,15 @@ describe("deck selection phase", () => {
       username: "Alice",
       deckChosen: true,
       connected: true,
+      bot: false,
       deckId: illegal.id,
       deckName: "Illegal",
       illegal: true,
     });
     // Bob sees the pick and none of its identity, dev room or not.
     expect(bob.lastPayloadOf(EVENTS.GAME_DECK_STATUS).seats).toEqual([
-      { username: "Alice", deckChosen: true, connected: true, deckId: null, deckName: null, illegal: false },
-      { username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: true, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
     ]);
   });
 
@@ -537,8 +541,8 @@ describe("game-state-request", () => {
         dev: false,
         viewer: "Alice",
         seats: [
-          { username: "Alice", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false },
-          { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+          { username: "Alice", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+          { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
         ],
       })
     );

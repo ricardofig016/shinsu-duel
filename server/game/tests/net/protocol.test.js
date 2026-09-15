@@ -216,8 +216,8 @@ describe("payload builders", () => {
 
   test("buildDeckStatus returns the exact per-seat progress, redacted for every viewer", () => {
     const seats = [
-      { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Starter", illegal: true },
-      { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: true, connected: true, bot: false, deckId: "deck-1", deckName: "Starter", illegal: true },
+      { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
     ];
 
     const ownView = buildDeckStatus({ dev: false, viewer: "Alice", seats });
@@ -225,8 +225,8 @@ describe("payload builders", () => {
     expect(ownView).toEqual({
       dev: false,
       seats: [
-        { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Starter", illegal: true },
-        { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+        { username: "Alice", deckChosen: true, connected: true, bot: false, deckId: "deck-1", deckName: "Starter", illegal: true },
+        { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
       ],
     });
     expect(ownView.seats[0]).not.toBe(seats[0]);
@@ -234,8 +234,8 @@ describe("payload builders", () => {
     // The other seat's pick is visible as a fact, never as an identity: a seat
     // that could read the opponent's deck could counter-pick it.
     expect(buildDeckStatus({ dev: false, viewer: "Bob", seats }).seats).toEqual([
-      { username: "Alice", deckChosen: true, connected: true, deckId: null, deckName: null, illegal: false },
-      { username: "Bob", deckChosen: false, connected: false, deckId: null, deckName: null, illegal: false },
+      { username: "Alice", deckChosen: true, connected: true, bot: false, deckId: null, deckName: null, illegal: false },
+      { username: "Bob", deckChosen: false, connected: false, bot: false, deckId: null, deckName: null, illegal: false },
     ]);
   });
 
@@ -266,7 +266,7 @@ describe("payload builders", () => {
   });
 
   test("buildDeckStatus rejects malformed progress", () => {
-    const seat = { username: "Alice", deckChosen: true, connected: true, deckId: "deck-1", deckName: "Starter", illegal: false };
+    const seat = { username: "Alice", deckChosen: true, connected: true, bot: false, deckId: "deck-1", deckName: "Starter", illegal: false };
     expect(() => buildDeckStatus({ dev: "yes", viewer: "Alice", seats: [seat] })).toThrow(TypeError);
     expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: [] })).toThrow(TypeError);
     expect(() => buildDeckStatus({ dev: false, viewer: "Alice", seats: null })).toThrow(TypeError);
@@ -280,7 +280,7 @@ describe("payload builders", () => {
       buildDeckStatus({
         dev: false,
         viewer: "Alice",
-        seats: [{ username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: "X", illegal: false }],
+        seats: [{ username: "Bob", deckChosen: false, connected: true, bot: false, deckId: null, deckName: "X", illegal: false }],
       })
     ).toThrow(TypeError);
     // The viewer's own seat has to be among the entries, and the viewer itself
@@ -289,7 +289,7 @@ describe("payload builders", () => {
       buildDeckStatus({
         dev: false,
         viewer: "Alice",
-        seats: [{ username: "Bob", deckChosen: false, connected: true, deckId: null, deckName: null, illegal: false }],
+        seats: [{ username: "Bob", deckChosen: false, connected: true, bot: false, deckId: null, deckName: null, illegal: false }],
       })
     ).toThrow(TypeError);
     expect(() => buildDeckStatus({ dev: false, seats: [seat] })).toThrow(TypeError);
