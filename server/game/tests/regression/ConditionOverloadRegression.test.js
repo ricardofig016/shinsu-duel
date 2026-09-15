@@ -15,7 +15,7 @@ import { resolveEffect } from "../../EffectResolver.js";
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
 import Card from "../../Card.js";
-import { getCardIdByName, createLegalDeck, cards } from "../utils.js";
+import { getCardIdByName, createLegalDeck, cards, confirmPendingDecision } from "../utils.js";
 
 const players = ["Alice", "Bob"];
 
@@ -55,6 +55,7 @@ describe("condition-field regression (EffectResolver)", () => {
       ctx, game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice", sourceType: "unit" }
     );
+    confirmPendingDecision(game);
 
     const effective = game.modifierStack.getEffective(victim.id, "condition", "poisoned");
     expect(effective).toBe(2);

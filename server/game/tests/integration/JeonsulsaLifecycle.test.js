@@ -1,6 +1,6 @@
 import EVT from "../../EventCatalog.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
-import { advanceToRound, deployUnit, setupGameWithHands } from "../utils.js";
+import { advanceToRound, deployUnit, setupGameWithHands, confirmPendingDecision } from "../utils.js";
 
 const BAANG_CONDITIONS = {
   "Test Lightning Baang": "burned",
@@ -14,6 +14,7 @@ function useAbility(game, username, unitId, abilityCode) {
     type: "use-ability-action",
     data: { source: "player", username, unitId, abilityCode },
   });
+  confirmPendingDecision(game);
 }
 
 describe("Jeonsulsa Conduit lifecycle", () => {

@@ -1,6 +1,6 @@
 import LifecycleEngine from "../../services/LifecycleEngine.js";
 import Card from "../../Card.js";
-import { setupGameWithCardsInHand, advanceToRound, getCardIdByName } from "../utils.js";
+import { setupGameWithCardsInHand, advanceToRound, getCardIdByName, confirmPendingDecision } from "../utils.js";
 
 describe("granted abilities can be used by their bearer", () => {
   test("Purple Dementor grants a usable poison ability that disappears when unequipped", () => {
@@ -45,7 +45,9 @@ describe("granted abilities can be used by their bearer", () => {
       type: "use-ability-action",
       data: { source: "player", username: "Alice", unitId: bearer.id, abilityCode },
     });
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(game.modifierStack.getEffective(victim.id, "condition", "poisoned")).toBe(4);
 
     LifecycleEngine.detachEquipment(game, bearer);

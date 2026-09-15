@@ -189,10 +189,20 @@ function resolveSharedSequence(effect, context, gameState, extra) {
   );
 
   // Choice descriptors select a fixed number of targets. The planner locks
-  // mandatory Taunt units, auto-selects when there is no genuine choice
-  // (including Blinded), else presents only the free candidates.
+  // mandatory Taunt units; an `auto` plan is a random (or Blinded) pick with no
+  // decision, any other plan defers to the player — a fully forced selection is
+  // presented pre-selected for confirmation.
   const choiceTargets = new Set(["ally", "enemy", "enemies", "enemy_frontline", "enemy_backline", "unit"]);
   if (choiceTargets.has(structured.target)) {
+    // Auto-pick descriptors ("the lowest-HP ally") name their target in the
+    // card text; the deterministic pick never becomes a decision. A tie among
+    // candidates remains a genuine choice.
+    if (structured.lowestHp && candidates.length === 1) {
+      return resolveSharedSteps(
+        effect.steps, context, gameState, extra,
+        candidates.map((unit) => unit.id)
+      );
+    }
     const plan = TargetResolver.resolveTargetSelection(gameState, candidates, {
       count,
       sourceUnit,
@@ -201,11 +211,15 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     if (plan.auto) {
       return resolveSharedSteps(effect.steps, context, gameState, extra, plan.ids);
     }
+    const lockedUnits = plan.lockedIds.map((id) => gameState._findUnit(id)).filter(Boolean);
     let chosenIds = null;
     gameState.createPendingDecision({
       owner: extra.owner || extra.sourceOwner,
       type: "target_selection",
-      candidates: plan.freeCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+      candidates: [
+        ...lockedUnits.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+        ...plan.freeCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+      ],
       minChoices: plan.freeCount,
       maxChoices: plan.freeCount,
       lockedIds: plan.lockedIds,
@@ -231,17 +245,29 @@ function resolveSharedSequence(effect, context, gameState, extra) {
     );
   }
 
-  // A single candidate needs no decision.
-  if (candidates.length === 1) {
-    return resolveSharedSteps(effect.steps, context, gameState, extra, candidates.map((unit) => unit.id));
-  }
-
-  // Every candidate is required — no genuine choice remains.
-  if (count >= candidates.length) {
-    return resolveSharedSteps(effect.steps, context, gameState, extra, candidates.map((unit) => unit.id));
-  }
-
   const take = count && count > 1 ? Math.min(count, candidates.length) : 1;
+
+  // The whole candidate set is required — the selection is engine-committed
+  // and presented pre-selected for confirmation.
+  if (take >= candidates.length) {
+    const committed = candidates.map((unit) => unit.id);
+    gameState.createPendingDecision({
+      owner: extra.owner || extra.sourceOwner,
+      type: "target_selection",
+      candidates: candidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+      minChoices: 0,
+      maxChoices: 0,
+      lockedIds: committed,
+      resolve: () => {},
+    });
+    // Queue the step runner as the first continuation (before the action's own
+    // completion) so any nested subset decision defers the end-turn correctly.
+    gameState.appendPendingDecisionContinuation(() => {
+      resolveSharedSteps(effect.steps, context, gameState, extra, committed);
+    });
+    return { resolved: true, pending: true };
+  }
+
   let chosenIds = null;
   gameState.createPendingDecision({
     owner: extra.owner || extra.sourceOwner,
@@ -465,14 +491,22 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
     );
 
     // Choice descriptors select a fixed number of targets. The planner locks
-    // mandatory Taunt units, auto-selects when there is no genuine choice
-    // (including explicit `random` and Blinded), else defers a decision over
-    // only the free candidates.
+    // mandatory Taunt units; an `auto` plan is a random (or Blinded) pick with
+    // no decision, any other plan defers to the player — a fully forced
+    // selection is presented pre-selected for confirmation.
     if (choiceTargets.has(payload.target)) {
       if (candidates.length === 0) {
         return { skipped: true, reason: "no valid targets" };
       }
       const count = payload.count && payload.count > 1 ? payload.count : 1;
+      // Auto-pick descriptors ("the lowest-HP ally") name their target in the
+      // card text; the deterministic pick never becomes a decision. A tie
+      // among candidates remains a genuine choice.
+      if ((targetFilters.lowestHp ?? payload.lowestHp) && candidates.length === 1) {
+        return candidates.map((unit) =>
+          resolveEffect(effect, context, gameState, { ...extra, targetId: unit.id })
+        );
+      }
       const plan = TargetResolver.resolveTargetSelection(gameState, candidates, {
         count,
         sourceUnit,
@@ -483,10 +517,14 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
           resolveEffect(effect, context, gameState, { ...extra, targetId: unitId })
         );
       }
+      const lockedUnits = plan.lockedIds.map((id) => gameState._findUnit(id)).filter(Boolean);
       gameState.createPendingDecision({
         owner: payload.owner || payload.sourceOwner,
         type: "target_selection",
-        candidates: plan.freeCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+        candidates: [
+          ...lockedUnits.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+          ...plan.freeCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+        ],
         minChoices: plan.freeCount,
         maxChoices: plan.freeCount,
         lockedIds: plan.lockedIds,
@@ -551,21 +589,33 @@ export function resolveEffect(effect, context, gameState, extra = {}) {
       shuffle(sourceCandidates, gameState._rng);
       return resolveEffect(effect, context, gameState, { ...extra, sourceUnitId: sourceCandidates[0].id });
     }
+    // A single legal source is engine-committed and presented for confirmation.
     if (sourceCandidates.length === 1) {
-      payload.sourceUnitId = sourceCandidates[0].id;
-    } else {
+      const [committed] = sourceCandidates;
       gameState.createPendingDecision({
         owner: payload.owner || payload.sourceOwner,
         type: "target_selection",
-        candidates: sourceCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
-        minChoices: 1,
-        maxChoices: 1,
-        resolve: ([sourceUnitId]) => {
-          resolveEffect(effect, context, gameState, { ...extra, sourceUnitId });
+        candidates: [{ id: committed.id, name: committed.card.name, hp: committed.currentHp }],
+        minChoices: 0,
+        maxChoices: 0,
+        lockedIds: [committed.id],
+        resolve: () => {
+          resolveEffect(effect, context, gameState, { ...extra, sourceUnitId: committed.id });
         },
       });
       return { pending: true };
     }
+    gameState.createPendingDecision({
+      owner: payload.owner || payload.sourceOwner,
+      type: "target_selection",
+      candidates: sourceCandidates.map((unit) => ({ id: unit.id, name: unit.card.name, hp: unit.currentHp })),
+      minChoices: 1,
+      maxChoices: 1,
+      resolve: ([sourceUnitId]) => {
+        resolveEffect(effect, context, gameState, { ...extra, sourceUnitId });
+      },
+    });
+    return { pending: true };
   }
 
   // `discard` targeting bearer attachments (`zone: attachments`): resolve the

@@ -1,6 +1,6 @@
 import LifecycleEngine from "../../services/LifecycleEngine.js";
 import Card from "../../Card.js";
-import { setupGameWithHands, deployUnit, getCardIdByName, cards } from "../utils.js";
+import { setupGameWithHands, deployUnit, getCardIdByName, cards, confirmPendingDecision } from "../utils.js";
 
 // deckWith dedupes names, so extra skill copies are pushed into the hand
 // directly to fuel repeated plays.
@@ -18,6 +18,7 @@ function playSkillFromHand(game, username, cardName) {
   const handId = game.playerStates[username].hand.findIndex((c) => c.name === cardName);
   if (handId < 0) throw new Error(`Card "${cardName}" not in ${username}'s hand`);
   game.processAction({ type: "play-skill-action", data: { source: "player", username, handId } });
+  confirmPendingDecision(game);
 }
 
 function playSkills(game, username, cardName, times) {

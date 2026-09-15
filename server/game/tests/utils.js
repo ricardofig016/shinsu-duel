@@ -88,6 +88,22 @@ export function createTestGame() {
   return new GameState(ROOM_CODE, USERNAMES, { Alice: createLegalDeck(), Bob: createLegalDeck() }, USERNAMES[0], TEST_OPTIONS());
 }
 
+/**
+ * Confirm pending committed decisions (zero free slots — every candidate is
+ * engine-committed) as their owner, until none remains: one resolution may
+ * chain into the next committed decision. No-op when nothing is pending, so
+ * tests can call it unconditionally after a resolution. A decision that still
+ * requires free choices fails loudly — those tests submit choices explicitly.
+ */
+export function confirmPendingDecision(game) {
+  let safety = 0;
+  while (game.pendingDecision) {
+    if (++safety > 100) throw new Error("confirmPendingDecision safety limit hit");
+    const decision = game.pendingDecision;
+    game.resolveDecision({ decisionId: decision.decisionId, choices: [], username: decision.owner });
+  }
+}
+
 // Build a legal deck whose initial draw (top of deck) contains the requested
 // card names, so both players can be seeded with specific cards in hand.
 function deckWith(names) {

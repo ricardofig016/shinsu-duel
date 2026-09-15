@@ -5,7 +5,7 @@ import * as IdFactory from "../../IdFactory.js";
 import { resetModifierCounter } from "../../ModifierStack.js";
 import EVT from "../../EventCatalog.js";
 import { resolveTargets } from "../../TargetResolver.js";
-import { setupGameWithHands, deployUnit, getCardIdByName } from "../utils.js";
+import { setupGameWithHands, deployUnit, getCardIdByName, confirmPendingDecision } from "../utils.js";
 
 function putInHand(game, username, name) {
   const cardId = getCardIdByName(name);
@@ -44,6 +44,7 @@ function useAbility(game, username, unit, abilityCode) {
   game.currentTurn = username;
   game.playerStates[username].shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
   game.processAction({ type: "use-ability-action", data: { source: "player", username, unitId: unit.id, abilityCode } });
+  confirmPendingDecision(game);
 }
 
 describe("Modifier runtime integration", () => {
@@ -183,6 +184,7 @@ describe("Modifier runtime integration", () => {
     game.playerStates.Alice.shinsu = { normalSpent: 0, normalAvailable: 10, recharged: 0 };
     const handId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Damage Skill");
     game.processAction({ type: "play-skill-action", data: { source: "player", username: "Alice", handId } });
+    confirmPendingDecision(game);
 
     expect(game.modifierStack.has(enemy.id, "condition", "burned")).toBe(true);
   });

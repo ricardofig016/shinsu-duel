@@ -83,6 +83,40 @@ describe("Resolution lifecycle state model", () => {
     expect(game.hasUnresolvedDecisions()).toBe(true);
   });
 
+  test("a committed zero-free-slot decision resolves with an empty choice list", () => {
+    const game = createGame();
+    const id = game.createPendingDecision({
+      owner: "Alice", type: "target_selection",
+      candidates: [{ id: "U1", name: "Target", hp: 3 }],
+      minChoices: 0,
+      maxChoices: 0,
+      lockedIds: ["U1"],
+      resolve: () => {},
+    });
+
+    expect(game._resolutionState).toBe(ResolutionState.RESOLVING);
+    game.resolveDecision({ decisionId: id, choices: [] });
+    expect(game._resolutionState).toBe(ResolutionState.IDLE);
+    expect(game.hasUnresolvedDecisions()).toBe(false);
+  });
+
+  test("rejects choices that include engine-committed targets", () => {
+    const game = createGame();
+    const id = game.createPendingDecision({
+      owner: "Alice", type: "target_selection",
+      candidates: [{ id: "U1", name: "Locked", hp: 3 }, { id: "U2", name: "Free", hp: 2 }],
+      minChoices: 1,
+      maxChoices: 1,
+      lockedIds: ["U1"],
+      resolve: () => {},
+    });
+
+    expect(() => game.resolveDecision({ decisionId: id, choices: ["U1"] }))
+      .toThrow(/engine-committed targets/);
+    game.resolveDecision({ decisionId: id, choices: ["U2"] });
+    expect(game._resolutionState).toBe(ResolutionState.IDLE);
+  });
+
   // -----------------------------------------------------------------------
   // Depth limit
   // -----------------------------------------------------------------------

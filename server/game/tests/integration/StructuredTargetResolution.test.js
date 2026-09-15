@@ -9,7 +9,7 @@
 
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck, cards } from "../utils.js";
+import { createLegalDeck, cards, confirmPendingDecision } from "../utils.js";
 import { resolveEffect } from "../../EffectResolver.js";
 
 const players = ["Alice", "Bob"];
@@ -83,7 +83,9 @@ describe("structured target resolution via EffectResolver", () => {
       context(game), game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(game.modifierStack.getEffective(victim.id, "condition", "poisoned")).toBe(2);
   });
 
@@ -100,7 +102,9 @@ describe("structured target resolution via EffectResolver", () => {
       context(game), game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(target.currentHp).toBe(5);
     expect(other.currentHp).toBe(3);
   });
@@ -135,7 +139,9 @@ describe("structured target resolution via EffectResolver", () => {
       context(game), game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(src.currentHp).toBe(6);
   });
 
@@ -151,7 +157,9 @@ describe("structured target resolution via EffectResolver", () => {
       context(game), game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(other.currentHp).toBe(6);
     expect(src.currentHp).toBe(4);
   });
@@ -170,7 +178,9 @@ describe("structured target resolution via EffectResolver", () => {
       context(game), game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(back.currentHp).toBe(6);
     expect(src.currentHp).toBe(4);
   });
@@ -185,7 +195,9 @@ describe("structured target resolution via EffectResolver", () => {
       context(game), game,
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
+    confirmPendingDecision(game);
 
+    expect(game.pendingDecision).toBeNull();
     expect(game.modifierStack.getEffective(ally.id, "trait", "strong")).toBe(2);
   });
 
@@ -208,7 +220,7 @@ describe("structured target resolution via EffectResolver", () => {
     expect(game.pendingDecision.lockedIds).toEqual([]);
   });
 
-  test("deal_damage with { side: enemy, count: 2 } and exactly two enemies auto-resolves without a decision", () => {
+  test("deal_damage with { side: enemy, count: 2 } and exactly two enemies commits the set and asks for confirmation", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice", "scout"));
     const e1 = push(game, "Bob", unit("e1", "Bob", "scout"));
@@ -220,8 +232,13 @@ describe("structured target resolution via EffectResolver", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(2);
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds.sort()).toEqual([e1.id, e2.id].sort());
+    expect(game.pendingDecision.candidates).toHaveLength(2);
+
+    confirmPendingDecision(game);
     expect(game.pendingDecision).toBeNull();
     expect(e1.currentHp).toBe(9);
     expect(e2.currentHp).toBe(9);
@@ -245,7 +262,7 @@ describe("structured target resolution via EffectResolver", () => {
     expect(game.pendingDecision.minChoices).toBe(1);
     expect(game.pendingDecision.maxChoices).toBe(1);
     expect(game.pendingDecision.lockedIds).toEqual(["taunter"]);
-    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual(["other1", "other2"]);
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual(["other1", "other2", "taunter"]);
   });
 
   test("grant_trait with lowest_hp and traitNot selects the lowest-HP non-immune target", () => {
@@ -263,8 +280,30 @@ describe("structured target resolution via EffectResolver", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
+    // An auto-pick descriptor never becomes a decision, even when a single
+    // candidate remains.
+    expect(game.pendingDecision).toBeNull();
     expect(game.modifierStack.getEffective(low.id, "trait", "immune")).toBe(1);
     expect(game.modifierStack.getEffective(immuneLow.id, "trait", "immune")).toBe(1);
+  });
+
+  test("a lowest_hp tie stays a genuine choice among the tied candidates", () => {
+    const game = createGame();
+    const src = push(game, "Alice", unit("src", "Alice", "scout"));
+    const tied1 = push(game, "Bob", unit("tied1", "Bob", "scout"));
+    const tied2 = push(game, "Bob", unit("tied2", "Bob", "scout"));
+    tied1.currentHp = 5;
+    tied2.currentHp = 5;
+
+    const result = resolveEffect(
+      { type: "deal_damage", amount: 1, target: { side: "enemy", lowest_hp: true } },
+      context(game), game,
+      { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
+    );
+
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual([tied1.id, tied2.id].sort());
+    expect(game.pendingDecision.minChoices).toBe(1);
   });
 
   test("deal_damage with a random structured target auto-selects without a decision", () => {
@@ -300,10 +339,11 @@ describe("structured target resolution via EffectResolver", () => {
     expect(pricey.currentHp).toBe(10);
   });
 
-  test("copy_traits with a single source auto-resolves without a decision", () => {
+  test("copy_traits with a single source commits it and asks for confirmation", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice", "scout"));
-    push(game, "Bob", unit("enemy", "Bob", "scout"));
+    const enemy = push(game, "Bob", unit("enemy", "Bob", "scout"));
+    game.modifierStack.apply({ sourceId: "system", sourceType: "system", targetId: "enemy", type: "trait", key: "strong", value: 2 });
 
     const result = resolveEffect(
       { type: "copy_traits", targetId: src.id, source: { side: "enemy" }, raw: "copy traits" },
@@ -311,8 +351,14 @@ describe("structured target resolution via EffectResolver", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds).toEqual(["enemy"]);
+
+    confirmPendingDecision(game);
     expect(game.pendingDecision).toBeNull();
-    expect(result).toEqual({ copied: 0, traits: [] });
+    expect(game.modifierStack.getEffective(src.id, "trait", "strong")).toBe(2);
   });
 
   test("copy_traits with multiple sources defers to a target_selection decision", () => {

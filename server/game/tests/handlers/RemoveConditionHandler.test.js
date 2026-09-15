@@ -157,20 +157,27 @@ describe("RemoveConditionHandler", () => {
     expect(stack.getEffective("Unit#1", "condition", "burned")).toBe(2);
   });
 
-  test("mode choose with amount >= available conditions removes all without a decision", () => {
+  test("mode choose with amount >= available conditions presents the committed set for confirmation", () => {
     stack.apply({ sourceId: "A", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "poisoned", value: 1 });
     stack.apply({ sourceId: "B", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "burned", value: 2 });
 
-    const createPendingDecision = jest.fn();
+    let decision;
     const ctx = { emitChild: (eventName, payload) => bus.emit(eventName, payload) };
     const result = handler.execute(
       { targetId: "Unit#1", mode: "choose", amount: 99, owner: "Alice" },
       ctx,
-      { modifierStack: stack, usernames: ["Alice"], createPendingDecision }
+      { modifierStack: stack, usernames: ["Alice"], createPendingDecision: (d) => { decision = d; } }
     );
 
-    expect(createPendingDecision).not.toHaveBeenCalled();
-    expect(result.pending).not.toBe(true);
+    expect(result.pending).toBe(true);
+    expect(decision.type).toBe("remove_conditions");
+    expect(decision.minChoices).toBe(0);
+    expect(decision.maxChoices).toBe(0);
+    expect(decision.lockedIds.sort()).toEqual(["burned", "poisoned"]);
+    expect(decision.candidates.map((c) => c.id).sort()).toEqual(["burned", "poisoned"]);
+
+    decision.resolve([]);
+
     expect([...stack.getActiveKeys("Unit#1", "condition")]).toHaveLength(0);
   });
 

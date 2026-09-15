@@ -1,7 +1,7 @@
 import EVT from "../../EventCatalog.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
 import ReplayDriver from "../../replay/ReplayDriver.js";
-import { setupGameWithHands, deployUnit, advanceToRound, getCardIdByName, cards } from "../utils.js";
+import { setupGameWithHands, deployUnit, advanceToRound, getCardIdByName, cards, confirmPendingDecision } from "../utils.js";
 
 /**
  * Card-level integration: effect primitives exercised through their real
@@ -15,6 +15,7 @@ function useAbility(game, username, unitId, abilityCode) {
     type: "use-ability-action",
     data: { source: "player", username, unitId, abilityCode },
   });
+  confirmPendingDecision(game);
 }
 
 function equipFromHand(game, unit, cardName) {
@@ -186,13 +187,16 @@ describe("effect primitives via real cards", () => {
 
     const weaponHandId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Return Equipment");
     game.processAction({ type: "equip-equipment-action", data: { source: "player", username: "Alice", handId: weaponHandId, targetUnitId: bearer.id } });
+    confirmPendingDecision(game);
 
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
     game.processAction({ type: "use-ability-action", data: { source: "player", username: "Alice", unitId: bearer.id, abilityCode: "1" } });
+    confirmPendingDecision(game);
     expect(bearer.equipmentAttachments[0].name).toBe("Test Return Equipment - Ignited");
 
     game.processAction({ type: "pass-turn-action", data: { source: "player", username: "Bob" } });
     game.processAction({ type: "use-ability-action", data: { source: "player", username: "Alice", unitId: bearer.id, abilityCode: "0" } });
+    confirmPendingDecision(game);
 
     const returnedHandId = game.playerStates.Alice.hand.findIndex((c) => c.name === "Test Retaining Returner");
     game.processAction({ type: "deploy-unit-action", data: { source: "player", username: "Alice", handId: returnedHandId, placedPositionCode: "fisherman" } });

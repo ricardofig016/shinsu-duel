@@ -257,7 +257,7 @@ Notes:
 - To **Spend**, you must have the shinsu to use it.
 - **Stealing** a unit moves it to its current position on your side, counting toward the line limit like any unit, and stealing into a full line is illegal. Everything about the unit is preserved: its HP, conditions, equipments (keeping their ignited state), traits, and effects. Rooted doesn't prevent stealing.
 - **Ally** includes the source unit: targeting an ally counts every unit on your side, including the unit resolving the effect. There is no self-exclusion; the source unit is just another ally and may be chosen like any other. To target an ally other than the source unit, cards say "another ally". "When an ally dies" includes the source unit's own death.
-- A target selection is offered only when the outcome is not already forced. When the legal candidates are equal to or fewer than the required count, or every candidate is mandatory (e.g. Taunt), the effect resolves automatically without a choice.
+- A target selection is always offered, even when the outcome is already forced: when the legal candidates are equal to or fewer than the required count, or every candidate is mandatory (e.g. Taunt), the forced targets are pre-selected and you only confirm the effect. Picks defined by the card text itself (e.g. "a random enemy", "the lowest-HP ally") are resolved by the game and are never offered as a choice.
 
 ## Positions
 

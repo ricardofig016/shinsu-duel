@@ -1,4 +1,4 @@
-import { setupGameWithHands, deployUnit } from "../utils.js";
+import { setupGameWithHands, deployUnit, confirmPendingDecision } from "../utils.js";
 import CopyAbilityHandler from "../../handlers/CopyAbilityHandler.js";
 
 const context = (game) => ({ emitChild: (eventName, payload) => game.eventBus.emit(eventName, payload) });
@@ -23,7 +23,10 @@ describe("CopyAbilityHandler", () => {
     );
 
     expect(result.used).toBe(true);
-    // The copied "deal 3 to an enemy" targets Bob's Bull (Alice's enemy).
+    expect(game.pendingDecision.type).toBe("target_selection");
+    // The committed copy of "deal 3 to an enemy" targets Bob's Bull (Alice's enemy).
+    expect(game.pendingDecision.lockedIds).toEqual([source.id]);
+    confirmPendingDecision(game);
     expect(source.currentHp).toBe(0);
   });
 

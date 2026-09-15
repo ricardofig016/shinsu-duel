@@ -1174,6 +1174,13 @@ export default class GameState {
       throw new Error("Decision contains an invalid candidate.");
     }
 
+    // Engine-committed candidates (e.g. mandatory Taunt targets) are rendered
+    // pre-selected and are never part of the player's selection.
+    const lockedIdSet = new Set(pending.lockedIds ?? []);
+    if (choices.some((choice) => lockedIdSet.has(choice))) {
+      throw new Error("Decision choices must not include engine-committed targets.");
+    }
+
     // Reject choices referencing units that were destroyed while the
     // decision was pending. Only enforced for candidates that were real
     // game units at decision-creation time.

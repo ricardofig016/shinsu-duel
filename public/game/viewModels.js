@@ -14,6 +14,7 @@ export const MAX_RECHARGED_SHINSU = 2;
 const DECISION_TITLES = Object.freeze({
   target_selection: "Choose a target",
   card_selection: "Choose cards",
+  remove_conditions: "Choose conditions",
 });
 
 const flattenCard = (card) => ({
@@ -206,8 +207,9 @@ export function buildGameOverViewModel(gameOver, username) {
 /**
  * Render a pending decision into a prompt model, or null when the player has
  * nothing to decide. `lockedIds` are engine-committed picks (e.g. mandatory
- * Taunt targets) rendered pre-selected and disabled; they sit outside the
- * candidates list and are never submitted.
+ * Taunt targets, forced selections) that sit inside the candidates list,
+ * rendered pre-selected and disabled, and are never submitted — the player's
+ * choices cover only the free slots.
  */
 export function buildDecisionPromptViewModel(pendingDecision) {
   if (!pendingDecision) return null;
@@ -227,15 +229,16 @@ export function buildDecisionPromptViewModel(pendingDecision) {
 }
 
 /**
- * Whether the current selection may be submitted. Locked candidates are
- * engine-committed and rendered pre-selected; they are not part of the
- * candidates list and are not submitted. The engine validates the free
- * selections against the min/max range and the candidate list.
+ * Whether the current selection may be submitted. Engine-committed candidates
+ * are rendered pre-selected and disabled and are never part of the
+ * submission; the engine validates the free selections against the min/max
+ * range and the candidate list.
  */
 export function canSubmitDecision(prompt, selectedIds) {
   if (!prompt) return false;
   const selected = [...new Set(selectedIds ?? [])];
   const candidateIds = new Set(prompt.candidates.map((candidate) => candidate.id));
   if (selected.some((id) => !candidateIds.has(id))) return false;
+  if (prompt.lockedIds.some((id) => selected.includes(id))) return false;
   return selected.length >= prompt.minChoices && selected.length <= prompt.maxChoices;
 }

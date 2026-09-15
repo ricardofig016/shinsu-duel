@@ -367,8 +367,10 @@ const renderDecisionPrompt = (state, socket) => {
   promptEl.classList.remove("hidden");
 
   document.querySelector("#decision-prompt-title").textContent = prompt.title;
-  const range = prompt.minChoices === prompt.maxChoices ? `${prompt.minChoices}` : `${prompt.minChoices} to ${prompt.maxChoices}`;
-  document.querySelector("#decision-prompt-hint").textContent = `Select ${range}.`;
+  // A fully committed decision (zero free slots) only asks for confirmation.
+  document.querySelector("#decision-prompt-hint").textContent = prompt.maxChoices === 0
+    ? "Confirm."
+    : `Select ${prompt.minChoices === prompt.maxChoices ? prompt.minChoices : `${prompt.minChoices} to ${prompt.maxChoices}`}.`;
 
   const lockedIds = new Set(prompt.lockedIds);
   const candidatesEl = document.querySelector("#decision-prompt-candidates");

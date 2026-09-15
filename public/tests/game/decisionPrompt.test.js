@@ -16,18 +16,33 @@ const targetDecision = {
   lockedIds: [],
 };
 
-// Locked decisions carry only the free candidates; locked ids are
-// engine-committed picks outside the candidate list (mandatory Taunts).
+// Engine-committed picks (e.g. mandatory Taunts, forced selections) sit inside
+// the candidates list, rendered pre-selected and disabled, and are never
+// submitted.
 const lockedDecision = {
   decisionId: "decision-2",
   type: "target_selection",
   candidates: [
+    { id: "unit-taunt", name: "Locked Taunt", hp: 4 },
     { id: "unit-3", name: "Free Ally", hp: 2 },
     { id: "unit-4", name: "Free Enemy", hp: 4 },
   ],
   minChoices: 1,
   maxChoices: 1,
   lockedIds: ["unit-taunt"],
+};
+
+// A fully committed decision: every candidate is locked and no free slots
+// remain — the player only confirms.
+const committedDecision = {
+  decisionId: "decision-4",
+  type: "target_selection",
+  candidates: [
+    { id: "unit-5", name: "Only Enemy", hp: 3 },
+  ],
+  minChoices: 0,
+  maxChoices: 0,
+  lockedIds: ["unit-5"],
 };
 
 const cardDecision = {
@@ -64,12 +79,21 @@ describe("buildDecisionPromptViewModel", () => {
     });
   });
 
-  test("renders a decision with engine-locked picks", () => {
+  test("renders a decision with engine-locked picks among the candidates", () => {
     const prompt = buildDecisionPromptViewModel(lockedDecision);
 
     expect(prompt.title).toBe("Choose a target");
-    expect(prompt.candidates.map((candidate) => candidate.id)).toEqual(["unit-3", "unit-4"]);
+    expect(prompt.candidates.map((candidate) => candidate.id)).toEqual(["unit-taunt", "unit-3", "unit-4"]);
     expect(prompt.lockedIds).toEqual(["unit-taunt"]);
+  });
+
+  test("renders a fully committed decision with its zero free slots", () => {
+    const prompt = buildDecisionPromptViewModel(committedDecision);
+
+    expect(prompt.title).toBe("Choose a target");
+    expect(prompt.minChoices).toBe(0);
+    expect(prompt.maxChoices).toBe(0);
+    expect(prompt.lockedIds).toEqual(["unit-5"]);
   });
 
   test("renders a card selection with its range", () => {
@@ -113,7 +137,13 @@ describe("canSubmitDecision", () => {
     const prompt = buildDecisionPromptViewModel(lockedDecision);
     expect(canSubmitDecision(prompt, [])).toBe(false); // one free choice still required
     expect(canSubmitDecision(prompt, ["unit-3"])).toBe(true);
-    expect(canSubmitDecision(prompt, ["unit-taunt"])).toBe(false); // not a candidate
+    expect(canSubmitDecision(prompt, ["unit-taunt"])).toBe(false); // engine-committed
+  });
+
+  test("a fully committed decision is submittable with no selection", () => {
+    const prompt = buildDecisionPromptViewModel(committedDecision);
+    expect(canSubmitDecision(prompt, [])).toBe(true);
+    expect(canSubmitDecision(prompt, ["unit-5"])).toBe(false);
   });
 
   test("rejects a single-choice decision with nothing selected", () => {

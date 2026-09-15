@@ -1,6 +1,6 @@
 import GameState from "../../GameState.js";
 import SeededRng from "../../utils/SeededRng.js";
-import { createLegalDeck, cards } from "../utils.js";
+import { createLegalDeck, cards, confirmPendingDecision } from "../utils.js";
 import { resolveEffect } from "../../EffectResolver.js";
 
 const players = ["Alice", "Bob"];
@@ -47,6 +47,7 @@ describe("EffectResolver structural nodes", () => {
         { type: "heal", amount: 1, target: { side: "self" } },
       ],
     }, context(game), game, { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" });
+    confirmPendingDecision(game);
 
     expect(result.resolved).toBe(true);
     expect(enemy.currentHp).toBe(18);
@@ -65,11 +66,13 @@ describe("EffectResolver structural nodes", () => {
 
     // Predicate false → otherwise (1 damage)
     resolveEffect(node, context(game), game, { owner: "Alice", sourceId: "src", sourceOwner: "Alice" });
+    confirmPendingDecision(game);
     expect(enemy.currentHp).toBe(19);
 
     // Predicate true → then (5 damage)
     push(game, "Alice", unit("miseng", "Alice", "scout", { name: "Yeo Miseng" }));
     resolveEffect(node, context(game), game, { owner: "Alice", sourceId: "src", sourceOwner: "Alice" });
+    confirmPendingDecision(game);
     expect(enemy.currentHp).toBe(14);
   });
 
@@ -102,6 +105,7 @@ describe("EffectResolver structural nodes", () => {
         ],
       },
     }, context(game), game, { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" });
+    confirmPendingDecision(game);
 
     expect(enemy.currentHp).toBe(18);
     expect(src.currentHp).toBe(11);

@@ -10,7 +10,9 @@ import shuffle from "../utils/shuffle.js";
  *
  * - mode "all" (default): remove every condition (optionally filtered by `condition`).
  * - mode "random": remove `amount` randomly-chosen conditions.
- * - mode "choose": remove `amount` conditions chosen by the owner (pending decision).
+ * - mode "choose": remove `amount` conditions chosen by the owner (pending
+ *   decision); when `amount` covers the whole eligible set the decision is
+ *   pre-selected and only asks for confirmation.
  *
  * `condition` restricts the eligible set to a single named condition.
  * targetId is always pre-resolved by EffectResolver before this handler runs.
@@ -49,11 +51,24 @@ export default class RemoveConditionHandler extends BaseHandler {
       return this._remove(targetId, chosen, modStack, context);
     }
 
-    // mode === "choose" — defer the selection to the owning player unless the
-    // whole eligible set is required (no genuine choice).
+    // mode === "choose" — the selection always goes through a pending decision
+    // so the player sees which conditions are removed; when the whole eligible
+    // set is required the decision is pre-selected and only asks for
+    // confirmation.
     const owner = payload.owner || payload.sourceOwner;
     if (count >= eligible.length) {
-      return this._remove(targetId, eligible, modStack, context);
+      gameState.createPendingDecision({
+        owner,
+        type: "remove_conditions",
+        candidates: eligible.map((key) => ({ id: key, name: key, hp: 0 })),
+        minChoices: 0,
+        maxChoices: 0,
+        lockedIds: [...eligible],
+        resolve: () => {
+          this._remove(targetId, eligible, modStack, context);
+        },
+      });
+      return { pending: true, cleansed: [] };
     }
     gameState.createPendingDecision({
       owner,

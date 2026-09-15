@@ -116,16 +116,20 @@ function filterUntargetable(candidates, gameState, sourceUnit) {
  *
  * Targetable enemy Taunt units are mandatory: they must be targeted before any
  * other enemy. Skills (no source unit) bypass Taunt and have no mandatory
- * targets. When the mandatory units already satisfy the requested `count`, when
- * every remaining target is forced, or when there is no genuine choice, the
- * selection is fully automatic. When there are more Taunt units than slots, the
- * player chooses `count` among them. Otherwise the caller receives the locked
- * Taunt ids plus the free (non-Taunt) candidates the player may still choose
- * from.
+ * targets. When there are more Taunt units than slots, the player chooses
+ * `count` among them. Otherwise the caller receives the locked Taunt ids plus
+ * the free (non-Taunt) candidates the player may still choose from.
+ *
+ * When the mandatory units already satisfy the requested `count`, or when every
+ * remaining candidate is forced, the whole selection is engine-committed: the
+ * plan marks every selected id as locked with zero free slots, and the caller
+ * presents the committed selection to the player for confirmation — a forced
+ * outcome is never resolved silently.
  *
  * `random` selects the free slots via the seeded RNG instead of a player
  * decision; the caller passes it for both explicit `random` targets and Blinded
- * sources (which cannot choose their targets).
+ * sources (which cannot choose their targets). It is the only fully automatic
+ * outcome: `auto` plans carry the picked `ids` and skip the decision.
  *
  * @param {GameState} gameState
  * @param {Array} candidates — already-filtered legal enemy targets
@@ -154,14 +158,16 @@ export function resolveTargetSelection(gameState, candidates, { count = 1, sourc
   const free = candidates.filter((unit) => !mandatory.includes(unit));
   const freeCount = count - mandatoryIds.length;
 
-  // Taunts exactly fill the requested count — no choice needed.
-  if (freeCount === 0) {
-    return { auto: true, ids: mandatoryIds };
-  }
-
-  // Every remaining target is forced — no genuine choice remains.
-  if (freeCount >= free.length) {
-    return { auto: true, ids: [...mandatoryIds, ...free.map((unit) => unit.id)] };
+  // The mandatory units already fill the count, or every remaining candidate is
+  // required — the whole selection is engine-committed and presented for
+  // confirmation, never resolved silently.
+  if (freeCount === 0 || freeCount >= free.length) {
+    return {
+      auto: false,
+      lockedIds: [...mandatoryIds, ...free.slice(0, Math.max(0, freeCount)).map((unit) => unit.id)],
+      freeCandidates: [],
+      freeCount: 0,
+    };
   }
 
   if (random) {

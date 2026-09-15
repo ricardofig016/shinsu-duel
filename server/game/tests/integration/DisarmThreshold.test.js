@@ -1,4 +1,4 @@
-import { setupGameWithHands, deployUnit } from "../utils.js";
+import { setupGameWithHands, deployUnit, confirmPendingDecision } from "../utils.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
 import EVT from "../../EventCatalog.js";
 
@@ -22,6 +22,7 @@ function useAbility(game, username, unitId, abilityCode) {
     type: "use-ability-action",
     data: { source: "player", username, unitId, abilityCode },
   });
+  confirmPendingDecision(game);
 }
 
 function equipOn(game, unit, cardName) {
@@ -30,6 +31,7 @@ function equipOn(game, unit, cardName) {
   game.playerStates[unit.owner].shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
   const handId = game.playerStates[unit.owner].hand.findIndex((c) => c.name === cardName);
   game.processAction({ type: "equip-equipment-action", data: { source: "player", username: unit.owner, handId, targetUnitId: unit.id } });
+  confirmPendingDecision(game);
 }
 
 function setupThresholdGame(bobUnit) {

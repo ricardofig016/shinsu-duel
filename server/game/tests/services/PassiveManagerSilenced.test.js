@@ -1,4 +1,4 @@
-import { setupGameWithHands, deployUnit } from "../utils.js";
+import { setupGameWithHands, deployUnit, confirmPendingDecision } from "../utils.js";
 import EVT from "../../EventCatalog.js";
 
 /**
@@ -15,6 +15,7 @@ function playSkillFromHand(game, username, cardName) {
   game.playerStates[username].shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
   const handId = game.playerStates[username].hand.findIndex((c) => c.name === cardName);
   game.processAction({ type: "play-skill-action", data: { source: "player", username, handId } });
+  confirmPendingDecision(game);
 }
 
 function silencedEvent(targetId, sourceOwner) {

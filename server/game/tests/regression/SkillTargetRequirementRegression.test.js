@@ -10,12 +10,12 @@
  * on every play attempt with "Requirement not met: target must be an ally".
  */
 
-import { setupGameWithHands, deployUnit } from "../utils.js";
+import { setupGameWithHands, deployUnit, confirmPendingDecision } from "../utils.js";
 
 const SKILL_NAME = "Test Target Ally Skill";
 
 describe("Skill target requirement regression", () => {
-  test("plays the skill when an allied unit exists and auto-resolves the forced ally target", () => {
+  test("plays the skill when an allied unit exists and commits the forced ally target for confirmation", () => {
     const game = setupGameWithHands({ Alice: [SKILL_NAME, "Test Scout"] });
     const unit = deployUnit(game, "Alice", "Test Scout", "fisherman");
     game.currentTurn = "Alice";
@@ -25,6 +25,11 @@ describe("Skill target requirement regression", () => {
       type: "play-skill-action",
       data: { source: "player", username: "Alice", handId },
     });
+
+    expect(game.pendingDecision.type).toBe("target_selection");
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds).toEqual([unit.id]);
+    confirmPendingDecision(game);
 
     expect(game.pendingDecision).toBeNull();
     expect(game.modifierStack.has(unit.id, "condition", "poisoned")).toBe(true);

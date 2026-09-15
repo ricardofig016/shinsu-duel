@@ -96,7 +96,7 @@ describe("TargetResolver", () => {
     expect(plan.freeCount).toBe(1);
   });
 
-  test("resolveTargetSelection auto-selects all Taunt units when they equal the count", () => {
+  test("resolveTargetSelection commits all Taunt units as locked when they equal the count", () => {
     const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
     const taunter1 = { id: "t1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
     const taunter2 = { id: "t2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
@@ -104,8 +104,10 @@ describe("TargetResolver", () => {
     game.modifierStack.has = (id, type, key) => (id === "t1" || id === "t2") && type === "trait" && key === "taunt";
 
     const plan = TargetResolver.resolveTargetSelection(game, [taunter1, taunter2, other], { count: 2, sourceUnit: source });
-    expect(plan.auto).toBe(true);
-    expect(plan.ids).toEqual(["t1", "t2"]);
+    expect(plan.auto).toBe(false);
+    expect(plan.lockedIds).toEqual(["t1", "t2"]);
+    expect(plan.freeCandidates).toEqual([]);
+    expect(plan.freeCount).toBe(0);
   });
 
   test("resolveTargetSelection defers the choice among Taunt units when they outnumber the count", () => {
@@ -122,18 +124,19 @@ describe("TargetResolver", () => {
     expect(plan.freeCount).toBe(1);
   });
 
-  test("resolveTargetSelection auto-selects every candidate when no genuine choice remains", () => {
+  test("resolveTargetSelection commits every candidate when the whole set is required", () => {
     const source = { id: "source", owner: "Alice", isAlive: () => true, card: { rank: "regular" } };
     const e1 = { id: "e1", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
     const e2 = { id: "e2", owner: "Bob", isAlive: () => true, card: { rank: "regular" } };
     game.modifierStack.has = () => false;
 
+    const committed = { auto: false, lockedIds: ["e1", "e2"], freeCandidates: [], freeCount: 0 };
     // candidates == count
     expect(TargetResolver.resolveTargetSelection(game, [e1, e2], { count: 2, sourceUnit: source }))
-      .toEqual({ auto: true, ids: ["e1", "e2"] });
+      .toEqual(committed);
     // candidates < count
     expect(TargetResolver.resolveTargetSelection(game, [e1, e2], { count: 3, sourceUnit: source }))
-      .toEqual({ auto: true, ids: ["e1", "e2"] });
+      .toEqual(committed);
   });
 
   test("resolveTargetSelection with random auto-selects Taunt plus random free slots", () => {

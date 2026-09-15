@@ -2,10 +2,12 @@
  * Shared-target sequence resolution.
  *
  * A `sequence` that declares a shared `targets` descriptor resolves that target
- * set ONCE; steps referencing it via `target: { link: sequence }` act on the
+ * set ONCE; steps referencing it via `target: { link: "sequence" }` act on the
  * same set (optionally a `count: N` subset). Regression coverage for:
  *   - single/multiple/empty shared sets
- *   - exactly ONE decision for the shared set (a subset step may add a second)
+ *   - exactly ONE decision for the shared set, including fully committed
+ *     selections presented as locked pre-selections (a subset step may add a
+ *     second decision)
  *   - guards against link steps outside a shared sequence
  */
 
@@ -44,12 +46,12 @@ function context(game) {
 }
 
 describe("shared-target sequence resolution", () => {
-  test("single candidate resolves both steps without a decision", () => {
+  test("single candidate commits both steps behind a confirmation decision", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice"));
     const enemy = push(game, "Bob", unit("e1", "Bob"));
 
-    resolveEffect(
+    const result = resolveEffect(
       {
         type: "sequence",
         targets: { side: "enemy" },
@@ -62,7 +64,12 @@ describe("shared-target sequence resolution", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    expect(game.pendingDecision).toBeNull();
+    expect(result).toEqual({ resolved: true, pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds).toEqual(["e1"]);
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [] });
     expect(enemy.currentHp).toBe(8);
     expect(game.modifierStack.has(enemy.id, "condition", "burned")).toBe(true);
   });

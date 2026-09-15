@@ -1,4 +1,4 @@
-import { setupGameWithCardsInHand, getCardIdByName } from "../utils.js";
+import { setupGameWithCardsInHand, getCardIdByName, confirmPendingDecision } from "../utils.js";
 import Card from "../../Card.js";
 
 describe("PlaySkillAction", () => {
@@ -18,6 +18,9 @@ describe("PlaySkillAction", () => {
       type: "play-skill-action",
       data: { source: "player", username: "Alice", handId: 0 },
     });
+    // The heal's single legal target is presented as a committed decision; the
+    // turn end stays deferred until it is confirmed.
+    confirmPendingDecision(game);
 
     expect(unit.currentHp).toBe(unitCard.maxHp);
     expect(game.playerStates.Alice.discard.at(-1).name).toBe("Test Heal");

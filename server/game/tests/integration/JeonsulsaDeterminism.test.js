@@ -1,5 +1,5 @@
 import ReplayDriver from "../../replay/ReplayDriver.js";
-import { advanceToRound, cards, setupGameWithHands } from "../utils.js";
+import { advanceToRound, cards, setupGameWithHands, confirmPendingDecision } from "../utils.js";
 
 const CONDITION_KEYS = ["burned", "exhausted", "weak"];
 
@@ -44,6 +44,7 @@ function runScenario() {
     type: "use-ability-action",
     data: { source: "player", username: "Alice", unitId: ran.id, abilityCode: "1" },
   });
+  confirmPendingDecision(game);
 
   return game;
 }

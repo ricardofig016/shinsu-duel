@@ -1,6 +1,6 @@
 import Card from "../../Card.js";
 import LifecycleEngine from "../../services/LifecycleEngine.js";
-import { setupGameWithHands, deployUnit, advanceToRound, getCardIdByName, cards } from "../utils.js";
+import { setupGameWithHands, deployUnit, advanceToRound, getCardIdByName, cards, confirmPendingDecision } from "../utils.js";
 
 /**
  * Passive trigger wiring exercised through real cards and the authoritative
@@ -15,6 +15,7 @@ function useAbility(game, username, unitId, abilityCode) {
     type: "use-ability-action",
     data: { source: "player", username, unitId, abilityCode },
   });
+  confirmPendingDecision(game);
 }
 
 function equipFromHand(game, unit, cardName) {
@@ -23,6 +24,7 @@ function equipFromHand(game, unit, cardName) {
   game.playerStates[unit.owner].shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
   const handId = game.playerStates[unit.owner].hand.findIndex((c) => c.name === cardName);
   game.processAction({ type: "equip-equipment-action", data: { source: "player", username: unit.owner, handId, targetUnitId: unit.id } });
+  confirmPendingDecision(game);
 }
 
 function playSkillFromHand(game, username, cardName) {
@@ -31,6 +33,7 @@ function playSkillFromHand(game, username, cardName) {
   game.playerStates[username].shinsu = { normalSpent: 0, normalAvailable: 15, recharged: 0 };
   const handId = game.playerStates[username].hand.findIndex((c) => c.name === cardName);
   game.processAction({ type: "play-skill-action", data: { source: "player", username, handId } });
+  confirmPendingDecision(game);
 }
 
 describe("passive triggers via real cards", () => {

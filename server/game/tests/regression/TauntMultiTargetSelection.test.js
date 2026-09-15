@@ -1,10 +1,13 @@
 /**
  * Regression: multi-target enemy selection must lock targetable Taunt units,
- * auto-resolve when there is no genuine choice, and respect Blinded/ignore_taunt.
+ * present every forced outcome as a pre-selected confirmation instead of
+ * resolving silently, and respect Blinded/ignore_taunt.
  *
  * Bug: `{ side: enemy, count: N }` collapsed the candidate pool to Taunt units,
- * so the player could never fill remaining slots with non-Taunts, and a forced
- * decision was created even when every legal target was already determined.
+ * so the player could never fill remaining slots with non-Taunts. Taunt units
+ * that already satisfy the count used to be resolved without any decision;
+ * forced selections are now committed as locked picks and confirmed by the
+ * player so the outcome is always visible.
  */
 
 import GameState from "../../GameState.js";
@@ -55,7 +58,7 @@ function grantIgnoreTaunt(game, u) {
 }
 
 describe("Taunt multi-target selection regressions", () => {
-  test("Taunt units equal to the count are auto-selected with no decision", () => {
+  test("Taunt units equal to the count are committed and presented for confirmation", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice"));
     const t1 = push(game, "Bob", unit("t1", "Bob"));
@@ -69,9 +72,13 @@ describe("Taunt multi-target selection regressions", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(2);
-    expect(game.pendingDecision).toBeNull();
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds.sort()).toEqual(["t1", "t2"]);
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual(["t1", "t2"]);
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [] });
     expect(t1.currentHp).toBe(9);
     expect(t2.currentHp).toBe(9);
   });
@@ -94,7 +101,7 @@ describe("Taunt multi-target selection regressions", () => {
     expect(game.pendingDecision.lockedIds).toEqual(["taunter"]);
     expect(game.pendingDecision.minChoices).toBe(1);
     expect(game.pendingDecision.maxChoices).toBe(1);
-    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual(["other1", "other2"]);
+    expect(game.pendingDecision.candidates.map((c) => c.id).sort()).toEqual(["other1", "other2", "taunter"]);
 
     game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: ["other1"] });
 
@@ -215,7 +222,7 @@ describe("Taunt multi-target selection regressions", () => {
     expect(other.currentHp).toBe(10);
   });
 
-  test("a single-target frontline effect targets the Taunt unit automatically", () => {
+  test("a single-target frontline effect commits the Taunt unit and asks for confirmation", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice"));
     const taunter = push(game, "Bob", unit("taunter", "Bob"));
@@ -228,8 +235,13 @@ describe("Taunt multi-target selection regressions", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    expect(Array.isArray(result)).toBe(true);
-    expect(game.pendingDecision).toBeNull();
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds).toEqual(["taunter"]);
+    expect(game.pendingDecision.candidates.map((c) => c.id)).toEqual(["taunter"]);
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [] });
     expect(taunter.currentHp).toBe(9);
     expect(other.currentHp).toBe(10);
   });
@@ -261,7 +273,7 @@ describe("Taunt multi-target selection regressions", () => {
     expect(other.currentHp).toBe(10);
   });
 
-  test("a single-target backline effect targets the Taunt unit in the backline", () => {
+  test("a single-target backline effect commits the backline Taunt unit and asks for confirmation", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice"));
     const taunter = unit("taunter", "Bob");
@@ -275,8 +287,12 @@ describe("Taunt multi-target selection regressions", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    expect(Array.isArray(result)).toBe(true);
-    expect(game.pendingDecision).toBeNull();
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds).toEqual(["taunter"]);
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [] });
     expect(taunter.currentHp).toBe(9);
     expect(other.currentHp).toBe(10);
   });
@@ -300,7 +316,7 @@ describe("Taunt multi-target selection regressions", () => {
     expect(game.pendingDecision.lockedIds).toEqual([]);
   });
 
-  test("a multi-target ally effect auto-resolves when the ally count matches (source unit included)", () => {
+  test("a multi-target ally effect commits the whole set and asks for confirmation when the ally count matches (source unit included)", () => {
     const game = createGame();
     const src = push(game, "Alice", unit("src", "Alice"));
     const ally1 = push(game, "Alice", unit("ally1", "Alice"));
@@ -311,9 +327,13 @@ describe("Taunt multi-target selection regressions", () => {
       { owner: "Alice", sourceId: src.id, sourceUnit: src, sourceOwner: "Alice" }
     );
 
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(2);
-    expect(game.pendingDecision).toBeNull();
+    expect(result).toEqual({ pending: true });
+    expect(game.pendingDecision.minChoices).toBe(0);
+    expect(game.pendingDecision.maxChoices).toBe(0);
+    expect(game.pendingDecision.lockedIds.sort()).toEqual(["ally1", "src"].sort());
+    expect(game.pendingDecision.candidates).toHaveLength(2);
+
+    game.resolveDecision({ decisionId: game.pendingDecision.decisionId, username: "Alice", choices: [] });
     expect(game.modifierStack.getEffective(src.id, "trait", "strong")).toBe(1);
     expect(game.modifierStack.getEffective(ally1.id, "trait", "strong")).toBe(1);
   });

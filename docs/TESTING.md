@@ -41,6 +41,7 @@ The shared helper `tests/utils.js` lives at the tests root; subfolder tests impo
 - `createTestGame()` — empty two-player game with legal decks.
 - `deployUnit(game, username, name, positionCode)` — deploy a unit from hand by name.
 - `advanceToRound(game, round)`, `getCardIdByName(name)`, `createLegalDeck([...ids])`, `expectShinsuState(...)`.
+- `confirmPendingDecision(game)` — confirm every pending committed decision (zero free slots) as its owner, until none remains; no-op when nothing is pending. Fails loudly on a decision that still requires free choices — those tests submit choices explicitly.
 
 ### Frontend tests
 
