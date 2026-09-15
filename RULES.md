@@ -488,11 +488,11 @@ Thunder Baang: give Exhausted 1 to a unit
 Static Baang: give Weak 1 to a unit
 ```
 
-"When I'm deployed, heal 2 HP from or summon Conduit": heal the enemy Conduit 2 HP if one exists, otherwise summon a Conduit on the enemy backline. The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
+"When I'm deployed, heal 2 HP from or summon Conduit": heal the enemy Conduit 2 HP if one exists, otherwise summon a Conduit on the enemy backline. If the enemy backline is full, the summon fails and the Conduit card is Discarded ([Shinheuh](#shinheuh)). The Conduit sits on the enemy backline and counts as a unit; "ally" in its text is its own team (the Jeonsulsa player's opponent), so the Baangs hit that player's units. The Baangs never target the Conduit itself. **Activation** is only used by the Conduit: an effect that says "activate the Conduit" triggers the Conduit's Activation effect.
 
 **Example Synergies:**
 
-- Passive: `when i use an ability, grant the enemy Conduit 1 HP or summon a new one`
+- Passive: `when i use an ability, heal the enemy Conduit 1 HP or summon a new one`
 - Ability: `spend 3: activate the enemy Conduit twice`
 - Passive: `the first time an ally Jeonsulsa dies this game, activate the enemy Conduit 4 times`
 

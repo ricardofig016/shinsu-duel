@@ -6,7 +6,8 @@ import LifecycleEngine from "../../services/LifecycleEngine.js";
  * no combat slot, no turn change. Delegates to the summon path, so same-name
  * uniqueness, the five-unit line cap, and every deployment subscription
  * (traits, triggers, passives, attribute wiring) behave as they do for a
- * summoned unit. A full destination line opens the line-overflow decision.
+ * summoned unit. A full destination line fizzles the spawn and the card is
+ * discarded.
  */
 export default class DebugSpawnUnitAction extends DebugAction {
   static schema = {

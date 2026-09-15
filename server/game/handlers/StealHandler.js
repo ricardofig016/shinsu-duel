@@ -64,7 +64,7 @@ export default class StealHandler extends BaseHandler {
     if (!positionCode) return { stolen: false, reason: "no legal position" };
 
     const result = LifecycleEngine.stealUnit(gameState, target, acting, positionCode);
-    return { stolen: result.stolen, pending: result.pending === true };
+    return { stolen: result.stolen, fizzled: result.fizzled === true, pending: result.pending === true };
   }
 
   _autoPosition(unit, newOwner, gameState) {
@@ -80,7 +80,7 @@ export default class StealHandler extends BaseHandler {
       if (line && gameState.playerStates[newOwner].field[line].length < 5) return pos;
     }
     // Every printed position leads to a full line: pick the first and let
-    // stealUnit's overflow decision resolve the conflict.
+    // stealUnit's line-cap fizzle resolve the conflict.
     return positions[0] || null;
   }
 }

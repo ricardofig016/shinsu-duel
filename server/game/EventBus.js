@@ -278,6 +278,26 @@ export default class EventBus {
     return this._emitInternal(eventName, payload, 0);
   }
 
+  /**
+   * Create a standalone root EventContext for programmatic effect execution
+   * outside any event chain — attribute engines and services that need the
+   * full handler pipeline (modifiers, caps, announcements) without a parent
+   * event to hang off. Child events emitted through it run at depth 1, so
+   * they resolve completely and reach every subscriber while the caller keeps
+   * executing, and the Logger records them through the enclosing player
+   * action's state diff instead of as separate root entries.
+   *
+   * The returned context is opaque: it only exposes `emitChild`, `cancel`,
+   * and `cancelled`.
+   *
+   * @param {string} [label="programmatic"] Diagnostic label stored as the
+   *   context's event name; it is never emitted.
+   * @returns {EventContext}
+   */
+  createRootContext(label = "programmatic") {
+    return new EventContext(this, label, "execute", 0);
+  }
+
   // -----------------------------------------------------------------------
   // Internal
   // -----------------------------------------------------------------------

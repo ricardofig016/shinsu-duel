@@ -1,5 +1,6 @@
 import { setupGameWithHands, deployUnit, getCardIdByName } from "../utils.js";
 import SummonHandler from "../../handlers/SummonHandler.js";
+import EVT from "../../EventCatalog.js";
 import Card from "../../Card.js";
 import ZoneService from "../../services/ZoneService.js";
 
@@ -141,7 +142,7 @@ describe("SummonHandler", () => {
     expect(onField(game, "Bob").some((u) => u.card.name === "Test Shinheuh")).toBe(true);
   });
 
-  test("summon into a full line defers to a line_overflow decision", () => {
+  test("summon into a full line fizzles, discards the summoned card, and announces the fizzle", () => {
     const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
     game.playerStates.Alice.field.frontline = [
       { id: "U1", card: { name: "A", maxHp: 1 }, currentHp: 1 },
@@ -150,14 +151,26 @@ describe("SummonHandler", () => {
       { id: "U4", card: { name: "D", maxHp: 1 }, currentHp: 1 },
       { id: "U5", card: { name: "E", maxHp: 1 }, currentHp: 1 },
     ];
+    const fizzles = [];
+    game.eventBus.on(EVT.UNIT_SUMMON_FIZZLED, (p) => fizzles.push(p), { phase: "pre" });
 
-    handler.execute(
+    const result = handler.execute(
       { owner: "Alice", card: { name: "Test Shinheuh" }, from: "hand", onto: "self", sourceId: "Unit#Src" },
       context(game),
       game
     );
 
-    expect(game.pendingDecision?.type).toBe("line_overflow");
+    // No substitution decision is offered for summons — only deployment
+    // from hand opens one (RULES.md §Summons).
+    expect(game.pendingDecision).toBeNull();
+    expect(result.summoned).toBe(false);
+    expect(result.results[0].fizzled).toBe(true);
+    expect(onField(game, "Alice")).toHaveLength(5);
+    expect(fizzles).toHaveLength(1);
+    expect(fizzles[0].owner).toBe("Alice");
+    expect(fizzles[0].cardName).toBe("Test Shinheuh");
+    expect(fizzles[0].line).toBe("frontline");
+    expect(game.playerStates.Alice.discard.some((c) => c.name === "Test Shinheuh")).toBe(true);
   });
 
   test("summon of a multi-position card defers to a position_selection decision", () => {

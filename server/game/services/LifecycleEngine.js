@@ -285,8 +285,10 @@ export default class LifecycleEngine {
    * combat slot, or ending the turn (RULES.md §Shinheuh).
    *
    * Enforces same-name uniqueness: a summoned copy of a unit already on the
-   * owner's board is discarded. A full destination line defers to the same
-   * line-overflow decision used by deployment.
+   * owner's board is discarded. A full destination line fizzles the summon
+   * (RULES.md §Summons): the unit is discarded and the failure is announced
+   * through `UNIT_SUMMON_FIZZLED`. Only deployment from hand opens the
+   * line-overflow substitution.
    *
    * @param {GameState} gameState
    * @param {string} owner — the player whose field receives the unit
@@ -308,32 +310,13 @@ export default class LifecycleEngine {
 
     const fieldLine = player.field[line];
     if (fieldLine.length >= 5) {
-      const pendingCardId = `pending-summon:${card.id}`;
-      gameState.createPendingDecision({
+      gameState.eventBus.emit(EVT.UNIT_SUMMON_FIZZLED, {
         owner,
-        type: "line_overflow",
-        candidates: [
-          ...fieldLine.map((candidate) => ({
-            id: candidate.id,
-            name: candidate.card.name,
-            hp: candidate.currentHp,
-          })),
-          { id: pendingCardId, name: card.name, hp: card.entryHp ?? card.maxHp },
-        ],
-        resolve: ([selectedId]) => {
-          if (selectedId === pendingCardId) {
-            ZoneService.discard(player, card);
-            return;
-          }
-          const selectedUnit = gameState._findUnit(selectedId);
-          if (!selectedUnit || !fieldLine.includes(selectedUnit)) {
-            throw new Error("Selected overflow unit is no longer in the destination line.");
-          }
-          LifecycleEngine.destroyUnit(gameState, selectedUnit);
-          LifecycleEngine._placeOnField(gameState, card, owner, positionCode, 0);
-        },
+        cardName: card.name,
+        line,
       });
-      return { unit: null, overflowDestroyed: true, pending: true };
+      ZoneService.discard(player, card);
+      return { unit: null, fizzled: true, pending: false };
     }
 
     const unit = LifecycleEngine._placeOnField(gameState, card, owner, positionCode, 0);
@@ -343,8 +326,9 @@ export default class LifecycleEngine {
   /**
    * Move a deployed unit to another player's field (steal). Ownership is
    * reassigned; the unit's modifiers, subscriptions, and identity are kept
-   * intact. A full destination line defers to the same line-overflow decision
-   * as summoning.
+   * intact. A full destination line fizzles the steal (RULES.md §Stealing):
+   * the unit stays where it is and the failure is announced through
+   * `UNIT_STEAL_FIZZLED`.
    *
    * @param {GameState} gameState
    * @param {object} unit — the deployed unit to steal
@@ -359,33 +343,12 @@ export default class LifecycleEngine {
     const line = newPlayer.field[newLine];
 
     if (line.length >= 5) {
-      const pendingId = `pending-steal:${unit.id}`;
-      gameState.createPendingDecision({
+      gameState.eventBus.emit(EVT.UNIT_STEAL_FIZZLED, {
+        unitId: unit.id,
+        cardName: unit.card.name,
         owner: newOwner,
-        type: "line_overflow",
-        candidates: [
-          ...line.map((candidate) => ({
-            id: candidate.id,
-            name: candidate.card.name,
-            hp: candidate.currentHp,
-          })),
-          { id: pendingId, name: unit.card.name, hp: unit.card.entryHp ?? unit.card.maxHp },
-        ],
-        resolve: ([selectedId]) => {
-          if (selectedId === pendingId) {
-            LifecycleEngine._removeFromField(gameState, unit);
-            ZoneService.discard(gameState.playerStates[unit.owner], unit.card);
-            return;
-          }
-          const selectedUnit = gameState._findUnit(selectedId);
-          if (!selectedUnit || !line.includes(selectedUnit)) {
-            throw new Error("Selected overflow unit is no longer in the destination line.");
-          }
-          LifecycleEngine.destroyUnit(gameState, selectedUnit);
-          LifecycleEngine.stealUnit(gameState, unit, newOwner, positionCode);
-        },
       });
-      return { stolen: true, pending: true };
+      return { stolen: false, fizzled: true, pending: false };
     }
 
     LifecycleEngine._removeFromField(gameState, unit);

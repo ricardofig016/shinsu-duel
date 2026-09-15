@@ -29,6 +29,12 @@ function findConduit(game, username) {
   return [...field.frontline, ...field.backline].find((u) => u.card.name === "Conduit") ?? null;
 }
 
+// Bare capacity fillers: the Conduit summon's line-cap check only reads the
+// destination line's length, mirroring the SummonHandler/StealHandler tests.
+function filler(id, name) {
+  return { id, card: { name }, currentHp: 1 };
+}
+
 describe("JeonsulsaEngine", () => {
   test("is registered on the attribute registry with access to the card catalog", () => {
     const game = createTestGame();
@@ -57,30 +63,122 @@ describe("JeonsulsaEngine", () => {
     expect(damageEvents).toHaveLength(0);
   });
 
-  test("deploying a Jeonsulsa unit with an enemy Conduit on the field grants it +2 max and current HP", () => {
+  test("deploying a Jeonsulsa unit with an enemy Conduit on the field heals it 2 HP without raising max HP", () => {
     const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
     addToHand(game, "Bob", "Conduit");
     const existing = deployFromHand(game, "Bob", "Conduit", "backline");
     expect(existing.currentHp).toBe(2);
 
+    const heals = [];
+    game.eventBus.on(EVT.HEAL_APPLIED, (p) => heals.push(p), { phase: "pre" });
+
     deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
 
     const conduit = findConduit(game, "Bob");
     expect(conduit).toBe(existing);
-    expect(conduit.card.maxHp).toBe(10);
+    // Heal semantics: the fixed 8 max HP is untouched; only current HP rises.
+    expect(conduit.card.maxHp).toBe(8);
     expect(conduit.currentHp).toBe(4);
+    expect(heals).toHaveLength(1);
+    expect(heals[0].targetId).toBe(conduit.id);
+    expect(heals[0].amount).toBe(2);
+    expect(heals[0].currentHp).toBe(4);
   });
 
-  test("the grant preserves the lost-HP delta of a damaged Conduit", () => {
+  test("the deploy heal is capped at the Conduit's max HP", () => {
     const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
     addToHand(game, "Bob", "Conduit");
     const existing = deployFromHand(game, "Bob", "Conduit", "backline");
-    UnitService.setHp(existing, 3);
+    UnitService.setHp(existing, 7);
+
+    const heals = [];
+    game.eventBus.on(EVT.HEAL_APPLIED, (p) => heals.push(p), { phase: "pre" });
 
     deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
 
-    expect(existing.card.maxHp).toBe(10);
-    expect(existing.currentHp).toBe(5);
+    expect(existing.card.maxHp).toBe(8);
+    expect(existing.currentHp).toBe(8);
+    expect(heals).toHaveLength(1);
+    expect(heals[0].amount).toBe(1);
+  });
+
+  test("deploying onto a full-HP Conduit heals nothing and emits no event", () => {
+    const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
+    addToHand(game, "Bob", "Conduit");
+    const existing = deployFromHand(game, "Bob", "Conduit", "backline");
+    UnitService.setHp(existing, 8);
+
+    const heals = [];
+    game.eventBus.on(EVT.HEAL_APPLIED, (p) => heals.push(p), { phase: "pre" });
+
+    deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
+
+    expect(existing.currentHp).toBe(8);
+    expect(heals).toHaveLength(0);
+  });
+
+  test("heal amplifiers on the deploying Jeonsulsa increase the Conduit heal", () => {
+    const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
+    addToHand(game, "Bob", "Conduit");
+    const existing = deployFromHand(game, "Bob", "Conduit", "backline");
+    UnitService.setHp(existing, 1);
+
+    // The second Jeonsulsa is the heal's source; its heal amplifier must
+    // apply to the deploy heal like to any other heal it performs.
+    const amplifierSource = { id: "Unit#jeonsulsa-amp", owner: "Alice", card: { attributes: ["jeonsulsa"] } };
+    game.modifierStack.apply({
+      sourceId: "System",
+      sourceType: "system",
+      targetId: amplifierSource.id,
+      type: "stat",
+      key: "heal",
+      value: 1,
+    });
+
+    const engine = game._attributeRegistry.get("jeonsulsa");
+    engine.onDeploy(amplifierSource, game);
+
+    expect(existing.currentHp).toBe(4);
+  });
+
+  test("deploying a Jeonsulsa unit when the enemy backline is full fizzles the summon and discards the Conduit card", () => {
+    const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
+    game.playerStates.Bob.field.backline = [
+      filler("F1", "A"), filler("F2", "B"), filler("F3", "C"), filler("F4", "D"), filler("F5", "E"),
+    ];
+    const fizzles = [];
+    game.eventBus.on(EVT.UNIT_SUMMON_FIZZLED, (p) => fizzles.push(p), { phase: "pre" });
+
+    deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
+
+    expect(findConduit(game, "Bob")).toBeNull();
+    expect(game.playerStates.Bob.field.backline).toHaveLength(5);
+    expect(fizzles).toHaveLength(1);
+    expect(fizzles[0].owner).toBe("Bob");
+    expect(fizzles[0].cardName).toBe("Conduit");
+    expect(fizzles[0].line).toBe("backline");
+    // A failed summon discards the summoned unit (RULES.md §Summons).
+    expect(game.playerStates.Bob.discard.some((c) => c.name === "Conduit")).toBe(true);
+  });
+
+  test("the existing-Conduit heal runs even when the enemy backline is full", () => {
+    const game = setupGameWithHands({ Alice: ["Test Khun Ran"], Bob: [] });
+    game.playerStates.Bob.field.backline = [
+      filler("F1", "A"), filler("F2", "B"), filler("F3", "C"), filler("F4", "D"), filler("F5", "E"),
+    ];
+    const conduitUnit = {
+      id: "Unit#conduit-hosted",
+      owner: "Bob",
+      card: { name: "Conduit", kind: "conduit", maxHp: 8, entryHp: 2 },
+      currentHp: 2,
+      isAlive: () => true,
+    };
+    game.playerStates.Bob.field.backline[0] = conduitUnit;
+
+    deployUnit(game, "Alice", "Test Khun Ran", "fisherman");
+
+    expect(conduitUnit.currentHp).toBe(4);
+    expect(game.playerStates.Bob.discard).toHaveLength(0);
   });
 
   test("resolves the enemy owner in a two-player game in both directions", () => {

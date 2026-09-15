@@ -17,6 +17,8 @@ import { toCardTargetView } from "../utils/cardData.js";
  * `TargetResolver.resolveCardTargets`; `random` picks deterministically via
  * the seeded RNG. A multi-position card defers position choice to a
  * `position_selection` decision; a single-position card is placed directly.
+ * A full destination line fizzles the summon and discards the card
+ * (LifecycleEngine).
  *
  * Payload:
  *   { owner, card, from, onto, sourceId, sourceUnit }
@@ -90,6 +92,7 @@ export default class SummonHandler extends BaseHandler {
       return {
         summoned: result.unit !== null || result.discardedDuplicate === true,
         discardedDuplicate: result.discardedDuplicate === true,
+        fizzled: result.fizzled === true,
         pending: false,
       };
     }
@@ -99,6 +102,7 @@ export default class SummonHandler extends BaseHandler {
       return {
         summoned: result.unit !== null || result.discardedDuplicate === true,
         discardedDuplicate: result.discardedDuplicate === true,
+        fizzled: result.fizzled === true,
         pending: false,
       };
     }

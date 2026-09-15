@@ -76,7 +76,7 @@ describe("DebugSpawnUnitAction", () => {
     ).toThrow("Source player is not allowed to perform this action.");
   });
 
-  test("a full line defers to the line-overflow decision", () => {
+  test("a full line fizzles the spawn and discards the card", () => {
     const game = createTestGame();
     const fillers = Array.from({ length: 5 }, (_, index) => getCardIdByName(`Test Filler ${index + 1}`));
 
@@ -91,8 +91,11 @@ describe("DebugSpawnUnitAction", () => {
 
     spawn(game, { username: "Alice", cardId: scout(), positionCode: "scout" });
 
-    expect(game.pendingDecision.type).toBe("line_overflow");
-    expect(game.hasUnresolvedDecisions()).toBe(true);
+    // The spawn fizzles like any summon: no substitution decision is opened,
+    // the line stays untouched, and the card is discarded.
+    expect(game.pendingDecision).toBeNull();
+    expect(game.hasUnresolvedDecisions()).toBe(false);
     expect(game.playerStates.Alice.field.frontline).toHaveLength(5);
+    expect(game.playerStates.Alice.discard.some((c) => c.name === "Test Scout")).toBe(true);
   });
 });

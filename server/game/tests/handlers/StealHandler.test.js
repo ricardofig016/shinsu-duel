@@ -76,7 +76,7 @@ describe("StealHandler", () => {
     expect(first.names).toEqual(second.names);
   });
 
-  test("steal into a full line defers to a line_overflow decision", () => {
+  test("steal into a full line fizzles and leaves the unit where it is", () => {
     const game = setupGameWithHands({ Bob: ["Test Shinheuh"] });
     deployUnit(game, "Bob", "Test Shinheuh", "frontline");
     game.playerStates.Alice.field.frontline = [
@@ -86,6 +86,8 @@ describe("StealHandler", () => {
       { id: "A4", card: { name: "D", maxHp: 1 }, currentHp: 1 },
       { id: "A5", card: { name: "E", maxHp: 1 }, currentHp: 1 },
     ];
+    const fizzles = [];
+    game.eventBus.on(EVT.UNIT_STEAL_FIZZLED, (p) => fizzles.push(p), { phase: "pre" });
 
     const result = handler.execute(
       { owner: "Alice", card: { kind: "shinheuh", cost: "cheapest" }, sourceId: "Unit#Src" },
@@ -93,8 +95,16 @@ describe("StealHandler", () => {
       game
     );
 
-    expect(result.pending).toBe(true);
-    expect(game.pendingDecision.type).toBe("line_overflow");
+    // The steal fails cleanly: the unit stays with its owner on the field
+    // and no substitution decision is opened (RULES.md §Stealing).
+    expect(result.stolen).toBe(false);
+    expect(result.fizzled).toBe(true);
+    expect(game.pendingDecision).toBeNull();
+    expect(onField(game, "Bob")).toHaveLength(1);
+    expect(onField(game, "Alice")).toHaveLength(5);
+    expect(fizzles).toHaveLength(1);
+    expect(fizzles[0].cardName).toBe("Test Shinheuh");
+    expect(fizzles[0].owner).toBe("Alice");
   });
 
   test("emits UNIT_STOLEN when a unit is stolen", () => {

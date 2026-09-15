@@ -101,6 +101,10 @@ const EVT = {
 
   // Steal
   UNIT_STOLEN: "unit:stolen",
+  UNIT_STEAL_FIZZLED: "unit:steal:fizzled",
+
+  // Summon (destination line full)
+  UNIT_SUMMON_FIZZLED: "unit:summon:fizzled",
 
   // Silence (remove traits)
   UNIT_SILENCED: "unit:silenced",

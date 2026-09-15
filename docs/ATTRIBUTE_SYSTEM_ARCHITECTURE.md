@@ -119,8 +119,10 @@ The engine owns no counters. Its state is the Conduit token itself: a `kind: con
 
 ### Lifecycle
 
-1. **Deploy:** scan the enemy field for a Conduit. Found → `UnitService.grantHp(conduit, 2)` permanently raises both its max and current HP. Not found → look up the Conduit card data and `LifecycleEngine.summonUnit(gameState, enemyOwner, card, "backline")`. The summon is re-entrant — it runs inside the deploying unit's attribute wiring, so the Conduit's full event chain completes before the deployer's own deploy event fires.
+1. **Deploy:** scan the enemy field for a Conduit. Found → heal it 2 HP through the standard `heal` handler pipeline (capped at its fixed 8 max HP, heal amplifiers on the deploying Jeonsulsa apply, `HEAL_APPLIED` announced with the Jeonsulsa as the source). Not found → look up the Conduit card data and `LifecycleEngine.summonUnit(gameState, enemyOwner, card, "backline")`; a full enemy backline fizzles the summon and discards the card. The summon is re-entrant — it runs inside the deploying unit's attribute wiring, so the Conduit's full event chain completes before the deployer's own deploy event fires.
 2. **After entry:** the Conduit's passives handle the rest — Ghost on round start, the self-slay and Baang passives on round start and `activation` events.
+
+The heal runs outside any event chain (inside the deploying unit's placement), so the engine executes it under a standalone root context from `EventBus.createRootContext` — child events reach every subscriber while the state lands in the enclosing player action's log entry.
 
 ### API
 
