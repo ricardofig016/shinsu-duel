@@ -86,6 +86,25 @@ export function validateDeckCards(cardSlugs, catalog) {
 }
 
 /**
+ * The deck-legal slug pool: every deck-legal card's slug repeated up to
+ * `MAX_CARD_COPIES` times, so a shuffled draw of `INIT_DECK_SIZE` entries is
+ * a legal deck by construction. Test cards are excluded: they never belong
+ * in a dealt deck. The rules are read from `GameState`, never copied.
+ *
+ * @param {object} catalog compiled card catalog keyed by card id, entries carrying `slug`
+ * @returns {string[]} slugs of every deck-legal card, each up to MAX_CARD_COPIES times
+ */
+export function buildLegalSlugPool(catalog) {
+  const pool = [];
+  for (const card of Object.values(catalog ?? {})) {
+    if ((card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) continue;
+    if (isTestCard(card)) continue;
+    for (let copy = 0; copy < GameState.MAX_CARD_COPIES; copy++) pool.push(card.slug);
+  }
+  return pool;
+}
+
+/**
  * The deck-construction numbers a client displays or caps input with. Clients
  * read these from the deck API rather than restating the rules, which live in
  * `GameState` and RULES.md.
