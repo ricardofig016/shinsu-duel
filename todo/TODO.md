@@ -2,14 +2,15 @@
 
 ## Tasks
 
-- [ ] frontend: change board background to something from the webtoon
-- [ ] rules: add contracts from `todo\contracts.md`
-- [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
-- [ ] game: add support for position:`any`
-- [ ] units: rethink `conduit` kind - maybe generalize as `construct`
-- [ ] cards: dynamically mark all cards in `data\cards\test` as unreachable
-- [ ] ui: add numbers to numeric traits and conditions
+- [ ] decision engine: remove auto decisions when there's only 1 choice - the player should still actively make it
+- [ ] game: add random bot and pass bot
 - [ ] jeonsulsa: make the engine heal instead of granting hp
+- [ ] ui: add numbers to numeric traits and conditions
+- [ ] rules: add contracts from `todo\contracts.md`
+- [ ] units: rethink `conduit` kind - maybe generalize as `construct`
+- [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
+- [ ] game: add support for position: `any`
+- [ ] frontend: change board background to something from the webtoon
 
 ## In Progress
 
