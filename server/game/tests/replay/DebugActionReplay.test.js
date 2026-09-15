@@ -23,7 +23,7 @@ import {
  */
 
 const DEV_ROOM = "TESTROOM77";
-const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", difficulty: null, seed });
+const ROOM_RECORD = (seed) => ({ players: [], opponent: "friend", seed });
 
 describe("debug action replay", () => {
   let tmpRoot;

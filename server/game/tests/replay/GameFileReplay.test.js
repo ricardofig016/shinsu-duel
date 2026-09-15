@@ -47,7 +47,7 @@ describe("GameFileLogger replay round-trip", () => {
           loggerBackends: devRoomLoggingBackends(roomCode, { directory: tmpRoot }),
         }),
     });
-    harness.rooms[ROOM_CODE] = { players: [], opponent: "friend", difficulty: null, seed: 42 };
+    harness.rooms[ROOM_CODE] = { players: [], opponent: "friend", seed: 42 };
     harness.joinRoom(ROOM_CODE, "Alice");
     harness.joinRoom(ROOM_CODE, "Bob");
 
