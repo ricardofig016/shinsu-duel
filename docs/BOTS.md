@@ -19,7 +19,7 @@ The first playstyles and deck methods:
 
 - **Whatever** — passes every turn, resolves a forced decision with the first valid candidates.
 - **Drunk** — a uniform random pick each turn over the moves its seat view can verify (pass, fire charge, affordable standard-unit deploys), and a random valid subset for decisions.
-- **Mirror mine** — the bot plays the human seat's pick, resolved at start.
+- **Mirror mine** — the bot plays the human seat's re-read deck at start, so a deck edited between pick and start is mirrored as edited.
 - **Randomly generated** — a fresh legal deck drawn from the deck-legal slug pool, seeded and shuffled deterministically.
 - **Random from my decks** — one of the human's own legal decks, chosen uniformly, falling back to a generated deck when none is legal.
 
@@ -37,17 +37,17 @@ The view is exactly what `buildStateView` builds for the seat: `currentTurn`, th
 A deck method is a pure, stateless `resolve(context)`:
 
 ```
-resolve({ catalog, deckLibrary, ownerUsername, humanPick, rng, dev })
+resolve({ catalog, deckLibrary, ownerUsername, humanDeck, rng })
   → { deckId, name, cards: slugs, illegal }
 ```
 
-Methods run at start time inside the gateway's start resolution (`SocketGateway.#resolveBotDeck`), and the result is validated by `validateDeckCards` like any human pick. A bot seat stores no pick of its own — `game-deck-status` reports the seat as a bot, and the deck stops being secret at the same moment every deck does: the versus reveal. A deck that cannot be made buildable (or legal outside a dev room) aborts the start and the room stays in selection.
+`humanDeck` is the human seat's deck record re-read at start time — the same live deck the human seat itself plays under, so a deck edited between pick and start is what a deck method that depends on it resolves. Methods run at start time inside the gateway's start resolution (`SocketGateway.#resolveBotDeck`), and the result is validated by `validateDeckCards` like any human pick. A bot seat stores no pick of its own — `game-deck-status` reports the seat as a bot, and the deck stops being secret at the same moment every deck does: the versus reveal. A method that throws, or a deck that cannot be made buildable (or legal outside a dev room), aborts the start and the room stays in selection; the next start trigger — a re-pick, a reconnect — resolves again.
 
 The deck-legal slug pool that generated decks draw from is `buildLegalSlugPool` in `server/decks/deckValidation.js` — the same pool shape the engine's default-deck pool uses, excluding Unreachable and test cards.
 
 ## The bot seat
 
-`server/bots/botSeat.js` assembles one room's bot seat: roster identity, the playstyle instance, the deck method instance, and the controller bound to the session registry and the gateway's validated paths. The bot seat's rng derives deterministically from the room's game seed (`deriveBotSeed`), so a seeded room replays identically end to end — bot decisions included — without touching the engine's own rng stream.
+`server/bots/botSeat.js` assembles one room's bot seat: the spec is validated there (`parseBotSpec`), making `createBotSeat` the single refusal point for a broken room record — the gateway catches its throw and refuses the connection. From the validated spec it builds the roster identity, the playstyle instance, the deck method instance, and the controller bound to the session registry and the gateway's validated paths. The bot seat's rng derives deterministically from the room's game seed (`deriveBotSeed`), so a seeded room replays identically end to end — bot decisions included — without touching the engine's own rng stream.
 
 `server/bots/BotSeatController.js` is the seat's connection and driver:
 

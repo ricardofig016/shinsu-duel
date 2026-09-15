@@ -1,29 +1,24 @@
 import MirrorDeckMethod from "../../deckMethods/MirrorDeckMethod.js";
 
-const humanPick = {
-  deckId: "ABC123",
-  name: "Tower Climb",
-  cards: ["baam", "shibisu", "rak"],
-  illegal: false,
-};
-
 describe("MirrorDeckMethod", () => {
   const method = new MirrorDeckMethod();
 
-  test("fields the human seat's pick, copied", async () => {
-    const pick = await method.resolve({ humanPick });
+  test("fields the human seat's re-read deck, copied", async () => {
+    const humanDeck = { name: "Tower Climb", cards: ["baam", "shibisu", "rak"] };
+    const pick = await method.resolve({ humanDeck });
 
-    expect(pick).toEqual({ deckId: "ABC123", name: "Tower Climb", cards: ["baam", "shibisu", "rak"], illegal: false });
+    expect(pick.deckId).toBe("mirrored");
+    expect(pick).toMatchObject({ name: "Tower Climb", cards: ["baam", "shibisu", "rak"], illegal: false });
     pick.cards.push("mutated");
-    expect(humanPick.cards).toHaveLength(3);
+    expect(humanDeck.cards).toHaveLength(3);
   });
 
-  test("mirrors an illegal pick as illegal", async () => {
-    const pick = await method.resolve({ humanPick: { ...humanPick, illegal: true } });
-    expect(pick.illegal).toBe(true);
+  test("mirrors whatever the human seat plays at start time, not an earlier snapshot", async () => {
+    const pick = await method.resolve({ humanDeck: { name: "Edited Late", cards: ["baam"] } });
+    expect(pick).toMatchObject({ name: "Edited Late", cards: ["baam"] });
   });
 
-  test("throws when the human seat has no pick yet", async () => {
-    await expect(method.resolve({ humanPick: null })).rejects.toThrow("needs the human seat's deck pick");
+  test("throws when the human seat has no deck to mirror", async () => {
+    await expect(method.resolve({ humanDeck: null })).rejects.toThrow("needs the human seat's re-read deck");
   });
 });

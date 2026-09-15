@@ -1,10 +1,14 @@
 import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "./harness.js";
 import { createSeededGame } from "../../gameFactory.js";
-import { cards, getCardIdByName } from "../utils.js";
+import { cards, createLegalDeck, getCardIdByName } from "../utils.js";
 import { createBotSeat as createRealBotSeat } from "../../../../server/bots/botSeat.js";
 import GeneratedDeckMethod from "../../../../server/bots/deckMethods/GeneratedDeckMethod.js";
+import MirrorDeckMethod from "../../../../server/bots/deckMethods/MirrorDeckMethod.js";
 import { buildDeckFanSlugs } from "../../../../server/decks/deckFan.js";
+
+/** A legal 30-card deck of fixture-catalog slugs. */
+const legalDeckSlugs = () => createLegalDeck().map((cardId) => cards[cardId].slug);
 
 /**
  * Bot rooms over the real transport: a bot room seats its bot the moment the
@@ -143,6 +147,57 @@ describe("bot rooms over the wire", () => {
       },
       "the bot never passed."
     );
+    expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
+  });
+
+  test("the mirror mirrors a deck the human edited between pick and start", async () => {
+    // The first start attempt fails once so the room stays in selection while
+    // the deck is edited, the way an edit between pick and start happens for
+    // a human opponent.
+    const scout = cards[getCardIdByName("Test Scout")].slug;
+    const fillers = Object.values(cards)
+      .filter((card) => {
+        if (card.slug === scout) return false;
+        if ((card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) return false;
+        return card.name.startsWith("Test Filler");
+      })
+      .map((card) => card.slug);
+    const beforeEdit = legalDeckSlugs();
+    const afterEdit = [scout, scout, scout, ...fillers.slice(0, 27)];
+    const flakyMirror = {
+      attempts: 0,
+      async resolve(context) {
+        this.attempts += 1;
+        if (this.attempts === 1) throw new Error("not yet");
+        return new MirrorDeckMethod().resolve(context);
+      },
+    };
+    await bootHarness({ botDeckMethod: flakyMirror });
+
+    const { roomCode, alice } = await connectBotRoom({ bot: "whatever", deckMethod: "mirror" });
+    const deck = await harness.createDeck("Alice", "Editable Deck", beforeEdit);
+    harness.selectDeck(alice, deck.id);
+    await harness.waitFor(
+      () => alice.payloadsOf(EVENTS.GAME_DECK_STATUS).length >= 2,
+      "the failed start never returned the room to selection."
+    );
+
+    await harness.updateDeck(deck.id, "Alice", { name: "Edited Late", cards: afterEdit });
+
+    harness.selectDeck(alice, deck.id);
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_DECK_REVEAL) !== null,
+      "the versus reveal never arrived."
+    );
+    const botReveal = alice.lastPayloadOf(EVENTS.GAME_DECK_REVEAL).seats.find((seat) => seat.username === BOT_WHATEVER);
+    expect(botReveal.deckName).toBe("Edited Late");
+    expect(botReveal.fan).toEqual(buildDeckFanSlugs(afterEdit, cards));
+
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null,
+      "the game never started."
+    );
+    expect(harness.registry.get(roomCode).isStarted).toBe(true);
     expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
   });
 

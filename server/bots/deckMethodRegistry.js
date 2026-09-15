@@ -2,9 +2,9 @@
  * Registry of bot deck methods keyed by kebab-case id.
  *
  * A deck method is the deck half of a bot: given a resolution context (the
- * compiled catalog, the deck library, the human seat's pick, and the seat's
- * seeded rng), it produces the concrete pick a bot seat fields. Methods are
- * stateless, so one instance serves every seat.
+ * compiled catalog, the deck library, the human seat's re-read deck, and the
+ * seat's seeded rng), it produces the concrete pick a bot seat fields.
+ * Methods are stateless, so one instance serves every seat.
  */
 
 import MirrorDeckMethod from "./deckMethods/MirrorDeckMethod.js";

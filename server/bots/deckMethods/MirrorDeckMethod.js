@@ -1,11 +1,13 @@
 /**
  * The "mirror" deck method: the bot plays exactly the deck the human seat
- * picked for itself.
+ * plays, resolved from that seat's re-read record at start time.
  *
- * The pick carries the mirrored deck's id and name so the deck reveal and
- * status payloads describe the deck truthfully. It resolves when the start
- * path runs, which is always after the human pick exists — a start cannot be
- * attempted before both seats hold a pick.
+ * The human deck arrives as the start path's re-read record, so a deck the
+ * human edited between picking and the start is what the bot mirrors — the
+ * same freshness rule the human seat itself plays under. The pick carries a
+ * synthetic deck id: a bot seat's pick is validated from its own slug list
+ * at start and never re-read through the deck library, which would not find
+ * a deck owned by the human under the bot's name.
  */
 
 export default class MirrorDeckMethod {
@@ -13,18 +15,19 @@ export default class MirrorDeckMethod {
    * Resolve the concrete deck this seat plays.
    *
    * @param {object} context
-   * @param {object|null} context.humanPick the human seat's deck pick
+   * @param {object} context.humanDeck the human seat's re-read deck record
+   *   (`{ name, cards }`) taken at start time
    * @returns {Promise<{ deckId: string, name: string, cards: string[], illegal: boolean }>}
    */
-  async resolve({ humanPick }) {
-    if (!humanPick || !Array.isArray(humanPick.cards)) {
-      throw new Error("The mirror deck method needs the human seat's deck pick.");
+  async resolve({ humanDeck }) {
+    if (!humanDeck || !Array.isArray(humanDeck.cards)) {
+      throw new Error("The mirror deck method needs the human seat's re-read deck.");
     }
     return {
-      deckId: humanPick.deckId,
-      name: humanPick.name,
-      cards: [...humanPick.cards],
-      illegal: Boolean(humanPick.illegal),
+      deckId: "mirrored",
+      name: humanDeck.name,
+      cards: [...humanDeck.cards],
+      illegal: false,
     };
   }
 }

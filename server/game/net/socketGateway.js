@@ -753,8 +753,8 @@ export default class SocketGateway {
    * Re-validate every pending pick against the live deck library, resolve the
    * stored slugs to the engine's cardIds, and build the versus reveal. The
    * bot seat has no stored pick: its deck method resolves a fresh deck at
-   * start time from the human seat's pick. Returns the start arguments, or
-   * null when a seat has no valid deck.
+   * start time from the human seat's re-read deck. Returns the start
+   * arguments, or null when a seat has no valid deck.
    */
   async #resolveStart(session) {
     const dev = isDevRoomCode(session.roomCode);
@@ -762,11 +762,12 @@ export default class SocketGateway {
     const botSeat = this.#botSeats.get(session.roomCode) ?? null;
     const decks = {};
     const reveal = [];
+    let humanDeck = null;
     let enforceDeckRules = true;
 
     for (const username of session.usernames) {
       if (botSeat && username === botSeat.seatName) {
-        const resolved = await this.#resolveBotDeck(session, botSeat, dev);
+        const resolved = await this.#resolveBotDeck(session, botSeat, { dev, humanDeck });
         if (!resolved) return null;
         const cardIds = resolved.cards.map((slug) => bySlug.get(slug)?.cardId);
         if (cardIds.some((cardId) => cardId === undefined)) return null;
@@ -785,6 +786,9 @@ export default class SocketGateway {
         session.clearDeckPick(username);
         return null;
       }
+      // The re-read record is what the human seat plays; the bot's deck
+      // methods that depend on it resolve against the same live deck.
+      humanDeck = { name: deck.name, cards: deck.cards };
 
       const cardIds = deck.cards.map((slug) => bySlug.get(slug)?.cardId);
       if (cardIds.some((cardId) => cardId === undefined)) {
@@ -808,17 +812,17 @@ export default class SocketGateway {
    * a dev room), aborts the start without a stored pick to clear — the room
    * stays in selection until the method produces a deck.
    *
+   * @param {object} context `dev` room flag and the human seat's re-read deck
    * @returns {Promise<{ name: string, cards: string[], illegal: boolean }|null>}
    */
-  async #resolveBotDeck(session, botSeat, dev) {
+  async #resolveBotDeck(session, botSeat, { dev, humanDeck }) {
     try {
       const pick = await botSeat.deckMethod.resolve({
         catalog: this.#catalog,
         deckLibrary: this.#deckLibrary,
         ownerUsername: botSeat.opponentName,
-        humanPick: session.getDeckPick(botSeat.opponentName),
+        humanDeck,
         rng: botSeat.rng,
-        dev,
       });
       const validation = validateDeckCards(pick.cards, this.#catalog);
       if (!validation.buildable || (!validation.legal && !dev)) {
