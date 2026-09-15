@@ -2,31 +2,53 @@ import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "./harness.js";
 import { createSeededGame } from "../../gameFactory.js";
 import { cards } from "../utils.js";
+import { createBotSeat as createRealBotSeat } from "../../../../server/bots/botSeat.js";
 
 /**
  * Bot rooms over the real transport: a bot room seats its bot the moment the
  * human connects, the human's pick starts the game with the bot's deck
- * resolved at start time by the room's deck method, and the bot drives its
- * own turns through the gateway's validated paths like any player.
+ * resolved at start time by the room's deck method, the bot drives its own
+ * turns through the gateway's validated paths like any player, and the bot
+ * sees only the redacted view its seat is delivered.
  */
 
 const BOT_WHATEVER = "[BOT] Whatever";
+const BOT_DRUNK = "[BOT] Drunk";
 
 describe("bot rooms over the wire", () => {
   let harness;
+  /** Every event the recording harness delivers to the bot seat's connection. */
+  let botDeliveries;
 
   beforeEach(() => {
     harness = null;
+    botDeliveries = [];
   });
 
   afterEach(async () => {
     if (harness) await harness.close();
   });
 
-  const bootHarness = async () => {
+  const recordingBotFactory = (args) => {
+    const seat = createRealBotSeat(args);
+    const controller = {
+      get connection() {
+        return {
+          send: (event, payload) => {
+            botDeliveries.push({ event, payload });
+            seat.controller.send(event, payload);
+          },
+        };
+      },
+    };
+    return { ...seat, controller };
+  };
+
+  const bootHarness = async ({ record = false } = {}) => {
     harness = await createNetHarness({
       createGame: ({ roomCode, usernames, seed, decks, enforceDeckRules }) =>
         createSeededGame({ roomCode, usernames, seed, decks, enforceDeckRules, cards }),
+      ...(record ? { createBotSeat: recordingBotFactory } : {}),
     });
   };
 
@@ -228,5 +250,57 @@ describe("bot rooms over the wire", () => {
       "the bot never passed after the restart."
     );
     expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
+  });
+
+  test("the bot sees only what its seat sees, never privileged state", async () => {
+    await bootHarness({ record: true });
+    const { alice } = await connectBotRoom({ bot: "drunk", deckMethod: "generated" });
+    const deck = await harness.createDeck("Alice", "Alice's deck", harness.legalDeckSlugs());
+    harness.selectDeck(alice, deck.id);
+
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null,
+      "the game never started."
+    );
+    const pass = alicePasses(alice);
+    await harness.waitFor(
+      () => {
+        pass();
+        const update = alice.lastPayloadOf(EVENTS.GAME_UPDATE);
+        return update !== null && update.round >= 3;
+      },
+      "the game never reached a later round.",
+      8000
+    );
+
+    // Every state view delivered to the seat is the bot's own redacted view.
+    const stateViews = botDeliveries
+      .filter(({ event }) => event === EVENTS.GAME_INIT || event === EVENTS.GAME_UPDATE)
+      .map(({ payload }) => payload);
+    expect(stateViews.length).toBeGreaterThan(0);
+    for (const view of stateViews) {
+      expect(view.you.username).toBe(BOT_DRUNK);
+      // The bot's own hand is readable card by card…
+      for (const card of view.you.hand) expect(typeof card.cardId).toBe("number");
+      // …while the opponent's hand arrives face down, and no deck contents
+      // travel at all — only sizes.
+      for (const card of view.opponent.hand) expect(Object.keys(card)).toHaveLength(0);
+      expect("deck" in view.you).toBe(false);
+      expect("deck" in view.opponent).toBe(false);
+    }
+
+    // The deck-status the bot receives redacts Alice's pick: the bot is not
+    // the viewer, so the deck it could counter-pick against stays hidden.
+    const statuses = botDeliveries
+      .filter(({ event }) => event === EVENTS.GAME_DECK_STATUS)
+      .map(({ payload }) => payload);
+    expect(statuses.length).toBeGreaterThan(0);
+    for (const status of statuses) {
+      const own = status.seats.find((seat) => seat.username === BOT_DRUNK);
+      const opponent = status.seats.find((seat) => seat.username === "Alice");
+      expect(own.bot).toBe(true);
+      expect(opponent.deckId).toBeNull();
+      expect(opponent.deckName).toBeNull();
+    }
   });
 });

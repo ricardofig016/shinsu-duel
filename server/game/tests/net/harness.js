@@ -83,7 +83,7 @@ function wrapSocket(socket) {
   };
 }
 
-export async function createNetHarness({ createGame: customCreateGame, gameLogDirectory } = {}) {
+export async function createNetHarness({ createGame: customCreateGame, createBotSeat, gameLogDirectory } = {}) {
   const rooms = {};
   let createGameCalls = 0;
   const clients = [];
@@ -175,6 +175,7 @@ export async function createNetHarness({ createGame: customCreateGame, gameLogDi
     accounts,
     authRouter,
     ...(createGame !== undefined ? { createGame } : {}),
+    ...(createBotSeat !== undefined ? { createBotSeat } : {}),
     ...(gameLogDirectory !== undefined ? { gameLogDirectory } : {}),
     logToFile: false,
   });

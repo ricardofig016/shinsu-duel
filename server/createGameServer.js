@@ -14,7 +14,7 @@ import { createSeededGame } from "./game/gameFactory.js";
 import { devRoomLoggingBackends } from "./game/logging/GameFileLogger.js";
 import SessionRegistry from "./game/net/SessionRegistry.js";
 import SocketGateway from "./game/net/socketGateway.js";
-import { createBotSeat } from "./bots/botSeat.js";
+import { createBotSeat as assembleBotSeat } from "./bots/botSeat.js";
 import { createAccountStore } from "./accounts/accountStore.js";
 import defaultDeckLibrary from "./decks/deckLibrary.js";
 import cardsData from "./data/cards.json" with { type: "json" };
@@ -57,7 +57,7 @@ async function readFileRoom(code) {
  *   io: import("socket.io").Server, gateway: SocketGateway,
  *   registry: SessionRegistry }}
  */
-export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, accounts = createAccountStore(), authRouter, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
+export function createGameServer({ registry = new SessionRegistry(), loadRoom, createGame, deckLibrary = defaultDeckLibrary, catalog = cardsData, accounts = createAccountStore(), authRouter, createBotSeat = assembleBotSeat, logToFile = true, gameLogDirectory = "server/logs/games" } = {}) {
   const app = express();
   const server = createServer(app);
   const io = new Server(server);
