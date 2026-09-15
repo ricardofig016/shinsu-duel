@@ -1,8 +1,8 @@
-import { createGameServer } from "../createGameServer.js";
-import cardsData from "../data/cards.json" with { type: "json" };
-import GameState from "../game/GameState.js";
-import { buildCatalogViews, findOrphanArtworks } from "./card-catalog.js";
-import { isTestCard } from "./test-card.js";
+import { createGameServer } from "../../createGameServer.js";
+import cardsData from "../../data/cards.json" with { type: "json" };
+import GameState from "../../game/GameState.js";
+import { buildCatalogViews, findOrphanArtworks } from "../card-catalog.js";
+import { isTestCard } from "../test-card.js";
 
 const unitEntry = {
   cardId: 10,

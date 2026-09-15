@@ -1,6 +1,6 @@
-import cardsData from "../data/cards.json" with { type: "json" };
-import { loadStarterDecks } from "./starterDecks.js";
-import { validateDeckCards } from "./deckValidation.js";
+import cardsData from "../../data/cards.json" with { type: "json" };
+import { loadStarterDecks } from "../starterDecks.js";
+import { validateDeckCards } from "../deckValidation.js";
 
 /**
  * Shipped-data audit for the starter decks, in the spirit of `CardDataAudit`:

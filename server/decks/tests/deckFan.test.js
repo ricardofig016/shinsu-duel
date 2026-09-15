@@ -1,6 +1,6 @@
-import { cards } from "../game/tests/fixtures/cards.js";
-import { buildDeckFanSlugs } from "./deckFan.js";
-import { buildDeckFan } from "../../public/utils/deck-model.js";
+import { cards } from "../../game/tests/fixtures/cards.js";
+import { buildDeckFanSlugs } from "../deckFan.js";
+import { buildDeckFan } from "../../../public/utils/deck-model.js";
 
 const bySlug = new Map(Object.values(cards).map((card) => [card.slug, card]));
 const entriesBySlug = new Map(

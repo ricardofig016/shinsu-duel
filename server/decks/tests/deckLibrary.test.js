@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createDeckLibrary } from "./deckLibrary.js";
+import { createDeckLibrary } from "../deckLibrary.js";
 
 function makeTempLibrary() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "shinsu-decks-"));

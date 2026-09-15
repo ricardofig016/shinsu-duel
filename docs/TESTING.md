@@ -30,7 +30,7 @@ Tests live in `server/game/tests/`, mirroring the source tree under `server/game
 
 ### Server modules outside the engine
 
-Tests for server modules that are not part of the engine live beside their source, as `server/utils/card-catalog.test.js` does: `server/decks/*.test.js` for the deck collection and `server/routes/*.test.js` for the routes. Route tests mount the router under test with injected storage, and the net harness injects its own accounts and deck library through `createGameServer`, so no suite reads or writes the runtime data files; the shipped-data audits (`StarterDeckAudit`) are the same class of exception as `CardDataAudit`.
+Tests for server modules that are not part of the engine live in a `tests/` subfolder of their area, mirroring the area's sources: `server/bots/tests/`, `server/decks/tests/`, `server/routes/tests/`, and `server/utils/tests/`. Route tests mount the router under test with injected storage, and the net harness injects its own accounts and deck library through `createGameServer`, so no suite reads or writes the runtime data files; the shipped-data audits (`StarterDeckAudit`) are the same class of exception as `CardDataAudit`.
 
 The shared helper `tests/utils.js` lives at the tests root; subfolder tests import it as `../utils.js` and source modules as `../../…`. Use `git mv` for renames to preserve history.
 

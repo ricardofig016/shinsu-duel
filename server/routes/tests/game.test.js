@@ -3,8 +3,8 @@ import session from "express-session";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createGameRouter } from "./game.js";
-import { createAccountStore } from "../accounts/accountStore.js";
+import { createGameRouter } from "../game.js";
+import { createAccountStore } from "../../accounts/accountStore.js";
 
 // The session username comes from a test header, so each request can act as
 // any user without juggling cookies. Accounts live in a temporary file, so the

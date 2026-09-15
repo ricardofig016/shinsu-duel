@@ -1,6 +1,8 @@
-import GameState from "../game/GameState.js";
-import { cards } from "../game/tests/fixtures/cards.js";
-import { validateDeckCards, normalizeDeckName } from "./deckValidation.js";
+import GameState from "../../game/GameState.js";
+import SeededRng from "../../game/utils/SeededRng.js";
+import shuffle from "../../game/utils/shuffle.js";
+import { cards } from "../../game/tests/fixtures/cards.js";
+import { buildLegalSlugPool, validateDeckCards, normalizeDeckName } from "../deckValidation.js";
 
 const eligibleSlugs = GameState.getEligibleCardIds(cards).map((cardId) => cards[cardId].slug);
 const eligibleDeck = () => eligibleSlugs.slice(0, GameState.INIT_DECK_SIZE);
@@ -112,5 +114,39 @@ describe("normalizeDeckName", () => {
     expect(normalizeDeckName("x".repeat(41))).toBeNull();
     expect(normalizeDeckName(7)).toBeNull();
     expect(normalizeDeckName(undefined)).toBeNull();
+  });
+});
+
+describe("buildLegalSlugPool", () => {
+  test("holds every eligible card up to the copy limit", () => {
+    const pool = buildLegalSlugPool(cards);
+    const counts = new Map();
+    for (const slug of pool) counts.set(slug, (counts.get(slug) ?? 0) + 1);
+    const eligible = GameState.getEligibleCardIds(cards).map((cardId) => cards[cardId].slug);
+
+    expect(new Set(pool)).toEqual(new Set(eligible));
+    for (const slug of eligible) expect(counts.get(slug)).toBe(GameState.MAX_CARD_COPIES);
+  });
+
+  test("excludes Unreachable cards", () => {
+    const pool = new Set(buildLegalSlugPool(cards));
+    expect(pool.has(unreachableSlug())).toBe(false);
+  });
+
+  test("excludes test cards", () => {
+    const pool = new Set(buildLegalSlugPool(catalogWithTestCard));
+    expect(pool.has("test_dev_card")).toBe(false);
+  });
+
+  test("any INIT_DECK_SIZE draw from the shuffled pool is a legal deck", () => {
+    const rng = new SeededRng(7);
+    for (let i = 0; i < 5; i++) {
+      const deck = shuffle([...buildLegalSlugPool(cards)], rng).slice(0, GameState.INIT_DECK_SIZE);
+      expect(validateDeckCards(deck, cards)).toEqual({ buildable: true, legal: true, problems: [] });
+    }
+  });
+
+  test("tolerates a missing catalog", () => {
+    expect(buildLegalSlugPool(null)).toEqual([]);
   });
 });

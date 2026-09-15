@@ -3,11 +3,11 @@ import session from "express-session";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createDecksRouter } from "./decks.js";
-import { createDeckLibrary } from "../decks/deckLibrary.js";
-import { createAccountStore } from "../accounts/accountStore.js";
-import GameState from "../game/GameState.js";
-import { cards } from "../game/tests/fixtures/cards.js";
+import { createDecksRouter } from "../decks.js";
+import { createDeckLibrary } from "../../decks/deckLibrary.js";
+import { createAccountStore } from "../../accounts/accountStore.js";
+import GameState from "../../game/GameState.js";
+import { cards } from "../../game/tests/fixtures/cards.js";
 
 const eligibleSlugs = GameState.getEligibleCardIds(cards).map((cardId) => cards[cardId].slug);
 const legalDeck = () => eligibleSlugs.slice(0, GameState.INIT_DECK_SIZE);

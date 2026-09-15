@@ -1,5 +1,5 @@
 import express from "express";
-import login from "./login.js";
+import login from "../login.js";
 
 // No session middleware and no gate: this route is the one page an anonymous
 // visitor is sent to, so it must answer on its own.

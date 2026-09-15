@@ -1,5 +1,5 @@
 import express from "express";
-import { createPlayRouter } from "./play.js";
+import { createPlayRouter } from "../play.js";
 
 // The page carries no session middleware, so the gate sees no session and
 // sends the visitor to the login page, which is where a session comes from.

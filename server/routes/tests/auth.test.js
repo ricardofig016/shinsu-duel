@@ -3,10 +3,10 @@ import session from "express-session";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createAuthRouter } from "./auth.js";
-import { createAccountStore } from "../accounts/accountStore.js";
-import { createDeckLibrary } from "../decks/deckLibrary.js";
-import { provisionStarterDecks } from "../decks/deckProvisioning.js";
+import { createAuthRouter } from "../auth.js";
+import { createAccountStore } from "../../accounts/accountStore.js";
+import { createDeckLibrary } from "../../decks/deckLibrary.js";
+import { provisionStarterDecks } from "../../decks/deckProvisioning.js";
 
 const TEMPLATES = [{ code: "starter", name: "Starter Deck", cards: ["ashen_knight", "brawn_idol", "cinder_skill"] }];
 

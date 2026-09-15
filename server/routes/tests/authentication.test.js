@@ -3,8 +3,8 @@ import session from "express-session";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createAccountStore } from "../accounts/accountStore.js";
-import { createAuthGate } from "./authentication.js";
+import { createAccountStore } from "../../accounts/accountStore.js";
+import { createAuthGate } from "../authentication.js";
 
 // The session username comes from a test header, so one request can act as a
 // user with a live account, a user whose record is gone, or nobody at all.
