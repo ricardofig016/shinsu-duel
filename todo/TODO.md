@@ -4,19 +4,19 @@
 
 - [ ] decision engine: remove auto decisions when there's only 1 choice - the player should still actively make it
 - [ ] game: add random bot and pass bot
-- [ ] jeonsulsa: make the engine heal instead of granting hp
 - [ ] ui: add numbers to numeric traits and conditions
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 - [ ] game: add support for position: `any`
-- [ ] frontend: change board background to something from the webtoon
+- [ ] frontend: make the board background match the game's contract
 
 ## In Progress
 
 
 ## Completed
 
+- [x] jeonsulsa: make the engine heal instead of granting hp
 - [x] cards: add unreachable to all evolved and ignited cards
 - [x] plan: audit phase 2 again
 - [x] public: plan how image artworks should be matched to cards
