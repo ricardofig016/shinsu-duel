@@ -3,7 +3,6 @@
 ## Tasks
 
 - [ ] bug: its possible to have 2 of the same unit deployed if they're in different evolution stages (Khun and Khun II)
-- [ ] decision engine: remove auto decisions when there's only 1 choice - the player should still actively make it
 - [ ] ui: add numbers to numeric traits and conditions
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`
@@ -16,6 +15,7 @@
 
 ## Completed
 
+- [x] decision engine: remove auto decisions when there's only 1 choice - the player should still actively make it
 - [x] game: add random bot and pass bot
 - [x] jeonsulsa: make the engine heal instead of granting hp
 - [x] cards: add unreachable to all evolved and ignited cards
