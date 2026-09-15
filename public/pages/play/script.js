@@ -1,6 +1,7 @@
 import { loadComponent } from "/utils/component-util.js";
 import { authFetch } from "/utils/auth-redirect.js";
 import { roomPath } from "/game/steps.js";
+import { BOTS, DECK_METHODS, getBot } from "/pages/play/bots.js";
 
 const isValidRoomCode = (code) => {
   return typeof code === "string" && code.trim() !== "" && code !== "undefined" && code !== "null";
@@ -26,20 +27,43 @@ const setupModeSelection = () => {
 };
 
 const setupPvE = () => {
-  document.getElementById("easy-mode-btn").addEventListener("click", async () => {
-    const roomCode = await createRoom("bot", "easy");
-    await joinRoom(roomCode);
+  const selection = { bot: BOTS[0].id, deckMethod: DECK_METHODS[0].id };
+  const blurb = document.getElementById("bot-blurb");
+
+  const setupPicker = (container, entries, selectedId, onPick) => {
+    for (const entry of entries) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = entry.name ?? entry.label;
+      button.dataset.entryId = entry.id;
+      button.classList.toggle("active", entry.id === selectedId);
+      button.addEventListener("click", () => {
+        onPick(entry.id);
+        container.querySelectorAll("button").forEach((other) => other.classList.toggle("active", other.dataset.entryId === entry.id));
+      });
+      container.appendChild(button);
+    }
+  };
+
+  setupPicker(document.getElementById("bot-roster"), BOTS, selection.bot, (id) => {
+    selection.bot = id;
+    blurb.textContent = getBot(id).blurb;
+  });
+  blurb.textContent = getBot(selection.bot).blurb;
+
+  setupPicker(document.getElementById("deck-method-container"), DECK_METHODS, selection.deckMethod, (id) => {
+    selection.deckMethod = id;
   });
 
-  document.getElementById("hard-mode-btn").addEventListener("click", async () => {
-    const roomCode = await createRoom("bot", "hard");
+  document.getElementById("create-bot-room-btn").addEventListener("click", async () => {
+    const roomCode = await createRoom({ opponent: "bot", bot: selection.bot, deckMethod: selection.deckMethod });
     await joinRoom(roomCode);
   });
 };
 
 const setupPvP = () => {
   document.getElementById("create-room-btn").addEventListener("click", async () => {
-    const roomCode = await createRoom("friend");
+    const roomCode = await createRoom({ opponent: "friend" });
     await joinRoom(roomCode);
   });
 
@@ -49,12 +73,12 @@ const setupPvP = () => {
   });
 };
 
-const createRoom = async (opponent, difficulty = null) => {
+const createRoom = async (payload) => {
   try {
     const response = await authFetch("/game/createRoom", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ opponent, difficulty }),
+      body: JSON.stringify(payload),
     });
     if (response.status === 200) {
       const roomCode = await response.text();

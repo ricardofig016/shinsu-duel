@@ -70,6 +70,11 @@ describe("buildOpponentLine", () => {
     expect(buildOpponentLine(seat({ deckChosen: true }))).toBe("Opponent is ready.");
   });
 
+  test("names a bot seat as ready whatever its pick state is", () => {
+    expect(buildOpponentLine(seat({ bot: true, username: "[BOT] Whatever" }))).toBe("[BOT] Whatever is ready.");
+    expect(buildOpponentLine(seat({ bot: true, username: "[BOT] Drunk", deckChosen: true }))).toBe("[BOT] Drunk is ready.");
+  });
+
   test("a deck name on the seat object never reaches the line", () => {
     const line = buildOpponentLine(seat({ deckChosen: true, deckName: "Secret Tech" }));
     expect(line).not.toContain("Secret Tech");

@@ -1,0 +1,7 @@
+/* The bot picker's personality blurb sits between the roster and the deck
+   method picker and reads as the bot speaking for itself. */
+#bot-blurb {
+  color: #555555;
+  font-style: italic;
+  margin: 4px 0;
+}

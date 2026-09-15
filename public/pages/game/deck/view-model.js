@@ -39,11 +39,15 @@ export function buildSelectionRows(decks, { entriesBySlug = null, limits = DEFAU
 /**
  * What the page says about the other seat. The opponent's deck is never named
  * before the game starts, so this only ever reports presence and readiness.
- * @param {{ connected?: boolean, deckChosen?: boolean }|null} seat
+ * A bot seat fields no deck pick of its own — its deck method resolves one at
+ * game start — so it reads as ready the moment the session exists, named so
+ * the player knows who they face.
+ * @param {{ connected?: boolean, deckChosen?: boolean, bot?: boolean, username?: string }|null} seat
  */
 export function buildOpponentLine(seat) {
   if (!seat) return "Waiting for the opponent to connect.";
   if (!seat.connected) return "Opponent is not connected.";
+  if (seat.bot) return `${seat.username} is ready.`;
   return seat.deckChosen ? "Opponent is ready." : "Opponent is still choosing.";
 }
 
