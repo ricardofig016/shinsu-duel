@@ -1,8 +1,10 @@
 import { EVENTS } from "../../net/protocol.js";
 import { createNetHarness } from "./harness.js";
 import { createSeededGame } from "../../gameFactory.js";
-import { cards } from "../utils.js";
+import { cards, getCardIdByName } from "../utils.js";
 import { createBotSeat as createRealBotSeat } from "../../../../server/bots/botSeat.js";
+import GeneratedDeckMethod from "../../../../server/bots/deckMethods/GeneratedDeckMethod.js";
+import { buildDeckFanSlugs } from "../../../../server/decks/deckFan.js";
 
 /**
  * Bot rooms over the real transport: a bot room seats its bot the moment the
@@ -29,8 +31,8 @@ describe("bot rooms over the wire", () => {
     if (harness) await harness.close();
   });
 
-  const recordingBotFactory = (args) => {
-    const seat = createRealBotSeat(args);
+  /** Wrap a bot seat so every event delivered to its connection is recorded. */
+  const recordingSeat = (seat) => {
     const controller = {
       get connection() {
         return {
@@ -44,11 +46,20 @@ describe("bot rooms over the wire", () => {
     return { ...seat, controller };
   };
 
-  const bootHarness = async ({ record = false } = {}) => {
+  const bootHarness = async ({ record = false, botDeckMethod = null } = {}) => {
+    let factory = createRealBotSeat;
+    if (botDeckMethod) {
+      const inner = factory;
+      factory = (args) => ({ ...inner(args), deckMethod: botDeckMethod });
+    }
+    if (record) {
+      const inner = factory;
+      factory = (args) => recordingSeat(inner(args));
+    }
     harness = await createNetHarness({
       createGame: ({ roomCode, usernames, seed, decks, enforceDeckRules }) =>
         createSeededGame({ roomCode, usernames, seed, decks, enforceDeckRules, cards }),
-      ...(record ? { createBotSeat: recordingBotFactory } : {}),
+      ...(factory !== createRealBotSeat ? { createBotSeat: factory } : {}),
     });
   };
 
@@ -248,6 +259,112 @@ describe("bot rooms over the wire", () => {
         return update !== null && update.round >= 2;
       },
       "the bot never passed after the restart."
+    );
+    expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
+  });
+
+  test("a random-owned bot deck fields one of the human's legal decks at start", async () => {
+    await bootHarness();
+    const roomCode = harness.createRoom({ opponent: "bot", bot: "whatever", deckMethod: "random-owned" });
+    harness.joinRoom(roomCode, "Alice");
+    const alice = await harness.connectPlayer({ username: "Alice", roomCode });
+
+    // Two legal owned decks give the method a real choice to resolve from
+    // the library's own listing.
+    const scout = cards[getCardIdByName("Test Scout")].slug;
+    const fillers = Object.values(cards)
+      .filter((card) => {
+        if (card.slug === scout) return false;
+        if ((card.deckConstraints || []).some((constraint) => constraint.type === "unreachable")) return false;
+        return card.name.startsWith("Test Filler");
+      })
+      .map((card) => card.slug);
+    const deckA = harness.legalDeckSlugs();
+    const deckB = [scout, scout, scout, ...fillers.slice(0, 27)];
+    await harness.createDeck("Alice", "Deck A", deckA);
+    await harness.createDeck("Alice", "Deck B", deckB);
+    harness.selectDeck(alice, (await harness.createDeck("Alice", "Alice's deck", deckA)).id);
+
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_DECK_REVEAL) !== null,
+      "the versus reveal never arrived."
+    );
+    const botReveal = alice.lastPayloadOf(EVENTS.GAME_DECK_REVEAL).seats.find((seat) => seat.username === BOT_WHATEVER);
+    expect(botReveal.deckName).toEqual(expect.stringMatching(/^Deck [AB]$/));
+    expect(botReveal.fan).toEqual(buildDeckFanSlugs(botReveal.deckName === "Deck A" ? deckA : deckB, cards));
+
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null,
+      "the game never started."
+    );
+    expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
+  });
+
+  test("a bot deck method that fails resolution aborts the start and recovers on the next trigger", async () => {
+    // First resolution throws; every later one fields a generated deck.
+    const flakyMethod = {
+      attempts: 0,
+      async resolve(context) {
+        this.attempts += 1;
+        if (this.attempts === 1) throw new Error("the deck librarian dropped the box");
+        return new GeneratedDeckMethod().resolve(context);
+      },
+    };
+    await bootHarness({ botDeckMethod: flakyMethod });
+    const { roomCode, alice } = await connectBotRoom({ bot: "whatever", deckMethod: "generated" });
+    const deck = await harness.createDeck("Alice", "Alice's deck", harness.legalDeckSlugs());
+
+    const statusesBefore = alice.payloadsOf(EVENTS.GAME_DECK_STATUS).length;
+    harness.selectDeck(alice, deck.id);
+
+    // The failed start resolves nothing and returns the room to selection:
+    // the re-broadcast is the room's answer, and no game ever formed.
+    await harness.waitFor(
+      () => alice.payloadsOf(EVENTS.GAME_DECK_STATUS).length > statusesBefore,
+      "the failed start never returned the room to selection."
+    );
+    expect(harness.registry.get(roomCode).isStarted).toBe(false);
+    expect(alice.payloadsOf(EVENTS.GAME_INIT)).toHaveLength(0);
+
+    // The next trigger — a re-pick — resolves the deck and starts the game.
+    harness.selectDeck(alice, deck.id);
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null,
+      "the room never recovered."
+    );
+    expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
+  });
+
+  test("an unbuildable bot deck aborts the start and recovers on the next trigger", async () => {
+    // First resolution fields a deck the engine cannot build; every later one
+    // fields a generated deck.
+    const ghostMethod = {
+      attempts: 0,
+      async resolve(context) {
+        this.attempts += 1;
+        if (this.attempts === 1) {
+          return { deckId: "ghost", name: "Ghost Deck", cards: Array(30).fill("not_a_card"), illegal: false };
+        }
+        return new GeneratedDeckMethod().resolve(context);
+      },
+    };
+    await bootHarness({ botDeckMethod: ghostMethod });
+    const { roomCode, alice } = await connectBotRoom({ bot: "whatever", deckMethod: "generated" });
+    const deck = await harness.createDeck("Alice", "Alice's deck", harness.legalDeckSlugs());
+
+    const statusesBefore = alice.payloadsOf(EVENTS.GAME_DECK_STATUS).length;
+    harness.selectDeck(alice, deck.id);
+    await harness.waitFor(
+      () => alice.payloadsOf(EVENTS.GAME_DECK_STATUS).length > statusesBefore,
+      "the unplayable bot deck never returned the room to selection."
+    );
+    expect(harness.registry.get(roomCode).isStarted).toBe(false);
+    expect(alice.payloadsOf(EVENTS.GAME_INIT)).toHaveLength(0);
+
+    harness.selectDeck(alice, deck.id);
+    await harness.waitFor(
+      () => alice.lastPayloadOf(EVENTS.GAME_INIT) !== null,
+      "the room never recovered."
     );
     expect(alice.payloadsOf(EVENTS.GAME_ERROR)).toHaveLength(0);
   });
