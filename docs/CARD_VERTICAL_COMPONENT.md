@@ -16,9 +16,13 @@ loadComponent(container, "card-vertical", { card, unit, isSmall, onAbilityClick 
 - Pass either `card` (a `buildCardViewModel` view) or `unit` (a
   `buildUnitViewModel` view), never both; a missing view or a null `cardId`
   renders the card back.
-- `isSmall` scales the card for hand rendering and enables right-click zoom
-  into a big copy. `onAbilityClick(code)` wires unit ability clicks; the page
-  passes it only where clicking is meaningful (its own field units).
+- `isSmall` scales the card for hand/fan rendering; right-clicking a small
+  card opens the card detail overlay (`public/components/card-detail-overlay/`),
+  which renders the focus card at its big size with attached equipment to its
+  left and its related cards to its right — the overlay owns every big-card
+  render, so the component itself never mounts one. `onAbilityClick(code)`
+  wires unit ability clicks; the page passes it only where clicking is
+  meaningful (its own field units).
 
 ## Data contract
 

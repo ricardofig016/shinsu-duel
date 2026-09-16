@@ -235,10 +235,6 @@ button:disabled {
   color: #555555;
 }
 
-#deck-pool-panel .card-vertical-frame.card-vertical-big {
-  position: fixed;
-}
-
 /* One pool card: the face plus its control bar. */
 
 .pool-card-bar {

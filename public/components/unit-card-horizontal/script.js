@@ -1,5 +1,6 @@
-import { loadComponent, addTooltip } from "/utils/component-util.js";
+import { addTooltip } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
+import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import { buildPositionTooltipEntries, buildUnitAbilityTooltipEntries } from "/utils/tooltip-entries.js";
 
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
@@ -54,18 +55,15 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
     return null;
   });
 
-  // expand to the full card on right-click; ability clicks are wired for your
-  // own units only
-  cardElement.addEventListener("contextmenu", async (event) => {
+  // right-click opens the card detail overlay for the unit: attached
+  // equipment to the left of the focus card, its relations to the right;
+  // ability clicks stay wired for your own units only
+  cardElement.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    const cardComponent = document.createElement("div");
-    cardComponent.classList.add("card-vertical-component");
-    cardElement.appendChild(cardComponent);
-    await loadComponent(cardComponent, "card-vertical", {
-      unit,
-      isSmall: false,
-      onAbilityClick: interactive ? onAbilityClick : null,
+    openCardDetail({
       source: cardElement,
+      unit,
+      onAbilityClick: interactive ? onAbilityClick : null,
     });
   });
 

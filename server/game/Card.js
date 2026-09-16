@@ -139,6 +139,7 @@ export default class Card {
       kind: this.kind,
       line: this.line,
       name: this.name,
+      series: this.series,
       sobriquet: this.sobriquet,
       maxHp: this.maxHp,
       entryHp: this.entryHp,

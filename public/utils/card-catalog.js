@@ -36,8 +36,8 @@ export function buildCatalogIndex(cardViews) {
 
 /**
  * Fetch the card catalog's public views and resolve them into the lookup
- * index. One request per call — pages that want a single shared fetch hold
- * the returned promise and await it wherever needed.
+ * index. One request per call — pages that want a single shared fetch use
+ * `getCardCatalog`, whose page-level cache holds the promise.
  *
  * @returns {Promise<{ byId: Map<number, object>, bySlug: Map<string, object>, byName: Map<string, object> }>}
  */
@@ -47,3 +47,19 @@ export async function fetchCardCatalog() {
   const payload = await response.json();
   return buildCatalogIndex(payload.cards ?? []);
 }
+
+let catalogPromise = null;
+
+/**
+ * The page-level catalog cache: the first caller fetches, every later one
+ * shares the same promise (a failure is cached too, so callers see one
+ * consistent outcome instead of refetching) — the same contract as
+ * `getGlossary`. Callers decide how to degrade when the catalog is
+ * unavailable.
+ *
+ * @returns {Promise<{ byId: Map<number, object>, bySlug: Map<string, object>, byName: Map<string, object> }>}
+ */
+export const getCardCatalog = () => {
+  if (!catalogPromise) catalogPromise = fetchCardCatalog();
+  return catalogPromise;
+};

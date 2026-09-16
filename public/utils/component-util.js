@@ -2,12 +2,14 @@ import loadNavbar from "/components/navbar/script.js";
 import loadTooltip from "/components/tooltip/script.js";
 import loadUnitCardHorizontal from "/components/unit-card-horizontal/script.js";
 import loadCardVertical from "/components/card-vertical/script.js";
+import loadCardDetailOverlay from "/components/card-detail-overlay/script.js";
 
 const components = {
   navbar: { load: loadNavbar },
   tooltip: { load: loadTooltip },
   "unit-card-horizontal": { load: loadUnitCardHorizontal },
   "card-vertical": { load: loadCardVertical },
+  "card-detail-overlay": { load: loadCardDetailOverlay },
 };
 
 /**

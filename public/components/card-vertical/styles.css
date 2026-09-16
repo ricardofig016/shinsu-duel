@@ -16,13 +16,8 @@
   isolation: isolate;
 }
 
-.card-vertical-frame.card-vertical-big {
-  position: absolute;
-  bottom: 50%;
-  right: 50%;
-  transform: translate(50%, 50%);
-  z-index: 3;
-}
+/* Big cards render inside the card detail overlay, which owns their
+   placement (see card-detail-overlay/styles.css). */
 
 .card-vertical-frame.card-vertical-small {
   font-size: 0.3rem;

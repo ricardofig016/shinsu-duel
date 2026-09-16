@@ -25,7 +25,7 @@ import {
 } from "/game/actions.js";
 import { STEP, roomCodeFromPath, followRoomStep } from "/game/steps.js";
 import { getGlossary } from "/utils/glossary.js";
-import { fetchCardCatalog } from "/utils/card-catalog.js";
+import { getCardCatalog } from "/utils/card-catalog.js";
 import {
   buildDeckTooltipText,
   buildPositionTooltipEntries,
@@ -57,9 +57,10 @@ const prepareData = async () => {
     return null;
   });
   // The full card catalog powers card detail views: relation stamps and the
-  // name-only equipment-attachment wire entries resolve against it. One
-  // shared request per page load; failure degrades like the glossary.
-  const catalog = await fetchCardCatalog().catch((error) => {
+  // name-only equipment-attachment wire entries resolve against it. The
+  // page-level cache shares one request with the card detail overlay, and
+  // failure degrades like the glossary.
+  const catalog = await getCardCatalog().catch((error) => {
     console.error(`Card catalog unavailable: ${error.message}`);
     return null;
   });
@@ -586,8 +587,6 @@ const prepareBoard = async (positionData, glossary, socket) => {
     lineContainer.addEventListener("click", (event) => {
       const unitDiv = event.target.closest(".unit-card-horizontal-component");
       if (!unitDiv || !unitDiv.dataset.unitId) return;
-      // clicks on an expanded card view are not board interactions
-      if (event.target.closest(".card-vertical-component")) return;
       const state = store.state;
       if (!state) return;
       const unitView = findUnit(state, "you", unitDiv.dataset.unitId);

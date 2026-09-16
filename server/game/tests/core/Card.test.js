@@ -67,6 +67,11 @@ describe("Card", () => {
     expect(makeCard().toSanitizedObject().relatedCards).toBeNull();
   });
 
+  test("serializes the series code", () => {
+    expect(makeCard({ series: "incinerate" }).toSanitizedObject().series).toBe("incinerate");
+    expect(makeCard().toSanitizedObject().series).toBeNull();
+  });
+
   test("serializes evolve and ignition trigger texts as segments, null when absent", () => {
     const evolving = makeCard({
       evolveInto: { triggers: [{ type: "deploy", text: ["when i am deployed"] }], cardId: 2 },

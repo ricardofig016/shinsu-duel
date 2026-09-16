@@ -1,0 +1,63 @@
+.card-detail-overlay-component {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  font-size: 1rem;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.card-detail-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.card-detail-overlay-row {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  align-items: center;
+  transform: translateY(-50%);
+  transition: transform 0.16s ease-out;
+  will-change: transform;
+}
+
+.card-detail-overlay-row.dragging {
+  transition: none;
+}
+
+.card-detail-slot {
+  position: relative;
+  flex: none;
+  /* The slot is the card's scaled footprint; the full-size card inside is
+     centered and scaled to match, so slot edges are the visual card edges. */
+  width: calc(30rem * var(--s, 1));
+  height: calc(45rem * var(--s, 1));
+  margin-inline: -2.5rem;
+  transition: width 0.1s ease-out, height 0.1s ease-out;
+}
+
+/* The overlay owns the big card's placement: centered in its slot, shrunk
+   by the slot's graded scale — no page-specific positioning overrides. */
+.card-detail-slot .card-vertical-frame.card-vertical-big {
+  position: absolute;
+  bottom: 50%;
+  right: 50%;
+  transform: translate(50%, 50%) scale(var(--s, 1));
+}
+
+.card-detail-tag {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  z-index: 1;
+}

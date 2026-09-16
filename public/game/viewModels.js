@@ -27,6 +27,8 @@ const flattenCard = (card) => ({
   type: card.type ?? null,
   kind: card.kind ?? null,
   name: card.name ?? "",
+  // The series code behind the related-card stamp's "series" entries.
+  series: card.series ?? null,
   sobriquet: card.sobriquet ?? null,
   artworkPath: card.artworkPath ?? null,
   cost: card.cost ?? 0,

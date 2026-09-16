@@ -1,5 +1,6 @@
-import { loadComponent, addTooltip, fitFontSize } from "/utils/component-util.js";
+import { addTooltip, fitFontSize } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
+import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import {
   buildAttributeTooltipEntries,
   buildPositionTooltipEntries,
@@ -29,44 +30,10 @@ const STRIP_ROW_SIZE = 4;
 // the fits must measure the final metrics, and fonts.ready alone is not
 // enough because a face first requested by this card is not in flight yet.
 const CARD_FONT_FAMILIES = Object.freeze(["Roboto", "New Rocker"]);
-// Entrance/exit zoom of the big card between its centered position and the
-// source card it was opened from.
-const BIG_CARD_MOTION_MS = 100;
-const BIG_CARD_BASE_TRANSFORM = "translate(50%, 50%)";
 
 const safePath = (p, fallback = null) => {
   if (typeof p === "string" && p.trim() !== "" && p !== "undefined" && p !== "null") return p;
   return fallback;
-};
-
-/**
- * FLIP zoom between the big card's centered position and the source card it
- * was opened from. Both rects are viewport coordinates, so every page's
- * positioning context (absolute overlay, fixed grid zoom) is irrelevant.
- * Returns the motion, or null when there is nothing to animate: reduced
- * motion requested, the source gone or hidden, or no animation support.
- * The caller owns what happens on finish (reveal the card / remove it).
- */
-const animateBigCard = (frame, source, direction) => {
-  const sourceRect = source?.isConnected ? source.getBoundingClientRect() : null;
-  if (
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    !sourceRect ||
-    sourceRect.width === 0 ||
-    typeof frame.animate !== "function"
-  ) {
-    return null;
-  }
-  const frameRect = frame.getBoundingClientRect();
-  const dx = sourceRect.left + sourceRect.width / 2 - (frameRect.left + frameRect.width / 2);
-  const dy = sourceRect.top + sourceRect.height / 2 - (frameRect.top + frameRect.height / 2);
-  const scale = sourceRect.width / frameRect.width;
-  const fromTransform = `${BIG_CARD_BASE_TRANSFORM} translate(${dx}px, ${dy}px) scale(${scale})`;
-  const keyframes =
-    direction === "open"
-      ? [{ transform: fromTransform }, { transform: BIG_CARD_BASE_TRANSFORM }]
-      : [{ transform: BIG_CARD_BASE_TRANSFORM }, { transform: fromTransform }];
-  return frame.animate(keyframes, { duration: BIG_CARD_MOTION_MS, easing: "ease-out" });
 };
 
 const displayCardBack = (container) => {
@@ -367,14 +334,11 @@ const loadPositions = async (container, model, unit, glossary) => {
 };
 
 // Need either unit or card, but not both; both are flattened view models.
-// `source` is the element the big card was opened from; it anchors the
-// entrance/exit zoom and is ignored on small (card back) renders.
 const load = async (container, {
   card = null,
   unit = null,
   isSmall = false,
   onAbilityClick = null,
-  source = null,
 }) => {
   if ((unit && card) || (!unit && !card)) return displayCardBack(container);
   const model = unit ?? card;
@@ -400,42 +364,12 @@ const load = async (container, {
   cardFrame.classList.remove("card-vertical-small", "card-vertical-big", "no-hover");
   cardFrame.classList.add(isSmall ? "card-vertical-small" : "card-vertical-big");
   if (isSmall) {
-    cardFrame.addEventListener("contextmenu", async (event) => {
+    // right-click opens the card detail overlay: the focused card plus its
+    // relations and attachments, owned by the overlay component
+    cardFrame.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      const cardComponent = document.createElement("div");
-      cardComponent.classList.add("card-vertical-component");
-      container.appendChild(cardComponent);
-      await loadComponent(cardComponent, "card-vertical", {
-        unit: unit ?? null,
-        card: unit ? null : model,
-        isSmall: false,
-        onAbilityClick: unit ? onAbilityClick : null,
-        source: cardFrame,
-      });
+      openCardDetail({ source: cardFrame, card: model });
     });
-  } else {
-    if (source) {
-      // hold the big card invisible until the source-anchored entrance runs;
-      // visibility (unlike display) keeps layout measurable for the fits
-      cardFrame.style.visibility = "hidden";
-    }
-    // close the big card when clicking outside; the listener removes itself
-    let closing = false;
-    const closeOnClickOutside = (event) => {
-      if (!container.isConnected) {
-        document.removeEventListener("mousedown", closeOnClickOutside);
-        return;
-      }
-      if (event.target !== cardFrame && !cardFrame.contains(event.target)) {
-        document.removeEventListener("mousedown", closeOnClickOutside);
-        if (closing) return;
-        closing = true;
-        const motion = animateBigCard(cardFrame, source, "close");
-        if (motion) motion.finished.finally(() => container.remove());
-        else container.remove();
-      }
-    };
-    document.addEventListener("mousedown", closeOnClickOutside);
   }
 
   // type letter
@@ -502,14 +436,6 @@ const load = async (container, {
   const hpTooltip = glossary?.hud?.[unit ? "hpCurrent" : "hpMax"];
   if (hpTooltip) {
     await addTooltip(container, hpContainer, hpTooltip.name, hpTooltip.texts);
-  }
-
-  // entrance: with content rendered, reveal and grow from the source card;
-  // a source click that closed the card mid-load detaches the container and
-  // skips the motion entirely
-  if (source && container.isConnected) {
-    cardFrame.style.visibility = "visible";
-    animateBigCard(cardFrame, source, "open");
   }
 };
 
