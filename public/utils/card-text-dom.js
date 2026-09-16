@@ -15,9 +15,10 @@
  * - every link carries a lazy hover tooltip built from server-owned data:
  *   card links show a mini card preview (the card face rendered through
  *   card-vertical), condition/trait/attribute/position links their name and
- *   description from the shared data catalogs, keyword/rule links the
- *   glossary's keywords/terms copy, and series/affiliation links the list of
- *   cards in that group (computed from the card catalog). A fetch failure
+ *   description from the shared data catalogs, keyword/trigger/rule/rank links
+ *   the glossary's keywords/triggers/terms/ranks copy, and series/affiliation
+ *   links the list of cards in that group (computed from the card catalog). A
+ *   fetch failure
  *   degrades to no tooltip; the link itself still renders.
  */
 
@@ -90,11 +91,30 @@ async function buildLinkHover(segment) {
     return { title: `${segment.text}`, entries: members.map((name) => ({ text: name })) };
   }
 
-  if (segment.type === "keyword" || segment.type === "rule") {
+  if (segment.type === "keyword" || segment.type === "trigger" || segment.type === "rule") {
     const glossary = await getGlossary().catch(() => null);
-    const entry = (segment.type === "keyword" ? glossary?.keywords : glossary?.terms)?.[segment.ref];
+    const section =
+      segment.type === "keyword"
+        ? glossary?.keywords
+        : segment.type === "trigger"
+          ? glossary?.triggers
+          : glossary?.terms;
+    const entry = section?.[segment.ref];
     if (!entry) return null;
     return { title: entry.name, entries: [{ text: entry.description, style: "italic" }] };
+  }
+
+  if (segment.type === "rank") {
+    const glossary = await getGlossary().catch(() => null);
+    const entry = glossary?.ranks?.list?.find(
+      (rank) => rank.code === segment.ref || rank.name?.toLowerCase() === segment.ref
+    );
+    if (!entry) return null;
+    const entries = [{ text: entry.description, style: "italic" }];
+    if (entry.minCost != null && entry.maxCost != null) {
+      entries.push({ text: `Cost range: ${entry.minCost}–${entry.maxCost}` });
+    }
+    return { title: entry.name, entries };
   }
 
   const catalogPath = CATALOG_ROUTES[segment.type];

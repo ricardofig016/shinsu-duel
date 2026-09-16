@@ -350,7 +350,7 @@
           "type": "object",
           "required": ["type", "ref", "text"],
           "properties": {
-            "type": { "enum": ["card", "condition", "trait", "attribute", "position", "affiliation", "series", "keyword", "rule"] },
+            "type": { "enum": ["card", "condition", "trait", "attribute", "position", "affiliation", "series", "keyword", "rule", "trigger", "rank"] },
             "ref": { "type": "string", "minLength": 1 },
             "text": { "type": "string", "minLength": 1 }
           },

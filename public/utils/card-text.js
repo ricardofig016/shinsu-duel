@@ -26,6 +26,8 @@ export const LINK_TYPES = Object.freeze([
   "series",
   "keyword",
   "rule",
+  "trigger",
+  "rank",
 ]);
 
 const LINK_PATTERN = /\[\[([^\[\]]+)\]\]/g;

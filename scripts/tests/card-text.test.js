@@ -48,11 +48,15 @@ describe("tokenizeSegments", () => {
       .toEqual([{ type: "series", ref: "incinerate", text: "Incinerate" }]);
   });
 
-  test("resolves keyword and rule links through the glossary sections", () => {
+  test("resolves glossary links through their sections", () => {
     expect(tokenizeSegments("i am [[keyword:Quick]]", "c.raw", registry))
       .toEqual(["i am ", { type: "keyword", ref: "quick", text: "Quick" }]);
     expect(tokenizeSegments("costs [[rule:shinsu]]", "c.raw", registry))
       .toEqual(["costs ", { type: "rule", ref: "shinsu", text: "Shinsu" }]);
+    expect(tokenizeSegments("[[trigger:Round Start]]", "c.raw", registry))
+      .toEqual([{ type: "trigger", ref: "round-start", text: "Round Start" }]);
+    expect(tokenizeSegments("[[rank:Regular]]", "c.raw", registry))
+      .toEqual([{ type: "rank", ref: "regular", text: "Regular" }]);
   });
 
   test("a display alias overrides the canonical text", () => {
@@ -115,7 +119,7 @@ describe("tokenizeSegments", () => {
   test("exposes the full launch vocabulary of link types", () => {
     expect(LINK_TYPES).toEqual([
       "card", "condition", "trait", "attribute", "position",
-      "affiliation", "series", "keyword", "rule",
+      "affiliation", "series", "keyword", "rule", "trigger", "rank",
     ]);
   });
 });

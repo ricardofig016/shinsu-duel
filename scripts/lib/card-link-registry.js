@@ -20,8 +20,10 @@ import glossary from "../../server/data/glossary.json" with { type: "json" };
  *   catalog key.
  * - `series` → the series codes declared by the pool's cards, stamped as the
  *   series code.
- * - `keyword`, `rule` → the glossary sections (`keywords`, `terms`) that hold
- *   the hover copy for shared game vocabulary, by key or display name.
+ * - `keyword`, `trigger`, `rule` → the glossary sections (`keywords`,
+ *   `triggers`, `terms`) that hold hover copy for shared game vocabulary, by
+ *   key or display name.
+ * - `rank` → the glossary's rank entries, by code or display name.
  *
  * A reference the registry cannot resolve is a build error, so a card text
  * can never ship pointing at vocabulary that does not exist. Resolution
@@ -81,8 +83,19 @@ export function createLinkRegistry({ names = [], series = [] } = {}) {
       if (!seriesCodes.has(code)) return null;
       return { ref: code, text: ref.trim() };
     }
-    if (type === "keyword" || type === "rule") {
-      const section = type === "keyword" ? glossary.keywords : glossary.terms;
+    if (type === "keyword" || type === "trigger" || type === "rule" || type === "rank") {
+      const section =
+        type === "keyword"
+          ? glossary.keywords
+          : type === "trigger"
+            ? glossary.triggers
+            : type === "rule"
+              ? glossary.terms
+              : Object.fromEntries(
+                  Object.entries(glossary.ranks ?? {}).filter(
+                    ([code]) => code !== "title" && code !== "concept"
+                  )
+                );
       return resolveCatalogEntry(section ?? {}, ref);
     }
     return resolveCatalogEntry(CATALOGS[type], ref);

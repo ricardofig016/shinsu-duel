@@ -77,28 +77,110 @@
     "ability": {
       "name": "Ability",
       "description": "An ability is an action a deployed unit can use during your turn. Abilities may cost shinsu."
+    },
+    "bearer": {
+      "name": "Bearer",
+      "description": "The unit an equipment card is attached to."
+    },
+    "fire-charge": {
+      "name": "Fire Charge",
+      "description": "A Hwayeomsa resource spent to create Incinerates."
+    }
+  },
+  "triggers": {
+    "deploy": {
+      "name": "Deploy",
+      "description": "A unit entering the board in a position."
+    },
+    "death": {
+      "name": "Death",
+      "description": "A unit leaving the board by dying."
+    },
+    "summon": {
+      "name": "Summon",
+      "description": "Appear on the board."
+    },
+    "round-start": {
+      "name": "Round Start",
+      "description": "The first phase of a round."
+    },
+    "round-end": {
+      "name": "Round End",
+      "description": "The final phase of a round."
+    },
+    "evolve": {
+      "name": "Evolve",
+      "description": "A unit transforming into its next evolution stage."
+    },
+    "ignite": {
+      "name": "Ignite",
+      "description": "An equipment igniting when its trigger is met."
+    },
+    "activation": {
+      "name": "Activation",
+      "description": "The moment a unit uses an ability."
     }
   },
   "keywords": {
     "quick": {
       "name": "Quick",
-      "description": "Playing a Quick card or using a Quick ability doesn't end your turn"
+      "description": "Playing a Quick card or using a Quick ability doesn't end your turn."
     },
     "free": {
       "name": "Free",
-      "description": "The ability doesn't require or expend a combat slot"
+      "description": "The ability doesn't require or expend a combat slot."
     },
     "unreachable": {
       "name": "Unreachable",
-      "description": "You can't put me in your deck during deckbuilding"
+      "description": "You can't put me in your deck during deckbuilding."
     },
-    "ally": {
-      "name": "Ally",
-      "description": "A unit on your side of the board, yourself included"
+    "charge": {
+      "name": "Charge",
+      "description": "Regain normal shinsu."
     },
-    "enemy": {
-      "name": "Enemy",
-      "description": "A unit on the opponent's side of the board"
+    "cleanse": {
+      "name": "Cleanse",
+      "description": "Remove all conditions."
+    },
+    "compress": {
+      "name": "Compress",
+      "description": "Reduce a card's shinsu cost."
+    },
+    "disarm": {
+      "name": "Disarm",
+      "description": "Send a unit's equipment back to its owner's hand."
+    },
+    "discard": {
+      "name": "Discard",
+      "description": "Send a card directly to the discard pile without triggering on-death effects."
+    },
+    "extinguish": {
+      "name": "Extinguish",
+      "description": "Deal damage to enemy lighthouses."
+    },
+    "light-up": {
+      "name": "Light Up",
+      "description": "Regain lighthouses."
+    },
+    "reclaim": {
+      "name": "Reclaim",
+      "description": "Put cards from your discard pile into your hand."
+    },
+    "silence": {
+      "name": "Silence",
+      "description": "Remove all of a unit's traits."
+    },
+    "slay": {
+      "name": "Slay",
+      "description": "Kill units."
+    },
+    "steal": {
+      "name": "Steal",
+      "description": "Take control of an enemy unit, moving it onto your battlefield."
+    },
+    "spend": {
+      "name": "Spend",
+      "description": "Spend shinsu."
     }
   },
   "hud": {

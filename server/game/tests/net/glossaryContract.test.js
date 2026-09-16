@@ -38,16 +38,30 @@ describe("GET /glossary: the client tooltip copy contract", () => {
         expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
       );
     }
-    for (const code of ["shinsu", "deck", "ability"]) {
+    for (const code of ["shinsu", "deck", "ability", "bearer", "fire-charge"]) {
       expect(glossary.terms[code]).toEqual(
         expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
       );
     }
-    for (const code of ["quick", "free", "unreachable", "ally", "enemy"]) {
+    for (const code of [
+      "deploy", "death", "summon", "round-start", "round-end",
+      "evolve", "ignite", "activation",
+    ]) {
+      expect(glossary.triggers[code]).toEqual(
+        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+      );
+    }
+    for (const code of [
+      "quick", "free", "unreachable", "charge", "cleanse", "compress",
+      "disarm", "discard", "extinguish", "light-up", "reclaim", "silence",
+      "slay", "steal", "spend",
+    ]) {
       expect(glossary.keywords[code]).toEqual(
         expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
       );
     }
+    expect(glossary.keywords.ally).toBeUndefined();
+    expect(glossary.keywords.enemy).toBeUndefined();
     for (const code of [
       "shinsuCard",
       "shinsuBoard",
