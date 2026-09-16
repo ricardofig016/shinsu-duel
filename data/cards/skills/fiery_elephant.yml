@@ -7,9 +7,9 @@ effects:
     condition: burned
     amount: 1
     target: { side: enemy }
-    raw: "give Burned 1 to an enemy"
+    raw: "Give [[condition:Burned]] 1 to an enemy"
   - type: compress_shinsu
     amount: 1
     card:
       attribute: hwayeomsa
-    raw: "Compress 1 from a Hwayeomsa in your hand"
+    raw: "[[keyword:Compress]] 1 from a [[attribute:Hwayeomsa]] in your hand"

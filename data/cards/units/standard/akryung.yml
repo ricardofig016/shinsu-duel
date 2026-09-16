@@ -13,16 +13,16 @@ passives:
       side: ally
       name: Rachel
     trigger: { type: round_start }
-    raw: "round start: give me all traits currently held by an allied Rachel"
+    raw: "[[trigger:Round Start]]: Give me all traits currently held by an allied [[card:Rachel]]"
 abilities:
   - type: create_card
     card:
       name: Shinwonryu
-    raw: "create Shinwonryu in your hand"
+    raw: "Create [[card:Shinwonryu]] in your hand"
   - type: heal
     amount: 3
     target: { side: self }
-    raw: "heal me 3 HP"
+    raw: "Heal me 3 HP"
 evolve:
 traits:
   - resilient 1

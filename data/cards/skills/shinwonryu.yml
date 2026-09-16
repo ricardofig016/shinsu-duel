@@ -7,7 +7,7 @@ requirements:
     raw: "have an ally Irregular"
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 effects:
   - type: give_condition
     condition: doomed

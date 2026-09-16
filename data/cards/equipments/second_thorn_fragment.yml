@@ -5,7 +5,7 @@ cost: 1
 requirements:
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 effects:
   - type: conditional
     quick: true

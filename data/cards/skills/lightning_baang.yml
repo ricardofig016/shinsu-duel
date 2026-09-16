@@ -1,10 +1,8 @@
 type: skill
 name: Lightning Baang
 cost: 1
+series: jeonsul-baang
 requirements:
-keywords:
-  - code: jeonsul-baang
-    raw: "i am a Jeonsul Baang"
 effects:
   - type: give_condition
     condition: burned

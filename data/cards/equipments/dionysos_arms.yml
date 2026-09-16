@@ -10,6 +10,6 @@ effects:
       trait: pierce
       amount: 1
       target: { side: self }
-      raw: "give me Pierce"
-    raw: "ability: give me Pierce"
+      raw: "Give me [[trait:Pierce]]"
+    raw: "[[rule:Ability]]: Give me [[trait:Pierce]]"
 ignition:

@@ -4,7 +4,7 @@ cost: 0
 requirements:
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 effects:
   - type: modify_repeat
     amount: 2

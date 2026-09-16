@@ -62,8 +62,8 @@ export function findCardsBySeries(cards, series, type) {
  * Keywords are identity markers authored on each card; the compiler normalizes
  * them to a uniform `{ code, raw? }` object. Unlike `series`, a keyword is not
  * a first-class grouping field, so this helper inspects the `keywords` array
- * directly. The three Jeonsul Baangs carry `jeonsul-baang` as a keyword code
- * rather than a `series`, so `findCardsBySeries` returns nothing for them.
+ * directly. Card families that need first-class grouping should use `series`
+ * and `findCardsBySeries` instead.
  *
  * @param {object} cards keyed compiled card object
  * @param {string} keywordCode

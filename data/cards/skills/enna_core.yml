@@ -4,9 +4,9 @@ cost: 2
 requirements:
 effects:
   - type: quick
-    raw: "i am Quick"
+    raw: "I am [[keyword:Quick]]"
   - type: reclaim_cards
     amount: 2
     card:
       type: equipment
-    raw: "Reclaim 2 equipments"
+    raw: "[[keyword:Reclaim]] 2 equipments"

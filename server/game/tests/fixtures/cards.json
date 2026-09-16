@@ -3436,13 +3436,8 @@
     "cardId": 10062,
     "type": "skill",
     "name": "Test Lightning Baang",
+    "series": "jeonsul-baang",
     "cost": 1,
-    "keywords": [
-      {
-        "code": "jeonsul-baang",
-        "raw": "i am a Jeonsul Baang"
-      }
-    ],
     "deckConstraints": [],
     "effects": [
       {
@@ -3457,7 +3452,17 @@
         ]
       }
     ],
-    "slug": "test_lightning_baang"
+    "slug": "test_lightning_baang",
+    "relatedCards": [
+      {
+        "cardId": 10092,
+        "kind": "series"
+      },
+      {
+        "cardId": 10103,
+        "kind": "series"
+      }
+    ]
   },
   "10063": {
     "cardId": 10063,
@@ -4625,13 +4630,8 @@
     "cardId": 10092,
     "type": "skill",
     "name": "Test Static Baang",
+    "series": "jeonsul-baang",
     "cost": 1,
-    "keywords": [
-      {
-        "code": "jeonsul-baang",
-        "raw": "i am a Jeonsul Baang"
-      }
-    ],
     "deckConstraints": [],
     "effects": [
       {
@@ -4646,7 +4646,17 @@
         ]
       }
     ],
-    "slug": "test_static_baang"
+    "slug": "test_static_baang",
+    "relatedCards": [
+      {
+        "cardId": 10062,
+        "kind": "series"
+      },
+      {
+        "cardId": 10103,
+        "kind": "series"
+      }
+    ]
   },
   "10093": {
     "cardId": 10093,
@@ -5257,13 +5267,8 @@
     "cardId": 10103,
     "type": "skill",
     "name": "Test Thunder Baang",
+    "series": "jeonsul-baang",
     "cost": 1,
-    "keywords": [
-      {
-        "code": "jeonsul-baang",
-        "raw": "i am a Jeonsul Baang"
-      }
-    ],
     "deckConstraints": [],
     "effects": [
       {
@@ -5278,7 +5283,17 @@
         ]
       }
     ],
-    "slug": "test_thunder_baang"
+    "slug": "test_thunder_baang",
+    "relatedCards": [
+      {
+        "cardId": 10062,
+        "kind": "series"
+      },
+      {
+        "cardId": 10092,
+        "kind": "series"
+      }
+    ]
   },
   "10104": {
     "cardId": 10104,

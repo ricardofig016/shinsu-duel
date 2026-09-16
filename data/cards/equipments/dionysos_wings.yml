@@ -6,5 +6,5 @@ effects:
   - type: charge_shinsu
     amount: 1
     trigger: { type: quick_ability_used }
-    raw: "the bearer's Quick abilities Charge 1"
+    raw: "The [[rule:Bearer]]'s [[keyword:Quick]] abilities [[keyword:Charge]] 1"
 ignition:

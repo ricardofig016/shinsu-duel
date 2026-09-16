@@ -46,7 +46,7 @@ Structural patterns live in the existing cards — read the closest match before
 | Evolution pair                               | `data/cards/units/standard/karaka.yml` + `karaka_ii.yml`                                                                                 |
 | Ignition pair                                | `data/cards/equipments/narumada.yml` + `narumada_ignited.yml`                                                                            |
 | Landmark / Shinheuh / Conduit                | `data/cards/units/landmark/floor_of_death.yml`, `data/cards/units/shinheuh/stone_doll.yml`, `data/cards/units/conduit/conduit.yml`       |
-| Identity keyword with display text           | `data/cards/skills/lightning_baang.yml`                                                                                                  |
+| Series group (`series` + series card target) | `data/cards/skills/incinerate_i.yml`, `data/cards/skills/fire_core.yml`                                                                 |
 | Deck constraint (`generated_by`)             | `data/cards/skills/incinerate_iv.yml`                                                                                                    |
 | Deck constraint (`unreachable`)              | `data/cards/equipments/narumada_ignited.yml`                                                                                             |
 | Structured triggers / modifiers              | `data/cards/units/standard/karaka_ii.yml`, `data/cards/units/landmark/wooden_horse.yml`, `data/cards/units/standard/evan_edrok.yml`      |
@@ -112,15 +112,18 @@ The card frame and layout are designed in the [Shinsu Duel Figma file](https://w
 
 ### Inline links
 
-Wrap any reference to shared game vocabulary in an explicit link so the UI can highlight it and show a hover preview: `[[card:Bull]]`, `[[condition:Burned]]`, `[[trait:Strong]]`, `[[attribute:Anima]]`, `[[position:Spear Bearer]]`, `[[affiliation:Team Baam]]`, `[[series:Incinerate]]`, `[[keyword:Quick]]`, `[[rule:shinsu]]`. The first pipe overrides the displayed text (`[[card:Kranos|Kranos' blade]]`); further pipes are reserved parameters — do not add any yet. Every target must exist: an unknown card, catalog entry, series, glossary keyword, or rule term fails the compile with the source path. Link cards wherever the prose names one — the linked card also appears among the card's related cards. See `docs/COMPILED_CARD_DSL.md` → [Display text and links](./COMPILED_CARD_DSL.md#display-text-and-links) for the full contract.
+Wrap every reference to shared game vocabulary in an explicit link so the UI can highlight it and show a hover preview. Link types are `card`, `condition`, `trait`, `attribute`, `position`, `affiliation`, `series`, `keyword`, `rule`, `trigger`, and `rank`: `[[card:Bull]]`, `[[condition:Burned]]`, `[[trait:Strong]]`, `[[attribute:Anima]]`, `[[position:Spear Bearer]]`, `[[affiliation:Team Baam]]`, `[[series:Incinerate]]`, `[[keyword:Quick]]`, `[[rule:Shinsu]]`, `[[trigger:Deploy]]`, and `[[rank:Regular]]`. Do not link generic `ally` or `enemy`. The first pipe overrides the displayed text (`[[card:Kranos|Kranos' Blade]]`); further pipes are reserved parameters — do not add any yet. Every target must exist, or the compile fails with the source path. Link cards wherever the prose names one — the linked card also appears among the card's related cards. See `docs/COMPILED_CARD_DSL.md` → [Display text and links](./COMPILED_CARD_DSL.md#display-text-and-links) for the full contract.
 
 ### Voice and case
 
-- **First person for the card itself**: `i` / `me` / `my` — "heal me 3 HP", "i deal +1 damage", "give me Ghost".
-- **Second person for the controlling player**: `you` / `your` — "in your hand", "from your deck".
-- **Third person for the bearer** (equipment): `the bearer` — "the bearer has Pierce 1".
-- **Keywords are capitalized**; effect verbs are lowercase: `deal`, `heal`, `give`, `draw`, `summon`, `create`, `steal`, `spend`, `force`. Capitalized keywords: `Light Up`/`Extinguish` (lighthouses), `Reclaim`, `Compress`, `Charge`, `Slay`, `Disarm`, `Silence`, `Cleanse`, `Quick`, `Free`, plus all condition and trait names (`Burned`, `Rooted`, `Taunt`, …).
-- **Amounts are digits**, never words — `deal 4`, `heal 2 HP`, `Burned 3+`.
+- **First person for the card itself**: `I` / `me` / `my` — "Heal me 3 HP", "I deal +1 damage", "Give me Ghost".
+- **Second person for the controlling player**: `you` / `your` — "In your hand", "From your deck".
+- **Third person for the bearer** (equipment): "The Bearer's" — "The Bearer has Pierce 1".
+- **Every raw text field starts with a capital letter, and text after a trigger label is capitalized too.**
+- **Every link displays title case**, including rule, trigger, keyword, condition, trait, rank, and catalog links. Use a display alias only when grammar requires a different form.
+- **Canonical trigger shorthand is limited to these forms:** `when i am deployed` → `Deploy`, `when i die` → `Death`, `when i evolve` → `Evolve`, and `when i ignite` → `Ignite`. Do not collapse other clauses such as `when i'm equipped with ...` or `whenever you draw ...`.
+- **Mechanic keywords are title case**: `Light Up`, `Extinguish`, `Reclaim`, `Compress`, `Charge`, `Slay`, `Disarm`, `Silence`, `Cleanse`, `Quick`, `Free`, `Unreachable`, and `Spend`, plus all condition and trait names (`Burned`, `Rooted`, `Taunt`, …).
+- **Amounts are digits**, never words — `Deal 4`, `Heal 2 HP`, `Burned 3+`.
 
 ### Canonical phrasings by effect
 
@@ -160,9 +163,9 @@ Wrap any reference to shared game vocabulary in an explicit link so the UI can h
 - **Spend**: `spend {n}: {effect}` — `spend 1: deal 6 to an enemy`.
 - **Position scope**: `{position}: {effect}` — `fisherman: deal 1 to an enemy`, `light bearer: Light Up 1`.
 - **Quick / Free**: as an ability prefix `quick: {effect}`, or as a standalone marker `i am Quick` / `Free: Spend 1: deal 1 to an enemy`.
-- **Triggered passives** lead with the trigger, then a colon: `round start: …`, `round end: …`, `when {event}`, `whenever {event}`, `when i die`, `when i'm equipped with X`, `when you summon a Shinheuh`.
+- **Triggered passives** lead with the trigger label and a colon. The collapsed labels are `Deploy`, `Death`, `Evolve`, and `Ignite`; every other trigger keeps its clause: `when i'm equipped with X`, `whenever you draw an equipment`, `when you summon a Shinheuh`.
 - **Conditionals**: `if {condition}, {effect}`, or with an `otherwise` branch: `if you have an ally Wave Controller deal 2 to an enemy, otherwise deal 1`. Always-on gates use `while`: `while i am alone on the ally frontline, i have Resilient 1 and Strong 3`.
 
 ### Identity and metadata markers
 
-- `i am Unreachable` (deck constraint), `i am Quick` (Quick keyword), `i am a Jeonsul Baang` (identity keyword) — the `i am …` form is reserved for these markers.
+- `i am Unreachable` (deck constraint), `i am Quick` (Quick keyword), `i am Blood Mad` (identity keyword) — the `i am …` form is reserved for these markers.

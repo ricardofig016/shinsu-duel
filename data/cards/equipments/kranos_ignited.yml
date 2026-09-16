@@ -3,7 +3,7 @@ name: Kranos - Ignited
 cost: 4
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 requirements:
 effects:
   - type: sequence

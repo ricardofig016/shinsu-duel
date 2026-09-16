@@ -3,7 +3,7 @@ name: Khun Ran II
 cost: 3
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 hp: 5
 rank: regular
 positions:

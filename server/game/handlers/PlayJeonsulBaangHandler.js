@@ -1,7 +1,7 @@
 import BaseHandler from "./BaseHandler.js";
 import SkillPlayService from "../services/SkillPlayService.js";
 import Card from "../Card.js";
-import { findCardsByKeyword } from "../utils/cardData.js";
+import { findCardsBySeries } from "../utils/cardData.js";
 import shuffle from "../utils/shuffle.js";
 
 /**
@@ -32,7 +32,7 @@ export default class PlayJeonsulBaangHandler extends BaseHandler {
   execute(payload, context, gameState) {
     const conduit = payload.sourceUnit;
     const count = Math.floor(conduit.currentHp / 2);
-    const baangs = findCardsByKeyword(gameState.cards, "jeonsul-baang", "skill");
+    const baangs = findCardsBySeries(gameState.cards, "jeonsul-baang", "skill");
     if (count <= 0 || baangs.length === 0) return { played: 0, skipped: 0 };
 
     const allies = this._allies(gameState, conduit);

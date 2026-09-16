@@ -6,7 +6,7 @@ hp: 20
 line: frontline
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 passives:
   - type: modify_stat
     stat: damage_taken

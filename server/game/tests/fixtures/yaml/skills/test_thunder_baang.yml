@@ -1,9 +1,7 @@
 type: skill
 name: Test Thunder Baang
 cost: 1
-keywords:
-  - code: jeonsul-baang
-    raw: "i am a Jeonsul Baang"
+series: jeonsul-baang
 effects:
   - type: give_condition
     condition: exhausted

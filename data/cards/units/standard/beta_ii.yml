@@ -3,7 +3,7 @@ name: Beta II
 cost: 2
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 hp: 4
 rank: regular
 positions:
@@ -20,7 +20,7 @@ abilities:
       type: grant_trait
       trait: lethal
       target: { side: self }
-    raw: "if i have 5+ equipments, give me Lethal"
+    raw: "If I have 5+ equipments, give me [[trait:Lethal]]"
 evolve:
 traits:
 attributes:

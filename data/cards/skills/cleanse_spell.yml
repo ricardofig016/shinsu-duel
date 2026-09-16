@@ -5,4 +5,4 @@ requirements:
 effects:
   - type: remove_conditions
     target: { side: ally }
-    raw: "Cleanse an ally"
+    raw: "[[keyword:Cleanse]] an ally"

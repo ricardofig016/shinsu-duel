@@ -10,23 +10,23 @@ passives:
   - type: draw_card
     amount: 1
     trigger: { type: draw, cardType: equipment }
-    raw: "whenever you draw an equipment, draw again"
+    raw: "Whenever you draw an equipment, draw again"
   - type: reclaim_cards
     amount: 1
     card:
       type: equipment
     trigger: { type: equip, cardName: Frog Fisher }
-    raw: "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
+    raw: "When I'm equipped with [[card:Frog Fisher]], [[keyword:Reclaim]] 1 Equipment card"
 abilities:
   - type: draw_card
     amount: 1
     card:
       type: equipment
       choose: true
-    raw: "draw an equipment of your choice"
+    raw: "Draw an equipment of your choice"
   - type: switch_position
     target: { side: enemy, can_switch: true }
-    raw: "force an enemy to switch positions"
+    raw: "Force an enemy to switch positions"
 evolve:
 traits:
   - beacon 3

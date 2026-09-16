@@ -14,13 +14,13 @@ passives:
       condition: burned
       conditionValue: 3
     trigger: { type: round_end }
-    raw: "round end: Slay all enemies with Burned 3+"
+    raw: "[[trigger:Round End]]: [[keyword:Slay]] all enemies with [[condition:Burned]] 3+"
 abilities:
   - type: give_condition
     condition: burned
     amount: 1
     target: { side: enemy, scope: all }
-    raw: "give Burned 1 to all enemies"
+    raw: "Give [[condition:Burned]] 1 to all enemies"
 evolve:
 traits:
 attributes:

@@ -13,23 +13,23 @@ passives:
     card:
       type: equipment
     trigger: { type: deploy }
-    raw: "when i am deployed: draw an equipment"
+    raw: "[[trigger:Deploy]]: Draw an equipment"
   - type: retain_equipment
-    raw: "when i return to hand, i keep my equipments"
+    raw: "When I return to hand, I keep my equipments"
   - type: create_card
     card:
       name: Phobos
     trigger: { type: evolve }
-    raw: "when i evolve: create Phobos in hand"
+    raw: "[[trigger:Evolve]]: Create [[card:Phobos]] in hand"
 abilities:
   - type: return_to_hand
     target: { side: self }
     quick: true
-    raw: "quick: return me to hand"
+    raw: "[[keyword:Quick]]: Return me to hand"
 evolve:
   - type: has_all_equipped
     cardNames: ["Dionysos: Arms", "Dionysos: Legs", "Dionysos: Wings"]
-    raw: "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+    raw: "I have [[card:Dionysos: Arms]], [[card:Dionysos: Legs]] and [[card:Dionysos: Wings]] equipped"
 traits:
 attributes:
   - living ignition weapon

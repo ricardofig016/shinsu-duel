@@ -6,13 +6,13 @@ hp: 8
 entryHp: 2
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 passives:
   - type: give_condition
     condition: ghost
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Ghost"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Ghost]]"
   - type: conditional
     triggers:
       - { type: round_start }
@@ -26,12 +26,12 @@ passives:
     then:
       type: slay
       target: { side: self }
-    raw: "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+    raw: "[[trigger:Round Start]] or [[trigger:Activation]]: If there is no [[attribute:Jeonsulsa]] on the enemy team, [[keyword:Slay]] me"
   - type: play_jeonsul_baang
     triggers:
       - { type: round_start }
       - { type: activation }
-    raw: "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+    raw: "[[trigger:Round Start]] or [[trigger:Activation]]: For every 2 HP that I have, play 1 random [[series:Jeonsul Baang]] on a random ally"
 abilities:
 evolve:
 traits:

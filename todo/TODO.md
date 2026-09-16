@@ -10,6 +10,7 @@
 - [ ] game: add support for position: `any`
 - [ ] frontend: make the board background match the game's contract
 - [ ] rules: remove "Slay" keyword - redundant
+- [ ] game: completely remove "keywords" (see `docs\COMPILED_CARD_DSL.md`)
 
 ## In Progress
 

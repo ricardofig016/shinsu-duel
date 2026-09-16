@@ -10,5 +10,5 @@ effects:
         target: { side: bearer }
       - type: remove_conditions
         target: { side: bearer }
-    raw: "heal the bearer 2 HP and Cleanse the bearer"
+    raw: "Heal the [[rule:Bearer]] 2 HP and [[keyword:Cleanse]] the [[rule:Bearer]]"
 ignition:

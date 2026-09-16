@@ -10,18 +10,18 @@ passives:
     keyword: free
     first: true
     target: { side: self }
-    raw: "the first ability i use each round has Free"
+    raw: "The first [[rule:Ability]] I use each round has [[keyword:Free]]"
 abilities:
   - type: give_condition
     condition: blinded
     target: { side: enemy }
     quick: true
-    raw: "quick: give an enemy Blinded"
+    raw: "[[keyword:Quick]]: Give an enemy [[condition:Blinded]]"
   - type: give_condition
     condition: ghost
     target: { side: enemy }
     quick: true
-    raw: "quick: give an enemy Ghost"
+    raw: "[[keyword:Quick]]: Give an enemy [[condition:Ghost]]"
 evolve:
 traits:
   - sharpshooter

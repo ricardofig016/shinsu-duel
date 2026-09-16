@@ -93,7 +93,7 @@ Authored `raw` strings are the player-visible prose of a node. They may embed ex
 - `[[card:Kranos]]` — links a card; display defaults to the card's canonical name.
 - `[[condition:Burned]]`, `[[trait:Strong]]`, `[[attribute:Anima]]`, `[[position:Spear Bearer]]`, `[[affiliation:Team Baam]]` — resolve against the shared data catalogs, by code or display name.
 - `[[series:Incinerate]]` — resolves against the series codes the card pool declares.
-- `[[keyword:Quick]]` and `[[rule:shinsu]]` — resolve against the glossary's `keywords` and `terms` sections, which hold the hover copy for shared game vocabulary.
+- `[[keyword:Quick]]`, `[[trigger:Deploy]]`, `[[rank:Regular]]`, and `[[rule:Shinsu]]` — resolve against the glossary's `keywords`, `triggers`, `ranks`, and `terms` sections, which hold the hover copy for shared game vocabulary.
 - `[[card:Kranos|Kranos' blade]]` — the first pipe overrides the displayed text.
 
 The compiler tokenizes every `raw` at the node's own source path into ordered **display segments** — a plain string, or a link segment `{ type, ref, text }` where `ref` is the resolved registry key (a card's persistent slug for `card` links, the catalog/glossary code otherwise) and `text` is what the player reads. Compiled nodes carry the segments under `text` and no `raw`. An unresolvable target, unknown link type, unknown parameter, or unclosed `[[` is a build error with the source path, so a card can never ship prose pointing at vocabulary that does not exist.
@@ -128,12 +128,12 @@ Shared metadata:
 
   ```yaml
   keywords:
-    - jeonsul-baang # machine identity only
-    - code: jeonsul-baang # identity + visible text
-      raw: "i am a Jeonsul Baang"
+    - blood-mad # machine identity only
+    - code: blood-mad # identity + visible text
+      raw: "i am Blood Mad"
   ```
 
-  The compiled form is a uniform object — `{ code }` or `{ code, raw }` — mirroring compiled traits (`{ code, value? }`). The Jeonsulsa engine and future identity mechanics query by `code`; the UI renders `raw`. Use the object form whenever the player should see the keyword's text on the card.
+  The compiled form is a uniform object — `{ code }` or `{ code, raw }` — mirroring compiled traits (`{ code, value? }`). Identity mechanics query by `code`; the UI renders `raw`. Use the object form whenever the player should see the keyword's text on the card. A group of cards that share an identity also used for card resolution is a `series`, not a keyword.
 
 - `deckConstraints` — deck-construction rules authored in YAML (see [Deck constraints](#deck-constraints)). Each constraint carries required display text (`raw` authored, `text` segments compiled).
 

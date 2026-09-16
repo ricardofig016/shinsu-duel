@@ -52,7 +52,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -543,7 +548,13 @@
           "name": "Shinwonryu"
         },
         "text": [
-          "create Shinwonryu in your hand"
+          "Create ",
+          {
+            "type": "card",
+            "ref": "shinwonryu",
+            "text": "Shinwonryu"
+          },
+          " in your hand"
         ]
       },
       {
@@ -553,7 +564,7 @@
           "side": "self"
         },
         "text": [
-          "heal me 3 HP"
+          "Heal me 3 HP"
         ]
       }
     ],
@@ -571,7 +582,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me all traits currently held by an allied Rachel"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me all traits currently held by an allied ",
+          {
+            "type": "card",
+            "ref": "rachel",
+            "text": "Rachel"
+          }
         ]
       }
     ],
@@ -622,7 +643,7 @@
           "side": "ally"
         },
         "text": [
-          "remove a condition from an ally"
+          "Remove a condition from an ally"
         ]
       }
     ],
@@ -640,7 +661,29 @@
           "type": "deploy"
         },
         "text": [
-          "when i am deployed: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+          {
+            "type": "trigger",
+            "ref": "deploy",
+            "text": "Deploy"
+          },
+          ": Give ",
+          {
+            "type": "trait",
+            "ref": "immune",
+            "text": "Immune"
+          },
+          " to the ",
+          {
+            "type": "affiliation",
+            "ref": "team-rachel",
+            "text": "Team Rachel"
+          },
+          " ally with the lowest HP that doesn't have ",
+          {
+            "type": "trait",
+            "ref": "immune",
+            "text": "Immune"
+          }
         ]
       },
       {
@@ -656,7 +699,29 @@
           "type": "dies"
         },
         "text": [
-          "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+          {
+            "type": "trigger",
+            "ref": "death",
+            "text": "Death"
+          },
+          ": Give ",
+          {
+            "type": "trait",
+            "ref": "immune",
+            "text": "Immune"
+          },
+          " to the ",
+          {
+            "type": "affiliation",
+            "ref": "team-rachel",
+            "text": "Team Rachel"
+          },
+          " ally with the lowest HP that doesn't have ",
+          {
+            "type": "trait",
+            "ref": "immune",
+            "text": "Immune"
+          }
         ]
       },
       {
@@ -667,7 +732,19 @@
           "rank": "regular"
         },
         "text": [
-          "when an ally Regular dies: Light Up 1"
+          "When an ally ",
+          {
+            "type": "rank",
+            "ref": "regular",
+            "text": "Regular"
+          },
+          " dies: ",
+          {
+            "type": "keyword",
+            "ref": "light-up",
+            "text": "Light Up"
+          },
+          " 1"
         ]
       }
     ],
@@ -705,7 +782,13 @@
           }
         },
         "text": [
-          "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
+          "If you have an ally ",
+          {
+            "type": "position",
+            "ref": "wave-controller",
+            "text": "Wave Controller"
+          },
+          ", deal 2 to an enemy, otherwise deal 1"
         ]
       }
     ],
@@ -784,7 +867,12 @@
         },
         "quick": true,
         "text": [
-          "quick: return me to hand"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Return me to hand"
         ]
       }
     ],
@@ -799,13 +887,18 @@
           "type": "deploy"
         },
         "text": [
-          "when i am deployed: draw an equipment"
+          {
+            "type": "trigger",
+            "ref": "deploy",
+            "text": "Deploy"
+          },
+          ": Draw an equipment"
         ]
       },
       {
         "type": "retain_equipment",
         "text": [
-          "when i return to hand, i keep my equipments"
+          "When I return to hand, I keep my equipments"
         ]
       },
       {
@@ -817,7 +910,18 @@
           "type": "evolve"
         },
         "text": [
-          "when i evolve: create Phobos in hand"
+          {
+            "type": "trigger",
+            "ref": "evolve",
+            "text": "Evolve"
+          },
+          ": Create ",
+          {
+            "type": "card",
+            "ref": "phobos",
+            "text": "Phobos"
+          },
+          " in hand"
         ]
       }
     ],
@@ -831,7 +935,25 @@
             "Dionysos: Wings"
           ],
           "text": [
-            "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+            "I have ",
+            {
+              "type": "card",
+              "ref": "dionysos_arms",
+              "text": "Dionysos: Arms"
+            },
+            ", ",
+            {
+              "type": "card",
+              "ref": "dionysos_legs",
+              "text": "Dionysos: Legs"
+            },
+            " and ",
+            {
+              "type": "card",
+              "ref": "dionysos_wings",
+              "text": "Dionysos: Wings"
+            },
+            " equipped"
           ]
         }
       ],
@@ -871,7 +993,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -906,7 +1033,12 @@
           }
         },
         "text": [
-          "if i have 5+ equipments, give me Lethal"
+          "If I have 5+ equipments, give me ",
+          {
+            "type": "trait",
+            "ref": "lethal",
+            "text": "Lethal"
+          }
         ]
       }
     ],
@@ -962,7 +1094,24 @@
           }
         ],
         "text": [
-          "heal the bearer 2 HP and Cleanse the bearer"
+          "Heal the ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " 2 HP and ",
+          {
+            "type": "keyword",
+            "ref": "cleanse",
+            "text": "Cleanse"
+          },
+          " the ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          }
         ]
       }
     ],
@@ -990,7 +1139,12 @@
         },
         "quick": true,
         "text": [
-          "quick: deal 3 to an enemy"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Deal 3 to an enemy"
         ]
       }
     ],
@@ -1038,7 +1192,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 2 to an enemy"
+          "Deal 2 to an enemy"
         ]
       }
     ],
@@ -1052,7 +1206,19 @@
           "affiliation": "team-chang"
         },
         "text": [
-          "allied Team Chang members have Resilient 1"
+          "Allied ",
+          {
+            "type": "affiliation",
+            "ref": "team-chang",
+            "text": "Team Chang"
+          },
+          " members have ",
+          {
+            "type": "trait",
+            "ref": "resilient",
+            "text": "Resilient"
+          },
+          " 1"
         ]
       }
     ],
@@ -1072,7 +1238,12 @@
           "side": "ally"
         },
         "text": [
-          "Cleanse an ally"
+          {
+            "type": "keyword",
+            "ref": "cleanse",
+            "text": "Cleanse"
+          },
+          " an ally"
         ]
       }
     ],
@@ -1087,7 +1258,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -1109,7 +1285,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Ghost"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "ghost",
+            "text": "Ghost"
+          }
         ]
       },
       {
@@ -1137,7 +1323,30 @@
           }
         },
         "text": [
-          "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          " or ",
+          {
+            "type": "trigger",
+            "ref": "activation",
+            "text": "Activation"
+          },
+          ": If there is no ",
+          {
+            "type": "attribute",
+            "ref": "jeonsulsa",
+            "text": "Jeonsulsa"
+          },
+          " on the enemy team, ",
+          {
+            "type": "keyword",
+            "ref": "slay",
+            "text": "Slay"
+          },
+          " me"
         ]
       },
       {
@@ -1151,12 +1360,41 @@
           }
         ],
         "text": [
-          "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          " or ",
+          {
+            "type": "trigger",
+            "ref": "activation",
+            "text": "Activation"
+          },
+          ": For every 2 HP that I have, play 1 random ",
+          {
+            "type": "series",
+            "ref": "jeonsul-baang",
+            "text": "Jeonsul Baang"
+          },
+          " on a random ally"
         ]
       }
     ],
     "slug": "conduit",
     "relatedCards": [
+      {
+        "cardId": 56,
+        "kind": "mention"
+      },
+      {
+        "cardId": 76,
+        "kind": "mention"
+      },
+      {
+        "cardId": 84,
+        "kind": "mention"
+      },
       {
         "cardId": 51,
         "kind": "mentioned-by"
@@ -1192,11 +1430,26 @@
             "side": "self"
           },
           "text": [
-            "give me Pierce"
+            "Give me ",
+            {
+              "type": "trait",
+              "ref": "pierce",
+              "text": "Pierce"
+            }
           ]
         },
         "text": [
-          "ability: give me Pierce"
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          ": Give me ",
+          {
+            "type": "trait",
+            "ref": "pierce",
+            "text": "Pierce"
+          }
         ]
       }
     ],
@@ -1245,11 +1498,27 @@
           },
           "quick": true,
           "text": [
-            "quick: deal 3 to an enemy"
+            {
+              "type": "keyword",
+              "ref": "quick",
+              "text": "Quick"
+            },
+            ": Deal 3 to an enemy"
           ]
         },
         "text": [
-          "ability: quick: deal 3 to an enemy"
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Deal 3 to an enemy"
         ]
       }
     ],
@@ -1292,7 +1561,25 @@
           "type": "quick_ability_used"
         },
         "text": [
-          "the bearer's Quick abilities Charge 1"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          " abilities ",
+          {
+            "type": "keyword",
+            "ref": "charge",
+            "text": "Charge"
+          },
+          " 1"
         ]
       }
     ],
@@ -1353,7 +1640,17 @@
         },
         "quick": true,
         "text": [
-          "quick: give an enemy Blinded"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Give an enemy ",
+          {
+            "type": "condition",
+            "ref": "blinded",
+            "text": "Blinded"
+          }
         ]
       },
       {
@@ -1364,7 +1661,17 @@
         },
         "quick": true,
         "text": [
-          "quick: give an enemy Ghost"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Give an enemy ",
+          {
+            "type": "condition",
+            "ref": "ghost",
+            "text": "Ghost"
+          }
         ]
       }
     ],
@@ -1377,7 +1684,18 @@
           "side": "self"
         },
         "text": [
-          "the first ability i use each round has Free"
+          "The first ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          " I use each round has ",
+          {
+            "type": "keyword",
+            "ref": "free",
+            "text": "Free"
+          }
         ]
       }
     ],
@@ -1394,7 +1712,12 @@
       {
         "type": "quick",
         "text": [
-          "i am Quick"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          }
         ]
       },
       {
@@ -1404,7 +1727,12 @@
           "type": "equipment"
         },
         "text": [
-          "Reclaim 2 equipments"
+          {
+            "type": "keyword",
+            "ref": "reclaim",
+            "text": "Reclaim"
+          },
+          " 2 equipments"
         ]
       }
     ],
@@ -1420,7 +1748,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -1433,7 +1766,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's damage-dealing abilities deal +2 damage"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s damage-dealing abilities deal +2 damage"
         ]
       },
       {
@@ -1444,7 +1783,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's healing abilities heal +2 HP"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s healing abilities heal +2 HP"
         ]
       },
       {
@@ -1455,7 +1800,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has +2 HP"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has +2 HP"
         ]
       },
       {
@@ -1466,7 +1817,19 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Bloodthirsty 1"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "bloodthirsty",
+            "text": "Bloodthirsty"
+          },
+          " 1"
         ]
       }
     ],
@@ -1549,7 +1912,7 @@
           "choose": true
         },
         "text": [
-          "draw an equipment of your choice"
+          "Draw an equipment of your choice"
         ]
       },
       {
@@ -1559,7 +1922,7 @@
           "can_switch": true
         },
         "text": [
-          "force an enemy to switch positions"
+          "Force an enemy to switch positions"
         ]
       }
     ],
@@ -1572,7 +1935,7 @@
           "cardType": "equipment"
         },
         "text": [
-          "whenever you draw an equipment, draw again"
+          "Whenever you draw an equipment, draw again"
         ]
       },
       {
@@ -1586,7 +1949,19 @@
           "cardName": "Frog Fisher"
         },
         "text": [
-          "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
+          "When I'm equipped with ",
+          {
+            "type": "card",
+            "ref": "frog_fisher",
+            "text": "Frog Fisher"
+          },
+          ", ",
+          {
+            "type": "keyword",
+            "ref": "reclaim",
+            "text": "Reclaim"
+          },
+          " 1 Equipment card"
         ]
       }
     ],
@@ -1629,7 +2004,13 @@
           "scope": "all"
         },
         "text": [
-          "give Burned 1 to all enemies"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 1 to all enemies"
         ]
       }
     ],
@@ -1646,7 +2027,24 @@
           "type": "round_end"
         },
         "text": [
-          "round end: Slay all enemies with Burned 3+"
+          {
+            "type": "trigger",
+            "ref": "round-end",
+            "text": "Round End"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "slay",
+            "text": "Slay"
+          },
+          " all enemies with ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 3+"
         ]
       }
     ],
@@ -1668,7 +2066,13 @@
           "side": "enemy"
         },
         "text": [
-          "give Burned 1 to an enemy"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 1 to an enemy"
         ]
       },
       {
@@ -1678,7 +2082,18 @@
           "attribute": "hwayeomsa"
         },
         "text": [
-          "Compress 1 from a Hwayeomsa in your hand"
+          {
+            "type": "keyword",
+            "ref": "compress",
+            "text": "Compress"
+          },
+          " 1 from a ",
+          {
+            "type": "attribute",
+            "ref": "hwayeomsa",
+            "text": "Hwayeomsa"
+          },
+          " in your hand"
         ]
       }
     ],
@@ -1694,7 +2109,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -1702,7 +2122,12 @@
       {
         "type": "quick",
         "text": [
-          "i am Quick"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          }
         ]
       },
       {
@@ -1712,7 +2137,24 @@
           "series": "incinerate"
         },
         "text": [
-          "Spend Fire Charges to create the highest affordable Incinerate in your hand"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " ",
+          {
+            "type": "rule",
+            "ref": "fire-charge",
+            "text": "Fire Charges"
+          },
+          " to create the highest affordable ",
+          {
+            "type": "series",
+            "ref": "incinerate",
+            "text": "Incinerate"
+          },
+          " in your hand"
         ]
       }
     ],
@@ -1747,7 +2189,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -1877,7 +2324,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -2136,7 +2588,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -2581,7 +3038,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       },
       {
@@ -2636,7 +3098,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       },
       {
@@ -2692,7 +3159,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       },
       {
@@ -2763,7 +3235,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       },
       {
@@ -3098,7 +3575,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -3345,7 +3827,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -3502,6 +3989,18 @@
       {
         "cardId": 73,
         "kind": "mention"
+      },
+      {
+        "cardId": 56,
+        "kind": "mention"
+      },
+      {
+        "cardId": 76,
+        "kind": "mention"
+      },
+      {
+        "cardId": 84,
+        "kind": "mention"
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_ran.png"
@@ -3515,7 +4014,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -3607,6 +4111,18 @@
       {
         "cardId": 73,
         "kind": "mention"
+      },
+      {
+        "cardId": 56,
+        "kind": "mention"
+      },
+      {
+        "cardId": 76,
+        "kind": "mention"
+      },
+      {
+        "cardId": 84,
+        "kind": "mention"
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_ran_ii.png"
@@ -3665,7 +4181,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -3782,13 +4303,8 @@
     "cardId": 56,
     "type": "skill",
     "name": "Lightning Baang",
+    "series": "jeonsul-baang",
     "cost": 1,
-    "keywords": [
-      {
-        "code": "jeonsul-baang",
-        "raw": "i am a Jeonsul Baang"
-      }
-    ],
     "deckConstraints": [],
     "effects": [
       {
@@ -3803,7 +4319,33 @@
         ]
       }
     ],
-    "slug": "lightning_baang"
+    "slug": "lightning_baang",
+    "relatedCards": [
+      {
+        "cardId": 15,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 76,
+        "kind": "series"
+      },
+      {
+        "cardId": 84,
+        "kind": "series"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 52,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 73,
+        "kind": "mention"
+      }
+    ]
   },
   "57": {
     "cardId": 57,
@@ -4122,7 +4664,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -4340,7 +4887,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -4716,7 +5268,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -4813,7 +5370,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -4946,6 +5508,18 @@
       {
         "cardId": 15,
         "kind": "mention"
+      },
+      {
+        "cardId": 56,
+        "kind": "mention"
+      },
+      {
+        "cardId": 76,
+        "kind": "mention"
+      },
+      {
+        "cardId": 84,
+        "kind": "mention"
       }
     ],
     "artworkPath": "/assets/images/artworks/redan.png"
@@ -4960,7 +5534,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -5065,7 +5644,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -5107,13 +5691,8 @@
     "cardId": 76,
     "type": "skill",
     "name": "Static Baang",
+    "series": "jeonsul-baang",
     "cost": 1,
-    "keywords": [
-      {
-        "code": "jeonsul-baang",
-        "raw": "i am a Jeonsul Baang"
-      }
-    ],
     "deckConstraints": [],
     "effects": [
       {
@@ -5128,7 +5707,33 @@
         ]
       }
     ],
-    "slug": "static_baang"
+    "slug": "static_baang",
+    "relatedCards": [
+      {
+        "cardId": 15,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 56,
+        "kind": "series"
+      },
+      {
+        "cardId": 84,
+        "kind": "series"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 52,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 73,
+        "kind": "mention"
+      }
+    ]
   },
   "77": {
     "cardId": 77,
@@ -5201,7 +5806,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -5499,7 +6109,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],
@@ -5599,13 +6214,8 @@
     "cardId": 84,
     "type": "skill",
     "name": "Thunder Baang",
+    "series": "jeonsul-baang",
     "cost": 1,
-    "keywords": [
-      {
-        "code": "jeonsul-baang",
-        "raw": "i am a Jeonsul Baang"
-      }
-    ],
     "deckConstraints": [],
     "effects": [
       {
@@ -5620,7 +6230,33 @@
         ]
       }
     ],
-    "slug": "thunder_baang"
+    "slug": "thunder_baang",
+    "relatedCards": [
+      {
+        "cardId": 15,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 56,
+        "kind": "series"
+      },
+      {
+        "cardId": 76,
+        "kind": "series"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 52,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 73,
+        "kind": "mention"
+      }
+    ]
   },
   "85": {
     "cardId": 85,
@@ -5724,7 +6360,12 @@
       {
         "type": "unreachable",
         "text": [
-          "i am Unreachable"
+          "I am ",
+          {
+            "type": "keyword",
+            "ref": "unreachable",
+            "text": "Unreachable"
+          }
         ]
       }
     ],

@@ -47,4 +47,4 @@ affiliations:
   - wolhaiksong
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"

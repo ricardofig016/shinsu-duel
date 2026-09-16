@@ -4,12 +4,12 @@ cost: 0
 requirements:
 deckConstraints:
   - type: unreachable
-    raw: "i am Unreachable"
+    raw: "I am [[keyword:Unreachable]]"
 effects:
   - type: quick
-    raw: "i am Quick"
+    raw: "I am [[keyword:Quick]]"
   - type: create_card
     card:
       type: skill
       series: incinerate
-    raw: "Spend Fire Charges to create the highest affordable Incinerate in your hand"
+    raw: "[[keyword:Spend]] [[rule:Fire Charge|Fire Charges]] to create the highest affordable [[series:Incinerate]] in your hand"

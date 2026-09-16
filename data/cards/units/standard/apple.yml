@@ -15,7 +15,7 @@ passives:
       lowest_hp: true
       traitNot: immune
     trigger: { type: deploy }
-    raw: "when i am deployed: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+    raw: "[[trigger:Deploy]]: Give [[trait:Immune]] to the [[affiliation:Team Rachel]] ally with the lowest HP that doesn't have [[trait:Immune]]"
   - type: grant_trait
     trait: immune
     target:
@@ -24,17 +24,17 @@ passives:
       lowest_hp: true
       traitNot: immune
     trigger: { type: dies }
-    raw: "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+    raw: "[[trigger:Death]]: Give [[trait:Immune]] to the [[affiliation:Team Rachel]] ally with the lowest HP that doesn't have [[trait:Immune]]"
   - type: light_up
     amount: 1
     trigger: { type: ally_dies, rank: regular }
-    raw: "when an ally Regular dies: Light Up 1"
+    raw: "When an ally [[rank:Regular]] dies: [[keyword:Light Up]] 1"
 abilities:
   - type: remove_conditions
     mode: choose
     amount: 1
     target: { side: ally }
-    raw: "remove a condition from an ally"
+    raw: "Remove a condition from an ally"
 evolve:
 traits:
   - dealer 1
