@@ -1,5 +1,4 @@
 import * as IdFactory from "./IdFactory.js";
-import { segmentsToPlainText } from "../../public/utils/card-text.js";
 import affiliations from "../data/affiliations.json" with { type: "json" };import attributes from "../data/attributes.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traits from "../data/traits.json" with { type: "json" };
@@ -53,6 +52,9 @@ export default class Card {
     // The persistent card identifier, stamped by the compiler; the runtime
     // cardId is a compile-time index that shifts when the catalog changes.
     this.slug = cardData.slug ?? null;
+    // The compiler's related-card stamp (see docs/COMPILED_CARD_DSL.md);
+    // entries are { cardId, kind } resolved client-side against the catalog.
+    this.relatedCards = cardData.relatedCards ?? null;
     // Resolved by the compiler from the card slug (`<normalizeName(name)>.png`);
     // null for cards without artwork, which the frontend renders as placeholder.
     this.artworkPath = cardData.artworkPath ?? null;
@@ -102,10 +104,10 @@ export default class Card {
     return dict;
   }
 
-  #displayTexts(entries) {
+  #textSegments(entries) {
     return (entries || [])
-      .map((entry) => segmentsToPlainText(entry.text))
-      .filter((text) => text !== "");
+      .filter((entry) => Array.isArray(entry.text) && entry.text.length > 0)
+      .map((entry) => entry.text);
   }
 
   #attributeViews() {
@@ -122,10 +124,11 @@ export default class Card {
   /**
    * Client-facing card view. Printed information a player reads off the card
    * (rank, requirements, effect/rule texts, evolve/ignition triggers) is
-   * projected into display-ready strings; looked-up metadata (attributes) is
-   * stamped with tooltip titles, descriptions, effect lines, and icon paths
-   * like the other code dictionaries. Hidden cards never reach the opponent
-   * because the state projection replaces them with empty views.
+   * projected as compiled display segments — the client renders and links
+   * them, it never re-parses authored text; looked-up metadata (attributes)
+   * is stamped with tooltip titles, descriptions, effect lines, and icon
+   * paths like the other code dictionaries. Hidden cards never reach the
+   * opponent because the state projection replaces them with empty views.
    */
   toSanitizedObject() {
     return {
@@ -150,11 +153,12 @@ export default class Card {
       attributes: this.#attributeViews(),
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
-      requirements: this.#displayTexts(this.requirements),
-      effects: this.#displayTexts(this.effects),
-      rules: this.#displayTexts(this.rules),
-      evolveTriggers: this.evolveInto ? this.#displayTexts(this.evolveInto.triggers) : null,
-      igniteTriggers: this.igniteInto ? this.#displayTexts(this.igniteInto.triggers) : null,
+      requirements: this.#textSegments(this.requirements),
+      effects: this.#textSegments(this.effects),
+      rules: this.#textSegments(this.rules),
+      evolveTriggers: this.evolveInto ? this.#textSegments(this.evolveInto.triggers) : null,
+      igniteTriggers: this.igniteInto ? this.#textSegments(this.igniteInto.triggers) : null,
+      relatedCards: this.relatedCards,
       owner: this.owner,
       artworkPath: this.artworkPath,
     };

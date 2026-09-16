@@ -162,17 +162,17 @@ describe("buildUnitViewModel", () => {
     expect(model.attributes.map((attribute) => attribute.code)).toEqual(["anima", "hwayeomsa"]);
   });
 
-  test("carries the printed card texts and evolve/ignition triggers", () => {
+  test("projects the printed segment texts and evolve/ignition triggers", () => {
     const model = buildCardViewModel({
       cardId: 10003,
       type: "unit",
       kind: "standard",
       name: "Test Ranker",
       rank: "ranker",
-      requirements: ["you control a fisherman"],
+      requirements: [["you control a fisherman"]],
       effects: [],
-      rules: ["passives have no effect"],
-      evolveTriggers: ["when i am deployed"],
+      rules: [["passives have no effect"]],
+      evolveTriggers: [["when i am deployed"]],
       igniteTriggers: null,
       abilities: [],
       traits: {},
@@ -185,6 +185,18 @@ describe("buildUnitViewModel", () => {
     expect(model.rules).toEqual(["passives have no effect"]);
     expect(model.evolveTriggers).toEqual(["when i am deployed"]);
     expect(model.igniteTriggers).toBeNull();
+  });
+
+  test("carries the card's relatedCards stamp through", () => {
+    const model = buildCardViewModel({
+      cardId: 10005,
+      type: "unit",
+      name: "Related",
+      relatedCards: [{ cardId: 10003, kind: "mention" }],
+    });
+
+    expect(model.relatedCards).toEqual([{ cardId: 10003, kind: "mention" }]);
+    expect(buildCardViewModel({ cardId: 10006, name: "Bare" }).relatedCards).toBeNull();
   });
 
   test("defaults printed texts to empty and rank to null", () => {

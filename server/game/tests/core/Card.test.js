@@ -45,7 +45,7 @@ describe("Card", () => {
     expect(bare.toSanitizedObject().artworkPath).toBeNull();
   });
 
-  test("serializes rank and the printed requirement, effect, and rule texts", () => {
+  test("serializes printed requirement, effect, and rule texts as display segments", () => {
     const card = makeCard({
       rank: "ranker",
       requirements: [{ type: "target_side", side: "ally", text: ["you control a fisherman"] }],
@@ -55,19 +55,26 @@ describe("Card", () => {
     const view = card.toSanitizedObject();
 
     expect(view.rank).toBe("ranker");
-    expect(view.requirements).toEqual(["you control a fisherman"]);
-    expect(view.effects).toEqual(["deal 2", "draw a card"]);
-    expect(view.rules).toEqual(["passives have no effect"]);
+    expect(view.requirements).toEqual([["you control a fisherman"]]);
+    expect(view.effects).toEqual([["deal 2"], ["draw a card"]]);
+    expect(view.rules).toEqual([["passives have no effect"]]);
   });
 
-  test("serializes evolve and ignition trigger texts, null when absent", () => {
+  test("ships relatedCards untouched and defaults to null when unstamped", () => {
+    const related = makeCard({ relatedCards: [{ cardId: 2, kind: "mention" }] });
+    expect(related.toSanitizedObject().relatedCards).toEqual([{ cardId: 2, kind: "mention" }]);
+
+    expect(makeCard().toSanitizedObject().relatedCards).toBeNull();
+  });
+
+  test("serializes evolve and ignition trigger texts as segments, null when absent", () => {
     const evolving = makeCard({
       evolveInto: { triggers: [{ type: "deploy", text: ["when i am deployed"] }], cardId: 2 },
       igniteInto: { triggers: [{ type: "slay", text: ["the bearer Slays a unit"] }], cardId: 3 },
     });
     const view = evolving.toSanitizedObject();
-    expect(view.evolveTriggers).toEqual(["when i am deployed"]);
-    expect(view.igniteTriggers).toEqual(["the bearer Slays a unit"]);
+    expect(view.evolveTriggers).toEqual([["when i am deployed"]]);
+    expect(view.igniteTriggers).toEqual([["the bearer Slays a unit"]]);
 
     const bare = makeCard();
     expect(bare.toSanitizedObject().evolveTriggers).toBeNull();

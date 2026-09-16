@@ -57,11 +57,15 @@ const flattenCard = (card) => ({
     iconPath: attribute.iconPath ?? null,
   })),
   rank: card.rank ?? null,
-  requirements: [...(card.requirements ?? [])],
-  effects: [...(card.effects ?? [])],
-  rules: [...(card.rules ?? [])],
-  evolveTriggers: card.evolveTriggers ? [...card.evolveTriggers] : null,
-  igniteTriggers: card.igniteTriggers ? [...card.igniteTriggers] : null,
+  // Printed prose lines arrive as compiled display segments; the view model
+  // projects them into the plain strings today's rendering and search
+  // consume. No authored-text parsing happens client-side.
+  requirements: (card.requirements ?? []).map((segments) => segmentsToPlainText(segments)),
+  effects: (card.effects ?? []).map((segments) => segmentsToPlainText(segments)),
+  rules: (card.rules ?? []).map((segments) => segmentsToPlainText(segments)),
+  evolveTriggers: card.evolveTriggers ? card.evolveTriggers.map((segments) => segmentsToPlainText(segments)) : null,
+  igniteTriggers: card.igniteTriggers ? card.igniteTriggers.map((segments) => segmentsToPlainText(segments)) : null,
+  relatedCards: card.relatedCards ?? null,
   affiliations: Object.entries(card.affiliations ?? {}).map(([code, affiliation]) => ({
     code,
     name: affiliation.name,

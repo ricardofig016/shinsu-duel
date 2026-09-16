@@ -25,6 +25,7 @@ import {
 } from "/game/actions.js";
 import { STEP, roomCodeFromPath, followRoomStep } from "/game/steps.js";
 import { getGlossary } from "/utils/glossary.js";
+import { fetchCardCatalog } from "/utils/card-catalog.js";
 import {
   buildDeckTooltipText,
   buildPositionTooltipEntries,
@@ -55,7 +56,14 @@ const prepareData = async () => {
     console.error(`Tooltip glossary unavailable: ${error.message}`);
     return null;
   });
-  return { positions, glossary };
+  // The full card catalog powers card detail views: relation stamps and the
+  // name-only equipment-attachment wire entries resolve against it. One
+  // shared request per page load; failure degrades like the glossary.
+  const catalog = await fetchCardCatalog().catch((error) => {
+    console.error(`Card catalog unavailable: ${error.message}`);
+    return null;
+  });
+  return { positions, glossary, catalog };
 };
 
 const findUnit = (state, player, unitId) => {
