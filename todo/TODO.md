@@ -9,6 +9,7 @@
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
 - [ ] game: add support for position: `any`
 - [ ] frontend: make the board background match the game's contract
+- [ ] rules: remove "Slay" keyword - redundant
 
 ## In Progress
 
