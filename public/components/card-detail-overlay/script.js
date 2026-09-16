@@ -282,3 +282,10 @@ export async function openCardDetail({
 
   active = { root, close, focusCard };
 }
+
+// Registry load contract: the overlay mounts itself (openCardDetail appends
+// its own root to the body), so a registry load with no card is a no-op that
+// only primes the component markup cache.
+export default function load(container, data = null) {
+  return openCardDetail(data ?? {});
+}
