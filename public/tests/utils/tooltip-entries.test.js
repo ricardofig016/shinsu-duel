@@ -52,6 +52,24 @@ describe("normalizeTooltipEntries", () => {
     expect(normalizeTooltipEntries(null)).toEqual([]);
     expect(normalizeTooltipEntries(undefined)).toEqual([]);
   });
+
+  test("passes segment entries through with their known style", () => {
+    const segments = ["strike ", { type: "card", ref: "kranos", text: "Kranos" }];
+    expect(normalizeTooltipEntries([
+      { segments },
+      { segments: [], style: "italic" },
+      { segments, style: "italic" },
+      { segments: "junk" },
+    ])).toEqual([
+      { segments, style: null },
+      { segments, style: "italic" },
+    ]);
+  });
+
+  test("passes pre-built node entries through", () => {
+    const node = { className: "preview" };
+    expect(normalizeTooltipEntries([{ node }])).toEqual([{ node }]);
+  });
 });
 
 describe("buildPositionTooltipEntries", () => {
@@ -112,31 +130,31 @@ describe("buildAttributeTooltipEntries", () => {
 describe("buildUnitAbilityTooltipEntries", () => {
   test("lists the unit's own abilities plainly, then granted abilities in italic", () => {
     const unit = {
-      abilities: [{ code: "0", text: "if i have 5+ equipments, give me Lethal" }],
+      abilities: [{ code: "0", text: ["if i have 5+ equipments, give me ", { type: "trait", ref: "lethal", text: "Lethal" }] }],
       grantedAbilities: [
-        { abilityCode: "granted:Card#16#117:grant_trait", sourceId: "Card#16#117", text: "give me Pierce" },
-        { abilityCode: "granted:Card#17#105:deal_damage", sourceId: "Card#17#105", text: "deal 5 to an enemy" },
+        { abilityCode: "granted:Card#16#117:grant_trait", sourceId: "Card#16#117", text: ["give me Pierce"] },
+        { abilityCode: "granted:Card#17#105:deal_damage", sourceId: "Card#17#105", text: ["deal 5 to an enemy"] },
       ],
     };
     expect(buildUnitAbilityTooltipEntries(unit)).toEqual([
-      { text: "if i have 5+ equipments, give me Lethal" },
-      { text: "give me Pierce", style: "italic" },
-      { text: "deal 5 to an enemy", style: "italic" },
+      { segments: ["if i have 5+ equipments, give me ", { type: "trait", ref: "lethal", text: "Lethal" }] },
+      { segments: ["give me Pierce"], style: "italic" },
+      { segments: ["deal 5 to an enemy"], style: "italic" },
     ]);
   });
 
   test("tolerates units without granted abilities and empty ability texts", () => {
     expect(buildUnitAbilityTooltipEntries({
-      abilities: [{ code: "0", text: "Peek at the opponent's hand." }, { code: "1", text: "" }],
+      abilities: [{ code: "0", text: ["Peek at the opponent's hand."] }, { code: "1", text: [] }],
       grantedAbilities: [],
-    })).toEqual([{ text: "Peek at the opponent's hand." }]);
+    })).toEqual([{ segments: ["Peek at the opponent's hand."] }]);
   });
 
-  test("degrades to granted fallback text and returns empty for missing lists", () => {
+  test("drops granted abilities without text and returns empty for missing lists", () => {
     expect(buildUnitAbilityTooltipEntries({
       abilities: [],
-      grantedAbilities: [{ abilityCode: "granted:Card#1#2:deal_damage", text: "granted:Card#1#2:deal_damage" }],
-    })).toEqual([{ text: "granted:Card#1#2:deal_damage", style: "italic" }]);
+      grantedAbilities: [{ abilityCode: "granted:Card#1#2:deal_damage", text: [] }],
+    })).toEqual([]);
     expect(buildUnitAbilityTooltipEntries({})).toEqual([]);
     expect(buildUnitAbilityTooltipEntries(null)).toEqual([]);
   });

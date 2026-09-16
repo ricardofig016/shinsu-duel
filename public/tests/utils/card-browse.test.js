@@ -25,7 +25,7 @@ const units = [
     rank: "regular",
     cost: 3,
     maxHp: 40,
-    abilities: [{ code: "0", text: "Deal 2 damage to a target." }],
+    abilities: [{ code: "0", text: ["Deal 2 damage to a target."] }],
     passiveAbilities: [],
     printedTraits: [
       { code: "lethal", name: "Lethal", description: "Kill what I damage.", iconPath: null },
@@ -52,13 +52,13 @@ const units = [
     cost: 5,
     maxHp: 90,
     abilities: [],
-    passiveAbilities: [{ text: "Round start: draw a card." }],
+    passiveAbilities: [{ text: ["Round start: draw a card."] }],
     printedTraits: [],
     attributes: [],
     affiliations: [{ code: "wolhaiksong", name: "Wolhaiksong" }],
     positions: {},
     effects: [],
-    rules: ["While this is on the field, units cannot be destroyed."],
+    rules: [["While this is on the field, units cannot be destroyed."]],
     evolveTriggers: null,
     igniteTriggers: null,
     artworkPath: null,
@@ -78,7 +78,7 @@ const units = [
     attributes: [],
     affiliations: [],
     positions: {},
-    effects: ["Deal 5 damage to a unit."],
+    effects: [["Deal 5 damage to a unit."]],
     rules: [],
     requirements: [],
     evolveTriggers: null,
@@ -102,6 +102,17 @@ describe("buildSearchableText", () => {
   test("covers landmark rules, passives, and skill effects", () => {
     expect(buildSearchableText(units[1])).toContain("draw a card");
     expect(buildSearchableText(units[2])).toContain("deal 5 damage");
+  });
+
+  test("searches linked segment text without link markers", () => {
+    const view = {
+      name: "Linked",
+      requirements: [["strike ", { type: "card", ref: "kranos", text: "Kranos" }]],
+    };
+
+    const text = buildSearchableText(view);
+    expect(text).toContain("strike kranos");
+    expect(text).not.toContain("[[");
   });
 
   test("tolerates sparse views", () => {

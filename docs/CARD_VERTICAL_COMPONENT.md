@@ -30,8 +30,13 @@ The component consumes only the flattened view models from
 `public/game/viewModels.js`, which mirror the server card view produced by
 `Card.toSanitizedObject()` (`server/game/Card.js`):
 
-- Printed content arrives as display-ready strings: `rank`, `requirements`,
-  `effects`, `rules`, `evolveTriggers`, `igniteTriggers`.
+- Printed content arrives as compiled display segments: `rank`,
+  `requirements`, `effects`, `rules`, `evolveTriggers`, `igniteTriggers`, and
+  the ability/passive `text` lists. The text area and header tooltips render
+  them through the linked-text renderer (`public/utils/card-text-dom.js`),
+  which highlights inline links, gives card links hover previews, and keeps
+  card links clickable — clicking moves the card detail overlay's focus or
+  opens it.
 - Looked-up metadata arrives as code-keyed dictionaries stamped with
   `name`, `description`, and `iconPath`: traits, positions, affiliations,
   attributes. Attribute views additionally carry the server-composed tooltip

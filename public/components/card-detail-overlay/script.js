@@ -51,6 +51,15 @@ const animateFocusCard = (frame, source, direction) => {
 // One overlay per page: opening again replaces the open one.
 let active = null;
 
+/** Whether a card detail overlay is currently open. */
+export const isCardDetailOpen = () => active !== null;
+
+/**
+ * Move the open overlay's focus to a card by its runtime cardId. Returns
+ * false when no overlay is open or the card is not in its row.
+ */
+export const focusCardDetail = (cardId) => active?.focusCard?.(cardId) ?? false;
+
 /**
  * Open the card detail overlay for one card: the focus card at its big
  * size, attached equipment to its left, its related cards to its right.
@@ -141,6 +150,18 @@ export async function openCardDetail({
   const setFocus = (index) => {
     focusSlotIndex = Math.max(0, Math.min(slots.length - 1, index));
     applyFocus();
+  };
+  // Card-link navigation: move the focus to the row entry for a card.
+  const slotByCardId = new Map();
+  entries.forEach((entry, index) => {
+    const cardId = entry.card?.cardId;
+    if (cardId != null && !slotByCardId.has(cardId)) slotByCardId.set(cardId, index);
+  });
+  const focusCard = (cardId) => {
+    const index = slotByCardId.get(cardId);
+    if (index === undefined) return false;
+    setFocus(index);
+    return true;
   };
 
   // Entrance: FLIP the focus card from the source card it opened from.
@@ -259,5 +280,5 @@ export async function openCardDetail({
   });
   root.addEventListener("contextmenu", (event) => event.preventDefault());
 
-  active = { root, close };
+  active = { root, close, focusCard };
 }

@@ -8,8 +8,6 @@
  * decisions rendered into prompt models. No DOM access here.
  */
 
-import { segmentsToPlainText } from "../utils/card-text.js";
-
 export const MAX_NORMAL_SHINSU = 10;
 export const MAX_RECHARGED_SHINSU = 2;
 
@@ -35,14 +33,15 @@ const flattenCard = (card) => ({
   effectiveCost: card.effectiveCost ?? card.cost ?? 0,
   maxHp: card.maxHp ?? null,
   // Native abilities are addressed by their hand index on the wire
-  // (abilityCode "0", "1", ...); the display text projects the compiled
-  // display segments.
+  // (abilityCode "0", "1", ...). Display text carries the compiled display
+  // segments; the linked-text renderer (public/utils/card-text-dom.js) turns
+  // them into DOM, and search projects them to plain text.
   abilities: (card.abilities ?? []).map((ability, index) => ({
     code: String(index),
-    text: segmentsToPlainText(ability.text),
+    text: [...(ability.text ?? [])],
   })),
   passiveAbilities: (card.passiveAbilities ?? []).map((passive) => ({
-    text: segmentsToPlainText(passive.text),
+    text: [...(passive.text ?? [])],
   })),
   printedTraits: Object.entries(card.traits ?? {}).map(([code, trait]) => ({
     code,
@@ -59,14 +58,14 @@ const flattenCard = (card) => ({
     iconPath: attribute.iconPath ?? null,
   })),
   rank: card.rank ?? null,
-  // Printed prose lines arrive as compiled display segments; the view model
-  // projects them into the plain strings today's rendering and search
-  // consume. No authored-text parsing happens client-side.
-  requirements: (card.requirements ?? []).map((segments) => segmentsToPlainText(segments)),
-  effects: (card.effects ?? []).map((segments) => segmentsToPlainText(segments)),
-  rules: (card.rules ?? []).map((segments) => segmentsToPlainText(segments)),
-  evolveTriggers: card.evolveTriggers ? card.evolveTriggers.map((segments) => segmentsToPlainText(segments)) : null,
-  igniteTriggers: card.igniteTriggers ? card.igniteTriggers.map((segments) => segmentsToPlainText(segments)) : null,
+  // Printed prose lines arrive as compiled display segments; the linked-text
+  // renderer turns them into DOM and search projects them to plain text. No
+  // authored-text parsing happens client-side.
+  requirements: [...(card.requirements ?? [])],
+  effects: [...(card.effects ?? [])],
+  rules: [...(card.rules ?? [])],
+  evolveTriggers: card.evolveTriggers ? [...card.evolveTriggers] : null,
+  igniteTriggers: card.igniteTriggers ? [...card.igniteTriggers] : null,
   relatedCards: card.relatedCards ?? null,
   affiliations: Object.entries(card.affiliations ?? {}).map(([code, affiliation]) => ({
     code,
@@ -111,12 +110,12 @@ export function buildUnitViewModel(unit) {
     })),
     equipmentAttachments: [...(unit.equipmentAttachments ?? [])],
     // Granted abilities are addressed by their registry code on the wire
-    // ("granted:<source>:<type>"); the display text projects the compiled
-    // display segments.
+    // ("granted:<source>:<type>"); display text carries the compiled display
+    // segments.
     grantedAbilities: (unit.grantedAbilities ?? []).map((granted) => ({
       abilityCode: granted.abilityCode,
       sourceId: granted.sourceId,
-      text: segmentsToPlainText(granted.ability?.text) || granted.abilityCode,
+      text: [...(granted.ability?.text ?? [])],
     })),
     runtimeTraits: [...(unit.traits ?? [])],
   };

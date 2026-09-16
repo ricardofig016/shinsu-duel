@@ -1,5 +1,6 @@
-import { addTooltip, fitFontSize } from "/utils/component-util.js";
+import { loadComponent, addTooltip, fitFontSize } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
+import { renderSegments } from "/utils/card-text-dom.js";
 import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import {
   buildAttributeTooltipEntries,
@@ -89,31 +90,31 @@ const loadHeaderIcons = async (container, model, glossary) => {
       texts: buildAttributeTooltipEntries(attribute),
     });
   }
-  const conceptEntry = (key, iconPath, texts) =>
-    concepts && texts.length > 0
+  const conceptEntry = (key, iconPath, textList) =>
+    concepts && textList.length > 0
       ? {
           iconPath,
           title: concepts[key].name,
-          texts: [{ text: concepts[key].description, style: "italic" }, ...texts],
+          texts: [{ text: concepts[key].description, style: "italic" }, ...textList],
         }
       : null;
   if (model.evolveTriggers?.length > 0) {
-    entries.push(conceptEntry("evolve", HEADER_ICON_PATHS.evolve, model.evolveTriggers));
+    entries.push(conceptEntry("evolve", HEADER_ICON_PATHS.evolve, model.evolveTriggers.map((segments) => ({ segments }))));
   }
   if (model.igniteTriggers?.length > 0) {
-    entries.push(conceptEntry("ignition", HEADER_ICON_PATHS.ignition, model.igniteTriggers));
+    entries.push(conceptEntry("ignition", HEADER_ICON_PATHS.ignition, model.igniteTriggers.map((segments) => ({ segments }))));
   }
   if (model.passiveAbilities?.length > 0) {
     entries.push(
       conceptEntry(
         "passives",
         HEADER_ICON_PATHS.passive,
-        model.passiveAbilities.map((passive) => passive.text)
+        model.passiveAbilities.map((passive) => ({ segments: passive.text }))
       )
     );
   }
   if (model.requirements?.length > 0) {
-    entries.push(conceptEntry("requirements", HEADER_ICON_PATHS.requirements, model.requirements));
+    entries.push(conceptEntry("requirements", HEADER_ICON_PATHS.requirements, model.requirements.map((segments) => ({ segments }))));
   }
 
   for (const { iconPath, title, texts } of entries.filter(Boolean)) {
@@ -262,11 +263,12 @@ const loadIconStrip = async (
 
 /**
  * The text area carries the card's printed content: unit abilities,
- * landmark rules, and skill/equipment effects. Abilities stay clickable
- * where the page wired them (your own units); effects and rules render as
- * plain paragraphs. The text box owns a fixed flex share of the card, so
- * the shared fit util only has to make the content fit its own box: it
- * shrinks the font until the content height matches the box height.
+ * landmark rules, and skill/equipment effects. Display text renders through
+ * the linked-text renderer, so inline links highlight and navigate; abilities
+ * stay clickable where the page wired them (your own units). The text box
+ * owns a fixed flex share of the card, so the shared fit util only has to
+ * make the content fit its own box: it shrinks the font until the content
+ * height matches the box height.
  */
 const loadText = (container, model, unit, onAbilityClick) => {
   const list = container.querySelector(".card-vertical-text");
@@ -274,9 +276,9 @@ const loadText = (container, model, unit, onAbilityClick) => {
   const listItems = [];
 
   const abilityClick = unit && onAbilityClick ? (code) => onAbilityClick(unit.id, code) : null;
-  const addItem = (text, { code = null, isGranted = false } = {}) => {
+  const addItem = (segments, { code = null, isGranted = false } = {}) => {
     const li = document.createElement("li");
-    li.innerText = text;
+    li.replaceChildren(renderSegments(segments));
     if (isGranted) li.classList.add("card-vertical-granted-ability");
     if (abilityClick && code) {
       li.classList.add("clickable");
@@ -295,7 +297,7 @@ const loadText = (container, model, unit, onAbilityClick) => {
     addItem(granted.text, { code: granted.abilityCode, isGranted: true });
   }
   const paragraphs = isLandmark ? model.rules : isUnit ? [] : model.effects;
-  for (const text of paragraphs) addItem(text);
+  for (const segments of paragraphs) addItem(segments);
 
   fitFontSize(listItems, () => list.clientHeight > 0 && list.scrollHeight > list.clientHeight + 1);
 };

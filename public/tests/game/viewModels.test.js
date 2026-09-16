@@ -61,14 +61,14 @@ describe("buildUnitViewModel", () => {
     expect(model.slug).toBe("test_scout");
     expect(model.sobriquet).toBe("The Lookout");
     expect(model.effectiveCost).toBe(1);
-    expect(model.passiveAbilities).toEqual([{ text: "Always watching." }]);
+    expect(model.passiveAbilities).toEqual([{ text: ["Always watching."] }]);
   });
 
   test("addresses native abilities by index and shows the raw text", () => {
     const model = buildUnitViewModel(unitView);
 
     expect(model.abilities).toEqual([
-      { code: "0", text: "Peek at the opponent's hand." },
+      { code: "0", text: ["Peek at the opponent's hand."] },
     ]);
   });
 
@@ -79,7 +79,7 @@ describe("buildUnitViewModel", () => {
       {
         abilityCode: "granted:equip-9:deal_damage",
         sourceId: "equip-9",
-        text: "Deal 2 damage.",
+        text: ["Deal 2 damage."],
       },
     ]);
   });
@@ -162,7 +162,7 @@ describe("buildUnitViewModel", () => {
     expect(model.attributes.map((attribute) => attribute.code)).toEqual(["anima", "hwayeomsa"]);
   });
 
-  test("projects the printed segment texts and evolve/ignition triggers", () => {
+  test("carries the printed segment texts and evolve/ignition triggers", () => {
     const model = buildCardViewModel({
       cardId: 10003,
       type: "unit",
@@ -181,9 +181,9 @@ describe("buildUnitViewModel", () => {
     });
 
     expect(model.rank).toBe("ranker");
-    expect(model.requirements).toEqual(["you control a fisherman"]);
-    expect(model.rules).toEqual(["passives have no effect"]);
-    expect(model.evolveTriggers).toEqual(["when i am deployed"]);
+    expect(model.requirements).toEqual([["you control a fisherman"]]);
+    expect(model.rules).toEqual([["passives have no effect"]]);
+    expect(model.evolveTriggers).toEqual([["when i am deployed"]]);
     expect(model.igniteTriggers).toBeNull();
   });
 

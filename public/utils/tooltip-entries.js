@@ -3,8 +3,15 @@
  *
  * All tooltip copy is server-owned: it arrives through the card views (Card.
  * toSanitizedObject) or the /glossary route. These helpers only arrange
- * server-provided fields into the entry contract the tooltip renders: an
- * entry is a plain string, or { text, style } with one of the styles below.
+ * server-provided fields into the entry contract the tooltip renders. An
+ * entry is one of:
+ *
+ * - a plain string, or `{ text, style }` with one of the styles below,
+ * - `{ segments }` — compiled display segments rendered by the linked-text
+ *   renderer (ability/requirement/trigger prose keeps its inline links),
+ * - `{ node }` — a pre-built DOM element (e.g. a card preview), appended as
+ *   is; callers build elements, never markup strings.
+ *
  * Nothing here authors copy; when the glossary is unavailable the entries
  * degrade to the data the card views still carry.
  */
@@ -14,9 +21,9 @@ export const TOOLTIP_ENTRY_STYLES = Object.freeze(["italic", "strong", "label"])
 const KNOWN_STYLES = new Set(TOOLTIP_ENTRY_STYLES);
 
 /**
- * Normalize a tooltip text payload into [{ text, style }] entries: strings
- * become unstyled entries, objects keep their known style, and empty or
- * invalid entries are dropped.
+ * Normalize a tooltip text payload into renderable entries: strings become
+ * unstyled entries, `{ text }` keeps its known style, `{ segments }` and
+ * `{ node }` pass through, and empty or invalid entries are dropped.
  */
 export const normalizeTooltipEntries = (textList) => {
   const raw = typeof textList === "string" ? [textList] : textList ?? [];
@@ -26,7 +33,16 @@ export const normalizeTooltipEntries = (textList) => {
       if (entry.trim() !== "") entries.push({ text: entry, style: null });
       continue;
     }
-    if (entry && typeof entry === "object" && typeof entry.text === "string" && entry.text.trim() !== "") {
+    if (!entry || typeof entry !== "object") continue;
+    if (Array.isArray(entry.segments) && entry.segments.length > 0) {
+      entries.push({ segments: entry.segments, style: KNOWN_STYLES.has(entry.style) ? entry.style : null });
+      continue;
+    }
+    if (entry.node) {
+      entries.push({ node: entry.node });
+      continue;
+    }
+    if (typeof entry.text === "string" && entry.text.trim() !== "") {
       entries.push({ text: entry.text, style: KNOWN_STYLES.has(entry.style) ? entry.style : null });
     }
   }
@@ -65,16 +81,18 @@ export const buildAttributeTooltipEntries = (attribute) => {
 
 /**
  * Deployed-unit ability tooltip entries: the unit's own abilities as plain
- * entries, then the abilities granted by equipment in italic — their display
- * text is the granted ability's server-owned `raw`, nothing is authored here.
+ * entries, then the abilities granted by equipment in italic — display text
+ * carries the compiled display segments, keeping their inline links.
  */
 export const buildUnitAbilityTooltipEntries = (unit) => {
   const entries = [];
   for (const ability of unit?.abilities ?? []) {
-    if (ability?.text) entries.push({ text: ability.text });
+    if (Array.isArray(ability?.text) && ability.text.length > 0) entries.push({ segments: ability.text });
   }
   for (const granted of unit?.grantedAbilities ?? []) {
-    if (granted?.text) entries.push({ text: granted.text, style: "italic" });
+    if (Array.isArray(granted?.text) && granted.text.length > 0) {
+      entries.push({ segments: granted.text, style: "italic" });
+    }
   }
   return entries;
 };

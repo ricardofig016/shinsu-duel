@@ -1,7 +1,9 @@
 import express from "express";
 
 import affiliations from "./affiliations.js";
+import attributes from "./attributes.js";
 import cards from "./cards.js";
+import conditions from "./conditions.js";
 import glossary from "./glossary.js";
 import login from "./login.js";
 import positions from "./positions.js";
@@ -36,8 +38,10 @@ export function createRouter({ accounts = createAccountStore(), deckLibrary, cat
   const decksOptions = { accounts, ...(deckLibrary ? { library: deckLibrary } : {}), ...(catalog ? { catalog } : {}) };
 
   router.use("/affiliations", affiliations);
+  router.use("/attributes", attributes);
   router.use("/auth", authRouter ?? createAuthRouter({ accounts }));
   router.use("/cards", cards);
+  router.use("/conditions", conditions);
   router.use("/decks", createDecksRouter(decksOptions));
   router.use("/game", createGameRouter({ accounts, registry }));
   router.use("/glossary", glossary);

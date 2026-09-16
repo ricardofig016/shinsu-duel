@@ -1,4 +1,5 @@
 import { normalizeTooltipEntries } from "/utils/tooltip-entries.js";
+import { renderSegments } from "/utils/card-text-dom.js";
 
 const load = async (container, { hoverContainer, title, textList, iconPath = null }) => {
   const iconEl = container.querySelector(".tooltip-icon");
@@ -18,14 +19,19 @@ const load = async (container, { hoverContainer, title, textList, iconPath = nul
   }
   container.querySelector(".tooltip-title").innerText = title;
 
-  // Payload text is rendered as text content only, so card names and ability
+  // String payload is rendered as text content, so card names and ability
   // text can never inject markup; styled entries only ever add a class.
+  // Segment entries render through the linked-text renderer, which builds
+  // elements (never markup strings), and node entries are pre-built by the
+  // caller — injection safety holds either way.
   const tooltipTextContainer = container.querySelector(".tooltip-text");
   tooltipTextContainer.replaceChildren(
-    ...normalizeTooltipEntries(textList).map(({ text, style }) => {
+    ...normalizeTooltipEntries(textList).map((entry) => {
+      if (entry.node) return entry.node;
       const p = document.createElement("p");
-      p.textContent = text;
-      if (style) p.classList.add(`tooltip-text-${style}`);
+      if (entry.segments) p.replaceChildren(renderSegments(entry.segments));
+      else p.textContent = entry.text;
+      if (entry.style) p.classList.add(`tooltip-text-${entry.style}`);
       return p;
     })
   );

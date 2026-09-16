@@ -6,6 +6,8 @@
  * the page script stays free of data-shaping logic.
  */
 
+import { segmentsToPlainText } from "./card-text.js";
+
 export const DEFAULT_SORT_KEY = "name-asc";
 
 export const SORT_KEYS = Object.freeze([
@@ -33,8 +35,11 @@ export function artworkDisplayName(stem) {
 }
 
 const asString = (value) => (typeof value === "string" ? value : "");
+const segmentsText = (segments) => segmentsToPlainText(segments ?? []);
 
-/** Every text a card can be searched by, lowercased into one string. */
+/** Every text a card can be searched by, lowercased into one string. Printed
+ * prose arrives as display segments; the search text is their plain
+ * projection, with no link markers by construction. */
 export function buildSearchableText(view) {
   const parts = [
     asString(view.name),
@@ -42,13 +47,13 @@ export function buildSearchableText(view) {
     asString(view.type),
     asString(view.kind),
     asString(view.rank),
-    ...(view.abilities ?? []).map((ability) => asString(ability.text)),
-    ...(view.passiveAbilities ?? []).map((passive) => asString(passive.text)),
-    ...(view.requirements ?? []),
-    ...(view.effects ?? []),
-    ...(view.rules ?? []),
-    ...(view.evolveTriggers ?? []),
-    ...(view.igniteTriggers ?? []),
+    ...(view.abilities ?? []).map((ability) => segmentsText(ability.text)),
+    ...(view.passiveAbilities ?? []).map((passive) => segmentsText(passive.text)),
+    ...(view.requirements ?? []).map(segmentsText),
+    ...(view.effects ?? []).map(segmentsText),
+    ...(view.rules ?? []).map(segmentsText),
+    ...(view.evolveTriggers ?? []).map(segmentsText),
+    ...(view.igniteTriggers ?? []).map(segmentsText),
     ...(view.affiliations ?? []).map((affiliation) => asString(affiliation.name)),
     ...(view.printedTraits ?? []).flatMap((trait) => [asString(trait.name), asString(trait.description)]),
     ...(view.attributes ?? []).flatMap((attribute) => [asString(attribute.name), asString(attribute.description)]),

@@ -51,6 +51,19 @@ h1 {
   overflow-y: auto;
 }
 
+/* Inline text links inside compiled display segments (card prose, tooltips).
+   The highlight assumes the card face's dark background; card links are
+   additionally clickable. */
+.card-text-link {
+  color: #e6b84c;
+  font-weight: 600;
+}
+
+.card-text-link-clickable {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .hidden {
   display: none !important;
 }

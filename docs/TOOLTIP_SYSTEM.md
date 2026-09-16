@@ -38,11 +38,44 @@ entries. An entry is a plain string, or `{ text, style }` with one of:
 | `strong` | Emphasis (the card's own rank in the rank tooltip)    |
 | `label`  | The battlefield line label (uppercase, small)         |
 
-Rendering stays `textContent`-based: styled entries only add a class, so no
-server text can inject markup. Entry assembly helpers live in
+Two further entry shapes serve card-prose tooltips:
+
+- `{ segments }` — compiled display segments (see
+  [COMPILED_CARD_DSL.md](./COMPILED_CARD_DSL.md)); the linked-text renderer
+  (`public/utils/card-text-dom.js`) turns them into DOM so inline links keep
+  working inside tooltips.
+- `{ node }` — a pre-built DOM element (the card preview a card link's hover
+  shows). Callers build elements; nothing renders markup strings.
+
+Rendering stays injection-safe either way: styled entries only add a class,
+string entries render as text content, and segment/node entries render
+through the element-building renderer. Entry assembly helpers live in
 `public/utils/tooltip-entries.js` (pure, unit-tested in
 `public/tests/utils/tooltip-entries.test.js`); the glossary is fetched once
 per page load by `public/utils/glossary.js`.
+
+---
+
+## Inline text links
+
+Compiled display segments may carry links (`[[type:ref]]`, see
+[CARD_AUTHORING.md](./CARD_AUTHORING.md)); the linked-text renderer
+(`public/utils/card-text-dom.js`) turns them into highlighted spans at the
+text choke points (card-vertical text area and header tooltips, unit-card
+horizontal ability tooltips, tooltip entries). Each link span carries a lazy
+hover tooltip built from server-owned data:
+
+| Link type                                | Hover shows                                                                 |
+| ---------------------------------------- | --------------------------------------------------------------------------- |
+| `card`                                   | A card preview: the card face rendered through card-vertical                |
+| `condition`, `trait`, `attribute`, `position` | The catalog entry's name, description, and effect lines (`GET /conditions`, `/traits`, `/attributes`, `/positions`) |
+| `keyword`, `rule`                        | The glossary `keywords`/`terms` copy (`GET /glossary`)                      |
+| `series`, `affiliation`                  | The names of every card in that group, computed from the card catalog (`GET /cards/data`) |
+
+Card links are also clickable: clicking moves the card detail overlay's focus
+when it is open, and opens the overlay for that card everywhere else. The
+data catalogs fetch once per page load inside the renderer; a failed fetch
+degrades to no hover tooltip, never to missing text.
 
 ---
 
@@ -60,7 +93,7 @@ from the enforced ones.
 | Tooltip                            | Title                       | Text                                                        |
 | ---------------------------------- | --------------------------- | ----------------------------------------------------------- |
 | Board combat slot, card positions  | Position name               | Line label, description, italic verbose description; the chosen variant appends the glossary chosen suffix |
-| Deployed unit artwork (`unit-card-horizontal`) | Unit name | The unit's own abilities as plain entries, then its equipment-granted abilities (the granted ability's server-owned `raw`) in italic |
+| Deployed unit artwork (`unit-card-horizontal`) | Unit name | The unit's own abilities as segment entries, then its equipment-granted abilities in italic — both keep their inline links |
 | Type letter (card-vertical)        | Kind name (standard shows "Unit") or type name | Kind or type summary from the glossary  |
 | Rank trapezoid                     | "Rank"                      | Italic concept, then every rank with cost range and description; the card's own rank is strong |
 | Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | Italic prose description, then the attribute's effect lines (the RULES.md core-mechanic block) |
