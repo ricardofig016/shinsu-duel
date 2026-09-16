@@ -13,7 +13,7 @@ passives:
 abilities:
 evolve:
   - type: deploy
-    raw: "when i am deployed"
+    raw: "[[trigger:Deploy]]"
 traits:
   - barrier
 attributes:

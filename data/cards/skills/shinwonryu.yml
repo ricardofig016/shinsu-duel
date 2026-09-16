@@ -4,7 +4,7 @@ cost: 4
 requirements:
   - type: has_ally
     attribute: irregular
-    raw: "have an ally Irregular"
+    raw: "Have an ally [[attribute:Irregular]]"
 deckConstraints:
   - type: unreachable
     raw: "I am [[keyword:Unreachable]]"
@@ -12,4 +12,4 @@ effects:
   - type: give_condition
     condition: doomed
     target: { side: enemy }
-    raw: "give an enemy Doomed"
+    raw: "Give an enemy [[condition:Doomed]]"

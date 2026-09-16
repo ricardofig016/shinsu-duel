@@ -6,5 +6,5 @@ effects:
   - type: grant_trait
     trait: barrier
     target: { side: bearer }
-    raw: "the bearer has Barrier"
+    raw: "The [[rule:Bearer]] has [[trait:Barrier]]"
 ignition:

@@ -20,7 +20,7 @@ abilities:
         condition: frozen
         target: { link: sequence }
     quick: true
-    raw: "quick: deal 9 to an enemy and give them Frozen"
+    raw: "[[keyword:Quick]]: Deal 9 to an enemy and give them [[condition:Frozen]]"
 evolve:
 traits:
   - taunt

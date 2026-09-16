@@ -8,4 +8,4 @@ effects:
     condition: burned
     amount: 1
     target: { side: any }
-    raw: "give Burned 1 to a unit"
+    raw: "Give [[condition:Burned]] 1 to a unit"

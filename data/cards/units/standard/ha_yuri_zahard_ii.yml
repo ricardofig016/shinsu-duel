@@ -16,7 +16,7 @@ passives:
       type: grant_trait
       trait: taunt
       target: { side: self }
-    raw: "if i have an allied Guide, i have Taunt"
+    raw: "If I have an allied Guide, I have [[trait:Taunt]]"
   - type: copy_traits
     target: { side: self }
     source: { side: enemy }
@@ -24,17 +24,17 @@ passives:
       type: silenced
       target: { side: enemy }
       source: { side: ally }
-    raw: "when you silence an enemy, give me its traits"
+    raw: "When you [[keyword:Silence]] an enemy, give me its traits"
 abilities:
   - type: deal_damage
     amount: 7
     target: { side: enemy }
-    raw: "deal 7 to an enemy"
+    raw: "Deal 7 to an enemy"
   - type: grant_trait
     trait: strong
     amount: 1
     target: { side: self }
-    raw: "give me Strong 1"
+    raw: "Give me [[trait:Strong]] 1"
 evolve:
 traits:
   - resilient 3

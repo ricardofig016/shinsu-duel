@@ -5,7 +5,7 @@ cost: 5
 hp: 6
 rules:
   - type: disable_passives
-    raw: "passives have no effect"
+    raw: "Passives have no effect"
 passives:
 abilities:
 evolve:

@@ -4,10 +4,10 @@ cost: 1
 requirements:
   - type: target_side
     side: ally
-    raw: "target is an ally"
+    raw: "Target is an ally"
 effects:
   - type: give_condition
     condition: poisoned
     amount: 1
     target: { side: ally }
-    raw: "give Poisoned 1"
+    raw: "Give [[condition:Poisoned]] 1"

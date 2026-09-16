@@ -7,4 +7,4 @@ effects:
     condition: heavy
     amount: 1
     target: { side: enemy }
-    raw: "give Heavy 1 to an enemy"
+    raw: "Give [[condition:Heavy]] 1 to an enemy"

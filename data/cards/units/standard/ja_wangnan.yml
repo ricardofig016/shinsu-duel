@@ -13,7 +13,7 @@ passives:
     target: { side: self }
     when:
       condition: burned
-    raw: "i deal +1 damage to Burned units"
+    raw: "I deal +1 damage to [[condition:Burned]] units"
 abilities:
   - type: spend_shinsu
     amount: 1
@@ -28,13 +28,13 @@ abilities:
           condition: burned
           amount: 1
           target: { link: sequence, count: 1 }
-    raw: "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
+    raw: "[[keyword:Spend]] 1: Deal 1 to 2 enemies and give [[condition:Burned]] 1 to one of them"
   - type: heal
     amount: 2
     target:
       side: ally
       affiliation: prince of the redlight district
-    raw: "heal a Prince of the Redlight District member 2 HP"
+    raw: "Heal a [[affiliation:Prince of the Redlight District]] member 2 HP"
 evolve:
 traits:
 attributes:

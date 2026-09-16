@@ -7,8 +7,8 @@ effects:
     target: { side: any }
     to: { zone: hand, owner: equipment_owner }
     trigger: { type: deal_damage, amount: 7 }
-    raw: "when my bearer deals 7+ damage to a single target, Disarm it"
+    raw: "When my [[rule:Bearer]] deals 7+ damage to a single target, [[keyword:Disarm]] it"
 ignition:
   - type: deal_damage
     amount: 10
-    raw: "the bearer deals 10+ damage to a single target"
+    raw: "The [[rule:Bearer]] deals 10+ damage to a single target"

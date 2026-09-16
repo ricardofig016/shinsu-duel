@@ -11,7 +11,7 @@ passives:
       scope: all
       rank: [ranker, high ranker]
     trigger: { type: round_start }
-    raw: "round start: give Ghost to all Ranker and High Ranker units"
+    raw: "[[trigger:Round Start]]: Give [[condition:Ghost]] to all [[rank:Ranker]] and [[rank:High Ranker]] units"
 abilities:
 evolve:
 traits:

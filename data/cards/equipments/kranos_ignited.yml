@@ -15,5 +15,5 @@ effects:
       - type: remove_traits
         target: { side: any }
     trigger: { type: deal_damage, amount: 7 }
-    raw: "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"
+    raw: "When my [[rule:Bearer]] deals 7+ damage to a single target, [[keyword:Disarm]] it and [[keyword:Silence]] it"
 ignition:

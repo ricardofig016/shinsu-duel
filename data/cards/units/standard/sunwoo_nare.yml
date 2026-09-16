@@ -9,7 +9,7 @@ passives:
   - type: charge_shinsu
     amount: 1
     trigger: { type: summon, source: shinheuh }
-    raw: "when you summon a Shinheuh, Charge 1"
+    raw: "When you [[trigger:Summon]] a Shinheuh, [[keyword:Charge]] 1"
 abilities:
   - type: conditional
     if:
@@ -22,7 +22,7 @@ abilities:
       condition: exhausted
       amount: 2
       target: { side: enemy }
-    raw: "if i have an allied Shinheuh, give Exhausted 2 to an enemy"
+    raw: "If I have an allied Shinheuh, give [[condition:Exhausted]] 2 to an enemy"
 evolve:
 traits:
   - sharpshooter

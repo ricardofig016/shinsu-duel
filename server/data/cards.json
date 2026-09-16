@@ -29,7 +29,11 @@
         {
           "type": "deploy",
           "text": [
-            "when i am deployed"
+            {
+              "type": "trigger",
+              "ref": "deploy",
+              "text": "Deploy"
+            }
           ]
         }
       ],
@@ -95,7 +99,7 @@
       {
         "type": "noop",
         "text": [
-          "test"
+          "Test"
         ]
       }
     ],
@@ -111,7 +115,7 @@
       {
         "type": "noop",
         "text": [
-          "test"
+          "Test"
         ]
       }
     ],
@@ -342,7 +346,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Blinded"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "blinded",
+            "text": "Blinded"
+          }
         ]
       },
       {
@@ -356,7 +370,18 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Burned 2"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 2"
         ]
       },
       {
@@ -370,7 +395,18 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Cursed 2"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "cursed",
+            "text": "Cursed"
+          },
+          " 2"
         ]
       },
       {
@@ -384,7 +420,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Disabled"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "disabled",
+            "text": "Disabled"
+          }
         ]
       },
       {
@@ -398,7 +444,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Doomed"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "doomed",
+            "text": "Doomed"
+          }
         ]
       },
       {
@@ -412,7 +468,18 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Exhausted 2"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "exhausted",
+            "text": "Exhausted"
+          },
+          " 2"
         ]
       },
       {
@@ -426,7 +493,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Frozen"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "frozen",
+            "text": "Frozen"
+          }
         ]
       },
       {
@@ -440,7 +517,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Ghost"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "ghost",
+            "text": "Ghost"
+          }
         ]
       },
       {
@@ -454,7 +541,18 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Heavy 2"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "heavy",
+            "text": "Heavy"
+          },
+          " 2"
         ]
       },
       {
@@ -468,7 +566,18 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Poisoned 2"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " 2"
         ]
       },
       {
@@ -482,7 +591,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Rooted"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          }
         ]
       },
       {
@@ -496,7 +615,17 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Stunned"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "stunned",
+            "text": "Stunned"
+          }
         ]
       },
       {
@@ -510,7 +639,18 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give me Weak 2"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give me ",
+          {
+            "type": "condition",
+            "ref": "weak",
+            "text": "Weak"
+          },
+          " 2"
         ]
       }
     ],
@@ -2230,7 +2370,31 @@
           ]
         },
         "text": [
-          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+          "When the ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " is equipped with all 4 unique ",
+          {
+            "type": "series",
+            "ref": "thorn-fragment",
+            "text": "Thorn Fragment"
+          },
+          " equipments, ",
+          {
+            "type": "keyword",
+            "ref": "discard",
+            "text": "Discard"
+          },
+          " those 4 equipments and create ",
+          {
+            "type": "card",
+            "ref": "enryus_thorn",
+            "text": "Enryu's Thorn"
+          },
+          " in your hand"
         ]
       },
       {
@@ -2241,7 +2405,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's damage-dealing abilities deal +1 damage"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s damage-dealing abilities deal +1 damage"
         ]
       }
     ],
@@ -2302,7 +2472,7 @@
       {
         "type": "disable_passives",
         "text": [
-          "passives have no effect"
+          "Passives have no effect"
         ]
       }
     ],
@@ -2365,7 +2535,31 @@
           ]
         },
         "text": [
-          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+          "When the ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " is equipped with all 4 unique ",
+          {
+            "type": "series",
+            "ref": "thorn-fragment",
+            "text": "Thorn Fragment"
+          },
+          " equipments, ",
+          {
+            "type": "keyword",
+            "ref": "discard",
+            "text": "Discard"
+          },
+          " those 4 equipments and create ",
+          {
+            "type": "card",
+            "ref": "enryus_thorn",
+            "text": "Enryu's Thorn"
+          },
+          " in your hand"
         ]
       },
       {
@@ -2376,7 +2570,19 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Bloodthirsty 1"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "bloodthirsty",
+            "text": "Bloodthirsty"
+          },
+          " 1"
         ]
       }
     ],
@@ -2439,7 +2645,18 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Barrier"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "barrier",
+            "text": "Barrier"
+          }
         ]
       }
     ],
@@ -2477,7 +2694,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 5 to an enemy"
+          "Deal 5 to an enemy"
         ]
       }
     ],
@@ -2519,7 +2736,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 6 to an enemy"
+          "Deal 6 to an enemy"
         ]
       },
       {
@@ -2530,7 +2747,13 @@
           "side": "self"
         },
         "text": [
-          "give me Strong 1"
+          "Give me ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 1"
         ]
       }
     ],
@@ -2555,7 +2778,12 @@
           }
         },
         "text": [
-          "if i have an allied Guide, i have Taunt"
+          "If I have an allied Guide, I have ",
+          {
+            "type": "trait",
+            "ref": "taunt",
+            "text": "Taunt"
+          }
         ]
       }
     ],
@@ -2564,7 +2792,12 @@
         {
           "type": "equipment_ignited",
           "text": [
-            "when my equipment ignites"
+            "When my equipment ",
+            {
+              "type": "trigger",
+              "ref": "ignite",
+              "text": "Ignites"
+            }
           ]
         }
       ],
@@ -2625,7 +2858,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 7 to an enemy"
+          "Deal 7 to an enemy"
         ]
       },
       {
@@ -2636,7 +2869,13 @@
           "side": "self"
         },
         "text": [
-          "give me Strong 1"
+          "Give me ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 1"
         ]
       }
     ],
@@ -2661,7 +2900,12 @@
           }
         },
         "text": [
-          "if i have an allied Guide, i have Taunt"
+          "If I have an allied Guide, I have ",
+          {
+            "type": "trait",
+            "ref": "taunt",
+            "text": "Taunt"
+          }
         ]
       },
       {
@@ -2682,7 +2926,13 @@
           }
         },
         "text": [
-          "when you silence an enemy, give me its traits"
+          "When you ",
+          {
+            "type": "keyword",
+            "ref": "silence",
+            "text": "Silence"
+          },
+          " an enemy, give me its traits"
         ]
       }
     ],
@@ -2708,7 +2958,18 @@
         "affiliation": "yeon-family",
         "attribute": "hwayeomsa",
         "text": [
-          "you have an ally yeon family member or Hwayeomsa"
+          "You have an ally ",
+          {
+            "type": "affiliation",
+            "ref": "yeon-family",
+            "text": "Yeon Family"
+          },
+          " member or ",
+          {
+            "type": "attribute",
+            "ref": "hwayeomsa",
+            "text": "Hwayeomsa"
+          }
         ]
       }
     ],
@@ -2733,7 +2994,12 @@
           }
         ],
         "text": [
-          "Cleanse all allies and heal each of them 4 HP"
+          {
+            "type": "keyword",
+            "ref": "cleanse",
+            "text": "Cleanse"
+          },
+          " all allies and heal each of them 4 HP"
         ]
       }
     ],
@@ -2754,7 +3020,7 @@
           "side": "ally"
         },
         "text": [
-          "heal an ally 5 HP"
+          "Heal an ally 5 HP"
         ]
       }
     ],
@@ -2788,7 +3054,30 @@
           "type": "round_start"
         },
         "text": [
-          "round start: give Ghost to all Ranker and High Ranker units"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Give ",
+          {
+            "type": "condition",
+            "ref": "ghost",
+            "text": "Ghost"
+          },
+          " to all ",
+          {
+            "type": "rank",
+            "ref": "ranker",
+            "text": "Ranker"
+          },
+          " and ",
+          {
+            "type": "rank",
+            "ref": "high ranker",
+            "text": "High Ranker"
+          },
+          " units"
         ]
       }
     ],
@@ -2820,7 +3109,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 4 to an enemy"
+          "Deal 4 to an enemy"
         ]
       }
     ],
@@ -2843,7 +3132,19 @@
           }
         },
         "text": [
-          "if I have an allied Yeo Miseng, I have Strong 1"
+          "If I have an allied ",
+          {
+            "type": "card",
+            "ref": "yeo_miseng",
+            "text": "Yeo Miseng"
+          },
+          ", I have ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 1"
         ]
       }
     ],
@@ -2879,7 +3180,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 2 to an enemy"
+          "Deal 2 to an enemy"
         ]
       },
       {
@@ -2890,7 +3191,12 @@
           "condition": "exhausted"
         },
         "text": [
-          "deal 3 to an enemy with Exhausted"
+          "Deal 3 to an enemy with ",
+          {
+            "type": "condition",
+            "ref": "exhausted",
+            "text": "Exhausted"
+          }
         ]
       }
     ],
@@ -2928,7 +3234,19 @@
         },
         "owner": "opponent",
         "text": [
-          "your opponent discards a regular of your choice"
+          "Your opponent ",
+          {
+            "type": "keyword",
+            "ref": "discard",
+            "text": "Discards"
+          },
+          " a ",
+          {
+            "type": "rank",
+            "ref": "regular",
+            "text": "Regular"
+          },
+          " of your choice"
         ]
       },
       {
@@ -2940,7 +3258,13 @@
           "scope": "backline"
         },
         "text": [
-          "give Heavy 1 to a backline enemy"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "heavy",
+            "text": "Heavy"
+          },
+          " 1 to a backline enemy"
         ]
       }
     ],
@@ -2964,7 +3288,19 @@
           }
         },
         "text": [
-          "while i have an ally team baam or team fug member, opponents skills cost 1 more"
+          "While I have an ally ",
+          {
+            "type": "affiliation",
+            "ref": "team-baam",
+            "text": "Team Baam"
+          },
+          " or ",
+          {
+            "type": "affiliation",
+            "ref": "team-fug",
+            "text": "Team FUG"
+          },
+          " member, opponents skills cost 1 more"
         ]
       }
     ],
@@ -2982,7 +3318,12 @@
         "type": "bearer_has",
         "affiliation": "khun-family",
         "text": [
-          "khun family member"
+          {
+            "type": "affiliation",
+            "ref": "khun-family",
+            "text": "Khun Family"
+          },
+          " member"
         ]
       }
     ],
@@ -3001,7 +3342,19 @@
           }
         },
         "text": [
-          "the bearer's abilities give Frozen to enemies"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s abilities give ",
+          {
+            "type": "condition",
+            "ref": "frozen",
+            "text": "Frozen"
+          },
+          " to enemies"
         ]
       },
       {
@@ -3012,7 +3365,19 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Pierce 1"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "pierce",
+            "text": "Pierce"
+          },
+          " 1"
         ]
       }
     ],
@@ -3051,7 +3416,12 @@
         "resource": "fire_charge",
         "amount": 1,
         "text": [
-          "create me by spending 1 Fire Charge"
+          "Create me by spending 1 ",
+          {
+            "type": "rule",
+            "ref": "fire-charge",
+            "text": "Fire Charge"
+          }
         ]
       }
     ],
@@ -3063,7 +3433,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 1 to an enemy"
+          "Deal 1 to an enemy"
         ]
       }
     ],
@@ -3111,7 +3481,12 @@
         "resource": "fire_charge",
         "amount": 3,
         "text": [
-          "create me by spending 3 Fire Charges"
+          "Create me by spending 3 ",
+          {
+            "type": "rule",
+            "ref": "fire-charge",
+            "text": "Fire Charges"
+          }
         ]
       }
     ],
@@ -3124,7 +3499,7 @@
           "count": 2
         },
         "text": [
-          "deal 2 to 2 enemies"
+          "Deal 2 to 2 enemies"
         ]
       }
     ],
@@ -3172,7 +3547,12 @@
         "resource": "fire_charge",
         "amount": 5,
         "text": [
-          "create me by spending 5 Fire Charges"
+          "Create me by spending 5 ",
+          {
+            "type": "rule",
+            "ref": "fire-charge",
+            "text": "Fire Charges"
+          }
         ]
       }
     ],
@@ -3200,7 +3580,12 @@
           }
         ],
         "text": [
-          "deal 2 to 3 enemies and give them Burn"
+          "Deal 2 to 3 enemies and give them ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          }
         ]
       }
     ],
@@ -3248,7 +3633,12 @@
         "resource": "fire_charge",
         "amount": 7,
         "text": [
-          "create me by spending 7 Fire Charges"
+          "Create me by spending 7 ",
+          {
+            "type": "rule",
+            "ref": "fire-charge",
+            "text": "Fire Charges"
+          }
         ]
       }
     ],
@@ -3275,7 +3665,13 @@
           }
         ],
         "text": [
-          "deal 3 to all enemies and give them Burn 2"
+          "Deal 3 to all enemies and give them ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 2"
         ]
       }
     ],
@@ -3350,7 +3746,18 @@
           ]
         },
         "text": [
-          "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 1: Deal 1 to 2 enemies and give ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 1 to one of them"
         ]
       },
       {
@@ -3361,7 +3768,13 @@
           "affiliation": "prince-of-the-redlight-district"
         },
         "text": [
-          "heal a Prince of the Redlight District member 2 HP"
+          "Heal a ",
+          {
+            "type": "affiliation",
+            "ref": "prince-of-the-redlight-district",
+            "text": "Prince of the Redlight District"
+          },
+          " member 2 HP"
         ]
       }
     ],
@@ -3377,7 +3790,13 @@
           "condition": "burned"
         },
         "text": [
-          "i deal +1 damage to Burned units"
+          "I deal +1 damage to ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " units"
         ]
       }
     ],
@@ -3414,7 +3833,12 @@
           "has_passive": true
         },
         "text": [
-          "Silence an enemy that has at least one passive"
+          {
+            "type": "keyword",
+            "ref": "silence",
+            "text": "Silence"
+          },
+          " an enemy that has at least one passive"
         ]
       },
       {
@@ -3427,7 +3851,17 @@
           }
         },
         "text": [
-          "spend 2: use an enemy ability"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 2: Use an enemy ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          }
         ]
       }
     ],
@@ -3466,7 +3900,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 7 to an enemy"
+          "Deal 7 to an enemy"
         ]
       },
       {
@@ -3495,7 +3929,24 @@
           ]
         },
         "text": [
-          "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 1: Give ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          },
+          " to 2 enemies and deal 3 to all ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          },
+          " enemies"
         ]
       }
     ],
@@ -3508,7 +3959,17 @@
           "affiliation": "karakas-servants"
         },
         "text": [
-          "karaka's servants' abilities have Quick"
+          {
+            "type": "affiliation",
+            "ref": "karakas-servants",
+            "text": "Karaka's Servants"
+          },
+          "' abilities have ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          }
         ]
       }
     ],
@@ -3519,7 +3980,17 @@
           "cardName": "Karaka's Armor Suit",
           "position": "fisherman",
           "text": [
-            "Fisherman: equip with Karaka's Armor Suit"
+            {
+              "type": "position",
+              "ref": "fisherman",
+              "text": "Fisherman"
+            },
+            ": Equip with ",
+            {
+              "type": "card",
+              "ref": "karakas_armor_suit",
+              "text": "Karaka's Armor Suit"
+            }
           ]
         },
         {
@@ -3527,7 +3998,17 @@
           "cardName": "Steel Tree",
           "position": "wave-controller",
           "text": [
-            "Wave Controller: equip with Steel Tree"
+            {
+              "type": "position",
+              "ref": "wave-controller",
+              "text": "Wave Controller"
+            },
+            ": Equip with ",
+            {
+              "type": "card",
+              "ref": "steel_tree",
+              "text": "Steel Tree"
+            }
           ]
         },
         {
@@ -3535,7 +4016,17 @@
           "cardName": "Purple Dementor",
           "position": "scout",
           "text": [
-            "Scout: equip with Purple Dementor"
+            {
+              "type": "position",
+              "ref": "scout",
+              "text": "Scout"
+            },
+            ": Equip with ",
+            {
+              "type": "card",
+              "ref": "purple_dementor",
+              "text": "Purple Dementor"
+            }
           ]
         }
       ],
@@ -3609,7 +4100,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 7 to an enemy"
+          "Deal 7 to an enemy"
         ]
       },
       {
@@ -3638,7 +4129,24 @@
           ]
         },
         "text": [
-          "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 1: Give ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          },
+          " to 2 enemies and deal 3 to all ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          },
+          " enemies"
         ]
       }
     ],
@@ -3651,7 +4159,17 @@
           "affiliation": "karakas-servants"
         },
         "text": [
-          "karaka's servants' abilities have Quick"
+          {
+            "type": "affiliation",
+            "ref": "karakas-servants",
+            "text": "Karaka's Servants"
+          },
+          "' abilities have ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          }
         ]
       },
       {
@@ -3666,7 +4184,18 @@
           "type": "round_end"
         },
         "text": [
-          "round end: deal 3 to all Rooted enemies"
+          {
+            "type": "trigger",
+            "ref": "round-end",
+            "text": "Round End"
+          },
+          ": Deal 3 to all ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          },
+          " enemies"
         ]
       }
     ],
@@ -3707,7 +4236,12 @@
         "type": "deployed_as",
         "position": "fisherman",
         "text": [
-          "deployed as Fisherman"
+          "Deployed as ",
+          {
+            "type": "position",
+            "ref": "fisherman",
+            "text": "Fisherman"
+          }
         ]
       }
     ],
@@ -3720,7 +4254,13 @@
           "cardName": "Ha Jinsung"
         },
         "text": [
-          "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+          "If you started the game with Ha Jinsung in your ",
+          {
+            "type": "rule",
+            "ref": "deck",
+            "text": "Deck"
+          },
+          ", I cost 2 less"
         ]
       },
       {
@@ -3730,7 +4270,18 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Barrier"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "barrier",
+            "text": "Barrier"
+          }
         ]
       }
     ],
@@ -3788,7 +4339,12 @@
         "type": "light_up",
         "amount": 1,
         "text": [
-          "Light Up 1"
+          {
+            "type": "keyword",
+            "ref": "light-up",
+            "text": "Light Up"
+          },
+          " 1"
         ]
       }
     ],
@@ -3799,7 +4355,12 @@
           "type": "equip",
           "cardName": "Ice Spear",
           "text": [
-            "i am equipped with Ice Spear"
+            "I am equipped with ",
+            {
+              "type": "card",
+              "ref": "ice_spear",
+              "text": "Ice Spear"
+            }
           ]
         }
       ],
@@ -3862,7 +4423,18 @@
         "amount": 1,
         "position": "light-bearer",
         "text": [
-          "light bearer: Light Up 1"
+          {
+            "type": "position",
+            "ref": "light-bearer",
+            "text": "Light Bearer"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "light-up",
+            "text": "Light Up"
+          },
+          " 1"
         ]
       },
       {
@@ -3873,7 +4445,12 @@
         },
         "position": "spear-bearer",
         "text": [
-          "spear bearer: deal 2 to an enemy"
+          {
+            "type": "position",
+            "ref": "spear-bearer",
+            "text": "Spear Bearer"
+          },
+          ": Deal 2 to an enemy"
         ]
       }
     ],
@@ -3885,7 +4462,12 @@
           "side": "self"
         },
         "text": [
-          "i ignore Taunt"
+          "I ignore ",
+          {
+            "type": "trait",
+            "ref": "taunt",
+            "text": "Taunt"
+          }
         ]
       }
     ],
@@ -3935,7 +4517,7 @@
           "scope": "frontline"
         },
         "text": [
-          "deal 3 to a frontline enemy"
+          "Deal 3 to a frontline enemy"
         ]
       },
       {
@@ -3959,7 +4541,13 @@
           }
         ],
         "text": [
-          "heal enemy Conduit 2 HP and activate it"
+          "Heal enemy ",
+          {
+            "type": "card",
+            "ref": "conduit",
+            "text": "Conduit"
+          },
+          " 2 HP and activate it"
         ]
       }
     ],
@@ -3970,7 +4558,13 @@
           "type": "given",
           "item": "Redan",
           "text": [
-            "Redan is played on me"
+            "When ",
+            {
+              "type": "card",
+              "ref": "redan",
+              "text": "Redan"
+            },
+            " is played on me"
           ]
         }
       ],
@@ -4070,7 +4664,13 @@
           }
         ],
         "text": [
-          "deal 3 to a frontline enemy, heal enemy Conduit 2 HP and activate it"
+          "Deal 3 to a frontline enemy, heal enemy ",
+          {
+            "type": "card",
+            "ref": "conduit",
+            "text": "Conduit"
+          },
+          " 2 HP and activate it"
         ]
       }
     ],
@@ -4093,7 +4693,23 @@
           }
         ],
         "text": [
-          "round end: create Redan in your hand and revert me to Khun Ran"
+          {
+            "type": "trigger",
+            "ref": "round-end",
+            "text": "Round End"
+          },
+          ": Create ",
+          {
+            "type": "card",
+            "ref": "redan",
+            "text": "Redan"
+          },
+          " in your hand and revert me to ",
+          {
+            "type": "card",
+            "ref": "khun_ran",
+            "text": "Khun Ran"
+          }
         ]
       }
     ],
@@ -4148,7 +4764,19 @@
           "amount": 7
         },
         "text": [
-          "when my bearer deals 7+ damage to a single target, Disarm it"
+          "When my ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " deals 7+ damage to a single target, ",
+          {
+            "type": "keyword",
+            "ref": "disarm",
+            "text": "Disarm"
+          },
+          " it"
         ]
       }
     ],
@@ -4158,7 +4786,13 @@
           "type": "deal_damage",
           "amount": 10,
           "text": [
-            "the bearer deals 10+ damage to a single target"
+            "The ",
+            {
+              "type": "rule",
+              "ref": "bearer",
+              "text": "Bearer"
+            },
+            " deals 10+ damage to a single target"
           ]
         }
       ],
@@ -4219,7 +4853,25 @@
           "amount": 7
         },
         "text": [
-          "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"
+          "When my ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " deals 7+ damage to a single target, ",
+          {
+            "type": "keyword",
+            "ref": "disarm",
+            "text": "Disarm"
+          },
+          " it and ",
+          {
+            "type": "keyword",
+            "ref": "silence",
+            "text": "Silence"
+          },
+          " it"
         ]
       }
     ],
@@ -4265,7 +4917,18 @@
           "owner": "you"
         },
         "text": [
-          "Disarm an enemy and send the equipment to your discard pile"
+          {
+            "type": "keyword",
+            "ref": "disarm",
+            "text": "Disarm"
+          },
+          " an enemy and send the equipment to your ",
+          {
+            "type": "keyword",
+            "ref": "discard",
+            "text": "Discard"
+          },
+          " pile"
         ]
       },
       {
@@ -4276,7 +4939,13 @@
           "side": "enemy"
         },
         "text": [
-          "give an enemy Heavy 1"
+          "Give an enemy ",
+          {
+            "type": "condition",
+            "ref": "heavy",
+            "text": "Heavy"
+          },
+          " 1"
         ]
       }
     ],
@@ -4292,7 +4961,19 @@
           "cardType": "equipment"
         },
         "text": [
-          "when you reclaim an equipment, Compress 1 from it"
+          "When you ",
+          {
+            "type": "keyword",
+            "ref": "reclaim",
+            "text": "Reclaim"
+          },
+          " an equipment, ",
+          {
+            "type": "keyword",
+            "ref": "compress",
+            "text": "Compress"
+          },
+          " 1 from it"
         ]
       }
     ],
@@ -4315,7 +4996,13 @@
           "side": "any"
         },
         "text": [
-          "give Burned 1 to a unit"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 1 to a unit"
         ]
       }
     ],
@@ -4379,7 +5066,12 @@
         "from": "game",
         "onto": "self",
         "text": [
-          "summon a random 2 cost Shinheuh"
+          {
+            "type": "trigger",
+            "ref": "summon",
+            "text": "Summon"
+          },
+          " a random 2 cost Shinheuh"
         ]
       },
       {
@@ -4389,7 +5081,12 @@
           "cost": "cheapest"
         },
         "text": [
-          "steal the enemy's cheapest Shinheuh"
+          {
+            "type": "keyword",
+            "ref": "steal",
+            "text": "Steal"
+          },
+          " the enemy's cheapest Shinheuh"
         ]
       }
     ],
@@ -4411,7 +5108,18 @@
           }
         },
         "text": [
-          "wave controller: your frontline Shinheuh's abilities give Poisoned 1"
+          {
+            "type": "position",
+            "ref": "wave-controller",
+            "text": "Wave Controller"
+          },
+          ": Your frontline Shinheuh's abilities give ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " 1"
         ]
       },
       {
@@ -4431,7 +5139,17 @@
           }
         },
         "text": [
-          "scout: your backline Shinheuh's abilities give Ghost"
+          {
+            "type": "position",
+            "ref": "scout",
+            "text": "Scout"
+          },
+          ": Your backline Shinheuh's abilities give ",
+          {
+            "type": "condition",
+            "ref": "ghost",
+            "text": "Ghost"
+          }
         ]
       }
     ],
@@ -4474,7 +5192,7 @@
           "exclude_self": true
         },
         "text": [
-          "give me a random affiliation of another ally"
+          "Give me a random affiliation of another ally"
         ]
       },
       {
@@ -4485,7 +5203,13 @@
           "side": "enemy"
         },
         "text": [
-          "give Poisoned 4 to an enemy"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " 4 to an enemy"
         ]
       }
     ],
@@ -4501,7 +5225,12 @@
           "type": "deploy"
         },
         "text": [
-          "when i am deployed: kill an ally backliner"
+          {
+            "type": "trigger",
+            "ref": "deploy",
+            "text": "Deploy"
+          },
+          ": Kill an ally backliner"
         ]
       },
       {
@@ -4516,7 +5245,12 @@
           "type": "round_start"
         },
         "text": [
-          "round start: heal all ally members of my affiliations 1 HP"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round Start"
+          },
+          ": Heal all ally members of my affiliations 1 HP"
         ]
       }
     ],
@@ -4547,7 +5281,18 @@
         "quick": true,
         "position": "scout",
         "text": [
-          "scout: quick: reveal a random card in the opponent's hand"
+          {
+            "type": "position",
+            "ref": "scout",
+            "text": "Scout"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Reveal a random card in the opponent's hand"
         ]
       },
       {
@@ -4558,7 +5303,12 @@
         },
         "position": "fisherman",
         "text": [
-          "fisherman: deal 1 to an enemy"
+          {
+            "type": "position",
+            "ref": "fisherman",
+            "text": "Fisherman"
+          },
+          ": Deal 1 to an enemy"
         ]
       }
     ],
@@ -4578,14 +5328,19 @@
         "type": "prevent_evolve",
         "position": "chosen",
         "text": [
-          "all units in the chosen position cannot evolve"
+          "All units in the chosen position cannot ",
+          {
+            "type": "trigger",
+            "ref": "evolve",
+            "text": "Evolve"
+          }
         ]
       },
       {
         "type": "prevent_equip",
         "position": "chosen",
         "text": [
-          "all units in the chosen position cannot be equipped"
+          "All units in the chosen position cannot be equipped"
         ]
       },
       {
@@ -4593,7 +5348,12 @@
         "condition": "rooted",
         "position": "chosen",
         "text": [
-          "all units in the chosen position have Rooted"
+          "All units in the chosen position have ",
+          {
+            "type": "condition",
+            "ref": "rooted",
+            "text": "Rooted"
+          }
         ]
       }
     ],
@@ -4608,7 +5368,12 @@
           "type": "deploy"
         },
         "text": [
-          "deploy: choose a position"
+          {
+            "type": "trigger",
+            "ref": "deploy",
+            "text": "Deploy"
+          },
+          ": Choose a position"
         ]
       }
     ],
@@ -4630,7 +5395,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's damage-dealing abilities deal +3 damage"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s damage-dealing abilities deal +3 damage"
         ]
       }
     ],
@@ -4640,7 +5411,19 @@
           "type": "slay",
           "target": "unit",
           "text": [
-            "the bearer Slays a unit"
+            "The ",
+            {
+              "type": "rule",
+              "ref": "bearer",
+              "text": "Bearer"
+            },
+            " ",
+            {
+              "type": "keyword",
+              "ref": "slay",
+              "text": "Slays"
+            },
+            " a unit"
           ]
         }
       ],
@@ -4682,7 +5465,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's damage-dealing abilities deal +3 damage"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s damage-dealing abilities deal +3 damage"
         ]
       },
       {
@@ -4696,7 +5485,19 @@
           "type": "deal_damage"
         },
         "text": [
-          "the bearer's damage-dealing abilities give Exhausted 1"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s damage-dealing abilities give ",
+          {
+            "type": "condition",
+            "ref": "exhausted",
+            "text": "Exhausted"
+          },
+          " 1"
         ]
       }
     ],
@@ -4745,7 +5546,12 @@
         },
         "position": "spear-bearer",
         "text": [
-          "spear bearer: deal 7 to an enemy"
+          {
+            "type": "position",
+            "ref": "spear-bearer",
+            "text": "Spear Bearer"
+          },
+          ": Deal 7 to an enemy"
         ]
       },
       {
@@ -4767,7 +5573,13 @@
           }
         ],
         "text": [
-          "give Stunned and deal 2 to an enemy"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "stunned",
+            "text": "Stunned"
+          },
+          " and deal 2 to an enemy"
         ]
       }
     ],
@@ -4785,7 +5597,13 @@
           "type": "deal_damage"
         },
         "text": [
-          "when i deal damage to an enemy: Disarm them"
+          "When I deal damage to an enemy: ",
+          {
+            "type": "keyword",
+            "ref": "disarm",
+            "text": "Disarm"
+          },
+          " them"
         ]
       },
       {
@@ -4798,7 +5616,18 @@
           "type": "deploy"
         },
         "text": [
-          "when i am deployed: give Barrier to an ally"
+          {
+            "type": "trigger",
+            "ref": "deploy",
+            "text": "Deploy"
+          },
+          ": Give ",
+          {
+            "type": "trait",
+            "ref": "barrier",
+            "text": "Barrier"
+          },
+          " to an ally"
         ]
       }
     ],
@@ -4832,7 +5661,13 @@
           "scope": "backline"
         },
         "text": [
-          "give Poisoned 1 to a backline enemy"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " 1 to a backline enemy"
         ]
       }
     ],
@@ -4850,7 +5685,25 @@
           "cardName": "Purple Dementor"
         },
         "text": [
-          "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
+          "If I have ",
+          {
+            "type": "card",
+            "ref": "purple_dementor",
+            "text": "Purple Dementor"
+          },
+          " equipped, I give ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " +2 to ",
+          {
+            "type": "rank",
+            "ref": "high ranker",
+            "text": "High Ranker"
+          },
+          " units"
         ]
       }
     ],
@@ -4904,7 +5757,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's abilities trigger twice"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s abilities trigger twice"
         ]
       }
     ],
@@ -4944,7 +5803,12 @@
         "type": "deployed_as",
         "position": "scout",
         "text": [
-          "deployed as Scout"
+          "Deployed as ",
+          {
+            "type": "position",
+            "ref": "scout",
+            "text": "Scout"
+          }
         ]
       }
     ],
@@ -4957,7 +5821,19 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Resilient 2"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "resilient",
+            "text": "Resilient"
+          },
+          " 2"
         ]
       },
       {
@@ -4973,11 +5849,28 @@
             "side": "enemy"
           },
           "text": [
-            "give Poisoned 4 to an enemy"
+            "Give ",
+            {
+              "type": "condition",
+              "ref": "poisoned",
+              "text": "Poisoned"
+            },
+            " 4 to an enemy"
           ]
         },
         "text": [
-          "ability: give Poisoned 4 to an enemy"
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          ": Give ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " 4 to an enemy"
         ]
       }
     ],
@@ -5041,7 +5934,18 @@
           }
         },
         "text": [
-          "spend 3: deal 2 to all Burned enemies"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 3: Deal 2 to all ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " enemies"
         ]
       }
     ],
@@ -5058,7 +5962,18 @@
           "cardName": "Baang"
         },
         "text": [
-          "Baang gives Burned 1"
+          {
+            "type": "card",
+            "ref": "baang",
+            "text": "Baang"
+          },
+          " gives ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 1"
         ]
       }
     ],
@@ -5153,7 +6068,13 @@
           }
         ],
         "text": [
-          "kill an ally to Light Up 3 and give me a random numeric trait"
+          "Kill an ally to ",
+          {
+            "type": "keyword",
+            "ref": "light-up",
+            "text": "Light Up"
+          },
+          " 3 and give me a random numeric trait"
         ]
       },
       {
@@ -5168,7 +6089,24 @@
           "onto": "self"
         },
         "text": [
-          "spend 3: summon Akryung from your deck or hand"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 3: ",
+          {
+            "type": "trigger",
+            "ref": "summon",
+            "text": "Summon"
+          },
+          " ",
+          {
+            "type": "card",
+            "ref": "akryung",
+            "text": "Akryung"
+          },
+          " from your deck or hand"
         ]
       }
     ],
@@ -5214,7 +6152,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 4 to an enemy"
+          "Deal 4 to an enemy"
         ]
       }
     ],
@@ -5230,7 +6168,18 @@
           "type": "evolve"
         },
         "text": [
-          "when i evolve: gain Bloodthirsty 1"
+          {
+            "type": "trigger",
+            "ref": "evolve",
+            "text": "Evolve"
+          },
+          ": Gain ",
+          {
+            "type": "trait",
+            "ref": "bloodthirsty",
+            "text": "Bloodthirsty"
+          },
+          " 1"
         ]
       }
     ],
@@ -5240,7 +6189,7 @@
           "type": "skills_played",
           "count": 7,
           "text": [
-            "when you have played 7 skills this game"
+            "When you have played 7 skills this game"
           ]
         }
       ],
@@ -5315,7 +6264,12 @@
           }
         ],
         "text": [
-          "deal 7 to an enemy and give them Frozen"
+          "Deal 7 to an enemy and give them ",
+          {
+            "type": "condition",
+            "ref": "frozen",
+            "text": "Frozen"
+          }
         ]
       }
     ],
@@ -5331,7 +6285,18 @@
           "type": "evolve"
         },
         "text": [
-          "when i evolve: gain Bloodthirsty 1"
+          {
+            "type": "trigger",
+            "ref": "evolve",
+            "text": "Evolve"
+          },
+          ": Gain ",
+          {
+            "type": "trait",
+            "ref": "bloodthirsty",
+            "text": "Bloodthirsty"
+          },
+          " 1"
         ]
       }
     ],
@@ -5341,7 +6306,7 @@
           "type": "skills_played",
           "count": 12,
           "text": [
-            "when you have played 12 skills this game"
+            "When you have played 12 skills this game"
           ]
         }
       ],
@@ -5418,7 +6383,17 @@
         ],
         "quick": true,
         "text": [
-          "quick: deal 9 to an enemy and give them Frozen"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": Deal 9 to an enemy and give them ",
+          {
+            "type": "condition",
+            "ref": "frozen",
+            "text": "Frozen"
+          }
         ]
       }
     ],
@@ -5456,11 +6431,16 @@
             "side": "enemy"
           },
           "text": [
-            "deal 5 to an enemy"
+            "Deal 5 to an enemy"
           ]
         },
         "text": [
-          "ability: deal 5 to an enemy"
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          ": Deal 5 to an enemy"
         ]
       }
     ],
@@ -5478,7 +6458,7 @@
         "type": "target_side",
         "side": "ally",
         "text": [
-          "target is an ally"
+          "Target is an ally"
         ]
       }
     ],
@@ -5491,19 +6471,25 @@
           "side": "ally"
         },
         "text": [
-          "give Poisoned 1"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "poisoned",
+            "text": "Poisoned"
+          },
+          " 1"
         ]
       }
     ],
     "slug": "redan",
     "relatedCards": [
       {
-        "cardId": 52,
+        "cardId": 51,
         "kind": "mentioned-by"
       },
       {
-        "cardId": 51,
-        "kind": "evolution"
+        "cardId": 52,
+        "kind": "mentioned-by"
       },
       {
         "cardId": 15,
@@ -5575,7 +6561,31 @@
           ]
         },
         "text": [
-          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+          "When the ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " is equipped with all 4 unique ",
+          {
+            "type": "series",
+            "ref": "thorn-fragment",
+            "text": "Thorn Fragment"
+          },
+          " equipments, ",
+          {
+            "type": "keyword",
+            "ref": "discard",
+            "text": "Discard"
+          },
+          " those 4 equipments and create ",
+          {
+            "type": "card",
+            "ref": "enryus_thorn",
+            "text": "Enryu's Thorn"
+          },
+          " in your hand"
         ]
       },
       {
@@ -5586,7 +6596,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer's healing abilities heal +1 HP"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          "'s healing abilities heal +1 HP"
         ]
       }
     ],
@@ -5658,7 +6674,12 @@
         "type": "has_ally",
         "attribute": "irregular",
         "text": [
-          "have an ally Irregular"
+          "Have an ally ",
+          {
+            "type": "attribute",
+            "ref": "irregular",
+            "text": "Irregular"
+          }
         ]
       }
     ],
@@ -5670,7 +6691,12 @@
           "side": "enemy"
         },
         "text": [
-          "give an enemy Doomed"
+          "Give an enemy ",
+          {
+            "type": "condition",
+            "ref": "doomed",
+            "text": "Doomed"
+          }
         ]
       }
     ],
@@ -5703,7 +6729,13 @@
           "side": "any"
         },
         "text": [
-          "give Weak 1 to a unit"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "weak",
+            "text": "Weak"
+          },
+          " 1 to a unit"
         ]
       }
     ],
@@ -5746,7 +6778,12 @@
         "type": "deployed_as",
         "position": "wave-controller",
         "text": [
-          "deployed as Wave Controller"
+          "Deployed as ",
+          {
+            "type": "position",
+            "ref": "wave-controller",
+            "text": "Wave Controller"
+          }
         ]
       }
     ],
@@ -5758,7 +6795,18 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Immune"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "immune",
+            "text": "Immune"
+          }
         ]
       },
       {
@@ -5769,7 +6817,19 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has Pierce 1"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "pierce",
+            "text": "Pierce"
+          },
+          " 1"
         ]
       }
     ],
@@ -5838,7 +6898,18 @@
           }
         },
         "text": [
-          "Free: Spend 1: deal 1 to an enemy"
+          {
+            "type": "keyword",
+            "ref": "free",
+            "text": "Free"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 1: Deal 1 to an enemy"
         ]
       }
     ],
@@ -5854,7 +6925,12 @@
           "position": "spear-bearer"
         },
         "text": [
-          "Spear bearers deal +4 damage to me"
+          {
+            "type": "position",
+            "ref": "spear-bearer",
+            "text": "Spear Bearers"
+          },
+          " deal +4 damage to me"
         ]
       }
     ],
@@ -5883,7 +6959,23 @@
           ]
         },
         "text": [
-          "Slay an enemy Regular or Ranker"
+          {
+            "type": "keyword",
+            "ref": "slay",
+            "text": "Slay"
+          },
+          " an enemy ",
+          {
+            "type": "rank",
+            "ref": "regular",
+            "text": "Regular"
+          },
+          " or ",
+          {
+            "type": "rank",
+            "ref": "ranker",
+            "text": "Ranker"
+          }
         ]
       }
     ],
@@ -5971,7 +7063,13 @@
           }
         },
         "text": [
-          "if i have an allied Shinheuh, give Exhausted 2 to an enemy"
+          "If I have an allied Shinheuh, give ",
+          {
+            "type": "condition",
+            "ref": "exhausted",
+            "text": "Exhausted"
+          },
+          " 2 to an enemy"
         ]
       }
     ],
@@ -5984,7 +7082,19 @@
           "source": "shinheuh"
         },
         "text": [
-          "when you summon a Shinheuh, Charge 1"
+          "When you ",
+          {
+            "type": "trigger",
+            "ref": "summon",
+            "text": "Summon"
+          },
+          " a Shinheuh, ",
+          {
+            "type": "keyword",
+            "ref": "charge",
+            "text": "Charge"
+          },
+          " 1"
         ]
       }
     ],
@@ -6011,7 +7121,25 @@
           "type": "free_ability_played"
         },
         "text": [
-          "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
+          "When an ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          " with ",
+          {
+            "type": "keyword",
+            "ref": "free",
+            "text": "Free"
+          },
+          " is played, the unit ",
+          {
+            "type": "keyword",
+            "ref": "extinguish",
+            "text": "Extinguishes"
+          },
+          " 5 of their own lighthouses"
         ]
       },
       {
@@ -6025,7 +7153,24 @@
           "type": "dies"
         },
         "text": [
-          "when i die, summon Stone Doll on both players' fields"
+          {
+            "type": "trigger",
+            "ref": "death",
+            "text": "Death"
+          },
+          ": ",
+          {
+            "type": "trigger",
+            "ref": "summon",
+            "text": "Summon"
+          },
+          " ",
+          {
+            "type": "card",
+            "ref": "stone_doll",
+            "text": "Stone Doll"
+          },
+          " on both players' fields"
         ]
       }
     ],
@@ -6056,7 +7201,12 @@
         "type": "extinguish",
         "amount": 1,
         "text": [
-          "Extinguish 1"
+          {
+            "type": "keyword",
+            "ref": "extinguish",
+            "text": "Extinguish"
+          },
+          " 1"
         ]
       },
       {
@@ -6066,7 +7216,7 @@
           "side": "ally"
         },
         "text": [
-          "heal an ally 1 HP"
+          "Heal an ally 1 HP"
         ]
       },
       {
@@ -6076,14 +7226,24 @@
           "cost": "most expensive"
         },
         "text": [
-          "Compress 1 from the most expensive card in your hand"
+          {
+            "type": "keyword",
+            "ref": "compress",
+            "text": "Compress"
+          },
+          " 1 from the most expensive card in your hand"
         ]
       },
       {
         "type": "reclaim_cards",
         "amount": 1,
         "text": [
-          "Reclaim 1"
+          {
+            "type": "keyword",
+            "ref": "reclaim",
+            "text": "Reclaim"
+          },
+          " 1"
         ]
       },
       {
@@ -6092,7 +7252,12 @@
           "side": "enemy"
         },
         "text": [
-          "Silence an enemy"
+          {
+            "type": "keyword",
+            "ref": "silence",
+            "text": "Silence"
+          },
+          " an enemy"
         ]
       }
     ],
@@ -6150,7 +7315,31 @@
           ]
         },
         "text": [
-          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+          "When the ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " is equipped with all 4 unique ",
+          {
+            "type": "series",
+            "ref": "thorn-fragment",
+            "text": "Thorn Fragment"
+          },
+          " equipments, ",
+          {
+            "type": "keyword",
+            "ref": "discard",
+            "text": "Discard"
+          },
+          " those 4 equipments and create ",
+          {
+            "type": "card",
+            "ref": "enryus_thorn",
+            "text": "Enryu's Thorn"
+          },
+          " in your hand"
         ]
       },
       {
@@ -6161,7 +7350,13 @@
           "side": "bearer"
         },
         "text": [
-          "the bearer has +1 HP"
+          "The ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has +1 HP"
         ]
       }
     ],
@@ -6226,7 +7421,13 @@
           "side": "any"
         },
         "text": [
-          "give Exhausted 1 to a unit"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "exhausted",
+            "text": "Exhausted"
+          },
+          " 1 to a unit"
         ]
       }
     ],
@@ -6289,7 +7490,13 @@
           "choose": true
         },
         "text": [
-          "create a Thorn Fragment of your choice in hand"
+          "Create a ",
+          {
+            "type": "series",
+            "ref": "thorn-fragment",
+            "text": "Thorn Fragment"
+          },
+          " of your choice in hand"
         ]
       }
     ],
@@ -6300,7 +7507,12 @@
           "type": "equip",
           "cardName": "Enryu's Thorn",
           "text": [
-            "i am equipped with Enryu's Thorn"
+            "I am equipped with ",
+            {
+              "type": "card",
+              "ref": "enryus_thorn",
+              "text": "Enryu's Thorn"
+            }
           ]
         }
       ],
@@ -6400,7 +7612,24 @@
           "cardName": "Baang"
         },
         "text": [
-          "quick: spend 2: the next time you play Baang this turn, play it 4 more times"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 2: The next time you play ",
+          {
+            "type": "card",
+            "ref": "baang",
+            "text": "Baang"
+          },
+          " this turn, play it 4 more times"
         ]
       }
     ],
@@ -6487,7 +7716,7 @@
           "side": "enemy"
         },
         "text": [
-          "deal 4 to an enemy"
+          "Deal 4 to an enemy"
         ]
       },
       {
@@ -6501,7 +7730,12 @@
           }
         },
         "text": [
-          "spend 1: deal 6 to an enemy"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 1: Deal 6 to an enemy"
         ]
       }
     ],
@@ -6534,7 +7768,19 @@
           ]
         },
         "text": [
-          "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
+          "While I am alone on the ally frontline, I have ",
+          {
+            "type": "trait",
+            "ref": "resilient",
+            "text": "Resilient"
+          },
+          " 1 and ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 3"
         ]
       }
     ],
@@ -6554,7 +7800,7 @@
         "type": "condition_stack_cap",
         "cap": 2,
         "text": [
-          "conditions do not stack past 2"
+          "Conditions do not stack past 2"
         ]
       }
     ],
@@ -6580,7 +7826,13 @@
           "side": "enemy"
         },
         "text": [
-          "give Heavy 1 to an enemy"
+          "Give ",
+          {
+            "type": "condition",
+            "ref": "heavy",
+            "text": "Heavy"
+          },
+          " 1 to an enemy"
         ]
       }
     ],
@@ -6618,7 +7870,25 @@
           }
         ],
         "text": [
-          "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
+          "When a unit uses an ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          " that has ",
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ", they ",
+          {
+            "type": "keyword",
+            "ref": "charge",
+            "text": "Charge"
+          },
+          " 1 and I lose 1 HP"
         ]
       }
     ],
@@ -6635,7 +7905,12 @@
         "type": "unit_on_board",
         "name": "Yeon Woon",
         "text": [
-          "Yeon Woon is in your board"
+          {
+            "type": "card",
+            "ref": "yeon_woon",
+            "text": "Yeon Woon"
+          },
+          " is in your board"
         ]
       }
     ],
@@ -6648,7 +7923,19 @@
           "side": "bearer"
         },
         "text": [
-          "my bearer has Strong 3"
+          "My ",
+          {
+            "type": "rule",
+            "ref": "bearer",
+            "text": "Bearer"
+          },
+          " has ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 3"
         ]
       }
     ],
@@ -6691,7 +7978,13 @@
           "affiliation": "team-sweet-and-sour"
         },
         "text": [
-          "heal a team sweet and sour member 1 HP"
+          "Heal an allied ",
+          {
+            "type": "affiliation",
+            "ref": "team-sweet-and-sour",
+            "text": "Team Sweet and Sour"
+          },
+          " member 1 HP"
         ]
       }
     ],
@@ -6705,7 +7998,13 @@
           "affiliation": "team-sweet-and-sour"
         },
         "text": [
-          "team sweet and sour members cost one less"
+          "Allied ",
+          {
+            "type": "affiliation",
+            "ref": "team-sweet-and-sour",
+            "text": "Team Sweet and Sour"
+          },
+          " members cost 1 less"
         ]
       }
     ],
@@ -6752,7 +8051,23 @@
           ]
         },
         "text": [
-          "spend 3: give me taunt and barrier"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 3: Give me ",
+          {
+            "type": "trait",
+            "ref": "taunt",
+            "text": "Taunt"
+          },
+          " and ",
+          {
+            "type": "trait",
+            "ref": "barrier",
+            "text": "Barrier"
+          }
         ]
       }
     ],
@@ -6766,7 +8081,18 @@
           "type": "round_end"
         },
         "text": [
-          "round end: Silence me"
+          {
+            "type": "trigger",
+            "ref": "round-end",
+            "text": "Round End"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "silence",
+            "text": "Silence"
+          },
+          " me"
         ]
       }
     ],
@@ -6809,7 +8135,18 @@
           }
         },
         "text": [
-          "spend 2: give barrier to 2 allies"
+          {
+            "type": "keyword",
+            "ref": "spend",
+            "text": "Spend"
+          },
+          " 2: Give ",
+          {
+            "type": "trait",
+            "ref": "barrier",
+            "text": "Barrier"
+          },
+          " to 2 allies"
         ]
       },
       {
@@ -6819,7 +8156,7 @@
           "side": "ally"
         },
         "text": [
-          "heal an ally 2 HP"
+          "Heal an ally 2 HP"
         ]
       }
     ],
@@ -6832,7 +8169,18 @@
           "affiliation": "yeon-family"
         },
         "text": [
-          "ally yeon family members have resilient"
+          "Allied ",
+          {
+            "type": "affiliation",
+            "ref": "yeon-family",
+            "text": "Yeon Family"
+          },
+          " members have ",
+          {
+            "type": "trait",
+            "ref": "resilient",
+            "text": "Resilient"
+          }
         ]
       }
     ],
@@ -6876,7 +8224,18 @@
           "condition": "burned"
         },
         "text": [
-          "give 2 Burned enemies Exhausted"
+          "Give 2 ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " enemies ",
+          {
+            "type": "condition",
+            "ref": "exhausted",
+            "text": "Exhausted"
+          }
         ]
       }
     ],
@@ -6890,7 +8249,13 @@
           "conditionValue": 3
         },
         "text": [
-          "units with Burned 3+ can't target me"
+          "Units with ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 3+ can't target me"
         ]
       }
     ],
@@ -6929,7 +8294,18 @@
           "name": "Submerged Fish"
         },
         "text": [
-          "Compress 1 from Submerged Fish in your hand"
+          {
+            "type": "keyword",
+            "ref": "compress",
+            "text": "Compress"
+          },
+          " 1 from ",
+          {
+            "type": "card",
+            "ref": "submerged_fish",
+            "text": "Submerged Fish"
+          },
+          " in your hand"
         ]
       },
       {
@@ -6939,7 +8315,18 @@
           "name": "Baang"
         },
         "text": [
-          "quick: create Baang in your hand"
+          {
+            "type": "keyword",
+            "ref": "quick",
+            "text": "Quick"
+          },
+          ": create ",
+          {
+            "type": "card",
+            "ref": "baang",
+            "text": "Baang"
+          },
+          " in your hand"
         ]
       }
     ],
@@ -6968,7 +8355,23 @@
           }
         ],
         "text": [
-          "Baang gives Weak 2 and Cursed"
+          {
+            "type": "card",
+            "ref": "baang",
+            "text": "Baang"
+          },
+          " gives ",
+          {
+            "type": "condition",
+            "ref": "weak",
+            "text": "Weak"
+          },
+          " 2 and ",
+          {
+            "type": "condition",
+            "ref": "cursed",
+            "text": "Cursed"
+          }
         ]
       }
     ],
@@ -7048,7 +8451,19 @@
           "name": "Bull"
         },
         "text": [
-          "give ally Bull Strong 2"
+          "Give ally ",
+          {
+            "type": "card",
+            "ref": "bull",
+            "text": "Bull"
+          },
+          " ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 2"
         ]
       }
     ],
@@ -7064,7 +8479,24 @@
           "type": "deploy"
         },
         "text": [
-          "when I am deployed, summon Bull from your deck or hand"
+          {
+            "type": "trigger",
+            "ref": "deploy",
+            "text": "Deploy"
+          },
+          ": ",
+          {
+            "type": "trigger",
+            "ref": "summon",
+            "text": "Summon"
+          },
+          " ",
+          {
+            "type": "card",
+            "ref": "bull",
+            "text": "Bull"
+          },
+          " from your deck or hand"
         ]
       }
     ],
@@ -7096,7 +8528,25 @@
           ]
         },
         "text": [
-          "give ally wolhaiksong and team sweet and sour members strong 2"
+          "Give ally ",
+          {
+            "type": "affiliation",
+            "ref": "wolhaiksong",
+            "text": "Wolhaiksong"
+          },
+          " and ",
+          {
+            "type": "affiliation",
+            "ref": "team-sweet-and-sour",
+            "text": "Team Sweet and Sour"
+          },
+          " members ",
+          {
+            "type": "trait",
+            "ref": "strong",
+            "text": "Strong"
+          },
+          " 2"
         ]
       }
     ],

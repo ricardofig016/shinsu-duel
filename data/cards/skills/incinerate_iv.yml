@@ -9,7 +9,7 @@ deckConstraints:
   - type: generated_by
     resource: fire_charge
     amount: 7
-    raw: "create me by spending 7 Fire Charges"
+    raw: "Create me by spending 7 [[rule:Fire Charge|Fire Charges]]"
 effects:
   - type: sequence
     steps:
@@ -20,4 +20,4 @@ effects:
         condition: burned
         amount: 2
         target: { side: enemy, scope: all }
-    raw: "deal 3 to all enemies and give them Burn 2"
+    raw: "Deal 3 to all enemies and give them [[condition:Burned]] 2"

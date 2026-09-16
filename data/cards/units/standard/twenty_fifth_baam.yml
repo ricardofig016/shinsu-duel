@@ -12,11 +12,11 @@ abilities:
       type: equipment
       series: thorn-fragment
       choose: true
-    raw: "create a Thorn Fragment of your choice in hand"
+    raw: "Create a [[series:Thorn Fragment]] of your choice in hand"
 evolve:
   - type: equip
     cardName: "Enryu's Thorn"
-    raw: "i am equipped with Enryu's Thorn"
+    raw: "I am equipped with [[card:Enryu's Thorn]]"
 traits:
 attributes:
   - living ignition weapon

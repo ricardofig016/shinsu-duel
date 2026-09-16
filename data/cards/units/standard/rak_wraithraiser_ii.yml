@@ -14,7 +14,7 @@ passives:
     amount: 1
     target: { side: self }
     trigger: { type: evolve }
-    raw: "when i evolve: gain Bloodthirsty 1"
+    raw: "[[trigger:Evolve]]: Gain [[trait:Bloodthirsty]] 1"
 abilities:
   - type: sequence
     targets: { side: enemy }
@@ -25,11 +25,11 @@ abilities:
       - type: give_condition
         condition: frozen
         target: { link: sequence }
-    raw: "deal 7 to an enemy and give them Frozen"
+    raw: "Deal 7 to an enemy and give them [[condition:Frozen]]"
 evolve:
   - type: skills_played
     count: 12
-    raw: "when you have played 12 skills this game"
+    raw: "When you have played 12 skills this game"
 traits:
   - taunt
 attributes:

@@ -11,17 +11,17 @@ passives:
     card:
       type: equipment
     trigger: { type: reclaim, cardType: equipment }
-    raw: "when you reclaim an equipment, Compress 1 from it"
+    raw: "When you [[keyword:Reclaim]] an equipment, [[keyword:Compress]] 1 from it"
 abilities:
   - type: disarm
     target: { side: enemy }
     to: { zone: discard, owner: you }
-    raw: "Disarm an enemy and send the equipment to your discard pile"
+    raw: "[[keyword:Disarm]] an enemy and send the equipment to your [[keyword:Discard]] pile"
   - type: give_condition
     condition: heavy
     amount: 1
     target: { side: enemy }
-    raw: "give an enemy Heavy 1"
+    raw: "Give an enemy [[condition:Heavy]] 1"
 evolve:
 traits:
   - reflect 2

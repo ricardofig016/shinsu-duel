@@ -14,7 +14,7 @@ passives:
     target: { side: self }
     source:
       position: spear bearer
-    raw: "Spear bearers deal +4 damage to me"
+    raw: "[[position:Spear Bearer|Spear Bearers]] deal +4 damage to me"
 abilities:
   - type: spend_shinsu
     amount: 1
@@ -23,7 +23,7 @@ abilities:
       type: deal_damage
       amount: 1
       target: { side: enemy }
-    raw: "Free: Spend 1: deal 1 to an enemy"
+    raw: "[[keyword:Free]]: [[keyword:Spend]] 1: Deal 1 to an enemy"
 evolve:
 traits:
   - taunt

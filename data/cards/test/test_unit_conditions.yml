@@ -15,79 +15,79 @@ passives:
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Blinded"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Blinded]]"
   - type: give_condition
     condition: burned
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Burned 2"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Burned]] 2"
   - type: give_condition
     condition: cursed
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Cursed 2"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Cursed]] 2"
   - type: give_condition
     condition: disabled
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Disabled"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Disabled]]"
   - type: give_condition
     condition: doomed
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Doomed"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Doomed]]"
   - type: give_condition
     condition: exhausted
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Exhausted 2"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Exhausted]] 2"
   - type: give_condition
     condition: frozen
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Frozen"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Frozen]]"
   - type: give_condition
     condition: ghost
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Ghost"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Ghost]]"
   - type: give_condition
     condition: heavy
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Heavy 2"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Heavy]] 2"
   - type: give_condition
     condition: poisoned
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Poisoned 2"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Poisoned]] 2"
   - type: give_condition
     condition: rooted
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Rooted"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Rooted]]"
   - type: give_condition
     condition: stunned
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Stunned"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Stunned]]"
   - type: give_condition
     condition: weak
     amount: 2
     target: { side: self }
     trigger: { type: round_start }
-    raw: "round start: give me Weak 2"
+    raw: "[[trigger:Round Start]]: Give me [[condition:Weak]] 2"
 abilities:
 evolve:
 traits:

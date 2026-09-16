@@ -9,7 +9,7 @@ passives:
   - type: slay
     target: { side: ally, scope: backline, exclude_self: true }
     trigger: { type: deploy }
-    raw: "when i am deployed: kill an ally backliner"
+    raw: "[[trigger:Deploy]]: Kill an ally backliner"
   - type: heal
     amount: 1
     target:
@@ -17,17 +17,17 @@ passives:
       scope: all
       shared_affiliation: true
     trigger: { type: round_start }
-    raw: "round start: heal all ally members of my affiliations 1 HP"
+    raw: "[[trigger:Round Start]]: Heal all ally members of my affiliations 1 HP"
 abilities:
   - type: grant_affiliation
     target: { side: self }
     source: { side: ally, random: true, exclude_self: true }
-    raw: "give me a random affiliation of another ally"
+    raw: "Give me a random affiliation of another ally"
   - type: give_condition
     condition: poisoned
     amount: 4
     target: { side: enemy }
-    raw: "give Poisoned 4 to an enemy"
+    raw: "Give [[condition:Poisoned]] 4 to an enemy"
 evolve:
 traits:
   - regenerate 3

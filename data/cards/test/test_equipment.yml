@@ -4,5 +4,5 @@ cost: 1
 requirements:
 effects:
   - type: noop
-    raw: "test"
+    raw: "Test"
 ignition:

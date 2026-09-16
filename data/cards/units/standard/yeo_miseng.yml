@@ -9,7 +9,7 @@ passives:
   - type: remove_traits
     target: { side: self }
     trigger: { type: round_end }
-    raw: "round end: Silence me"
+    raw: "[[trigger:Round End]]: [[keyword:Silence]] me"
 abilities:
   - type: spend_shinsu
     amount: 3
@@ -22,7 +22,7 @@ abilities:
         - type: grant_trait
           trait: barrier
           target: { side: self }
-    raw: "spend 3: give me taunt and barrier"
+    raw: "[[keyword:Spend]] 3: Give me [[trait:Taunt]] and [[trait:Barrier]]"
 evolve:
 traits:
 attributes:

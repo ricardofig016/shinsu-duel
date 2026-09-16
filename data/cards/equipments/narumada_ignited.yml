@@ -10,11 +10,11 @@ effects:
     stat: damage
     amount: 3
     target: { side: bearer }
-    raw: "the bearer's damage-dealing abilities deal +3 damage"
+    raw: "The [[rule:Bearer]]'s damage-dealing abilities deal +3 damage"
   - type: give_condition
     condition: exhausted
     amount: 1
     target: { side: enemy }
     trigger: { type: deal_damage }
-    raw: "the bearer's damage-dealing abilities give Exhausted 1" # synergy with Hong Chunhwa
+    raw: "The [[rule:Bearer]]'s damage-dealing abilities give [[condition:Exhausted]] 1" # synergy with Hong Chunhwa
 ignition:

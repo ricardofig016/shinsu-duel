@@ -9,7 +9,7 @@ deckConstraints:
   - type: generated_by
     resource: fire_charge
     amount: 5
-    raw: "create me by spending 5 Fire Charges"
+    raw: "Create me by spending 5 [[rule:Fire Charge|Fire Charges]]"
 effects:
   - type: sequence
     targets: { side: enemy, count: 3 }
@@ -20,4 +20,4 @@ effects:
       - type: give_condition
         condition: burned
         target: { link: sequence }
-    raw: "deal 2 to 3 enemies and give them Burn"
+    raw: "Deal 2 to 3 enemies and give them [[condition:Burned]]"

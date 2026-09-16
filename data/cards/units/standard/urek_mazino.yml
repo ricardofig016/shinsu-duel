@@ -21,19 +21,19 @@ passives:
           trait: strong
           amount: 3
           target: { side: self }
-    raw: "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
+    raw: "While I am alone on the ally frontline, I have [[trait:Resilient]] 1 and [[trait:Strong]] 3"
 abilities:
   - type: deal_damage
     amount: 4
     target: { side: enemy }
-    raw: "deal 4 to an enemy"
+    raw: "Deal 4 to an enemy"
   - type: spend_shinsu
     amount: 1
     effect:
       type: deal_damage
       amount: 6
       target: { side: enemy }
-    raw: "spend 1: deal 6 to an enemy"
+    raw: "[[keyword:Spend]] 1: Deal 6 to an enemy"
 evolve:
 traits:
   - barrier

@@ -13,12 +13,12 @@ passives:
     target:
       side: ally
       affiliation: "karaka's servants"
-    raw: "karaka's servants' abilities have Quick"
+    raw: "[[affiliation:Karaka's Servants]]' abilities have [[keyword:Quick]]"
 abilities:
   - type: deal_damage
     amount: 7
     target: { side: enemy }
-    raw: "deal 7 to an enemy"
+    raw: "Deal 7 to an enemy"
   - type: spend_shinsu
     amount: 1
     effect:
@@ -30,20 +30,20 @@ abilities:
         - type: deal_damage
           amount: 3
           target: { side: enemy, scope: all, condition: rooted }
-    raw: "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+    raw: "[[keyword:Spend]] 1: Give [[condition:Rooted]] to 2 enemies and deal 3 to all [[condition:Rooted]] enemies"
 evolve:
   - type: equip
     cardName: "Karaka's Armor Suit"
     position: fisherman
-    raw: "Fisherman: equip with Karaka's Armor Suit"
+    raw: "[[position:Fisherman]]: Equip with [[card:Karaka's Armor Suit]]"
   - type: equip
     cardName: Steel Tree
     position: wave controller
-    raw: "Wave Controller: equip with Steel Tree"
+    raw: "[[position:Wave Controller]]: Equip with [[card:Steel Tree]]"
   - type: equip
     cardName: Purple Dementor
     position: scout
-    raw: "Scout: equip with Purple Dementor"
+    raw: "[[position:Scout]]: Equip with [[card:Purple Dementor]]"
 traits:
   - reflect
 attributes:

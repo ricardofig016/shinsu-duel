@@ -12,12 +12,12 @@ abilities:
     owner: opponent
     quick: true
     position: scout
-    raw: "scout: quick: reveal a random card in the opponent's hand"
+    raw: "[[position:Scout]]: [[keyword:Quick]]: Reveal a random card in the opponent's hand"
   - type: deal_damage
     amount: 1
     target: { side: enemy }
     position: fisherman
-    raw: "fisherman: deal 1 to an enemy"
+    raw: "[[position:Fisherman]]: Deal 1 to an enemy"
 evolve:
 traits:
 attributes:

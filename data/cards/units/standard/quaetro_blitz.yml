@@ -11,7 +11,7 @@ passives:
     amount: 1
     target: { side: enemy }
     trigger: { type: skill_played, cardName: "Baang" }
-    raw: "Baang gives Burned 1"
+    raw: "[[card:Baang]] gives [[condition:Burned]] 1"
 abilities:
   - type: spend_shinsu
     amount: 3
@@ -22,7 +22,7 @@ abilities:
         side: enemy
         scope: all
         condition: burned
-    raw: "spend 3: deal 2 to all Burned enemies"
+    raw: "[[keyword:Spend]] 3: Deal 2 to all [[condition:Burned]] enemies"
 evolve:
 traits:
   - sharpshooter

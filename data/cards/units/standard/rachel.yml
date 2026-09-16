@@ -16,7 +16,7 @@ abilities:
       - type: grant_random_trait
         target: { side: self }
         numeric: true
-    raw: "kill an ally to Light Up 3 and give me a random numeric trait"
+    raw: "Kill an ally to [[keyword:Light Up]] 3 and give me a random numeric trait"
   - type: spend_shinsu
     amount: 3
     effect:
@@ -25,7 +25,7 @@ abilities:
         name: Akryung
       from: deck_or_hand
       onto: self
-    raw: "spend 3: summon Akryung from your deck or hand"
+    raw: "[[keyword:Spend]] 3: [[trigger:Summon]] [[card:Akryung]] from your deck or hand"
 evolve:
 traits:
 attributes:

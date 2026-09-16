@@ -16,17 +16,17 @@ passives:
     target:
       side: ally
       affiliation: "karaka's servants"
-    raw: "karaka's servants' abilities have Quick"
+    raw: "[[affiliation:Karaka's Servants]]' abilities have [[keyword:Quick]]"
   - type: deal_damage
     amount: 3
     target: { side: enemy, scope: all, condition: rooted }
     trigger: { type: round_end }
-    raw: "round end: deal 3 to all Rooted enemies"
+    raw: "[[trigger:Round End]]: Deal 3 to all [[condition:Rooted]] enemies"
 abilities:
   - type: deal_damage
     amount: 7
     target: { side: enemy }
-    raw: "deal 7 to an enemy"
+    raw: "Deal 7 to an enemy"
   - type: spend_shinsu
     amount: 1
     effect:
@@ -38,7 +38,7 @@ abilities:
         - type: deal_damage
           amount: 3
           target: { side: enemy, scope: all, condition: rooted }
-    raw: "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+    raw: "[[keyword:Spend]] 1: Give [[condition:Rooted]] to 2 enemies and deal 3 to all [[condition:Rooted]] enemies"
 evolve:
 traits:
   - reflect

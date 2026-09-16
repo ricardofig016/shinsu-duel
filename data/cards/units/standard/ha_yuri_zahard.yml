@@ -16,20 +16,20 @@ passives:
       type: grant_trait
       trait: taunt
       target: { side: self }
-    raw: "if i have an allied Guide, i have Taunt"
+    raw: "If I have an allied Guide, I have [[trait:Taunt]]"
 abilities:
   - type: deal_damage
     amount: 6
     target: { side: enemy }
-    raw: "deal 6 to an enemy"
+    raw: "Deal 6 to an enemy"
   - type: grant_trait
     trait: strong
     amount: 1
     target: { side: self }
-    raw: "give me Strong 1"
+    raw: "Give me [[trait:Strong]] 1"
 evolve:
   - type: equipment_ignited
-    raw: "when my equipment ignites"
+    raw: "When my equipment [[trigger:Ignite|Ignites]]"
 traits:
   - resilient 3
 attributes:

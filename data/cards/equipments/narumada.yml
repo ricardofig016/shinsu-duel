@@ -7,8 +7,8 @@ effects:
     stat: damage
     amount: 3
     target: { side: bearer }
-    raw: "the bearer's damage-dealing abilities deal +3 damage"
+    raw: "The [[rule:Bearer]]'s damage-dealing abilities deal +3 damage"
 ignition:
   - type: slay
     target: unit
-    raw: "the bearer Slays a unit"
+    raw: "The [[rule:Bearer]] [[keyword:Slay|Slays]] a unit"

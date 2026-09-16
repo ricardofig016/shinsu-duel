@@ -9,9 +9,9 @@ deckConstraints:
   - type: generated_by
     resource: fire_charge
     amount: 3
-    raw: "create me by spending 3 Fire Charges"
+    raw: "Create me by spending 3 [[rule:Fire Charge|Fire Charges]]"
 effects:
   - type: deal_damage
     amount: 2
     target: { side: enemy, count: 2 }
-    raw: "deal 2 to 2 enemies"
+    raw: "Deal 2 to 2 enemies"

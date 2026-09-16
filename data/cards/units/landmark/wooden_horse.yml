@@ -12,7 +12,7 @@ passives:
       - type: deal_damage
         amount: 1
         target: { side: self }
-    raw: "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
+    raw: "When a unit uses an [[rule:Ability]] that has [[keyword:Quick]], they [[keyword:Charge]] 1 and I lose 1 HP"
 abilities:
 evolve:
 traits:

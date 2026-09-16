@@ -13,7 +13,7 @@ passives:
     from: deck_or_hand
     onto: self
     trigger: { type: deploy }
-    raw: "when I am deployed, summon Bull from your deck or hand"
+    raw: "[[trigger:Deploy]]: [[trigger:Summon]] [[card:Bull]] from your deck or hand"
 abilities:
   - type: grant_trait
     trait: strong
@@ -21,7 +21,7 @@ abilities:
     target:
       side: ally
       name: Bull
-    raw: "give ally Bull Strong 2"
+    raw: "Give ally [[card:Bull]] [[trait:Strong]] 2"
 evolve:
 traits:
 attributes:

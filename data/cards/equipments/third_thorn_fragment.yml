@@ -25,10 +25,10 @@ effects:
         - type: create_card
           card:
             name: "Enryu's Thorn"
-    raw: "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+    raw: "When the [[rule:Bearer]] is equipped with all 4 unique [[series:Thorn Fragment]] equipments, [[keyword:Discard]] those 4 equipments and create [[card:Enryu's Thorn]] in your hand"
   - type: modify_stat
     stat: hp
     amount: 1
     target: { side: bearer }
-    raw: "the bearer has +1 HP"
+    raw: "The [[rule:Bearer]] has +1 HP"
 ignition:

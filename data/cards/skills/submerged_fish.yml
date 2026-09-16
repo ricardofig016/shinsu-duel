@@ -7,4 +7,4 @@ effects:
     target:
       side: enemy
       rank: [regular, ranker]
-    raw: "Slay an enemy Regular or Ranker"
+    raw: "[[keyword:Slay]] an enemy [[rank:Regular]] or [[rank:Ranker]]"

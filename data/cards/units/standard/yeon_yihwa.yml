@@ -12,7 +12,7 @@ passives:
       side: any
       condition: burned
       conditionValue: 3
-    raw: "units with Burned 3+ can't target me"
+    raw: "Units with [[condition:Burned]] 3+ can't target me"
 abilities:
   - type: give_condition
     condition: exhausted
@@ -20,7 +20,7 @@ abilities:
       side: enemy
       count: 2
       condition: burned
-    raw: "give 2 Burned enemies Exhausted"
+    raw: "Give 2 [[condition:Burned]] enemies [[condition:Exhausted]]"
 evolve:
 traits:
 attributes:

@@ -9,13 +9,13 @@ passives:
 abilities:
   - type: remove_traits
     target: { side: enemy, has_passive: true }
-    raw: "Silence an enemy that has at least one passive"
+    raw: "[[keyword:Silence]] an enemy that has at least one passive"
   - type: spend_shinsu
     amount: 2
     effect:
       type: copy_ability
       source: { side: enemy }
-    raw: "spend 2: use an enemy ability"
+    raw: "[[keyword:Spend]] 2: Use an enemy [[rule:Ability]]"
 evolve:
 traits:
 attributes:

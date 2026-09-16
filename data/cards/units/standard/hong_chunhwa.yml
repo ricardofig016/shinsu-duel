@@ -10,13 +10,13 @@ abilities:
   - type: deal_damage
     amount: 2
     target: { side: enemy }
-    raw: "deal 2 to an enemy"
+    raw: "Deal 2 to an enemy"
   - type: deal_damage
     amount: 3
     target:
       side: enemy
       condition: exhausted
-    raw: "deal 3 to an enemy with Exhausted" # synergy with Sunwoo Nare and Narumada (ignited)
+    raw: "Deal 3 to an enemy with [[condition:Exhausted]]" # synergy with Sunwoo Nare and Narumada (ignited)
 evolve:
 traits:
 attributes:

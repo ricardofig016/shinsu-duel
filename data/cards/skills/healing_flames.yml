@@ -5,7 +5,7 @@ requirements:
   - type: has_ally
     affiliation: yeon family
     attribute: hwayeomsa
-    raw: "you have an ally yeon family member or Hwayeomsa"
+    raw: "You have an ally [[affiliation:Yeon Family]] member or [[attribute:Hwayeomsa]]"
 effects:
   - type: sequence
     steps:
@@ -14,4 +14,4 @@ effects:
       - type: heal
         amount: 4
         target: { side: ally, scope: all }
-    raw: "Cleanse all allies and heal each of them 4 HP"
+    raw: "[[keyword:Cleanse]] all allies and heal each of them 4 HP"

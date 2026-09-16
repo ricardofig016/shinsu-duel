@@ -17,7 +17,7 @@ passives:
         card: { name: Redan }
       - type: transform
         cardName: "Khun Ran"
-    raw: "round end: create Redan in your hand and revert me to Khun Ran"
+    raw: "[[trigger:Round End]]: Create [[card:Redan]] in your hand and revert me to [[card:Khun Ran]]"
 abilities:
   - type: sequence
     steps:
@@ -34,7 +34,7 @@ abilities:
         target:
           side: enemy
           name: Conduit
-    raw: "deal 3 to a frontline enemy, heal enemy Conduit 2 HP and activate it"
+    raw: "Deal 3 to a frontline enemy, heal enemy [[card:Conduit]] 2 HP and activate it"
 evolve:
 traits:
 attributes:

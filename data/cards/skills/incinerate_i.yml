@@ -9,9 +9,9 @@ deckConstraints:
   - type: generated_by
     resource: fire_charge
     amount: 1
-    raw: "create me by spending 1 Fire Charge"
+    raw: "Create me by spending 1 [[rule:Fire Charge]]"
 effects:
   - type: deal_damage
     amount: 1
     target: { side: enemy }
-    raw: "deal 1 to an enemy"
+    raw: "Deal 1 to an enemy"

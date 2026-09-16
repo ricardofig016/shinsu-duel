@@ -15,13 +15,13 @@ passives:
     if:
       type: has_equipped
       cardName: "Purple Dementor"
-    raw: "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
+    raw: "If I have [[card:Purple Dementor]] equipped, I give [[condition:Poisoned]] +2 to [[rank:High Ranker]] units"
 abilities:
   - type: give_condition
     condition: poisoned
     amount: 1
     target: { side: enemy, scope: backline }
-    raw: "give Poisoned 1 to a backline enemy"
+    raw: "Give [[condition:Poisoned]] 1 to a backline enemy"
 evolve:
 traits:
 attributes:

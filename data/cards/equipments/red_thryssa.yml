@@ -9,6 +9,6 @@ effects:
       type: deal_damage
       amount: 5
       target: { side: enemy }
-      raw: "deal 5 to an enemy"
-    raw: "ability: deal 5 to an enemy"
+      raw: "Deal 5 to an enemy"
+    raw: "[[rule:Ability]]: Deal 5 to an enemy"
 ignition:

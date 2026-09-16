@@ -8,4 +8,4 @@ effects:
     condition: weak
     amount: 1
     target: { side: any }
-    raw: "give Weak 1 to a unit"
+    raw: "Give [[condition:Weak]] 1 to a unit"

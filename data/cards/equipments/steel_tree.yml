@@ -4,15 +4,15 @@ cost: 3
 requirements:
   - type: deployed_as
     position: wave controller
-    raw: "deployed as Wave Controller"
+    raw: "Deployed as [[position:Wave Controller]]"
 effects:
   - type: grant_trait
     trait: immune
     target: { side: bearer }
-    raw: "the bearer has Immune"
+    raw: "The [[rule:Bearer]] has [[trait:Immune]]"
   - type: grant_trait
     trait: pierce
     amount: 1
     target: { side: bearer }
-    raw: "the bearer has Pierce 1"
+    raw: "The [[rule:Bearer]] has [[trait:Pierce]] 1"
 ignition:

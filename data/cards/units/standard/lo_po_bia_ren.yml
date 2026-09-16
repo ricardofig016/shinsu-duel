@@ -18,7 +18,7 @@ passives:
       condition: poisoned
       amount: 1
       target: { side: enemy }
-    raw: "wave controller: your frontline Shinheuh's abilities give Poisoned 1"
+    raw: "[[position:Wave Controller]]: Your frontline Shinheuh's abilities give [[condition:Poisoned]] 1"
   - type: modify_ability
     position: scout
     target:
@@ -30,7 +30,7 @@ passives:
       condition: ghost
       amount: 1
       target: { side: enemy }
-    raw: "scout: your backline Shinheuh's abilities give Ghost"
+    raw: "[[position:Scout]]: Your backline Shinheuh's abilities give [[condition:Ghost]]"
 abilities:
   - type: summon
     card:
@@ -39,12 +39,12 @@ abilities:
       random: true
     from: game
     onto: self
-    raw: "summon a random 2 cost Shinheuh"
+    raw: "[[trigger:Summon]] a random 2 cost Shinheuh"
   - type: steal
     card:
       kind: shinheuh
       cost: cheapest
-    raw: "steal the enemy's cheapest Shinheuh"
+    raw: "[[keyword:Steal]] the enemy's cheapest Shinheuh"
 evolve:
 traits:
 attributes:

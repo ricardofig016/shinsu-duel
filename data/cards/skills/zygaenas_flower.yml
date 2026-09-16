@@ -9,4 +9,4 @@ effects:
     target:
       side: ally
       affiliation: [wolhaiksong, team sweet and sour]
-    raw: "give ally wolhaiksong and team sweet and sour members strong 2"
+    raw: "Give ally [[affiliation:Wolhaiksong]] and [[affiliation:Team Sweet and Sour]] members [[trait:Strong]] 2"
