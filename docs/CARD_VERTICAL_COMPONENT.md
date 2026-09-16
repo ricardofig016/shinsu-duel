@@ -91,9 +91,53 @@ The card frame is an isolated stacking context (`isolation: isolate`), so
 positioned descendants (trapezoids, overlays) can never paint above
 neighboring cards in the overlapping hand fan.
 
+## Card detail overlay
+
+`public/components/card-detail-overlay/` replaces the per-card big-copy
+expansion: right-clicking any small card-vertical or a deployed
+unit-card-horizontal opens one fixed, singleton overlay above every page
+surface. The component owns every big-card render — nothing outside it
+positions or mounts one.
+
+**Row assembly** is pure (`public/utils/card-detail-row.js`): attached
+equipment left of the focus (resolved from the wire's name-only
+`equipmentAttachments` through the catalog), the focus card, then the
+card's compiled `relatedCards` (see [CARD_RELATIONS.md](./CARD_RELATIONS.md)),
+with each attachment's own closure folded in at open time under the same
+never-repeat rule. The list is static for the overlay's lifetime — changing
+focus never rebuilds it.
+
+**Layout and sizing:** the focus slot sits slightly right of screen center
+(55% of the viewport) so the equipment column has room on its left. Every
+card is a full-size card-vertical in a slot; non-focus slots shrink by a
+slight graded scale per step of distance from the focus (−5% per step with a
+0.65 floor), neighbors overlap their slots slightly, and z-index falls off
+with distance from the focus — both recomputed on every focus change. The
+scale falloff, overlap, and focus position are component constants tuned in
+the browser.
+
+**Interactions:**
+
+- wheel/trackpad scroll steps the focus one card at a time (snapped, no wrap),
+- clicking a side card focuses it,
+- horizontal drag with pointer capture pans the row and snaps back to card
+  alignment on release; a press that never crosses the movement threshold
+  stays a click, so drags neither close the overlay nor misfire card clicks,
+- left/right arrow keys move the focus while the overlay is open,
+- Escape and backdrop click close it.
+
+Opening and closing FLIP-zoom the focus card between its slot and the source
+card the overlay was opened from (reduced motion renders without zoom);
+opening again while open replaces the open overlay. Card links inside the
+rendered text navigate: clicking one moves the row's focus when the target
+is in it, and otherwise opens the overlay for that card (see
+[TOOLTIP_SYSTEM.md](./TOOLTIP_SYSTEM.md) for the link hover sources).
+
 ## Testing
 
 The view models and wire projections behind the component are covered by
 `public/tests/game/viewModels.test.js` and the server suites around
 `Card.toSanitizedObject()` and the GameState condition projections. The
-component script itself is DOM code without a test harness.
+overlay's row assembly is pure and unit-tested in
+`public/tests/utils/card-detail-row.test.js`; the component scripts
+themselves are DOM code without a test harness.

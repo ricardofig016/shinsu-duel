@@ -102,12 +102,11 @@ Link target resolution lives in scripts/lib/card-link-registry.js, backed by `pu
 
 ### Related cards
 
-Every compiled card carries an optional **`relatedCards`** list — the deduplicated, recursively closed, deterministically ordered set of cards it relates to. It is stamped at compile time (scripts/lib/card-relations.js) and is what the client's related-card detail view renders:
-
-- **Relation kinds**: `evolution` (`evolvedFrom`/`evolveInto`), `ignition` (`ignitedFrom`/`igniteInto`), `mention` (this card's text points at the target — explicit `card`/`series` links plus the machine-readable references the DSL already carries: the `name`/`series` fields of the target descriptors under `card`, `target`, `targets`, and `source`, `cardName`, `cardNames`, `unit_on_board`), `mentioned-by` (reverse mentions, computed from every card's forward references), and `series` (cards sharing the card's `series` code). A series reference counts as a mention of every card in that series.
-- **Order**: breadth-first over all edge kinds until closure; edges are examined from each card in the priority evolution/ignition → mentions → reverse mentions → series siblings, ties broken by `cardId` (the name-sorted index).
-- **Dedup**: a card is never repeated; the first edge that reaches it wins its relation kind.
-- Entries are `{ cardId, kind }`; a card that relates to nothing carries no field (sparse contract).
+Every compiled card carries an optional **`relatedCards`** stamp — the
+deduplicated, recursively closed, deterministically ordered set of cards it
+relates to, stamped at compile time (scripts/lib/card-relations.js). The
+relation kinds, closure order, dedup rule, and data sources are owned by
+[CARD_RELATIONS.md](./CARD_RELATIONS.md).
 
 ### Card metadata
 

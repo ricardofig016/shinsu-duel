@@ -20,6 +20,14 @@ client through two channels:
   header concept descriptions (passives, evolve, ignition, requirements), HUD
   strings (shinsu, HP, lighthouses, fire charges, deck), line labels, and the
   chosen suffix. Data lives in `server/data/glossary.json`.
+- **The shared data catalogs** (`server/data/conditions.json`, `traits.json`,
+  `attributes.json`, `positions.json`, `affiliations.json`) — the condition,
+  trait, attribute, position, and affiliation vocabularies every part of the
+  game resolves codes against: the engine and card views server-side, and the
+  content routes `GET /conditions`, `/traits`, `/attributes`, `/positions`,
+  `/affiliations` for client lookups such as inline-link hover copy. These
+  files are engine data too (conditions and attributes drive mechanics), not
+  only tooltip copy.
 
 When the glossary is unavailable, tooltips degrade to what the card views
 still carry: glossary-only tooltips (type letter, rank, header concepts, HUD)
