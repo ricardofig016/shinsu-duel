@@ -4,12 +4,12 @@ import { setupGameWithCardsInHand } from "../utils.js";
 // Requirements are compiled structured check objects (see the requirements
 // grammar in docs/COMPILED_CARD_DSL.md). Tests author the compiled shape.
 
-const deployedAs = (position, raw = `deployed as ${position}`) => ({ type: "deployed_as", position, raw });
-const targetSide = (side, raw = `target is ${side === "ally" ? "an ally" : "an enemy"}`) => ({ type: "target_side", side, raw });
-const unitOnBoard = (name) => ({ type: "unit_on_board", name, raw: `${name} is in your board` });
-const firstCard = () => ({ type: "first_card_this_round", raw: "I'm the first card you play this round" });
-const hasAlly = (fields, raw) => ({ type: "has_ally", ...fields, raw });
-const bearerHas = (fields, raw) => ({ type: "bearer_has", ...fields, raw });
+const deployedAs = (position, text = `deployed as ${position}`) => ({ type: "deployed_as", position, text: [text] });
+const targetSide = (side, text = `target is ${side === "ally" ? "an ally" : "an enemy"}`) => ({ type: "target_side", side, text: [text] });
+const unitOnBoard = (name) => ({ type: "unit_on_board", name, text: [`${name} is in your board`] });
+const firstCard = () => ({ type: "first_card_this_round", text: ["I'm the first card you play this round"] });
+const hasAlly = (fields, text) => ({ type: "has_ally", ...fields, text: [text] });
+const bearerHas = (fields, text) => ({ type: "bearer_has", ...fields, text: [text] });
 
 describe("RequirementValidator", () => {
   let game;
@@ -306,7 +306,7 @@ describe("RequirementValidator", () => {
 
   test("unknown requirement type throws", () => {
     expect(() =>
-      RequirementValidator.validate([{ type: "banana", raw: "mystery" }], { gameState: game, username: "Alice" })
+      RequirementValidator.validate([{ type: "banana", text: ["mystery"] }], { gameState: game, username: "Alice" })
     ).toThrow(/unsupported requirement type/i);
   });
 

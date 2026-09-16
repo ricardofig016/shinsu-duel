@@ -16,7 +16,17 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "slug": "test_filler_1"
+    "slug": "test_filler_1",
+    "relatedCards": [
+      {
+        "cardId": 10031,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10032,
+        "kind": "evolution"
+      }
+    ]
   },
   "2": {
     "cardId": 2,
@@ -767,7 +777,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 8,
@@ -787,7 +799,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Ghost"
+        "text": [
+          "round start: give me Ghost"
+        ]
       },
       {
         "type": "conditional",
@@ -813,7 +827,9 @@
             "side": "self"
           }
         },
-        "raw": "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+        "text": [
+          "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+        ]
       },
       {
         "type": "play_jeonsul_baang",
@@ -825,10 +841,30 @@
             "type": "activation"
           }
         ],
-        "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+        "text": [
+          "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+        ]
       }
     ],
-    "slug": "conduit"
+    "slug": "conduit",
+    "relatedCards": [
+      {
+        "cardId": 10057,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10066,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10067,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10072,
+        "kind": "mention"
+      }
+    ]
   },
   "10001": {
     "cardId": 10001,
@@ -838,13 +874,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
       {
         "type": "quick",
-        "raw": "i am Quick"
+        "text": [
+          "i am Quick"
+        ]
       },
       {
         "type": "create_card",
@@ -852,10 +892,30 @@
           "type": "skill",
           "series": "incinerate"
         },
-        "raw": "Spend Fire Charges to create the highest affordable Incinerate in your hand"
+        "text": [
+          "Spend Fire Charges to create the highest affordable Incinerate in your hand"
+        ]
       }
     ],
-    "slug": "fire_core"
+    "slug": "fire_core",
+    "relatedCards": [
+      {
+        "cardId": 10052,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10053,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10054,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10055,
+        "kind": "mention"
+      }
+    ]
   },
   "10002": {
     "cardId": 10002,
@@ -926,7 +986,9 @@
           "random": true,
           "exclude_self": true
         },
-        "raw": "Free: give me a random affiliation of another ally"
+        "text": [
+          "Free: give me a random affiliation of another ally"
+        ]
       },
       {
         "type": "heal",
@@ -937,7 +999,9 @@
           "scope": "all",
           "shared_affiliation": true
         },
-        "raw": "Free: heal all ally members of my affiliations 1 HP"
+        "text": [
+          "Free: heal all ally members of my affiliations 1 HP"
+        ]
       }
     ],
     "passives": [],
@@ -988,7 +1052,9 @@
           "type": "ally_dies",
           "rank": "regular"
         },
-        "raw": "when an ally Regular dies: Light Up 1"
+        "text": [
+          "when an ally Regular dies: Light Up 1"
+        ]
       }
     ],
     "slug": "test_ally_dies_passive_unit"
@@ -1023,7 +1089,9 @@
         },
         "from": "game",
         "onto": "self",
-        "raw": "summon a random 2 cost Shinheuh"
+        "text": [
+          "summon a random 2 cost Shinheuh"
+        ]
       },
       {
         "type": "steal",
@@ -1031,7 +1099,9 @@
           "kind": "shinheuh",
           "cost": "cheapest"
         },
-        "raw": "steal the enemy's cheapest Shinheuh"
+        "text": [
+          "steal the enemy's cheapest Shinheuh"
+        ]
       }
     ],
     "passives": [],
@@ -1047,7 +1117,9 @@
       {
         "type": "deployed_as",
         "position": "fisherman",
-        "raw": "deployed as Fisherman"
+        "text": [
+          "deployed as Fisherman"
+        ]
       }
     ],
     "effects": [
@@ -1058,7 +1130,9 @@
           "type": "started_with_card",
           "cardName": "Ha Jinsung"
         },
-        "raw": "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+        "text": [
+          "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+        ]
       },
       {
         "type": "grant_trait",
@@ -1066,10 +1140,38 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Barrier"
+        "text": [
+          "the bearer has Barrier"
+        ]
       }
     ],
-    "slug": "test_armor"
+    "slug": "test_armor",
+    "relatedCards": [
+      {
+        "cardId": 10016,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10029,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10033,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10015,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10017,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10034,
+        "kind": "evolution"
+      }
+    ]
   },
   "10009": {
     "cardId": 10009,
@@ -1126,7 +1228,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 4 to an enemy"
+        "text": [
+          "deal 4 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -1154,7 +1258,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 6 to an enemy"
+        "text": [
+          "deal 6 to an enemy"
+        ]
       },
       {
         "type": "deal_damage",
@@ -1162,7 +1268,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 12 to an enemy"
+        "text": [
+          "deal 12 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -1195,7 +1303,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 4 to an enemy"
+        "text": [
+          "deal 4 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -1225,7 +1335,9 @@
             }
           }
         ],
-        "raw": "heal the bearer 2 HP and Cleanse the bearer"
+        "text": [
+          "heal the bearer 2 HP and Cleanse the bearer"
+        ]
       }
     ],
     "slug": "test_blue_thryssa"
@@ -1264,7 +1376,9 @@
             "condition": "burned"
           }
         },
-        "raw": "spend 3: deal 2 to all Burned enemies"
+        "text": [
+          "spend 3: deal 2 to all Burned enemies"
+        ]
       }
     ],
     "passives": [
@@ -1279,10 +1393,29 @@
           "type": "skill_played",
           "cardName": "Test Damage Skill"
         },
-        "raw": "Test Damage Skill gives Burned 1"
+        "text": [
+          {
+            "type": "card",
+            "ref": "test_damage_skill",
+            "text": "Test Damage Skill"
+          },
+          " gives ",
+          {
+            "type": "condition",
+            "ref": "burned",
+            "text": "Burned"
+          },
+          " 1"
+        ]
       }
     ],
-    "slug": "test_burn_passive_unit"
+    "slug": "test_burn_passive_unit",
+    "relatedCards": [
+      {
+        "cardId": 10021,
+        "kind": "mention"
+      }
+    ]
   },
   "10015": {
     "cardId": 10015,
@@ -1305,12 +1438,40 @@
       "triggers": [
         {
           "type": "deploy",
-          "raw": "when i am deployed"
+          "text": [
+            "when i am deployed"
+          ]
         }
       ],
       "cardId": 10016
     },
-    "slug": "test_chain_unit"
+    "slug": "test_chain_unit",
+    "relatedCards": [
+      {
+        "cardId": 10016,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10017,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10008,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10029,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10033,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10034,
+        "kind": "evolution"
+      }
+    ]
   },
   "10016": {
     "cardId": 10016,
@@ -1334,13 +1495,41 @@
         {
           "type": "equip",
           "cardName": "Test Armor",
-          "raw": "i am equipped with Test Armor"
+          "text": [
+            "i am equipped with Test Armor"
+          ]
         }
       ],
       "cardId": 10017
     },
     "evolvedFrom": 10015,
-    "slug": "test_chain_unit_ii"
+    "slug": "test_chain_unit_ii",
+    "relatedCards": [
+      {
+        "cardId": 10015,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10017,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10008,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10029,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10033,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10034,
+        "kind": "evolution"
+      }
+    ]
   },
   "10017": {
     "cardId": 10017,
@@ -1360,7 +1549,33 @@
     "abilities": [],
     "passives": [],
     "evolvedFrom": 10016,
-    "slug": "test_chain_unit_iii"
+    "slug": "test_chain_unit_iii",
+    "relatedCards": [
+      {
+        "cardId": 10016,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10015,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10008,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10029,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10033,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10034,
+        "kind": "evolution"
+      }
+    ]
   },
   "10018": {
     "cardId": 10018,
@@ -1376,7 +1591,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give Burned 1 to an enemy"
+        "text": [
+          "give Burned 1 to an enemy"
+        ]
       },
       {
         "type": "compress_shinsu",
@@ -1384,7 +1601,9 @@
         "card": {
           "attribute": "hwayeomsa"
         },
-        "raw": "Compress 1 from a Hwayeomsa in your hand"
+        "text": [
+          "Compress 1 from a Hwayeomsa in your hand"
+        ]
       }
     ],
     "slug": "test_compress_skill"
@@ -1397,7 +1616,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 2,
@@ -1435,7 +1656,9 @@
           "side": "enemy",
           "has_passive": true
         },
-        "raw": "Silence an enemy that has at least one passive"
+        "text": [
+          "Silence an enemy that has at least one passive"
+        ]
       },
       {
         "type": "spend_shinsu",
@@ -1446,7 +1669,9 @@
             "side": "enemy"
           }
         },
-        "raw": "spend 2: use an enemy ability"
+        "text": [
+          "spend 2: use an enemy ability"
+        ]
       }
     ],
     "passives": [],
@@ -1482,10 +1707,18 @@
             "side": "enemy"
           }
         },
-        "raw": "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
+        "text": [
+          "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
+        ]
       }
     ],
-    "slug": "test_damage_skill"
+    "slug": "test_damage_skill",
+    "relatedCards": [
+      {
+        "cardId": 10014,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "10022": {
     "cardId": 10022,
@@ -1516,12 +1749,20 @@
       "triggers": [
         {
           "type": "deploy",
-          "raw": "when i am deployed"
+          "text": [
+            "when i am deployed"
+          ]
         }
       ],
       "cardId": 10023
     },
-    "slug": "test_deploy_evolve"
+    "slug": "test_deploy_evolve",
+    "relatedCards": [
+      {
+        "cardId": 10023,
+        "kind": "evolution"
+      }
+    ]
   },
   "10023": {
     "cardId": 10023,
@@ -1545,7 +1786,13 @@
     "abilities": [],
     "passives": [],
     "evolvedFrom": 10022,
-    "slug": "test_deploy_evolve_ii"
+    "slug": "test_deploy_evolve_ii",
+    "relatedCards": [
+      {
+        "cardId": 10022,
+        "kind": "evolution"
+      }
+    ]
   },
   "10024": {
     "cardId": 10024,
@@ -1570,7 +1817,9 @@
         "trigger": {
           "type": "dies"
         },
-        "raw": "when i die, Light Up 1"
+        "text": [
+          "when i die, Light Up 1"
+        ]
       }
     ],
     "slug": "test_dies_passive_unit"
@@ -1588,7 +1837,9 @@
         "trigger": {
           "type": "quick_ability_used"
         },
-        "raw": "the bearer's Quick abilities Charge 1"
+        "text": [
+          "the bearer's Quick abilities Charge 1"
+        ]
       }
     ],
     "slug": "test_dionysos_wings"
@@ -1613,7 +1864,9 @@
           "type": "deal_damage",
           "amount": 7
         },
-        "raw": "when my bearer deals 7+ damage to a single target, Disarm it"
+        "text": [
+          "when my bearer deals 7+ damage to a single target, Disarm it"
+        ]
       }
     ],
     "igniteInto": {
@@ -1621,12 +1874,20 @@
         {
           "type": "deal_damage",
           "amount": 10,
-          "raw": "the bearer deals 10+ damage to a single target"
+          "text": [
+            "the bearer deals 10+ damage to a single target"
+          ]
         }
       ],
       "cardId": 10027
     },
-    "slug": "test_disarm_lance"
+    "slug": "test_disarm_lance",
+    "relatedCards": [
+      {
+        "cardId": 10027,
+        "kind": "ignition"
+      }
+    ]
   },
   "10027": {
     "cardId": 10027,
@@ -1662,11 +1923,19 @@
           "type": "deal_damage",
           "amount": 7
         },
-        "raw": "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"
+        "text": [
+          "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"
+        ]
       }
     ],
     "ignitedFrom": 10026,
-    "slug": "test_disarm_lance_ignited"
+    "slug": "test_disarm_lance_ignited",
+    "relatedCards": [
+      {
+        "cardId": 10026,
+        "kind": "ignition"
+      }
+    ]
   },
   "10028": {
     "cardId": 10028,
@@ -1692,7 +1961,9 @@
           "type": "draw",
           "cardType": "equipment"
         },
-        "raw": "whenever you draw an equipment, draw again"
+        "text": [
+          "whenever you draw an equipment, draw again"
+        ]
       }
     ],
     "slug": "test_draw_passive_unit"
@@ -1724,10 +1995,38 @@
           "type": "equip",
           "cardName": "Test Armor"
         },
-        "raw": "when i'm equipped with Test Armor, Reclaim 1 Equipment card"
+        "text": [
+          "when i'm equipped with Test Armor, Reclaim 1 Equipment card"
+        ]
       }
     ],
-    "slug": "test_equip_passive_unit"
+    "slug": "test_equip_passive_unit",
+    "relatedCards": [
+      {
+        "cardId": 10008,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10016,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10033,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10015,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10017,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10034,
+        "kind": "evolution"
+      }
+    ]
   },
   "10030": {
     "cardId": 10030,
@@ -1742,7 +2041,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Barrier"
+        "text": [
+          "the bearer has Barrier"
+        ]
       }
     ],
     "slug": "test_equipment_filler"
@@ -1772,19 +2073,33 @@
         "trigger": {
           "type": "evolve"
         },
-        "raw": "when i evolve: create Test Filler 1 in hand"
+        "text": [
+          "when i evolve: create Test Filler 1 in hand"
+        ]
       }
     ],
     "evolveInto": {
       "triggers": [
         {
           "type": "deploy",
-          "raw": "when i am deployed"
+          "text": [
+            "when i am deployed"
+          ]
         }
       ],
       "cardId": 10032
     },
-    "slug": "test_evolve_passive_unit"
+    "slug": "test_evolve_passive_unit",
+    "relatedCards": [
+      {
+        "cardId": 10032,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 1,
+        "kind": "mention"
+      }
+    ]
   },
   "10032": {
     "cardId": 10032,
@@ -1804,7 +2119,17 @@
     "abilities": [],
     "passives": [],
     "evolvedFrom": 10031,
-    "slug": "test_evolve_passive_unit_ii"
+    "slug": "test_evolve_passive_unit_ii",
+    "relatedCards": [
+      {
+        "cardId": 10031,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 1,
+        "kind": "mention"
+      }
+    ]
   },
   "10033": {
     "cardId": 10033,
@@ -1838,7 +2163,9 @@
           "side": "ally",
           "affiliation": "karakas-servants"
         },
-        "raw": "allied karaka's servants' abilities have Quick"
+        "text": [
+          "allied karaka's servants' abilities have Quick"
+        ]
       }
     ],
     "evolveInto": {
@@ -1847,12 +2174,40 @@
           "type": "equip",
           "cardName": "Test Armor",
           "position": "fisherman",
-          "raw": "Fisherman: equip with Test Armor"
+          "text": [
+            "Fisherman: equip with Test Armor"
+          ]
         }
       ],
       "cardId": 10034
     },
-    "slug": "test_evolve_unit"
+    "slug": "test_evolve_unit",
+    "relatedCards": [
+      {
+        "cardId": 10034,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10008,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10016,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10029,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10015,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10017,
+        "kind": "evolution"
+      }
+    ]
   },
   "10034": {
     "cardId": 10034,
@@ -1886,7 +2241,9 @@
           "side": "ally",
           "affiliation": "karakas-servants"
         },
-        "raw": "allied karaka's servants' abilities have Quick"
+        "text": [
+          "allied karaka's servants' abilities have Quick"
+        ]
       },
       {
         "type": "deal_damage",
@@ -1899,11 +2256,39 @@
         "trigger": {
           "type": "round_end"
         },
-        "raw": "round end: deal 3 to all Rooted enemies"
+        "text": [
+          "round end: deal 3 to all Rooted enemies"
+        ]
       }
     ],
     "evolvedFrom": 10033,
-    "slug": "test_evolve_unit_ii"
+    "slug": "test_evolve_unit_ii",
+    "relatedCards": [
+      {
+        "cardId": 10033,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10008,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10016,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10029,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10015,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10017,
+        "kind": "evolution"
+      }
+    ]
   },
   "10035": {
     "cardId": 10035,
@@ -1914,14 +2299,18 @@
     "requirements": [
       {
         "type": "first_card_this_round",
-        "raw": "I'm the first card you play this round"
+        "text": [
+          "I'm the first card you play this round"
+        ]
       }
     ],
     "effects": [
       {
         "type": "extinguish",
         "amount": 1,
-        "raw": "Extinguish 1"
+        "text": [
+          "Extinguish 1"
+        ]
       },
       {
         "type": "heal",
@@ -1929,7 +2318,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "heal an ally 1 HP"
+        "text": [
+          "heal an ally 1 HP"
+        ]
       },
       {
         "type": "compress_shinsu",
@@ -1937,19 +2328,25 @@
         "card": {
           "cost": "most expensive"
         },
-        "raw": "Compress 1 from the most expensive card in your hand"
+        "text": [
+          "Compress 1 from the most expensive card in your hand"
+        ]
       },
       {
         "type": "reclaim_cards",
         "amount": 1,
-        "raw": "Reclaim 1"
+        "text": [
+          "Reclaim 1"
+        ]
       },
       {
         "type": "remove_traits",
         "target": {
           "side": "enemy"
         },
-        "raw": "Silence an enemy"
+        "text": [
+          "Silence an enemy"
+        ]
       }
     ],
     "slug": "test_expensive_skill"
@@ -2006,7 +2403,9 @@
         "target": {
           "side": "self"
         },
-        "raw": "heal me 3 HP"
+        "text": [
+          "heal me 3 HP"
+        ]
       }
     ],
     "passives": [],
@@ -2045,7 +2444,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 2 to an enemy"
+        "text": [
+          "deal 2 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -2057,7 +2458,9 @@
           "side": "ally",
           "affiliation": "team-chang"
         },
-        "raw": "allied team-chang members have Resilient 1"
+        "text": [
+          "allied team-chang members have Resilient 1"
+        ]
       }
     ],
     "slug": "test_fisherman_unit"
@@ -2073,7 +2476,9 @@
     "rules": [
       {
         "type": "disable_passives",
-        "raw": "unit passives have no effect"
+        "text": [
+          "unit passives have no effect"
+        ]
       }
     ],
     "traits": [],
@@ -2086,7 +2491,9 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "deploy: choose a position"
+        "text": [
+          "deploy: choose a position"
+        ]
       }
     ],
     "slug": "test_floor_of_death"
@@ -2111,7 +2518,9 @@
         "trigger": {
           "type": "free_ability_played"
         },
-        "raw": "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
+        "text": [
+          "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
+        ]
       }
     ],
     "slug": "test_free_ability_landmark"
@@ -2145,7 +2554,9 @@
           "side": "enemy"
         },
         "quick": true,
-        "raw": "quick: give an enemy Blinded"
+        "text": [
+          "quick: give an enemy Blinded"
+        ]
       },
       {
         "type": "give_condition",
@@ -2154,7 +2565,9 @@
           "side": "enemy"
         },
         "quick": true,
-        "raw": "quick: give an enemy Ghost"
+        "text": [
+          "quick: give an enemy Ghost"
+        ]
       }
     ],
     "passives": [
@@ -2165,7 +2578,9 @@
         "target": {
           "side": "self"
         },
-        "raw": "the first ability i use each round has Free"
+        "text": [
+          "the first ability i use each round has Free"
+        ]
       }
     ],
     "slug": "test_free_keyword_unit"
@@ -2183,7 +2598,9 @@
         "type": "grant_global_trait",
         "trait": "strong",
         "position": "scout",
-        "raw": "units in Scout have Strong"
+        "text": [
+          "units in Scout have Strong"
+        ]
       }
     ],
     "traits": [],
@@ -2206,7 +2623,9 @@
         "type": "grant_global_trait",
         "trait": "strong",
         "position": "scout",
-        "raw": "units in Scout have Strong"
+        "text": [
+          "units in Scout have Strong"
+        ]
       }
     ],
     "traits": [],
@@ -2226,7 +2645,9 @@
       {
         "type": "deployed_as",
         "position": "scout",
-        "raw": "deployed as Scout"
+        "text": [
+          "deployed as Scout"
+        ]
       }
     ],
     "effects": [
@@ -2237,7 +2658,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Resilient 2"
+        "text": [
+          "the bearer has Resilient 2"
+        ]
       },
       {
         "type": "grant_ability",
@@ -2251,12 +2674,22 @@
           "target": {
             "side": "enemy"
           },
-          "raw": "give Poisoned 4 to an enemy"
+          "text": [
+            "give Poisoned 4 to an enemy"
+          ]
         },
-        "raw": "ability: give Poisoned 4 to an enemy"
+        "text": [
+          "ability: give Poisoned 4 to an enemy"
+        ]
       }
     ],
-    "slug": "test_grant_ability_equip"
+    "slug": "test_grant_ability_equip",
+    "relatedCards": [
+      {
+        "cardId": 10085,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "10045": {
     "cardId": 10045,
@@ -2271,7 +2704,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "heal an ally 5 HP"
+        "text": [
+          "heal an ally 5 HP"
+        ]
       }
     ],
     "slug": "test_heal"
@@ -2306,7 +2741,9 @@
           "side": "enemy",
           "scope": "backline"
         },
-        "raw": "give Heavy 1 to a backline enemy"
+        "text": [
+          "give Heavy 1 to a backline enemy"
+        ]
       }
     ],
     "passives": [
@@ -2328,7 +2765,9 @@
             ]
           }
         },
-        "raw": "while i have an ally team baam or team fug member, opponents' skills cost 1 more"
+        "text": [
+          "while i have an ally team baam or team fug member, opponents' skills cost 1 more"
+        ]
       }
     ],
     "slug": "test_hwa_ryun"
@@ -2362,7 +2801,9 @@
           "count": 2,
           "condition": "burned"
         },
-        "raw": "give 2 Burned enemies Exhausted"
+        "text": [
+          "give 2 Burned enemies Exhausted"
+        ]
       }
     ],
     "passives": [
@@ -2374,7 +2815,9 @@
           "condition": "burned",
           "conditionValue": 3
         },
-        "raw": "units with Burned 3+ can't target me"
+        "text": [
+          "units with Burned 3+ can't target me"
+        ]
       }
     ],
     "slug": "test_hwayeomsa"
@@ -2393,7 +2836,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +3 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +3 damage"
+        ]
       }
     ],
     "igniteInto": {
@@ -2401,12 +2846,20 @@
         {
           "type": "slay",
           "target": "unit",
-          "raw": "the bearer Slays a unit"
+          "text": [
+            "the bearer Slays a unit"
+          ]
         }
       ],
       "cardId": 10049
     },
-    "slug": "test_ignite_weapon"
+    "slug": "test_ignite_weapon",
+    "relatedCards": [
+      {
+        "cardId": 10049,
+        "kind": "ignition"
+      }
+    ]
   },
   "10049": {
     "cardId": 10049,
@@ -2422,7 +2875,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +3 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +3 damage"
+        ]
       },
       {
         "type": "give_condition",
@@ -2434,11 +2889,19 @@
         "trigger": {
           "type": "deal_damage"
         },
-        "raw": "the bearer's damage-dealing abilities give Exhausted 1"
+        "text": [
+          "the bearer's damage-dealing abilities give Exhausted 1"
+        ]
       }
     ],
     "ignitedFrom": 10048,
-    "slug": "test_ignite_weapon_ignited"
+    "slug": "test_ignite_weapon_ignited",
+    "relatedCards": [
+      {
+        "cardId": 10048,
+        "kind": "ignition"
+      }
+    ]
   },
   "10050": {
     "cardId": 10050,
@@ -2461,12 +2924,20 @@
       "triggers": [
         {
           "type": "equipment_ignited",
-          "raw": "when my equipment ignites"
+          "text": [
+            "when my equipment ignites"
+          ]
         }
       ],
       "cardId": 10051
     },
-    "slug": "test_ignition_evolver"
+    "slug": "test_ignition_evolver",
+    "relatedCards": [
+      {
+        "cardId": 10051,
+        "kind": "evolution"
+      }
+    ]
   },
   "10051": {
     "cardId": 10051,
@@ -2490,7 +2961,13 @@
     "abilities": [],
     "passives": [],
     "evolvedFrom": 10050,
-    "slug": "test_ignition_evolver_ii"
+    "slug": "test_ignition_evolver_ii",
+    "relatedCards": [
+      {
+        "cardId": 10050,
+        "kind": "evolution"
+      }
+    ]
   },
   "10052": {
     "cardId": 10052,
@@ -2501,13 +2978,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 1,
-        "raw": "create me by spending 1 Fire Charges"
+        "text": [
+          "create me by spending 1 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2517,10 +2998,30 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 1 to an enemy"
+        "text": [
+          "deal 1 to an enemy"
+        ]
       }
     ],
-    "slug": "test_incinerate_i"
+    "slug": "test_incinerate_i",
+    "relatedCards": [
+      {
+        "cardId": 10001,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10053,
+        "kind": "series"
+      },
+      {
+        "cardId": 10054,
+        "kind": "series"
+      },
+      {
+        "cardId": 10055,
+        "kind": "series"
+      }
+    ]
   },
   "10053": {
     "cardId": 10053,
@@ -2531,13 +3032,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 3,
-        "raw": "create me by spending 3 Fire Charges"
+        "text": [
+          "create me by spending 3 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2548,10 +3053,30 @@
           "side": "enemy",
           "count": 2
         },
-        "raw": "deal 2 to 2 enemies"
+        "text": [
+          "deal 2 to 2 enemies"
+        ]
       }
     ],
-    "slug": "test_incinerate_ii"
+    "slug": "test_incinerate_ii",
+    "relatedCards": [
+      {
+        "cardId": 10001,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10052,
+        "kind": "series"
+      },
+      {
+        "cardId": 10054,
+        "kind": "series"
+      },
+      {
+        "cardId": 10055,
+        "kind": "series"
+      }
+    ]
   },
   "10054": {
     "cardId": 10054,
@@ -2562,13 +3087,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 5,
-        "raw": "create me by spending 5 Fire Charges"
+        "text": [
+          "create me by spending 5 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2594,10 +3123,30 @@
             }
           }
         ],
-        "raw": "deal 2 to 3 enemies and give them Burn"
+        "text": [
+          "deal 2 to 3 enemies and give them Burn"
+        ]
       }
     ],
-    "slug": "test_incinerate_iii"
+    "slug": "test_incinerate_iii",
+    "relatedCards": [
+      {
+        "cardId": 10001,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10052,
+        "kind": "series"
+      },
+      {
+        "cardId": 10053,
+        "kind": "series"
+      },
+      {
+        "cardId": 10055,
+        "kind": "series"
+      }
+    ]
   },
   "10055": {
     "cardId": 10055,
@@ -2608,13 +3157,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 7,
-        "raw": "create me by spending 7 Fire Charges"
+        "text": [
+          "create me by spending 7 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2639,10 +3192,30 @@
             }
           }
         ],
-        "raw": "deal 3 to all enemies and give them Burn 2"
+        "text": [
+          "deal 3 to all enemies and give them Burn 2"
+        ]
       }
     ],
-    "slug": "test_incinerate_iv"
+    "slug": "test_incinerate_iv",
+    "relatedCards": [
+      {
+        "cardId": 10001,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10052,
+        "kind": "series"
+      },
+      {
+        "cardId": 10053,
+        "kind": "series"
+      },
+      {
+        "cardId": 10054,
+        "kind": "series"
+      }
+    ]
   },
   "10056": {
     "cardId": 10056,
@@ -2693,7 +3266,9 @@
           "side": "enemy",
           "scope": "frontline"
         },
-        "raw": "deal 3 to a frontline enemy"
+        "text": [
+          "deal 3 to a frontline enemy"
+        ]
       },
       {
         "type": "sequence",
@@ -2715,11 +3290,31 @@
             }
           }
         ],
-        "raw": "heal enemy Conduit 2 HP and activate it"
+        "text": [
+          "heal enemy Conduit 2 HP and activate it"
+        ]
       }
     ],
     "passives": [],
-    "slug": "test_khun_ran"
+    "slug": "test_khun_ran",
+    "relatedCards": [
+      {
+        "cardId": 10000,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10066,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10067,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10072,
+        "kind": "mention"
+      }
+    ]
   },
   "10058": {
     "cardId": 10058,
@@ -2732,7 +3327,9 @@
     "rules": [
       {
         "type": "disable_passives",
-        "raw": "passives have no effect"
+        "text": [
+          "passives have no effect"
+        ]
       }
     ],
     "traits": [],
@@ -2773,7 +3370,9 @@
             }
           }
         ],
-        "raw": "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
+        "text": [
+          "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
+        ]
       }
     ],
     "slug": "test_landmark_unit"
@@ -2825,7 +3424,9 @@
       {
         "type": "light_up",
         "amount": 1,
-        "raw": "Light Up 1"
+        "text": [
+          "Light Up 1"
+        ]
       }
     ],
     "passives": [],
@@ -2851,7 +3452,9 @@
         "target": {
           "side": "any"
         },
-        "raw": "give Burned 1 to a unit"
+        "text": [
+          "give Burned 1 to a unit"
+        ]
       }
     ],
     "slug": "test_lightning_baang"
@@ -2869,7 +3472,9 @@
           "side": "enemy",
           "scope": "all"
         },
-        "raw": "Silence all enemies"
+        "text": [
+          "Silence all enemies"
+        ]
       }
     ],
     "slug": "test_mass_silence_skill"
@@ -2886,13 +3491,17 @@
       {
         "type": "prevent_evolve",
         "position": "chosen",
-        "raw": "units in the chosen position cannot evolve"
+        "text": [
+          "units in the chosen position cannot evolve"
+        ]
       },
       {
         "type": "grant_global_trait",
         "trait": "strong",
         "position": "scout",
-        "raw": "units in Scout have Strong"
+        "text": [
+          "units in Scout have Strong"
+        ]
       }
     ],
     "traits": [],
@@ -2905,7 +3514,9 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "deploy: choose a position"
+        "text": [
+          "deploy: choose a position"
+        ]
       }
     ],
     "slug": "test_mixed_rule_landmark"
@@ -2920,7 +3531,9 @@
       {
         "type": "bearer_has",
         "affiliation": "khun-family",
-        "raw": "khun family member"
+        "text": [
+          "khun family member"
+        ]
       }
     ],
     "effects": [
@@ -2937,7 +3550,9 @@
             "side": "enemy"
           }
         },
-        "raw": "the bearer's abilities give Frozen to enemies"
+        "text": [
+          "the bearer's abilities give Frozen to enemies"
+        ]
       },
       {
         "type": "grant_trait",
@@ -2946,7 +3561,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Pierce 1"
+        "text": [
+          "the bearer has Pierce 1"
+        ]
       }
     ],
     "slug": "test_modify_ability_equip"
@@ -2979,7 +3596,9 @@
           "side": "enemy",
           "scope": "frontline"
         },
-        "raw": "deal 3 to a frontline enemy"
+        "text": [
+          "deal 3 to a frontline enemy"
+        ]
       },
       {
         "type": "heal",
@@ -2988,7 +3607,9 @@
           "side": "enemy",
           "name": "Conduit"
         },
-        "raw": "heal enemy Conduit 2 HP"
+        "text": [
+          "heal enemy Conduit 2 HP"
+        ]
       }
     ],
     "passives": [],
@@ -2997,12 +3618,32 @@
         {
           "type": "given",
           "item": "Test Poison Skill",
-          "raw": "Test Poison Skill is played on me"
+          "text": [
+            "Test Poison Skill is played on me"
+          ]
         }
       ],
       "cardId": 10067
     },
-    "slug": "test_multi_position"
+    "slug": "test_multi_position",
+    "relatedCards": [
+      {
+        "cardId": 10067,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10000,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10072,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10057,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "10067": {
     "cardId": 10067,
@@ -3045,7 +3686,9 @@
             }
           }
         ],
-        "raw": "deal 3 to a frontline enemy and heal enemy Conduit 2 HP"
+        "text": [
+          "deal 3 to a frontline enemy and heal enemy Conduit 2 HP"
+        ]
       }
     ],
     "passives": [
@@ -3066,11 +3709,31 @@
             "cardName": "Test Multi Position"
           }
         ],
-        "raw": "round end: create Test Poison Skill in your hand and revert me to Test Multi Position"
+        "text": [
+          "round end: create Test Poison Skill in your hand and revert me to Test Multi Position"
+        ]
       }
     ],
     "evolvedFrom": 10066,
-    "slug": "test_multi_position_ii"
+    "slug": "test_multi_position_ii",
+    "relatedCards": [
+      {
+        "cardId": 10066,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10000,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10072,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10057,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "10068": {
     "cardId": 10068,
@@ -3084,18 +3747,24 @@
       {
         "type": "prevent_evolve",
         "position": "chosen",
-        "raw": "units in the chosen position cannot evolve"
+        "text": [
+          "units in the chosen position cannot evolve"
+        ]
       },
       {
         "type": "prevent_equip",
         "position": "chosen",
-        "raw": "units in the chosen position cannot be equipped"
+        "text": [
+          "units in the chosen position cannot be equipped"
+        ]
       },
       {
         "type": "grant_global_condition",
         "condition": "rooted",
         "position": "chosen",
-        "raw": "units in the chosen position are Rooted"
+        "text": [
+          "units in the chosen position are Rooted"
+        ]
       }
     ],
     "traits": [],
@@ -3108,7 +3777,9 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "deploy: choose a position"
+        "text": [
+          "deploy: choose a position"
+        ]
       }
     ],
     "slug": "test_name_hunt_station"
@@ -3135,7 +3806,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 2 to an enemy"
+        "text": [
+          "deal 2 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3167,7 +3840,9 @@
           "side": "enemy"
         },
         "position": "spear-bearer",
-        "raw": "spear bearer: deal 7 to an enemy"
+        "text": [
+          "spear bearer: deal 7 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -3183,7 +3858,9 @@
         "trigger": {
           "type": "deal_damage"
         },
-        "raw": "when i deal damage to an enemy: Disarm them"
+        "text": [
+          "when i deal damage to an enemy: Disarm them"
+        ]
       }
     ],
     "slug": "test_novick"
@@ -3221,7 +3898,9 @@
       {
         "type": "target_side",
         "side": "ally",
-        "raw": "target is an ally"
+        "text": [
+          "target is an ally"
+        ]
       }
     ],
     "effects": [
@@ -3232,10 +3911,30 @@
         "target": {
           "side": "ally"
         },
-        "raw": "give Poisoned 1"
+        "text": [
+          "give Poisoned 1"
+        ]
       }
     ],
-    "slug": "test_poison_skill"
+    "slug": "test_poison_skill",
+    "relatedCards": [
+      {
+        "cardId": 10067,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10066,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10000,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10057,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "10073": {
     "cardId": 10073,
@@ -3249,7 +3948,9 @@
       {
         "type": "prevent_equip",
         "position": "scout",
-        "raw": "units in Scout cannot be equipped"
+        "text": [
+          "units in Scout cannot be equipped"
+        ]
       }
     ],
     "traits": [],
@@ -3271,7 +3972,9 @@
       {
         "type": "prevent_evolve",
         "position": "scout",
-        "raw": "units in Scout cannot evolve"
+        "text": [
+          "units in Scout cannot evolve"
+        ]
       }
     ],
     "traits": [],
@@ -3310,7 +4013,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 6 to an enemy"
+        "text": [
+          "deal 6 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3339,7 +4044,9 @@
           "side": "enemy",
           "random": true
         },
-        "raw": "deal 1 to a random enemy"
+        "text": [
+          "deal 1 to a random enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3372,7 +4079,9 @@
           "type": "reclaim",
           "cardType": "equipment"
         },
-        "raw": "when you reclaim an equipment, Compress 1 from it"
+        "text": [
+          "when you reclaim an equipment, Compress 1 from it"
+        ]
       }
     ],
     "slug": "test_reclaim_passive_unit"
@@ -3390,7 +4099,9 @@
         "card": {
           "type": "equipment"
         },
-        "raw": "Reclaim 1 Equipment card"
+        "text": [
+          "Reclaim 1 Equipment card"
+        ]
       }
     ],
     "slug": "test_reclaim_skill"
@@ -3403,7 +4114,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -3413,7 +4126,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's abilities trigger twice"
+        "text": [
+          "the bearer's abilities trigger twice"
+        ]
       }
     ],
     "slug": "test_repeat_equip"
@@ -3440,7 +4155,9 @@
           "side": "self"
         },
         "quick": true,
-        "raw": "quick: return me to hand"
+        "text": [
+          "quick: return me to hand"
+        ]
       },
       {
         "type": "slay",
@@ -3448,13 +4165,17 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "Free: Slay an enemy"
+        "text": [
+          "Free: Slay an enemy"
+        ]
       }
     ],
     "passives": [
       {
         "type": "retain_equipment",
-        "raw": "when i return to hand, i keep my equipments"
+        "text": [
+          "when i return to hand, i keep my equipments"
+        ]
       }
     ],
     "slug": "test_retaining_returner"
@@ -3473,7 +4194,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +2 damage"
+        ]
       }
     ],
     "igniteInto": {
@@ -3481,12 +4204,20 @@
         {
           "type": "slay",
           "target": "unit",
-          "raw": "the bearer Slays a unit"
+          "text": [
+            "the bearer Slays a unit"
+          ]
         }
       ],
       "cardId": 10082
     },
-    "slug": "test_return_equipment"
+    "slug": "test_return_equipment",
+    "relatedCards": [
+      {
+        "cardId": 10082,
+        "kind": "ignition"
+      }
+    ]
   },
   "10082": {
     "cardId": 10082,
@@ -3502,7 +4233,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +2 damage"
+        ]
       },
       {
         "type": "give_condition",
@@ -3514,11 +4247,19 @@
         "trigger": {
           "type": "deal_damage"
         },
-        "raw": "the bearer's damage-dealing abilities give Exhausted 1"
+        "text": [
+          "the bearer's damage-dealing abilities give Exhausted 1"
+        ]
       }
     ],
     "ignitedFrom": 10081,
-    "slug": "test_return_equipment_ignited"
+    "slug": "test_return_equipment_ignited",
+    "relatedCards": [
+      {
+        "cardId": 10081,
+        "kind": "ignition"
+      }
+    ]
   },
   "10083": {
     "cardId": 10083,
@@ -3542,7 +4283,9 @@
           "side": "self"
         },
         "quick": true,
-        "raw": "quick: return me to hand"
+        "text": [
+          "quick: return me to hand"
+        ]
       }
     ],
     "passives": [],
@@ -3572,7 +4315,9 @@
         "owner": "opponent",
         "quick": true,
         "position": "scout",
-        "raw": "scout: quick: reveal a random card in the opponent's hand"
+        "text": [
+          "scout: quick: reveal a random card in the opponent's hand"
+        ]
       },
       {
         "type": "deal_damage",
@@ -3581,7 +4326,9 @@
           "side": "enemy"
         },
         "position": "fisherman",
-        "raw": "fisherman: deal 1 to an enemy"
+        "text": [
+          "fisherman: deal 1 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3614,7 +4361,9 @@
           "side": "enemy",
           "scope": "backline"
         },
-        "raw": "give Poisoned 1 to a backline enemy"
+        "text": [
+          "give Poisoned 1 to a backline enemy"
+        ]
       }
     ],
     "passives": [
@@ -3630,10 +4379,18 @@
           "type": "has_equipped",
           "cardName": "Test Grant Ability Equip"
         },
-        "raw": "if i have Test Grant Ability Equip equipped, i give Poisoned +2 to High Ranker units"
+        "text": [
+          "if i have Test Grant Ability Equip equipped, i give Poisoned +2 to High Ranker units"
+        ]
       }
     ],
-    "slug": "test_scout_ranker"
+    "slug": "test_scout_ranker",
+    "relatedCards": [
+      {
+        "cardId": 10044,
+        "kind": "mention"
+      }
+    ]
   },
   "10086": {
     "cardId": 10086,
@@ -3655,7 +4412,9 @@
           "side": "enemy"
         },
         "quick": true,
-        "raw": "quick: deal 3 to an enemy"
+        "text": [
+          "quick: deal 3 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3673,7 +4432,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "Silence an enemy"
+        "text": [
+          "Silence an enemy"
+        ]
       }
     ],
     "slug": "test_silence_skill"
@@ -3705,7 +4466,9 @@
         "trigger": {
           "type": "evolve"
         },
-        "raw": "when i evolve: gain Bloodthirsty 1"
+        "text": [
+          "when i evolve: gain Bloodthirsty 1"
+        ]
       }
     ],
     "evolveInto": {
@@ -3713,12 +4476,24 @@
         {
           "type": "skills_played",
           "count": 3,
-          "raw": "when you have played 3 skills this game"
+          "text": [
+            "when you have played 3 skills this game"
+          ]
         }
       ],
       "cardId": 10089
     },
-    "slug": "test_skill_evo_unit"
+    "slug": "test_skill_evo_unit",
+    "relatedCards": [
+      {
+        "cardId": 10089,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10090,
+        "kind": "evolution"
+      }
+    ]
   },
   "10089": {
     "cardId": 10089,
@@ -3747,7 +4522,9 @@
         "trigger": {
           "type": "evolve"
         },
-        "raw": "when i evolve: gain Bloodthirsty 1"
+        "text": [
+          "when i evolve: gain Bloodthirsty 1"
+        ]
       }
     ],
     "evolveInto": {
@@ -3755,13 +4532,25 @@
         {
           "type": "skills_played",
           "count": 6,
-          "raw": "when you have played 6 skills this game"
+          "text": [
+            "when you have played 6 skills this game"
+          ]
         }
       ],
       "cardId": 10090
     },
     "evolvedFrom": 10088,
-    "slug": "test_skill_evo_unit_ii"
+    "slug": "test_skill_evo_unit_ii",
+    "relatedCards": [
+      {
+        "cardId": 10088,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10090,
+        "kind": "evolution"
+      }
+    ]
   },
   "10090": {
     "cardId": 10090,
@@ -3781,7 +4570,17 @@
     "abilities": [],
     "passives": [],
     "evolvedFrom": 10089,
-    "slug": "test_skill_evo_unit_iii"
+    "slug": "test_skill_evo_unit_iii",
+    "relatedCards": [
+      {
+        "cardId": 10089,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 10088,
+        "kind": "evolution"
+      }
+    ]
   },
   "10091": {
     "cardId": 10091,
@@ -3814,7 +4613,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 4 to an enemy"
+        "text": [
+          "deal 4 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3840,7 +4641,9 @@
         "target": {
           "side": "any"
         },
-        "raw": "give Weak 1 to a unit"
+        "text": [
+          "give Weak 1 to a unit"
+        ]
       }
     ],
     "slug": "test_static_baang"
@@ -3876,7 +4679,9 @@
             "side": "enemy"
           }
         },
-        "raw": "Free: Spend 1: deal 1 to an enemy"
+        "text": [
+          "Free: Spend 1: deal 1 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -3890,7 +4695,9 @@
         "source": {
           "position": "spear-bearer"
         },
-        "raw": "Spear bearers deal +4 damage to me"
+        "text": [
+          "Spear bearers deal +4 damage to me"
+        ]
       }
     ],
     "slug": "test_stone_doll"
@@ -3928,7 +4735,9 @@
           "type": "equipment",
           "choose": true
         },
-        "raw": "draw an equipment of your choice"
+        "text": [
+          "draw an equipment of your choice"
+        ]
       },
       {
         "type": "switch_position",
@@ -3936,7 +4745,9 @@
           "side": "enemy",
           "can_switch": true
         },
-        "raw": "force an enemy to switch positions"
+        "text": [
+          "force an enemy to switch positions"
+        ]
       }
     ],
     "passives": [],
@@ -3952,7 +4763,9 @@
       {
         "type": "target_side",
         "side": "ally",
-        "raw": "target is an ally"
+        "text": [
+          "target is an ally"
+        ]
       }
     ],
     "effects": [
@@ -3963,7 +4776,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "give Poisoned 1"
+        "text": [
+          "give Poisoned 1"
+        ]
       }
     ],
     "slug": "test_target_ally_skill"
@@ -3976,7 +4791,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -3987,7 +4804,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +2 damage"
+        ]
       },
       {
         "type": "modify_stat",
@@ -3996,7 +4815,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's healing abilities heal +2 HP"
+        "text": [
+          "the bearer's healing abilities heal +2 HP"
+        ]
       },
       {
         "type": "modify_stat",
@@ -4005,7 +4826,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has +2 HP"
+        "text": [
+          "the bearer has +2 HP"
+        ]
       },
       {
         "type": "grant_trait",
@@ -4014,10 +4837,30 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Bloodthirsty 1"
+        "text": [
+          "the bearer has Bloodthirsty 1"
+        ]
       }
     ],
-    "slug": "test_thorn"
+    "slug": "test_thorn",
+    "relatedCards": [
+      {
+        "cardId": 10097,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10098,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10099,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10100,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "10097": {
     "cardId": 10097,
@@ -4028,7 +4871,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -4062,7 +4907,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        ]
       },
       {
         "type": "modify_stat",
@@ -4071,10 +4918,30 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +1 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +1 damage"
+        ]
       }
     ],
-    "slug": "test_thorn_fragment_i"
+    "slug": "test_thorn_fragment_i",
+    "relatedCards": [
+      {
+        "cardId": 10096,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10098,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10099,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10100,
+        "kind": "mention"
+      }
+    ]
   },
   "10098": {
     "cardId": 10098,
@@ -4085,7 +4952,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -4119,7 +4988,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        ]
       },
       {
         "type": "modify_stat",
@@ -4128,10 +4999,30 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's healing abilities heal +1 HP"
+        "text": [
+          "the bearer's healing abilities heal +1 HP"
+        ]
       }
     ],
-    "slug": "test_thorn_fragment_ii"
+    "slug": "test_thorn_fragment_ii",
+    "relatedCards": [
+      {
+        "cardId": 10096,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10097,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10099,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10100,
+        "kind": "mention"
+      }
+    ]
   },
   "10099": {
     "cardId": 10099,
@@ -4142,7 +5033,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -4176,7 +5069,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        ]
       },
       {
         "type": "modify_stat",
@@ -4185,10 +5080,30 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has +1 HP"
+        "text": [
+          "the bearer has +1 HP"
+        ]
       }
     ],
-    "slug": "test_thorn_fragment_iii"
+    "slug": "test_thorn_fragment_iii",
+    "relatedCards": [
+      {
+        "cardId": 10096,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10097,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10098,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10100,
+        "kind": "mention"
+      }
+    ]
   },
   "10100": {
     "cardId": 10100,
@@ -4199,7 +5114,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -4233,7 +5150,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique thorn fragments, discard them and create Test Thorn in your hand"
+        ]
       },
       {
         "type": "grant_trait",
@@ -4242,10 +5161,30 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Bloodthirsty 1"
+        "text": [
+          "the bearer has Bloodthirsty 1"
+        ]
       }
     ],
-    "slug": "test_thorn_fragment_iv"
+    "slug": "test_thorn_fragment_iv",
+    "relatedCards": [
+      {
+        "cardId": 10096,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10097,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10098,
+        "kind": "mention"
+      },
+      {
+        "cardId": 10099,
+        "kind": "mention"
+      }
+    ]
   },
   "10101": {
     "cardId": 10101,
@@ -4261,7 +5200,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +2 damage"
+        ]
       }
     ],
     "igniteInto": {
@@ -4269,12 +5210,20 @@
         {
           "type": "deal_damage",
           "amount": 10,
-          "raw": "the bearer deals 10+ damage to a single target"
+          "text": [
+            "the bearer deals 10+ damage to a single target"
+          ]
         }
       ],
       "cardId": 10102
     },
-    "slug": "test_threshold_igniter"
+    "slug": "test_threshold_igniter",
+    "relatedCards": [
+      {
+        "cardId": 10102,
+        "kind": "ignition"
+      }
+    ]
   },
   "10102": {
     "cardId": 10102,
@@ -4290,11 +5239,19 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +2 damage"
+        ]
       }
     ],
     "ignitedFrom": 10101,
-    "slug": "test_threshold_igniter_ignited"
+    "slug": "test_threshold_igniter_ignited",
+    "relatedCards": [
+      {
+        "cardId": 10101,
+        "kind": "ignition"
+      }
+    ]
   },
   "10103": {
     "cardId": 10103,
@@ -4316,7 +5273,9 @@
         "target": {
           "side": "any"
         },
-        "raw": "give Exhausted 1 to a unit"
+        "text": [
+          "give Exhausted 1 to a unit"
+        ]
       }
     ],
     "slug": "test_thunder_baang"
@@ -4387,7 +5346,9 @@
             "side": "ally"
           }
         },
-        "raw": "when you silence an enemy, give me its traits"
+        "text": [
+          "when you silence an enemy, give me its traits"
+        ]
       }
     ],
     "slug": "test_trait_thief"
@@ -4486,14 +5447,18 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "requirements": [
       {
         "type": "has_ally",
         "attribute": "irregular",
-        "raw": "have an ally Irregular"
+        "text": [
+          "have an ally Irregular"
+        ]
       }
     ],
     "effects": [
@@ -4503,7 +5468,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give an enemy Doomed"
+        "text": [
+          "give an enemy Doomed"
+        ]
       }
     ],
     "slug": "test_unreachable_skill"
@@ -4520,7 +5487,9 @@
       {
         "type": "condition_stack_cap",
         "cap": 2,
-        "raw": "conditions do not stack past 2"
+        "text": [
+          "conditions do not stack past 2"
+        ]
       }
     ],
     "traits": [],
@@ -4542,7 +5511,9 @@
       {
         "type": "condition_stack_cap",
         "cap": 3,
-        "raw": "conditions do not stack past 3"
+        "text": [
+          "conditions do not stack past 3"
+        ]
       }
     ],
     "traits": [],
@@ -4582,7 +5553,9 @@
           "side": "ally",
           "affiliation": "team-sweet-and-sour"
         },
-        "raw": "heal a team sweet and sour member 1 HP"
+        "text": [
+          "heal a team sweet and sour member 1 HP"
+        ]
       }
     ],
     "passives": [
@@ -4594,7 +5567,9 @@
           "side": "ally",
           "affiliation": "team-sweet-and-sour"
         },
-        "raw": "team sweet and sour members cost 1 less"
+        "text": [
+          "team sweet and sour members cost 1 less"
+        ]
       }
     ],
     "slug": "test_yeo_goseng"

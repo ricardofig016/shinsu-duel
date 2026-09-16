@@ -38,6 +38,16 @@ describe("GET /glossary: the client tooltip copy contract", () => {
         expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
       );
     }
+    for (const code of ["shinsu", "deck", "ability"]) {
+      expect(glossary.terms[code]).toEqual(
+        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+      );
+    }
+    for (const code of ["quick", "free", "unreachable", "ally", "enemy"]) {
+      expect(glossary.keywords[code]).toEqual(
+        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+      );
+    }
     for (const code of [
       "shinsuCard",
       "shinsuBoard",

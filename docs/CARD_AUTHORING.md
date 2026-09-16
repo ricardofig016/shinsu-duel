@@ -108,7 +108,11 @@ The card frame and layout are designed in the [Shinsu Duel Figma file](https://w
 
 ## Raw text conventions
 
-`raw` is player-visible display text. It is never parsed, but it must read consistently. Follow these conventions from the existing card set; when unsure, match the phrasing of the nearest reference card.
+`raw` is player-visible display text. It compiles into display segments and may embed explicit links, but it must read consistently. Follow these conventions from the existing card set; when unsure, match the phrasing of the nearest reference card.
+
+### Inline links
+
+Wrap any reference to shared game vocabulary in an explicit link so the UI can highlight it and show a hover preview: `[[card:Bull]]`, `[[condition:Burned]]`, `[[trait:Strong]]`, `[[attribute:Anima]]`, `[[position:Spear Bearer]]`, `[[affiliation:Team Baam]]`, `[[series:Incinerate]]`, `[[keyword:Quick]]`, `[[rule:shinsu]]`. The first pipe overrides the displayed text (`[[card:Kranos|Kranos' blade]]`); further pipes are reserved parameters — do not add any yet. Every target must exist: an unknown card, catalog entry, series, glossary keyword, or rule term fails the compile with the source path. Link cards wherever the prose names one — the linked card also appears among the card's related cards. See `docs/COMPILED_CARD_DSL.md` → [Display text and links](./COMPILED_CARD_DSL.md#display-text-and-links) for the full contract.
 
 ### Voice and case
 

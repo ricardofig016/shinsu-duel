@@ -28,12 +28,20 @@
       "triggers": [
         {
           "type": "deploy",
-          "raw": "when i am deployed"
+          "text": [
+            "when i am deployed"
+          ]
         }
       ],
       "cardId": 1
     },
-    "slug": "test_deploy_evolve"
+    "slug": "test_deploy_evolve",
+    "relatedCards": [
+      {
+        "cardId": 1,
+        "kind": "evolution"
+      }
+    ]
   },
   "1": {
     "cardId": 1,
@@ -43,7 +51,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 100,
@@ -62,7 +72,13 @@
     "abilities": [],
     "passives": [],
     "evolvedFrom": 0,
-    "slug": "test_deploy_evolve_ii"
+    "slug": "test_deploy_evolve_ii",
+    "relatedCards": [
+      {
+        "cardId": 0,
+        "kind": "evolution"
+      }
+    ]
   },
   "2": {
     "cardId": 2,
@@ -73,7 +89,9 @@
     "effects": [
       {
         "type": "noop",
-        "raw": "test"
+        "text": [
+          "test"
+        ]
       }
     ],
     "slug": "test_equipment"
@@ -87,7 +105,9 @@
     "effects": [
       {
         "type": "noop",
-        "raw": "test"
+        "text": [
+          "test"
+        ]
       }
     ],
     "slug": "test_skill"
@@ -316,7 +336,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Blinded"
+        "text": [
+          "round start: give me Blinded"
+        ]
       },
       {
         "type": "give_condition",
@@ -328,7 +350,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Burned 2"
+        "text": [
+          "round start: give me Burned 2"
+        ]
       },
       {
         "type": "give_condition",
@@ -340,7 +364,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Cursed 2"
+        "text": [
+          "round start: give me Cursed 2"
+        ]
       },
       {
         "type": "give_condition",
@@ -352,7 +378,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Disabled"
+        "text": [
+          "round start: give me Disabled"
+        ]
       },
       {
         "type": "give_condition",
@@ -364,7 +392,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Doomed"
+        "text": [
+          "round start: give me Doomed"
+        ]
       },
       {
         "type": "give_condition",
@@ -376,7 +406,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Exhausted 2"
+        "text": [
+          "round start: give me Exhausted 2"
+        ]
       },
       {
         "type": "give_condition",
@@ -388,7 +420,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Frozen"
+        "text": [
+          "round start: give me Frozen"
+        ]
       },
       {
         "type": "give_condition",
@@ -400,7 +434,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Ghost"
+        "text": [
+          "round start: give me Ghost"
+        ]
       },
       {
         "type": "give_condition",
@@ -412,7 +448,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Heavy 2"
+        "text": [
+          "round start: give me Heavy 2"
+        ]
       },
       {
         "type": "give_condition",
@@ -424,7 +462,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Poisoned 2"
+        "text": [
+          "round start: give me Poisoned 2"
+        ]
       },
       {
         "type": "give_condition",
@@ -436,7 +476,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Rooted"
+        "text": [
+          "round start: give me Rooted"
+        ]
       },
       {
         "type": "give_condition",
@@ -448,7 +490,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Stunned"
+        "text": [
+          "round start: give me Stunned"
+        ]
       },
       {
         "type": "give_condition",
@@ -460,7 +504,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Weak 2"
+        "text": [
+          "round start: give me Weak 2"
+        ]
       }
     ],
     "slug": "test_unit_conditions"
@@ -496,7 +542,9 @@
         "card": {
           "name": "Shinwonryu"
         },
-        "raw": "create Shinwonryu in your hand"
+        "text": [
+          "create Shinwonryu in your hand"
+        ]
       },
       {
         "type": "heal",
@@ -504,7 +552,9 @@
         "target": {
           "side": "self"
         },
-        "raw": "heal me 3 HP"
+        "text": [
+          "heal me 3 HP"
+        ]
       }
     ],
     "passives": [
@@ -520,11 +570,23 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me all traits currently held by an allied Rachel"
+        "text": [
+          "round start: give me all traits currently held by an allied Rachel"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/akryung.png",
-    "slug": "akryung"
+    "slug": "akryung",
+    "relatedCards": [
+      {
+        "cardId": 68,
+        "kind": "mention"
+      },
+      {
+        "cardId": 75,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/akryung.png"
   },
   "7": {
     "cardId": 7,
@@ -559,7 +621,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "remove a condition from an ally"
+        "text": [
+          "remove a condition from an ally"
+        ]
       }
     ],
     "passives": [
@@ -575,7 +639,9 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "when i am deployed: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+        "text": [
+          "when i am deployed: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+        ]
       },
       {
         "type": "grant_trait",
@@ -589,7 +655,9 @@
         "trigger": {
           "type": "dies"
         },
-        "raw": "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+        "text": [
+          "when i die: give Immune to the Team Rachel ally with the lowest HP that doesn't have Immune"
+        ]
       },
       {
         "type": "light_up",
@@ -598,11 +666,13 @@
           "type": "ally_dies",
           "rank": "regular"
         },
-        "raw": "when an ally Regular dies: Light Up 1"
+        "text": [
+          "when an ally Regular dies: Light Up 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/apple.png",
-    "slug": "apple"
+    "slug": "apple",
+    "artworkPath": "/assets/images/artworks/apple.png"
   },
   "8": {
     "cardId": 8,
@@ -634,11 +704,55 @@
             "side": "enemy"
           }
         },
-        "raw": "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
+        "text": [
+          "if you have an ally Wave Controller, deal 2 to an enemy, otherwise deal 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/baang.png",
-    "slug": "baang"
+    "slug": "baang",
+    "relatedCards": [
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 85,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      },
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/baang.png"
   },
   "9": {
     "cardId": 9,
@@ -669,7 +783,9 @@
           "side": "self"
         },
         "quick": true,
-        "raw": "quick: return me to hand"
+        "text": [
+          "quick: return me to hand"
+        ]
       }
     ],
     "passives": [
@@ -682,11 +798,15 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "when i am deployed: draw an equipment"
+        "text": [
+          "when i am deployed: draw an equipment"
+        ]
       },
       {
         "type": "retain_equipment",
-        "raw": "when i return to hand, i keep my equipments"
+        "text": [
+          "when i return to hand, i keep my equipments"
+        ]
       },
       {
         "type": "create_card",
@@ -696,7 +816,9 @@
         "trigger": {
           "type": "evolve"
         },
-        "raw": "when i evolve: create Phobos in hand"
+        "text": [
+          "when i evolve: create Phobos in hand"
+        ]
       }
     ],
     "evolveInto": {
@@ -708,13 +830,37 @@
             "Dionysos: Legs",
             "Dionysos: Wings"
           ],
-          "raw": "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+          "text": [
+            "i have Dionysos: Arms, Dionysos: Legs and Dionysos: Wings equipped"
+          ]
         }
       ],
       "cardId": 10
     },
-    "artworkPath": "/assets/images/artworks/beta.png",
-    "slug": "beta"
+    "slug": "beta",
+    "relatedCards": [
+      {
+        "cardId": 10,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 16,
+        "kind": "mention"
+      },
+      {
+        "cardId": 17,
+        "kind": "mention"
+      },
+      {
+        "cardId": 18,
+        "kind": "mention"
+      },
+      {
+        "cardId": 65,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/beta.png"
   },
   "10": {
     "cardId": 10,
@@ -724,7 +870,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 4,
@@ -757,13 +905,37 @@
             "side": "self"
           }
         },
-        "raw": "if i have 5+ equipments, give me Lethal"
+        "text": [
+          "if i have 5+ equipments, give me Lethal"
+        ]
       }
     ],
     "passives": [],
     "evolvedFrom": 9,
-    "artworkPath": "/assets/images/artworks/beta_ii.png",
-    "slug": "beta_ii"
+    "slug": "beta_ii",
+    "relatedCards": [
+      {
+        "cardId": 9,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 16,
+        "kind": "mention"
+      },
+      {
+        "cardId": 17,
+        "kind": "mention"
+      },
+      {
+        "cardId": 18,
+        "kind": "mention"
+      },
+      {
+        "cardId": 65,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/beta_ii.png"
   },
   "11": {
     "cardId": 11,
@@ -789,11 +961,13 @@
             }
           }
         ],
-        "raw": "heal the bearer 2 HP and Cleanse the bearer"
+        "text": [
+          "heal the bearer 2 HP and Cleanse the bearer"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/blue_thryssa.png",
-    "slug": "blue_thryssa"
+    "slug": "blue_thryssa",
+    "artworkPath": "/assets/images/artworks/blue_thryssa.png"
   },
   "12": {
     "cardId": 12,
@@ -815,12 +989,20 @@
           "side": "enemy"
         },
         "quick": true,
-        "raw": "quick: deal 3 to an enemy"
+        "text": [
+          "quick: deal 3 to an enemy"
+        ]
       }
     ],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/bull.png",
-    "slug": "bull"
+    "slug": "bull",
+    "relatedCards": [
+      {
+        "cardId": 97,
+        "kind": "mentioned-by"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/bull.png"
   },
   "13": {
     "cardId": 13,
@@ -855,7 +1037,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 2 to an enemy"
+        "text": [
+          "deal 2 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -867,11 +1051,13 @@
           "side": "ally",
           "affiliation": "team-chang"
         },
-        "raw": "allied Team Chang members have Resilient 1"
+        "text": [
+          "allied Team Chang members have Resilient 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/chang_blarode.png",
-    "slug": "chang_blarode"
+    "slug": "chang_blarode",
+    "artworkPath": "/assets/images/artworks/chang_blarode.png"
   },
   "14": {
     "cardId": 14,
@@ -885,7 +1071,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "Cleanse an ally"
+        "text": [
+          "Cleanse an ally"
+        ]
       }
     ],
     "slug": "cleanse_spell"
@@ -898,7 +1086,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 8,
@@ -918,7 +1108,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give me Ghost"
+        "text": [
+          "round start: give me Ghost"
+        ]
       },
       {
         "type": "conditional",
@@ -944,7 +1136,9 @@
             "side": "self"
           }
         },
-        "raw": "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+        "text": [
+          "round start or activation: if there is no Jeonsulsa on the enemy team, Slay me"
+        ]
       },
       {
         "type": "play_jeonsul_baang",
@@ -956,11 +1150,27 @@
             "type": "activation"
           }
         ],
-        "raw": "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+        "text": [
+          "round start or activation: for every 2 HP that i have, play 1 random Jeonsul Baang on a random ally"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/conduit.png",
-    "slug": "conduit"
+    "slug": "conduit",
+    "relatedCards": [
+      {
+        "cardId": 51,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 52,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 73,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/conduit.png"
   },
   "16": {
     "cardId": 16,
@@ -981,13 +1191,39 @@
           "target": {
             "side": "self"
           },
-          "raw": "give me Pierce"
+          "text": [
+            "give me Pierce"
+          ]
         },
-        "raw": "ability: give me Pierce"
+        "text": [
+          "ability: give me Pierce"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/dionysos_arms.png",
-    "slug": "dionysos_arms"
+    "slug": "dionysos_arms",
+    "relatedCards": [
+      {
+        "cardId": 9,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 17,
+        "kind": "mention"
+      },
+      {
+        "cardId": 18,
+        "kind": "mention"
+      },
+      {
+        "cardId": 65,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/dionysos_arms.png"
   },
   "17": {
     "cardId": 17,
@@ -1008,13 +1244,39 @@
             "side": "enemy"
           },
           "quick": true,
-          "raw": "quick: deal 3 to an enemy"
+          "text": [
+            "quick: deal 3 to an enemy"
+          ]
         },
-        "raw": "ability: quick: deal 3 to an enemy"
+        "text": [
+          "ability: quick: deal 3 to an enemy"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/dionysos_legs.png",
-    "slug": "dionysos_legs"
+    "slug": "dionysos_legs",
+    "relatedCards": [
+      {
+        "cardId": 9,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 16,
+        "kind": "mention"
+      },
+      {
+        "cardId": 18,
+        "kind": "mention"
+      },
+      {
+        "cardId": 65,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/dionysos_legs.png"
   },
   "18": {
     "cardId": 18,
@@ -1029,11 +1291,35 @@
         "trigger": {
           "type": "quick_ability_used"
         },
-        "raw": "the bearer's Quick abilities Charge 1"
+        "text": [
+          "the bearer's Quick abilities Charge 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/dionysos_wings.png",
-    "slug": "dionysos_wings"
+    "slug": "dionysos_wings",
+    "relatedCards": [
+      {
+        "cardId": 9,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 16,
+        "kind": "mention"
+      },
+      {
+        "cardId": 17,
+        "kind": "mention"
+      },
+      {
+        "cardId": 65,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/dionysos_wings.png"
   },
   "19": {
     "cardId": 19,
@@ -1066,7 +1352,9 @@
           "side": "enemy"
         },
         "quick": true,
-        "raw": "quick: give an enemy Blinded"
+        "text": [
+          "quick: give an enemy Blinded"
+        ]
       },
       {
         "type": "give_condition",
@@ -1075,7 +1363,9 @@
           "side": "enemy"
         },
         "quick": true,
-        "raw": "quick: give an enemy Ghost"
+        "text": [
+          "quick: give an enemy Ghost"
+        ]
       }
     ],
     "passives": [
@@ -1086,11 +1376,13 @@
         "target": {
           "side": "self"
         },
-        "raw": "the first ability i use each round has Free"
+        "text": [
+          "the first ability i use each round has Free"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/edin_dan.png",
-    "slug": "edin_dan"
+    "slug": "edin_dan",
+    "artworkPath": "/assets/images/artworks/edin_dan.png"
   },
   "20": {
     "cardId": 20,
@@ -1101,7 +1393,9 @@
     "effects": [
       {
         "type": "quick",
-        "raw": "i am Quick"
+        "text": [
+          "i am Quick"
+        ]
       },
       {
         "type": "reclaim_cards",
@@ -1109,11 +1403,13 @@
         "card": {
           "type": "equipment"
         },
-        "raw": "Reclaim 2 equipments"
+        "text": [
+          "Reclaim 2 equipments"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/enna_core.png",
-    "slug": "enna_core"
+    "slug": "enna_core",
+    "artworkPath": "/assets/images/artworks/enna_core.png"
   },
   "21": {
     "cardId": 21,
@@ -1123,7 +1419,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -1134,7 +1432,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +2 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +2 damage"
+        ]
       },
       {
         "type": "modify_stat",
@@ -1143,7 +1443,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's healing abilities heal +2 HP"
+        "text": [
+          "the bearer's healing abilities heal +2 HP"
+        ]
       },
       {
         "type": "modify_stat",
@@ -1152,7 +1454,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has +2 HP"
+        "text": [
+          "the bearer has +2 HP"
+        ]
       },
       {
         "type": "grant_trait",
@@ -1161,11 +1465,55 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Bloodthirsty 1"
+        "text": [
+          "the bearer has Bloodthirsty 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/enryus_thorn.png",
-    "slug": "enryus_thorn"
+    "slug": "enryus_thorn",
+    "relatedCards": [
+      {
+        "cardId": 26,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 28,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 74,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 83,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 85,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/enryus_thorn.png"
   },
   "22": {
     "cardId": 22,
@@ -1200,7 +1548,9 @@
           "type": "equipment",
           "choose": true
         },
-        "raw": "draw an equipment of your choice"
+        "text": [
+          "draw an equipment of your choice"
+        ]
       },
       {
         "type": "switch_position",
@@ -1208,7 +1558,9 @@
           "side": "enemy",
           "can_switch": true
         },
-        "raw": "force an enemy to switch positions"
+        "text": [
+          "force an enemy to switch positions"
+        ]
       }
     ],
     "passives": [
@@ -1219,7 +1571,9 @@
           "type": "draw",
           "cardType": "equipment"
         },
-        "raw": "whenever you draw an equipment, draw again"
+        "text": [
+          "whenever you draw an equipment, draw again"
+        ]
       },
       {
         "type": "reclaim_cards",
@@ -1231,11 +1585,19 @@
           "type": "equip",
           "cardName": "Frog Fisher"
         },
-        "raw": "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
+        "text": [
+          "when i'm equipped with Frog Fisher, Reclaim 1 Equipment card"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/evan_edrok.png",
-    "slug": "evan_edrok"
+    "slug": "evan_edrok",
+    "relatedCards": [
+      {
+        "cardId": 29,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/evan_edrok.png"
   },
   "23": {
     "cardId": 23,
@@ -1266,7 +1628,9 @@
           "side": "enemy",
           "scope": "all"
         },
-        "raw": "give Burned 1 to all enemies"
+        "text": [
+          "give Burned 1 to all enemies"
+        ]
       }
     ],
     "passives": [
@@ -1281,11 +1645,13 @@
         "trigger": {
           "type": "round_end"
         },
-        "raw": "round end: Slay all enemies with Burned 3+"
+        "text": [
+          "round end: Slay all enemies with Burned 3+"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/evankhell.png",
-    "slug": "evankhell"
+    "slug": "evankhell",
+    "artworkPath": "/assets/images/artworks/evankhell.png"
   },
   "24": {
     "cardId": 24,
@@ -1301,7 +1667,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give Burned 1 to an enemy"
+        "text": [
+          "give Burned 1 to an enemy"
+        ]
       },
       {
         "type": "compress_shinsu",
@@ -1309,11 +1677,13 @@
         "card": {
           "attribute": "hwayeomsa"
         },
-        "raw": "Compress 1 from a Hwayeomsa in your hand"
+        "text": [
+          "Compress 1 from a Hwayeomsa in your hand"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/fiery_elephant.png",
-    "slug": "fiery_elephant"
+    "slug": "fiery_elephant",
+    "artworkPath": "/assets/images/artworks/fiery_elephant.png"
   },
   "25": {
     "cardId": 25,
@@ -1323,13 +1693,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
       {
         "type": "quick",
-        "raw": "i am Quick"
+        "text": [
+          "i am Quick"
+        ]
       },
       {
         "type": "create_card",
@@ -1337,11 +1711,31 @@
           "type": "skill",
           "series": "incinerate"
         },
-        "raw": "Spend Fire Charges to create the highest affordable Incinerate in your hand"
+        "text": [
+          "Spend Fire Charges to create the highest affordable Incinerate in your hand"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/fire_core.png",
-    "slug": "fire_core"
+    "slug": "fire_core",
+    "relatedCards": [
+      {
+        "cardId": 40,
+        "kind": "mention"
+      },
+      {
+        "cardId": 41,
+        "kind": "mention"
+      },
+      {
+        "cardId": 42,
+        "kind": "mention"
+      },
+      {
+        "cardId": 43,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/fire_core.png"
   },
   "26": {
     "cardId": 26,
@@ -1352,7 +1746,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -1386,7 +1782,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        ]
       },
       {
         "type": "modify_stat",
@@ -1395,11 +1793,55 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +1 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +1 damage"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/first_thorn_fragment.png",
-    "slug": "first_thorn_fragment"
+    "slug": "first_thorn_fragment",
+    "relatedCards": [
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      },
+      {
+        "cardId": 85,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/first_thorn_fragment.png"
   },
   "27": {
     "cardId": 27,
@@ -1412,7 +1854,9 @@
     "rules": [
       {
         "type": "disable_passives",
-        "raw": "passives have no effect"
+        "text": [
+          "passives have no effect"
+        ]
       }
     ],
     "traits": [],
@@ -1420,8 +1864,8 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/floor_of_death.png",
-    "slug": "floor_of_death"
+    "slug": "floor_of_death",
+    "artworkPath": "/assets/images/artworks/floor_of_death.png"
   },
   "28": {
     "cardId": 28,
@@ -1432,7 +1876,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -1466,7 +1912,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        ]
       },
       {
         "type": "grant_trait",
@@ -1475,11 +1923,55 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Bloodthirsty 1"
+        "text": [
+          "the bearer has Bloodthirsty 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png",
-    "slug": "fourth_thorn_fragment"
+    "slug": "fourth_thorn_fragment",
+    "relatedCards": [
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      },
+      {
+        "cardId": 85,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png"
   },
   "29": {
     "cardId": 29,
@@ -1494,11 +1986,19 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Barrier"
+        "text": [
+          "the bearer has Barrier"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/frog_fisher.png",
-    "slug": "frog_fisher"
+    "slug": "frog_fisher",
+    "relatedCards": [
+      {
+        "cardId": 22,
+        "kind": "mentioned-by"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/frog_fisher.png"
   },
   "30": {
     "cardId": 30,
@@ -1524,12 +2024,14 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 5 to an enemy"
+        "text": [
+          "deal 5 to an enemy"
+        ]
       }
     ],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/gyetang.png",
-    "slug": "gyetang"
+    "slug": "gyetang",
+    "artworkPath": "/assets/images/artworks/gyetang.png"
   },
   "31": {
     "cardId": 31,
@@ -1564,7 +2066,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 6 to an enemy"
+        "text": [
+          "deal 6 to an enemy"
+        ]
       },
       {
         "type": "grant_trait",
@@ -1573,7 +2077,9 @@
         "target": {
           "side": "self"
         },
-        "raw": "give me Strong 1"
+        "text": [
+          "give me Strong 1"
+        ]
       }
     ],
     "passives": [
@@ -1596,20 +2102,30 @@
             "side": "self"
           }
         },
-        "raw": "if i have an allied Guide, i have Taunt"
+        "text": [
+          "if i have an allied Guide, i have Taunt"
+        ]
       }
     ],
     "evolveInto": {
       "triggers": [
         {
           "type": "equipment_ignited",
-          "raw": "when my equipment ignites"
+          "text": [
+            "when my equipment ignites"
+          ]
         }
       ],
       "cardId": 32
     },
-    "artworkPath": "/assets/images/artworks/ha_yuri_zahard.png",
-    "slug": "ha_yuri_zahard"
+    "slug": "ha_yuri_zahard",
+    "relatedCards": [
+      {
+        "cardId": 32,
+        "kind": "evolution"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/ha_yuri_zahard.png"
   },
   "32": {
     "cardId": 32,
@@ -1619,7 +2135,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 9,
@@ -1649,7 +2167,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 7 to an enemy"
+        "text": [
+          "deal 7 to an enemy"
+        ]
       },
       {
         "type": "grant_trait",
@@ -1658,7 +2178,9 @@
         "target": {
           "side": "self"
         },
-        "raw": "give me Strong 1"
+        "text": [
+          "give me Strong 1"
+        ]
       }
     ],
     "passives": [
@@ -1681,7 +2203,9 @@
             "side": "self"
           }
         },
-        "raw": "if i have an allied Guide, i have Taunt"
+        "text": [
+          "if i have an allied Guide, i have Taunt"
+        ]
       },
       {
         "type": "copy_traits",
@@ -1700,12 +2224,20 @@
             "side": "ally"
           }
         },
-        "raw": "when you silence an enemy, give me its traits"
+        "text": [
+          "when you silence an enemy, give me its traits"
+        ]
       }
     ],
     "evolvedFrom": 31,
-    "artworkPath": "/assets/images/artworks/ha_yuri_zahard_ii.png",
-    "slug": "ha_yuri_zahard_ii"
+    "slug": "ha_yuri_zahard_ii",
+    "relatedCards": [
+      {
+        "cardId": 31,
+        "kind": "evolution"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/ha_yuri_zahard_ii.png"
   },
   "33": {
     "cardId": 33,
@@ -1718,7 +2250,9 @@
         "type": "has_ally",
         "affiliation": "yeon-family",
         "attribute": "hwayeomsa",
-        "raw": "you have an ally yeon family member or Hwayeomsa"
+        "text": [
+          "you have an ally yeon family member or Hwayeomsa"
+        ]
       }
     ],
     "effects": [
@@ -1741,11 +2275,13 @@
             }
           }
         ],
-        "raw": "Cleanse all allies and heal each of them 4 HP"
+        "text": [
+          "Cleanse all allies and heal each of them 4 HP"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/healing_flames.png",
-    "slug": "healing_flames"
+    "slug": "healing_flames",
+    "artworkPath": "/assets/images/artworks/healing_flames.png"
   },
   "34": {
     "cardId": 34,
@@ -1760,7 +2296,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "heal an ally 5 HP"
+        "text": [
+          "heal an ally 5 HP"
+        ]
       }
     ],
     "slug": "healing_potion"
@@ -1792,11 +2330,13 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: give Ghost to all Ranker and High Ranker units"
+        "text": [
+          "round start: give Ghost to all Ranker and High Ranker units"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/hell_express.png",
-    "slug": "hell_express"
+    "slug": "hell_express",
+    "artworkPath": "/assets/images/artworks/hell_express.png"
   },
   "36": {
     "cardId": 36,
@@ -1822,7 +2362,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 4 to an enemy"
+        "text": [
+          "deal 4 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -1843,11 +2385,19 @@
             "side": "self"
           }
         },
-        "raw": "if I have an allied Yeo Miseng, I have Strong 1"
+        "text": [
+          "if I have an allied Yeo Miseng, I have Strong 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/hon_akraptor.png",
-    "slug": "hon_akraptor"
+    "slug": "hon_akraptor",
+    "relatedCards": [
+      {
+        "cardId": 93,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/hon_akraptor.png"
   },
   "37": {
     "cardId": 37,
@@ -1871,7 +2421,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 2 to an enemy"
+        "text": [
+          "deal 2 to an enemy"
+        ]
       },
       {
         "type": "deal_damage",
@@ -1880,12 +2432,14 @@
           "side": "enemy",
           "condition": "exhausted"
         },
-        "raw": "deal 3 to an enemy with Exhausted"
+        "text": [
+          "deal 3 to an enemy with Exhausted"
+        ]
       }
     ],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/hong_chunhwa.png",
-    "slug": "hong_chunhwa"
+    "slug": "hong_chunhwa",
+    "artworkPath": "/assets/images/artworks/hong_chunhwa.png"
   },
   "38": {
     "cardId": 38,
@@ -1916,7 +2470,9 @@
           "choose": true
         },
         "owner": "opponent",
-        "raw": "your opponent discards a regular of your choice"
+        "text": [
+          "your opponent discards a regular of your choice"
+        ]
       },
       {
         "type": "give_condition",
@@ -1926,7 +2482,9 @@
           "side": "enemy",
           "scope": "backline"
         },
-        "raw": "give Heavy 1 to a backline enemy"
+        "text": [
+          "give Heavy 1 to a backline enemy"
+        ]
       }
     ],
     "passives": [
@@ -1948,11 +2506,13 @@
             ]
           }
         },
-        "raw": "while i have an ally team baam or team fug member, opponents skills cost 1 more"
+        "text": [
+          "while i have an ally team baam or team fug member, opponents skills cost 1 more"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/hwa_ryun.png",
-    "slug": "hwa_ryun"
+    "slug": "hwa_ryun",
+    "artworkPath": "/assets/images/artworks/hwa_ryun.png"
   },
   "39": {
     "cardId": 39,
@@ -1964,7 +2524,9 @@
       {
         "type": "bearer_has",
         "affiliation": "khun-family",
-        "raw": "khun family member"
+        "text": [
+          "khun family member"
+        ]
       }
     ],
     "effects": [
@@ -1981,7 +2543,9 @@
             "side": "enemy"
           }
         },
-        "raw": "the bearer's abilities give Frozen to enemies"
+        "text": [
+          "the bearer's abilities give Frozen to enemies"
+        ]
       },
       {
         "type": "grant_trait",
@@ -1990,10 +2554,22 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Pierce 1"
+        "text": [
+          "the bearer has Pierce 1"
+        ]
       }
     ],
-    "slug": "ice_spear"
+    "slug": "ice_spear",
+    "relatedCards": [
+      {
+        "cardId": 49,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 50,
+        "kind": "evolution"
+      }
+    ]
   },
   "40": {
     "cardId": 40,
@@ -2004,13 +2580,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 1,
-        "raw": "create me by spending 1 Fire Charge"
+        "text": [
+          "create me by spending 1 Fire Charge"
+        ]
       }
     ],
     "effects": [
@@ -2020,11 +2600,31 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 1 to an enemy"
+        "text": [
+          "deal 1 to an enemy"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_i.png",
-    "slug": "incinerate_i"
+    "slug": "incinerate_i",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 41,
+        "kind": "series"
+      },
+      {
+        "cardId": 42,
+        "kind": "series"
+      },
+      {
+        "cardId": 43,
+        "kind": "series"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_i.png"
   },
   "41": {
     "cardId": 41,
@@ -2035,13 +2635,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 3,
-        "raw": "create me by spending 3 Fire Charges"
+        "text": [
+          "create me by spending 3 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2052,11 +2656,31 @@
           "side": "enemy",
           "count": 2
         },
-        "raw": "deal 2 to 2 enemies"
+        "text": [
+          "deal 2 to 2 enemies"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_ii.png",
-    "slug": "incinerate_ii"
+    "slug": "incinerate_ii",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 40,
+        "kind": "series"
+      },
+      {
+        "cardId": 42,
+        "kind": "series"
+      },
+      {
+        "cardId": 43,
+        "kind": "series"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_ii.png"
   },
   "42": {
     "cardId": 42,
@@ -2067,13 +2691,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 5,
-        "raw": "create me by spending 5 Fire Charges"
+        "text": [
+          "create me by spending 5 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2099,11 +2727,31 @@
             }
           }
         ],
-        "raw": "deal 2 to 3 enemies and give them Burn"
+        "text": [
+          "deal 2 to 3 enemies and give them Burn"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_iii.png",
-    "slug": "incinerate_iii"
+    "slug": "incinerate_iii",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 40,
+        "kind": "series"
+      },
+      {
+        "cardId": 41,
+        "kind": "series"
+      },
+      {
+        "cardId": 43,
+        "kind": "series"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_iii.png"
   },
   "43": {
     "cardId": 43,
@@ -2114,13 +2762,17 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       },
       {
         "type": "generated_by",
         "resource": "fire_charge",
         "amount": 7,
-        "raw": "create me by spending 7 Fire Charges"
+        "text": [
+          "create me by spending 7 Fire Charges"
+        ]
       }
     ],
     "effects": [
@@ -2145,11 +2797,31 @@
             }
           }
         ],
-        "raw": "deal 3 to all enemies and give them Burn 2"
+        "text": [
+          "deal 3 to all enemies and give them Burn 2"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/incinerate_iv.png",
-    "slug": "incinerate_iv"
+    "slug": "incinerate_iv",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 40,
+        "kind": "series"
+      },
+      {
+        "cardId": 41,
+        "kind": "series"
+      },
+      {
+        "cardId": 42,
+        "kind": "series"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/incinerate_iv.png"
   },
   "44": {
     "cardId": 44,
@@ -2200,7 +2872,9 @@
             }
           ]
         },
-        "raw": "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
+        "text": [
+          "spend 1: deal 1 to 2 enemies and give Burned 1 to one of them"
+        ]
       },
       {
         "type": "heal",
@@ -2209,7 +2883,9 @@
           "side": "ally",
           "affiliation": "prince-of-the-redlight-district"
         },
-        "raw": "heal a Prince of the Redlight District member 2 HP"
+        "text": [
+          "heal a Prince of the Redlight District member 2 HP"
+        ]
       }
     ],
     "passives": [
@@ -2223,11 +2899,13 @@
         "when": {
           "condition": "burned"
         },
-        "raw": "i deal +1 damage to Burned units"
+        "text": [
+          "i deal +1 damage to Burned units"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/ja_wangnan.png",
-    "slug": "ja_wangnan"
+    "slug": "ja_wangnan",
+    "artworkPath": "/assets/images/artworks/ja_wangnan.png"
   },
   "45": {
     "cardId": 45,
@@ -2258,7 +2936,9 @@
           "side": "enemy",
           "has_passive": true
         },
-        "raw": "Silence an enemy that has at least one passive"
+        "text": [
+          "Silence an enemy that has at least one passive"
+        ]
       },
       {
         "type": "spend_shinsu",
@@ -2269,12 +2949,14 @@
             "side": "enemy"
           }
         },
-        "raw": "spend 2: use an enemy ability"
+        "text": [
+          "spend 2: use an enemy ability"
+        ]
       }
     ],
     "passives": [],
-    "artworkPath": "/assets/images/artworks/jyu_viole_grace.png",
-    "slug": "jyu_viole_grace"
+    "slug": "jyu_viole_grace",
+    "artworkPath": "/assets/images/artworks/jyu_viole_grace.png"
   },
   "46": {
     "cardId": 46,
@@ -2306,7 +2988,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 7 to an enemy"
+        "text": [
+          "deal 7 to an enemy"
+        ]
       },
       {
         "type": "spend_shinsu",
@@ -2333,7 +3017,9 @@
             }
           ]
         },
-        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+        "text": [
+          "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+        ]
       }
     ],
     "passives": [
@@ -2344,7 +3030,9 @@
           "side": "ally",
           "affiliation": "karakas-servants"
         },
-        "raw": "karaka's servants' abilities have Quick"
+        "text": [
+          "karaka's servants' abilities have Quick"
+        ]
       }
     ],
     "evolveInto": {
@@ -2353,25 +3041,53 @@
           "type": "equip",
           "cardName": "Karaka's Armor Suit",
           "position": "fisherman",
-          "raw": "Fisherman: equip with Karaka's Armor Suit"
+          "text": [
+            "Fisherman: equip with Karaka's Armor Suit"
+          ]
         },
         {
           "type": "equip",
           "cardName": "Steel Tree",
           "position": "wave-controller",
-          "raw": "Wave Controller: equip with Steel Tree"
+          "text": [
+            "Wave Controller: equip with Steel Tree"
+          ]
         },
         {
           "type": "equip",
           "cardName": "Purple Dementor",
           "position": "scout",
-          "raw": "Scout: equip with Purple Dementor"
+          "text": [
+            "Scout: equip with Purple Dementor"
+          ]
         }
       ],
       "cardId": 47
     },
-    "artworkPath": "/assets/images/artworks/karaka.png",
-    "slug": "karaka"
+    "slug": "karaka",
+    "relatedCards": [
+      {
+        "cardId": 47,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 48,
+        "kind": "mention"
+      },
+      {
+        "cardId": 66,
+        "kind": "mention"
+      },
+      {
+        "cardId": 77,
+        "kind": "mention"
+      },
+      {
+        "cardId": 64,
+        "kind": "mentioned-by"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/karaka.png"
   },
   "47": {
     "cardId": 47,
@@ -2381,7 +3097,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 9,
@@ -2408,7 +3126,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 7 to an enemy"
+        "text": [
+          "deal 7 to an enemy"
+        ]
       },
       {
         "type": "spend_shinsu",
@@ -2435,7 +3155,9 @@
             }
           ]
         },
-        "raw": "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+        "text": [
+          "spend 1: give Rooted to 2 enemies and deal 3 to all Rooted enemies"
+        ]
       }
     ],
     "passives": [
@@ -2446,7 +3168,9 @@
           "side": "ally",
           "affiliation": "karakas-servants"
         },
-        "raw": "karaka's servants' abilities have Quick"
+        "text": [
+          "karaka's servants' abilities have Quick"
+        ]
       },
       {
         "type": "deal_damage",
@@ -2459,12 +3183,36 @@
         "trigger": {
           "type": "round_end"
         },
-        "raw": "round end: deal 3 to all Rooted enemies"
+        "text": [
+          "round end: deal 3 to all Rooted enemies"
+        ]
       }
     ],
     "evolvedFrom": 46,
-    "artworkPath": "/assets/images/artworks/karaka_ii.png",
-    "slug": "karaka_ii"
+    "slug": "karaka_ii",
+    "relatedCards": [
+      {
+        "cardId": 46,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 48,
+        "kind": "mention"
+      },
+      {
+        "cardId": 66,
+        "kind": "mention"
+      },
+      {
+        "cardId": 77,
+        "kind": "mention"
+      },
+      {
+        "cardId": 64,
+        "kind": "mentioned-by"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/karaka_ii.png"
   },
   "48": {
     "cardId": 48,
@@ -2476,7 +3224,9 @@
       {
         "type": "deployed_as",
         "position": "fisherman",
-        "raw": "deployed as Fisherman"
+        "text": [
+          "deployed as Fisherman"
+        ]
       }
     ],
     "effects": [
@@ -2487,7 +3237,9 @@
           "type": "started_with_card",
           "cardName": "Ha Jinsung"
         },
-        "raw": "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+        "text": [
+          "if you started the game with Ha Jinsung in your deck, i cost 2 less"
+        ]
       },
       {
         "type": "grant_trait",
@@ -2495,10 +3247,34 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Barrier"
+        "text": [
+          "the bearer has Barrier"
+        ]
       }
     ],
-    "slug": "karakas_armor_suit"
+    "slug": "karakas_armor_suit",
+    "relatedCards": [
+      {
+        "cardId": 46,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 47,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 66,
+        "kind": "mention"
+      },
+      {
+        "cardId": 77,
+        "kind": "mention"
+      },
+      {
+        "cardId": 64,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "49": {
     "cardId": 49,
@@ -2529,7 +3305,9 @@
       {
         "type": "light_up",
         "amount": 1,
-        "raw": "Light Up 1"
+        "text": [
+          "Light Up 1"
+        ]
       }
     ],
     "passives": [],
@@ -2538,13 +3316,25 @@
         {
           "type": "equip",
           "cardName": "Ice Spear",
-          "raw": "i am equipped with Ice Spear"
+          "text": [
+            "i am equipped with Ice Spear"
+          ]
         }
       ],
       "cardId": 50
     },
-    "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png",
-    "slug": "khun_aguero_agnis"
+    "slug": "khun_aguero_agnis",
+    "relatedCards": [
+      {
+        "cardId": 50,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 39,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png"
   },
   "50": {
     "cardId": 50,
@@ -2554,7 +3344,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 3,
@@ -2582,7 +3374,9 @@
         "type": "light_up",
         "amount": 1,
         "position": "light-bearer",
-        "raw": "light bearer: Light Up 1"
+        "text": [
+          "light bearer: Light Up 1"
+        ]
       },
       {
         "type": "deal_damage",
@@ -2591,7 +3385,9 @@
           "side": "enemy"
         },
         "position": "spear-bearer",
-        "raw": "spear bearer: deal 2 to an enemy"
+        "text": [
+          "spear bearer: deal 2 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -2601,12 +3397,24 @@
         "target": {
           "side": "self"
         },
-        "raw": "i ignore Taunt"
+        "text": [
+          "i ignore Taunt"
+        ]
       }
     ],
     "evolvedFrom": 49,
-    "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png",
-    "slug": "khun_aguero_agnis_ii"
+    "slug": "khun_aguero_agnis_ii",
+    "relatedCards": [
+      {
+        "cardId": 49,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 39,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png"
   },
   "51": {
     "cardId": 51,
@@ -2639,7 +3447,9 @@
           "side": "enemy",
           "scope": "frontline"
         },
-        "raw": "deal 3 to a frontline enemy"
+        "text": [
+          "deal 3 to a frontline enemy"
+        ]
       },
       {
         "type": "sequence",
@@ -2661,7 +3471,9 @@
             }
           }
         ],
-        "raw": "heal enemy Conduit 2 HP and activate it"
+        "text": [
+          "heal enemy Conduit 2 HP and activate it"
+        ]
       }
     ],
     "passives": [],
@@ -2670,13 +3482,29 @@
         {
           "type": "given",
           "item": "Redan",
-          "raw": "Redan is played on me"
+          "text": [
+            "Redan is played on me"
+          ]
         }
       ],
       "cardId": 52
     },
-    "artworkPath": "/assets/images/artworks/khun_ran.png",
-    "slug": "khun_ran"
+    "slug": "khun_ran",
+    "relatedCards": [
+      {
+        "cardId": 52,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 15,
+        "kind": "mention"
+      },
+      {
+        "cardId": 73,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/khun_ran.png"
   },
   "52": {
     "cardId": 52,
@@ -2686,7 +3514,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 5,
@@ -2735,7 +3565,9 @@
             }
           }
         ],
-        "raw": "deal 3 to a frontline enemy, heal enemy Conduit 2 HP and activate it"
+        "text": [
+          "deal 3 to a frontline enemy, heal enemy Conduit 2 HP and activate it"
+        ]
       }
     ],
     "passives": [
@@ -2756,12 +3588,28 @@
             "cardName": "Khun Ran"
           }
         ],
-        "raw": "round end: create Redan in your hand and revert me to Khun Ran"
+        "text": [
+          "round end: create Redan in your hand and revert me to Khun Ran"
+        ]
       }
     ],
     "evolvedFrom": 51,
-    "artworkPath": "/assets/images/artworks/khun_ran_ii.png",
-    "slug": "khun_ran_ii"
+    "slug": "khun_ran_ii",
+    "relatedCards": [
+      {
+        "cardId": 51,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 15,
+        "kind": "mention"
+      },
+      {
+        "cardId": 73,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/khun_ran_ii.png"
   },
   "53": {
     "cardId": 53,
@@ -2783,7 +3631,9 @@
           "type": "deal_damage",
           "amount": 7
         },
-        "raw": "when my bearer deals 7+ damage to a single target, Disarm it"
+        "text": [
+          "when my bearer deals 7+ damage to a single target, Disarm it"
+        ]
       }
     ],
     "igniteInto": {
@@ -2791,12 +3641,20 @@
         {
           "type": "deal_damage",
           "amount": 10,
-          "raw": "the bearer deals 10+ damage to a single target"
+          "text": [
+            "the bearer deals 10+ damage to a single target"
+          ]
         }
       ],
       "cardId": 54
     },
-    "slug": "kranos"
+    "slug": "kranos",
+    "relatedCards": [
+      {
+        "cardId": 54,
+        "kind": "ignition"
+      }
+    ]
   },
   "54": {
     "cardId": 54,
@@ -2806,7 +3664,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -2837,11 +3697,19 @@
           "type": "deal_damage",
           "amount": 7
         },
-        "raw": "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"
+        "text": [
+          "when my bearer deals 7+ damage to a single target, Disarm it and Silence it"
+        ]
       }
     ],
     "ignitedFrom": 53,
-    "slug": "kranos_ignited"
+    "slug": "kranos_ignited",
+    "relatedCards": [
+      {
+        "cardId": 53,
+        "kind": "ignition"
+      }
+    ]
   },
   "55": {
     "cardId": 55,
@@ -2875,7 +3743,9 @@
           "zone": "discard",
           "owner": "you"
         },
-        "raw": "Disarm an enemy and send the equipment to your discard pile"
+        "text": [
+          "Disarm an enemy and send the equipment to your discard pile"
+        ]
       },
       {
         "type": "give_condition",
@@ -2884,7 +3754,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give an enemy Heavy 1"
+        "text": [
+          "give an enemy Heavy 1"
+        ]
       }
     ],
     "passives": [
@@ -2898,11 +3770,13 @@
           "type": "reclaim",
           "cardType": "equipment"
         },
-        "raw": "when you reclaim an equipment, Compress 1 from it"
+        "text": [
+          "when you reclaim an equipment, Compress 1 from it"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/kurudan.png",
-    "slug": "kurudan"
+    "slug": "kurudan",
+    "artworkPath": "/assets/images/artworks/kurudan.png"
   },
   "56": {
     "cardId": 56,
@@ -2924,7 +3798,9 @@
         "target": {
           "side": "any"
         },
-        "raw": "give Burned 1 to a unit"
+        "text": [
+          "give Burned 1 to a unit"
+        ]
       }
     ],
     "slug": "lightning_baang"
@@ -2960,7 +3836,9 @@
         },
         "from": "game",
         "onto": "self",
-        "raw": "summon a random 2 cost Shinheuh"
+        "text": [
+          "summon a random 2 cost Shinheuh"
+        ]
       },
       {
         "type": "steal",
@@ -2968,7 +3846,9 @@
           "kind": "shinheuh",
           "cost": "cheapest"
         },
-        "raw": "steal the enemy's cheapest Shinheuh"
+        "text": [
+          "steal the enemy's cheapest Shinheuh"
+        ]
       }
     ],
     "passives": [
@@ -2988,7 +3868,9 @@
             "side": "enemy"
           }
         },
-        "raw": "wave controller: your frontline Shinheuh's abilities give Poisoned 1"
+        "text": [
+          "wave controller: your frontline Shinheuh's abilities give Poisoned 1"
+        ]
       },
       {
         "type": "modify_ability",
@@ -3006,11 +3888,13 @@
             "side": "enemy"
           }
         },
-        "raw": "scout: your backline Shinheuh's abilities give Ghost"
+        "text": [
+          "scout: your backline Shinheuh's abilities give Ghost"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/lo_po_bia_ren.png",
-    "slug": "lo_po_bia_ren"
+    "slug": "lo_po_bia_ren",
+    "artworkPath": "/assets/images/artworks/lo_po_bia_ren.png"
   },
   "58": {
     "cardId": 58,
@@ -3047,7 +3931,9 @@
           "random": true,
           "exclude_self": true
         },
-        "raw": "give me a random affiliation of another ally"
+        "text": [
+          "give me a random affiliation of another ally"
+        ]
       },
       {
         "type": "give_condition",
@@ -3056,7 +3942,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give Poisoned 4 to an enemy"
+        "text": [
+          "give Poisoned 4 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -3070,7 +3958,9 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "when i am deployed: kill an ally backliner"
+        "text": [
+          "when i am deployed: kill an ally backliner"
+        ]
       },
       {
         "type": "heal",
@@ -3083,7 +3973,9 @@
         "trigger": {
           "type": "round_start"
         },
-        "raw": "round start: heal all ally members of my affiliations 1 HP"
+        "text": [
+          "round start: heal all ally members of my affiliations 1 HP"
+        ]
       }
     ],
     "slug": "michael"
@@ -3112,7 +4004,9 @@
         "owner": "opponent",
         "quick": true,
         "position": "scout",
-        "raw": "scout: quick: reveal a random card in the opponent's hand"
+        "text": [
+          "scout: quick: reveal a random card in the opponent's hand"
+        ]
       },
       {
         "type": "deal_damage",
@@ -3121,7 +4015,9 @@
           "side": "enemy"
         },
         "position": "fisherman",
-        "raw": "fisherman: deal 1 to an enemy"
+        "text": [
+          "fisherman: deal 1 to an enemy"
+        ]
       }
     ],
     "passives": [],
@@ -3139,18 +4035,24 @@
       {
         "type": "prevent_evolve",
         "position": "chosen",
-        "raw": "all units in the chosen position cannot evolve"
+        "text": [
+          "all units in the chosen position cannot evolve"
+        ]
       },
       {
         "type": "prevent_equip",
         "position": "chosen",
-        "raw": "all units in the chosen position cannot be equipped"
+        "text": [
+          "all units in the chosen position cannot be equipped"
+        ]
       },
       {
         "type": "grant_global_condition",
         "condition": "rooted",
         "position": "chosen",
-        "raw": "all units in the chosen position have Rooted"
+        "text": [
+          "all units in the chosen position have Rooted"
+        ]
       }
     ],
     "traits": [],
@@ -3163,11 +4065,13 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "deploy: choose a position"
+        "text": [
+          "deploy: choose a position"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/name_hunt_station.png",
-    "slug": "name_hunt_station"
+    "slug": "name_hunt_station",
+    "artworkPath": "/assets/images/artworks/name_hunt_station.png"
   },
   "61": {
     "cardId": 61,
@@ -3183,7 +4087,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +3 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +3 damage"
+        ]
       }
     ],
     "igniteInto": {
@@ -3191,13 +4097,21 @@
         {
           "type": "slay",
           "target": "unit",
-          "raw": "the bearer Slays a unit"
+          "text": [
+            "the bearer Slays a unit"
+          ]
         }
       ],
       "cardId": 62
     },
-    "artworkPath": "/assets/images/artworks/narumada.png",
-    "slug": "narumada"
+    "slug": "narumada",
+    "relatedCards": [
+      {
+        "cardId": 62,
+        "kind": "ignition"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/narumada.png"
   },
   "62": {
     "cardId": 62,
@@ -3207,7 +4121,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -3218,7 +4134,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's damage-dealing abilities deal +3 damage"
+        "text": [
+          "the bearer's damage-dealing abilities deal +3 damage"
+        ]
       },
       {
         "type": "give_condition",
@@ -3230,12 +4148,20 @@
         "trigger": {
           "type": "deal_damage"
         },
-        "raw": "the bearer's damage-dealing abilities give Exhausted 1"
+        "text": [
+          "the bearer's damage-dealing abilities give Exhausted 1"
+        ]
       }
     ],
     "ignitedFrom": 61,
-    "artworkPath": "/assets/images/artworks/narumada_ignited.png",
-    "slug": "narumada_ignited"
+    "slug": "narumada_ignited",
+    "relatedCards": [
+      {
+        "cardId": 61,
+        "kind": "ignition"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/narumada_ignited.png"
   },
   "63": {
     "cardId": 63,
@@ -3271,7 +4197,9 @@
           "side": "enemy"
         },
         "position": "spear-bearer",
-        "raw": "spear bearer: deal 7 to an enemy"
+        "text": [
+          "spear bearer: deal 7 to an enemy"
+        ]
       },
       {
         "type": "sequence",
@@ -3291,7 +4219,9 @@
             }
           }
         ],
-        "raw": "give Stunned and deal 2 to an enemy"
+        "text": [
+          "give Stunned and deal 2 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -3307,7 +4237,9 @@
         "trigger": {
           "type": "deal_damage"
         },
-        "raw": "when i deal damage to an enemy: Disarm them"
+        "text": [
+          "when i deal damage to an enemy: Disarm them"
+        ]
       },
       {
         "type": "grant_trait",
@@ -3318,7 +4250,9 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "when i am deployed: give Barrier to an ally"
+        "text": [
+          "when i am deployed: give Barrier to an ally"
+        ]
       }
     ],
     "slug": "novick"
@@ -3350,7 +4284,9 @@
           "side": "enemy",
           "scope": "backline"
         },
-        "raw": "give Poisoned 1 to a backline enemy"
+        "text": [
+          "give Poisoned 1 to a backline enemy"
+        ]
       }
     ],
     "passives": [
@@ -3366,10 +4302,34 @@
           "type": "has_equipped",
           "cardName": "Purple Dementor"
         },
-        "raw": "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
+        "text": [
+          "if i have Purple Dementor equipped, i give Poisoned +2 to High Ranker units"
+        ]
       }
     ],
-    "slug": "pedro"
+    "slug": "pedro",
+    "relatedCards": [
+      {
+        "cardId": 66,
+        "kind": "mention"
+      },
+      {
+        "cardId": 46,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 47,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 48,
+        "kind": "mention"
+      },
+      {
+        "cardId": 77,
+        "kind": "mention"
+      }
+    ]
   },
   "65": {
     "cardId": 65,
@@ -3379,7 +4339,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -3389,11 +4351,35 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's abilities trigger twice"
+        "text": [
+          "the bearer's abilities trigger twice"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/phobos.png",
-    "slug": "phobos"
+    "slug": "phobos",
+    "relatedCards": [
+      {
+        "cardId": 9,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 10,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 16,
+        "kind": "mention"
+      },
+      {
+        "cardId": 17,
+        "kind": "mention"
+      },
+      {
+        "cardId": 18,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/phobos.png"
   },
   "66": {
     "cardId": 66,
@@ -3405,7 +4391,9 @@
       {
         "type": "deployed_as",
         "position": "scout",
-        "raw": "deployed as Scout"
+        "text": [
+          "deployed as Scout"
+        ]
       }
     ],
     "effects": [
@@ -3416,7 +4404,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Resilient 2"
+        "text": [
+          "the bearer has Resilient 2"
+        ]
       },
       {
         "type": "grant_ability",
@@ -3430,12 +4420,38 @@
           "target": {
             "side": "enemy"
           },
-          "raw": "give Poisoned 4 to an enemy"
+          "text": [
+            "give Poisoned 4 to an enemy"
+          ]
         },
-        "raw": "ability: give Poisoned 4 to an enemy"
+        "text": [
+          "ability: give Poisoned 4 to an enemy"
+        ]
       }
     ],
-    "slug": "purple_dementor"
+    "slug": "purple_dementor",
+    "relatedCards": [
+      {
+        "cardId": 46,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 64,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 47,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 48,
+        "kind": "mention"
+      },
+      {
+        "cardId": 77,
+        "kind": "mention"
+      }
+    ]
   },
   "67": {
     "cardId": 67,
@@ -3472,7 +4488,9 @@
             "condition": "burned"
           }
         },
-        "raw": "spend 3: deal 2 to all Burned enemies"
+        "text": [
+          "spend 3: deal 2 to all Burned enemies"
+        ]
       }
     ],
     "passives": [
@@ -3487,11 +4505,55 @@
           "type": "skill_played",
           "cardName": "Baang"
         },
-        "raw": "Baang gives Burned 1"
+        "text": [
+          "Baang gives Burned 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/quaetro_blitz.png",
-    "slug": "quaetro_blitz"
+    "slug": "quaetro_blitz",
+    "relatedCards": [
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 86,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 85,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      },
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/quaetro_blitz.png"
   },
   "68": {
     "cardId": 68,
@@ -3538,7 +4600,9 @@
             "numeric": true
           }
         ],
-        "raw": "kill an ally to Light Up 3 and give me a random numeric trait"
+        "text": [
+          "kill an ally to Light Up 3 and give me a random numeric trait"
+        ]
       },
       {
         "type": "spend_shinsu",
@@ -3551,11 +4615,23 @@
           "from": "deck_or_hand",
           "onto": "self"
         },
-        "raw": "spend 3: summon Akryung from your deck or hand"
+        "text": [
+          "spend 3: summon Akryung from your deck or hand"
+        ]
       }
     ],
     "passives": [],
-    "slug": "rachel"
+    "slug": "rachel",
+    "relatedCards": [
+      {
+        "cardId": 6,
+        "kind": "mention"
+      },
+      {
+        "cardId": 75,
+        "kind": "mention"
+      }
+    ]
   },
   "69": {
     "cardId": 69,
@@ -3585,7 +4661,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 4 to an enemy"
+        "text": [
+          "deal 4 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -3599,7 +4677,9 @@
         "trigger": {
           "type": "evolve"
         },
-        "raw": "when i evolve: gain Bloodthirsty 1"
+        "text": [
+          "when i evolve: gain Bloodthirsty 1"
+        ]
       }
     ],
     "evolveInto": {
@@ -3607,13 +4687,25 @@
         {
           "type": "skills_played",
           "count": 7,
-          "raw": "when you have played 7 skills this game"
+          "text": [
+            "when you have played 7 skills this game"
+          ]
         }
       ],
       "cardId": 70
     },
-    "artworkPath": "/assets/images/artworks/rak_wraithraiser.png",
-    "slug": "rak_wraithraiser"
+    "slug": "rak_wraithraiser",
+    "relatedCards": [
+      {
+        "cardId": 70,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 71,
+        "kind": "evolution"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser.png"
   },
   "70": {
     "cardId": 70,
@@ -3623,7 +4715,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 7,
@@ -3663,7 +4757,9 @@
             }
           }
         ],
-        "raw": "deal 7 to an enemy and give them Frozen"
+        "text": [
+          "deal 7 to an enemy and give them Frozen"
+        ]
       }
     ],
     "passives": [
@@ -3677,7 +4773,9 @@
         "trigger": {
           "type": "evolve"
         },
-        "raw": "when i evolve: gain Bloodthirsty 1"
+        "text": [
+          "when i evolve: gain Bloodthirsty 1"
+        ]
       }
     ],
     "evolveInto": {
@@ -3685,14 +4783,26 @@
         {
           "type": "skills_played",
           "count": 12,
-          "raw": "when you have played 12 skills this game"
+          "text": [
+            "when you have played 12 skills this game"
+          ]
         }
       ],
       "cardId": 71
     },
     "evolvedFrom": 69,
-    "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png",
-    "slug": "rak_wraithraiser_ii"
+    "slug": "rak_wraithraiser_ii",
+    "relatedCards": [
+      {
+        "cardId": 69,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 71,
+        "kind": "evolution"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png"
   },
   "71": {
     "cardId": 71,
@@ -3702,7 +4812,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 9,
@@ -3743,13 +4855,25 @@
           }
         ],
         "quick": true,
-        "raw": "quick: deal 9 to an enemy and give them Frozen"
+        "text": [
+          "quick: deal 9 to an enemy and give them Frozen"
+        ]
       }
     ],
     "passives": [],
     "evolvedFrom": 70,
-    "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png",
-    "slug": "rak_wraithraiser_iii"
+    "slug": "rak_wraithraiser_iii",
+    "relatedCards": [
+      {
+        "cardId": 70,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 69,
+        "kind": "evolution"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png"
   },
   "72": {
     "cardId": 72,
@@ -3769,13 +4893,17 @@
           "target": {
             "side": "enemy"
           },
-          "raw": "deal 5 to an enemy"
+          "text": [
+            "deal 5 to an enemy"
+          ]
         },
-        "raw": "ability: deal 5 to an enemy"
+        "text": [
+          "ability: deal 5 to an enemy"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/red_thryssa.png",
-    "slug": "red_thryssa"
+    "slug": "red_thryssa",
+    "artworkPath": "/assets/images/artworks/red_thryssa.png"
   },
   "73": {
     "cardId": 73,
@@ -3787,7 +4915,9 @@
       {
         "type": "target_side",
         "side": "ally",
-        "raw": "target is an ally"
+        "text": [
+          "target is an ally"
+        ]
       }
     ],
     "effects": [
@@ -3798,11 +4928,27 @@
         "target": {
           "side": "ally"
         },
-        "raw": "give Poisoned 1"
+        "text": [
+          "give Poisoned 1"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/redan.png",
-    "slug": "redan"
+    "slug": "redan",
+    "relatedCards": [
+      {
+        "cardId": 52,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 51,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 15,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/redan.png"
   },
   "74": {
     "cardId": 74,
@@ -3813,7 +4959,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -3847,7 +4995,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        ]
       },
       {
         "type": "modify_stat",
@@ -3856,11 +5006,55 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer's healing abilities heal +1 HP"
+        "text": [
+          "the bearer's healing abilities heal +1 HP"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/second_thorn_fragment.png",
-    "slug": "second_thorn_fragment"
+    "slug": "second_thorn_fragment",
+    "relatedCards": [
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      },
+      {
+        "cardId": 85,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/second_thorn_fragment.png"
   },
   "75": {
     "cardId": 75,
@@ -3870,14 +5064,18 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "requirements": [
       {
         "type": "has_ally",
         "attribute": "irregular",
-        "raw": "have an ally Irregular"
+        "text": [
+          "have an ally Irregular"
+        ]
       }
     ],
     "effects": [
@@ -3887,11 +5085,23 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give an enemy Doomed"
+        "text": [
+          "give an enemy Doomed"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/shinwonryu.png",
-    "slug": "shinwonryu"
+    "slug": "shinwonryu",
+    "relatedCards": [
+      {
+        "cardId": 6,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 68,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/shinwonryu.png"
   },
   "76": {
     "cardId": 76,
@@ -3913,7 +5123,9 @@
         "target": {
           "side": "any"
         },
-        "raw": "give Weak 1 to a unit"
+        "text": [
+          "give Weak 1 to a unit"
+        ]
       }
     ],
     "slug": "static_baang"
@@ -3928,7 +5140,9 @@
       {
         "type": "deployed_as",
         "position": "wave-controller",
-        "raw": "deployed as Wave Controller"
+        "text": [
+          "deployed as Wave Controller"
+        ]
       }
     ],
     "effects": [
@@ -3938,7 +5152,9 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Immune"
+        "text": [
+          "the bearer has Immune"
+        ]
       },
       {
         "type": "grant_trait",
@@ -3947,10 +5163,34 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has Pierce 1"
+        "text": [
+          "the bearer has Pierce 1"
+        ]
       }
     ],
-    "slug": "steel_tree"
+    "slug": "steel_tree",
+    "relatedCards": [
+      {
+        "cardId": 46,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 47,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 48,
+        "kind": "mention"
+      },
+      {
+        "cardId": 66,
+        "kind": "mention"
+      },
+      {
+        "cardId": 64,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "78": {
     "cardId": 78,
@@ -3960,7 +5200,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 20,
@@ -3985,7 +5227,9 @@
             "side": "enemy"
           }
         },
-        "raw": "Free: Spend 1: deal 1 to an enemy"
+        "text": [
+          "Free: Spend 1: deal 1 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -3999,10 +5243,18 @@
         "source": {
           "position": "spear-bearer"
         },
-        "raw": "Spear bearers deal +4 damage to me"
+        "text": [
+          "Spear bearers deal +4 damage to me"
+        ]
       }
     ],
-    "slug": "stone_doll"
+    "slug": "stone_doll",
+    "relatedCards": [
+      {
+        "cardId": 81,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "79": {
     "cardId": 79,
@@ -4020,10 +5272,54 @@
             "ranker"
           ]
         },
-        "raw": "Slay an enemy Regular or Ranker"
+        "text": [
+          "Slay an enemy Regular or Ranker"
+        ]
       }
     ],
-    "slug": "submerged_fish"
+    "slug": "submerged_fish",
+    "relatedCards": [
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 85,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      }
+    ]
   },
   "80": {
     "cardId": 80,
@@ -4064,7 +5360,9 @@
             "side": "enemy"
           }
         },
-        "raw": "if i have an allied Shinheuh, give Exhausted 2 to an enemy"
+        "text": [
+          "if i have an allied Shinheuh, give Exhausted 2 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -4075,7 +5373,9 @@
           "type": "summon",
           "source": "shinheuh"
         },
-        "raw": "when you summon a Shinheuh, Charge 1"
+        "text": [
+          "when you summon a Shinheuh, Charge 1"
+        ]
       }
     ],
     "slug": "sunwoo_nare"
@@ -4100,7 +5400,9 @@
         "trigger": {
           "type": "free_ability_played"
         },
-        "raw": "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
+        "text": [
+          "when an ability with Free is played, the unit Extinguishes 5 of their own lighthouses"
+        ]
       },
       {
         "type": "summon",
@@ -4112,10 +5414,18 @@
         "trigger": {
           "type": "dies"
         },
-        "raw": "when i die, summon Stone Doll on both players' fields"
+        "text": [
+          "when i die, summon Stone Doll on both players' fields"
+        ]
       }
     ],
-    "slug": "the_hand_of_arlen"
+    "slug": "the_hand_of_arlen",
+    "relatedCards": [
+      {
+        "cardId": 78,
+        "kind": "mention"
+      }
+    ]
   },
   "82": {
     "cardId": 82,
@@ -4126,14 +5436,18 @@
     "requirements": [
       {
         "type": "first_card_this_round",
-        "raw": "I'm the first card you play this round"
+        "text": [
+          "I'm the first card you play this round"
+        ]
       }
     ],
     "effects": [
       {
         "type": "extinguish",
         "amount": 1,
-        "raw": "Extinguish 1"
+        "text": [
+          "Extinguish 1"
+        ]
       },
       {
         "type": "heal",
@@ -4141,7 +5455,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "heal an ally 1 HP"
+        "text": [
+          "heal an ally 1 HP"
+        ]
       },
       {
         "type": "compress_shinsu",
@@ -4149,23 +5465,29 @@
         "card": {
           "cost": "most expensive"
         },
-        "raw": "Compress 1 from the most expensive card in your hand"
+        "text": [
+          "Compress 1 from the most expensive card in your hand"
+        ]
       },
       {
         "type": "reclaim_cards",
         "amount": 1,
-        "raw": "Reclaim 1"
+        "text": [
+          "Reclaim 1"
+        ]
       },
       {
         "type": "remove_traits",
         "target": {
           "side": "enemy"
         },
-        "raw": "Silence an enemy"
+        "text": [
+          "Silence an enemy"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/the_workshop.png",
-    "slug": "the_workshop"
+    "slug": "the_workshop",
+    "artworkPath": "/assets/images/artworks/the_workshop.png"
   },
   "83": {
     "cardId": 83,
@@ -4176,7 +5498,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "effects": [
@@ -4210,7 +5534,9 @@
             }
           ]
         },
-        "raw": "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        "text": [
+          "when the bearer is equipped with all 4 unique Thorn Fragment equipments, discard those 4 equipments and create Enryu's Thorn in your hand"
+        ]
       },
       {
         "type": "modify_stat",
@@ -4219,11 +5545,55 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "the bearer has +1 HP"
+        "text": [
+          "the bearer has +1 HP"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/third_thorn_fragment.png",
-    "slug": "third_thorn_fragment"
+    "slug": "third_thorn_fragment",
+    "relatedCards": [
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 85,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/third_thorn_fragment.png"
   },
   "84": {
     "cardId": 84,
@@ -4245,7 +5615,9 @@
         "target": {
           "side": "any"
         },
-        "raw": "give Exhausted 1 to a unit"
+        "text": [
+          "give Exhausted 1 to a unit"
+        ]
       }
     ],
     "slug": "thunder_baang"
@@ -4280,7 +5652,9 @@
           "series": "thorn-fragment",
           "choose": true
         },
-        "raw": "create a Thorn Fragment of your choice in hand"
+        "text": [
+          "create a Thorn Fragment of your choice in hand"
+        ]
       }
     ],
     "passives": [],
@@ -4289,13 +5663,57 @@
         {
           "type": "equip",
           "cardName": "Enryu's Thorn",
-          "raw": "i am equipped with Enryu's Thorn"
+          "text": [
+            "i am equipped with Enryu's Thorn"
+          ]
         }
       ],
       "cardId": 86
     },
-    "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png",
-    "slug": "twenty_fifth_baam"
+    "slug": "twenty_fifth_baam",
+    "relatedCards": [
+      {
+        "cardId": 86,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png"
   },
   "86": {
     "cardId": 86,
@@ -4305,7 +5723,9 @@
     "deckConstraints": [
       {
         "type": "unreachable",
-        "raw": "i am Unreachable"
+        "text": [
+          "i am Unreachable"
+        ]
       }
     ],
     "hp": 6,
@@ -4338,13 +5758,57 @@
           "amount": 4,
           "cardName": "Baang"
         },
-        "raw": "quick: spend 2: the next time you play Baang this turn, play it 4 more times"
+        "text": [
+          "quick: spend 2: the next time you play Baang this turn, play it 4 more times"
+        ]
       }
     ],
     "passives": [],
     "evolvedFrom": 85,
-    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png",
-    "slug": "twenty_fifth_baam_ii"
+    "slug": "twenty_fifth_baam_ii",
+    "relatedCards": [
+      {
+        "cardId": 85,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 96,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png"
   },
   "87": {
     "cardId": 87,
@@ -4381,7 +5845,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "deal 4 to an enemy"
+        "text": [
+          "deal 4 to an enemy"
+        ]
       },
       {
         "type": "spend_shinsu",
@@ -4393,7 +5859,9 @@
             "side": "enemy"
           }
         },
-        "raw": "spend 1: deal 6 to an enemy"
+        "text": [
+          "spend 1: deal 6 to an enemy"
+        ]
       }
     ],
     "passives": [
@@ -4424,11 +5892,13 @@
             }
           ]
         },
-        "raw": "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
+        "text": [
+          "while i am alone on the ally frontline, i have Resilient 1 and Strong 3"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/urek_mazino.png",
-    "slug": "urek_mazino"
+    "slug": "urek_mazino",
+    "artworkPath": "/assets/images/artworks/urek_mazino.png"
   },
   "88": {
     "cardId": 88,
@@ -4442,7 +5912,9 @@
       {
         "type": "condition_stack_cap",
         "cap": 2,
-        "raw": "conditions do not stack past 2"
+        "text": [
+          "conditions do not stack past 2"
+        ]
       }
     ],
     "traits": [],
@@ -4466,7 +5938,9 @@
         "target": {
           "side": "enemy"
         },
-        "raw": "give Heavy 1 to an enemy"
+        "text": [
+          "give Heavy 1 to an enemy"
+        ]
       }
     ],
     "slug": "weights"
@@ -4502,7 +5976,9 @@
             }
           }
         ],
-        "raw": "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
+        "text": [
+          "when a unit uses an ability that has Quick, they Charge 1 and i lose 1 HP"
+        ]
       }
     ],
     "slug": "wooden_horse"
@@ -4517,7 +5993,9 @@
       {
         "type": "unit_on_board",
         "name": "Yeon Woon",
-        "raw": "Yeon Woon is in your board"
+        "text": [
+          "Yeon Woon is in your board"
+        ]
       }
     ],
     "effects": [
@@ -4528,11 +6006,19 @@
         "target": {
           "side": "bearer"
         },
-        "raw": "my bearer has Strong 3"
+        "text": [
+          "my bearer has Strong 3"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/woons_hammer.png",
-    "slug": "woons_hammer"
+    "slug": "woons_hammer",
+    "relatedCards": [
+      {
+        "cardId": 94,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/woons_hammer.png"
   },
   "92": {
     "cardId": 92,
@@ -4563,7 +6049,9 @@
           "side": "ally",
           "affiliation": "team-sweet-and-sour"
         },
-        "raw": "heal a team sweet and sour member 1 HP"
+        "text": [
+          "heal a team sweet and sour member 1 HP"
+        ]
       }
     ],
     "passives": [
@@ -4575,7 +6063,9 @@
           "side": "ally",
           "affiliation": "team-sweet-and-sour"
         },
-        "raw": "team sweet and sour members cost one less"
+        "text": [
+          "team sweet and sour members cost one less"
+        ]
       }
     ],
     "slug": "yeo_goseng"
@@ -4620,7 +6110,9 @@
             }
           ]
         },
-        "raw": "spend 3: give me taunt and barrier"
+        "text": [
+          "spend 3: give me taunt and barrier"
+        ]
       }
     ],
     "passives": [
@@ -4632,10 +6124,18 @@
         "trigger": {
           "type": "round_end"
         },
-        "raw": "round end: Silence me"
+        "text": [
+          "round end: Silence me"
+        ]
       }
     ],
-    "slug": "yeo_miseng"
+    "slug": "yeo_miseng",
+    "relatedCards": [
+      {
+        "cardId": 36,
+        "kind": "mentioned-by"
+      }
+    ]
   },
   "94": {
     "cardId": 94,
@@ -4667,7 +6167,9 @@
             "count": 2
           }
         },
-        "raw": "spend 2: give barrier to 2 allies"
+        "text": [
+          "spend 2: give barrier to 2 allies"
+        ]
       },
       {
         "type": "heal",
@@ -4675,7 +6177,9 @@
         "target": {
           "side": "ally"
         },
-        "raw": "heal an ally 2 HP"
+        "text": [
+          "heal an ally 2 HP"
+        ]
       }
     ],
     "passives": [
@@ -4686,11 +6190,19 @@
           "side": "ally",
           "affiliation": "yeon-family"
         },
-        "raw": "ally yeon family members have resilient"
+        "text": [
+          "ally yeon family members have resilient"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/yeon_woon.png",
-    "slug": "yeon_woon"
+    "slug": "yeon_woon",
+    "relatedCards": [
+      {
+        "cardId": 91,
+        "kind": "mentioned-by"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/yeon_woon.png"
   },
   "95": {
     "cardId": 95,
@@ -4722,7 +6234,9 @@
           "count": 2,
           "condition": "burned"
         },
-        "raw": "give 2 Burned enemies Exhausted"
+        "text": [
+          "give 2 Burned enemies Exhausted"
+        ]
       }
     ],
     "passives": [
@@ -4734,11 +6248,13 @@
           "condition": "burned",
           "conditionValue": 3
         },
-        "raw": "units with Burned 3+ can't target me"
+        "text": [
+          "units with Burned 3+ can't target me"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/yeon_yihwa.png",
-    "slug": "yeon_yihwa"
+    "slug": "yeon_yihwa",
+    "artworkPath": "/assets/images/artworks/yeon_yihwa.png"
   },
   "96": {
     "cardId": 96,
@@ -4771,7 +6287,9 @@
         "card": {
           "name": "Submerged Fish"
         },
-        "raw": "Compress 1 from Submerged Fish in your hand"
+        "text": [
+          "Compress 1 from Submerged Fish in your hand"
+        ]
       },
       {
         "type": "create_card",
@@ -4779,7 +6297,9 @@
         "card": {
           "name": "Baang"
         },
-        "raw": "quick: create Baang in your hand"
+        "text": [
+          "quick: create Baang in your hand"
+        ]
       }
     ],
     "passives": [
@@ -4806,11 +6326,55 @@
             }
           }
         ],
-        "raw": "Baang gives Weak 2 and Cursed"
+        "text": [
+          "Baang gives Weak 2 and Cursed"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/yu_han_sung.png",
-    "slug": "yu_han_sung"
+    "slug": "yu_han_sung",
+    "relatedCards": [
+      {
+        "cardId": 8,
+        "kind": "mention"
+      },
+      {
+        "cardId": 79,
+        "kind": "mention"
+      },
+      {
+        "cardId": 67,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 86,
+        "kind": "mentioned-by"
+      },
+      {
+        "cardId": 85,
+        "kind": "evolution"
+      },
+      {
+        "cardId": 21,
+        "kind": "mention"
+      },
+      {
+        "cardId": 26,
+        "kind": "mention"
+      },
+      {
+        "cardId": 28,
+        "kind": "mention"
+      },
+      {
+        "cardId": 74,
+        "kind": "mention"
+      },
+      {
+        "cardId": 83,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/yu_han_sung.png"
   },
   "97": {
     "cardId": 97,
@@ -4842,7 +6406,9 @@
           "side": "ally",
           "name": "Bull"
         },
-        "raw": "give ally Bull Strong 2"
+        "text": [
+          "give ally Bull Strong 2"
+        ]
       }
     ],
     "passives": [
@@ -4856,11 +6422,19 @@
         "trigger": {
           "type": "deploy"
         },
-        "raw": "when I am deployed, summon Bull from your deck or hand"
+        "text": [
+          "when I am deployed, summon Bull from your deck or hand"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/yuga.png",
-    "slug": "yuga"
+    "slug": "yuga",
+    "relatedCards": [
+      {
+        "cardId": 12,
+        "kind": "mention"
+      }
+    ],
+    "artworkPath": "/assets/images/artworks/yuga.png"
   },
   "98": {
     "cardId": 98,
@@ -4880,10 +6454,12 @@
             "team-sweet-and-sour"
           ]
         },
-        "raw": "give ally wolhaiksong and team sweet and sour members strong 2"
+        "text": [
+          "give ally wolhaiksong and team sweet and sour members strong 2"
+        ]
       }
     ],
-    "artworkPath": "/assets/images/artworks/zygaenas_flower.png",
-    "slug": "zygaenas_flower"
+    "slug": "zygaenas_flower",
+    "artworkPath": "/assets/images/artworks/zygaenas_flower.png"
   }
 }

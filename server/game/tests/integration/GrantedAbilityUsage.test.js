@@ -27,13 +27,13 @@ describe("granted abilities can be used by their bearer", () => {
     const abilityCode = grantedEntries[0].code;
 
     // The projected granted ability must carry the inner ability's authored
-    // `raw` display text — without it the client falls back to the registry
+    // display segments — without them the client falls back to the registry
     // code ("granted:Card#…:<type>") and prints that on the deployed card.
     expect(game.getClientState("Alice").you.field.frontline[0].grantedAbilities)
       .toEqual(expect.arrayContaining([
         expect.objectContaining({
           abilityCode,
-          ability: expect.objectContaining({ raw: "give Poisoned 4 to an enemy" }),
+          ability: expect.objectContaining({ text: ["give Poisoned 4 to an enemy"] }),
         }),
       ]));
 

@@ -170,8 +170,8 @@ function asList(raw) {
   return [raw];
 }
 
-// Extract matchable/display text from a DSL entry. Abilities, effects, and
-// passives are structured objects whose player-facing text lives in `raw`;
+// Extract matchable/display text from a DSL entry. This tool reads the
+// authored YAML (abilities, effects, passives carry their text in `raw`);
 // other fields (positions, traits, requirements) are plain strings.
 function dslEntryText(entry) {
   if (typeof entry === "string") return entry;

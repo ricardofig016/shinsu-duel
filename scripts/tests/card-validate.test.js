@@ -187,4 +187,31 @@ describe("card-validate cross-references (evolution stages)", () => {
     const errors = [...failures.values()].flat();
     expect(errors.some((e) => e.includes(`duplicate card name "A Unit"`))).toBe(true);
   });
+
+  test("rejects a text link whose target does not exist, with its source path", () => {
+    const failures = run([
+      entry({
+        type: "unit",
+        name: "A Unit",
+        evolve: [],
+        abilities: [{ type: "deal_damage", amount: 1, raw: "strike [[card:Ghost Card]]" }],
+      }),
+      entry({ type: "unit", name: "Real Unit", evolve: [] }),
+    ]);
+    const errors = [...failures.values()].flat();
+    expect(errors).toContain(`abilities[0].raw: unknown card link target "Ghost Card"`);
+  });
+
+  test("accepts a text link that resolves against the pool", () => {
+    const failures = run([
+      entry({
+        type: "unit",
+        name: "A Unit",
+        evolve: [],
+        abilities: [{ type: "deal_damage", amount: 1, raw: "strike [[card:Real Unit]]" }],
+      }),
+      entry({ type: "unit", name: "Real Unit", evolve: [] }),
+    ]);
+    expect(failures.size).toBe(0);
+  });
 });

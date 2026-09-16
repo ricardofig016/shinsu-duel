@@ -231,13 +231,13 @@ export default class GlobalRuleRegistry {
   }
 
   _validateRules(rules) {
-    const allowedFields = new Set(["type", "raw", "trait", "condition", "cap", "position"]);
+    const allowedFields = new Set(["type", "text", "trait", "condition", "cap", "position"]);
     for (const rule of rules) {
       if (!rule || typeof rule !== "object" || Array.isArray(rule) || !RULE_TYPES.has(rule.type)) {
         throw new Error(`Unknown landmark rule type: ${rule?.type}`);
       }
-      if (typeof rule.raw !== "string" || rule.raw.trim().length === 0) {
-        throw new Error(`Landmark rule ${rule.type} requires non-empty raw text`);
+      if (!Array.isArray(rule.text) || rule.text.length === 0) {
+        throw new Error(`Landmark rule ${rule.type} requires non-empty display text`);
       }
       for (const field of Object.keys(rule)) {
         if (!allowedFields.has(field)) throw new Error(`Unknown landmark rule field: ${field}`);

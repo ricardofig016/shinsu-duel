@@ -15,6 +15,8 @@
  *   requires that a legal allied target exists on the board.
  */
 
+import { segmentsToPlainText } from "../../../public/utils/card-text.js";
+
 // ── Field helpers ───────────────────────────────────────────────────────────
 
 function allOwnUnits(username, gameState) {
@@ -90,7 +92,7 @@ const REQUIREMENT_CHECKS = {
     const hasAff = unit && req.affiliation && hasGrantedAffiliation(unit, req.affiliation, ctx.gameState);
     const hasAttr = unit && req.attribute && hasAttribute(unit, req.attribute, ctx.gameState);
     if (!hasAff && !hasAttr) {
-      throw new Error(`Requirement not met: ${req.raw}`);
+      throw new Error(`Requirement not met: ${segmentsToPlainText(req.text)}`);
     }
   },
 
@@ -113,7 +115,7 @@ const REQUIREMENT_CHECKS = {
     const hasAff = req.affiliation && hasAffiliationOnBoard(units, req.affiliation, ctx.gameState);
     const hasAttr = req.attribute && hasAttributeOnBoard(units, req.attribute, ctx.gameState);
     if (!hasAff && !hasAttr) {
-      throw new Error(`Requirement not met: ${req.raw}`);
+      throw new Error(`Requirement not met: ${segmentsToPlainText(req.text)}`);
     }
   },
 };

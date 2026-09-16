@@ -8,6 +8,8 @@
  * decisions rendered into prompt models. No DOM access here.
  */
 
+import { segmentsToPlainText } from "../utils/card-text.js";
+
 export const MAX_NORMAL_SHINSU = 10;
 export const MAX_RECHARGED_SHINSU = 2;
 
@@ -31,13 +33,14 @@ const flattenCard = (card) => ({
   effectiveCost: card.effectiveCost ?? card.cost ?? 0,
   maxHp: card.maxHp ?? null,
   // Native abilities are addressed by their hand index on the wire
-  // (abilityCode "0", "1", ...); the display text is the compiled `raw`.
+  // (abilityCode "0", "1", ...); the display text projects the compiled
+  // display segments.
   abilities: (card.abilities ?? []).map((ability, index) => ({
     code: String(index),
-    text: ability.raw ?? ability.text ?? "",
+    text: segmentsToPlainText(ability.text),
   })),
   passiveAbilities: (card.passiveAbilities ?? []).map((passive) => ({
-    text: passive.raw ?? passive.text ?? "",
+    text: segmentsToPlainText(passive.text),
   })),
   printedTraits: Object.entries(card.traits ?? {}).map(([code, trait]) => ({
     code,
@@ -54,7 +57,7 @@ const flattenCard = (card) => ({
     iconPath: attribute.iconPath ?? null,
   })),
   rank: card.rank ?? null,
-  requirements: (card.requirements ?? []).map((requirement) => requirement.raw),
+  requirements: [...(card.requirements ?? [])],
   effects: [...(card.effects ?? [])],
   rules: [...(card.rules ?? [])],
   evolveTriggers: card.evolveTriggers ? [...card.evolveTriggers] : null,
@@ -102,11 +105,12 @@ export function buildUnitViewModel(unit) {
     })),
     equipmentAttachments: [...(unit.equipmentAttachments ?? [])],
     // Granted abilities are addressed by their registry code on the wire
-    // ("granted:<source>:<type>"); the display text is the compiled `raw`.
+    // ("granted:<source>:<type>"); the display text projects the compiled
+    // display segments.
     grantedAbilities: (unit.grantedAbilities ?? []).map((granted) => ({
       abilityCode: granted.abilityCode,
       sourceId: granted.sourceId,
-      text: granted.ability?.raw ?? granted.ability?.text ?? granted.abilityCode,
+      text: segmentsToPlainText(granted.ability?.text) || granted.abilityCode,
     })),
     runtimeTraits: [...(unit.traits ?? [])],
   };

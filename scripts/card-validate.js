@@ -8,6 +8,8 @@ import Ajv from "ajv";
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
 import { MAX_STAGE, MIN_STAGE, parseStage, stageName } from "./lib/stage-name.js";
+import { createPoolLinkRegistry } from "./lib/card-link-registry.js";
+import { tokenizeSegments } from "../public/utils/card-text.js";
 import { RANKS } from "../server/game/ranks.js";
 import conditions from "../server/data/conditions.json" with { type: "json" };
 
@@ -128,6 +130,27 @@ export function normalizeCardForSchema(card) {
 }
 
 // ── Find and load cards ─────────────────────────────────────────────────────
+
+// Authored display text lives on `raw` fields across these top-level lists
+// and recurses into nested nodes (sequence steps, conditional branches,
+// grant_ability abilities, triggers, target descriptors).
+const RAW_TEXT_LISTS = [
+  "abilities", "passives", "effects", "requirements", "rules",
+  "evolve", "ignition", "deckConstraints",
+];
+
+function forEachAuthoringRaw(value, path, callback) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => forEachAuthoringRaw(item, `${path}[${index}]`, callback));
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  if (typeof value.raw === "string") callback(value.raw, `${path}.raw`);
+  for (const [key, child] of Object.entries(value)) {
+    if (key === "raw") continue;
+    if (child !== null && typeof child === "object") forEachAuthoringRaw(child, `${path}.${key}`, callback);
+  }
+}
 
 async function findCardFiles() {
   return collectCardFiles(cardsDirectory);
@@ -382,6 +405,13 @@ function validateRankAndCost(card, errors, kind) {
 // ── Cross-reference validator (runs after all cards loaded) ─────────────────
 
 export function validateCrossReferences(allCards, failuresByFile) {
+  // Text links resolve against the whole pool plus the shared catalogs, the
+  // same surface the compiler tokenizes against — an unknown target fails
+  // validation before the compile ever sees it.
+  const linkRegistry = createPoolLinkRegistry(
+    allCards.map(({ card }) => card).filter(Boolean)
+  );
+
   // Build map: normalized name → card info
   const nameToFile = new Map();
   const slugToFile = new Map();
@@ -450,6 +480,16 @@ export function validateCrossReferences(allCards, failuresByFile) {
       if (!target || target.card.type !== "equipment") {
         fileErrors.push(`ignition: target card "${targetName}" does not exist`);
       }
+    }
+
+    for (const listName of RAW_TEXT_LISTS) {
+      forEachAuthoringRaw(card[listName], listName, (raw, fieldPath) => {
+        try {
+          tokenizeSegments(raw, fieldPath, linkRegistry);
+        } catch (error) {
+          fileErrors.push(error.message);
+        }
+      });
     }
 
     if (fileErrors.length > 0 && !failuresByFile.has(relativePath)) {

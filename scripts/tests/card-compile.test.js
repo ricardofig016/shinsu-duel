@@ -185,7 +185,7 @@ evolve: []
     const unit = cards.find((card) => card.name === "A Unit");
 
     expect(unit.evolveInto.triggers).toEqual([
-      { type: "equip", cardName: "Test Armor", position: "fisherman", raw: "Fisherman: equip with Test Armor" },
+      { type: "equip", cardName: "Test Armor", position: "fisherman", text: ["Fisherman: equip with Test Armor"] },
     ]);
   });
 
@@ -323,7 +323,7 @@ describe("card-compile compileCard", () => {
     expect(card.type).toBe("unit");
     expect(card.series).toBe("thorn-fragment");
     expect(card.keywords).toEqual([{ code: "jeonsul-baang" }]);
-    expect(card.deckConstraints).toEqual([{ type: "unreachable", raw: "i am Unreachable" }]);
+    expect(card.deckConstraints).toEqual([{ type: "unreachable", text: ["i am Unreachable"] }]);
     expect(card.positions).toEqual(["wave-controller"]);
     expect(card.attributes).toEqual(["hwayeomsa"]);
     expect(card.abilities[0].type).toBe("deal_damage");
@@ -387,7 +387,7 @@ deckConstraints:
     const written = JSON.parse(await fs.readFile(outputPath, "utf-8"));
     expect(Object.keys(written)).toHaveLength(2);
     const unit = Object.values(written).find((card) => card.name === "Test Unit");
-    expect(unit.deckConstraints[0]).toEqual({ type: "unreachable", raw: "i am Unreachable" });
+    expect(unit.deckConstraints[0]).toEqual({ type: "unreachable", text: ["i am Unreachable"] });
     expect(unit.keywords).toEqual([{ code: "jeonsul-baang" }]);
   });
 
@@ -469,7 +469,7 @@ passives:
     expect(cards).toHaveLength(1);
   });
 
-  test("keeps the granted ability's own raw display text in the compiled artifact", async () => {
+  test("keeps the granted ability's own display segments in the compiled artifact", async () => {
     await fs.writeFile(path.join(tmpDir, "equipment.yml"), `type: equipment
 name: Test Arms
 cost: 1
@@ -493,8 +493,8 @@ effects:
     });
 
     const effect = cards[0].effects[0];
-    expect(effect.raw).toBe("ability: give me Pierce");
-    expect(effect.ability.raw).toBe("give me Pierce");
+    expect(effect.text).toEqual(["ability: give me Pierce"]);
+    expect(effect.ability.text).toEqual(["give me Pierce"]);
   });
 
   test("rejects a grant_ability whose inner ability carries no raw", async () => {

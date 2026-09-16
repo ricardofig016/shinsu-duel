@@ -83,7 +83,7 @@ describe("dev console line formatting", () => {
       unitId: "unit-1",
       name: "Test Scout",
       owner: "Alice",
-      native: [{ abilityCode: "0", ability: { raw: "scout: quick: peek" } }],
+      native: [{ abilityCode: "0", ability: { text: ["scout: quick: peek"] } }],
       granted: [{ abilityCode: "granted:Equip#1:heal", ability: { type: "heal" }, sourceId: "Equip#1" }],
     });
     expect(text.split("\n")).toEqual([

@@ -29,8 +29,8 @@ const unitView = {
     cost: 2,
     effectiveCost: 1,
     maxHp: 4,
-    abilities: [{ type: "hand_peek", raw: "Peek at the opponent's hand." }],
-    passiveAbilities: [{ raw: "Always watching." }],
+    abilities: [{ type: "hand_peek", text: ["Peek at the opponent's hand."] }],
+    passiveAbilities: [{ text: ["Always watching."] }],
     traits: { scout: { name: "Scout", description: "Moves first.", iconPath: "/assets/icons/traits/scout.png" } },
     affiliations: { sweet_and_sour: { name: "Team Sweet and Sour" } },
     positions: {
@@ -43,7 +43,7 @@ const unitView = {
   grantedAbilities: [
     {
       abilityCode: "granted:equip-9:deal_damage",
-      ability: { type: "deal_damage", raw: "Deal 2 damage." },
+      ability: { type: "deal_damage", text: ["Deal 2 damage."] },
       sourceId: "equip-9",
     },
   ],
@@ -169,7 +169,7 @@ describe("buildUnitViewModel", () => {
       kind: "standard",
       name: "Test Ranker",
       rank: "ranker",
-      requirements: [{ type: "target_side", side: "ally", raw: "you control a fisherman" }],
+      requirements: ["you control a fisherman"],
       effects: [],
       rules: ["passives have no effect"],
       evolveTriggers: ["when i am deployed"],

@@ -86,6 +86,25 @@ describe("fixture card audit (contract coupling only)", () => {
     }
   });
 
+  test("text links compile into segments and stamp recursive relations", () => {
+    const burner = cards[byName["test burn passive unit"]];
+    const damageSkill = cards[byName["test damage skill"]];
+
+    // The passive's authored text tokenized into display segments.
+    const passive = burner.passives[0];
+    expect(passive.text).toEqual([
+      { type: "card", ref: "test_damage_skill", text: "Test Damage Skill" },
+      " gives ",
+      { type: "condition", ref: "burned", text: "Burned" },
+      " 1",
+    ]);
+
+    // The card link stamps a mention; the skill sees it in reverse. The
+    // condition link names no card, so it contributes no relation.
+    expect(burner.relatedCards).toContainEqual({ cardId: damageSkill.cardId, kind: "mention" });
+    expect(damageSkill.relatedCards).toContainEqual({ cardId: burner.cardId, kind: "mentioned-by" });
+  });
+
   test("no fixture uses `custom` or `handler` DSL", () => {
     expect(JSON.stringify(cards)).not.toContain('"custom"');
     expect(JSON.stringify(cards)).not.toContain('"handler"');

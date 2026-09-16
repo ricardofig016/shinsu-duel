@@ -1,10 +1,12 @@
 /**
  * Formatting for the dev console.
  *
- * The console's output is built here, DOM-free and dependency-free, so the
+ * The console's output is built here, DOM-free and network-free, so the
  * command wrappers in `debugConsole.js` stay a thin socket layer and the
  * presentation can be tested in Node (see `public/tests/game/debugOutput.test.js`).
  */
+
+import { segmentsToPlainText } from "../utils/card-text.js";
 
 /** The command surface shown by `debug.help()`. */
 export const DEBUG_COMMANDS = Object.freeze([
@@ -126,7 +128,7 @@ export function formatCardList(kind, result, index) {
 /** An ability's one-line summary: its printed text when the DSL carries one. */
 function abilitySummary(ability) {
   if (!ability || typeof ability !== "object") return String(ability ?? "unknown");
-  return ability.raw ?? ability.type ?? JSON.stringify(ability);
+  return segmentsToPlainText(ability.text) || ability.type || JSON.stringify(ability);
 }
 
 /** A unit's printed and granted abilities, with the codes the client sends back. */

@@ -65,6 +65,42 @@
       "description": "Requirements must all be met for the card to be played."
     }
   },
+  "terms": {
+    "shinsu": {
+      "name": "Shinsu",
+      "description": "Shinsu is split into two pools: the Normal pool and the Recharged pool."
+    },
+    "deck": {
+      "name": "Deck",
+      "description": "A deck must have exactly 30 cards. A deck may contain up to 3 copies of each card. If at any point a player tries to draw and their deck is empty, they lose the game."
+    },
+    "ability": {
+      "name": "Ability",
+      "description": "An ability is an action a deployed unit can use during your turn. Abilities may cost shinsu."
+    }
+  },
+  "keywords": {
+    "quick": {
+      "name": "Quick",
+      "description": "Playing a Quick card or using a Quick ability doesn't end your turn"
+    },
+    "free": {
+      "name": "Free",
+      "description": "The ability doesn't require or expend a combat slot"
+    },
+    "unreachable": {
+      "name": "Unreachable",
+      "description": "You can't put me in your deck during deckbuilding"
+    },
+    "ally": {
+      "name": "Ally",
+      "description": "A unit on your side of the board, yourself included"
+    },
+    "enemy": {
+      "name": "Enemy",
+      "description": "A unit on the opponent's side of the board"
+    }
+  },
   "hud": {
     "shinsuCard": {
       "name": "Shinsu",

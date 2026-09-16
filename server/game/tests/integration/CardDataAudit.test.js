@@ -315,7 +315,7 @@ describe("card data audit (recursive DSL inventory)", () => {
     expect(formatTypeReport(unknown)).toEqual([]);
   });
 
-  test("every top-level DSL entry carries non-empty authored raw text", () => {
+  test("every top-level DSL entry carries non-empty display segments", () => {
     const violations = [];
     for (const card of Object.values(cardsData)) {
       for (const listName of NODE_LISTS) {
@@ -324,8 +324,11 @@ describe("card data audit (recursive DSL inventory)", () => {
             violations.push(`"${card.name}" ${listName}[${index}] is not an object`);
             return;
           }
-          if (typeof entry.raw !== "string" || entry.raw.trim() === "") {
-            violations.push(`"${card.name}" ${listName}[${index}] (${entry.type}) has no non-empty "raw"`);
+          const plainText = Array.isArray(entry.text)
+            ? entry.text.map((segment) => (typeof segment === "string" ? segment : segment?.text ?? "")).join("")
+            : "";
+          if (plainText.trim() === "") {
+            violations.push(`"${card.name}" ${listName}[${index}] (${entry.type}) has no non-empty "text"`);
           }
         });
       }

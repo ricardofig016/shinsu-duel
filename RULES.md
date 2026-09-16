@@ -164,6 +164,8 @@ Each action ends your turn unless the card or ability has Quick. Passing ends yo
 **Play** = the action of playing a card (playing a unit also summons it)
 **Create** = create a card somewhere (hand, deck, discard pile, etc.).
 
+An **ability** is an action a deployed unit can use during your turn. Abilities may cost shinsu.
+
 ### Units
 
 Represent characters, creatures or locations from Tower of God:

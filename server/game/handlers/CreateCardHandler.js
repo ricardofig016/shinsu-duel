@@ -4,6 +4,7 @@ import Card from "../Card.js";
 import EVT from "../EventCatalog.js";
 import shuffle from "../utils/shuffle.js";
 import { findCardsByName, findCardsBySeries } from "../utils/cardData.js";
+import { segmentsToPlainText } from "../../../public/utils/card-text.js";
 
 /**
  * Creates a card in the owner's hand from a compiled card-target descriptor.
@@ -103,7 +104,7 @@ export default class CreateCardHandler extends BaseHandler {
         skipped: true,
         reason: "unsupported_effect",
         type: "create_card",
-        raw: payload.raw,
+        text: segmentsToPlainText(payload.text),
         owner,
         sourceId: payload.sourceId || null,
         detail: `unknown generated_by resource "${resource}"`,

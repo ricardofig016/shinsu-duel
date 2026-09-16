@@ -27,7 +27,7 @@ npm run compile:cards    # validate YAML → compile → validate JSON → write
 
 ## Authoring model
 
-Effects, abilities, and passives are **structured DSL nodes**, not natural-language strings. The compiler validates and normalizes them; it never guesses meaning from prose. Card text is authored separately as a display-only `raw` field.
+Effects, abilities, and passives are **structured DSL nodes**, not natural-language strings. The compiler validates and normalizes them; it never guesses meaning from prose. Card text is authored separately as a display-only `raw` field and compiles into display segments.
 
 ```yaml
 effects:
@@ -39,7 +39,7 @@ effects:
 
 Guarantees:
 
-- `raw` is display text. It is **never parsed** at compile or run time.
+- `raw` is authored display text, parsed **only at compile time**, where it is tokenized into display segments (see [Display text and links](#display-text-and-links)). The runtime never parses authored text — it consumes the compiled segments.
 - The compiler **fails loudly** on any node, trigger, or predicate `type` outside `schemas/dsl-catalog.json`, at the exact source path that introduced it — including nested nodes. There is no `custom` fallback and no `handler` field — the handler registry maps `type` to a handler class, one per type.
 - `type` is the single bridge between a compiled node and its runtime handler.
 
@@ -75,14 +75,39 @@ Every node is an object with a discriminator `type` and a field set that depends
 | Field      | Scope                        | Description                                    |
 | ---------- | ---------------------------- | ---------------------------------------------- |
 | `type`     | every node                   | One of the node types in the catalog below.    |
-| `raw`      | every node                   | Authored display text. Never parsed. Required on top-level entries and on `grant_ability.ability`. |
+| `text`     | every node                   | Compiled display segments projected from the authored `raw`. Required on top-level entries and on `grant_ability.ability`. |
 | `quick`    | abilities, effects           | `true` if the entry has the Quick keyword.     |
 | `free`     | abilities, effects           | `true` if the entry has the Free keyword.      |
 | `position` | abilities, passives          | Position code if position-scoped, else `null`. |
 | `trigger`  | passives                     | The event that activates a triggered passive.  |
 | `triggers` | passives                     | Multiple single-event triggers; each entry is wired independently to its own event (no compound trigger types). |
 
-Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) require `raw`. Nested nodes (`sequence.steps[]`, `spend_shinsu.effect`, `conditional.then/otherwise`) omit `raw`; the exception is `grant_ability.ability`, which requires it — the registry stores the inner node verbatim, so its `raw` is the display text for the granted ability on the deployed unit card.
+Top-level entries (`abilities`, skill/equipment `effects`, and `passives`) require `raw`. Nested nodes (`sequence.steps[]`, `spend_shinsu.effect`, `conditional.then/otherwise`) omit `raw`; the exception is `grant_ability.ability`, which requires it — the registry stores the inner node verbatim, so its display text serves the granted ability on the deployed unit card.
+
+---
+
+## Display text and links
+
+Authored `raw` strings are the player-visible prose of a node. They may embed explicit links shaped `[[type:ref]]`, optionally with a display alias as the first pipe and further `key=value` parameters reserved for future needs:
+
+- `[[card:Kranos]]` — links a card; display defaults to the card's canonical name.
+- `[[condition:Burned]]`, `[[trait:Strong]]`, `[[attribute:Anima]]`, `[[position:Spear Bearer]]`, `[[affiliation:Team Baam]]` — resolve against the shared data catalogs, by code or display name.
+- `[[series:Incinerate]]` — resolves against the series codes the card pool declares.
+- `[[keyword:Quick]]` and `[[rule:shinsu]]` — resolve against the glossary's `keywords` and `terms` sections, which hold the hover copy for shared game vocabulary.
+- `[[card:Kranos|Kranos' blade]]` — the first pipe overrides the displayed text.
+
+The compiler tokenizes every `raw` at the node's own source path into ordered **display segments** — a plain string, or a link segment `{ type, ref, text }` where `ref` is the resolved registry key (a card's persistent slug for `card` links, the catalog/glossary code otherwise) and `text` is what the player reads. Compiled nodes carry the segments under `text` and no `raw`. An unresolvable target, unknown link type, unknown parameter, or unclosed `[[` is a build error with the source path, so a card can never ship prose pointing at vocabulary that does not exist.
+
+Link target resolution lives in scripts/lib/card-link-registry.js, backed by `public/utils/card-text.js` — the single dependency-free definition of the segment format and its plain-text projection (`segmentsToPlainText`), shared by the build scripts, the server, and the client.
+
+### Related cards
+
+Every compiled card carries an optional **`relatedCards`** list — the deduplicated, recursively closed, deterministically ordered set of cards it relates to. It is stamped at compile time (scripts/lib/card-relations.js) and is what the client's related-card detail view renders:
+
+- **Relation kinds**: `evolution` (`evolvedFrom`/`evolveInto`), `ignition` (`ignitedFrom`/`igniteInto`), `mention` (this card's text points at the target — explicit `card`/`series` links plus the machine-readable references the DSL already carries: the `name`/`series` fields of the target descriptors under `card`, `target`, `targets`, and `source`, `cardName`, `cardNames`, `unit_on_board`), `mentioned-by` (reverse mentions, computed from every card's forward references), and `series` (cards sharing the card's `series` code). A series reference counts as a mention of every card in that series.
+- **Order**: breadth-first over all edge kinds until closure; edges are examined from each card in the priority evolution/ignition → mentions → reverse mentions → series siblings, ties broken by `cardId` (the name-sorted index).
+- **Dedup**: a card is never repeated; the first edge that reaches it wins its relation kind.
+- Entries are `{ cardId, kind }`; a card that relates to nothing carries no field (sparse contract).
 
 ### Card metadata
 
@@ -111,7 +136,7 @@ Shared metadata:
 
   The compiled form is a uniform object — `{ code }` or `{ code, raw }` — mirroring compiled traits (`{ code, value? }`). The Jeonsulsa engine and future identity mechanics query by `code`; the UI renders `raw`. Use the object form whenever the player should see the keyword's text on the card.
 
-- `deckConstraints` — deck-construction rules authored in YAML (see [Deck constraints](#deck-constraints)). Each constraint carries required `raw` display text.
+- `deckConstraints` — deck-construction rules authored in YAML (see [Deck constraints](#deck-constraints)). Each constraint carries required display text (`raw` authored, `text` segments compiled).
 
 Card-level keywords (Quick, Free) that apply to the whole card — not to a single effect — are authored as marker nodes: `{ type: quick, raw: "i am Quick" }`. See [Structural](#structural).
 

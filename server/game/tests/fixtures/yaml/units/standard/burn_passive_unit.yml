@@ -20,4 +20,4 @@ passives:
     amount: 1
     target: { side: enemy }
     trigger: { type: skill_played, cardName: Test Damage Skill }
-    raw: "Test Damage Skill gives Burned 1"
+    raw: "[[card:Test Damage Skill]] gives [[condition:Burned]] 1"

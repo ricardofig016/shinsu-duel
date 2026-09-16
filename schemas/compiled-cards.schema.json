@@ -130,7 +130,7 @@
       "required": ["type"],
       "properties": {
         "type": { "enum": ["equip", "slay", "deploy", "given", "kill", "ally_dies", "damaged_by", "round_start", "round_end", "deal_damage", "ability_used", "summon", "draw", "free_ability_played", "quick_ability_used", "activation", "skill_played", "skills_played", "reclaim", "dies", "enemy_dies", "evolve", "has_all_equipped", "equipment_ignited", "silenced"] },
-        "raw": { "type": "string", "minLength": 1 },
+        "text": { "$ref": "#/definitions/displaySegments" },
         "cardName": { "type": "string", "minLength": 1 },
         "cardNames": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
         "target": { "$ref": "#/definitions/triggerTarget" },
@@ -159,12 +159,12 @@
     },
     "requirementNode": {
       "oneOf": [
-        { "type": "object", "required": ["type", "position", "raw"], "properties": { "type": { "const": "deployed_as" }, "position": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "side", "raw"], "properties": { "type": { "const": "target_side" }, "side": { "enum": ["ally", "enemy"] }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "bearer_has" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] },
-        { "type": "object", "required": ["type", "name", "raw"], "properties": { "type": { "const": "unit_on_board" }, "name": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "first_card_this_round" }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false },
-        { "type": "object", "required": ["type", "raw"], "properties": { "type": { "const": "has_ally" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "raw": { "type": "string", "minLength": 1 } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] }
+        { "type": "object", "required": ["type", "position", "text"], "properties": { "type": { "const": "deployed_as" }, "position": { "type": "string", "minLength": 1 }, "text": { "$ref": "#/definitions/displaySegments" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "side", "text"], "properties": { "type": { "const": "target_side" }, "side": { "enum": ["ally", "enemy"] }, "text": { "$ref": "#/definitions/displaySegments" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "text"], "properties": { "type": { "const": "bearer_has" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "text": { "$ref": "#/definitions/displaySegments" } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] },
+        { "type": "object", "required": ["type", "name", "text"], "properties": { "type": { "const": "unit_on_board" }, "name": { "type": "string", "minLength": 1 }, "text": { "$ref": "#/definitions/displaySegments" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "text"], "properties": { "type": { "const": "first_card_this_round" }, "text": { "$ref": "#/definitions/displaySegments" } }, "additionalProperties": false },
+        { "type": "object", "required": ["type", "text"], "properties": { "type": { "const": "has_ally" }, "affiliation": { "type": "string", "minLength": 1 }, "attribute": { "type": "string", "minLength": 1 }, "text": { "$ref": "#/definitions/displaySegments" } }, "additionalProperties": false, "anyOf": [{ "required": ["affiliation"] }, { "required": ["attribute"] }] }
       ]
     },
     "effectNode": {
@@ -172,7 +172,7 @@
       "required": ["type"],
       "properties": {
         "type": { "enum": ["charge_shinsu", "spend_shinsu", "compress_shinsu", "reclaim_cards", "light_up", "extinguish", "draw_card", "create_card", "summon", "discard", "steal", "disarm", "switch_position", "deal_damage", "heal", "give_condition", "remove_conditions", "grant_trait", "remove_traits", "copy_traits", "grant_random_trait", "slay", "transform", "grant_ability", "copy_ability", "peek_hand", "play_jeonsul_baang", "sequence", "conditional", "noop", "repeat_play", "quick", "choose_position", "grant_affiliation", "return_to_hand", "activate"] },
-        "raw": { "type": "string", "minLength": 1 },
+        "text": { "$ref": "#/definitions/displaySegments" },
         "quick": { "type": "boolean" },
         "free": { "type": "boolean" },
         "position": { "type": ["string", "null"] },
@@ -236,7 +236,7 @@
         { "if": { "properties": { "type": { "const": "grant_random_trait" } } }, "then": { "required": ["target"] } },
         { "if": { "properties": { "type": { "const": "slay" } } }, "then": { "required": ["target"] } },
         { "if": { "properties": { "type": { "const": "transform" } } }, "then": { "required": ["cardName"] } },
-        { "if": { "properties": { "type": { "const": "grant_ability" } } }, "then": { "required": ["ability", "target"], "properties": { "ability": { "required": ["raw"] } } } },
+        { "if": { "properties": { "type": { "const": "grant_ability" } } }, "then": { "required": ["ability", "target"], "properties": { "ability": { "required": ["text"] } } } },
         { "if": { "properties": { "type": { "const": "copy_ability" } } }, "then": { "required": ["source"] } },
         { "if": { "properties": { "type": { "const": "peek_hand" } } }, "then": { "required": ["owner"] } },
         { "if": { "properties": { "type": { "const": "sequence" } } }, "then": { "required": ["steps"] } },
@@ -250,10 +250,10 @@
     },
     "modifierNode": {
       "type": "object",
-      "required": ["type", "raw"],
+      "required": ["type", "text"],
       "properties": {
         "type": { "enum": ["modify_stat", "modify_keyword", "modify_targeting", "modify_cost", "modify_condition", "retain_equipment", "modify_repeat", "modify_ability"] },
-        "raw": { "type": "string", "minLength": 1 },
+        "text": { "$ref": "#/definitions/displaySegments" },
         "target": { "$ref": "#/definitions/unitTarget" },
         "stat": { "enum": ["damage", "heal", "hp", "cost", "damage_taken"] },
         "amount": { "type": "integer" },
@@ -281,10 +281,10 @@
     },
     "ruleNode": {
       "type": "object",
-      "required": ["type", "raw"],
+      "required": ["type", "text"],
       "properties": {
         "type": { "enum": ["disable_passives", "grant_global_trait", "grant_global_condition", "condition_stack_cap", "prevent_evolve", "prevent_equip"] },
-        "raw": { "type": "string", "minLength": 1 },
+        "text": { "$ref": "#/definitions/displaySegments" },
         "trait": { "type": "string", "minLength": 1 },
         "condition": { "type": "string", "minLength": 1 },
         "position": { "type": "string", "minLength": 1 },
@@ -299,7 +299,7 @@
     },
     "effectEntry": {
       "oneOf": [
-        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["raw"] }] },
+        { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["text"] }] },
         { "$ref": "#/definitions/modifierNode" }
       ]
     },
@@ -315,7 +315,7 @@
       "allOf": [
         {
           "oneOf": [
-            { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["raw"] }] },
+            { "allOf": [{ "$ref": "#/definitions/effectNode" }, { "required": ["text"] }] },
             { "$ref": "#/definitions/modifierNode" }
           ]
         },
@@ -343,6 +343,40 @@
       },
       "additionalProperties": false
     },
+    "displaySegment": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "required": ["type", "ref", "text"],
+          "properties": {
+            "type": { "enum": ["card", "condition", "trait", "attribute", "position", "affiliation", "series", "keyword", "rule"] },
+            "ref": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "displaySegments": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/displaySegment" }
+    },
+    "relatedCard": {
+      "type": "object",
+      "required": ["cardId", "kind"],
+      "properties": {
+        "cardId": { "type": "integer", "minimum": 0 },
+        "kind": { "enum": ["evolution", "ignition", "mention", "mentioned-by", "series"] }
+      },
+      "additionalProperties": false
+    },
+    "relatedCards": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/relatedCard" }
+    },
     "transformation": {
       "type": "object",
       "required": ["triggers", "cardId"],
@@ -358,10 +392,10 @@
     },
     "deckConstraint": {
       "type": "object",
-      "required": ["type", "raw"],
+      "required": ["type", "text"],
       "properties": {
         "type": { "enum": ["unreachable", "generated_by"] },
-        "raw": { "type": "string", "minLength": 1 },
+        "text": { "$ref": "#/definitions/displaySegments" },
         "resource": { "type": "string", "minLength": 1 },
         "amount": { "type": "integer", "minimum": 1 }
       },
@@ -402,6 +436,7 @@
           "passives": { "type": "array", "items": { "$ref": "#/definitions/passiveEntry" } },
           "evolveInto": { "$ref": "#/definitions/transformation" },
           "evolvedFrom": { "type": "integer", "minimum": 0 },
+          "relatedCards": { "$ref": "#/definitions/relatedCards" },
           "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
         },
         "allOf": [
@@ -425,6 +460,7 @@
           "requirements": { "type": "array", "items": { "$ref": "#/definitions/requirementNode" } },
           "keywords": { "type": "array", "items": { "$ref": "#/definitions/keyword" } },
           "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/effectEntry" } },
+          "relatedCards": { "$ref": "#/definitions/relatedCards" },
           "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
         }
       },
@@ -446,6 +482,7 @@
           "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/effectEntry" } },
           "igniteInto": { "$ref": "#/definitions/transformation" },
           "ignitedFrom": { "type": "integer", "minimum": 0 },
+          "relatedCards": { "$ref": "#/definitions/relatedCards" },
           "deckConstraints": { "type": "array", "items": { "$ref": "#/definitions/deckConstraint" } }
         }
       }

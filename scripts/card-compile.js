@@ -8,7 +8,11 @@ import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
+import { toCode } from "./lib/code.js";
 import { MAX_STAGE, MIN_STAGE, parseStage, stageName } from "./lib/stage-name.js";
+import { tokenizeSegments } from "../public/utils/card-text.js";
+import { createPoolLinkRegistry } from "./lib/card-link-registry.js";
+import { stampRelatedCards } from "./lib/card-relations.js";
 import dslCatalog from "../schemas/dsl-catalog.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
@@ -21,10 +25,6 @@ const validatorPath = path.join(projectRoot, "scripts", "card-validate.js");
 const compiledSchemaPath = path.join(projectRoot, "schemas", "compiled-cards.schema.json");
 
 // ── Code mapping helpers ────────────────────────────────────────────────────
-
-function toCode(str) {
-  return str.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-}
 
 // Position display name → internal code
 const positionCodeMap = {
@@ -156,12 +156,30 @@ export function normalizeList(value, fn) {
   return fn(value);
 }
 
-export function normalizeEffectObject(obj, context) {
+// ── Link registry ───────────────────────────────────────────────────────────
+// One registry per compilation pool, built from the pool's names and series,
+// backs every text-link tokenization below.
+
+function linkRegistryFor(cards) {
+  return createPoolLinkRegistry(cards);
+}
+
+export function normalizeEffectObject(obj, context, linkRegistry = null) {
   if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
     throw new Error(`${context}: expected an object`);
   }
 
   const normalized = { ...obj };
+
+  // Authored display text compiles into display segments at the node's own
+  // source path, replacing `raw` — the runtime never sees authoring syntax.
+  if (obj.raw !== undefined) {
+    if (typeof obj.raw !== "string") {
+      throw new Error(`${context}.raw: must be a string`);
+    }
+    normalized.text = tokenizeSegments(obj.raw, `${context}.raw`, linkRegistry);
+    delete normalized.raw;
+  }
 
   if (obj.condition !== undefined) normalized.condition = normalizeCondition(obj.condition);
   if (obj.trait !== undefined) normalized.trait = normalizeTrait(obj.trait);
@@ -182,12 +200,12 @@ export function normalizeEffectObject(obj, context) {
       throw new Error(`${context}.steps: expected an array`);
     }
     normalized.steps = obj.steps.map((step, i) =>
-      compileNode(step, `${context}.steps[${i}]`)
+      compileNode(step, `${context}.steps[${i}]`, linkRegistry)
     );
   }
   for (const key of NESTED_NODE_KEYS) {
     if (obj[key] !== undefined) {
-      normalized[key] = compileNode(obj[key], `${context}.${key}`);
+      normalized[key] = compileNode(obj[key], `${context}.${key}`, linkRegistry);
     }
   }
 
@@ -195,7 +213,7 @@ export function normalizeEffectObject(obj, context) {
   // (a trigger's `target`/`source` are plain strings, left as-is).
   for (const key of NESTED_DESCRIPTOR_KEYS) {
     if (obj[key] !== undefined && typeof obj[key] === "object") {
-      normalized[key] = normalizeEffectObject(obj[key], `${context}.${key}`);
+      normalized[key] = normalizeEffectObject(obj[key], `${context}.${key}`, linkRegistry);
     }
   }
 
@@ -229,7 +247,7 @@ export function normalizeEffectObject(obj, context) {
           `${context}.triggers[${i}]: unknown trigger type "${t.type}" — list it in schemas/dsl-catalog.json and both card schemas`
         );
       }
-      return normalizeEffectObject(t, `${context}.triggers[${i}]`);
+      return normalizeEffectObject(t, `${context}.triggers[${i}]`, linkRegistry);
     });
   }
   const predicate = obj.if;
@@ -245,7 +263,7 @@ export function normalizeEffectObject(obj, context) {
   return normalized;
 }
 
-export function compileNode(node, context) {
+export function compileNode(node, context, linkRegistry = null) {
   if (node === null || typeof node !== "object" || Array.isArray(node)) {
     throw new Error(`${context}: expected a structured effect object`);
   }
@@ -257,11 +275,11 @@ export function compileNode(node, context) {
       `${context}: unknown node type "${node.type}" — list it in schemas/dsl-catalog.json and both card schemas before compiling`
     );
   }
-  return normalizeEffectObject(node, context);
+  return normalizeEffectObject(node, context, linkRegistry);
 }
 
-export function compileEntries(entries, context) {
-  return (entries || []).map((entry, i) => compileNode(entry, `${context}[${i}]`));
+export function compileEntries(entries, context, linkRegistry = null) {
+  return (entries || []).map((entry, i) => compileNode(entry, `${context}[${i}]`, linkRegistry));
 }
 
 // ── Transformation trigger compilation ──────────────────────────────────────
@@ -270,7 +288,7 @@ export function compileEntries(entries, context) {
 // each entry's `type` against the catalog at its own source path and
 // normalizes code-bearing fields; the runtime never sees authoring syntax.
 
-function compileTransformationTriggers(entries, cardName, kind) {
+function compileTransformationTriggers(entries, cardName, kind, linkRegistry = null) {
   return (entries || [])
     .filter((entry) => entry !== null && entry !== undefined)
     .map((entry, index) => {
@@ -284,7 +302,7 @@ function compileTransformationTriggers(entries, cardName, kind) {
           `${cardName}.${kind}[${index}]: unknown trigger type "${entry.type}" — list it in schemas/dsl-catalog.json and both card schemas`
         );
       }
-      return normalizeEffectObject(entry, `${cardName}.${kind}[${index}]`);
+      return normalizeEffectObject(entry, `${cardName}.${kind}[${index}]`, linkRegistry);
     });
 }
 
@@ -294,7 +312,7 @@ function compileTransformationTriggers(entries, cardName, kind) {
 // against the catalog and normalizes code-bearing fields; RequirementValidator
 // consumes the compiled objects.
 
-function compileRequirements(entries, cardName) {
+function compileRequirements(entries, cardName, linkRegistry = null) {
   return (entries || []).map((entry, index) => {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
       throw new Error(
@@ -306,13 +324,13 @@ function compileRequirements(entries, cardName) {
         `${cardName}.requirements[${index}]: unknown requirement type "${entry.type}" — list it in schemas/dsl-catalog.json and both card schemas`
       );
     }
-    return normalizeEffectObject(entry, `${cardName}.requirements[${index}]`);
+    return normalizeEffectObject(entry, `${cardName}.requirements[${index}]`, linkRegistry);
   });
 }
 
 // ── Cross-reference resolution ──────────────────────────────────────────────
 
-export function resolveEvolveInto(card, allCards) {
+export function resolveEvolveInto(card, allCards, linkRegistry = linkRegistryFor(allCards)) {
   if (card.type !== "unit") return null;
   const evolveTriggers = card.evolve;
   if (!Array.isArray(evolveTriggers) || evolveTriggers.length === 0) return null;
@@ -335,7 +353,7 @@ export function resolveEvolveInto(card, allCards) {
   }
 
   // Structured trigger objects, validated and normalized
-  const triggers = compileTransformationTriggers(evolveTriggers, card.name, "evolve");
+  const triggers = compileTransformationTriggers(evolveTriggers, card.name, "evolve", linkRegistry);
 
   return {
     triggers,
@@ -355,7 +373,7 @@ export function resolveEvolvedFrom(card, allCards) {
   return baseCard ? baseCard.cardId : null;
 }
 
-export function resolveIgniteInto(card, allCards) {
+export function resolveIgniteInto(card, allCards, linkRegistry = linkRegistryFor(allCards)) {
   if (card.type !== "equipment") return null;
   const ignitionTriggers = card.ignition;
   if (!Array.isArray(ignitionTriggers) || ignitionTriggers.length === 0) return null;
@@ -369,7 +387,7 @@ export function resolveIgniteInto(card, allCards) {
   }
 
   // Structured trigger objects, validated and normalized
-  const triggers = compileTransformationTriggers(ignitionTriggers, card.name, "ignition");
+  const triggers = compileTransformationTriggers(ignitionTriggers, card.name, "ignition", linkRegistry);
 
   return {
     triggers,
@@ -388,7 +406,26 @@ export function resolveIgnitedFrom(card, allCards) {
 
 // ── Card compilation ────────────────────────────────────────────────────────
 
-export function compileCard(rawCard, allCards) {
+// Deck constraints are structured check objects carrying their own authored
+// display text; they tokenize like every other DSL node.
+function compileDeckConstraints(constraints, cardName, linkRegistry) {
+  return (constraints || []).map((constraint, index) => {
+    if (!constraint || typeof constraint !== "object" || Array.isArray(constraint)) {
+      throw new Error(`${cardName}.deckConstraints[${index}]: expected an object`);
+    }
+    const compiled = { ...constraint };
+    if (compiled.raw !== undefined) {
+      if (typeof compiled.raw !== "string") {
+        throw new Error(`${cardName}.deckConstraints[${index}].raw: must be a string`);
+      }
+      compiled.text = tokenizeSegments(compiled.raw, `${cardName}.deckConstraints[${index}].raw`, linkRegistry);
+      delete compiled.raw;
+    }
+    return compiled;
+  });
+}
+
+export function compileCard(rawCard, allCards, linkRegistry = linkRegistryFor([rawCard])) {
   const type = rawCard.type;
   const cardName = rawCard.name || "<unnamed>";
 
@@ -408,7 +445,7 @@ export function compileCard(rawCard, allCards) {
     sobriquet: rawCard.sobriquet || null,
     cost: rawCard.cost ?? 0,
     keywords: (rawCard.keywords || []).map(normalizeKeyword),
-    deckConstraints: (rawCard.deckConstraints || []).map((constraint) => ({ ...constraint })),
+    deckConstraints: compileDeckConstraints(rawCard.deckConstraints, cardName, linkRegistry),
   };
 
   if (type === "unit") {
@@ -425,7 +462,7 @@ export function compileCard(rawCard, allCards) {
 
     // Positions — only the five main positions; special kinds have none.
     compiled.positions = (rawCard.positions || []).map((p) => positionCodeMap[p.toLowerCase()] || toCode(p));
-    compiled.rules = compileEntries(rawCard.rules, `${cardName}.rules`);
+    compiled.rules = compileEntries(rawCard.rules, `${cardName}.rules`, linkRegistry);
 
     // Traits — { code, value? } objects (value only present for numeric traits)
     const parsedTraits = (rawCard.traits || [])
@@ -445,8 +482,8 @@ export function compileCard(rawCard, allCards) {
     compiled.affiliations = (rawCard.affiliations || []).map(toCode);
 
     // Abilities + passives — structured DSL nodes (same shape as effects)
-    compiled.abilities = compileEntries(rawCard.abilities, `${cardName}.abilities`);
-    compiled.passives = compileEntries(rawCard.passives, `${cardName}.passives`);
+    compiled.abilities = compileEntries(rawCard.abilities, `${cardName}.abilities`, linkRegistry);
+    compiled.passives = compileEntries(rawCard.passives, `${cardName}.passives`, linkRegistry);
 
     // Evolution (computed after all cards have cardIds)
     compiled._evolveRaw = rawCard.evolve || [];
@@ -461,8 +498,8 @@ export function compileCard(rawCard, allCards) {
   }
 
   if (type === "skill") {
-    compiled.requirements = compileRequirements(rawCard.requirements, cardName);
-    compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`);
+    compiled.requirements = compileRequirements(rawCard.requirements, cardName, linkRegistry);
+    compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`, linkRegistry);
 
     // Not applicable to skills
     compiled.hp = null;
@@ -480,8 +517,8 @@ export function compileCard(rawCard, allCards) {
   }
 
   if (type === "equipment") {
-    compiled.requirements = compileRequirements(rawCard.requirements, cardName);
-    compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`);
+    compiled.requirements = compileRequirements(rawCard.requirements, cardName, linkRegistry);
+    compiled.effects = compileEntries(rawCard.effects, `${cardName}.effects`, linkRegistry);
 
     // Ignition (computed after all cards have cardIds)
     compiled._ignitionRaw = rawCard.ignition || [];
@@ -721,11 +758,14 @@ export async function compileCards(options = {}) {
     card._tempId = index;
   });
 
-  // 4. First pass: compile all cards with temporary IDs
+  // 4. First pass: compile all cards with temporary IDs. The link registry
+  //    is built once from the whole pool so every text link resolves against
+  //    every card and series in it.
+  const linkRegistry = linkRegistryFor(rawCards);
   const compiledCards = rawCards.map((raw) => compileCard(raw, rawCards.map((r) => ({
     name: r.name,
     cardId: r._tempId,
-  }))));
+  })), linkRegistry));
 
   // Assign temporary cardIds
   compiledCards.forEach((card, index) => {
@@ -748,7 +788,8 @@ export async function compileCards(options = {}) {
     if (compiled.type === "unit" && rawCard.evolve && rawCard.evolve.length > 0) {
       compiled.evolveInto = resolveEvolveInto(
         { ...rawCard, name: compiled.name },
-        allWithIds
+        allWithIds,
+        linkRegistry
       );
     }
     compiled.evolvedFrom = resolveEvolvedFrom(
@@ -760,7 +801,8 @@ export async function compileCards(options = {}) {
     if (compiled.type === "equipment" && rawCard.ignition && rawCard.ignition.length > 0) {
       compiled.igniteInto = resolveIgniteInto(
         { ...rawCard, name: compiled.name },
-        allWithIds
+        allWithIds,
+        linkRegistry
       );
     }
     compiled.ignitedFrom = resolveIgnitedFrom(
@@ -768,6 +810,29 @@ export async function compileCards(options = {}) {
       allWithIds
     );
   }
+
+  // 5a. Stamp slugs. The slug is a card's persistent identifier: the runtime
+  //     cardId is a name-sorted compile-time index that shifts whenever cards
+  //     are added or renamed, so everything persisted outside a running game
+  //     (deck collections, starter decks) references cards by slug. A slug
+  //     collision would silently merge two cards, so it fails the compile the
+  //     same way a duplicate name does. Relations (5b) resolve text links and
+  //     machine references through slugs, so they are stamped first.
+  const seenSlugs = new Map();
+  for (const card of compiledCards) {
+    const slug = normalizeName(card.name);
+    const owner = seenSlugs.get(slug);
+    if (owner !== undefined) {
+      throw new Error(`Duplicate card slugs: "${slug}" ("${owner}" and "${card.name}")`);
+    }
+    seenSlugs.set(slug, card.name);
+    card.slug = slug;
+  }
+
+  // 5b. Stamp relations. Text links and machine-readable references were
+  //     resolved during compilation; the recursive closure needs final
+  //     cardIds, so it runs once every cross-reference is in place.
+  stampRelatedCards(compiledCards);
 
   // 6. Clean up temporary fields
   const finalCards = compiledCards.map(cleanCompiled);
@@ -777,29 +842,13 @@ export async function compileCards(options = {}) {
   //    same derivation that names the YAML source). Cards without a file stay
   //    fieldless, matching cleanCompiled's sparse optional-field convention;
   //    gaps and orphans are reported by checkArtworks, not failed here.
+  //    Slugs were stamped in 5a, so the artwork contract binds against them.
   const artworkStems = await listArtworkStems(artDir);
   for (const card of finalCards) {
     const stem = normalizeName(card.name);
     if (artworkStems.has(stem)) {
       card.artworkPath = `/assets/images/artworks/${stem}.png`;
     }
-  }
-
-  // 7b. Stamp slugs. The slug is a card's persistent identifier: the runtime
-  //     cardId is a name-sorted compile-time index that shifts whenever cards
-  //     are added or renamed, so everything persisted outside a running game
-  //     (deck collections, starter decks) references cards by slug. A slug
-  //     collision would silently merge two cards, so it fails the compile the
-  //     same way a duplicate name does.
-  const seenSlugs = new Map();
-  for (const card of finalCards) {
-    const slug = normalizeName(card.name);
-    const owner = seenSlugs.get(slug);
-    if (owner !== undefined) {
-      throw new Error(`Duplicate card slugs: "${slug}" ("${owner}" and "${card.name}")`);
-    }
-    seenSlugs.set(slug, card.name);
-    card.slug = slug;
   }
 
   // 8. Convert to keyed object (by cardId as string), failing on any
@@ -899,3 +948,4 @@ if (isMain) {
     process.exitCode = 1;
   });
 }
+

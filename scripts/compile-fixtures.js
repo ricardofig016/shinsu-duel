@@ -7,6 +7,8 @@ import Ajv from "ajv";
 
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
+import { createPoolLinkRegistry } from "./lib/card-link-registry.js";
+import { stampRelatedCards } from "./lib/card-relations.js";
 import {
   compileCard,
   cleanCompiled,
@@ -108,9 +110,11 @@ export async function compileFixtures() {
 
   const rawCards = [...fillers, ...namedCards];
 
-  // 3. Compile each card through the real compiler.
+  // 3. Compile each card through the real compiler. The link registry is
+  //    built once from the whole fixture pool.
+  const linkRegistry = createPoolLinkRegistry(rawCards);
   const compiled = rawCards.map((raw) => {
-    const card = compileCard(raw, rawCards.map((r) => ({ name: r.name, cardId: r.cardId })));
+    const card = compileCard(raw, rawCards.map((r) => ({ name: r.name, cardId: r.cardId })), linkRegistry);
     card.cardId = raw.cardId;
     return card;
   });
@@ -122,24 +126,28 @@ export async function compileFixtures() {
     if (!raw) throw new Error(`internal: raw card not found for "${card.name}"`);
 
     if (card.type === "unit" && raw.evolve && raw.evolve.length > 0) {
-      card.evolveInto = resolveEvolveInto({ ...raw, name: card.name }, allWithIds);
+      card.evolveInto = resolveEvolveInto({ ...raw, name: card.name }, allWithIds, linkRegistry);
     }
     card.evolvedFrom = resolveEvolvedFrom({ ...raw, name: card.name, type: card.type }, allWithIds);
 
     if (card.type === "equipment" && raw.ignition && raw.ignition.length > 0) {
-      card.igniteInto = resolveIgniteInto({ ...raw, name: card.name }, allWithIds);
+      card.igniteInto = resolveIgniteInto({ ...raw, name: card.name }, allWithIds, linkRegistry);
     }
     card.ignitedFrom = resolveIgnitedFrom({ ...raw, name: card.name, type: card.type }, allWithIds);
   }
 
-  // 5. Clean up temporary/empty fields to the sparse compiled contract.
-  const finalCards = compiled.map(cleanCompiled);
-
-  // 5b. Stamp slugs, mirroring the shipped compiler: the slug is the
-  //     persistent card identifier, so fixtures carry it too.
-  for (const card of finalCards) {
+  // 4a. Stamp slugs, mirroring the shipped compiler: the slug is the
+  //     persistent card identifier, so fixtures carry it too. Relations (4b)
+  //     resolve text links and machine references through slugs.
+  for (const card of compiled) {
     card.slug = normalizeName(card.name);
   }
+
+  // 4b. Stamp relations from the compiled text links and machine references.
+  stampRelatedCards(compiled);
+
+  // 5. Clean up temporary/empty fields to the sparse compiled contract.
+  const finalCards = compiled.map(cleanCompiled);
 
   // 6. Validate against the compiled schema.
   const output = {};

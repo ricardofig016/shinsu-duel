@@ -82,4 +82,20 @@ describe("shipped description data matches RULES.md", () => {
       });
     }
   });
+
+  describe("glossary rule terms", () => {
+    for (const [code, term] of Object.entries(glossary.terms ?? {})) {
+      test(`${term.name} description`, () => {
+        expectEverySentenceInRules(term.description);
+      });
+    }
+  });
+
+  describe("glossary keywords", () => {
+    for (const [code, keyword] of Object.entries(glossary.keywords ?? {})) {
+      test(`${keyword.name} description`, () => {
+        expectEverySentenceInRules(keyword.description);
+      });
+    }
+  });
 });

@@ -27,8 +27,8 @@ function landmarkUnit(overrides = {}) {
     card: {
       kind: "landmark",
       rules: [
-        { type: "disable_passives", raw: "passives have no effect" },
-        { type: "condition_stack_cap", cap: 2, raw: "conditions do not stack past 2" },
+        { type: "disable_passives", text: ["passives have no effect"] },
+        { type: "condition_stack_cap", cap: 2, text: ["conditions do not stack past 2"] },
       ],
     },
     ...overrides,
@@ -53,7 +53,7 @@ describe("GlobalRuleRegistry", () => {
     expect(mods.map((m) => m.key)).toEqual(["disable_passives", "condition_stack_cap"]);
     expect(mods.every((m) => m.sourceType === "landmark")).toBe(true);
     expect(mods.every((m) => m.sourceId === IdFactory.landmarkSource(unit.id))).toBe(true);
-    expect(mods[0].meta.rule).toEqual({ type: "disable_passives", raw: "passives have no effect" });
+    expect(mods[0].meta.rule).toEqual({ type: "disable_passives", text: ["passives have no effect"] });
   });
 
   test("skips non-landmark units and landmark cards without rules", () => {
@@ -89,8 +89,8 @@ describe("GlobalRuleRegistry", () => {
       card: {
         kind: "landmark",
         rules: [
-          { type: "prevent_evolve", position: "chosen", raw: "chosen units cannot evolve" },
-          { type: "prevent_equip", position: "scout", raw: "scout units cannot be equipped" },
+          { type: "prevent_evolve", position: "chosen", text: ["chosen units cannot evolve"] },
+          { type: "prevent_equip", position: "scout", text: ["scout units cannot be equipped"] },
         ],
       },
     });
@@ -125,7 +125,7 @@ describe("GlobalRuleRegistry", () => {
       id: "Unit#9#2",
       card: {
         kind: "landmark",
-        rules: [{ type: "prevent_evolve", position: "chosen", raw: "chosen units cannot evolve" }],
+        rules: [{ type: "prevent_evolve", position: "chosen", text: ["chosen units cannot evolve"] }],
       },
     });
     game._findUnit = (id) => (id === chosen.id ? chosen : null);
@@ -142,11 +142,11 @@ describe("GlobalRuleRegistry", () => {
     const game = makeGame();
     const cap2 = landmarkUnit({
       id: "Unit#cap2",
-      card: { kind: "landmark", rules: [{ type: "condition_stack_cap", cap: 2, raw: "cap 2" }] },
+      card: { kind: "landmark", rules: [{ type: "condition_stack_cap", cap: 2, text: ["cap 2"] }] },
     });
     const cap5 = landmarkUnit({
       id: "Unit#cap5",
-      card: { kind: "landmark", rules: [{ type: "condition_stack_cap", cap: 5, raw: "cap 5" }] },
+      card: { kind: "landmark", rules: [{ type: "condition_stack_cap", cap: 5, text: ["cap 5"] }] },
     });
     const unit = { id: "Unit#target", placedPositionCode: "scout", card: { attributes: [] } };
     game._findUnit = (id) => (id === cap2.id ? cap2 : id === cap5.id ? cap5 : null);
@@ -176,7 +176,7 @@ describe("GlobalRuleRegistry", () => {
     const landmark = landmarkUnit({
       card: {
         kind: "landmark",
-        rules: [{ type: "prevent_evolve", position: "chosen", raw: "chosen units cannot evolve" }],
+        rules: [{ type: "prevent_evolve", position: "chosen", text: ["chosen units cannot evolve"] }],
       },
     });
     const regular = { id: "Unit#1", placedPositionCode: "scout", card: { attributes: [] } };
@@ -195,17 +195,17 @@ describe("GlobalRuleRegistry", () => {
   test("validates positions without relying on a GameState constructor", () => {
     const game = makeGame();
     expect(() => registry.registerUnit(landmarkUnit({
-      card: { kind: "landmark", rules: [{ type: "prevent_equip", position: "not-a-position", raw: "bad" }] },
+      card: { kind: "landmark", rules: [{ type: "prevent_equip", position: "not-a-position", text: ["bad"] }] },
     }), game)).toThrow("Invalid landmark rule position");
   });
 
   test.each([
-    [{ type: "disable_passives", raw: "   " }, "non-empty raw text"],
-    [{ type: "grant_global_trait", trait: "not-a-trait", raw: "bad trait" }, "Invalid landmark trait"],
-    [{ type: "grant_global_condition", condition: "not-a-condition", raw: "bad condition" }, "Invalid landmark condition"],
-    [{ type: "prevent_equip", raw: "bad field", cap: 1 }, "cannot declare a cap"],
-    [{ type: "condition_stack_cap", cap: 2, position: "scout", raw: "bad scope" }, "cannot declare a position"],
-    [{ type: "prevent_evolve", raw: "bad field", unexpected: true }, "Unknown landmark rule field"],
+    [{ type: "disable_passives" }, "non-empty display text"],
+    [{ type: "grant_global_trait", trait: "not-a-trait", text: ["bad trait"] }, "Invalid landmark trait"],
+    [{ type: "grant_global_condition", condition: "not-a-condition", text: ["bad condition"] }, "Invalid landmark condition"],
+    [{ type: "prevent_equip", text: ["bad field"], cap: 1 }, "cannot declare a cap"],
+    [{ type: "condition_stack_cap", cap: 2, position: "scout", text: ["bad scope"] }, "cannot declare a position"],
+    [{ type: "prevent_evolve", text: ["bad field"], unexpected: true }, "Unknown landmark rule field"],
   ])("rejects compiled rule contract violations", (rule, error) => {
     const game = makeGame();
     expect(() => registry.registerUnit(landmarkUnit({

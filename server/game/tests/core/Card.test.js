@@ -48,9 +48,9 @@ describe("Card", () => {
   test("serializes rank and the printed requirement, effect, and rule texts", () => {
     const card = makeCard({
       rank: "ranker",
-      requirements: [{ type: "target_side", side: "ally", raw: "you control a fisherman" }],
-      effects: [{ type: "deal_damage", raw: "deal 2" }, { type: "draw", text: "draw a card" }],
-      rules: [{ type: "disable_passives", raw: "passives have no effect" }],
+      requirements: [{ type: "target_side", side: "ally", text: ["you control a fisherman"] }],
+      effects: [{ type: "deal_damage", text: ["deal 2"] }, { type: "draw", text: ["draw a card"] }],
+      rules: [{ type: "disable_passives", text: ["passives have no effect"] }],
     });
     const view = card.toSanitizedObject();
 
@@ -62,8 +62,8 @@ describe("Card", () => {
 
   test("serializes evolve and ignition trigger texts, null when absent", () => {
     const evolving = makeCard({
-      evolveInto: { triggers: [{ type: "deploy", raw: "when i am deployed" }], cardId: 2 },
-      igniteInto: { triggers: [{ type: "slay", raw: "the bearer Slays a unit" }], cardId: 3 },
+      evolveInto: { triggers: [{ type: "deploy", text: ["when i am deployed"] }], cardId: 2 },
+      igniteInto: { triggers: [{ type: "slay", text: ["the bearer Slays a unit"] }], cardId: 3 },
     });
     const view = evolving.toSanitizedObject();
     expect(view.evolveTriggers).toEqual(["when i am deployed"]);

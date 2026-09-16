@@ -1,6 +1,6 @@
 import * as IdFactory from "./IdFactory.js";
-import affiliations from "../data/affiliations.json" with { type: "json" };
-import attributes from "../data/attributes.json" with { type: "json" };
+import { segmentsToPlainText } from "../../public/utils/card-text.js";
+import affiliations from "../data/affiliations.json" with { type: "json" };import attributes from "../data/attributes.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traits from "../data/traits.json" with { type: "json" };
 
@@ -104,7 +104,7 @@ export default class Card {
 
   #displayTexts(entries) {
     return (entries || [])
-      .map((entry) => entry.raw ?? entry.text ?? "")
+      .map((entry) => segmentsToPlainText(entry.text))
       .filter((text) => text !== "");
   }
 

@@ -1,5 +1,6 @@
 import BaseHandler from "./BaseHandler.js";
 import { resolveEffect } from "../EffectResolver.js";
+import { segmentsToPlainText } from "../../../public/utils/card-text.js";
 
 /**
  * Uses a copy of an enemy unit's ability.
@@ -52,7 +53,7 @@ export default class CopyAbilityHandler extends BaseHandler {
       type: "ability_selection",
       candidates: abilities.map((a, i) => ({
         id: String(i),
-        name: a.raw || a.type,
+        name: segmentsToPlainText(a.text) || a.type,
         hp: 0,
       })),
       minChoices: 1,
