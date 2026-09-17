@@ -143,7 +143,6 @@ const renderCombatSlots = (state, positions, glossary) => {
       slot.appendChild(icon);
       slotsContainer.appendChild(slot);
       addTooltip(
-        slotsContainer,
         slot,
         position?.name ?? code,
         buildPositionTooltipEntries(position, glossary),
@@ -172,7 +171,7 @@ const renderDecks = async (state, glossary) => {
       newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
       if (i === cardAmount - 1 && deckTooltip) {
         const text = buildDeckTooltipText(state[player].deckSize, deckTooltip);
-        if (text) await addTooltip(outerDiv, newDiv, deckTooltip.name, text);
+        if (text) await addTooltip(newDiv, deckTooltip.name, text);
       }
     }
   }
@@ -429,7 +428,6 @@ const prepareBoard = async (positionData, glossary, socket) => {
     if (lighthouseTooltip) {
       const lighthouseContainer = document.querySelector(`#${player}-container .lighthouse-container`);
       await addTooltip(
-        lighthouseContainer,
         lighthouseContainer.querySelector("img"),
         lighthouseTooltip.name,
         lighthouseTooltip.texts
@@ -442,9 +440,9 @@ const prepareBoard = async (positionData, glossary, socket) => {
     if (shinsuTooltip && rechargedTooltip) {
       const shinsuContainer = document.querySelector(`#${player}-container .shinsu-container`);
       const normalContainer = shinsuContainer.querySelector(".normal-shinsu");
-      await addTooltip(shinsuContainer, normalContainer, shinsuTooltip.name, shinsuTooltip.texts);
+      await addTooltip(normalContainer, shinsuTooltip.name, shinsuTooltip.texts);
       const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
-      await addTooltip(shinsuContainer, rechargedContainer, rechargedTooltip.name, rechargedTooltip.texts);
+      await addTooltip(rechargedContainer, rechargedTooltip.name, rechargedTooltip.texts);
     }
   }
 
@@ -543,7 +541,6 @@ const prepareBoard = async (positionData, glossary, socket) => {
   if (fireChargeTooltip) {
     const fireChargeContainer = document.querySelector("#fire-charge-container");
     await addTooltip(
-      fireChargeContainer,
       fireChargeContainer.querySelector("h2"),
       fireChargeTooltip.name,
       fireChargeTooltip.texts

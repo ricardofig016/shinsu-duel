@@ -70,7 +70,7 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   // artwork (use fallback if missing)
   const artworkContainer = container.querySelector(".unit-card-horizontal-artwork");
   artworkContainer.style.backgroundImage = `url("${safePath(unit.artworkPath, DEFAULT_ARTWORK)}")`;
-  await addTooltip(container, artworkContainer, unit.name, buildUnitAbilityTooltipEntries(unit));
+  await addTooltip(artworkContainer, unit.name, buildUnitAbilityTooltipEntries(unit));
 
   // status badges
   loadStatus(container, unit);
@@ -89,7 +89,6 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
     const positionIcon = safePath(placedPosition.iconPath, DEFAULT_POSITION_ICON);
     positionContainer.style.backgroundImage = `url("${positionIcon}")`;
     await addTooltip(
-      container,
       positionContainer,
       placedPosition.name,
       buildPositionTooltipEntries(placedPosition, glossary),
@@ -103,7 +102,6 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
     chosenContainer.classList.remove("hidden");
     chosenContainer.style.backgroundImage = `url("${chosenIcon}")`;
     await addTooltip(
-      container,
       chosenContainer,
       chosenPosition.name,
       buildPositionTooltipEntries(chosenPosition, glossary, { chosen: true }),
@@ -119,7 +117,7 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   if (hpHeader) hpHeader.innerText = unit.currentHp ?? 0;
   const hpTooltip = glossary?.hud?.hpCurrent;
   if (hpTooltip) {
-    await addTooltip(container, hpContainer, hpTooltip.name, hpTooltip.texts);
+    await addTooltip(hpContainer, hpTooltip.name, hpTooltip.texts);
   }
 };
 

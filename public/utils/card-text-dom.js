@@ -14,7 +14,8 @@
  *   every other surface.
  * - every link carries a lazy hover tooltip built from server-owned data:
  *   card links show a mini card preview (the card face rendered through
- *   card-vertical), condition/trait/attribute/position links their name and
+ *   card-vertical) with no tooltip chrome of its own, condition/trait/
+ *   attribute/position links their name and
  *   description from the shared data catalogs, keyword/trigger/rule/rank links
  *   the glossary's keywords/triggers/terms/ranks copy, and series/affiliation
  *   links the list of cards in that group (computed from the card catalog). A
@@ -22,7 +23,7 @@
  *   degrades to no tooltip; the link itself still renders.
  */
 
-import { loadComponent } from "/utils/component-util.js";
+import { loadComponent, mountTooltip } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
 import { buildCardViewModel } from "/game/viewModels.js";
@@ -66,6 +67,23 @@ const navigateToCard = async (segment, source) => {
   await openCardDetail({ source, card: buildCardViewModel(view) });
 };
 
+/**
+ * Off-screen host for building card previews. A card fits its own text while
+ * it renders, so it has to be rendered itself: a detached card measures zero
+ * everywhere, keeps its text at full size, and shows the last lines clipped.
+ * The preview is built here, laid out but never painted, and the tooltip that
+ * receives it takes the element out of this host.
+ */
+let previewHost = null;
+const offscreenHost = () => {
+  if (!previewHost) {
+    previewHost = document.createElement("div");
+    previewHost.className = "card-text-preview-host";
+    document.body.appendChild(previewHost);
+  }
+  return previewHost;
+};
+
 /** Hover copy for one link segment, or null when the target is unknown. */
 async function buildLinkHover(segment) {
   if (segment.type === "card") {
@@ -74,10 +92,12 @@ async function buildLinkHover(segment) {
     if (!view) return null;
     const host = document.createElement("div");
     host.className = "card-text-link-preview";
+    offscreenHost().appendChild(host);
     await loadComponent(host, "card-vertical", { card: buildCardViewModel(view), isSmall: true });
     // suppress the hand-hover zoom: a preview is read, not interacted with
     host.querySelector(".card-vertical-frame")?.classList.add("no-hover");
-    return { title: view.name, entries: [{ node: host }] };
+    // bare: the card face is the whole tooltip, so the frame adds no chrome
+    return { bare: true, title: view.name, entries: [{ node: host }] };
   }
 
   if (segment.type === "series" || segment.type === "affiliation") {
@@ -130,35 +150,49 @@ async function buildLinkHover(segment) {
 
 /**
  * Wire one link span's lazy hover tooltip: built on first hover, removed on
- * leave, so re-rendered text can never leak tooltip nodes. The tooltip
- * attaches to the body and is positioned in page coordinates by the tooltip
- * component, exactly like every other hover surface.
+ * leave, so re-rendered text can never leak tooltip nodes. The tooltip mounts
+ * through the shared tooltip layer, exactly like every other hover surface.
+ *
+ * The component reveals itself on `mouseover` and follows `mousemove`, but a
+ * lazily built tooltip attaches those listeners only after its markup loads,
+ * long after the hover that requested it. The pointer position is tracked so
+ * the component's own handlers can be replayed once it exists, in the order a
+ * real hover produces: the reveal first, so the frame has a box to measure
+ * before the move decides where to put it. Without the replay the tooltip
+ * stays in the DOM with `display: none`; out of order it lands on the cursor
+ * with a zero height.
  */
 const wireLinkHover = (span, segment) => {
   let pending = null;
-  span.addEventListener("mouseenter", async () => {
+  let pointer = { x: 0, y: 0 };
+  span.addEventListener("mousemove", (event) => {
+    pointer = { x: event.clientX, y: event.clientY };
+  });
+  span.addEventListener("mouseenter", async (event) => {
     if (pending) return;
+    pointer = { x: event.clientX, y: event.clientY };
     const state = { cancelled: false, tooltip: null };
     pending = state;
     const payload = await buildLinkHover(segment).catch(() => null);
-    if (!payload) {
+    if (!payload || state.cancelled || !span.isConnected) {
+      // a payload that never reaches a tooltip would leave its built nodes behind
+      for (const entry of payload?.entries ?? []) entry.node?.remove();
       pending = null;
       return;
     }
-    if (state.cancelled || !span.isConnected) {
-      pending = null;
-      return;
-    }
-    const tooltip = document.createElement("div");
-    tooltip.className = "tooltip-component";
-    state.tooltip = tooltip;
-    document.body.appendChild(tooltip);
-    await loadComponent(tooltip, "tooltip", {
-      hoverContainer: span,
+    const { element, loaded } = mountTooltip(span, {
       title: payload.title,
       textList: payload.entries,
+      bare: payload.bare === true,
     });
-    if (state.cancelled) tooltip.remove();
+    state.tooltip = element;
+    await loaded;
+    if (state.cancelled) {
+      element.remove();
+      return;
+    }
+    span.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    span.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientX: pointer.x, clientY: pointer.y }));
   });
   span.addEventListener("mouseleave", () => {
     if (!pending) return;

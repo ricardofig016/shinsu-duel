@@ -53,15 +53,23 @@ h1 {
 
 /* Inline text links inside compiled display segments (card prose, tooltips).
    The highlight assumes the card face's dark background; card links are
-   additionally clickable. */
+   additionally clickable, which only changes the cursor: links read as the
+   surrounding prose in the accent color, with no weight or underline shift. */
 .card-text-link {
   color: #e6b84c;
-  font-weight: 600;
 }
 
 .card-text-link-clickable {
   cursor: pointer;
-  text-decoration: underline;
+}
+
+/* Off-screen host for building card-link previews: laid out, so the card inside
+   can fit its own text, but never painted. */
+.card-text-preview-host {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  visibility: hidden;
 }
 
 .hidden {

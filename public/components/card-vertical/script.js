@@ -62,7 +62,7 @@ const loadTypeLetter = async (container, model, glossary) => {
   letter.classList.remove("hidden");
   letter.src = icon;
   const tooltip = buildTypeLetterTooltip(model, glossary);
-  if (tooltip) await addTooltip(container, letter, tooltip.title, tooltip.texts);
+  if (tooltip) await addTooltip(letter, tooltip.title, tooltip.texts);
   // The name's fit measurement depends on the letter's rendered width; an
   // undecoded image has none. A broken icon resolves the wait instead of
   // blocking.
@@ -126,8 +126,11 @@ const loadHeaderIcons = async (container, model, glossary) => {
     // an undecoded image has none, so each icon must be ready before the
     // name is fitted. A broken icon resolves the wait instead of blocking.
     await img.decode().catch(() => {});
-    await addTooltip(container, img, title, texts, icon);
+    // Append before mounting the tooltip: the tooltip layer drops tooltips
+    // whose hover target has left the document, and an element still being
+    // built is not in it yet.
     headerIcons.appendChild(img);
+    await addTooltip(img, title, texts, icon);
   }
 };
 
@@ -145,7 +148,7 @@ const loadName = async (container, name, sobriquet) => {
   const nameOverflows = () =>
     range.getBoundingClientRect().width > nameContainer.getBoundingClientRect().width + 0.25;
   fitFontSize([nameContainer], nameOverflows, { max: 2.4, min: 1.2 });
-  await addTooltip(container, nameContainer, name, sobriquet ? sobriquet : "");
+  await addTooltip(nameContainer, name, sobriquet ? sobriquet : "");
 };
 
 /**
@@ -159,7 +162,7 @@ const loadRank = async (container, model, glossary) => {
   container.querySelector(".card-vertical-rank").innerText = model.rank ?? "";
   if (!model.rank) return;
   const tooltip = buildRankTooltip(model.rank, glossary?.ranks ?? null);
-  if (tooltip) await addTooltip(container, trapezoid, tooltip.title, tooltip.texts);
+  if (tooltip) await addTooltip(trapezoid, tooltip.title, tooltip.texts);
 };
 
 /**
@@ -237,8 +240,10 @@ const loadIconStrip = async (
     }
     const icon = safePath(entry.iconPath, fallbackIcon);
     img.src = icon;
-    await addTooltip(container, img, entry.name, entry.description, icon);
+    // The element goes in before its tooltip: a hover target that is not in the
+    // document yet reads as gone, and the tooltip layer drops those.
     strip.appendChild(img);
+    await addTooltip(img, entry.name, entry.description, icon);
   }
   if (entries.length === 0) strip.innerText = emptyText;
 
@@ -251,10 +256,12 @@ const loadIconStrip = async (
     const img = document.createElement("img");
     const icon = safePath(entry.iconPath, fallbackIcon);
     img.src = icon;
-    await addTooltip(container, img, entry.name, entry.description, icon);
+    // The row joins the tooltip before its icons do, so every icon is in the
+    // document when its tooltip mounts (see the strip above).
+    if (!tooltipRow.isConnected) tooltip.appendChild(tooltipRow);
     tooltipRow.appendChild(img);
+    await addTooltip(img, entry.name, entry.description, icon);
     if ((i - (STRIP_ROW_SIZE - 1)) % STRIP_ROW_SIZE === STRIP_ROW_SIZE - 1 || i === entries.length - 1) {
-      tooltip.appendChild(tooltipRow);
       tooltipRow = document.createElement("div");
       tooltipRow.classList.add(rowClass, "container-horizontal");
     }
@@ -324,14 +331,10 @@ const loadPositions = async (container, model, unit, glossary) => {
     const posIcon = safePath(position.iconPath, DEFAULT_POSITION_ICON);
     li.style.backgroundImage = `url("${posIcon}")`;
     if (chosen) li.classList.add("chosen-position");
-    await addTooltip(
-      container,
-      li,
-      position.name,
-      buildPositionTooltipEntries(position, glossary, { chosen }),
-      posIcon
-    );
+    // The icon joins the list before its tooltip mounts, for the same reason as
+    // the header icons.
     positionsList.appendChild(li);
+    await addTooltip(li, position.name, buildPositionTooltipEntries(position, glossary, { chosen }), posIcon);
   }
 };
 
@@ -424,7 +427,7 @@ const load = async (container, {
   shinsuContainer.innerText = model.cost;
   const shinsuTooltip = glossary?.hud?.shinsuCard;
   if (shinsuTooltip) {
-    await addTooltip(container, shinsuContainer, shinsuTooltip.name, shinsuTooltip.texts);
+    await addTooltip(shinsuContainer, shinsuTooltip.name, shinsuTooltip.texts);
   }
 
   // positions and hp exist for units only
@@ -437,7 +440,7 @@ const load = async (container, {
   hpContainer.innerText = unit ? unit.currentHp : model.maxHp ?? "";
   const hpTooltip = glossary?.hud?.[unit ? "hpCurrent" : "hpMax"];
   if (hpTooltip) {
-    await addTooltip(container, hpContainer, hpTooltip.name, hpTooltip.texts);
+    await addTooltip(hpContainer, hpTooltip.name, hpTooltip.texts);
   }
 };
 

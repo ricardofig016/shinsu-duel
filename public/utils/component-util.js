@@ -3,6 +3,7 @@ import loadTooltip from "/components/tooltip/script.js";
 import loadUnitCardHorizontal from "/components/unit-card-horizontal/script.js";
 import loadCardVertical from "/components/card-vertical/script.js";
 import loadCardDetailOverlay from "/components/card-detail-overlay/script.js";
+import { isStaleTooltip } from "/utils/tooltip-lifetime.js";
 
 const components = {
   navbar: { load: loadNavbar },
@@ -13,10 +14,38 @@ const components = {
 };
 
 /**
+ * Resolve once every stylesheet the markup just inserted links is applied.
+ * `link.sheet` is set as soon as the browser has the sheet's CSSOM, which is
+ * when its rules start affecting layout; a sheet still in flight reports null
+ * and resolves through its own load or error event. A detached container never
+ * starts the fetch, so it resolves instead of blocking the renderer.
+ */
+const awaitStylesheets = async (container) => {
+  const links = [...container.querySelectorAll('link[rel="stylesheet"]')];
+  if (!container.isConnected) return;
+  await Promise.all(
+    links.map(
+      (link) =>
+        new Promise((resolve) => {
+          if (link.sheet) return resolve();
+          link.addEventListener("load", resolve, { once: true });
+          link.addEventListener("error", resolve, { once: true });
+        })
+    )
+  );
+};
+
+/**
  * Load a component's markup into the container and run its renderer.
  * The container must be attached to the document: components that measure
  * their layout while rendering (font fitting, overflow checks) need real
  * geometry, and a detached container measures as zero in every direction.
+ *
+ * The renderer waits for the component's own stylesheet. Markup arrives with
+ * its `<link>`, and freshly inserted markup is laid out unstyled until that
+ * sheet loads, so a renderer that measures geometry would measure the wrong
+ * tree: the card detail overlay read a full-width unstyled slot as its card
+ * width and opened its rows off center.
  */
 export const loadComponent = async (container, component, data = null) => {
   if (!components[component] || !container) console.error("Invalid component or container");
@@ -27,14 +56,73 @@ export const loadComponent = async (container, component, data = null) => {
   }
 
   container.innerHTML = components[component].html;
+  await awaitStylesheets(container);
   await components[component].load(container, data);
 };
 
-export const addTooltip = async (container, hoverContainer, title, textList, iconPath = null) => {
-  const tooltipComponent = document.createElement("div");
-  tooltipComponent.classList.add("tooltip-component");
-  container.appendChild(tooltipComponent);
-  await loadComponent(tooltipComponent, "tooltip", { hoverContainer, title, textList, iconPath });
+/**
+ * The page's tooltip layer: every hover tooltip mounts on the body instead of
+ * inside the host that owns the hover target.
+ *
+ * Tooltips float above the surface that hosts them. Inside the card detail
+ * overlay a tooltip mounted in its host would sit in that card's slot, which
+ * is a stacking context, and any card with a higher z-index would paint over
+ * it; on a plain page it would resolve its absolute coordinates against the
+ * nearest positioned ancestor rather than the page origin.
+ *
+ * Mounting on the body costs the host's own cleanup: a host removes its
+ * subtree, and a body-mounted tooltip is not in it. A page that opens and
+ * closes the overlay mounts a tooltip per card face each time, so a tooltip
+ * whose target has left the document is dropped as soon as the next one
+ * mounts. That keeps at most one dead host alive, and the layer never grows
+ * past the tooltips of the surfaces currently on the page.
+ */
+const mountedTooltips = new Set();
+
+const pruneTooltips = () => {
+  for (const tooltip of [...mountedTooltips]) {
+    const targetConnected = tooltip.target.isConnected;
+    if (targetConnected) tooltip.attached = true;
+    if (!isStaleTooltip({ settled: tooltip.settled, attached: tooltip.attached, targetConnected })) continue;
+    tooltip.element.remove();
+    mountedTooltips.delete(tooltip);
+  }
+};
+
+/**
+ * Mount one tooltip for `hoverContainer` and start loading it. Returns the
+ * tooltip element — already in the document, so a caller that has to remove it
+ * early (a hover that ended while the tooltip was still loading) can — with
+ * the load itself as `loaded`. `options` are the tooltip component's, minus
+ * the hover target: `title`, `textList`, `iconPath`, and `bare`.
+ */
+export const mountTooltip = (hoverContainer, options = {}) => {
+  pruneTooltips();
+  const element = document.createElement("div");
+  element.classList.add("tooltip-component");
+  document.body.appendChild(element);
+  const mounted = { target: hoverContainer, element, settled: false, attached: hoverContainer.isConnected };
+  mountedTooltips.add(mounted);
+  const loaded = loadComponent(element, "tooltip", { ...options, hoverContainer });
+  // the settled mark is bookkeeping for the prune pass; the caller still owns
+  // the load's rejection
+  loaded
+    .finally(() => {
+      mounted.settled = true;
+    })
+    .catch(() => {});
+  return { element, loaded };
+};
+
+/**
+ * Attach a hover tooltip to `hoverContainer`, resolving when it is ready to
+ * show. `iconPath` leads the tooltip; `bare` drops the frame chrome, for a
+ * tooltip whose entry node is the whole tooltip (a card link's card face).
+ */
+export const addTooltip = async (hoverContainer, title, textList, iconPath = null, { bare = false } = {}) => {
+  const { element, loaded } = mountTooltip(hoverContainer, { title, textList, iconPath, bare });
+  await loaded;
+  return element;
 };
 
 /**

@@ -262,9 +262,12 @@
 }
 
 .card-vertical-text li {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  /* Block, not flex: the linked-text renderer puts text nodes and link spans
+     side by side inside this li, and a flex container would make each of them
+     its own flex item. That drops the spaces between them, wraps every
+     segment independently, and keeps the content one line tall, which hides
+     the overflow from the font fit. */
+  display: block;
   text-align: center;
   overflow: hidden;
   transition: scale 0.1s;

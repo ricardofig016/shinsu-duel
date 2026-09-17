@@ -52,8 +52,7 @@ Two further entry shapes serve card-prose tooltips:
   [COMPILED_CARD_DSL.md](./COMPILED_CARD_DSL.md)); the linked-text renderer
   (`public/utils/card-text-dom.js`) turns them into DOM so inline links keep
   working inside tooltips.
-- `{ node }` — a pre-built DOM element (the card preview a card link's hover
-  shows). Callers build elements; nothing renders markup strings.
+- `{ node }` — a pre-built DOM element. Callers build elements; nothing renders markup strings. This is how a card link's hover shows a card face.
 
 Rendering stays injection-safe either way: styled entries only add a class,
 string entries render as text content, and segment/node entries render
@@ -61,6 +60,41 @@ through the element-building renderer. Entry assembly helpers live in
 `public/utils/tooltip-entries.js` (pure, unit-tested in
 `public/tests/utils/tooltip-entries.test.js`); the glossary is fetched once
 per page load by `public/utils/glossary.js`.
+
+A tooltip mounts on the body through the shared layer in
+`public/utils/component-util.js` rather than inside the component that owns the
+hover target. Two reasons: it has to paint above whatever hosts it (a tooltip
+inside a card-detail-overlay slot would sit in that card's stacking context and
+lose to any card with a higher z-index), and it is positioned against the
+containing block it lands in, which the layer keeps at the page origin. The
+tooltip component measures that block from the frame itself, so a host that
+still positions or transforms its subtree places the tooltip correctly anyway.
+
+The layer also owns the tooltip's lifetime, because a host that removes its own
+subtree cannot take a body-mounted tooltip with it. A tooltip is dropped once it
+has loaded and its hover target has left the document, and those two conditions
+are both load-bearing:
+
+- a tooltip that is still loading is never removed, because its renderer waits
+  on its own stylesheet and removing the element aborts that load, which leaves
+  the caller that mounted it waiting forever. One card's tooltip could deadlock
+  another card's render, and with it a page's whole setup;
+- a target that has never been in the document has not left it, because callers
+  build an element and then append it. Mounting a tooltip on an element that has
+  not joined the tree yet is still wrong for the first reason's sake: put the
+  element in its parent first, as `card-vertical` does for its header icons,
+  strip icons, paged tooltip rows, and position icons.
+
+The tooltip's stylesheet only ever targets the tooltip's own classes. Its
+frame can host a whole component as an entry node, so an element selector such
+as `.tooltip-frame h1` reaches into that component's markup; that is how a
+preview card's cost circle once took the tooltip title's size.
+
+A card-link preview is a real card, so it is built in an off-screen host
+(`.card-text-preview-host`): a card fits its own text as it renders, and a
+detached card measures zero everywhere, keeps its text at full size, and shows
+the last lines clipped. The tooltip that receives the preview takes the element
+out of that host.
 
 ---
 
@@ -75,7 +109,7 @@ hover tooltip built from server-owned data:
 
 | Link type                                | Hover shows                                                                 |
 | ---------------------------------------- | --------------------------------------------------------------------------- |
-| `card`                                   | A card preview: the card face rendered through card-vertical                |
+| `card`                                   | A card preview: the card face rendered through card-vertical, shown bare (the card is the whole tooltip, no frame chrome or title) |
 | `condition`, `trait`, `attribute`, `position` | The catalog entry's name, description, and effect lines (`GET /conditions`, `/traits`, `/attributes`, `/positions`) |
 | `keyword`, `rule`                        | The glossary `keywords`/`terms` copy (`GET /glossary`)                      |
 | `series`, `affiliation`                  | The names of every card in that group, computed from the card catalog (`GET /cards/data`) |

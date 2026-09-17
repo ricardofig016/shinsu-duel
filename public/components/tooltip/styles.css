@@ -1,9 +1,17 @@
+/* Every rule here targets the tooltip's own markup by class. A tooltip can
+   carry a whole component as an entry node — a card link's hover shows a card
+   face — so an element selector such as `.tooltip-frame h1` would reach inside
+   that component and restyle it: the preview card's cost circle once took the
+   tooltip title's 2rem, ballooned, and squeezed the card's own text to nothing. */
 .tooltip-frame {
   max-width: 30rem;
   padding: 0.3rem;
   border-radius: 4px;
   position: absolute;
-  z-index: 9;
+  /* Above every host surface: tooltips position against the page origin (see
+     `addTooltip`), so they must clear the card detail overlay (30) and the
+     page layers below it. */
+  z-index: 100;
   display: none;
   background-image: url("/assets/images/card/frame.png");
   background-size: cover;
@@ -26,12 +34,12 @@
   background-position: center;
 }
 
-.tooltip-frame img {
+.tooltip-icon {
   height: 2.5em;
   width: auto;
 }
 
-.tooltip-frame h1 {
+.tooltip-title {
   margin: 0;
   font-size: 2rem;
   flex: 1;
@@ -39,7 +47,7 @@
 
 /* The divider's full look lives here so tooltips render identically on
    every host page, not just pages that style a bare `hr` themselves. */
-.tooltip-frame hr {
+.tooltip-divider {
   width: 100%;
   min-height: 2px;
   margin: 0;
@@ -50,7 +58,7 @@
   border: none;
 }
 
-.tooltip-frame p {
+.tooltip-entry {
   margin: 0;
   padding: 0.5rem 0;
   font-size: 1rem;
@@ -58,18 +66,32 @@
 
 /* Styled entries: descriptions and concepts read as context (italic, muted),
    emphasis marks the card's own rank, labels name the battlefield line. */
-.tooltip-frame p.tooltip-text-italic {
+.tooltip-entry-italic {
   font-style: italic;
   color: rgba(255, 255, 255, 0.82);
 }
 
-.tooltip-frame p.tooltip-text-strong {
+.tooltip-entry-strong {
   font-weight: 700;
 }
 
-.tooltip-frame p.tooltip-text-label {
+.tooltip-entry-label {
   text-transform: uppercase;
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.75);
+}
+
+/* A bare tooltip is content only: the node it carries is the whole tooltip, so
+   the frame adds no padding, no background, and no title. */
+.tooltip-frame-bare,
+.tooltip-frame-bare .tooltip-content {
+  padding: 0;
+  border-radius: 0;
+  background-image: none;
+}
+
+.tooltip-frame-bare .tooltip-icon-title-container,
+.tooltip-frame-bare .tooltip-divider {
+  display: none;
 }
