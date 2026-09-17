@@ -13,6 +13,11 @@ Loaded through the component registry in `public/utils/component-util.js`:
 loadComponent(container, "card-vertical", { card, unit, isSmall, onAbilityClick });
 ```
 
+The container must be attached to the document, and the renderer runs only
+after the component's own stylesheet is applied: the renderer fits fonts and
+measures geometry, and freshly inserted markup is laid out unstyled until its
+`<link>` loads.
+
 - Pass either `card` (a `buildCardViewModel` view) or `unit` (a
   `buildUnitViewModel` view), never both; a missing view or a null `cardId`
   renders the card back.
@@ -107,37 +112,51 @@ with each attachment's own closure folded in at open time under the same
 never-repeat rule. The list is static for the overlay's lifetime — changing
 focus never rebuilds it.
 
-**Layout and sizing:** the focus slot sits slightly right of screen center
-(55% of the viewport) so the equipment column has room on its left. Every
-card is a full-size card-vertical in a slot; non-focus slots shrink by a
-slight graded scale per step of distance from the focus (−5% per step with a
-0.65 floor), neighbors overlap their slots slightly, and z-index falls off
-with distance from the focus — both recomputed on every focus change. The
-scale falloff, overlap, and focus position are component constants tuned in
-the browser.
+**Layout and sizing:** the focus slot sits at the middle of the viewport, with
+the equipment column to its left. Every card is a full-size card-vertical in a
+slot; non-focus slots shrink by a slight graded scale per step of distance from
+the focus (−5% per step with a 0.65 floor), neighbors overlap their slots
+slightly, and z-index falls off with distance from the focus — both recomputed
+on every focus change. The scale falloff, overlap, and focus position are
+component constants tuned in the browser.
+
+The row is deliberately not kept promoted: `will-change: transform` on it made
+the browser rasterize the cards inside at whatever scale the graded animation
+last asked for and never re-rasterize them, leaving every card that had
+animated its scale permanently soft.
+
+Centering is arithmetic, not measurement (`public/utils/card-detail-layout.js`):
+the slot footprint at scale 1 is read once when the row is built, and every
+row offset is derived from the scales the overlay applied. Slot footprints and
+the cards inside them transition to their new scale, so a card measured
+immediately after a focus change reports the scale it is leaving, and the row
+would land short by exactly the distance still in flight.
 
 **Interactions:**
 
 - wheel/trackpad scroll steps the focus one card at a time (snapped, no wrap),
-- clicking a side card focuses it,
-- horizontal drag with pointer capture pans the row and snaps back to card
-  alignment on release; a press that never crosses the movement threshold
-  stays a click, so drags neither close the overlay nor misfire card clicks,
+- clicking a card focuses it,
 - left/right arrow keys move the focus while the overlay is open,
-- Escape and backdrop click close it.
+- Escape, a right-click anywhere in the overlay, or a click outside a card
+  closes it.
 
 Opening and closing FLIP-zoom the focus card between its slot and the source
-card the overlay was opened from (reduced motion renders without zoom);
-opening again while open replaces the open overlay. Card links inside the
-rendered text navigate: clicking one moves the row's focus when the target
-is in it, and otherwise opens the overlay for that card (see
-[TOOLTIP_SYSTEM.md](./TOOLTIP_SYSTEM.md) for the link hover sources).
+card the overlay was opened from (reduced motion renders without zoom), and
+opening again while open replaces the open overlay. The opening placement lands
+without transition, in the frame the overlay appears in, and motion is enabled
+only afterwards: an animated initial transform slides the row in from the
+overlay's left edge, and the entrance zoom would measure a card that is still
+travelling. Card links inside the rendered text navigate: clicking one moves
+the row's focus when the target is in it, and otherwise opens the overlay for
+that card (see [TOOLTIP_SYSTEM.md](./TOOLTIP_SYSTEM.md) for the link hover
+sources).
 
 ## Testing
 
 The view models and wire projections behind the component are covered by
 `public/tests/game/viewModels.test.js` and the server suites around
 `Card.toSanitizedObject()` and the GameState condition projections. The
-overlay's row assembly is pure and unit-tested in
-`public/tests/utils/card-detail-row.test.js`; the component scripts
+overlay's row assembly and layout geometry are pure and unit-tested in
+`public/tests/utils/card-detail-row.test.js` and
+`public/tests/utils/card-detail-layout.test.js`; the component scripts
 themselves are DOM code without a test harness.

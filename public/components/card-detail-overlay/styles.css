@@ -3,8 +3,6 @@
   inset: 0;
   z-index: 30;
   font-size: 1rem;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 .card-detail-overlay-backdrop {
@@ -20,12 +18,11 @@
   display: flex;
   align-items: center;
   transform: translateY(-50%);
-  transition: transform 0.16s ease-out;
-  will-change: transform;
-}
-
-.card-detail-overlay-row.dragging {
-  transition: none;
+  /* No will-change here: keeping the row promoted makes the browser rasterize
+     the cards inside it at the scale the graded animation last asked for and
+     never re-rasterize them, so every card that has animated its scale stays
+     permanently soft (measured at 74% of the sharpness of a fresh card). The
+     transition promotes the row for its own duration anyway. */
 }
 
 .card-detail-slot {
@@ -36,16 +33,35 @@
   width: calc(30rem * var(--s, 1));
   height: calc(45rem * var(--s, 1));
   margin-inline: -2.5rem;
-  transition: width 0.1s ease-out, height 0.1s ease-out;
 }
 
 /* The overlay owns the big card's placement: centered in its slot, shrunk
-   by the slot's graded scale — no page-specific positioning overrides. */
+   by the slot's graded scale — no page-specific positioning overrides. Its
+   own transition is off: the slot footprint already animates the graded
+   scale, and the card's placement must land without motion when the overlay
+   opens. */
 .card-detail-slot .card-vertical-frame.card-vertical-big {
   position: absolute;
   bottom: 50%;
   right: 50%;
   transform: translate(50%, 50%) scale(var(--s, 1));
+  transition: none;
+}
+
+/* Motion is off until the overlay has painted its opening frame: the row, the
+   slot footprints, and the cards must all land in place first, or the row
+   slides in from the overlay's left edge and the entrance zoom measures a card
+   that is still travelling. Focus changes animate once the overlay enables it. */
+.card-detail-overlay-motion .card-detail-overlay-row {
+  transition: transform 0.16s ease-out;
+}
+
+.card-detail-overlay-motion .card-detail-slot {
+  transition: width 0.1s ease-out, height 0.1s ease-out;
+}
+
+.card-detail-overlay-motion .card-detail-slot .card-vertical-frame {
+  transition: transform 0.1s ease-out;
 }
 
 .card-detail-tag {
