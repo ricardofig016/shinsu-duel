@@ -128,6 +128,23 @@ export default class Card {
   }
 
   /**
+   * Printed trait views: the shared catalog projection, which carries compiled
+   * display segments for the trait's prose plus its icon path and numeric
+   * flag, with the value this card prints for the trait. A card face shows a
+   * numeric trait's number before the card is ever deployed, and a trait
+   * authored without a value falls back to the same default the engine applies
+   * when it wires the unit's modifiers. A non-numeric trait carries no value.
+   */
+  #traitViews() {
+    return Object.fromEntries(
+      Object.entries(this.traits).map(([code, entry]) => [
+        code,
+        { ...entry, value: entry.numeric === true ? this.traitValues?.[code] ?? 1 : null },
+      ])
+    );
+  }
+
+  /**
    * Client-facing card view. Printed information a player reads off the card
    * (rank, requirements, effect/rule texts, evolve/ignition triggers) is
    * projected as compiled display segments — the client renders and links
@@ -158,7 +175,7 @@ export default class Card {
       visible: this.visible,
       affiliations: this.affiliations,
       positions: this.positions,
-      traits: this.traits,
+      traits: this.#traitViews(),
       attributes: this.#attributeViews(),
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,

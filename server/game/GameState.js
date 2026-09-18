@@ -17,7 +17,8 @@ import EVT from "./EventCatalog.js";
 import cards from "../data/cards.json" with { type: "json" };
 import conditions from "../data/conditions.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
-import { getConditions } from "./displayCatalogs.js";
+import traitsSource from "../data/traits.json" with { type: "json" };
+import { getConditions, getTraits } from "./displayCatalogs.js";
 import GameClock from "./GameClock.js";
 import EventBus from "./EventBus.js";
 import ModifierStack, { getModifierCounter } from "./ModifierStack.js";
@@ -465,14 +466,14 @@ export default class GameState {
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: this.#getConditionViews(unit.id),
-          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+          traits: this.#getTraitViews(unit.id),
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
         backline: playerState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: this.#getConditionViews(unit.id),
-          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+          traits: this.#getTraitViews(unit.id),
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
       },
@@ -499,10 +500,12 @@ export default class GameState {
   /**
    * Project the conditions active on a unit with their effective magnitude
    * from the ModifierStack, so clients can render stacks (e.g. "Poisoned 3").
-   * Each view carries the condition catalog's name, prose, and icon path; the
-   * prose arrives as compiled display segments, so a condition tooltip keeps
-   * its inline links. Unknown keys degrade to their raw key so a catalog
-   * drift surfaces in the UI instead of crashing the projection.
+   * Each view carries the condition catalog's name, prose, numeric flag, and
+   * icon path; the prose arrives as compiled display segments, so a condition
+   * tooltip keeps its inline links. The numeric flag gates the number: only a
+   * numeric condition's magnitude is a value a player reads, so a non-numeric
+   * condition never shows one. Unknown keys degrade to their raw key so a
+   * catalog drift surfaces in the UI instead of crashing the projection.
    */
   #getConditionViews(unitId) {
     const conditionViews = getConditions();
@@ -511,9 +514,34 @@ export default class GameState {
       return {
         key,
         magnitude: this.modifierStack.getEffective(unitId, "condition", key),
+        numeric: entry?.numeric === true,
         name: entry?.name ?? key,
         description: entry?.description ?? null,
         iconPath: conditions[key] ? `/assets/icons/${conditions[key].iconPath}` : null,
+      };
+    });
+  }
+
+  /**
+   * Project the traits active on a unit with their effective value from the
+   * ModifierStack, so a client can render the number a numeric trait carries
+   * (e.g. "Resilient 3") next to its icon. Each view carries the trait
+   * catalog's name, prose, numeric flag, and icon path; the prose arrives as
+   * compiled display segments, so a trait tooltip keeps its inline links, and
+   * a trait the unit gained at runtime projects exactly like a printed one.
+   * Unknown keys degrade to their raw key, like conditions.
+   */
+  #getTraitViews(unitId) {
+    const traitViews = getTraits();
+    return [...this.modifierStack.getActiveKeys(unitId, "trait")].map((key) => {
+      const entry = traitViews[key] ?? traitsSource[key];
+      return {
+        key,
+        value: this.modifierStack.getEffective(unitId, "trait", key),
+        numeric: entry?.numeric === true,
+        name: entry?.name ?? key,
+        description: entry?.description ?? null,
+        iconPath: traitsSource[key] ? `/assets/icons/${traitsSource[key].iconPath}` : null,
       };
     });
   }
@@ -541,13 +569,13 @@ export default class GameState {
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: this.#getConditionViews(unit.id),
-          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+          traits: this.#getTraitViews(unit.id),
         })),
         backline: opponentState.field.backline.map((unit) => ({
           ...unit.toSanitizedObject(),
           equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
           conditions: this.#getConditionViews(unit.id),
-          traits: [...this.modifierStack.getActiveKeys(unit.id, "trait")],
+          traits: this.#getTraitViews(unit.id),
         })),
       },
       hand: hand,

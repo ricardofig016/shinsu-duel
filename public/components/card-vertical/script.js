@@ -4,6 +4,7 @@ import { renderSegments } from "/utils/card-text-dom.js";
 import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import {
   buildAttributeTooltipEntries,
+  buildEntryTitle,
   buildPositionTooltipEntries,
   buildProseEntry,
   buildRankTooltip,
@@ -11,12 +12,13 @@ import {
 } from "/utils/tooltip-entries.js";
 
 /**
- * One catalog prose field as the tooltip's entry list. Trait and condition
- * descriptions compile to display segments now, so they carry inline links; a
- * synthetic view still hands over plain text.
+ * One catalog prose field as the tooltip's entry list, with the value slots it
+ * states filled when the caller knows them and an optional style. Trait and
+ * condition descriptions compile to display segments, so they carry inline
+ * links; a synthetic view still hands over plain text.
  */
-const proseEntries = (value) => {
-  const entry = buildProseEntry(value);
+const proseEntries = (value, values = null, style = null) => {
+  const entry = buildProseEntry(value, style, values);
   return entry ? [entry] : [];
 };
 
@@ -101,12 +103,15 @@ const loadHeaderIcons = async (container, model, glossary) => {
       texts: buildAttributeTooltipEntries(attribute),
     });
   }
+  // The concept copy is compiled prose like every other catalog field, so it
+  // becomes a prose entry rather than a `{ text }` string: reading it as text
+  // silently dropped the description from the tooltip.
   const conceptEntry = (key, iconPath, textList) =>
     concepts && textList.length > 0
       ? {
           iconPath,
           title: concepts[key].name,
-          texts: [{ text: concepts[key].description, style: "italic" }, ...textList],
+          texts: [...proseEntries(concepts[key].description, null, "italic"), ...textList],
         }
       : null;
   if (model.evolveTriggers?.length > 0) {
@@ -218,13 +223,45 @@ const loadAffiliations = (container, model) => {
 };
 
 /**
- * Shared icon-strip renderer for traits and conditions: up to four icons,
- * an ellipsis overflow opening the paged tooltip, and the strip's own label
- * when it has no entries.
+ * The number a strip entry states, or null when it states none. The catalog's
+ * numeric flag is the gate: a condition's magnitude exists for every condition
+ * (none is suppressed without one), so without the flag a non-numeric
+ * condition would claim a number it does not have.
+ */
+const stripValue = (entry, readValue) => (entry.numeric === true ? readValue(entry) ?? null : null);
+
+/**
+ * One strip icon with its value badge. The badge is positioned absolutely in
+ * the icon's bottom-right corner, so it floats over the artwork without
+ * joining the strip's flex layout: gaps, alignment, and every measured box
+ * stay exactly what they were without it.
+ */
+const buildStripIcon = (entry, { fallbackIcon, value }) => {
+  const wrapper = document.createElement("span");
+  wrapper.className = "card-vertical-strip-icon";
+  const img = document.createElement("img");
+  const icon = safePath(entry.iconPath, fallbackIcon);
+  img.src = icon;
+  wrapper.appendChild(img);
+  if (value !== null) {
+    const badge = document.createElement("span");
+    badge.className = "card-vertical-strip-value";
+    badge.textContent = String(value);
+    wrapper.appendChild(badge);
+  }
+  return { wrapper, icon };
+};
+
+/**
+ * Shared icon-strip renderer for traits and conditions: up to four icons, an
+ * ellipsis overflow opening the paged tooltip, and the strip's own label when
+ * it has no entries. `slot` names the value slot the entries' prose fills and
+ * `readValue` reads an entry's number, so both strips state their numbers the
+ * same way.
  */
 const loadIconStrip = async (
   container,
-  { stripSelector, tooltipFrameSelector, tooltipSelector, rowClass, fallbackIcon },
+  { stripSelector, tooltipFrameSelector, tooltipSelector, rowClass, fallbackIcon, slot, readValue },
   entries,
   emptyText
 ) => {
@@ -234,8 +271,8 @@ const loadIconStrip = async (
 
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
-    const img = document.createElement("img");
     if (i + 1 >= STRIP_ROW_SIZE && entries.length > STRIP_ROW_SIZE) {
+      const img = document.createElement("img");
       img.src = OVERFLOW_ICON;
       let hideTimeout = null;
       img.addEventListener("mouseenter", () => {
@@ -249,12 +286,17 @@ const loadIconStrip = async (
       strip.appendChild(img);
       break;
     }
-    const icon = safePath(entry.iconPath, fallbackIcon);
-    img.src = icon;
+    const value = stripValue(entry, readValue);
+    const { wrapper, icon } = buildStripIcon(entry, { fallbackIcon, value });
     // The element goes in before its tooltip: a hover target that is not in the
     // document yet reads as gone, and the tooltip layer drops those.
-    strip.appendChild(img);
-    await addTooltip(img, entry.name, proseEntries(entry.description), icon);
+    strip.appendChild(wrapper);
+    await addTooltip(
+      wrapper,
+      buildEntryTitle(entry, value),
+      proseEntries(entry.description, value === null ? null : { [slot]: value }),
+      icon
+    );
   }
   if (entries.length === 0) strip.innerText = emptyText;
 
@@ -264,14 +306,18 @@ const loadIconStrip = async (
   tooltipRow.classList.add(rowClass, "container-horizontal");
   for (let i = STRIP_ROW_SIZE - 1; i < entries.length; i++) {
     const entry = entries[i];
-    const img = document.createElement("img");
-    const icon = safePath(entry.iconPath, fallbackIcon);
-    img.src = icon;
+    const value = stripValue(entry, readValue);
+    const { wrapper, icon } = buildStripIcon(entry, { fallbackIcon, value });
     // The row joins the tooltip before its icons do, so every icon is in the
     // document when its tooltip mounts (see the strip above).
     if (!tooltipRow.isConnected) tooltip.appendChild(tooltipRow);
-    tooltipRow.appendChild(img);
-    await addTooltip(img, entry.name, proseEntries(entry.description), icon);
+    tooltipRow.appendChild(wrapper);
+    await addTooltip(
+      wrapper,
+      buildEntryTitle(entry, value),
+      proseEntries(entry.description, value === null ? null : { [slot]: value }),
+      icon
+    );
     if ((i - (STRIP_ROW_SIZE - 1)) % STRIP_ROW_SIZE === STRIP_ROW_SIZE - 1 || i === entries.length - 1) {
       tooltipRow = document.createElement("div");
       tooltipRow.classList.add(rowClass, "container-horizontal");
@@ -402,7 +448,10 @@ const load = async (container, {
   // affiliations trapezoid
   loadAffiliations(container, model);
 
-  // trait and condition strips (units only)
+  // trait and condition strips (units only). Both state what is true on the
+  // board: a deployed unit shows the traits and conditions it actually has,
+  // with their effective values, while a card that is not on the field has no
+  // runtime state and shows what it prints.
   const isUnitCard = model.type === "unit";
   container.querySelector(".card-vertical-strips").classList.toggle("hidden", !isUnitCard);
   await loadIconStrip(
@@ -413,8 +462,10 @@ const load = async (container, {
       tooltipSelector: ".card-vertical-traits-tooltip",
       rowClass: "card-vertical-traits-tooltip-row",
       fallbackIcon: DEFAULT_TRAIT_ICON,
+      slot: "trait",
+      readValue: (entry) => entry.value,
     },
-    model.printedTraits,
+    unit ? model.runtimeTraits : model.printedTraits,
     "Traits"
   );
   await loadIconStrip(
@@ -425,6 +476,8 @@ const load = async (container, {
       tooltipSelector: ".card-vertical-conditions-tooltip",
       rowClass: "card-vertical-conditions-tooltip-row",
       fallbackIcon: DEFAULT_CONDITION_ICON,
+      slot: "condition",
+      readValue: (entry) => entry.magnitude,
     },
     unit?.conditions ?? [],
     "Conditions"

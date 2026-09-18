@@ -79,7 +79,12 @@ describe("GET /glossary: the client tooltip copy contract", () => {
       expect(glossary.hud[code]).toBeTruthy();
     }
     expect(glossary.hud.shinsuCard.texts).toEqual([prose]);
-    expect(glossary.hud.deck.textTemplate).toContain("{count}");
+    // The deck count is a render value now, not a `{count}` placeholder: the
+    // served copy carries the value slot and the client fills it per viewer.
+    expect(glossary.hud.deck.texts).toEqual([
+      { segments: expect.arrayContaining([{ type: "value", ref: "count", text: "x" }]) },
+    ]);
+    expect(glossary.hud.deck.textTemplate).toBeUndefined();
     expect(typeof glossary.hud.chosenSuffix).toBe("string");
     for (const code of ["frontline", "backline"]) {
       expect(glossary.lines[code].label).toBeTruthy();

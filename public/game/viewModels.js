@@ -48,12 +48,16 @@ const flattenCard = (card) => ({
   // `effect` lines) arrive from the server as compiled display segments
   // (`{ segments }`, see docs/COMPILED_CARD_DSL.md), so their inline links
   // render through the linked-text renderer and search projects them to plain
-  // text. No authored-text parsing happens client-side.
+  // text. No authored-text parsing happens client-side. `value` is the
+  // number the card prints for a numeric trait, and `numeric` decides whether
+  // that number is shown at all.
   printedTraits: Object.entries(card.traits ?? {}).map(([code, trait]) => ({
     code,
     name: trait.name,
     description: trait.description ?? null,
     iconPath: trait.iconPath ?? null,
+    numeric: trait.numeric === true,
+    value: trait.value ?? null,
   })),
   attributes: Object.entries(card.attributes ?? {}).map(([code, attribute]) => ({
     code,
@@ -110,6 +114,7 @@ export function buildUnitViewModel(unit) {
     conditions: (unit.conditions ?? []).map((condition) => ({
       key: condition.key,
       magnitude: condition.magnitude,
+      numeric: condition.numeric === true,
       name: condition.name ?? condition.key,
       description: condition.description ?? null,
       iconPath: condition.iconPath ?? null,
@@ -123,7 +128,18 @@ export function buildUnitViewModel(unit) {
       sourceId: granted.sourceId,
       text: [...(granted.ability?.text ?? [])],
     })),
-    runtimeTraits: [...(unit.traits ?? [])],
+    // The traits the unit actually has right now: printed ones plus anything
+    // it gained, and nothing it lost. Each carries its effective value, so a
+    // deployed unit's strip states what is true on the board rather than what
+    // the card was printed with.
+    runtimeTraits: (unit.traits ?? []).map((trait) => ({
+      code: trait.key,
+      name: trait.name ?? trait.key,
+      description: trait.description ?? null,
+      iconPath: trait.iconPath ?? null,
+      numeric: trait.numeric === true,
+      value: trait.value ?? null,
+    })),
   };
 }
 

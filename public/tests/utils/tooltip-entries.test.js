@@ -1,7 +1,8 @@
 import {
   buildAttributeTooltipEntries,
   buildCatalogTooltipEntries,
-  buildDeckTooltipText,
+  buildDeckTooltipEntries,
+  buildEntryTitle,
   buildPositionTooltipEntries,
   buildRankTooltip,
   buildTypeLetterTooltip,
@@ -26,7 +27,10 @@ const glossary = {
   },
   hud: {
     chosenSuffix: "(chosen)",
-    deck: { name: "Deck", textTemplate: "{count} cards remaining" },
+    deck: {
+      name: "Deck",
+      texts: [{ segments: [{ type: "value", ref: "count", text: "x" }, " cards remaining"] }],
+    },
   },
   lines: { frontline: { label: "Frontline" } },
 };
@@ -70,6 +74,29 @@ describe("normalizeTooltipEntries", () => {
   test("passes pre-built node entries through", () => {
     const node = { className: "preview" };
     expect(normalizeTooltipEntries([{ node }])).toEqual([{ node }]);
+  });
+
+  test("carries a value map on a segment entry so its slots can fill", () => {
+    const segments = ["I take -", { type: "value", ref: "trait", text: "x" }, " damage"];
+    expect(normalizeTooltipEntries([{ segments, values: { trait: 3 }, style: "italic" }])).toEqual([
+      { segments, style: "italic", values: { trait: 3 } },
+    ]);
+    expect(normalizeTooltipEntries([{ segments, values: "junk" }])).toEqual([{ segments }]);
+  });
+});
+
+describe("buildEntryTitle", () => {
+  test("states a numeric entry's value, and its placeholder when there is none", () => {
+    expect(buildEntryTitle({ name: "Resilient", numeric: true }, 3)).toBe("Resilient 3");
+    expect(buildEntryTitle({ name: "Resilient", numeric: true }, 0)).toBe("Resilient 0");
+    // A static catalog link has no instance, so it titles the slot's absence.
+    expect(buildEntryTitle({ name: "Resilient", numeric: true })).toBe("Resilient X");
+  });
+
+  test("keeps a non-numeric entry's plain name, and degrades without an entry", () => {
+    expect(buildEntryTitle({ name: "Barrier", numeric: false })).toBe("Barrier");
+    expect(buildEntryTitle({ name: "Barrier" })).toBe("Barrier");
+    expect(buildEntryTitle(null)).toBe("");
   });
 });
 
@@ -210,8 +237,8 @@ describe("buildRankTooltip", () => {
     expect(tooltip.title).toBe("Rank");
     expect(tooltip.texts).toEqual([
       { text: "Rank enforces a cost range.", style: "italic" },
-      { text: "Regular (cost 0-5): a Regular" },
-      { text: "Ranker (cost 3-7): a Ranker", style: "strong" },
+      { segments: ["Regular (cost 0-5): ", "a Regular"] },
+      { segments: ["Ranker (cost 3-7): ", "a Ranker"], style: "strong" },
     ]);
   });
 
@@ -219,6 +246,28 @@ describe("buildRankTooltip", () => {
     expect(buildRankTooltip("ranker", null)).toBeNull();
     expect(buildRankTooltip("ranker", {})).toBeNull();
     expect(buildRankTooltip("ranker", { title: "Rank", list: [] })).toBeNull();
+  });
+
+  test("renders the served rank list, whose title and descriptions are compiled prose", () => {
+    // Every prose field of the glossary compiles, the rank title included, so a
+    // served title is `{ segments }` too. Reading either as a string printed
+    // "[object Object]" in the tooltip.
+    const ranks = {
+      title: { segments: ["Rank"] },
+      concept: { segments: ["How the person is ranked."] },
+      list: [
+        { code: "regular", name: "Regular", description: { segments: ["a Regular"] }, minCost: 0, maxCost: 5 },
+        { code: "ranker", name: "Ranker", description: { segments: ["a Ranker"] }, minCost: 3, maxCost: 7 },
+      ],
+    };
+
+    const tooltip = buildRankTooltip("ranker", ranks);
+    expect(tooltip.title).toBe("Rank");
+    expect(tooltip.texts).toEqual([
+      { segments: ["How the person is ranked."], style: "italic" },
+      { segments: ["Regular (cost 0-5): ", "a Regular"] },
+      { segments: ["Ranker (cost 3-7): ", "a Ranker"], style: "strong" },
+    ]);
   });
 
   test("keeps a compiled rank description's links after the cost label", () => {
@@ -232,7 +281,7 @@ describe("buildRankTooltip", () => {
 
     expect(buildRankTooltip("regular", ranks).texts).toEqual([
       { segments: ["How the person is ranked."], style: "italic" },
-      { segments: [{ text: "Regular (cost 0-5): " }, "Someone chosen by ", { type: "rule", ref: "decks", text: "Headon" }], style: "strong" },
+      { segments: ["Regular (cost 0-5): ", "Someone chosen by ", { type: "rule", ref: "decks", text: "Headon" }], style: "strong" },
     ]);
   });
 });
@@ -280,10 +329,12 @@ describe("buildTypeLetterTooltip", () => {
   });
 });
 
-describe("buildDeckTooltipText", () => {
-  test("fills the server-owned template with the live count", () => {
-    expect(buildDeckTooltipText(17, glossary.hud.deck)).toBe("17 cards remaining");
-    expect(buildDeckTooltipText(17, null)).toBeNull();
+describe("buildDeckTooltipEntries", () => {
+  test("hands the compiled HUD copy over with the live count as a render value", () => {
+    expect(buildDeckTooltipEntries(17, glossary.hud.deck)).toEqual([
+      { segments: glossary.hud.deck.texts[0].segments, values: { count: 17 } },
+    ]);
+    expect(buildDeckTooltipEntries(17, null)).toEqual([]);
   });
 });
 

@@ -96,8 +96,9 @@ Authored `raw` strings are the player-visible prose of a node. They may embed ex
 - `[[series:Incinerate]]` — resolves against the series codes the card pool declares.
 - `[[keyword:Quick]]`, `[[trigger:Deploy]]`, `[[rank:Regular]]`, and `[[rule:Shinsu]]` — resolve against the glossary's `keywords`, `triggers`, `ranks`, and `terms` sections, which hold the hover copy for shared game vocabulary.
 - `[[card:Kranos|Kranos' blade]]` — the first pipe overrides the displayed text.
+- `[[value:trait]]`, `[[value:condition]]`, `[[value:count]]` — a runtime **value slot**, not a reference. The number belongs to the instance the prose is rendered for, so nothing resolves it at build time: the compiler stamps the slot and the text to fall back on, the renderer fills it from the values the entry carries, and every context without an instance shows that fallback (the authored alias, else `x`). See [Value slots](#value-slots).
 
-The compiler tokenizes every `raw` at the node's own source path into ordered **display segments** — a plain string, or a link segment `{ type, ref, text }` where `ref` is the resolved registry key (a card's persistent slug for `card` links, the catalog/glossary code otherwise) and `text` is what the player reads. Compiled nodes carry the segments under `text` and no `raw`. An unresolvable target, unknown link type, unknown parameter, or unclosed `[[` is a build error with the source path, so a card can never ship prose pointing at vocabulary that does not exist.
+The compiler tokenizes every `raw` at the node's own source path into ordered **display segments** — a plain string, or a link segment `{ type, ref, text }` where `ref` is the resolved registry key (a card's persistent slug for `card` links, the catalog/glossary code otherwise) and `text` is what the player reads. Compiled nodes carry the segments under `text` and no `raw`. An unresolvable target, unknown link type, unknown parameter, or unclosed `[[` is a build error with the source path, so a card can never ship prose pointing at vocabulary that does not exist. A `value` link is the one kind with no target to resolve: its slot is checked against the slot vocabulary instead.
 
 Link target resolution lives in scripts/lib/card-link-registry.js, backed by `public/utils/card-text.js` — the single dependency-free definition of the segment format and its plain-text projection (`segmentsToPlainText`), shared by the build scripts, the server, and the client.
 
@@ -119,6 +120,18 @@ The copy catalogs are **authoring sources**: never overwrite one with compiled o
 #### Copy links and the pool
 
 A `card:` link in shared copy names a card of the **shipped pool**, which is where the copy is authored. Compilation therefore resolves the catalogs against the shipped pool's names and series; a compile that runs over a smaller pool (fixtures, or a test-authored source directory) passes that pool as the first registry and the shipped pool as its fallback, so card text resolves against the pool in hand while shared copy still resolves against the pool it belongs to. Catalog copy is the only text compiled twice, once per pool.
+
+#### Value slots
+
+A numeric entry states its number as a value slot instead of a literal placeholder: `traits.resilient.description` reads `I take -[[value:trait]] damage from all sources`, `conditions.burned.description` reads `Turn end: I take [[value:condition]] damage`, and the deck HUD copy reads `[[value:count]] cards remaining`. The slot names what supplies the number:
+
+| Slot        | Supplied by                                                              |
+| ----------- | ------------------------------------------------------------------------ |
+| `trait`     | a trait's value: the printed value a card face shows before deployment, the effective value a deployed unit has |
+| `condition` | a condition's effective magnitude                                        |
+| `count`     | the viewer's remaining deck count                                        |
+
+The `numeric` flag on the entry is what gates display, so the copy and the flag have to agree: the compile test in `scripts/tests/catalog-copy.test.js` fails when a numeric entry does not carry exactly one slot, or a non-numeric entry carries any. `server/game/displayCatalogs.js`, `Card.toSanitizedObject`, and the `GameState` trait and condition views carry the numbers, and the client fills the slots where it renders.
 
 #### Mechanics stay in the authoring files
 

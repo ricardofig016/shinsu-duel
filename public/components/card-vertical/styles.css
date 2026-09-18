@@ -209,6 +209,46 @@
   height: 70%;
 }
 
+/* Each strip icon and its value badge share one positioned wrapper, so the
+   badge floats in the icon's bottom-right corner without joining the strip's
+   flex layout: gaps, alignment, and every measured box stay what they were
+   without it. */
+.card-vertical-strip-icon {
+  position: relative;
+  display: inline-flex;
+  height: 70%;
+  flex: 0 0 auto;
+}
+
+.card-vertical-traits .card-vertical-strip-icon img,
+.card-vertical-conditions .card-vertical-strip-icon img,
+.card-vertical-traits-tooltip-row .card-vertical-strip-icon img,
+.card-vertical-conditions-tooltip-row .card-vertical-strip-icon img {
+  height: 100%;
+  display: block;
+}
+
+.card-vertical-traits-tooltip-row .card-vertical-strip-icon,
+.card-vertical-conditions-tooltip-row .card-vertical-strip-icon {
+  height: 1.56em;
+}
+
+.card-vertical-strip-value {
+  position: absolute;
+  right: -0.2em;
+  bottom: -0.35em;
+  font-size: 1.1em;
+  line-height: 1;
+  font-weight: 700;
+  color: white;
+  pointer-events: none;
+  text-shadow:
+    -0.07em -0.07em 0 black,
+    0.07em -0.07em 0 black,
+    -0.07em 0.07em 0 black,
+    0.07em 0.07em 0 black;
+}
+
 .card-vertical-traits-tooltip-frame,
 .card-vertical-conditions-tooltip-frame {
   width: 100%;

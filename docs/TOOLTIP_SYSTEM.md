@@ -37,6 +37,13 @@ content routes serve the compiled copy from
 [COMPILED_CARD_DSL.md](./COMPILED_CARD_DSL.md#shared-catalog-copy)). The
 `affiliations` catalog stays plain text and carries no links.
 
+A numeric trait or condition states its number as a `value` slot in that copy
+(`I take -[[value:trait]] damage from all sources`), never as a literal
+placeholder. The slot has no build-time target: the card view states the value
+a card face prints, the `GameState` projection states the effective value a
+deployed unit has, and the tooltip fills the slot from whichever it was handed.
+A tooltip with no instance behind it shows the fallback `x`.
+
 When the glossary is unavailable, tooltips degrade to what the card views
 still carry: glossary-only tooltips (type letter, rank, header concepts, HUD)
 are skipped, and no copy is substituted from the frontend.
@@ -122,6 +129,10 @@ hover tooltip built from server-owned data:
 | `keyword`, `rule`                        | The glossary `keywords`/`terms` copy (`GET /glossary`)                      |
 | `series`, `affiliation`                  | The names of every card in that group, computed from the card catalog (`GET /cards/data`) |
 
+The `value` slot is the exception: it is a link in the copy, but not a
+reference, so it renders as plain text with no highlight and no hover — see
+[Value slots](./COMPILED_CARD_DSL.md#value-slots).
+
 Card links are also clickable: clicking moves the card detail overlay's focus
 when it is open, and opens the overlay for that card everywhere else. The
 data catalogs fetch once per page load inside the renderer; a failed fetch
@@ -148,11 +159,16 @@ from the enforced ones.
 | Rank trapezoid                     | "Rank" (glossary rank title) | Italic concept, then every rank with cost range and description; the card's own rank is strong |
 | Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | Italic prose description, then the attribute's effect lines (the RULES.md core-mechanic block) |
 | Evolve / Ignition / Passives / Requirements header icons | Glossary concept name | Italic concept description, then the card's printed texts |
-| HUD (shinsu, recharged, HP, lighthouses, fire charges, deck) | Glossary name | Glossary texts; the deck count fills the `{count}` template |
+| Trait / condition strip icon        | Catalog name, plus the entry's value for a numeric entry ("Resilient 3", or "Resilient X" where no instance supplies one) | The entry's compiled prose, with its value slots filled from the instance |
+| HUD (shinsu, recharged, HP, lighthouses, fire charges, deck) | Glossary name | Glossary texts; the deck copy's `[[value:count]]` slot fills with the viewer's remaining count |
 
 Every prose field above arrives as compiled display segments, so a link
 authored in shared catalog copy renders in the tooltip. The entries are
-assembled by the builders in `public/utils/tooltip-entries.js`.
+assembled by the builders in `public/utils/tooltip-entries.js`, which also
+carry the values (`values`, keyed by slot) a numeric entry's copy fills from.
+A surface with no instance to read a number from, such as a
+`[[trait:Resilient]]` link hover, shows the slot's fallback `x` and titles the
+entry with the placeholder `X`.
 
 ---
 

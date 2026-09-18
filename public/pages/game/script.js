@@ -27,7 +27,7 @@ import { STEP, roomCodeFromPath, followRoomStep } from "/game/steps.js";
 import { getGlossary } from "/utils/glossary.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
 import {
-  buildDeckTooltipText,
+  buildDeckTooltipEntries,
   buildPositionTooltipEntries,
 } from "/utils/tooltip-entries.js";
 
@@ -170,8 +170,8 @@ const renderDecks = async (state, glossary) => {
       newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
       newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
       if (i === cardAmount - 1 && deckTooltip) {
-        const text = buildDeckTooltipText(state[player].deckSize, deckTooltip);
-        if (text) await addTooltip(newDiv, deckTooltip.name, text);
+        const entries = buildDeckTooltipEntries(state[player].deckSize, deckTooltip);
+        if (entries.length > 0) await addTooltip(newDiv, deckTooltip.name, entries);
       }
     }
   }

@@ -80,6 +80,23 @@ describe("tokenizeSegments", () => {
       .toThrow('unknown series link target "Unknown Series"');
   });
 
+  test("tokenizes a value slot without a registry, since the number belongs to the instance", () => {
+    expect(tokenizeSegments("I take -[[value:trait]] damage from all sources", "traits.resilient.description", null))
+      .toEqual(["I take -", { type: "value", ref: "trait", text: "x" }, " damage from all sources"]);
+    expect(tokenizeSegments("[[value:count]] cards remaining", "glossary.hud.deck.texts[0]", registry))
+      .toEqual([{ type: "value", ref: "count", text: "x" }, " cards remaining"]);
+  });
+
+  test("a value slot's alias overrides its fallback text", () => {
+    expect(tokenizeSegments("I take [[value:condition|N]] damage", "c.raw", null))
+      .toEqual(["I take ", { type: "value", ref: "condition", text: "N" }, " damage"]);
+  });
+
+  test("rejects an unknown value slot with the slot vocabulary", () => {
+    expect(() => tokenizeSegments("[[value:damage]]", "c.raw", null))
+      .toThrow('names unknown value slot "damage" — expected one of: trait, condition, count');
+  });
+
   test("rejects unknown link types and malformed links", () => {
     expect(() => tokenizeSegments("[[banana:Bull]]", "c.raw", registry))
       .toThrow('unknown link type "banana"');
@@ -119,7 +136,7 @@ describe("tokenizeSegments", () => {
   test("exposes the full launch vocabulary of link types", () => {
     expect(LINK_TYPES).toEqual([
       "card", "condition", "trait", "attribute", "position",
-      "affiliation", "series", "keyword", "rule", "trigger", "rank",
+      "affiliation", "series", "keyword", "rule", "trigger", "rank", "value",
     ]);
   });
 });
@@ -133,6 +150,11 @@ describe("segmentsToPlainText", () => {
   test("aliases replace the canonical text in the plain projection", () => {
     const segments = tokenizeSegments("give [[card:Kranos|Kranos' blade]] to me", "c.raw", registry);
     expect(segmentsToPlainText(segments)).toBe("give Kranos' blade to me");
+  });
+
+  test("projects a value slot to its fallback, because plain text carries no instance", () => {
+    const segments = tokenizeSegments("I take -[[value:trait]] damage from all sources", "c.raw", null);
+    expect(segmentsToPlainText(segments)).toBe("I take -x damage from all sources");
   });
 
   test("returns an empty string for absent segments", () => {

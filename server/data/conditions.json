@@ -9,7 +9,7 @@
   },
   "burned": {
     "name": "Burned",
-    "description": "Turn end: I take x damage",
+    "description": "Turn end: I take [[value:condition]] damage",
     "color": "red",
     "colorName": "Damage Debuff",
     "numeric": true,
@@ -17,7 +17,7 @@
   },
   "cursed": {
     "name": "Cursed",
-    "description": "[[trigger:Round End]]: I take x damage for each unique condition I have",
+    "description": "[[trigger:Round End]]: I take [[value:condition]] damage for each unique condition I have",
     "color": "red",
     "colorName": "Damage Debuff",
     "numeric": true,
@@ -41,7 +41,7 @@
   },
   "exhausted": {
     "name": "Exhausted",
-    "description": "I deal -x damage",
+    "description": "I deal -[[value:condition]] damage",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": true,
@@ -65,7 +65,7 @@
   },
   "heavy": {
     "name": "Heavy",
-    "description": "My [[rule:Ability|Abilities]] cost +x [[rule:Shinsu]]",
+    "description": "My [[rule:Ability|Abilities]] cost +[[value:condition]] [[rule:Shinsu]]",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": true,
@@ -73,7 +73,7 @@
   },
   "poisoned": {
     "name": "Poisoned",
-    "description": "I take x damage when I use an [[rule:Ability]]",
+    "description": "I take [[value:condition]] damage when I use an [[rule:Ability]]",
     "color": "red",
     "colorName": "Damage Debuff",
     "numeric": true,
@@ -97,7 +97,7 @@
   },
   "weak": {
     "name": "Weak",
-    "description": "I take +x damage from all sources",
+    "description": "I take +[[value:condition]] damage from all sources",
     "color": "red",
     "colorName": "Damage Debuff",
     "numeric": true,

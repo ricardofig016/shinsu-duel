@@ -214,7 +214,7 @@
     },
     "deck": {
       "name": "Deck",
-      "textTemplate": "{count} cards remaining"
+      "texts": ["[[value:count]] cards remaining"]
     },
     "chosenSuffix": "(chosen)"
   },

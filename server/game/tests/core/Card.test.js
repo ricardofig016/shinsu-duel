@@ -45,8 +45,26 @@ describe("Card", () => {
     expect(bare.toSanitizedObject().artworkPath).toBeNull();
   });
 
-  test("serializes printed requirement, effect, and rule texts as display segments", () => {
+  test("stamps printed traits with the card's own value, gated on the numeric flag", () => {
     const card = makeCard({
+      traits: [{ code: "resilient", value: 3 }, { code: "strong" }, { code: "barrier" }],
+    });
+    const traits = card.toSanitizedObject().traits;
+
+    expect(traits.resilient).toMatchObject({ name: "Resilient", numeric: true, value: 3 });
+    expect(traits.resilient.description.segments).toEqual([
+      "I take -",
+      { type: "value", ref: "trait", text: "x" },
+      " damage from all sources",
+    ]);
+    // The engine wires a numeric trait authored without a value at 1, so the
+    // card face states the same number the unit will have.
+    expect(traits.strong).toMatchObject({ numeric: true, value: 1 });
+    // A valueless trait keeps the engine's wiring value but shows no number.
+    expect(traits.barrier).toMatchObject({ numeric: false, value: null });
+  });
+
+  test("serializes printed requirement, effect, and rule texts as display segments", () => {    const card = makeCard({
       rank: "ranker",
       requirements: [{ type: "target_side", side: "ally", text: ["you control a fisherman"] }],
       effects: [{ type: "deal_damage", text: ["deal 2"] }, { type: "draw", text: ["draw a card"] }],

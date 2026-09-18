@@ -46,7 +46,10 @@ The component consumes only the flattened view models from
   `name`, `description`, and `iconPath`: traits, positions, affiliations,
   attributes. Attribute views additionally carry the server-composed tooltip
   `title` (guide attributes get "Guide - <name>") and their `effect` lines.
-  Runtime conditions are stamped the same way by the GameState projections.
+  Runtime conditions and traits are stamped the same way by the GameState
+  projections, and both carry the catalog's `numeric` flag with the value to
+  show for it (`magnitude` on a condition, `value` on a trait); a printed
+  trait carries its own value on the card view.
 - Tooltip copy outside the card views (type/kind summaries, rank entries,
   header concept descriptions, HUD strings) comes from the glossary route —
   see `docs/TOOLTIP_SYSTEM.md` for the copy map and the styled entry contract.
@@ -83,7 +86,15 @@ mutates the view models.
   inside either element.
 - **Strips:** trait and condition icon strips, unit cards only, sharing one
   renderer: up to four icons, an ellipsis overflow that opens a paged
-  tooltip, and the strip label ("Traits" / "Conditions") when empty.
+  tooltip, and the strip label ("Traits" / "Conditions") when empty. Both
+  strips state what is true on the board, because both are handed the unit's
+  runtime state: a deployed unit shows the traits it actually has (printed
+  ones plus anything granted, minus anything silenced) and the conditions on
+  it, while a card that is not on the field has no runtime state and shows
+  what it prints. A numeric entry carries its number as a badge in its icon's
+  bottom-right corner, and the tooltip titles the entry with it ("Resilient
+  3"). The badge is positioned absolutely, so it floats over the artwork
+  without adding to the strip's flex layout or changing any measured box.
 - **Text area:** unit abilities (plus granted abilities, italic), landmark
   rules, and skill/equipment effects as paragraphs. The list owns a fixed
   flex share of the card (`overflow: hidden` and `min-height: 0`), and the

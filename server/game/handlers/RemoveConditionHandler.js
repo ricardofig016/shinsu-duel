@@ -1,6 +1,7 @@
 import BaseHandler from "./BaseHandler.js";
 import EVT from "../EventCatalog.js";
 import shuffle from "../utils/shuffle.js";
+import conditions from "../../data/conditions.json" with { type: "json" };
 
 /**
  * Removes conditions from a target unit.
@@ -56,11 +57,12 @@ export default class RemoveConditionHandler extends BaseHandler {
     // set is required the decision is pre-selected and only asks for
     // confirmation.
     const owner = payload.owner || payload.sourceOwner;
+    const candidates = eligible.map((key) => this._candidate(modStack, targetId, key));
     if (count >= eligible.length) {
       gameState.createPendingDecision({
         owner,
         type: "remove_conditions",
-        candidates: eligible.map((key) => ({ id: key, name: key, hp: 0 })),
+        candidates,
         minChoices: 0,
         maxChoices: 0,
         lockedIds: [...eligible],
@@ -73,7 +75,7 @@ export default class RemoveConditionHandler extends BaseHandler {
     gameState.createPendingDecision({
       owner,
       type: "remove_conditions",
-      candidates: eligible.map((key) => ({ id: key, name: key, hp: 0 })),
+      candidates,
       minChoices: count,
       maxChoices: count,
       resolve: (chosenKeys) => {
@@ -81,6 +83,18 @@ export default class RemoveConditionHandler extends BaseHandler {
       },
     });
     return { pending: true, cleansed: [] };
+  }
+
+  /**
+   * One condition candidate for the removal prompt: the raw code, plus its
+   * effective magnitude when the catalog marks the condition numeric. That
+   * magnitude is exactly what the choice turns on, and a non-numeric condition
+   * has no number to state. Conditions carry no HP, so the candidate omits it
+   * rather than stamping a zero the shared prompt would print.
+   */
+  _candidate(modStack, targetId, key) {
+    if (conditions[key]?.numeric !== true) return { id: key, name: key };
+    return { id: key, name: `${key} ${modStack.getEffective(targetId, "condition", key)}` };
   }
 
   _eligibleKeys(modStack, targetId, conditionFilter) {

@@ -181,6 +181,27 @@ describe("RemoveConditionHandler", () => {
     expect([...stack.getActiveKeys("Unit#1", "condition")]).toHaveLength(0);
   });
 
+  test("candidates state a numeric condition's magnitude and carry no HP", () => {
+    stack.apply({ sourceId: "A", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "poisoned", value: 2 });
+    stack.apply({ sourceId: "B", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "poisoned", value: 1 });
+    stack.apply({ sourceId: "C", sourceType: "unit", targetId: "Unit#1", type: "condition", key: "rooted", value: 1 });
+
+    let decision;
+    handler.execute(
+      { targetId: "Unit#1", mode: "choose", amount: 2, owner: "Alice" },
+      { emitChild: () => {} },
+      { modifierStack: stack, usernames: ["Alice"], createPendingDecision: (d) => { decision = d; } }
+    );
+
+    // The magnitude is the whole point of the choice; a non-numeric condition
+    // has no number to state, and a condition has no HP for the prompt to
+    // print, so the candidate omits the field rather than stamping a zero.
+    expect(decision.candidates).toEqual([
+      { id: "poisoned", name: "poisoned 3" },
+      { id: "rooted", name: "rooted" },
+    ]);
+  });
+
   test("rejects an invalid mode", () => {
     expect(() => handler.validate({ targetId: "Unit#1", mode: "bogus" })).toThrow('invalid mode "bogus"');
   });

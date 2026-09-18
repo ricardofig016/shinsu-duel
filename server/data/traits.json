@@ -9,7 +9,7 @@
   },
   "beacon": {
     "name": "Beacon",
-    "description": "[[trigger:Round Start]]: [[keyword:Light Up]] x",
+    "description": "[[trigger:Round Start]]: [[keyword:Light Up]] [[value:trait]]",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -17,7 +17,7 @@
   },
   "bloodthirsty": {
     "name": "Bloodthirsty",
-    "description": "When I kill a unit, restore x HP",
+    "description": "When I kill a unit, restore [[value:trait]] HP",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -25,7 +25,7 @@
   },
   "dealer": {
     "name": "Dealer",
-    "description": "[[trigger:Round Start]]: draw x cards",
+    "description": "[[trigger:Round Start]]: draw [[value:trait]] cards",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -41,7 +41,7 @@
   },
   "last-one-standing": {
     "name": "Last One Standing",
-    "description": "If I am the only ally unit, I have +x HP",
+    "description": "If I am the only ally unit, I have +[[value:trait]] HP",
     "color": "yellow",
     "colorName": "Defensive Buff",
     "numeric": true,
@@ -57,7 +57,7 @@
   },
   "pierce": {
     "name": "Pierce",
-    "description": "When I kill a unit, [[keyword:Extinguish]] x",
+    "description": "When I kill a unit, [[keyword:Extinguish]] [[value:trait]]",
     "color": "orange",
     "colorName": "Damage Buff",
     "numeric": true,
@@ -65,7 +65,7 @@
   },
   "reflect": {
     "name": "Reflect",
-    "description": "When I take damage from a unit's ability, deal x damage back",
+    "description": "When I take damage from a unit's ability, deal [[value:trait]] damage back",
     "color": "yellow",
     "colorName": "Defensive Buff",
     "numeric": true,
@@ -73,7 +73,7 @@
   },
   "regenerate": {
     "name": "Regenerate",
-    "description": "[[trigger:Round End]]: heal me x HP",
+    "description": "[[trigger:Round End]]: heal me [[value:trait]] HP",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -81,7 +81,7 @@
   },
   "resilient": {
     "name": "Resilient",
-    "description": "I take -x damage from all sources",
+    "description": "I take -[[value:trait]] damage from all sources",
     "color": "yellow",
     "colorName": "Defensive Buff",
     "numeric": true,
@@ -89,7 +89,7 @@
   },
   "ruthless": {
     "name": "Ruthless",
-    "description": "I deal +x damage if the enemy has less than 10 lighthouses",
+    "description": "I deal +[[value:trait]] damage if the enemy has less than 10 lighthouses",
     "color": "orange",
     "colorName": "Damage Buff",
     "numeric": true,
@@ -105,7 +105,7 @@
   },
   "strong": {
     "name": "Strong",
-    "description": "I deal +x damage",
+    "description": "I deal +[[value:trait]] damage",
     "color": "orange",
     "colorName": "Damage Buff",
     "numeric": true,
@@ -129,7 +129,7 @@
   },
   "vengeful": {
     "name": "Vengeful",
-    "description": "I deal +x damage if I am missing HP",
+    "description": "I deal +[[value:trait]] damage if I am missing HP",
     "color": "orange",
     "colorName": "Damage Buff",
     "numeric": true,

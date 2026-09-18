@@ -448,8 +448,16 @@ describe("client state projections", () => {
     expect(ownView.conditions[0]).toHaveProperty("magnitude");
     expect(ownView.conditions[0]).toMatchObject({
       key: "poisoned",
+      numeric: true,
       name: "Poisoned",
-      description: { segments: ["I take x damage when I use an ", { type: "rule", ref: "ability", text: "Ability" }] },
+      description: {
+        segments: [
+          "I take ",
+          { type: "value", ref: "condition", text: "x" },
+          " damage when I use an ",
+          { type: "rule", ref: "ability", text: "Ability" },
+        ],
+      },
       iconPath: "/assets/icons/conditions/poisoned.png",
     });
 
@@ -472,8 +480,75 @@ describe("client state projections", () => {
 
     const ownView = game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id);
     expect(ownView.conditions).toEqual([
-      { key: "no-such-condition", magnitude: 1, name: "no-such-condition", description: null, iconPath: null },
+      { key: "no-such-condition", magnitude: 1, numeric: false, name: "no-such-condition", description: null, iconPath: null },
     ]);
+  });
+
+  test("unit traits carry their effective value, the numeric flag, and the slot their copy fills", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    const traits = () =>
+      game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id).traits;
+
+    game.modifierStack.apply({
+      sourceId: unit.id,
+      sourceType: "unit",
+      targetId: unit.id,
+      type: "trait",
+      key: "strong",
+      value: 2,
+      operation: "add",
+    });
+    game.modifierStack.apply({
+      sourceId: unit.id,
+      sourceType: "unit",
+      targetId: unit.id,
+      type: "trait",
+      key: "barrier",
+      value: 1,
+      operation: "add",
+    });
+
+    expect(traits().find((trait) => trait.key === "strong")).toMatchObject({
+      value: 2,
+      numeric: true,
+      name: "Strong",
+      iconPath: "/assets/icons/traits/strong.png",
+      description: {
+        segments: ["I deal +", { type: "value", ref: "trait", text: "x" }, " damage"],
+      },
+    });
+    // A valueless trait still carries the value the engine wired, but its
+    // catalog entry is not numeric, so no number is ever shown for it.
+    expect(traits().find((trait) => trait.key === "barrier")).toMatchObject({
+      value: 1,
+      numeric: false,
+      name: "Barrier",
+    });
+  });
+
+  test("the trait projection states what the unit has now, not what the card printed", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    const traitKeys = () =>
+      game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id).traits.map((trait) => trait.key);
+
+    // A trait granted at runtime joins the projection: the strip is a board
+    // readout, not a copy of the card face.
+    game.modifierStack.apply({
+      sourceId: "Equip#9",
+      sourceType: "equipment",
+      targetId: unit.id,
+      type: "trait",
+      key: "strong",
+      value: 2,
+    });
+    expect(traitKeys()).toContain("strong");
+
+    // Silence removes trait modifiers, so the trait leaves the projection with
+    // them and the strip stops claiming a trait the unit no longer has.
+    game.modifierStack.removeWhere((m) => m.targetId === unit.id && m.type === "trait" && m.key === "strong");
+    expect(traitKeys()).not.toContain("strong");
   });
 
   test("gameOver is projected as a copy once the game has ended", () => {

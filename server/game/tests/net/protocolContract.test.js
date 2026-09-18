@@ -148,8 +148,16 @@ describe("per-player decision and condition projections", () => {
       {
         key: "poisoned",
         magnitude: 2,
+        numeric: true,
         name: "Poisoned",
-        description: { segments: ["I take x damage when I use an ", { type: "rule", ref: "ability", text: "Ability" }] },
+        description: {
+          segments: [
+            "I take ",
+            { type: "value", ref: "condition", text: "x" },
+            " damage when I use an ",
+            { type: "rule", ref: "ability", text: "Ability" },
+          ],
+        },
         iconPath: "/assets/icons/conditions/poisoned.png",
       },
     ]);
@@ -161,8 +169,16 @@ describe("per-player decision and condition projections", () => {
       {
         key: "poisoned",
         magnitude: 2,
+        numeric: true,
         name: "Poisoned",
-        description: { segments: ["I take x damage when I use an ", { type: "rule", ref: "ability", text: "Ability" }] },
+        description: {
+          segments: [
+            "I take ",
+            { type: "value", ref: "condition", text: "x" },
+            " damage when I use an ",
+            { type: "rule", ref: "ability", text: "Ability" },
+          ],
+        },
         iconPath: "/assets/icons/conditions/poisoned.png",
       },
     ]);

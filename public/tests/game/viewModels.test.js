@@ -47,7 +47,10 @@ const unitView = {
       sourceId: "equip-9",
     },
   ],
-  traits: ["scout", "fearless"],
+  traits: [
+    { key: "scout", value: 1, numeric: false, name: "Scout", description: null, iconPath: null },
+    { key: "fearless", value: 1, numeric: false, name: "Fearless", description: null, iconPath: null },
+  ],
 };
 
 describe("buildUnitViewModel", () => {
@@ -88,17 +91,64 @@ describe("buildUnitViewModel", () => {
     const model = buildUnitViewModel(unitView);
 
     expect(model.printedTraits).toEqual([
-      { code: "scout", name: "Scout", description: "Moves first.", iconPath: "/assets/icons/traits/scout.png" },
+      {
+        code: "scout",
+        name: "Scout",
+        description: "Moves first.",
+        iconPath: "/assets/icons/traits/scout.png",
+        numeric: false,
+        value: null,
+      },
     ]);
-    expect(model.runtimeTraits).toEqual(["scout", "fearless"]);
+    // A unit's runtime traits state the number in force, so their entries carry
+    // the same shape the printed ones do.
+    expect(model.runtimeTraits).toEqual([
+      { code: "scout", name: "Scout", description: null, iconPath: null, numeric: false, value: 1 },
+      { code: "fearless", name: "Fearless", description: null, iconPath: null, numeric: false, value: 1 },
+    ]);
     expect(model.conditions).toEqual([
       {
         key: "poisoned",
         magnitude: 2,
+        numeric: false,
         name: "Poisoned",
         description: "Turn end: I take x damage",
         iconPath: "/assets/icons/conditions/poisoned.png",
       },
+    ]);
+  });
+
+  test("states a numeric trait's and condition's number, and only for numeric entries", () => {
+    const numeric = buildUnitViewModel({
+      ...unitView,
+      card: {
+        ...unitView.card,
+        traits: {
+          resilient: { name: "Resilient", description: "I take -x damage.", iconPath: "/assets/icons/traits/resilient.png", numeric: true, value: 3 },
+          barrier: { name: "Barrier", description: "Negate damage.", iconPath: "/assets/icons/traits/barrier.png", numeric: false },
+        },
+      },
+      conditions: [
+        { key: "burned", magnitude: 4, numeric: true, name: "Burned", description: "Take x damage.", iconPath: "/assets/icons/conditions/burned.png" },
+        { key: "blinded", magnitude: 1, numeric: false, name: "Blinded", description: "Targets are random.", iconPath: "/assets/icons/conditions/blinded.png" },
+      ],
+      traits: [
+        { key: "resilient", value: 3, numeric: true, name: "Resilient", description: "I take -x damage.", iconPath: "/assets/icons/traits/resilient.png" },
+        { key: "taunt", value: 1, numeric: false, name: "Taunt", description: "Enemies target me.", iconPath: "/assets/icons/traits/taunt.png" },
+      ],
+    });
+
+    expect(numeric.printedTraits.map((trait) => [trait.code, trait.numeric, trait.value])).toEqual([
+      ["resilient", true, 3],
+      ["barrier", false, null],
+    ]);
+    expect(numeric.runtimeTraits.map((trait) => [trait.code, trait.numeric, trait.value])).toEqual([
+      ["resilient", true, 3],
+      ["taunt", false, 1],
+    ]);
+    expect(numeric.conditions.map((condition) => [condition.key, condition.numeric, condition.magnitude])).toEqual([
+      ["burned", true, 4],
+      ["blinded", false, 1],
     ]);
   });
 

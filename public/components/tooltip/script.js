@@ -46,7 +46,7 @@ const load = async (container, {
       if (entry.node) return entry.node;
       const p = document.createElement("p");
       p.classList.add("tooltip-entry");
-      if (entry.segments) p.replaceChildren(renderSegments(entry.segments));
+      if (entry.segments) p.replaceChildren(renderSegments(entry.segments, { values: entry.values ?? null }));
       else p.textContent = entry.text;
       if (entry.style) p.classList.add(`tooltip-entry-${entry.style}`);
       return p;

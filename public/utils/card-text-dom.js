@@ -29,7 +29,7 @@ import { loadComponent, mountTooltip } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
 import { buildCardViewModel } from "/game/viewModels.js";
-import { buildCatalogTooltipEntries } from "/utils/tooltip-entries.js";
+import { buildCatalogTooltipEntries, buildEntryTitle } from "/utils/tooltip-entries.js";
 import { openCardDetail, isCardDetailOpen, focusCardDetail } from "/components/card-detail-overlay/script.js";
 
 // The data catalogs a link's hover copy comes from; each fetches once per
@@ -124,7 +124,7 @@ async function buildLinkHover(segment) {
           : glossary?.terms;
     const entry = section?.[segment.ref];
     if (!entry) return null;
-    return { title: entry.name, entries: buildCatalogTooltipEntries(entry) };
+    return { title: buildEntryTitle(entry), entries: buildCatalogTooltipEntries(entry) };
   }
 
   if (segment.type === "rank") {
@@ -137,7 +137,7 @@ async function buildLinkHover(segment) {
     if (entry.minCost != null && entry.maxCost != null) {
       entries.push({ text: `Cost range: ${entry.minCost}-${entry.maxCost}` });
     }
-    return { title: entry.name, entries };
+    return { title: buildEntryTitle(entry), entries };
   }
 
   const catalogPath = CATALOG_ROUTES[segment.type];
@@ -145,7 +145,9 @@ async function buildLinkHover(segment) {
   const catalogs = await getDataCatalogs().catch(() => null);
   const entry = catalogs?.[segment.type]?.[segment.ref];
   if (!entry) return null;
-  return { title: entry.name, entries: buildCatalogTooltipEntries(entry) };
+  // A link hover has no instance, so a numeric entry titles its placeholder
+  // ("Resilient X") and its prose shows the slot's fallback.
+  return { title: buildEntryTitle(entry), entries: buildCatalogTooltipEntries(entry) };
 }
 
 /**
@@ -206,13 +208,16 @@ const wireLinkHover = (span, segment) => {
  * Render display segments into a DOM fragment: plain text nodes, and link
  * segments as highlighted spans. Card links navigate (carousel focus or
  * overlay open); `onCardLink(segment, sourceElement)` overrides the default
- * navigation where a surface needs its own behavior.
+ * navigation where a surface needs its own behavior. A value slot renders as
+ * plain text, the number the entry carries for that slot or else the slot's
+ * fallback, because a number is not a reference: it gets no highlight, no
+ * hover, and no click.
  *
  * @param {Array<string | { type: string, ref: string, text: string }>} segments
- * @param {{ onCardLink?: (segment: object, source: Element) => void }} [options]
+ * @param {{ values?: Record<string, number|string> | null, onCardLink?: (segment: object, source: Element) => void }} [options]
  * @returns {DocumentFragment}
  */
-export function renderSegments(segments, { onCardLink = null } = {}) {
+export function renderSegments(segments, { values = null, onCardLink = null } = {}) {
   const fragment = document.createDocumentFragment();
   for (const segment of segments ?? []) {
     if (typeof segment === "string") {
@@ -220,6 +225,11 @@ export function renderSegments(segments, { onCardLink = null } = {}) {
       continue;
     }
     if (!segment || typeof segment !== "object") continue;
+    if (segment.type === "value") {
+      const filled = values?.[segment.ref];
+      fragment.appendChild(document.createTextNode(String(filled ?? segment.text)));
+      continue;
+    }
     const span = document.createElement("span");
     span.className = `card-text-link card-text-link-${segment.type}`;
     span.textContent = segment.text;

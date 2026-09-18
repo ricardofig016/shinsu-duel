@@ -12,16 +12,30 @@ const safePath = (p, fallback) => {
 };
 
 /**
+ * A status badge's text: the raw code, with the entry's number only where the
+ * catalog marks it numeric. Every condition carries a magnitude whether or not
+ * it has one to state, so the flag is what keeps a non-numeric condition
+ * ("blinded") from claiming a number.
+ */
+const badgeLabel = (code, value) => (value === null || value === undefined ? code : `${code} ${value}`);
+
+/**
  * Compact runtime-state badges: conditions with magnitudes, equipment
  * attachments, granted abilities, and runtime traits. Text content only.
  */
 const loadStatus = (container, unit) => {
   const statusContainer = container.querySelector(".unit-card-horizontal-status");
   const badges = [
-    ...unit.conditions.map((condition) => ({ text: `${condition.key} ${condition.magnitude}`, kind: "condition" })),
+    ...unit.conditions.map((condition) => ({
+      text: badgeLabel(condition.key, condition.numeric === true ? condition.magnitude : null),
+      kind: "condition",
+    })),
     ...unit.equipmentAttachments.map((name) => ({ text: name, kind: "equipment" })),
     ...unit.grantedAbilities.map((granted) => ({ text: granted.abilityCode, kind: "granted-ability" })),
-    ...unit.runtimeTraits.map((key) => ({ text: key, kind: "runtime-trait" })),
+    ...unit.runtimeTraits.map((trait) => ({
+      text: badgeLabel(trait.code, trait.numeric === true ? trait.value : null),
+      kind: "runtime-trait",
+    })),
   ];
   if (badges.length === 0) {
     statusContainer.classList.add("hidden");

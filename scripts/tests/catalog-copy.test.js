@@ -4,6 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { compileCards } from "../card-compile.js";
+import traitsSource from "../../server/data/traits.json" with { type: "json" };
+import conditionsSource from "../../server/data/conditions.json" with { type: "json" };
 
 /**
  * Shared catalog copy as a build product: the five shared catalogs are
@@ -48,6 +50,24 @@ describe("shared catalog copy compilation (shipped pool)", () => {
     expect(Array.isArray(catalogCopy.attributes.hwayeomsa.effect)).toBe(true);
     expect(Array.isArray(catalogCopy.conditions.poisoned.description.segments)).toBe(true);
     expect(Array.isArray(catalogCopy.glossary.hud.lighthouses.texts[0].segments)).toBe(true);
+  });
+
+  test("gives every numeric trait and condition exactly one value slot, and no other entry any", () => {
+    // The `numeric` flag drives the icon's number badge and the title, while
+    // the copy states where the number belongs. An entry that carries both
+    // halves of that contract, or neither, is the drift this pins.
+    const valueSlots = (entry) =>
+      (entry?.description?.segments ?? []).filter((segment) => segment?.type === "value").length;
+
+    for (const [kind, source, copy] of [
+      ["trait", traitsSource, compiled.catalogCopy.traits],
+      ["condition", conditionsSource, compiled.catalogCopy.conditions],
+    ]) {
+      expect(Object.keys(copy).sort()).toEqual(Object.keys(source).sort());
+      for (const [code, entry] of Object.entries(source)) {
+        expect([kind, code, valueSlots(copy[code])]).toEqual([kind, code, entry.numeric ? 1 : 0]);
+      }
+    }
   });
 
   test("keeps the Hwayeomsa effect line's four references as ordered link segments", () => {

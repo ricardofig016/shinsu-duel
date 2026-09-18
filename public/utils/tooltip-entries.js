@@ -9,6 +9,7 @@
  * - a plain string, or `{ text, style }` with one of the styles below,
  * - `{ segments }` — compiled display segments rendered by the linked-text
  *   renderer (ability/requirement/trigger prose keeps its inline links),
+ *   optionally with `values`, the numbers its value slots fill from,
  * - `{ node }` — a pre-built DOM element (e.g. a card preview), appended as
  *   is; callers build elements, never markup strings.
  *
@@ -16,11 +17,26 @@
  * degrade to the data the card views still carry.
  */
 
-import { segmentsToPlainText } from "./card-text.js";
+import { segmentsToPlainText, TITLE_VALUE_FALLBACK } from "./card-text.js";
 
 export const TOOLTIP_ENTRY_STYLES = Object.freeze(["italic", "strong", "label"]);
 
 const KNOWN_STYLES = new Set(TOOLTIP_ENTRY_STYLES);
+
+/**
+ * The tooltip title for a catalog entry. A numeric entry states its number, so
+ * a trait or condition tooltip reads "Resilient 3" where the value is known and
+ * "Resilient X" where it is not — a static `[[trait:Resilient]]` hover has no
+ * instance to read one from. A non-numeric entry keeps its plain name.
+ *
+ * @param {{ name?: string, numeric?: boolean }|null} entry catalog entry
+ * @param {number|string|null} [value] the entry's value, when the caller knows it
+ */
+export const buildEntryTitle = (entry, value = null) => {
+  const name = entry?.name ?? "";
+  if (entry?.numeric !== true) return name;
+  return `${name} ${value ?? TITLE_VALUE_FALLBACK}`;
+};
 
 /**
  * One catalog prose field as a tooltip entry. Shared catalog copy arrives as
@@ -28,11 +44,21 @@ const KNOWN_STYLES = new Set(TOOLTIP_ENTRY_STYLES);
  * `docs/COMPILED_CARD_DSL.md`) so its inline links render; copy that is still
  * a plain string (synthetic card views, synthetic tooltip payloads) renders
  * as text. Anything else is dropped, and a null style adds no field.
+ *
+ * `values` fills the field's value slots when the caller knows them (a trait's
+ * value, a condition's magnitude, the deck's count); without it a slot shows
+ * its own fallback.
+ *
+ * @param {object|string|Array} value compiled prose: `{ segments }`, segments,
+ *   or plain text
+ * @param {string|null} [style] one of `TOOLTIP_ENTRY_STYLES`
+ * @param {Record<string, number|string>|null} [values] value slots for the entry
  */
-export const buildProseEntry = (value, style = null) => {
+export const buildProseEntry = (value, style = null, values = null) => {
   const segments = Array.isArray(value) ? value : value?.segments;
   if (Array.isArray(segments)) {
-    return segments.length > 0 ? (style ? { segments, style } : { segments }) : null;
+    if (segments.length === 0) return null;
+    return { segments, ...(style ? { style } : {}), ...(values ? { values } : {}) };
   }
   if (typeof value === "string" && value.trim() !== "") {
     return style ? { text: value, style } : { text: value };
@@ -45,7 +71,7 @@ export const buildProseEntry = (value, style = null) => {
  * unstyled entries, `{ text }` keeps its known style, `{ segments }` and
  * `{ node }` pass through, and empty or invalid entries are dropped. A null
  * style is dropped rather than carried, matching the entry shape callers
- * compare against.
+ * compare against; an entry's `values` survive so its value slots can fill.
  */
 export const normalizeTooltipEntries = (textList) => {
   // A payload is normally a list, but copy fields are objects now that catalog
@@ -62,7 +88,12 @@ export const normalizeTooltipEntries = (textList) => {
     if (!entry || typeof entry !== "object") continue;
     const style = KNOWN_STYLES.has(entry.style) ? entry.style : null;
     if (Array.isArray(entry.segments) && entry.segments.length > 0) {
-      entries.push(style ? { segments: entry.segments, style } : { segments: entry.segments });
+      const values = entry.values && typeof entry.values === "object" ? entry.values : null;
+      entries.push({
+        segments: entry.segments,
+        ...(style ? { style } : {}),
+        ...(values ? { values } : {}),
+      });
       continue;
     }
     if (entry.node) {
@@ -152,9 +183,26 @@ export const buildUnitAbilityTooltipEntries = (unit) => {
 };
 
 /**
+ * A prose field as a flat segment list, whatever shape it arrived in: compiled
+ * segments pass through, a plain string becomes one text segment, and an
+ * absent field contributes nothing. Composing a label ahead of a description
+ * has to keep the description's own links, so the line is never projected to a
+ * string first.
+ */
+const proseSegments = (value) => {
+  const entry = buildProseEntry(value);
+  if (!entry) return [];
+  return entry.segments ?? [entry.text];
+};
+
+/**
  * Rank tooltip: the italic concept line, then one entry per rank with its
  * cost range and description; the card's own rank is strong. Returns null
  * when the glossary carries no ranks.
+ *
+ * The rank title is compiled prose like the rest of the glossary copy, but a
+ * tooltip title is a plain string field, so it is projected here; handing the
+ * `{ segments }` object to the component printed "[object Object]".
  */
 export const buildRankTooltip = (rankCode, ranks) => {
   if (!ranks?.title || !Array.isArray(ranks.list) || ranks.list.length === 0) return null;
@@ -163,16 +211,13 @@ export const buildRankTooltip = (rankCode, ranks) => {
   if (concept) texts.push(concept);
   for (const rank of ranks.list) {
     const style = rank.code === rankCode ? "strong" : null;
+    // The label is prose, not a reference: as a string segment it renders as
+    // text, where a link segment would highlight it and hunt for a tooltip.
     const label = `${rank.name} (cost ${rank.minCost}-${rank.maxCost}): `;
-    if (Array.isArray(rank.description)) {
-      const segments = [{ text: label }, ...rank.description];
-      texts.push(style ? { segments, style } : { segments });
-    } else {
-      const text = `${label}${rank.description}`;
-      texts.push(style ? { text, style } : { text });
-    }
+    const segments = [label, ...proseSegments(rank.description)];
+    texts.push(style ? { segments, style } : { segments });
   }
-  return { title: ranks.title, texts };
+  return { title: segmentsToPlainText(ranks.title), texts };
 };
 
 /**
@@ -194,9 +239,11 @@ export const buildTypeLetterTooltip = (model, glossary) => {
 };
 
 /**
- * Deck tooltip text: the server-owned template with the live count filled in.
+ * Deck tooltip entries: the server-owned HUD copy with the live count filled
+ * into its value slot. The count belongs to the viewer's board state, so it is
+ * a render value like any other: the copy is compiled, the number is not.
  */
-export const buildDeckTooltipText = (count, deckEntry) => {
-  if (!deckEntry?.textTemplate) return null;
-  return deckEntry.textTemplate.replace("{count}", String(count));
-};
+export const buildDeckTooltipEntries = (count, deckEntry) =>
+  (deckEntry?.texts ?? [])
+    .map((line) => buildProseEntry(line, null, { count }))
+    .filter(Boolean);
