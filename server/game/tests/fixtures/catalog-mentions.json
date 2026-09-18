@@ -1,8 +1,20 @@
 {
+  "10000": [
+    "slug:conduit"
+  ],
   "10018": [
     "slug:fire_core"
   ],
   "10047": [
     "slug:fire_core"
+  ],
+  "10057": [
+    "slug:conduit"
+  ],
+  "10066": [
+    "slug:conduit"
+  ],
+  "10067": [
+    "slug:conduit"
   ]
 }

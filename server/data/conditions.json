@@ -17,7 +17,7 @@
   },
   "cursed": {
     "name": "Cursed",
-    "description": "Round end: I take x damage for each unique condition I have",
+    "description": "[[trigger:Round End]]: I take x damage for each unique condition I have",
     "color": "red",
     "colorName": "Damage Debuff",
     "numeric": true,
@@ -49,7 +49,7 @@
   },
   "frozen": {
     "name": "Frozen",
-    "description": "When I use an ability, spend all ally combat slots",
+    "description": "When I use an [[rule:Ability]], spend all ally combat slots",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": false,
@@ -65,7 +65,7 @@
   },
   "heavy": {
     "name": "Heavy",
-    "description": "My abilities cost +x shinsu",
+    "description": "My [[rule:Ability|Abilities]] cost +x [[rule:Shinsu]]",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": true,
@@ -73,7 +73,7 @@
   },
   "poisoned": {
     "name": "Poisoned",
-    "description": "I take x damage when I use an ability",
+    "description": "I take x damage when I use an [[rule:Ability]]",
     "color": "red",
     "colorName": "Damage Debuff",
     "numeric": true,
@@ -89,7 +89,7 @@
   },
   "stunned": {
     "name": "Stunned",
-    "description": "I can't use abilities",
+    "description": "I can't use [[rule:Ability|Abilities]]",
     "color": "purple",
     "colorName": "Utility Debuff",
     "numeric": false,

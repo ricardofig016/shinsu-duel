@@ -1,6 +1,10 @@
 {
   "4": [
+    "slug:conduit",
     "slug:fire_core"
+  ],
+  "15": [
+    "slug:conduit"
   ],
   "23": [
     "slug:fire_core"
@@ -10,6 +14,12 @@
   ],
   "33": [
     "slug:fire_core"
+  ],
+  "51": [
+    "slug:conduit"
+  ],
+  "52": [
+    "slug:conduit"
   ],
   "95": [
     "slug:fire_core"

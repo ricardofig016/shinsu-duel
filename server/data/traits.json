@@ -9,7 +9,7 @@
   },
   "beacon": {
     "name": "Beacon",
-    "description": "Round start: Light Up x",
+    "description": "[[trigger:Round Start]]: [[keyword:Light Up]] x",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -25,7 +25,7 @@
   },
   "dealer": {
     "name": "Dealer",
-    "description": "Round start: draw x cards",
+    "description": "[[trigger:Round Start]]: draw x cards",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,
@@ -57,7 +57,7 @@
   },
   "pierce": {
     "name": "Pierce",
-    "description": "When I kill a unit, Extinguish x",
+    "description": "When I kill a unit, [[keyword:Extinguish]] x",
     "color": "orange",
     "colorName": "Damage Buff",
     "numeric": true,
@@ -73,7 +73,7 @@
   },
   "regenerate": {
     "name": "Regenerate",
-    "description": "Round end: heal me x HP",
+    "description": "[[trigger:Round End]]: heal me x HP",
     "color": "blue",
     "colorName": "Utility Buff",
     "numeric": true,

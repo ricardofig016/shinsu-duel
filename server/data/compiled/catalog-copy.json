@@ -88,7 +88,19 @@
       "effect": [
         {
           "segments": [
-            "when i'm deployed, heal 2 HP from or summon Conduit on the enemy backline"
+            "When I'm ",
+            {
+              "type": "trigger",
+              "ref": "deploy",
+              "text": "deployed"
+            },
+            ", heal 2 HP from or summon ",
+            {
+              "type": "card",
+              "ref": "conduit",
+              "text": "Conduit"
+            },
+            " on the enemy backline"
           ]
         }
       ]
@@ -133,7 +145,18 @@
     "beacon": {
       "description": {
         "segments": [
-          "Round start: Light Up x"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round start"
+          },
+          ": ",
+          {
+            "type": "keyword",
+            "ref": "light-up",
+            "text": "Light Up"
+          },
+          " x"
         ]
       }
     },
@@ -147,7 +170,12 @@
     "dealer": {
       "description": {
         "segments": [
-          "Round start: draw x cards"
+          {
+            "type": "trigger",
+            "ref": "round-start",
+            "text": "Round start"
+          },
+          ": draw x cards"
         ]
       }
     },
@@ -175,7 +203,13 @@
     "pierce": {
       "description": {
         "segments": [
-          "When I kill a unit, Extinguish x"
+          "When I kill a unit, ",
+          {
+            "type": "keyword",
+            "ref": "extinguish",
+            "text": "Extinguish"
+          },
+          " x"
         ]
       }
     },
@@ -189,7 +223,12 @@
     "regenerate": {
       "description": {
         "segments": [
-          "Round end: heal me x HP"
+          {
+            "type": "trigger",
+            "ref": "round-end",
+            "text": "Round end"
+          },
+          ": heal me x HP"
         ]
       }
     },
@@ -323,7 +362,12 @@
     "cursed": {
       "description": {
         "segments": [
-          "Round end: I take x damage for each unique condition I have"
+          {
+            "type": "trigger",
+            "ref": "round-end",
+            "text": "Round End"
+          },
+          ": I take x damage for each unique condition I have"
         ]
       }
     },
@@ -351,7 +395,13 @@
     "frozen": {
       "description": {
         "segments": [
-          "When I use an ability, spend all ally combat slots"
+          "When I use an ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          },
+          ", spend all ally combat slots"
         ]
       }
     },
@@ -365,14 +415,30 @@
     "heavy": {
       "description": {
         "segments": [
-          "My abilities cost +x shinsu"
+          "My ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Abilities"
+          },
+          " cost +x ",
+          {
+            "type": "rule",
+            "ref": "shinsu",
+            "text": "Shinsu"
+          }
         ]
       }
     },
     "poisoned": {
       "description": {
         "segments": [
-          "I take x damage when I use an ability"
+          "I take x damage when I use an ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Ability"
+          }
         ]
       }
     },
@@ -386,7 +452,12 @@
     "stunned": {
       "description": {
         "segments": [
-          "I can't use abilities"
+          "I can't use ",
+          {
+            "type": "rule",
+            "ref": "ability",
+            "text": "Abilities"
+          }
         ]
       }
     },

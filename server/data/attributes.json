@@ -3,7 +3,7 @@
     "name": "Anima",
     "description": "Anima summon and control special creatures called Shinheuh to fight for them.",
     "effect": [
-      "Round start: gain a single-use Shinheuh combat slot if you don't already have one."
+      "[[trigger:Round Start]]: gain a single-use Shinheuh combat slot if you don't already have one."
     ]
   },
   "silver-dwarf": {
@@ -31,7 +31,7 @@
     "name": "Jeonsulsa",
     "description": "Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units.",
     "effect": [
-      "when i'm deployed, heal 2 HP from or summon Conduit on the enemy backline"
+      "When I'm [[trigger:Deploy|Deployed]], heal 2 HP from or summon [[card:Conduit]] on the enemy backline"
     ]
   },
   "irregular": {

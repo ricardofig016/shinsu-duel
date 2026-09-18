@@ -256,9 +256,42 @@
     "slug": "test_unit",
     "relatedCards": [
       {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
         "cardId": 25,
         "kind": "mentioned-in",
         "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 40,
@@ -303,6 +336,11 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ]
   },
@@ -1622,6 +1660,11 @@
         "seriesCode": "jeonsul-baang"
       },
       {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
         "cardId": 51,
         "kind": "mentions",
         "peerCardId": 15
@@ -1632,9 +1675,58 @@
         "peerCardId": 15
       },
       {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
         "cardId": 73,
         "kind": "mentioned-in",
         "peerCardId": 51
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/conduit.png"
@@ -2353,6 +2445,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/evankhell.png"
@@ -2453,6 +2583,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/fiery_elephant.png"
@@ -2560,6 +2728,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/fire_core.png"
@@ -3327,6 +3533,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/healing_flames.png"
@@ -3814,6 +4058,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_i.png"
@@ -3912,6 +4194,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_ii.png"
@@ -4030,6 +4350,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_iii.png"
@@ -4148,6 +4506,44 @@
         "cardId": 95,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_iv.png"
@@ -5079,6 +5475,60 @@
         "kind": "series-mentioned",
         "peerCardId": 15,
         "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_ran.png"
@@ -5232,6 +5682,60 @@
         "kind": "series-mentioned",
         "peerCardId": 15,
         "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_ran_ii.png"
@@ -5521,6 +6025,11 @@
         "seriesCode": "jeonsul-baang"
       },
       {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
         "cardId": 51,
         "kind": "mentions",
         "peerCardId": 15
@@ -5531,9 +6040,58 @@
         "peerCardId": 15
       },
       {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
         "cardId": 73,
         "kind": "mentioned-in",
         "peerCardId": 51
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ]
   },
@@ -7057,6 +7615,60 @@
         "kind": "series-mentioned",
         "peerCardId": 15,
         "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/redan.png"
@@ -7325,6 +7937,11 @@
         "seriesCode": "jeonsul-baang"
       },
       {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
         "cardId": 51,
         "kind": "mentions",
         "peerCardId": 15
@@ -7335,9 +7952,58 @@
         "peerCardId": 15
       },
       {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
         "cardId": 73,
         "kind": "mentioned-in",
         "peerCardId": 51
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ]
   },
@@ -8059,6 +8725,11 @@
         "seriesCode": "jeonsul-baang"
       },
       {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
         "cardId": 51,
         "kind": "mentions",
         "peerCardId": 15
@@ -8069,9 +8740,58 @@
         "peerCardId": 15
       },
       {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
         "cardId": 73,
         "kind": "mentioned-in",
         "peerCardId": 51
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ]
   },
@@ -8956,6 +9676,44 @@
         "cardId": 33,
         "kind": "mentions",
         "peerCardId": 25
+      },
+      {
+        "cardId": 15,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 56,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 76,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 84,
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
+      },
+      {
+        "cardId": 51,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 52,
+        "kind": "mentions",
+        "peerCardId": 15
+      },
+      {
+        "cardId": 73,
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/yeon_yihwa.png"
