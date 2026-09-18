@@ -67,6 +67,22 @@ export const buildProseEntry = (value, style = null, values = null) => {
 };
 
 /**
+ * One catalog prose field as the entry list a tooltip renders: the single
+ * entry `buildProseEntry` produces, or nothing when the field is empty. The
+ * uniform shape lets a caller spread several prose fields into one tooltip
+ * without testing each one first.
+ *
+ * @param {object|string|Array} value compiled prose: `{ segments }`, segments,
+ *   or plain text
+ * @param {Record<string, number|string>|null} [values] value slots for the entry
+ * @param {string|null} [style] one of `TOOLTIP_ENTRY_STYLES`
+ */
+export const proseEntries = (value, values = null, style = null) => {
+  const entry = buildProseEntry(value, style, values);
+  return entry ? [entry] : [];
+};
+
+/**
  * Normalize a tooltip text payload into renderable entries: strings become
  * unstyled entries, `{ text }` keeps its known style, `{ segments }` and
  * `{ node }` pass through, and empty or invalid entries are dropped. A null
