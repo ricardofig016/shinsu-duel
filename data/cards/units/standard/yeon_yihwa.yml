@@ -20,7 +20,7 @@ abilities:
       side: enemy
       count: 2
       condition: burned
-    raw: "Give 2 [[condition:Burned]] enemies [[condition:Exhausted]]"
+    raw: "Give 2 [[condition:Burned]] enemies [[condition:Exhausted]] 1"
 evolve:
 traits:
 attributes:
