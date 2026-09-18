@@ -3,70 +3,176 @@
   height: 100%;
   padding: 0.5em;
   border-radius: 4px;
-  gap: 3%;
+  gap: 0;
+  /* The top ribbon hangs off the card's top edge (see below) and is positioned
+     against the card, so the card is its containing block; `overflow: hidden`
+     keeps it inside the card's rounded corners. */
+  position: relative;
+  overflow: hidden;
   background-image: url("/assets/images/card/background.png");
   background-size: cover;
   background-position: center;
   color: white;
-  overflow: hidden;
   cursor: default;
+  /* The live-state strip's height and the size of the icon drawn in it. Both
+     are ems on this element, so they scale with the card's font size; raising
+     them enlarges the icons and the row together, and the artwork gives up
+     whatever height they take (the card's height is set by its line). */
+  --unit-card-strip-height: 2.5em;
+  --unit-card-icon-size: 1.5em;
+}
+
+/* The card is one of a line of equal cards, so it must accept the width its
+   line gives it and never ask for more. As a flex item its automatic minimum
+   is its content's minimum, and that minimum is large: an icon whose height is
+   a percentage of the card has no width until the card is being sized, which
+   the browser cannot resolve in that pass, so it falls back to the icon's
+   natural width. Cards carrying two trait icons then demanded a thousand
+   pixels, overflowed their line, and squeezed their icon-free neighbours to
+   almost nothing. Zeroing the minimum lets the flex line decide every card's
+   width, whatever the card carries. */
+.unit-card-horizontal-component {
+  min-width: 0;
+}
+
+/* The same, one level in: the card's own parts must not hand their content's
+   minimum back to the card. */
+.unit-card-horizontal > * {
+  min-width: 0;
+}
+
+/* The header icons, hung as black ribbons off the card's top edge. The ribbon
+   is an overlay: it takes no space in the card's flow, so an icon-free card's
+   artwork and stats sit exactly where an equipped card's do. It hangs inside
+   the card's padding, clear of the right edge, and sits above the card's own
+   highlight glow rather than being painted over by it. It is right-aligned and
+   reads outward in the card-vertical header's own order — equipment,
+   attributes, evolve, ignition, passives, requirements — with the attachment
+   icon leftmost. Icons past the card's width are clipped rather than wrapped;
+   the vertical card carries the full list. */
+.unit-card-horizontal-ribbon {
+  position: absolute;
+  /* Hung just inside the card's edges: clear of the right edge, and clear of
+     the top edge so the card's own highlight (the drop-target glow's yellow
+     outline) stays visible above the hanging bands. */
+  top: 0.25em;
+  right: 0.5em;
+  max-width: 100%;
+  height: 2.4em;
+  gap: 0.2em;
+  padding-left: 0.2em;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.unit-card-horizontal-ribbon-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Its height is the ribbon's; its width follows the icon inside it. */
+  height: 100%;
+  padding: 0.4em;
+  border-bottom-left-radius: 0.4em;
+  border-bottom-right-radius: 0.4em;
+  background-color: rgba(0, 0, 0, 0.85);
+  flex: 0 0 auto;
+}
+
+/* Every icon in this component is sized in em on the image itself, never as a
+   percentage of its row: a percentage height is unresolvable while the card is
+   being sized, and the browser then falls back to the icon file's natural size
+   for the width, which is what once dragged whole cards wide. A definite em
+   size keeps the icon, its band, and the card's minimum width all predictable
+   and proportional to the card. The band is sized to hold the icon with a
+   little air above and below, so the glyph is never clipped by the band. */
+.unit-card-horizontal-ribbon-icon img {
+  height: 1.35em;
+  width: auto;
+  display: block;
+}
+
+/* The unit's live state along one bare row between the artwork and the stats:
+   every trait, then every condition, in the order the unit view delivers them.
+   The row stays clear of the artwork above it and the stats below it, reserves
+   its height on every card (so a unit with no traits and no conditions keeps
+   the same artwork and stats geometry as its neighbours), and clips whatever
+   does not fit the card's width, which varies with the line's occupancy. The
+   row's height and the size of the icon in it are one value each; see
+   `--unit-card-strip-height` and `--unit-card-icon-size` on the card root. */
+.unit-card-horizontal-strip {
+  width: 100%;
+  flex: 0 0 var(--unit-card-strip-height);
+  gap: 0.25em;
+  padding: 0.3em;
+  flex-wrap: nowrap;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.unit-card-horizontal-strip-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  flex: 0 0 auto;
+}
+
+.unit-card-horizontal-strip-icon img {
+  height: var(--unit-card-icon-size);
+  width: auto;
+  display: block;
+  /* The icons are white glyphs on the card's near-black background, so they
+     need their own edge to stay legible at this size. */
+  filter: drop-shadow(0 0 0.08em rgba(0, 0, 0, 0.9));
+}
+
+/* A numeric entry floats its number in the icon's bottom-right corner without
+   joining the row's flex layout, exactly as the vertical card's strips do. The
+   row's bottom padding is what keeps the badge inside the row's clipped box,
+   so the number is never cut in half. */
+.unit-card-horizontal-strip-value {
+  position: absolute;
+  right: -0.15em;
+  bottom: -0.3em;
+  font-size: 0.8em;
+  line-height: 1;
+  font-weight: 700;
+  color: white;
+  pointer-events: none;
+  text-shadow:
+    -0.07em -0.07em 0 black,
+    0.07em -0.07em 0 black,
+    -0.07em 0.07em 0 black,
+    0.07em 0.07em 0 black;
 }
 
 .unit-card-horizontal-artwork {
   width: 100%;
-  flex: 0 0 55%;
+  flex: 1;
+  min-height: 0;
   border-radius: 4px;
   background-image: url("/assets/images/placeholder.png");
   background-size: cover;
   background-position: center;
 }
 
-.unit-card-horizontal-status {
-  width: 100%;
-  flex: 0 0 12%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-.unit-card-horizontal-badge {
-  font-size: 0.65em;
-  padding: 0 0.3em;
-  border-radius: 0.4em;
-  background-color: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  white-space: nowrap;
-}
-
-.unit-card-horizontal-badge.condition {
-  border-color: #b0413e;
-}
-
-.unit-card-horizontal-badge.equipment {
-  border-color: #4f97d0;
-}
-
-.unit-card-horizontal-badge.granted-ability {
-  border-color: #d0a94f;
-}
-
-.unit-card-horizontal-badge.runtime-trait {
-  border-color: #67b06a;
-}
-
 .unit-card-horizontal-stats {
   width: 100%;
-  flex: 0 0 30%;
-  gap: 5%;
+  flex: 0 0 28%;
+  gap: 6%;
   justify-content: space-between;
 }
 
+/* The placed position and the hp frame are the card's two stats: one flex
+   share each, so neither can take width from the other as the card's own width
+   changes. The position icon stops short of the stats row's height, which is
+   what makes it read as the same size as the hp frame beside it. */
 .unit-card-horizontal-positions {
   height: 100%;
-  flex: 2;
+  flex: 1 1 0;
+  min-width: 0;
   gap: 6%;
 }
 
@@ -80,12 +186,13 @@
 
 .unit-card-horizontal-position-chosen {
   outline: 2px solid rgba(255, 255, 160, 0.9);
-  border-radius: 0.3em;
+  border-radius: 0.4em;
 }
 
 .unit-card-horizontal-hp {
   height: 100%;
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   background-image: url("/assets/images/card/hp-frame.png");
   background-size: contain;
   background-position: center;
@@ -97,4 +204,10 @@
 
 .unit-card-horizontal-hp h1 {
   font-size: 1.5em;
+}
+
+/* A unit below its maximum hp reads its current hp in the card faces' accent
+   yellow, so damage is visible at a glance instead of in the tooltip alone. */
+.unit-card-horizontal-hp.lowered h1 {
+  color: #ffd75e;
 }

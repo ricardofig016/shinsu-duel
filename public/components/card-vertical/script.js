@@ -2,25 +2,14 @@ import { loadComponent, addTooltip, fitFontSize } from "/utils/component-util.js
 import { getGlossary } from "/utils/glossary.js";
 import { renderSegments } from "/utils/card-text-dom.js";
 import { openCardDetail } from "/components/card-detail-overlay/script.js";
+import { buildUnitHeaderIcons } from "/utils/unit-header-icons.js";
 import {
-  buildAttributeTooltipEntries,
   buildEntryTitle,
   buildPositionTooltipEntries,
-  buildProseEntry,
   buildRankTooltip,
   buildTypeLetterTooltip,
+  proseEntries,
 } from "/utils/tooltip-entries.js";
-
-/**
- * One catalog prose field as the tooltip's entry list, with the value slots it
- * states filled when the caller knows them and an optional style. Trait and
- * condition descriptions compile to display segments, so they carry inline
- * links; a synthetic view still hands over plain text.
- */
-const proseEntries = (value, values = null, style = null) => {
-  const entry = buildProseEntry(value, style, values);
-  return entry ? [entry] : [];
-};
 
 const TYPE_LETTER_ICONS = Object.freeze({
   skill: "/assets/icons/types/skill.png",
@@ -28,12 +17,6 @@ const TYPE_LETTER_ICONS = Object.freeze({
   unit: "/assets/icons/types/unit.png",
 });
 const LANDMARK_TYPE_LETTER_ICON = "/assets/icons/types/landmark.png";
-const HEADER_ICON_PATHS = Object.freeze({
-  requirements: "/assets/icons/other/requirements.png",
-  passive: "/assets/icons/other/passive.png",
-  evolve: "/assets/icons/other/evolve.png",
-  ignition: "/assets/icons/other/ignition.png",
-});
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
 const DEFAULT_TRAIT_ICON = "/assets/icons/traits/placeholder.png";
 const DEFAULT_CONDITION_ICON = "/assets/icons/conditions/placeholder.png";
@@ -84,60 +67,19 @@ const loadTypeLetter = async (container, model, glossary) => {
 
 /**
  * Header icons surface the card's printed features: attributes, evolve/ignition
- * triggers, passive abilities, and requirements. Attributes render in the
- * canonical order delivered by the card view and are explained by the
- * server-composed tooltip title plus the italic description and effect lines;
- * the other features lead with the glossary concept description. Each icon is
- * hover-only and explains itself through the shared tooltip.
+ * triggers, passive abilities, requirements, and the unit's equipment
+ * attachments. The display list is shared with the horizontal card face
+ * (`/utils/unit-header-icons.js`), so both state the same features in the same
+ * canonical order and explain each one through the same tooltip. Each icon is
+ * hover-only.
  */
 const loadHeaderIcons = async (container, model, glossary) => {
   const headerIcons = container.querySelector(".card-vertical-header-icons");
   headerIcons.replaceChildren();
 
-  const concepts = glossary?.concepts ?? null;
-  const entries = [];
-  for (const attribute of model.attributes ?? []) {
-    entries.push({
-      iconPath: attribute.iconPath,
-      title: attribute.title ?? attribute.name,
-      texts: buildAttributeTooltipEntries(attribute),
-    });
-  }
-  // The concept copy is compiled prose like every other catalog field, so it
-  // becomes a prose entry rather than a `{ text }` string: reading it as text
-  // silently dropped the description from the tooltip.
-  const conceptEntry = (key, iconPath, textList) =>
-    concepts && textList.length > 0
-      ? {
-          iconPath,
-          title: concepts[key].name,
-          texts: [...proseEntries(concepts[key].description, null, "italic"), ...textList],
-        }
-      : null;
-  if (model.evolveTriggers?.length > 0) {
-    entries.push(conceptEntry("evolve", HEADER_ICON_PATHS.evolve, model.evolveTriggers.map((segments) => ({ segments }))));
-  }
-  if (model.igniteTriggers?.length > 0) {
-    entries.push(conceptEntry("ignition", HEADER_ICON_PATHS.ignition, model.igniteTriggers.map((segments) => ({ segments }))));
-  }
-  if (model.passiveAbilities?.length > 0) {
-    entries.push(
-      conceptEntry(
-        "passives",
-        HEADER_ICON_PATHS.passive,
-        model.passiveAbilities.map((passive) => ({ segments: passive.text }))
-      )
-    );
-  }
-  if (model.requirements?.length > 0) {
-    entries.push(conceptEntry("requirements", HEADER_ICON_PATHS.requirements, model.requirements.map((segments) => ({ segments }))));
-  }
-
-  for (const { iconPath, title, texts } of entries.filter(Boolean)) {
-    const icon = safePath(iconPath);
-    if (!icon) continue;
+  for (const { iconPath, title, texts } of buildUnitHeaderIcons(model, glossary)) {
     const img = document.createElement("img");
-    img.src = icon;
+    img.src = iconPath;
     // The name's fit measurement depends on the icons' rendered widths;
     // an undecoded image has none, so each icon must be ready before the
     // name is fitted. A broken icon resolves the wait instead of blocking.
@@ -146,7 +88,7 @@ const loadHeaderIcons = async (container, model, glossary) => {
     // whose hover target has left the document, and an element still being
     // built is not in it yet.
     headerIcons.appendChild(img);
-    await addTooltip(img, title, texts, icon);
+    await addTooltip(img, title, texts, iconPath);
   }
 };
 

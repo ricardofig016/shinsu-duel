@@ -64,9 +64,14 @@ mutates the view models.
   units the kind's, server-owned summary), the name (left-aligned after the
   letter), and the header icons — one icon per attribute (in the canonical
   attribute order of the card view), evolve, ignition, passive abilities,
-  and requirements. Header icons render only when the
+  requirements, and the unit's equipment attachments (one icon for any number
+  of them). The list is built by `public/utils/unit-header-icons.js`, which
+  the horizontal card face draws its own header ribbons from, so both faces
+  state the same features in the same order. Header icons render only when the
   card has the feature and are hover-only; each explains itself through the
   shared tooltip component.
+  The compact deployed-unit face is documented in
+  [UNIT_CARD_HORIZONTAL_COMPONENT.md](./UNIT_CARD_HORIZONTAL_COMPONENT.md).
 - **Artwork:** up to two opaque trapezoids textured with the card's
   `background.png` overlay the top and
   bottom. Both have a wide (base) edge of 2/3 of the artwork width and a

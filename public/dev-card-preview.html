@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>unit-card-horizontal preview</title>
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/pages/game/styles.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <div id="you-container" class="side-container container-horizontal" style="height: 100vh">
+        <div class="combat-slots-container container-vertical"></div>
+        <div class="deck-lighthouse-container container-vertical"></div>
+        <div class="board-container">
+          <div class="board-frame container-vertical">
+            <div class="frontline-container container-horizontal" id="line" style="max-height: 120px"></div>
+            <div class="backline-container container-horizontal" id="line-two" style="max-height: 120px"></div>
+            <div class="frontline-container container-horizontal" id="line-three" style="max-height: 120px"></div>
+          </div>
+        </div>
+        <div class="hand-shinsu-pass-button-container container-vertical"></div>
+      </div>
+    </div>
+    <script type="module">
+      import { loadComponent } from "/utils/component-util.js";
+      import { buildUnitViewModel } from "/game/viewModels.js";
+
+      const payload = await (await fetch("/cards/data/")).json();
+      const catalog = payload.cards;
+
+      const traitViews = (entry) =>
+        (entry.traits ?? Object.keys(entry.traits ?? {})).length === 0
+          ? []
+          : Object.entries(entry.traits ?? {}).map(([code, trait], index) => ({
+              key: code,
+              value: trait.value ?? index + 1,
+              numeric: trait.numeric === true,
+              name: trait.name ?? code,
+              description: trait.description ?? "Prose.",
+              iconPath: trait.iconPath ?? null,
+            }));
+
+      const byName = (fragment) => catalog.find((card) => card.type === "unit" && card.name.includes(fragment));
+
+      const make = (card, overrides = {}) =>
+        buildUnitViewModel({
+          id: "u-" + card.cardId,
+          owner: "you",
+          currentHp: overrides.currentHp ?? card.maxHp ?? 5,
+          line: "frontline",
+          placedPositionCode: Object.keys(card.positions ?? {})[0] ?? null,
+          chosenPositionCode: overrides.chosenPositionCode ?? null,
+          card,
+          conditions: overrides.conditions ?? [],
+          equipmentAttachments: overrides.equipmentAttachments ?? [],
+          grantedAbilities: [],
+          traits: overrides.traits ?? traitViews(card),
+        });
+
+      const picked = {
+        short: byName("Baam"),
+        long: catalog
+          .filter((card) => card.type === "unit" && card.name)
+          .sort((a, b) => b.name.length - a.name.length)[0],
+        bare: catalog
+          .filter((card) => card.type === "unit" && Object.keys(card.traits ?? {}).length === 0)
+          .sort((a, b) => a.name.length - b.name.length)[0],
+        rich: catalog
+          .filter((card) => card.type === "unit")
+          .sort((a, b) => Object.keys(b.traits ?? {}).length - Object.keys(a.traits ?? {}).length)[0],
+      };
+      console.log("picked", Object.fromEntries(Object.entries(picked).map(([key, card]) => [key, card?.name])));
+
+      const place = async (lineId, entries) => {
+        const line = document.getElementById(lineId);
+        for (const { id, unit } of entries) {
+          const host = document.createElement("div");
+          host.classList.add("unit-card-horizontal-component");
+          host.id = id;
+          host.dataset.cardName = unit.name;
+          host.dataset.strip = String(unit.runtimeTraits.length + unit.conditions.length);
+          line.appendChild(host);
+          await loadComponent(host, "unit-card-horizontal", { unit, interactive: false });
+        }
+      };
+
+      await place("line", [
+        { id: "short", unit: make(picked.short) },
+        { id: "long", unit: make(picked.long) },
+        { id: "bare", unit: make(picked.bare) },
+        { id: "rich", unit: make(picked.rich) },
+        { id: "equipped", unit: make(picked.short, { equipmentAttachments: ["Narumada"], currentHp: 2 }) },
+      ]);
+      await place("line-two", [
+        { id: "long2", unit: make(picked.long) },
+        { id: "bare2", unit: make(picked.bare) },
+        { id: "rich2", unit: make(picked.rich) },
+      ]);
+      await place("line-three", [
+        { id: "withConditions", unit: make(picked.short, { conditions: [{ key: "burned", magnitude: 4, numeric: true, name: "Burned", description: "Prose.", iconPath: "/assets/icons/conditions/burned.png" }], traits: [{ code: "barrier", value: 1, numeric: false, name: "Barrier", description: "Prose.", iconPath: "/assets/icons/traits/barrier.png" }] }) },
+        { id: "none", unit: make(picked.bare) },
+        { id: "none2", unit: make(picked.bare) },
+      ]);
+      document.title = "ready";
+    </script>
+  </body>
+</html>

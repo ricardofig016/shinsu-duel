@@ -1,6 +1,8 @@
 import { addTooltip } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
 import { openCardDetail } from "/components/card-detail-overlay/script.js";
+import { buildUnitHeaderIcons } from "/utils/unit-header-icons.js";
+import { buildTraitStripEntries } from "/utils/unit-trait-strip.js";
 import { buildPositionTooltipEntries, buildUnitAbilityTooltipEntries } from "/utils/tooltip-entries.js";
 
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
@@ -12,44 +14,118 @@ const safePath = (p, fallback) => {
 };
 
 /**
- * A status badge's text: the raw code, with the entry's number only where the
- * catalog marks it numeric. Every condition carries a magnitude whether or not
- * it has one to state, so the flag is what keeps a non-numeric condition
- * ("blinded") from claiming a number.
+ * Draw one icon row. Each entry states its own icon and tooltip, and the row
+ * is the same shape for the header ribbon and the trait strip: build the icon
+ * element, put it in the document, then mount its tooltip — a hover target
+ * that is not in the document yet reads as gone, and the tooltip layer drops
+ * those.
+ *
+ * `badgeClass` is the optional number the entry states in its icon's corner,
+ * drawn as a badge that floats over the icon without joining the row's flex
+ * layout.
  */
-const badgeLabel = (code, value) => (value === null || value === undefined ? code : `${code} ${value}`);
+const loadIconRow = async (container, entries, { iconClass, badgeClass = null }) => {
+  container.replaceChildren();
+  for (const { iconPath, title, texts, value = null } of entries) {
+    const wrapper = document.createElement("span");
+    wrapper.className = iconClass;
+    const img = document.createElement("img");
+    img.src = iconPath;
+    wrapper.appendChild(img);
+    if (badgeClass && value !== null) {
+      const badge = document.createElement("span");
+      badge.className = badgeClass;
+      badge.textContent = String(value);
+      wrapper.appendChild(badge);
+    }
+    container.appendChild(wrapper);
+    await addTooltip(wrapper, title, texts, iconPath);
+  }
+};
 
 /**
- * Compact runtime-state badges: conditions with magnitudes, equipment
- * attachments, granted abilities, and runtime traits. Text content only.
+ * The unit's printed features and attachments as ribbons hung off the card's
+ * top edge, over the artwork. The display list is shared with the vertical
+ * card face, so both state the same features in the same canonical order.
  */
-const loadStatus = (container, unit) => {
-  const statusContainer = container.querySelector(".unit-card-horizontal-status");
-  const badges = [
-    ...unit.conditions.map((condition) => ({
-      text: badgeLabel(condition.key, condition.numeric === true ? condition.magnitude : null),
-      kind: "condition",
-    })),
-    ...unit.equipmentAttachments.map((name) => ({ text: name, kind: "equipment" })),
-    ...unit.grantedAbilities.map((granted) => ({ text: granted.abilityCode, kind: "granted-ability" })),
-    ...unit.runtimeTraits.map((trait) => ({
-      text: badgeLabel(trait.code, trait.numeric === true ? trait.value : null),
-      kind: "runtime-trait",
-    })),
-  ];
-  if (badges.length === 0) {
-    statusContainer.classList.add("hidden");
-    return;
+const loadRibbon = async (container, unit, glossary) => {
+  const ribbon = container.querySelector(".unit-card-horizontal-ribbon");
+  const entries = buildUnitHeaderIcons(unit, glossary);
+  // An icon-less ribbon is hidden outright: it is already out of the card's
+  // flow, and display: none keeps it from being hit-tested over the artwork.
+  ribbon.classList.toggle("hidden", entries.length === 0);
+  if (entries.length > 0) {
+    await loadIconRow(ribbon, entries, { iconClass: "unit-card-horizontal-ribbon-icon" });
   }
-  statusContainer.classList.remove("hidden");
-  statusContainer.replaceChildren(
-    ...badges.map(({ text, kind }) => {
-      const badge = document.createElement("span");
-      badge.className = `unit-card-horizontal-badge ${kind}`;
-      badge.textContent = text;
-      return badge;
-    })
-  );
+};
+
+/**
+ * The unit's live state: every trait it has, then every condition on it, as
+ * bare icons in one row. The row reserves its height whether or not it has
+ * entries, so the artwork and stats keep the same geometry on every card of a
+ * line.
+ */
+const loadStrip = async (container, unit) => {
+  const strip = container.querySelector(".unit-card-horizontal-strip");
+  await loadIconRow(strip, buildTraitStripEntries(unit), {
+    iconClass: "unit-card-horizontal-strip-icon",
+    badgeClass: "unit-card-horizontal-strip-value",
+  });
+};
+
+/**
+ * The card's two stats, one flex share each: the position the unit stands in,
+ * plus the position a landmark choice moved it to when that differs, and the
+ * unit's hp. Only the current hp is drawn; the tooltip states it out of the
+ * unit's maximum and carries the glossary's hp copy.
+ */
+const loadStats = async (container, unit, glossary) => {
+  const positionContainer = container.querySelector(".unit-card-horizontal-position:not(.unit-card-horizontal-position-chosen)");
+  const chosenContainer = container.querySelector(".unit-card-horizontal-position-chosen");
+  const placedPosition = unit.placedPositionCode ? unit.positions[unit.placedPositionCode] : null;
+  const chosenPosition =
+    unit.chosenPositionCode && unit.chosenPositionCode !== unit.placedPositionCode
+      ? unit.positions[unit.chosenPositionCode]
+      : null;
+  positionContainer.innerHTML = "";
+  if (placedPosition) {
+    const positionIcon = safePath(placedPosition.iconPath, DEFAULT_POSITION_ICON);
+    positionContainer.style.backgroundImage = `url("${positionIcon}")`;
+    await addTooltip(
+      positionContainer,
+      placedPosition.name,
+      buildPositionTooltipEntries(placedPosition, glossary),
+      positionIcon
+    );
+  } else {
+    positionContainer.style.backgroundImage = `url("${DEFAULT_POSITION_ICON}")`;
+  }
+  if (chosenPosition) {
+    const chosenIcon = safePath(chosenPosition.iconPath, DEFAULT_POSITION_ICON);
+    chosenContainer.classList.remove("hidden");
+    chosenContainer.style.backgroundImage = `url("${chosenIcon}")`;
+    await addTooltip(
+      chosenContainer,
+      chosenPosition.name,
+      buildPositionTooltipEntries(chosenPosition, glossary, { chosen: true }),
+      chosenIcon
+    );
+  } else {
+    chosenContainer.classList.add("hidden");
+  }
+
+  const hpContainer = container.querySelector(".unit-card-horizontal-hp");
+  const currentHp = unit.currentHp ?? 0;
+  hpContainer.querySelector("h1").innerText = currentHp;
+  hpContainer.classList.toggle("lowered", typeof unit.maxHp === "number" && currentHp < unit.maxHp);
+  const hpTooltip = glossary?.hud?.hpCurrent;
+  if (hpTooltip) {
+    await addTooltip(
+      hpContainer,
+      typeof unit.maxHp === "number" ? `${currentHp}/${unit.maxHp} HP` : `${currentHp} HP`,
+      hpTooltip.texts
+    );
+  }
 };
 
 const load = async (container, { unit, interactive = false, onAbilityClick = null }) => {
@@ -86,53 +162,12 @@ const load = async (container, { unit, interactive = false, onAbilityClick = nul
   artworkContainer.style.backgroundImage = `url("${safePath(unit.artworkPath, DEFAULT_ARTWORK)}")`;
   await addTooltip(artworkContainer, unit.name, buildUnitAbilityTooltipEntries(unit));
 
-  // status badges
-  loadStatus(container, unit);
+  // header ribbons, then the live trait and condition strip
+  await loadRibbon(container, unit, glossary);
+  await loadStrip(container, unit);
 
-  // position icons: the placed position, plus the chosen one when a landmark
-  // choice moved the unit and differs from where it stands
-  const positionContainer = container.querySelector(".unit-card-horizontal-position:not(.unit-card-horizontal-position-chosen)");
-  const chosenContainer = container.querySelector(".unit-card-horizontal-position-chosen");
-  const placedPosition = unit.placedPositionCode ? unit.positions[unit.placedPositionCode] : null;
-  const chosenPosition =
-    unit.chosenPositionCode && unit.chosenPositionCode !== unit.placedPositionCode
-      ? unit.positions[unit.chosenPositionCode]
-      : null;
-  positionContainer.innerHTML = "";
-  if (placedPosition) {
-    const positionIcon = safePath(placedPosition.iconPath, DEFAULT_POSITION_ICON);
-    positionContainer.style.backgroundImage = `url("${positionIcon}")`;
-    await addTooltip(
-      positionContainer,
-      placedPosition.name,
-      buildPositionTooltipEntries(placedPosition, glossary),
-      positionIcon
-    );
-  } else {
-    positionContainer.style.backgroundImage = `url("${DEFAULT_POSITION_ICON}")`;
-  }
-  if (chosenPosition) {
-    const chosenIcon = safePath(chosenPosition.iconPath, DEFAULT_POSITION_ICON);
-    chosenContainer.classList.remove("hidden");
-    chosenContainer.style.backgroundImage = `url("${chosenIcon}")`;
-    await addTooltip(
-      chosenContainer,
-      chosenPosition.name,
-      buildPositionTooltipEntries(chosenPosition, glossary, { chosen: true }),
-      chosenIcon
-    );
-  } else {
-    chosenContainer.classList.add("hidden");
-  }
-
-  // hp (use 0 if missing)
-  const hpContainer = container.querySelector(".unit-card-horizontal-hp");
-  const hpHeader = hpContainer.querySelector("h1");
-  if (hpHeader) hpHeader.innerText = unit.currentHp ?? 0;
-  const hpTooltip = glossary?.hud?.hpCurrent;
-  if (hpTooltip) {
-    await addTooltip(hpContainer, hpTooltip.name, hpTooltip.texts);
-  }
+  // stats
+  await loadStats(container, unit, glossary);
 };
 
 export default load;

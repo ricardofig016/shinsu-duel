@@ -155,11 +155,13 @@ from the enforced ones.
 | ---------------------------------- | --------------------------- | ----------------------------------------------------------- |
 | Board combat slot, card positions  | Position name               | Line label, description, italic verbose description; the chosen variant appends the glossary chosen suffix |
 | Deployed unit artwork (`unit-card-horizontal`) | Unit name | The unit's own abilities as segment entries, then its equipment-granted abilities in italic — both keep their inline links |
+| Equipment header icon (both card faces) | Equipment (the glossary type name) | The names of the unit's attachments |
+| Deployed unit hp (`unit-card-horizontal`) | "<current>/<max> HP", or "<current> HP" when the card states no maximum | The glossary's current-hp copy |
 | Type letter (card-vertical)        | Kind name (standard shows "Unit") or type name | Kind or type summary from the glossary  |
 | Rank trapezoid                     | "Rank" (glossary rank title) | Italic concept, then every rank with cost range and description; the card's own rank is strong |
 | Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | Italic prose description, then the attribute's effect lines (the RULES.md core-mechanic block) |
 | Evolve / Ignition / Passives / Requirements header icons | Glossary concept name | Italic concept description, then the card's printed texts |
-| Trait / condition strip icon        | Catalog name, plus the entry's value for a numeric entry ("Resilient 3", or "Resilient X" where no instance supplies one) | The entry's compiled prose, with its value slots filled from the instance |
+| Trait / condition icon (both card faces) | Catalog name, plus the entry's value for a numeric entry ("Resilient 3", or "Resilient X" where no instance supplies one) | The entry's compiled prose, with its value slots filled from the instance |
 | HUD (shinsu, recharged, HP, lighthouses, fire charges, deck) | Glossary name | Glossary texts; the deck copy's `[[value:count]]` slot fills with the viewer's remaining count |
 
 Every prose field above arrives as compiled display segments, so a link
