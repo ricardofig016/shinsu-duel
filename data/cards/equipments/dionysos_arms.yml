@@ -11,5 +11,5 @@ effects:
       amount: 1
       target: { side: self }
       raw: "Give me [[trait:Pierce]]"
-    raw: "[[rule:Ability]]: Give me [[trait:Pierce]]"
+    raw: "[[rule:Ability]]: Give me [[trait:Pierce]] 1"
 ignition:

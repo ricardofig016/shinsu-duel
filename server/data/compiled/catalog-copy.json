@@ -161,14 +161,25 @@
             "ref": "light-up",
             "text": "Light Up"
           },
-          " x"
+          " ",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          }
         ]
       }
     },
     "bloodthirsty": {
       "description": {
         "segments": [
-          "When I kill a unit, restore x HP"
+          "When I kill a unit, restore ",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " HP"
         ]
       }
     },
@@ -180,7 +191,13 @@
             "ref": "round-start",
             "text": "Round Start"
           },
-          ": draw x cards"
+          ": draw ",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " cards"
         ]
       }
     },
@@ -194,7 +211,13 @@
     "last-one-standing": {
       "description": {
         "segments": [
-          "If I am the only ally unit, I have +x HP"
+          "If I am the only ally unit, I have +",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " HP"
         ]
       }
     },
@@ -214,14 +237,25 @@
             "ref": "extinguish",
             "text": "Extinguish"
           },
-          " x"
+          " ",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          }
         ]
       }
     },
     "reflect": {
       "description": {
         "segments": [
-          "When I take damage from a unit's ability, deal x damage back"
+          "When I take damage from a unit's ability, deal ",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " damage back"
         ]
       }
     },
@@ -233,21 +267,39 @@
             "ref": "round-end",
             "text": "Round End"
           },
-          ": heal me x HP"
+          ": heal me ",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " HP"
         ]
       }
     },
     "resilient": {
       "description": {
         "segments": [
-          "I take -x damage from all sources"
+          "I take -",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " damage from all sources"
         ]
       }
     },
     "ruthless": {
       "description": {
         "segments": [
-          "I deal +x damage if the enemy has less than 10 lighthouses"
+          "I deal +",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " damage if the enemy has less than 10 lighthouses"
         ]
       }
     },
@@ -261,7 +313,13 @@
     "strong": {
       "description": {
         "segments": [
-          "I deal +x damage"
+          "I deal +",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " damage"
         ]
       }
     },
@@ -282,7 +340,13 @@
     "vengeful": {
       "description": {
         "segments": [
-          "I deal +x damage if I am missing HP"
+          "I deal +",
+          {
+            "type": "value",
+            "ref": "trait",
+            "text": "x"
+          },
+          " damage if I am missing HP"
         ]
       }
     }
@@ -360,7 +424,13 @@
     "burned": {
       "description": {
         "segments": [
-          "Turn end: I take x damage"
+          "Turn end: I take ",
+          {
+            "type": "value",
+            "ref": "condition",
+            "text": "x"
+          },
+          " damage"
         ]
       }
     },
@@ -372,7 +442,13 @@
             "ref": "round-end",
             "text": "Round End"
           },
-          ": I take x damage for each unique condition I have"
+          ": I take ",
+          {
+            "type": "value",
+            "ref": "condition",
+            "text": "x"
+          },
+          " damage for each unique condition I have"
         ]
       }
     },
@@ -393,7 +469,13 @@
     "exhausted": {
       "description": {
         "segments": [
-          "I deal -x damage"
+          "I deal -",
+          {
+            "type": "value",
+            "ref": "condition",
+            "text": "x"
+          },
+          " damage"
         ]
       }
     },
@@ -426,7 +508,13 @@
             "ref": "ability",
             "text": "Abilities"
           },
-          " cost +x ",
+          " cost +",
+          {
+            "type": "value",
+            "ref": "condition",
+            "text": "x"
+          },
+          " ",
           {
             "type": "rule",
             "ref": "shinsu",
@@ -438,7 +526,13 @@
     "poisoned": {
       "description": {
         "segments": [
-          "I take x damage when I use an ",
+          "I take ",
+          {
+            "type": "value",
+            "ref": "condition",
+            "text": "x"
+          },
+          " damage when I use an ",
           {
             "type": "rule",
             "ref": "ability",
@@ -469,7 +563,13 @@
     "weak": {
       "description": {
         "segments": [
-          "I take +x damage from all sources"
+          "I take +",
+          {
+            "type": "value",
+            "ref": "condition",
+            "text": "x"
+          },
+          " damage from all sources"
         ]
       }
     }
@@ -568,6 +668,20 @@
           {
             "segments": [
               "Gained by your Hwayeomsa units and consumed by Fire Core to create Incinerate cards."
+            ]
+          }
+        ]
+      },
+      "deck": {
+        "texts": [
+          {
+            "segments": [
+              {
+                "type": "value",
+                "ref": "count",
+                "text": "x"
+              },
+              " cards remaining"
             ]
           }
         ]
