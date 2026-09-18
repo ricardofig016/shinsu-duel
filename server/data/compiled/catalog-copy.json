@@ -9,7 +9,12 @@
       "effect": [
         {
           "segments": [
-            "Round start: gain a single-use Shinheuh combat slot if you don't already have one."
+            {
+              "type": "trigger",
+              "ref": "round-start",
+              "text": "Round Start"
+            },
+            ": gain a single-use Shinheuh combat slot if you don't already have one."
           ]
         }
       ]
@@ -92,7 +97,7 @@
             {
               "type": "trigger",
               "ref": "deploy",
-              "text": "deployed"
+              "text": "Deployed"
             },
             ", heal 2 HP from or summon ",
             {
@@ -148,7 +153,7 @@
           {
             "type": "trigger",
             "ref": "round-start",
-            "text": "Round start"
+            "text": "Round Start"
           },
           ": ",
           {
@@ -173,7 +178,7 @@
           {
             "type": "trigger",
             "ref": "round-start",
-            "text": "Round start"
+            "text": "Round Start"
           },
           ": draw x cards"
         ]
@@ -226,7 +231,7 @@
           {
             "type": "trigger",
             "ref": "round-end",
-            "text": "Round end"
+            "text": "Round End"
           },
           ": heal me x HP"
         ]
