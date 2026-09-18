@@ -170,6 +170,9 @@ describe("filterCards", () => {
     expect(filterCards(units, { affiliations: ["FUG", "Wolhaiksong"] })).toHaveLength(2);
     expect(filterCards(units, { traits: ["Lethal"] })).toHaveLength(1);
     expect(filterCards(units, { positions: ["Fisherman"] })).toHaveLength(1);
+    expect(filterCards(units, { attributes: ["Hwayeomsa"] }).map((view) => view.name)).toEqual(["Ashen Knight"]);
+    expect(filterCards(units, { attributes: ["Hwayeomsa", "Anima"] })).toHaveLength(1);
+    expect(filterCards(units, { attributes: ["Anima"] })).toEqual([]);
   });
 
   test("facets combine with AND", () => {
@@ -233,6 +236,7 @@ describe("deriveFacetOptions", () => {
     expect(options.affiliations).toEqual(["FUG", "Wolhaiksong"]);
     expect(options.traits).toEqual(["Lethal"]);
     expect(options.positions).toEqual(["Fisherman", "Scout"]);
+    expect(options.attributes).toEqual(["Hwayeomsa"]);
   });
 
   test("ignores null facet values", () => {
@@ -273,6 +277,7 @@ describe("encodeState and decodeState", () => {
       affiliations: ["FUG", "Wolhaiksong"],
       traits: ["Lethal"],
       positions: ["Scout"],
+      attributes: ["Hwayeomsa"],
       costMin: 1,
       costMax: 5,
     };
@@ -290,10 +295,11 @@ describe("encodeState and decodeState", () => {
   });
 
   test("decodeState keeps multi-value facets", () => {
-    const params = new URLSearchParams("affiliation=FUG&affiliation=Wolhaiksong&trait=Lethal");
+    const params = new URLSearchParams("affiliation=FUG&affiliation=Wolhaiksong&trait=Lethal&attribute=Hwayeomsa");
     const decoded = decodeState(params);
     expect(decoded.criteria.affiliations).toEqual(["FUG", "Wolhaiksong"]);
     expect(decoded.criteria.traits).toEqual(["Lethal"]);
+    expect(decoded.criteria.attributes).toEqual(["Hwayeomsa"]);
   });
 
   test("exposes the four documented sort keys", () => {

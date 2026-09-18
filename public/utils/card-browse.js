@@ -70,6 +70,7 @@ const EMPTY_CRITERIA = Object.freeze({
   affiliations: [],
   traits: [],
   positions: [],
+  attributes: [],
   costMin: null,
   costMax: null,
 });
@@ -85,6 +86,7 @@ export function normalizeCriteria(criteria) {
     affiliations: [...(input.affiliations ?? [])],
     traits: [...(input.traits ?? [])],
     positions: [...(input.positions ?? [])],
+    attributes: [...(input.attributes ?? [])],
     costMin: input.costMin ?? null,
     costMax: input.costMax ?? null,
   };
@@ -95,7 +97,7 @@ export function normalizeCriteria(criteria) {
  * one facet combine with OR; the cost bounds are inclusive.
  */
 export function filterCards(views, criteria) {
-  const { text, type, kind, rank, affiliations, traits, positions, costMin, costMax } =
+  const { text, type, kind, rank, affiliations, traits, positions, attributes, costMin, costMax } =
     normalizeCriteria(criteria);
   const needle = text.trim().toLowerCase();
 
@@ -114,6 +116,7 @@ export function filterCards(views, criteria) {
     if (!matchesAny((view.affiliations ?? []).map((entry) => entry.name), affiliations)) return false;
     if (!matchesAny((view.printedTraits ?? []).map((entry) => entry.name), traits)) return false;
     if (!matchesAny(Object.values(view.positions ?? {}).map((entry) => entry.name), positions)) return false;
+    if (!matchesAny((view.attributes ?? []).map((entry) => entry.name), attributes)) return false;
     return matchesCost(view.cost ?? 0);
   });
 }
@@ -149,6 +152,7 @@ export function deriveFacetOptions(views) {
     affiliations: distinctSorted(views.flatMap((view) => (view.affiliations ?? []).map((entry) => entry.name))),
     traits: distinctSorted(views.flatMap((view) => (view.printedTraits ?? []).map((entry) => entry.name))),
     positions: distinctSorted(views.flatMap((view) => Object.values(view.positions ?? {}).map((entry) => entry.name))),
+    attributes: distinctSorted(views.flatMap((view) => (view.attributes ?? []).map((entry) => entry.name))),
   };
 }
 
@@ -167,7 +171,7 @@ export function planGrid(views, { criteria = null, sortKey = null, fixedSortKey 
  * stay short; `dev` is page-level state and never written here.
  */
 export function encodeState(criteria, sortKey = DEFAULT_SORT_KEY) {
-  const { text, type, kind, rank, affiliations, traits, positions, costMin, costMax } =
+  const { text, type, kind, rank, affiliations, traits, positions, attributes, costMin, costMax } =
     normalizeCriteria(criteria);
   const params = new URLSearchParams();
   const query = text.trim();
@@ -178,6 +182,7 @@ export function encodeState(criteria, sortKey = DEFAULT_SORT_KEY) {
   for (const name of affiliations) params.append("affiliation", name);
   for (const name of traits) params.append("trait", name);
   for (const name of positions) params.append("position", name);
+  for (const name of attributes) params.append("attribute", name);
   if (costMin !== null) params.set("min", String(costMin));
   if (costMax !== null) params.set("max", String(costMax));
   if (sortKey !== DEFAULT_SORT_KEY) params.set("sort", sortKey);
@@ -211,6 +216,7 @@ export function decodeState(params) {
       affiliations: multiParams(params, "affiliation"),
       traits: multiParams(params, "trait"),
       positions: multiParams(params, "position"),
+      attributes: multiParams(params, "attribute"),
       costMin: numberParam(params, "min"),
       costMax: numberParam(params, "max"),
     },

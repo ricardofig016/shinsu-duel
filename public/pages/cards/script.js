@@ -105,6 +105,7 @@ const toolbar = wireCatalogToolbar({
       affiliations: document.getElementById("filter-affiliations"),
       traits: document.getElementById("filter-traits"),
       positions: document.getElementById("filter-positions"),
+      attributes: document.getElementById("filter-attributes"),
     },
   },
   onChange: onControlChange,

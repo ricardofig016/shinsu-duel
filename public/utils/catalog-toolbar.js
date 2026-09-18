@@ -28,7 +28,7 @@ const debounce = (fn, delayMs) => {
  *     costMin?: HTMLInputElement,
  *     costMax?: HTMLInputElement,
  *     sort?: HTMLSelectElement,
- *     facets?: { affiliations?: HTMLFieldSetElement, traits?: HTMLFieldSetElement, positions?: HTMLFieldSetElement },
+ *     facets?: { affiliations?: HTMLFieldSetElement, traits?: HTMLFieldSetElement, positions?: HTMLFieldSetElement, attributes?: HTMLFieldSetElement },
  *   },
  *   onChange: () => void,
  *   sortKeys?: Array<{ key: string, label: string }>,
@@ -103,6 +103,7 @@ export function wireCatalogToolbar({ elements, onChange, sortKeys = SORT_KEYS, d
       populateFacet(facets.affiliations, options.affiliations);
       populateFacet(facets.traits, options.traits);
       populateFacet(facets.positions, options.positions);
+      populateFacet(facets.attributes, options.attributes);
     },
 
     /** Fill the sort select; defaults stay offered as the empty option value. */
@@ -128,6 +129,7 @@ export function wireCatalogToolbar({ elements, onChange, sortKeys = SORT_KEYS, d
         affiliations: checkedValues(facets.affiliations),
         traits: checkedValues(facets.traits),
         positions: checkedValues(facets.positions),
+        attributes: checkedValues(facets.attributes),
         costMin: parseCost(elements.costMin),
         costMax: parseCost(elements.costMax),
       });
@@ -148,6 +150,7 @@ export function wireCatalogToolbar({ elements, onChange, sortKeys = SORT_KEYS, d
         [facets.affiliations, normalized.affiliations],
         [facets.traits, normalized.traits],
         [facets.positions, normalized.positions],
+        [facets.attributes, normalized.attributes],
       ]) {
         for (const checkbox of fieldset?.querySelectorAll("input") ?? []) {
           checkbox.checked = values.includes(checkbox.value);

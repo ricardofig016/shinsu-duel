@@ -183,6 +183,7 @@ const poolToolbar = wireCatalogToolbar({
       affiliations: byId("pool-facet-affiliations"),
       traits: byId("pool-facet-traits"),
       positions: byId("pool-facet-positions"),
+      attributes: byId("pool-facet-attributes"),
     },
   },
   onChange: () => {
