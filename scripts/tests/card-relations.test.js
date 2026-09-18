@@ -254,6 +254,31 @@ describe("stampRelatedCards", () => {
     expect(solo.relatedCards).toBeUndefined();
   });
 
+  test("test cards are outside the graph: their copy never routes a real card into a closure", () => {
+    // The shipped pool carries the dev cards under data/cards/test, and the
+    // served catalog filters them out. A dev card naming a card must therefore
+    // not hand that card to anything else: the relation it created could not be
+    // rendered (its peer is missing from the client's catalog), and it dragged
+    // the named card, and everything it relates to, into a real card's row.
+    const devRegistry = createLinkRegistry({ names: ["A", "F", "B"] });
+    const real = card({ cardId: 1, slug: "a", name: "A" });
+    const fireCore = card({ cardId: 2, slug: "f", name: "F" });
+    const dev = card({
+      cardId: 3,
+      slug: "test_unit",
+      name: "_Test Unit",
+      abilities: [{ type: "deal_damage", text: tokenizeSegments("strike [[card:F]] and [[card:B]]", "test.raw", devRegistry) }],
+    });
+    const unrelated = card({ cardId: 4, slug: "b", name: "B" });
+
+    // A carries shared copy naming F, which is what reaches the dev card.
+    stampRelatedCards([real, fireCore, dev, unrelated], { 1: ["slug:f"] });
+
+    expect(real.relatedCards).toEqual([{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }]);
+    expect(dev.relatedCards).toBeUndefined();
+    expect(unrelated.relatedCards).toBeUndefined();
+  });
+
   test("references that resolve to no card contribute nothing", () => {
     const a = card({
       cardId: 1,

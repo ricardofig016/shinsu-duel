@@ -102,6 +102,19 @@ references that resolve to no compiled card (an unlinked machine reference
 the compiler never validated) contribute nothing. Link targets, by contrast,
 are compile errors when unresolvable.
 
+## Test cards
+
+Test cards (`_Test*`, see `server/utils/test-card.js`) are outside the graph:
+`stampRelatedCards` builds it over the public pool only. The served catalog
+filters test cards out (`GET /cards/data`), so a relation naming one could
+never render — it would list a card the client cannot find, or leave a slot
+whose tag names a peer it cannot resolve. Their copy must also not route a
+real card into a closure it has nothing to do with, which is how a dev card
+naming another card once pulled that card, and everything it relates to, into
+a real card's carousel. Filtering inside the stamp leaves `cardId`s untouched
+(they are assigned first), so an excluded card simply carries no relations in
+either direction.
+
 ## Client consumption
 
 The card detail overlay assembles its row from the focus card's stamp plus
@@ -111,3 +124,9 @@ closure folds into the right-hand list at open time under the same
 never-repeat rule, so a card both attached and statically related stays in
 the equipment column. Peer names are resolved once when the row is built,
 and each side slot's tag comes from its entry's kind through `relationTag`.
+
+Every rendered slot carries a tag: an entry whose tag cannot be produced — an
+unknown kind, a peer the catalog does not name, a series entry with no series
+code — is dropped, and the next edge that reaches that card takes the slot.
+That is what keeps a stamp/catalog mismatch from showing as a related card
+claiming nothing.

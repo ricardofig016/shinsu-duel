@@ -1,4 +1,5 @@
 import { LINK_TYPES } from "../../public/utils/card-text.js";
+import { isTestCard } from "../../server/utils/test-card.js";
 import { normalizeName } from "./normalize-name.js";
 
 /**
@@ -37,6 +38,14 @@ import { normalizeName } from "./normalize-name.js";
  * References that resolve to no compiled card (an unlinked machine reference
  * the compiler never validated) contribute nothing; link targets are already
  * compile errors when unresolvable.
+ *
+ * Test cards (`_Test*`, see `server/utils/test-card.js`) are outside the
+ * graph. The served catalog filters them out, so a relation naming one could
+ * never render: it would either list a card the client cannot find or leave a
+ * slot whose tag names a peer it cannot resolve. Their copy also must not
+ * route a real card into a closure it has nothing to do with, which is how a
+ * dev card naming another card once pulled that card, and everything it
+ * relates to, into a real card's carousel.
  */
 
 const NODE_LISTS = ["abilities", "passives", "effects", "requirements", "rules", "deckConstraints"];
@@ -148,11 +157,15 @@ function isCardId(value) {
  *   resolved forward references per cardId
  */
 export function stampRelatedCards(cards, extraReferences = null) {
-  const byId = new Map(cards.map((card) => [card.cardId, card]));
-  const bySlug = new Map(cards.map((card) => [card.slug, card]));
+  // The pool the graph is built over: every card the client can be served.
+  // Filtering here keeps cardIds untouched (they are assigned before this
+  // stamp), so an excluded card simply has no relations in either direction.
+  const pool = cards.filter((card) => !isTestCard(card));
+  const byId = new Map(pool.map((card) => [card.cardId, card]));
+  const bySlug = new Map(pool.map((card) => [card.slug, card]));
 
   const seriesGroups = new Map();
-  for (const card of cards) {
+  for (const card of pool) {
     if (!card.series) continue;
     if (!seriesGroups.has(card.series)) seriesGroups.set(card.series, []);
     seriesGroups.get(card.series).push(card.cardId);
@@ -168,7 +181,7 @@ export function stampRelatedCards(cards, extraReferences = null) {
   };
 
   const ownReferences = new Map();
-  for (const card of cards) {
+  for (const card of pool) {
     ownReferences.set(card.cardId, collectForwardReferences(card));
   }
 
@@ -191,7 +204,7 @@ export function stampRelatedCards(cards, extraReferences = null) {
   // A card's own references are examined before the ones it inherits.
   const namedEdges = new Map();
   const seriesEdges = new Map();
-  for (const card of cards) {
+  for (const card of pool) {
     const own = ownReferences.get(card.cardId);
     const inherited = splitReferences(inheritedFor(card));
 
@@ -217,7 +230,7 @@ export function stampRelatedCards(cards, extraReferences = null) {
   // Reverse mentions: every card whose copy names this one, directly or
   // through a series it names.
   const mentionedByEdges = new Map();
-  for (const card of cards) {
+  for (const card of pool) {
     const targets = new Set(namedEdges.get(card.cardId));
     for (const { cardIds } of seriesEdges.get(card.cardId)) {
       for (const cardId of cardIds) targets.add(cardId);
@@ -259,7 +272,7 @@ export function stampRelatedCards(cards, extraReferences = null) {
       .map((group) => group.sort(compareByCardId));
   }
 
-  for (const card of cards) {
+  for (const card of pool) {
     const related = [];
     const seen = new Set([card.cardId]);
     const queue = [card.cardId];

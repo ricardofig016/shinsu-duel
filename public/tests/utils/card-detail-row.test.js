@@ -111,6 +111,27 @@ describe("assembleDetailRow", () => {
     ]);
   });
 
+  test("drops entries whose relation cannot be stated, letting a later edge claim the card", () => {
+    const unit = {
+      ...focus,
+      relatedCards: [
+        { cardId: 2, kind: "mentions", peerCardId: 99 }, // peer 99 is not in the catalog
+        { cardId: 2, kind: "evolves-from", peerCardId: 1 }, // same card, a statable edge
+        { cardId: 3, kind: "custom", peerCardId: 1 }, // unknown kind
+        { cardId: 4, kind: "series-mentioned", peerCardId: 1 }, // series entry with no series
+        { cardId: 7, kind: "mentioned-in", peerCardId: 1 },
+      ],
+    };
+    const row = assembleDetailRow(unit, catalogIndex);
+
+    // 2 is claimed by its second, statable edge; 3 and 4 would sit in the row
+    // claiming nothing, so they are not shown at all.
+    expect(row.right.map((entry) => [entry.card.cardId, relationTag(entry)])).toEqual([
+      [2, "Evolves from Focus"],
+      [7, "Mentioned in Focus"],
+    ]);
+  });
+
   test("folds each attachment's own related cards into the right list", () => {
     const equipment = {
       ...heavyWeights,
@@ -246,13 +267,17 @@ describe("assembleDetailRow", () => {
     expect(row.right).toEqual([]);
   });
 
-  test("a relation whose peer is not in the catalog still renders its card", () => {
+  test("drops a relation whose peer is not in the catalog instead of showing it untagged", () => {
+    // A peer the catalog cannot name leaves the tag empty, and a slot claiming
+    // nothing is not a relation a player can read. This is the shape a
+    // dev-only card's mention reached a real card's carousel in: the served
+    // catalog filters dev cards out, so their id never resolves here.
     const unit = {
       ...focus,
       relatedCards: [{ cardId: 2, kind: "mentions", peerCardId: 99 }],
     };
     const row = assembleDetailRow(unit, catalogIndex);
 
-    expect(row.right.map((entry) => relationTag(entry))).toEqual([""]);
+    expect(row.right).toEqual([]);
   });
 });

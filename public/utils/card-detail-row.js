@@ -74,7 +74,8 @@ export function relationTag(entry) {
  *   Row entries shaped `{ kind, seriesCode, peerName, focusName, card }` —
  *   `left` holds the equipment column, `right` the related cards in display
  *   order, and `focusIndex` is the focus card's index in
- *   `[...left, focus, ...right]`.
+ *   `[...left, focus, ...right]`. Every entry in `right` carries a tag: one
+ *   whose relation cannot be stated is dropped rather than shown untagged.
  */
 export function assembleDetailRow(model, catalogIndex) {
   const byId = catalogIndex?.byId ?? new Map();
@@ -114,8 +115,14 @@ export function assembleDetailRow(model, catalogIndex) {
     if (seen.has(cardId)) return;
     const view = byId.get(cardId);
     if (!view) return;
+    const entry = toEntry(kind, seriesCode, peerCardId, view);
+    // A side slot exists to state its relation. An entry whose tag cannot be
+    // rendered — an unknown kind, a peer the catalog does not name, a series
+    // entry with no series — would put a card in the row claiming nothing, so
+    // it is dropped and the next edge that reaches the card takes the slot.
+    if (relationTag(entry) === "") return;
     seen.add(cardId);
-    right.push(toEntry(kind, seriesCode, peerCardId, view));
+    right.push(entry);
   };
   for (const { cardId, kind, peerCardId, seriesCode } of model.relatedCards ?? []) {
     addRelated(kind, seriesCode ?? null, peerCardId, cardId);
