@@ -14,6 +14,22 @@ const components = {
 };
 
 /**
+ * Whether the document already applies a sheet for this link. A duplicate link
+ * to a sheet that is already applied contributes the same rules, so the markup
+ * is styled correctly from the moment it is inserted and waiting for that
+ * link's own load would only add a task round-trip per component instance. The
+ * overlay mounts about ten tooltips per card, which made a ten-card row wait on
+ * a hundred of those before its opening animation could start.
+ */
+const sheetAlreadyApplied = (link) =>
+  [...document.styleSheets].some(
+    (sheet) =>
+      !sheet.disabled &&
+      sheet.href === link.href &&
+      (sheet.media?.mediaText ?? "") === (link.media ?? "")
+  );
+
+/**
  * Resolve once every stylesheet the markup just inserted links is applied.
  * `link.sheet` is set as soon as the browser has the sheet's CSSOM, which is
  * when its rules start affecting layout; a sheet still in flight reports null
@@ -27,7 +43,7 @@ const awaitStylesheets = async (container) => {
     links.map(
       (link) =>
         new Promise((resolve) => {
-          if (link.sheet) return resolve();
+          if (link.sheet || sheetAlreadyApplied(link)) return resolve();
           link.addEventListener("load", resolve, { once: true });
           link.addEventListener("error", resolve, { once: true });
         })

@@ -15,8 +15,14 @@ const SCALE_FLOOR = 0.65;
 const Z_INDEX_BASE = 30;
 // Entrance/exit zoom of the focus card between its slot and the source card
 // it was opened from (the card-vertical big-card FLIP pattern).
-const MOTION_MS = 120;
+const MOTION_MS = 140;
+// How long the cards beside the focus take to travel from behind it to their
+// own slots (and back on close).
+const SIDE_MOTION_MS = 140;
 const BASE_TRANSFORM = "translate(50%, 50%) scale(1)";
+
+/** Whether the user asked for reduced motion; every animation here respects it. */
+const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * FLIP zoom of the focus card between the focus position and the source card
@@ -32,7 +38,7 @@ const BASE_TRANSFORM = "translate(50%, 50%) scale(1)";
 const animateFocusCard = (frame, target, source, direction) => {
   const sourceRect = source?.isConnected ? source.getBoundingClientRect() : null;
   if (
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    prefersReducedMotion() ||
     !sourceRect ||
     sourceRect.width === 0 ||
     typeof frame.animate !== "function"
@@ -101,11 +107,14 @@ export async function openCardDetail({
   const { left, right, focusIndex } = assembleDetailRow(model, catalog);
 
   // One slot per row entry, focus included; side slots carry their relation
-  // tag under the card.
+  // tag under the card. Every slot joins the row in order first, then the cards
+  // render: each card mounts about ten tooltips and fits two blocks of text, and
+  // building them one after another made a long row sit still for about a second
+  // before its opening animation could start.
   const row = root.querySelector(".card-detail-overlay-row");
   const entries = [...left, { kind: "focus", card: model }, ...right];
   const slots = [];
-  const frames = [];
+  const frames = new Array(entries.length);
   for (const [index, entry] of entries.entries()) {
     const slot = document.createElement("div");
     slot.className = "card-detail-slot";
@@ -120,12 +129,16 @@ export async function openCardDetail({
     }
     row.appendChild(slot);
     slots.push(slot);
-    const isFocus = entry.kind === "focus";
-    await loadComponent(host, "card-vertical", isFocus && unit
-      ? { unit, isSmall: false, onAbilityClick }
-      : { card: isFocus ? model : entry.card, isSmall: false });
-    frames.push(host.querySelector(".card-vertical-frame"));
   }
+  await Promise.all(
+    entries.map(async (entry, index) => {
+      const isFocus = entry.kind === "focus";
+      await loadComponent(slots[index].firstElementChild, "card-vertical", isFocus && unit
+        ? { unit, isSmall: false, onAbilityClick }
+        : { card: isFocus ? model : entry.card, isSmall: false });
+      frames[index] = slots[index].querySelector(".card-vertical-frame");
+    })
+  );
 
   // Slot geometry at scale 1, read once before any scale is applied: the
   // stylesheet owns the slot's size and overlap, and every row offset below
@@ -178,6 +191,7 @@ export async function openCardDetail({
   };
   const setFocus = (index) => {
     focusSlotIndex = Math.max(0, Math.min(slots.length - 1, index));
+    unparkSides();
     applyFocus();
   };
   // Card-link navigation: move the focus to the row entry for a card.
@@ -193,6 +207,111 @@ export async function openCardDetail({
     return true;
   };
 
+  // Motion of the cards beside the focus. They wait parked at the focus slot's
+  // centre, where the focus card hides them (every side card is smaller than
+  // it), and travel to their own slots together once the focus card has
+  // finished expanding, their tags fading in as they emerge. Closing runs it
+  // backwards, so the cards return behind the focus card before it shrinks
+  // away. A focus change abandons the park: the row must never animate cards
+  // from a position the row has already left.
+  const stillOpen = () => active?.root === root;
+  // The slots parked at open: every slot except the one focused then. A focus
+  // change abandons the park, so this set is only ever used by the opening.
+  const sideSlots = slots.filter((slot, index) => index !== focusIndex);
+  const sideTags = sideSlots.map((slot) => slot.querySelector(".card-detail-tag"));
+  /**
+   * Every slot except the one focused right now, with its tag. Closing recomputes
+   * this rather than reusing the opening set: once the focus has moved, the
+   * focused slot is no longer the one it parked around, and hiding it would make
+   * its own exit animation play on an invisible card.
+   */
+  const besideFocus = () =>
+    slots
+      .filter((_, index) => index !== focusSlotIndex)
+      .map((slot) => ({ slot, tag: slot.querySelector(".card-detail-tag") }));
+  let parked = false;
+  let parkedOffsets = [];
+
+  /** How far each side slot sits from the focus slot's centre, in pixels. */
+  const offsetsToFocus = () => {
+    const focusRect = slots[focusSlotIndex].getBoundingClientRect();
+    const focusCenter = focusRect.left + focusRect.width / 2;
+    return sideSlots.map((slot) => {
+      const rect = slot.getBoundingClientRect();
+      return focusCenter - (rect.left + rect.width / 2);
+    });
+  };
+  const parkSides = () => {
+    if (sideSlots.length === 0 || prefersReducedMotion()) return;
+    parkedOffsets = offsetsToFocus();
+    sideSlots.forEach((slot, index) => {
+      slot.style.transform = `translateX(${parkedOffsets[index]}px)`;
+      slot.style.opacity = "0";
+    });
+    for (const tag of sideTags) tag.style.opacity = "0";
+    parked = true;
+  };
+  const unparkSides = () => {
+    if (!parked) return;
+    parked = false;
+    for (const slot of sideSlots) {
+      slot.style.transform = "";
+      slot.style.opacity = "";
+    }
+    for (const tag of sideTags) tag.style.opacity = "";
+  };
+  const travelSides = () => {
+    if (!parked || !stillOpen()) return;
+    parked = false;
+    const offsets = parkedOffsets;
+    sideSlots.forEach((slot, index) => {
+      slot.style.transform = "";
+      slot.style.opacity = "";
+      slot.animate(
+        [{ transform: `translateX(${offsets[index]}px)` }, { transform: "translateX(0px)" }],
+        { duration: SIDE_MOTION_MS, easing: "ease-out" }
+      );
+    });
+    for (const tag of sideTags) {
+      // the park wrote an inline opacity of 0, and the animation must not hand
+      // the tag back to it when it ends: clear it and animate from 0 instead
+      tag.style.opacity = "";
+      tag.animate([{ opacity: 0 }, { opacity: 1 }], { duration: SIDE_MOTION_MS, easing: "ease-out" });
+    }
+  };
+  /**
+   * The reverse of `travelSides`, resolving once the cards are back behind the
+   * focus card and hidden there. Each card starts from wherever it is now, so a
+   * close during the opening travel does not first snap it to its slot, and the
+   * cards are hidden before the focus card shrinks: left visible, they would be
+   * revealed behind it as it leaves.
+   */
+  const gatherSides = () => {
+    if (slots.length < 2 || prefersReducedMotion()) return null;
+    const beside = besideFocus();
+    const focusRect = slots[focusSlotIndex].getBoundingClientRect();
+    const focusCenter = focusRect.left + focusRect.width / 2;
+    const motions = beside.map(({ slot }) => {
+      const rect = slot.getBoundingClientRect();
+      const dx = focusCenter - (rect.left + rect.width / 2);
+      const from = getComputedStyle(slot).transform;
+      for (const animation of slot.getAnimations()) animation.cancel();
+      return slot.animate(
+        [{ transform: from === "none" ? "translateX(0px)" : from }, { transform: `translateX(${dx}px)` }],
+        { duration: SIDE_MOTION_MS, easing: "ease-in", fill: "forwards" }
+      );
+    });
+    for (const { tag } of beside) {
+      if (!tag) continue;
+      const from = getComputedStyle(tag).opacity;
+      for (const animation of tag.getAnimations()) animation.cancel();
+      tag.animate([{ opacity: from }, { opacity: 0 }], { duration: SIDE_MOTION_MS, easing: "ease-in", fill: "forwards" });
+    }
+    return Promise.all(motions.map((motion) => motion.finished.catch(() => {}))).then(() => {
+      for (const { slot } of beside) slot.style.opacity = "0";
+    });
+  };
+
   // First placement, then motion. The placement must land in the frame the
   // overlay appears in: a transition on the initial transform would slide the
   // whole row in from the overlay's left edge, and the entrance zoom would
@@ -202,10 +321,16 @@ export async function openCardDetail({
   applyFocus();
   void row.getBoundingClientRect();
   root.classList.add("card-detail-overlay-motion");
+  // park the side cards in the same committed frame, so they are never painted
+  // at their own slots before the entrance
+  parkSides();
 
-  // Entrance: FLIP the focus card from the source card it opened from.
+  // Entrance: FLIP the focus card from the source card it opened from, then let
+  // the parked cards travel out from behind it.
   root.style.visibility = "";
-  animateFocusCard(frames[focusIndex], focusTarget(), source, "open");
+  const entranceMotion = animateFocusCard(frames[focusIndex], focusTarget(), source, "open");
+  if (entranceMotion) entranceMotion.finished.catch(() => {}).then(travelSides);
+  else travelSides();
 
   // closing
   const close = ({ animated = true } = {}) => {
@@ -213,14 +338,35 @@ export async function openCardDetail({
     active = null;
     document.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("resize", onResize);
-    if (animated) {
-      const closeMotion = animateFocusCard(frames[focusSlotIndex], focusTarget(), source, "close");
+    // `withMotion` is what the caller asked for, not a preference: another card
+    // opening over this one replaces it with no exit animation at all.
+    const shrinkFocus = (withMotion) => {
+      const closeMotion = withMotion
+        ? animateFocusCard(frames[focusSlotIndex], focusTarget(), source, "close")
+        : null;
       if (closeMotion) {
         closeMotion.finished.finally(() => root.remove()).catch(() => root.remove());
         return;
       }
+      root.remove();
+    };
+    if (!animated) {
+      shrinkFocus(false);
+      return;
     }
-    root.remove();
+    // the cards return behind the focus card before it shrinks away, so closing
+    // reads as the opening in reverse
+    if (parked) {
+      unparkSides();
+      shrinkFocus(true);
+      return;
+    }
+    const gathering = gatherSides();
+    if (gathering) {
+      gathering.then(() => shrinkFocus(true));
+      return;
+    }
+    shrinkFocus(true);
   };
 
   // interactions
