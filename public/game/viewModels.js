@@ -25,7 +25,8 @@ const flattenCard = (card) => ({
   type: card.type ?? null,
   kind: card.kind ?? null,
   name: card.name ?? "",
-  // The series code behind the related-card stamp's "series" entries.
+  // The card's series code, the same code the stamp carries on its series
+  // entries.
   series: card.series ?? null,
   sobriquet: card.sobriquet ?? null,
   artworkPath: card.artworkPath ?? null,
@@ -43,6 +44,11 @@ const flattenCard = (card) => ({
   passiveAbilities: (card.passiveAbilities ?? []).map((passive) => ({
     text: [...(passive.text ?? [])],
   })),
+  // Printed metadata: names and icons are plain, prose fields (`description`,
+  // `effect` lines) arrive from the server as compiled display segments
+  // (`{ segments }`, see docs/COMPILED_CARD_DSL.md), so their inline links
+  // render through the linked-text renderer and search projects them to plain
+  // text. No authored-text parsing happens client-side.
   printedTraits: Object.entries(card.traits ?? {}).map(([code, trait]) => ({
     code,
     name: trait.name,

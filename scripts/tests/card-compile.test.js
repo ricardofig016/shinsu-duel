@@ -330,6 +330,20 @@ describe("card-compile compileCard", () => {
   });
 });
 
+/**
+ * `compileAll` writes the compiled shared-catalog copy next to the card
+ * artifact, so a test that redirects its output must redirect those too.
+ * Otherwise a test compile would overwrite the checked-in artifacts.
+ */
+const compileInto = (options) => {
+  const dir = options.cardsDirectory;
+  return compileAll({
+    ...options,
+    catalogCopyPath: path.join(dir, "catalog-copy.json"),
+    catalogMentionsPath: path.join(dir, "catalog-mentions.json"),
+  });
+};
+
 describe("card-compile compileAll (fixture)", () => {
   let tmpDir;
 
@@ -373,7 +387,7 @@ deckConstraints:
 `, "utf-8");
 
     const outputPath = path.join(tmpDir, "cards.json");
-    const cards = await compileAll({
+    const cards = await compileInto({
       cardsDirectory: tmpDir,
       outputPath,
       runValidate: false,
@@ -400,7 +414,7 @@ effects:
   - "deal 2 to an enemy"
 `, "utf-8");
 
-    await expect(compileAll({
+    await expect(compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -426,7 +440,7 @@ passives:
     raw: "always deal 1"
 `, "utf-8");
 
-    await expect(compileAll({
+    await expect(compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -460,7 +474,7 @@ passives:
     raw: "while alone, strong 1"
 `, "utf-8");
 
-    const cards = await compileAll({
+    const cards = await compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -486,7 +500,7 @@ effects:
     raw: "ability: give me Pierce"
 `, "utf-8");
 
-    const cards = await compileAll({
+    const cards = await compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -512,7 +526,7 @@ effects:
     raw: "ability: deal 3 to an enemy"
 `, "utf-8");
 
-    await expect(compileAll({
+    await expect(compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -531,7 +545,7 @@ effects:
     raw: "remove a random condition from an ally"
 `, "utf-8");
 
-    await expect(compileAll({
+    await expect(compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -551,7 +565,7 @@ effects:
     raw: "remove a random condition from an ally"
 `, "utf-8");
 
-    const cards = await compileAll({
+    const cards = await compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -578,7 +592,7 @@ effects:
     raw: "deal 2 to 3 enemies and give them Burn"
 `, "utf-8");
 
-    const cards = await compileAll({
+    const cards = await compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -606,7 +620,7 @@ effects:
     raw: "deal 2 to a shared target"
 `, "utf-8");
 
-    await expect(compileAll({
+    await expect(compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -625,7 +639,7 @@ effects:
     raw: "deal 2 to a shared target"
 `, "utf-8");
 
-    await expect(compileAll({
+    await expect(compileInto({
       cardsDirectory: tmpDir,
       outputPath: path.join(tmpDir, "cards.json"),
       runValidate: false,
@@ -679,7 +693,7 @@ deckConstraints: []
     expect(Object.keys(output)).toHaveLength(2);
 
     const outputPath = path.join(tmpDir, "cards.json");
-    await compileAll({ cardsDirectory: tmpDir, outputPath, runValidate: false });
+    await compileInto({ cardsDirectory: tmpDir, outputPath, runValidate: false });
     const written = JSON.parse(await fs.readFile(outputPath, "utf-8"));
 
     expect(output).toEqual(written);

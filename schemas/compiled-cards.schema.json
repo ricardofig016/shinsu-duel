@@ -365,10 +365,12 @@
     },
     "relatedCard": {
       "type": "object",
-      "required": ["cardId", "kind"],
+      "required": ["cardId", "kind", "peerCardId"],
       "properties": {
         "cardId": { "type": "integer", "minimum": 0 },
-        "kind": { "enum": ["evolution", "ignition", "mention", "mentioned-by", "series"] }
+        "kind": { "enum": ["evolves-into", "evolves-from", "ignites-into", "ignited-from", "mentions", "mentioned-in", "series-mentioned", "same-series-as"] },
+        "peerCardId": { "type": "integer", "minimum": 0 },
+        "seriesCode": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false
     },

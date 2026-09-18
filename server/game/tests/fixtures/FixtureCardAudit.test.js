@@ -5,9 +5,18 @@ import positions from "../../../data/positions.json" with { type: "json" };
 import traits from "../../../data/traits.json" with { type: "json" };
 import affiliations from "../../../data/affiliations.json" with { type: "json" };
 import attributes from "../../../data/attributes.json" with { type: "json" };
+import catalogCopy from "./catalog-copy.json" with { type: "json" };
+import shippedCatalogCopy from "../../../data/compiled/catalog-copy.json" with { type: "json" };
 
 import { cards, byName } from "./cards.js";
 import { FILLER_START, FILLER_COUNT, NAMED_ID_START } from "../../../../scripts/compile-fixtures.js";
+
+/** Nested `{ [key]: value }` shape, used to compare catalog artifacts. */
+function shapeOf(value) {
+  if (Array.isArray(value)) return value.map(shapeOf);
+  if (!value || typeof value !== "object") return typeof value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, shapeOf(value[key])]));
+}
 
 describe("fixture card audit (contract coupling only)", () => {
   test("fixtures validate against the compiled schema", () => {
@@ -101,12 +110,45 @@ describe("fixture card audit (contract coupling only)", () => {
 
     // The card link stamps a mention; the skill sees it in reverse. The
     // condition link names no card, so it contributes no relation.
-    expect(burner.relatedCards).toContainEqual({ cardId: damageSkill.cardId, kind: "mention" });
-    expect(damageSkill.relatedCards).toContainEqual({ cardId: burner.cardId, kind: "mentioned-by" });
+    expect(burner.relatedCards).toContainEqual({
+      cardId: damageSkill.cardId,
+      kind: "mentioned-in",
+      peerCardId: burner.cardId,
+    });
+    expect(damageSkill.relatedCards).toContainEqual({
+      cardId: burner.cardId,
+      kind: "mentions",
+      peerCardId: damageSkill.cardId,
+    });
   });
 
   test("no fixture uses `custom` or `handler` DSL", () => {
     expect(JSON.stringify(cards)).not.toContain('"custom"');
     expect(JSON.stringify(cards)).not.toContain('"handler"');
+  });
+
+  test("the fixture shared-catalog copy mirrors the shipped copy field for field", () => {
+    // The fixture artifact is compiled by its own run, but it compiles the
+    // same authoring catalogs. A display path must never find a field that
+    // exists only in one of the two.
+    expect(shapeOf(catalogCopy)).toEqual(shapeOf(shippedCatalogCopy));
+  });
+
+  test("inherited catalog mentions reach the cards that carry or name the copy", () => {
+    // The fixtures carry a Hwayeomsa attribute and a card targeting one; the
+    // copy those name (the Hwayeomsa effect line) names Fire Core, so every
+    // such card relates to the fixture's Fire Core with itself as the peer.
+    const fireCore = cards[byName["fire core"]];
+    expect(fireCore).toBeDefined();
+
+    const carriers = Object.values(cards).filter((card) =>
+      card.relatedCards?.some(
+        (entry) => entry.cardId === fireCore.cardId && entry.kind === "mentioned-in" && entry.peerCardId === card.cardId
+      )
+    );
+    expect(carriers.length).toBeGreaterThan(0);
+    expect(fireCore.relatedCards).toEqual(
+      expect.arrayContaining(carriers.map((card) => ({ cardId: card.cardId, kind: "mentions", peerCardId: fireCore.cardId })))
+    );
   });
 });

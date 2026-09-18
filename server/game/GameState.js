@@ -17,6 +17,7 @@ import EVT from "./EventCatalog.js";
 import cards from "../data/cards.json" with { type: "json" };
 import conditions from "../data/conditions.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
+import { getConditions } from "./displayCatalogs.js";
 import GameClock from "./GameClock.js";
 import EventBus from "./EventBus.js";
 import ModifierStack, { getModifierCounter } from "./ModifierStack.js";
@@ -498,19 +499,21 @@ export default class GameState {
   /**
    * Project the conditions active on a unit with their effective magnitude
    * from the ModifierStack, so clients can render stacks (e.g. "Poisoned 3").
-   * Each view carries the condition catalog's name, description, and icon
-   * path; unknown keys degrade to their raw key so a catalog drift surfaces
-   * in the UI instead of crashing the projection.
+   * Each view carries the condition catalog's name, prose, and icon path; the
+   * prose arrives as compiled display segments, so a condition tooltip keeps
+   * its inline links. Unknown keys degrade to their raw key so a catalog
+   * drift surfaces in the UI instead of crashing the projection.
    */
   #getConditionViews(unitId) {
+    const conditionViews = getConditions();
     return [...this.modifierStack.getActiveKeys(unitId, "condition")].map((key) => {
-      const entry = conditions[key];
+      const entry = conditionViews[key] ?? conditions[key];
       return {
         key,
         magnitude: this.modifierStack.getEffective(unitId, "condition", key),
         name: entry?.name ?? key,
         description: entry?.description ?? null,
-        iconPath: entry ? `/assets/icons/${entry.iconPath}` : null,
+        iconPath: conditions[key] ? `/assets/icons/${conditions[key].iconPath}` : null,
       };
     });
   }

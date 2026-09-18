@@ -1,0 +1,786 @@
+{
+  "attributes": {
+    "anima": {
+      "description": {
+        "segments": [
+          "Anima summon and control special creatures called Shinheuh to fight for them."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            "Round start: gain a single-use Shinheuh combat slot if you don't already have one."
+          ]
+        }
+      ]
+    },
+    "silver-dwarf": {
+      "description": {
+        "segments": [
+          "Guides are support units that help their team by providing information. They can tell what's the best move and predict the future. Silver dwarves specialize in navigating the immediate physical crossroads and obstacles right in front of them."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            "The first time you draw a card each round, choose the card directly from your deck."
+          ]
+        }
+      ]
+    },
+    "red-witch": {
+      "description": {
+        "segments": [
+          "Guides are support units that help their team by providing information. They can tell what's the best move and predict the future. Red witches specialize in reading long-term destiny and the overarching threads of fate."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            "You can always see your opponent's hand and the top card of both players' decks."
+          ]
+        }
+      ]
+    },
+    "hwayeomsa": {
+      "description": {
+        "segments": [
+          "Hwayeomsa are flame users who are able to convert shinsu into fire. They deal team-wide massive fire damage."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            {
+              "type": "keyword",
+              "ref": "spend",
+              "text": "Spend"
+            },
+            " 1, ",
+            {
+              "type": "keyword",
+              "ref": "free",
+              "text": "Free"
+            },
+            ": gain 1 ",
+            {
+              "type": "rule",
+              "ref": "fire-charge",
+              "text": "Fire Charge"
+            },
+            " and create ",
+            {
+              "type": "card",
+              "ref": "fire_core",
+              "text": "Fire Core"
+            },
+            " in your hand if you don't already have one"
+          ]
+        }
+      ]
+    },
+    "jeonsulsa": {
+      "description": {
+        "segments": [
+          "Jeonsulsa are lightning users who have the ability to give electrical properties to Shinsu. They slowly chip, debuff, and immobilize enemy units."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            "when i'm deployed, heal 2 HP from or summon Conduit on the enemy backline"
+          ]
+        }
+      ]
+    },
+    "irregular": {
+      "description": {
+        "segments": [
+          "Irregulars are powerful individuals who were not selected by Headon and came from outside the Tower. They don't follow the rules of the Tower and so are unaltered by many card effects."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            "Unit passives and landmark rules have no effect on me."
+          ]
+        }
+      ]
+    },
+    "living-ignition-weapon": {
+      "description": {
+        "segments": [
+          "Living Ignition Weapons are living beings who were fused with a Weapon by the Workshop. They can use a plethora of equipments to adapt to any circumstance."
+        ]
+      },
+      "effect": [
+        {
+          "segments": [
+            "You may equip me as many times as you want with unique equipments."
+          ]
+        }
+      ]
+    }
+  },
+  "traits": {
+    "barrier": {
+      "description": {
+        "segments": [
+          "Negate all damage the first time I take damage each round"
+        ]
+      }
+    },
+    "beacon": {
+      "description": {
+        "segments": [
+          "Round start: Light Up x"
+        ]
+      }
+    },
+    "bloodthirsty": {
+      "description": {
+        "segments": [
+          "When I kill a unit, restore x HP"
+        ]
+      }
+    },
+    "dealer": {
+      "description": {
+        "segments": [
+          "Round start: draw x cards"
+        ]
+      }
+    },
+    "immune": {
+      "description": {
+        "segments": [
+          "I am immune to conditions"
+        ]
+      }
+    },
+    "last-one-standing": {
+      "description": {
+        "segments": [
+          "If I am the only ally unit, I have +x HP"
+        ]
+      }
+    },
+    "lethal": {
+      "description": {
+        "segments": [
+          "When I damage another unit, kill it"
+        ]
+      }
+    },
+    "pierce": {
+      "description": {
+        "segments": [
+          "When I kill a unit, Extinguish x"
+        ]
+      }
+    },
+    "reflect": {
+      "description": {
+        "segments": [
+          "When I take damage from a unit's ability, deal x damage back"
+        ]
+      }
+    },
+    "regenerate": {
+      "description": {
+        "segments": [
+          "Round end: heal me x HP"
+        ]
+      }
+    },
+    "resilient": {
+      "description": {
+        "segments": [
+          "I take -x damage from all sources"
+        ]
+      }
+    },
+    "ruthless": {
+      "description": {
+        "segments": [
+          "I deal +x damage if the enemy has less than 10 lighthouses"
+        ]
+      }
+    },
+    "sharpshooter": {
+      "description": {
+        "segments": [
+          "I can target any enemy unit"
+        ]
+      }
+    },
+    "strong": {
+      "description": {
+        "segments": [
+          "I deal +x damage"
+        ]
+      }
+    },
+    "taunt": {
+      "description": {
+        "segments": [
+          "Enemies are forced to target me if they can"
+        ]
+      }
+    },
+    "undying": {
+      "description": {
+        "segments": [
+          "When I would die, I survive with 1 HP instead"
+        ]
+      }
+    },
+    "vengeful": {
+      "description": {
+        "segments": [
+          "I deal +x damage if I am missing HP"
+        ]
+      }
+    }
+  },
+  "positions": {
+    "fisherman": {
+      "description": {
+        "segments": [
+          "Durable units that tank damage and deal consistent damage to enemies"
+        ]
+      },
+      "verboseDescription": {
+        "segments": [
+          "Fishermen are suited for close to medium-range combats and are the main offence of the team. They generally possess the most destructive power in man-to-man fights and tend to use Reel or Needles as their primary weapon."
+        ]
+      }
+    },
+    "spear-bearer": {
+      "description": {
+        "segments": [
+          "Long-range units designed to deal massive amounts of damage"
+        ]
+      },
+      "verboseDescription": {
+        "segments": [
+          "Spear Bearers attack from long distance and snipe the opponent using Spears as their primary weapon. They do not tend to be very powerful in a melee, but are very valuable due to their pinpoint attacking from a distance."
+        ]
+      }
+    },
+    "scout": {
+      "description": {
+        "segments": [
+          "Disruptive units that excel at applying debuffs, breaking synergy, and compromising the enemy backline"
+        ]
+      },
+      "verboseDescription": {
+        "segments": [
+          "Scouts move ahead of the group, observe the environment and situation, and aid the Fishermen as secondary offence. They are usually lightly armed for the intention to be agile and swift in movement and thinking."
+        ]
+      }
+    },
+    "light-bearer": {
+      "description": {
+        "segments": [
+          "Strategic support units specializing in utility, buffs, and lighthouses"
+        ]
+      },
+      "verboseDescription": {
+        "segments": [
+          "Lightbearers use Lighthouses to gain information on the battle or the surroundings. They gather information and formulate plans with the help of such information as they command their Lighthouse."
+        ]
+      }
+    },
+    "wave-controller": {
+      "description": {
+        "segments": [
+          "All rounder units that help their team by manipulating shinsu and providing shinsu-related buffs and debuffs"
+        ]
+      },
+      "verboseDescription": {
+        "segments": [
+          "Wave Controllers help their allies in battle by attacking the enemy or aiding the team by manipulating Shinsu. This position is rare compared to the others and requires an expert and specialized manipulation of Shinsu."
+        ]
+      }
+    }
+  },
+  "conditions": {
+    "blinded": {
+      "description": {
+        "segments": [
+          "My targets are chosen at random"
+        ]
+      }
+    },
+    "burned": {
+      "description": {
+        "segments": [
+          "Turn end: I take x damage"
+        ]
+      }
+    },
+    "cursed": {
+      "description": {
+        "segments": [
+          "Round end: I take x damage for each unique condition I have"
+        ]
+      }
+    },
+    "disabled": {
+      "description": {
+        "segments": [
+          "My passives have no effect"
+        ]
+      }
+    },
+    "doomed": {
+      "description": {
+        "segments": [
+          "I will die at the end of this round"
+        ]
+      }
+    },
+    "exhausted": {
+      "description": {
+        "segments": [
+          "I deal -x damage"
+        ]
+      }
+    },
+    "frozen": {
+      "description": {
+        "segments": [
+          "When I use an ability, spend all ally combat slots"
+        ]
+      }
+    },
+    "ghost": {
+      "description": {
+        "segments": [
+          "I don't prevent the enemy from targeting what's behind me"
+        ]
+      }
+    },
+    "heavy": {
+      "description": {
+        "segments": [
+          "My abilities cost +x shinsu"
+        ]
+      }
+    },
+    "poisoned": {
+      "description": {
+        "segments": [
+          "I take x damage when I use an ability"
+        ]
+      }
+    },
+    "rooted": {
+      "description": {
+        "segments": [
+          "I can't switch positions or be substituted"
+        ]
+      }
+    },
+    "stunned": {
+      "description": {
+        "segments": [
+          "I can't use abilities"
+        ]
+      }
+    },
+    "weak": {
+      "description": {
+        "segments": [
+          "I take +x damage from all sources"
+        ]
+      }
+    }
+  },
+  "glossary": {
+    "ranks": {
+      "title": {
+        "segments": [
+          "Rank"
+        ]
+      },
+      "concept": {
+        "segments": [
+          "How the person is ranked in the tower by the Ranking Administration Office."
+        ]
+      },
+      "regular": {
+        "description": {
+          "segments": [
+            "Someone chosen by Headon to climb the tower"
+          ]
+        }
+      },
+      "ranker": {
+        "description": {
+          "segments": [
+            "Someone who has reached the 134th floor of the tower"
+          ]
+        }
+      },
+      "high ranker": {
+        "description": {
+          "segments": [
+            "Someone at the top 1% of Rankers"
+          ]
+        }
+      }
+    },
+    "hud": {
+      "shinsuCard": {
+        "texts": [
+          {
+            "segments": [
+              "The cost of playing this card."
+            ]
+          }
+        ]
+      },
+      "shinsuBoard": {
+        "texts": [
+          {
+            "segments": [
+              "The foundational energy for life within the tower and the main resource of the Shinsu Duel."
+            ]
+          }
+        ]
+      },
+      "rechargedShinsu": {
+        "texts": [
+          {
+            "segments": [
+              "Shinsu that wasn't used last round."
+            ]
+          }
+        ]
+      },
+      "hpCurrent": {
+        "texts": [
+          {
+            "segments": [
+              "The current hit points of this unit."
+            ]
+          }
+        ]
+      },
+      "hpMax": {
+        "texts": [
+          {
+            "segments": [
+              "The maximum hit points of this unit."
+            ]
+          }
+        ]
+      },
+      "lighthouses": {
+        "texts": [
+          {
+            "segments": [
+              "Lighthouses are devices used as tactical command centers to gather intelligence and manipulate Shinsu on the battlefield. If you run out of lighthouses, you lose the game."
+            ]
+          }
+        ]
+      },
+      "fireCharges": {
+        "texts": [
+          {
+            "segments": [
+              "Gained by your Hwayeomsa units and consumed by Fire Core to create Incinerate cards."
+            ]
+          }
+        ]
+      }
+    },
+    "types": {
+      "unit": {
+        "description": {
+          "segments": [
+            "Characters, creatures, and locations from Tower of God. Units are deployed to the battlefield, have HP and a shinsu cost to deploy, and occupy one or more of the positions printed on their card."
+          ]
+        }
+      },
+      "skill": {
+        "description": {
+          "segments": [
+            "Single-use items, spells, and techniques that provide an immediate effect."
+          ]
+        }
+      },
+      "equipment": {
+        "description": {
+          "segments": [
+            "Equipments are attached to ally deployed units for enhancements. A unit can only hold 1 equipment at a time unless it is a Living Ignition Weapon."
+          ]
+        }
+      }
+    },
+    "kinds": {
+      "standard": {
+        "description": {
+          "segments": [
+            "Characters from Tower of God that occupy one of the 5 main battlefield positions."
+          ]
+        }
+      },
+      "shinheuh": {
+        "description": {
+          "segments": [
+            "Special units summoned by Animas to attack on their behalf. Using their abilities requires the Shinheuh combat slot only an Anima can create."
+          ]
+        }
+      },
+      "landmark": {
+        "description": {
+          "segments": [
+            "Special units that apply continuous battlefield rules to the entire board. They have no combat slot or abilities, and each player can only have 1 landmark deployed at a time."
+          ]
+        }
+      },
+      "conduit": {
+        "description": {
+          "segments": [
+            "A special construct summoned by Jeonsulsa onto the enemy backline."
+          ]
+        }
+      }
+    },
+    "concepts": {
+      "passives": {
+        "description": {
+          "segments": [
+            "Unit effects that are always active or trigger automatically."
+          ]
+        }
+      },
+      "evolve": {
+        "description": {
+          "segments": [
+            "Some units evolve when a listed trigger is met, becoming stronger and gaining new abilities."
+          ]
+        }
+      },
+      "ignition": {
+        "description": {
+          "segments": [
+            "Some equipment ignite when a listed trigger is met, upgrading their effects. They stay ignited until they leave the board."
+          ]
+        }
+      },
+      "requirements": {
+        "description": {
+          "segments": [
+            "Requirements must all be met for the card to be played."
+          ]
+        }
+      }
+    },
+    "terms": {
+      "shinsu": {
+        "description": {
+          "segments": [
+            "Shinsu is split into two pools: the Normal pool and the Recharged pool."
+          ]
+        }
+      },
+      "deck": {
+        "description": {
+          "segments": [
+            "A deck must have exactly 30 cards. A deck may contain up to 3 copies of each card. If at any point a player tries to draw and their deck is empty, they lose the game."
+          ]
+        }
+      },
+      "ability": {
+        "description": {
+          "segments": [
+            "An ability is an action a deployed unit can use during your turn. Abilities may cost shinsu."
+          ]
+        }
+      },
+      "bearer": {
+        "description": {
+          "segments": [
+            "The unit an equipment card is attached to."
+          ]
+        }
+      },
+      "fire-charge": {
+        "description": {
+          "segments": [
+            "A Hwayeomsa resource spent to create Incinerates."
+          ]
+        }
+      }
+    },
+    "triggers": {
+      "deploy": {
+        "description": {
+          "segments": [
+            "A unit entering the board in a position."
+          ]
+        }
+      },
+      "death": {
+        "description": {
+          "segments": [
+            "A unit leaving the board by dying."
+          ]
+        }
+      },
+      "summon": {
+        "description": {
+          "segments": [
+            "Appear on the board."
+          ]
+        }
+      },
+      "round-start": {
+        "description": {
+          "segments": [
+            "The first phase of a round."
+          ]
+        }
+      },
+      "round-end": {
+        "description": {
+          "segments": [
+            "The final phase of a round."
+          ]
+        }
+      },
+      "evolve": {
+        "description": {
+          "segments": [
+            "A unit transforming into its next evolution stage."
+          ]
+        }
+      },
+      "ignite": {
+        "description": {
+          "segments": [
+            "An equipment igniting when its trigger is met."
+          ]
+        }
+      },
+      "activation": {
+        "description": {
+          "segments": [
+            "The moment a unit uses an ability."
+          ]
+        }
+      }
+    },
+    "keywords": {
+      "quick": {
+        "description": {
+          "segments": [
+            "Playing a Quick card or using a Quick ability doesn't end your turn."
+          ]
+        }
+      },
+      "free": {
+        "description": {
+          "segments": [
+            "The ability doesn't require or expend a combat slot."
+          ]
+        }
+      },
+      "unreachable": {
+        "description": {
+          "segments": [
+            "You can't put me in your deck during deckbuilding."
+          ]
+        }
+      },
+      "charge": {
+        "description": {
+          "segments": [
+            "Regain normal shinsu."
+          ]
+        }
+      },
+      "cleanse": {
+        "description": {
+          "segments": [
+            "Remove all conditions."
+          ]
+        }
+      },
+      "compress": {
+        "description": {
+          "segments": [
+            "Reduce a card's shinsu cost."
+          ]
+        }
+      },
+      "disarm": {
+        "description": {
+          "segments": [
+            "Send a unit's equipment back to its owner's hand."
+          ]
+        }
+      },
+      "discard": {
+        "description": {
+          "segments": [
+            "Send a card directly to the discard pile without triggering on-death effects."
+          ]
+        }
+      },
+      "extinguish": {
+        "description": {
+          "segments": [
+            "Deal damage to enemy lighthouses."
+          ]
+        }
+      },
+      "light-up": {
+        "description": {
+          "segments": [
+            "Regain lighthouses."
+          ]
+        }
+      },
+      "reclaim": {
+        "description": {
+          "segments": [
+            "Put cards from your discard pile into your hand."
+          ]
+        }
+      },
+      "silence": {
+        "description": {
+          "segments": [
+            "Remove all of a unit's traits."
+          ]
+        }
+      },
+      "slay": {
+        "description": {
+          "segments": [
+            "Kill units."
+          ]
+        }
+      },
+      "steal": {
+        "description": {
+          "segments": [
+            "Take control of an enemy unit, moving it onto your battlefield."
+          ]
+        }
+      },
+      "spend": {
+        "description": {
+          "segments": [
+            "Spend shinsu."
+          ]
+        }
+      }
+    }
+  }
+}

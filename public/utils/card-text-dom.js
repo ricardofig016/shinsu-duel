@@ -16,10 +16,12 @@
  *   card links show a mini card preview (the card face rendered through
  *   card-vertical) with no tooltip chrome of its own, condition/trait/
  *   attribute/position links their name and
- *   description from the shared data catalogs, keyword/trigger/rule/rank links
- *   the glossary's keywords/triggers/terms/ranks copy, and series/affiliation
- *   links the list of cards in that group (computed from the card catalog). A
- *   fetch failure
+ *   compiled prose from the shared data catalogs (which carries its own
+ *   inline links), keyword/trigger/rule/rank links the glossary copy, and
+ *   series/affiliation links the list of cards in that group (computed from
+ *   the card catalog). Tooltip entries come from the shared builders in
+ *   `public/utils/tooltip-entries.js`, so catalog prose renders identically
+ *   wherever it appears. A fetch failure
  *   degrades to no tooltip; the link itself still renders.
  */
 
@@ -27,6 +29,7 @@ import { loadComponent, mountTooltip } from "/utils/component-util.js";
 import { getGlossary } from "/utils/glossary.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
 import { buildCardViewModel } from "/game/viewModels.js";
+import { buildCatalogTooltipEntries } from "/utils/tooltip-entries.js";
 import { openCardDetail, isCardDetailOpen, focusCardDetail } from "/components/card-detail-overlay/script.js";
 
 // The data catalogs a link's hover copy comes from; each fetches once per
@@ -121,7 +124,7 @@ async function buildLinkHover(segment) {
           : glossary?.terms;
     const entry = section?.[segment.ref];
     if (!entry) return null;
-    return { title: entry.name, entries: [{ text: entry.description, style: "italic" }] };
+    return { title: entry.name, entries: buildCatalogTooltipEntries(entry) };
   }
 
   if (segment.type === "rank") {
@@ -130,9 +133,9 @@ async function buildLinkHover(segment) {
       (rank) => rank.code === segment.ref || rank.name?.toLowerCase() === segment.ref
     );
     if (!entry) return null;
-    const entries = [{ text: entry.description, style: "italic" }];
+    const entries = buildCatalogTooltipEntries(entry);
     if (entry.minCost != null && entry.maxCost != null) {
-      entries.push({ text: `Cost range: ${entry.minCost}–${entry.maxCost}` });
+      entries.push({ text: `Cost range: ${entry.minCost}-${entry.maxCost}` });
     }
     return { title: entry.name, entries };
   }
@@ -142,10 +145,7 @@ async function buildLinkHover(segment) {
   const catalogs = await getDataCatalogs().catch(() => null);
   const entry = catalogs?.[segment.type]?.[segment.ref];
   if (!entry) return null;
-  const entries = [];
-  if (entry.description) entries.push({ text: entry.description, style: "italic" });
-  if (entry.effect) for (const line of entry.effect) entries.push({ text: line });
-  return { title: entry.name, entries };
+  return { title: entry.name, entries: buildCatalogTooltipEntries(entry) };
 }
 
 /**

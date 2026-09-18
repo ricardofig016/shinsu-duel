@@ -1,7 +1,6 @@
 import * as IdFactory from "./IdFactory.js";
-import affiliations from "../data/affiliations.json" with { type: "json" };import attributes from "../data/attributes.json" with { type: "json" };
-import positions from "../data/positions.json" with { type: "json" };
-import traits from "../data/traits.json" with { type: "json" };
+import affiliations from "../data/affiliations.json" with { type: "json" };
+import { getAttributes, getPositions, getTraits } from "./displayCatalogs.js";
 
 // Guide attributes carry their category in the tooltip title (RULES.md §Guide).
 const GUIDE_ATTRIBUTES = new Set(["silver-dwarf", "red-witch"]);
@@ -29,9 +28,9 @@ export default class Card {
     this.retainedEquipment = [];
 
     this.affiliations = this.#mapCodesToDictionary(cardData.affiliations || [], affiliations);
-    this.positions = this.#mapCodesToDictionary(cardData.positions || [], positions);
+    this.positions = this.#mapCodesToDictionary(cardData.positions || [], getPositions());
     this.#addArtworkPathToDictionary(this.positions, "positions");
-    this.traits = this.#mapTraitCodesToDictionary(cardData.traits || [], traits);
+    this.traits = this.#mapTraitCodesToDictionary(cardData.traits || [], getTraits());
     this.#addArtworkPathToDictionary(this.traits, "traits");
     this.traitValues = this.#extractTraitValues(cardData.traits || []); // numeric trait values
 
@@ -110,13 +109,20 @@ export default class Card {
       .map((entry) => entry.text);
   }
 
+  /**
+   * Attribute views in canonical catalog order. Name and prose come from the
+   * shared catalog projection, where prose fields carry compiled display
+   * segments (see `docs/COMPILED_CARD_DSL.md`), so an attribute tooltip keeps
+   * its inline links.
+   */
   #attributeViews() {
-    const catalogOrder = new Map(Object.keys(attributes).map((code, index) => [code, index]));
+    const catalog = getAttributes();
+    const catalogOrder = new Map(Object.keys(catalog).map((code, index) => [code, index]));
     const views = Object.fromEntries(
       this.attributes
-        .filter((code) => attributes[code] !== undefined)
+        .filter((code) => catalog[code] !== undefined)
         .sort((a, b) => catalogOrder.get(a) - catalogOrder.get(b))
-        .map((code) => [code, { ...attributes[code], title: attributeTitle(code, attributes[code]) }])
+        .map((code) => [code, { ...catalog[code], title: attributeTitle(code, catalog[code]) }])
     );
     return this.#addArtworkPathToDictionary(views, "attributes");
   }
@@ -125,10 +131,12 @@ export default class Card {
    * Client-facing card view. Printed information a player reads off the card
    * (rank, requirements, effect/rule texts, evolve/ignition triggers) is
    * projected as compiled display segments — the client renders and links
-   * them, it never re-parses authored text; looked-up metadata (attributes)
-   * is stamped with tooltip titles, descriptions, effect lines, and icon
-   * paths like the other code dictionaries. Hidden cards never reach the
-   * opponent because the state projection replaces them with empty views.
+   * them, it never re-parses authored text; looked-up metadata (attributes,
+   * traits, positions) is stamped from the shared catalog projection, which
+   * carries compiled display segments for its prose plus the icon paths, so
+   * link markup in shared copy reaches the client too. Hidden cards never
+   * reach the opponent because the state projection replaces them with empty
+   * views.
    */
   toSanitizedObject() {
     return {

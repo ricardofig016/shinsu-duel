@@ -449,7 +449,7 @@ describe("client state projections", () => {
     expect(ownView.conditions[0]).toMatchObject({
       key: "poisoned",
       name: "Poisoned",
-      description: "I take x damage when I use an ability",
+      description: { segments: ["I take x damage when I use an ability"] },
       iconPath: "/assets/icons/conditions/poisoned.png",
     });
 

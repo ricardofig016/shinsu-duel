@@ -149,7 +149,7 @@ describe("per-player decision and condition projections", () => {
         key: "poisoned",
         magnitude: 2,
         name: "Poisoned",
-        description: "I take x damage when I use an ability",
+        description: { segments: ["I take x damage when I use an ability"] },
         iconPath: "/assets/icons/conditions/poisoned.png",
       },
     ]);
@@ -162,7 +162,7 @@ describe("per-player decision and condition projections", () => {
         key: "poisoned",
         magnitude: 2,
         name: "Poisoned",
-        description: "I take x damage when I use an ability",
+        description: { segments: ["I take x damage when I use an ability"] },
         iconPath: "/assets/icons/conditions/poisoned.png",
       },
     ]);

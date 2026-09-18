@@ -99,11 +99,11 @@ describe("buildCatalogViews", () => {
   });
 
   test("ships the compiler's display segments and relatedCards stamp", () => {
-    const stamped = { ...skillEntry, relatedCards: [{ cardId: 10, kind: "mention" }] };
+    const stamped = { ...skillEntry, relatedCards: [{ cardId: 10, kind: "mentioned-in", peerCardId: 11 }] };
     const [view] = buildCatalogViews({ 11: stamped });
 
     expect(view.effects).toEqual([["Deal 2 damage."]]);
-    expect(view.relatedCards).toEqual([{ cardId: 10, kind: "mention" }]);
+    expect(view.relatedCards).toEqual([{ cardId: 10, kind: "mentioned-in", peerCardId: 11 }]);
   });
 
   test("throws no test-card views into orphan computations implicitly", () => {

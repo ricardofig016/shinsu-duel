@@ -4,8 +4,12 @@ import { RANKS } from "../../ranks.js";
 /**
  * Contract test for the tooltip glossary route: the frontend's only source of
  * tooltip copy outside the card views. Booted through the real express app so
- * routing, composition, and status behave exactly as in the browser.
+ * routing, composition, and status behave exactly as in the browser. Prose
+ * fields carry compiled display segments (see docs/COMPILED_CARD_DSL.md); the
+ * frontend renders or projects them, never re-parsing authored text.
  */
+
+const prose = { segments: expect.any(Array) };
 
 describe("GET /glossary: the client tooltip copy contract", () => {
   let harness;
@@ -25,22 +29,22 @@ describe("GET /glossary: the client tooltip copy contract", () => {
 
     for (const code of ["unit", "skill", "equipment"]) {
       expect(glossary.types[code]).toEqual(
-        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+        expect.objectContaining({ name: expect.any(String), description: prose })
       );
     }
     for (const code of ["standard", "shinheuh", "landmark", "conduit"]) {
       expect(glossary.kinds[code]).toEqual(
-        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+        expect.objectContaining({ name: expect.any(String), description: prose })
       );
     }
     for (const code of ["passives", "evolve", "ignition", "requirements"]) {
       expect(glossary.concepts[code]).toEqual(
-        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+        expect.objectContaining({ name: expect.any(String), description: prose })
       );
     }
     for (const code of ["shinsu", "deck", "ability", "bearer", "fire-charge"]) {
       expect(glossary.terms[code]).toEqual(
-        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+        expect.objectContaining({ name: expect.any(String), description: prose })
       );
     }
     for (const code of [
@@ -48,7 +52,7 @@ describe("GET /glossary: the client tooltip copy contract", () => {
       "evolve", "ignite", "activation",
     ]) {
       expect(glossary.triggers[code]).toEqual(
-        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+        expect.objectContaining({ name: expect.any(String), description: prose })
       );
     }
     for (const code of [
@@ -57,7 +61,7 @@ describe("GET /glossary: the client tooltip copy contract", () => {
       "slay", "steal", "spend",
     ]) {
       expect(glossary.keywords[code]).toEqual(
-        expect.objectContaining({ name: expect.any(String), description: expect.any(String) })
+        expect.objectContaining({ name: expect.any(String), description: prose })
       );
     }
     expect(glossary.keywords.ally).toBeUndefined();
@@ -74,6 +78,7 @@ describe("GET /glossary: the client tooltip copy contract", () => {
     ]) {
       expect(glossary.hud[code]).toBeTruthy();
     }
+    expect(glossary.hud.shinsuCard.texts).toEqual([prose]);
     expect(glossary.hud.deck.textTemplate).toContain("{count}");
     expect(typeof glossary.hud.chosenSuffix).toBe("string");
     for (const code of ["frontline", "backline"]) {
@@ -85,14 +90,14 @@ describe("GET /glossary: the client tooltip copy contract", () => {
     const response = await fetch(`${harness.baseUrl}/glossary/`);
     const { ranks } = await response.json();
 
-    expect(ranks.title).toBe("Rank");
-    expect(ranks.concept).toBeTruthy();
+    expect(ranks.title).toEqual(prose);
+    expect(ranks.concept).toEqual(expect.any(Array));
     expect(ranks.list.map((rank) => rank.code)).toEqual(Object.keys(RANKS));
     for (const rank of ranks.list) {
       expect(rank.name).toBe(RANKS[rank.code].name);
       expect(rank.minCost).toBe(RANKS[rank.code].minCost);
       expect(rank.maxCost).toBe(RANKS[rank.code].maxCost);
-      expect(rank.description).toBeTruthy();
+      expect(rank.description).toEqual(prose);
     }
   });
 });

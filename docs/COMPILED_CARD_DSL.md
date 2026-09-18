@@ -8,9 +8,10 @@ This document is the authoritative contract for **card effect authoring and the 
 
 Cards are authored as YAML in `data/cards/` and compiled to a single `server/data/cards.json`. That file is the **sole runtime data source** — the game engine never reads YAML directly.
 
-| Source                | Compiled                 | Validated by                                                                                                 |
-| --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `data/cards/**/*.yml` | `server/data/cards.json` | `scripts/card-validate.js` + `schemas/card.schema.json` (YAML) → `schemas/compiled-cards.schema.json` (JSON) |
+| Source                             | Compiled                                          | Validated by                                                                                                  |
+| ---------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `data/cards/**/*.yml`              | `server/data/cards.json`                          | `scripts/card-validate.js` + `schemas/card.schema.json` (YAML) → `schemas/compiled-cards.schema.json` (JSON)  |
+| `server/data/*.json` (catalogs)    | `server/data/compiled/catalog-copy.json` + `catalog-mentions.json` | the compiler's link-registry resolution (unresolvable targets are build errors)   |
 
 `schemas/dsl-catalog.json` is the canonical machine-readable inventory of every node, trigger, predicate, and deck-constraint discriminator, together with the runtime owner each category requires. The compiler validates types against it (see [Node catalog](#node-catalog)).
 
@@ -18,10 +19,10 @@ Commands:
 
 ```powershell
 npm run validate:cards   # validate YAML only
-npm run compile:cards    # validate YAML → compile → validate JSON → write
+npm run compile:cards    # validate YAML → compile → validate JSON → write cards.json + the compiled catalog copy
 ```
 
-**⚠️ Never edit `server/data/cards.json` by hand.** Always edit the YAML source and recompile. The compiled file is a build artifact.
+**⚠️ Never edit `server/data/cards.json` or `server/data/compiled/` by hand.** Always edit the YAML or catalog source and recompile. The compiled files are build artifacts.
 
 ---
 
@@ -100,12 +101,40 @@ The compiler tokenizes every `raw` at the node's own source path into ordered **
 
 Link target resolution lives in scripts/lib/card-link-registry.js, backed by `public/utils/card-text.js` — the single dependency-free definition of the segment format and its plain-text projection (`segmentsToPlainText`), shared by the build scripts, the server, and the client.
 
+### Shared catalog copy
+
+The five shared catalogs (`server/data/attributes.json`, `traits.json`, `positions.json`, `conditions.json`, `glossary.json`) are prose sources for copy that cards and tooltips display: attribute descriptions and effect lines, trait, position (including verbose), and condition descriptions, and the glossary's type, kind, concept, term, trigger, keyword, rank, and HUD copy. `affiliations.json` is out of scope — its copy is plain text and takes no links.
+
+Those fields take the same inline-link syntax as card `raw` text, and the compiler tokenizes them **with the pool link registry**, exactly as it tokenizes card prose. `npm run compile:cards` writes the card artifact and, from the same run:
+
+| Artifact                                            | Holds                                                                                                                                    |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/data/compiled/catalog-copy.json`            | `{ attributes, traits, positions, conditions, glossary }`. Each entry carries only its prose fields, compiled to the same segment shapes card prose uses: a lone field is `{ segments }`, and a field list (`attributes.*.effect`, `glossary.hud.*.texts`) is an array of `{ segments }`. The rank `concept` stays a flat segment array. |
+| `server/data/compiled/catalog-mentions.json`        | `{ [cardId]: ["slug:<card-slug>" \| "series:<code>", ...] }`, the `card` and series references whose mentions each card **carries or names** (see [Related cards](#related-cards)). |
+
+Both are byte-deterministic across runs: keys keep catalog order (the catalogs are code-ordered, not hash-ordered), object key insertion order is fixed by construction, and every artifact ends with a newline. `npm run compile:fixtures` writes the test-owned counterparts into `server/game/tests/fixtures/`, so no suite reads the shipped compiled copy.
+
+The copy catalogs are **authoring sources**: never overwrite one with compiled output, and never edit a compiled artifact by hand.
+
+#### Copy links and the pool
+
+A `card:` link in shared copy names a card of the **shipped pool**, which is where the copy is authored. Compilation therefore resolves the catalogs against the shipped pool's names and series; a compile that runs over a smaller pool (fixtures, or a test-authored source directory) passes that pool as the first registry and the shipped pool as its fallback, so card text resolves against the pool in hand while shared copy still resolves against the pool it belongs to. Catalog copy is the only text compiled twice, once per pool.
+
+#### Mechanics stay in the authoring files
+
+The engine keeps reading `server/data/*.json` for codes, lines, colors, icon paths, and numeric flags. `server/game/displayCatalogs.js` is the single boundary: it projects an authoring catalog with the compiled prose overlaid, so a served entry carries exactly the shape it always did apart from its prose becoming segments. Display paths consume that projection — `Card.toSanitizedObject` (attributes, printed traits, positions), the `GameState` condition views, the content routes (`GET /attributes`, `/conditions`, `/traits`, `/positions`, `/glossary`), and the client projection `public/game/viewModels.js`. Anything that needs plain text projects it with `segmentsToPlainText` (for example `public/utils/card-browse.js` search text over attribute and position descriptions).
+
 ### Related cards
 
-Every compiled card carries an optional **`relatedCards`** stamp — the
+Every compiled card carries an optional **`relatedCards`** stamp, the
 deduplicated, recursively closed, deterministically ordered set of cards it
-relates to, stamped at compile time (scripts/lib/card-relations.js). The
-relation kinds, closure order, dedup rule, and data sources are owned by
+relates to, stamped at compile time (scripts/lib/card-relations.js). Each
+entry is `{ cardId, kind, peerCardId }`, plus `seriesCode` on the two series
+kinds: `kind` is directional and states the tagged card's own relation to the
+peer. A card inherits the mentions of any shared copy it carries or names
+(scripts/lib/catalog-mentions.js), recorded as if the copy were its own, so the
+peer of an inherited mention is the card itself. The kinds, closure order,
+dedup rule, and data sources are owned by
 [CARD_RELATIONS.md](./CARD_RELATIONS.md).
 
 ### Card metadata

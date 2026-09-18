@@ -105,15 +105,21 @@ function parseLink(body, context, registry) {
 }
 
 /**
- * Plain-text projection of display segments: link segments collapse to their
- * display text, so the result is exactly what a player reads.
+ * Plain-text projection of display text: link segments collapse to their
+ * display text, so the result is exactly what a player reads. Accepted forms
+ * are segments themselves, a compiled prose field (`{ segments }`), or plain
+ * text, so a caller can project any of them.
  *
- * @param {Array<string | { text: string }> | null | undefined} segments
+ * @param {string | Array<string | { text: string }> | { segments: Array } | null | undefined} value
  * @returns {string}
  */
-export function segmentsToPlainText(segments) {
-  if (!Array.isArray(segments)) return "";
-  return segments
-    .map((segment) => (typeof segment === "string" ? segment : segment.text))
-    .join("");
+export function segmentsToPlainText(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    return value
+      .map((segment) => (typeof segment === "string" ? segment : segment.text))
+      .join("");
+  }
+  if (value && Array.isArray(value.segments)) return segmentsToPlainText(value.segments);
+  return "";
 }

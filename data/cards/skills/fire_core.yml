@@ -12,4 +12,4 @@ effects:
     card:
       type: skill
       series: incinerate
-    raw: "[[keyword:Spend]] [[rule:Fire Charge|Fire Charges]] to create the highest affordable [[series:Incinerate]] in your hand"
+    raw: "Spend [[rule:Fire Charge|Fire Charges]] to create the highest affordable [[series:Incinerate]] in your hand"

@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
@@ -9,42 +10,35 @@ import Ajv from "ajv";
 import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
 import { toCode } from "./lib/code.js";
+import { ATTRIBUTE_CODES, normalizeAttribute as normalizeAttributeCode } from "./lib/attribute-code.js";
+import { POSITION_CODES, normalizePosition as normalizePositionCode } from "./lib/position-code.js";
 import { MAX_STAGE, MIN_STAGE, parseStage, stageName } from "./lib/stage-name.js";
 import { tokenizeSegments } from "../public/utils/card-text.js";
 import { createPoolLinkRegistry } from "./lib/card-link-registry.js";
 import { stampRelatedCards } from "./lib/card-relations.js";
+import { compileCatalogCopy, serializeArtifact } from "./lib/compiled-catalog.js";
+import { buildCatalogMentions, packageCatalogMentions } from "./lib/catalog-mentions.js";
 import dslCatalog from "../schemas/dsl-catalog.json" with { type: "json" };
+import attributesCatalog from "../server/data/attributes.json" with { type: "json" };
+import traitsCatalog from "../server/data/traits.json" with { type: "json" };
+import positionsCatalog from "../server/data/positions.json" with { type: "json" };
+import conditionsCatalog from "../server/data/conditions.json" with { type: "json" };
+import glossaryCatalog from "../server/data/glossary.json" with { type: "json" };
 
 const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const cardsDirectory = path.join(projectRoot, "data", "cards");
 const outputPath = path.join(projectRoot, "server", "data", "cards.json");
+const catalogCopyPath = path.join(projectRoot, "server", "data", "compiled", "catalog-copy.json");
+const catalogMentionsPath = path.join(projectRoot, "server", "data", "compiled", "catalog-mentions.json");
 const iconsDir = path.join(projectRoot, "public", "assets", "icons");
 const artworksDir = path.join(projectRoot, "public", "assets", "images", "artworks");
 const validatorPath = path.join(projectRoot, "scripts", "card-validate.js");
 const compiledSchemaPath = path.join(projectRoot, "schemas", "compiled-cards.schema.json");
 
 // ── Code mapping helpers ────────────────────────────────────────────────────
-
-// Position display name → internal code
-const positionCodeMap = {
-  "fisherman": "fisherman",
-  "light bearer": "light-bearer",
-  "scout": "scout",
-  "spear bearer": "spear-bearer",
-  "wave controller": "wave-controller",
-};
-
-// Attribute display name → internal code
-const attributeCodeMap = {
-  "anima": "anima",
-  "silver dwarf": "silver-dwarf",
-  "red witch": "red-witch",
-  "hwayeomsa": "hwayeomsa",
-  "jeonsulsa": "jeonsulsa",
-  "irregular": "irregular",
-  "living ignition weapon": "living-ignition-weapon",
-};
+// Position and attribute display names normalize to their catalog codes
+// through the shared maps in ./lib, which the relation resolver uses too.
 
 // ── Trait parsing ───────────────────────────────────────────────────────────
 
@@ -112,12 +106,6 @@ export function normalizeKeyword(value) {
   throw new Error(`keywords: expected a string or { code, raw } object, got ${JSON.stringify(value)}`);
 }
 
-function normalizePosition(value) {
-  if (value === null) return null;
-  const str = String(value);
-  return positionCodeMap[str.toLowerCase()] || toCode(str);
-}
-
 // Position filters in target/predicate descriptors map display names to codes.
 // The special kinds (shinheuh/landmark/conduit) are filtered via `kind`/`line`,
 // not `position`, so position filters only ever reference the five main positions.
@@ -131,10 +119,10 @@ function normalizeAffiliation(value) {
   return toCode(value);
 }
 
-function normalizeAttribute(value) {
-  const str = String(value);
-  return attributeCodeMap[str.toLowerCase()] || toCode(str);
-}
+// Position and attribute display names normalize through the shared maps in
+// ./lib, which the relation resolver uses too.
+const normalizePosition = (value) => normalizePositionCode(value);
+const normalizeAttribute = (value) => normalizeAttributeCode(value);
 
 function normalizeRank(value) {
   // Ranks keep their space ("high ranker"), unlike dashed codes.
@@ -160,8 +148,50 @@ export function normalizeList(value, fn) {
 // One registry per compilation pool, built from the pool's names and series,
 // backs every text-link tokenization below.
 
-function linkRegistryFor(cards) {
-  return createPoolLinkRegistry(cards);
+function linkRegistryFor(cards, fallback = null) {
+  return createPoolLinkRegistry(cards, fallback);
+}
+
+let shippedRegistry = null;
+
+/**
+ * Link registry for the shipped card pool. Shared catalog copy is authored
+ * against that pool, so its `card:` links resolve here even when the cards
+ * being compiled belong to a different pool.
+ */
+export function shippedLinkRegistry() {
+  if (!shippedRegistry) {
+    const shipped = JSON.parse(fsSync.readFileSync(outputPath, "utf-8"));
+    shippedRegistry = createPoolLinkRegistry(Object.values(shipped));
+  }
+  return shippedRegistry;
+}
+
+/**
+ * Compile the shared catalog copy that card prose and tooltips display.
+ *
+ * The catalogs are the authoring source; the compiled artifact is a build
+ * product that is never read back into a source file. Their `card:` links
+ * name cards from the **shipped pool**, which is where the copy is authored,
+ * so the registry carries the shipped pool's names and series and a caller
+ * that compiles a different pool (fixtures) merges that pool in. Compiling
+ * them against a fixture-only pool would fail on every shipped reference.
+ *
+ * @param {{ resolve: (type: string, ref: string) => object | null }} [registry]
+ *   pool link registry; defaults to the shipped pool
+ * @returns {object} compiled catalog copy artifact
+ */
+export function compileSharedCatalogCopy(registry = shippedLinkRegistry()) {
+  return compileCatalogCopy(
+    {
+      attributes: attributesCatalog,
+      traits: traitsCatalog,
+      positions: positionsCatalog,
+      conditions: conditionsCatalog,
+      glossary: glossaryCatalog,
+    },
+    registry
+  );
 }
 
 export function normalizeEffectObject(obj, context, linkRegistry = null) {
@@ -461,7 +491,7 @@ export function compileCard(rawCard, allCards, linkRegistry = linkRegistryFor([r
     compiled.line = rawCard.line ? normalizeLine(rawCard.line) : null;
 
     // Positions — only the five main positions; special kinds have none.
-    compiled.positions = (rawCard.positions || []).map((p) => positionCodeMap[p.toLowerCase()] || toCode(p));
+    compiled.positions = (rawCard.positions || []).map((p) => POSITION_CODES[p.toLowerCase()] || toCode(p));
     compiled.rules = compileEntries(rawCard.rules, `${cardName}.rules`, linkRegistry);
 
     // Traits — { code, value? } objects (value only present for numeric traits)
@@ -475,7 +505,7 @@ export function compileCard(rawCard, allCards, linkRegistry = linkRegistryFor([r
 
     // Attributes
     compiled.attributes = (rawCard.attributes || []).map(
-      (a) => attributeCodeMap[a.toLowerCase()] || toCode(a)
+      (a) => ATTRIBUTE_CODES[a.toLowerCase()] || toCode(a)
     );
 
     // Affiliations
@@ -708,8 +738,10 @@ const colors = {
  * evolve/ignite lookups and any by-name reference ambiguous, and one keyed
  * artifact entry would silently shadow the other.
  *
- * @returns {Promise<{ output: object, cards: object[] }>} `output` is the
- *   cardId-keyed artifact object; `cards` is the same data as a flat array.
+ * @returns {Promise<{ output: object, cards: object[], catalogCopy: object, catalogMentions: object }>}
+ *   `output` is the cardId-keyed artifact object; `cards` is the same data as
+ *   a flat array; the catalog fields are the compiled shared copy and the
+ *   per-card inherited mentions they resolve to.
  */
 export async function compileCards(options = {}) {
   const {
@@ -760,8 +792,11 @@ export async function compileCards(options = {}) {
 
   // 4. First pass: compile all cards with temporary IDs. The link registry
   //    is built once from the whole pool so every text link resolves against
-  //    every card and series in it.
-  const linkRegistry = linkRegistryFor(rawCards);
+  //    every card and series in it. Shared catalog copy compiles against the
+  //    shipped pool as well: its `card:` links name shipped cards, so a
+  //    compile over a smaller pool (a test-authored source directory) still
+  //    resolves them.
+  const linkRegistry = linkRegistryFor(rawCards, shippedLinkRegistry());
   const compiledCards = rawCards.map((raw) => compileCard(raw, rawCards.map((r) => ({
     name: r.name,
     cardId: r._tempId,
@@ -831,8 +866,16 @@ export async function compileCards(options = {}) {
 
   // 5b. Stamp relations. Text links and machine-readable references were
   //     resolved during compilation; the recursive closure needs final
-  //     cardIds, so it runs once every cross-reference is in place.
-  stampRelatedCards(compiledCards);
+  //     cardIds, so it runs once every cross-reference is in place. A card
+  //     also inherits the mentions of the shared catalog copy it carries or
+  //     names (attributes, printed traits, positions, conditions it applies,
+  //     glossary entries it links), which joins the mention edge as if the
+  //     copy were its own.
+  const catalogCopy = compileSharedCatalogCopy(linkRegistry);
+  const catalogMentions = packageCatalogMentions(compiledCards, rawCards, {
+    mentions: buildCatalogMentions(catalogCopy),
+  });
+  stampRelatedCards(compiledCards, catalogMentions);
 
   // 6. Clean up temporary fields
   const finalCards = compiledCards.map(cleanCompiled);
@@ -873,7 +916,7 @@ export async function compileCards(options = {}) {
     throw new Error(`Compiled card data failed ${path.relative(projectRoot, schemaPath)}:\n  ${details}`);
   }
 
-  return { output, cards: finalCards };
+  return { output, cards: finalCards, catalogCopy, catalogMentions };
 }
 
 export async function compileAll(options = {}) {
@@ -882,6 +925,12 @@ export async function compileAll(options = {}) {
     outputPath: outPath = outputPath,
     runValidate = true,
     artworksDirectory: artDir = artworksDir,
+    // The compiled catalog copy is a peer artifact of the card catalog, so the
+    // two are written from the same run. A caller that redirects `outputPath`
+    // (a test compiling into a temp directory) must redirect these too, or it
+    // would overwrite the checked-in artifacts.
+    catalogCopyPath: copyPath = catalogCopyPath,
+    catalogMentionsPath: mentionsPath = catalogMentionsPath,
   } = options;
 
   // Source YAML is the only authoring input. Never compile unvalidated cards.
@@ -892,15 +941,20 @@ export async function compileAll(options = {}) {
     });
   }
 
-  const { output, cards: finalCards } = await compileCards({
+  const { output, cards: finalCards, catalogCopy, catalogMentions } = await compileCards({
     cardsDirectory: cardsDir,
     compiledSchemaPath: options.compiledSchemaPath,
     artworksDirectory: artDir,
   });
 
-  // Write output
+  // Write output. The compiled catalog copy is a peer artifact of the card
+  // catalog and ships from the same run, so the two can never drift.
   await fs.mkdir(path.dirname(outPath), { recursive: true });
   await fs.writeFile(outPath, JSON.stringify(output, null, 2) + "\n", "utf-8");
+
+  await fs.mkdir(path.dirname(copyPath), { recursive: true });
+  await fs.writeFile(copyPath, serializeArtifact(catalogCopy), "utf-8");
+  await fs.writeFile(mentionsPath, serializeArtifact(catalogMentions), "utf-8");
 
   // Check icons
   const missingIcons = await checkIcons(finalCards);
@@ -910,6 +964,10 @@ export async function compileAll(options = {}) {
 
   // Report
   console.log(`${colors.green}✓ Compiled ${finalCards.length} cards to ${path.relative(projectRoot, outPath)}${colors.reset}`);
+  console.log(
+    `  Shared catalog copy: ${path.relative(projectRoot, copyPath)} ` +
+      `(${Object.keys(catalogMentions).length} cards inherit mentions)`
+  );
 
   const units = finalCards.filter((c) => c.type === "unit").length;
   const skills = finalCards.filter((c) => c.type === "skill").length;

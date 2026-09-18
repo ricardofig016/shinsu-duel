@@ -5,6 +5,8 @@ import Ajv from "ajv";
 import yaml from "js-yaml";
 
 import cardsData from "../../../data/cards.json" with { type: "json" };
+import compiledCatalogCopy from "../../../data/compiled/catalog-copy.json" with { type: "json" };
+import compiledCatalogMentions from "../../../data/compiled/catalog-mentions.json" with { type: "json" };
 import compiledSchema from "../../../../schemas/compiled-cards.schema.json" with { type: "json" };
 import sourceSchema from "../../../../schemas/card.schema.json" with { type: "json" };
 import dslCatalog from "../../../../schemas/dsl-catalog.json" with { type: "json" };
@@ -201,6 +203,20 @@ describe("card data audit (source/artifact identity)", () => {
   test("a fresh in-memory compile equals the checked-in artifact", async () => {
     const { output } = await compileCards();
     expect(canonicalize(output)).toEqual(canonicalize(cardsData));
+  });
+
+  test("a fresh compile reproduces the checked-in shared catalog copy", async () => {
+    const { catalogCopy, catalogMentions } = await compileCards();
+    expect(canonicalize(catalogCopy)).toEqual(canonicalize(compiledCatalogCopy));
+    expect(canonicalize(catalogMentions)).toEqual(canonicalize(compiledCatalogMentions));
+  });
+
+  test("compiling twice produces byte-identical card and catalog artifacts", async () => {
+    const first = await compileCards();
+    const second = await compileCards();
+    expect(JSON.stringify(second.output)).toBe(JSON.stringify(first.output));
+    expect(JSON.stringify(second.catalogCopy)).toBe(JSON.stringify(first.catalogCopy));
+    expect(JSON.stringify(second.catalogMentions)).toBe(JSON.stringify(first.catalogMentions));
   });
 
   test("card identity is unique and follows the stable name-sorted cardId contract", () => {

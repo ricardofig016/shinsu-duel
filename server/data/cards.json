@@ -43,7 +43,8 @@
     "relatedCards": [
       {
         "cardId": 1,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 0
       }
     ]
   },
@@ -85,7 +86,8 @@
     "relatedCards": [
       {
         "cardId": 0,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 1
       }
     ]
   },
@@ -251,7 +253,58 @@
     ],
     "abilities": [],
     "passives": [],
-    "slug": "test_unit"
+    "slug": "test_unit",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 4
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
+      }
+    ]
   },
   "5": {
     "cardId": 5,
@@ -740,11 +793,13 @@
     "relatedCards": [
       {
         "cardId": 68,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 6
       },
       {
         "cardId": 75,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 6
       }
     ],
     "artworkPath": "/assets/images/artworks/akryung.png"
@@ -936,43 +991,57 @@
     "relatedCards": [
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 86,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 85,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 86
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       },
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 85
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       }
     ],
     "artworkPath": "/assets/images/artworks/baang.png"
@@ -1103,23 +1172,28 @@
     "relatedCards": [
       {
         "cardId": 10,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 9
       },
       {
         "cardId": 16,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 17,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 18,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 65,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       }
     ],
     "artworkPath": "/assets/images/artworks/beta.png"
@@ -1188,23 +1262,28 @@
     "relatedCards": [
       {
         "cardId": 9,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10
       },
       {
         "cardId": 16,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 17,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 18,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 65,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       }
     ],
     "artworkPath": "/assets/images/artworks/beta_ii.png"
@@ -1293,7 +1372,8 @@
     "relatedCards": [
       {
         "cardId": 97,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 12
       }
     ],
     "artworkPath": "/assets/images/artworks/bull.png"
@@ -1525,27 +1605,36 @@
     "relatedCards": [
       {
         "cardId": 56,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 76,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 84,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 51,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 52,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 73,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ],
     "artworkPath": "/assets/images/artworks/conduit.png"
@@ -1597,23 +1686,28 @@
     "relatedCards": [
       {
         "cardId": 9,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 16
       },
       {
         "cardId": 10,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 9
       },
       {
         "cardId": 17,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 18,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 65,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       }
     ],
     "artworkPath": "/assets/images/artworks/dionysos_arms.png"
@@ -1666,23 +1760,28 @@
     "relatedCards": [
       {
         "cardId": 9,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 17
       },
       {
         "cardId": 10,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 9
       },
       {
         "cardId": 16,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 18,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 65,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       }
     ],
     "artworkPath": "/assets/images/artworks/dionysos_legs.png"
@@ -1727,23 +1826,28 @@
     "relatedCards": [
       {
         "cardId": 9,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 18
       },
       {
         "cardId": 10,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 9
       },
       {
         "cardId": 16,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 17,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 65,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       }
     ],
     "artworkPath": "/assets/images/artworks/dionysos_wings.png"
@@ -1977,43 +2081,53 @@
     "relatedCards": [
       {
         "cardId": 26,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 21
       },
       {
         "cardId": 28,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 21
       },
       {
         "cardId": 74,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 21
       },
       {
         "cardId": 83,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 21
       },
       {
         "cardId": 85,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 21
       },
       {
         "cardId": 86,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 85
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/enryus_thorn.png"
@@ -2109,7 +2223,8 @@
     "relatedCards": [
       {
         "cardId": 29,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 22
       }
     ],
     "artworkPath": "/assets/images/artworks/evan_edrok.png"
@@ -2189,6 +2304,57 @@
       }
     ],
     "slug": "evankhell",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 23
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
+      }
+    ],
     "artworkPath": "/assets/images/artworks/evankhell.png"
   },
   "24": {
@@ -2238,6 +2404,57 @@
       }
     ],
     "slug": "fiery_elephant",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 24
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
+      }
+    ],
     "artworkPath": "/assets/images/artworks/fiery_elephant.png"
   },
   "25": {
@@ -2277,12 +2494,7 @@
           "series": "incinerate"
         },
         "text": [
-          {
-            "type": "keyword",
-            "ref": "spend",
-            "text": "Spend"
-          },
-          " ",
+          "Spend ",
           {
             "type": "rule",
             "ref": "fire-charge",
@@ -2302,19 +2514,52 @@
     "relatedCards": [
       {
         "cardId": 40,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 41,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 42,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 43,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/fire_core.png"
@@ -2419,43 +2664,56 @@
     "relatedCards": [
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 26
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 26,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 26,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 26,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 85,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 26
       },
       {
         "cardId": 86,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 85
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/first_thorn_fragment.png"
@@ -2590,43 +2848,56 @@
     "relatedCards": [
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 28
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 28,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 28,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 28,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 85,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 28
       },
       {
         "cardId": 86,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 85
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/fourth_thorn_fragment.png"
@@ -2664,7 +2935,8 @@
     "relatedCards": [
       {
         "cardId": 22,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 29
       }
     ],
     "artworkPath": "/assets/images/artworks/frog_fisher.png"
@@ -2807,7 +3079,8 @@
     "relatedCards": [
       {
         "cardId": 32,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 31
       }
     ],
     "artworkPath": "/assets/images/artworks/ha_yuri_zahard.png"
@@ -2941,7 +3214,8 @@
     "relatedCards": [
       {
         "cardId": 31,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 32
       }
     ],
     "artworkPath": "/assets/images/artworks/ha_yuri_zahard_ii.png"
@@ -3004,6 +3278,57 @@
       }
     ],
     "slug": "healing_flames",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 33
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
+      }
+    ],
     "artworkPath": "/assets/images/artworks/healing_flames.png"
   },
   "34": {
@@ -3152,7 +3477,8 @@
     "relatedCards": [
       {
         "cardId": 93,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 36
       }
     ],
     "artworkPath": "/assets/images/artworks/hon_akraptor.png"
@@ -3385,11 +3711,13 @@
     "relatedCards": [
       {
         "cardId": 49,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 39
       },
       {
         "cardId": 50,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 49
       }
     ]
   },
@@ -3441,19 +3769,51 @@
     "relatedCards": [
       {
         "cardId": 25,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 40
       },
       {
         "cardId": 41,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 40,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 42,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 40,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 43,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 40,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_i.png"
@@ -3507,19 +3867,51 @@
     "relatedCards": [
       {
         "cardId": 25,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 41
       },
       {
         "cardId": 40,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 41,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 42,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 41,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 43,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 41,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_ii.png"
@@ -3593,19 +3985,51 @@
     "relatedCards": [
       {
         "cardId": 25,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 42
       },
       {
         "cardId": 40,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 42,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 41,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 42,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 43,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 42,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_iii.png"
@@ -3679,19 +4103,51 @@
     "relatedCards": [
       {
         "cardId": 25,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 43
       },
       {
         "cardId": 40,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 43,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 41,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 43,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 42,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 43,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 95,
+        "kind": "mentions",
+        "peerCardId": 25
       }
     ],
     "artworkPath": "/assets/images/artworks/incinerate_iv.png"
@@ -4036,23 +4492,28 @@
     "relatedCards": [
       {
         "cardId": 47,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 46
       },
       {
         "cardId": 48,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 66,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 77,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 64,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       }
     ],
     "artworkPath": "/assets/images/artworks/karaka.png"
@@ -4204,23 +4665,28 @@
     "relatedCards": [
       {
         "cardId": 46,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 47
       },
       {
         "cardId": 48,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 66,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 77,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 64,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       }
     ],
     "artworkPath": "/assets/images/artworks/karaka_ii.png"
@@ -4289,23 +4755,28 @@
     "relatedCards": [
       {
         "cardId": 46,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 48
       },
       {
         "cardId": 47,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 46
       },
       {
         "cardId": 66,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 77,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 64,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       }
     ]
   },
@@ -4370,11 +4841,13 @@
     "relatedCards": [
       {
         "cardId": 50,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 49
       },
       {
         "cardId": 39,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 49
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_aguero_agnis.png"
@@ -4476,11 +4949,13 @@
     "relatedCards": [
       {
         "cardId": 49,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 50
       },
       {
         "cardId": 39,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 49
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_aguero_agnis_ii.png"
@@ -4574,27 +5049,36 @@
     "relatedCards": [
       {
         "cardId": 52,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 51
       },
       {
         "cardId": 15,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       },
       {
         "cardId": 73,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       },
       {
         "cardId": 56,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 76,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 84,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_ran.png"
@@ -4718,27 +5202,36 @@
     "relatedCards": [
       {
         "cardId": 51,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 52
       },
       {
         "cardId": 15,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 52
       },
       {
         "cardId": 73,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 52
       },
       {
         "cardId": 56,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 76,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 84,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       }
     ],
     "artworkPath": "/assets/images/artworks/khun_ran_ii.png"
@@ -4802,7 +5295,8 @@
     "relatedCards": [
       {
         "cardId": 54,
-        "kind": "ignition"
+        "kind": "ignited-from",
+        "peerCardId": 53
       }
     ]
   },
@@ -4880,7 +5374,8 @@
     "relatedCards": [
       {
         "cardId": 53,
-        "kind": "ignition"
+        "kind": "ignites-into",
+        "peerCardId": 54
       }
     ]
   },
@@ -5010,27 +5505,35 @@
     "relatedCards": [
       {
         "cardId": 15,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 56
       },
       {
         "cardId": 76,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 56,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 84,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 56,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 51,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 52,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 73,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ]
   },
@@ -5433,7 +5936,8 @@
     "relatedCards": [
       {
         "cardId": 62,
-        "kind": "ignition"
+        "kind": "ignited-from",
+        "peerCardId": 61
       }
     ],
     "artworkPath": "/assets/images/artworks/narumada.png"
@@ -5506,7 +6010,8 @@
     "relatedCards": [
       {
         "cardId": 61,
-        "kind": "ignition"
+        "kind": "ignites-into",
+        "peerCardId": 62
       }
     ],
     "artworkPath": "/assets/images/artworks/narumada_ignited.png"
@@ -5711,23 +6216,28 @@
     "relatedCards": [
       {
         "cardId": 66,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 64
       },
       {
         "cardId": 46,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       },
       {
         "cardId": 47,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 46
       },
       {
         "cardId": 48,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 77,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       }
     ]
   },
@@ -5771,23 +6281,28 @@
     "relatedCards": [
       {
         "cardId": 9,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 65
       },
       {
         "cardId": 10,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 9
       },
       {
         "cardId": 16,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 17,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       },
       {
         "cardId": 18,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 9
       }
     ],
     "artworkPath": "/assets/images/artworks/phobos.png"
@@ -5878,23 +6393,28 @@
     "relatedCards": [
       {
         "cardId": 46,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       },
       {
         "cardId": 64,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       },
       {
         "cardId": 47,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 46
       },
       {
         "cardId": 48,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 77,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       }
     ]
   },
@@ -5981,43 +6501,57 @@
     "relatedCards": [
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 67
       },
       {
         "cardId": 86,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 85,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 86
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       },
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 85
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       }
     ],
     "artworkPath": "/assets/images/artworks/quaetro_blitz.png"
@@ -6115,11 +6649,13 @@
     "relatedCards": [
       {
         "cardId": 6,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 68
       },
       {
         "cardId": 75,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 6
       }
     ]
   },
@@ -6199,11 +6735,13 @@
     "relatedCards": [
       {
         "cardId": 70,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 69
       },
       {
         "cardId": 71,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 70
       }
     ],
     "artworkPath": "/assets/images/artworks/rak_wraithraiser.png"
@@ -6317,11 +6855,13 @@
     "relatedCards": [
       {
         "cardId": 69,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 70
       },
       {
         "cardId": 71,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 70
       }
     ],
     "artworkPath": "/assets/images/artworks/rak_wraithraiser_ii.png"
@@ -6403,11 +6943,13 @@
     "relatedCards": [
       {
         "cardId": 70,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 71
       },
       {
         "cardId": 69,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 70
       }
     ],
     "artworkPath": "/assets/images/artworks/rak_wraithraiser_iii.png"
@@ -6485,27 +7027,36 @@
     "relatedCards": [
       {
         "cardId": 51,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 73
       },
       {
         "cardId": 52,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 73
       },
       {
         "cardId": 15,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       },
       {
         "cardId": 56,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 76,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 84,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 15,
+        "seriesCode": "jeonsul-baang"
       }
     ],
     "artworkPath": "/assets/images/artworks/redan.png"
@@ -6610,43 +7161,56 @@
     "relatedCards": [
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 74
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 74,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 74,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 74,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 85,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 74
       },
       {
         "cardId": 86,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 85
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/second_thorn_fragment.png"
@@ -6704,11 +7268,13 @@
     "relatedCards": [
       {
         "cardId": 6,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 75
       },
       {
         "cardId": 68,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 6
       }
     ],
     "artworkPath": "/assets/images/artworks/shinwonryu.png"
@@ -6743,27 +7309,35 @@
     "relatedCards": [
       {
         "cardId": 15,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 76
       },
       {
         "cardId": 56,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 76,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 84,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 76,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 51,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 52,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 73,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ]
   },
@@ -6837,23 +7411,28 @@
     "relatedCards": [
       {
         "cardId": 46,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 77
       },
       {
         "cardId": 47,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 46
       },
       {
         "cardId": 48,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 66,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 46
       },
       {
         "cardId": 64,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 66
       }
     ]
   },
@@ -6938,7 +7517,8 @@
     "relatedCards": [
       {
         "cardId": 81,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 78
       }
     ]
   },
@@ -6983,43 +7563,57 @@
     "relatedCards": [
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 79
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 86,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 85,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 86
       },
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 85
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       }
     ]
   },
@@ -7178,7 +7772,8 @@
     "relatedCards": [
       {
         "cardId": 78,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 81
       }
     ]
   },
@@ -7364,43 +7959,56 @@
     "relatedCards": [
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 83
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 83,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 83,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 83,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 85,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 83
       },
       {
         "cardId": 86,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 85
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/third_thorn_fragment.png"
@@ -7435,27 +8043,35 @@
     "relatedCards": [
       {
         "cardId": 15,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 84
       },
       {
         "cardId": 56,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 84,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 76,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 84,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 51,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 52,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 15
       },
       {
         "cardId": 73,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 51
       }
     ]
   },
@@ -7522,43 +8138,57 @@
     "relatedCards": [
       {
         "cardId": 86,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 85
       },
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 85
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/twenty_fifth_baam.png"
@@ -7639,43 +8269,57 @@
     "relatedCards": [
       {
         "cardId": 85,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 86
       },
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 86
       },
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 85
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 96,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       }
     ],
     "artworkPath": "/assets/images/artworks/twenty_fifth_baam_ii.png"
@@ -7943,7 +8587,8 @@
     "relatedCards": [
       {
         "cardId": 94,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 91
       }
     ],
     "artworkPath": "/assets/images/artworks/woons_hammer.png"
@@ -8100,7 +8745,8 @@
     "relatedCards": [
       {
         "cardId": 36,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 93
       }
     ]
   },
@@ -8188,7 +8834,8 @@
     "relatedCards": [
       {
         "cardId": 91,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 94
       }
     ],
     "artworkPath": "/assets/images/artworks/yeon_woon.png"
@@ -8260,6 +8907,57 @@
       }
     ],
     "slug": "yeon_yihwa",
+    "relatedCards": [
+      {
+        "cardId": 25,
+        "kind": "mentioned-in",
+        "peerCardId": 95
+      },
+      {
+        "cardId": 40,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 41,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 42,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 43,
+        "kind": "series-mentioned",
+        "peerCardId": 25,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 4,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 23,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 24,
+        "kind": "mentions",
+        "peerCardId": 25
+      },
+      {
+        "cardId": 33,
+        "kind": "mentions",
+        "peerCardId": 25
+      }
+    ],
     "artworkPath": "/assets/images/artworks/yeon_yihwa.png"
   },
   "96": {
@@ -8379,43 +9077,57 @@
     "relatedCards": [
       {
         "cardId": 8,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       },
       {
         "cardId": 79,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 96
       },
       {
         "cardId": 67,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 86,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 8
       },
       {
         "cardId": 85,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 86
       },
       {
         "cardId": 21,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 85
       },
       {
         "cardId": 26,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 28,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 74,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 83,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 85,
+        "seriesCode": "thorn-fragment"
       }
     ],
     "artworkPath": "/assets/images/artworks/yu_han_sung.png"
@@ -8504,7 +9216,8 @@
     "relatedCards": [
       {
         "cardId": 12,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 97
       }
     ],
     "artworkPath": "/assets/images/artworks/yuga.png"

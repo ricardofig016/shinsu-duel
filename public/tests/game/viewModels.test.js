@@ -193,10 +193,12 @@ describe("buildUnitViewModel", () => {
       type: "unit",
       name: "Related",
       series: "incinerate",
-      relatedCards: [{ cardId: 10003, kind: "series" }],
+      relatedCards: [{ cardId: 10003, kind: "same-series-as", peerCardId: 10004, seriesCode: "incinerate" }],
     });
 
-    expect(model.relatedCards).toEqual([{ cardId: 10003, kind: "series" }]);
+    expect(model.relatedCards).toEqual([
+      { cardId: 10003, kind: "same-series-as", peerCardId: 10004, seriesCode: "incinerate" },
+    ]);
     expect(model.series).toBe("incinerate");
     expect(buildCardViewModel({ cardId: 10006, name: "Bare" }).relatedCards).toBeNull();
   });

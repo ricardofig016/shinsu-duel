@@ -62,16 +62,29 @@ function resolveCatalogEntry(catalog, ref) {
 /**
  * Build the link-target registry for one compilation pool.
  *
+ * `fallback` extends resolution to a second registry: the pool in hand is
+ * tried first, then the fallback. Shared catalog copy is authored against the
+ * shipped pool, so a compile over a smaller pool (fixtures, a test-authored
+ * source directory) passes the shipped registry as its fallback and its
+ * `card:` links still resolve.
+ *
  * @param {object} pool
  * @param {string[]} pool.names - card display names of the pool.
  * @param {string[]} [pool.series] - authored series values of the pool.
+ * @param {{ resolve: (type: string, ref: string) => object | null }} [pool.fallback]
  * @returns {{ resolve: (type: string, ref: string) => { ref: string, text: string } | null }}
  */
-export function createLinkRegistry({ names = [], series = [] } = {}) {
+export function createLinkRegistry({ names = [], series = [], fallback = null } = {}) {
   const cardsBySlug = new Map(names.map((name) => [normalizeName(name), name]));
   const seriesCodes = new Set(series.map(toCode));
 
   function resolve(type, ref) {
+    const resolved = resolveInPool(type, ref);
+    if (resolved) return resolved;
+    return fallback ? fallback.resolve(type, ref) : null;
+  }
+
+  function resolveInPool(type, ref) {
     if (type === "card") {
       const slug = normalizeName(ref);
       const name = cardsBySlug.get(slug);
@@ -109,11 +122,13 @@ export function createLinkRegistry({ names = [], series = [] } = {}) {
  * series value in the pool becomes resolvable.
  *
  * @param {Array<{ name?: string, series?: string | null }>} cards
+ * @param {{ resolve: (type: string, ref: string) => object | null }} [fallback]
  * @returns {{ resolve: (type: string, ref: string) => { ref: string, text: string } | null }}
  */
-export function createPoolLinkRegistry(cards) {
+export function createPoolLinkRegistry(cards, fallback = null) {
   return createLinkRegistry({
     names: cards.map((card) => card.name).filter(Boolean),
     series: cards.map((card) => card.series).filter(Boolean),
+    fallback,
   });
 }

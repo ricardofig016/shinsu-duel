@@ -5,9 +5,20 @@ import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import {
   buildAttributeTooltipEntries,
   buildPositionTooltipEntries,
+  buildProseEntry,
   buildRankTooltip,
   buildTypeLetterTooltip,
 } from "/utils/tooltip-entries.js";
+
+/**
+ * One catalog prose field as the tooltip's entry list. Trait and condition
+ * descriptions compile to display segments now, so they carry inline links; a
+ * synthetic view still hands over plain text.
+ */
+const proseEntries = (value) => {
+  const entry = buildProseEntry(value);
+  return entry ? [entry] : [];
+};
 
 const TYPE_LETTER_ICONS = Object.freeze({
   skill: "/assets/icons/types/skill.png",
@@ -243,7 +254,7 @@ const loadIconStrip = async (
     // The element goes in before its tooltip: a hover target that is not in the
     // document yet reads as gone, and the tooltip layer drops those.
     strip.appendChild(img);
-    await addTooltip(img, entry.name, entry.description, icon);
+    await addTooltip(img, entry.name, proseEntries(entry.description), icon);
   }
   if (entries.length === 0) strip.innerText = emptyText;
 
@@ -260,7 +271,7 @@ const loadIconStrip = async (
     // document when its tooltip mounts (see the strip above).
     if (!tooltipRow.isConnected) tooltip.appendChild(tooltipRow);
     tooltipRow.appendChild(img);
-    await addTooltip(img, entry.name, entry.description, icon);
+    await addTooltip(img, entry.name, proseEntries(entry.description), icon);
     if ((i - (STRIP_ROW_SIZE - 1)) % STRIP_ROW_SIZE === STRIP_ROW_SIZE - 1 || i === entries.length - 1) {
       tooltipRow = document.createElement("div");
       tooltipRow.classList.add(rowClass, "container-horizontal");

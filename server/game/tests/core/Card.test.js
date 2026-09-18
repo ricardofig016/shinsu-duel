@@ -61,8 +61,8 @@ describe("Card", () => {
   });
 
   test("ships relatedCards untouched and defaults to null when unstamped", () => {
-    const related = makeCard({ relatedCards: [{ cardId: 2, kind: "mention" }] });
-    expect(related.toSanitizedObject().relatedCards).toEqual([{ cardId: 2, kind: "mention" }]);
+    const related = makeCard({ relatedCards: [{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }] });
+    expect(related.toSanitizedObject().relatedCards).toEqual([{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }]);
 
     expect(makeCard().toSanitizedObject().relatedCards).toBeNull();
   });
@@ -94,7 +94,7 @@ describe("Card", () => {
       hwayeomsa: {
         name: "Hwayeomsa",
         title: "Hwayeomsa",
-        description: expect.any(String),
+        description: { segments: expect.any(Array) },
         effect: expect.any(Array),
         iconPath: "/assets/icons/attributes/hwayeomsa.png",
       },
@@ -111,7 +111,7 @@ describe("Card", () => {
     expect(view.attributes["silver-dwarf"].title).toBe("Guide - Silver Dwarf");
     expect(view.attributes.hwayeomsa.title).toBe("Hwayeomsa");
     expect(view.attributes["silver-dwarf"].effect).toEqual([
-      "The first time you draw a card each round, choose the card directly from your deck.",
+      { segments: ["The first time you draw a card each round, choose the card directly from your deck."] },
     ]);
   });
 

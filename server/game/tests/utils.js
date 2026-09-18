@@ -1,11 +1,22 @@
 import GameState from "../GameState.js";
 import SeededRng from "../utils/SeededRng.js";
+import { setCompiledCatalogCopy } from "../displayCatalogs.js";
 import { cards, byName } from "./fixtures/cards.js";
+import fixtureCatalogCopy from "./fixtures/catalog-copy.json" with { type: "json" };
 
 export { cards };
 
 const ROOM_CODE = "TEST";
 const USERNAMES = ["Alice", "Bob"];
+
+// Test-owned shared-catalog copy. Swapping it in keeps every card view,
+// condition projection, and catalog route on the fixture artifact instead of
+// the shipped `server/data/compiled/catalog-copy.json`. It is registered here
+// rather than in the Jest setup file because the setup file gets its own
+// module instances of `displayCatalogs`; this module is shared with the test
+// file's registry. Suites that build card views without importing these
+// helpers project the same shape from the shipped artifact.
+setCompiledCatalogCopy(fixtureCatalogCopy);
 
 // Test-owned fixture catalog; see fixtures/cards.js.
 const TEST_OPTIONS = () => ({ rng: new SeededRng(1), cards });

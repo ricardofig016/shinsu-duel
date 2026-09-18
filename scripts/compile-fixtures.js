@@ -9,13 +9,17 @@ import { collectCardFiles } from "./lib/collect-card-files.js";
 import { normalizeName } from "./lib/normalize-name.js";
 import { createPoolLinkRegistry } from "./lib/card-link-registry.js";
 import { stampRelatedCards } from "./lib/card-relations.js";
+import { serializeArtifact } from "./lib/compiled-catalog.js";
+import { buildCatalogMentions, packageCatalogMentions } from "./lib/catalog-mentions.js";
 import {
   compileCard,
+  compileSharedCatalogCopy,
   cleanCompiled,
   resolveEvolveInto,
   resolveEvolvedFrom,
   resolveIgniteInto,
   resolveIgnitedFrom,
+  shippedLinkRegistry,
 } from "./card-compile.js";
 
 /**
@@ -45,6 +49,8 @@ const currentFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(currentFile), "..");
 const fixturesYamlDir = path.join(projectRoot, "server", "game", "tests", "fixtures", "yaml");
 const outputPath = path.join(projectRoot, "server", "game", "tests", "fixtures", "cards.json");
+const catalogCopyPath = path.join(projectRoot, "server", "game", "tests", "fixtures", "catalog-copy.json");
+const catalogMentionsPath = path.join(projectRoot, "server", "game", "tests", "fixtures", "catalog-mentions.json");
 const compiledSchemaPath = path.join(projectRoot, "schemas", "compiled-cards.schema.json");
 
 // ── Generic filler units (deck padding; ≥30 needed for legal decks) ──────
@@ -110,9 +116,14 @@ export async function compileFixtures() {
 
   const rawCards = [...fillers, ...namedCards];
 
-  // 3. Compile each card through the real compiler. The link registry is
-  //    built once from the whole fixture pool.
-  const linkRegistry = createPoolLinkRegistry(rawCards);
+  // 3. Compile each card through the real compiler. Card text resolves
+  //    against the fixture pool; shared catalog copy resolves against the
+  //    shipped pool, because that is where the copy is authored and its
+  //    `card:` links name shipped cards fixtures never carry (the Hwayeomsa
+  //    core ability names Fire Core). Neither pool's data leaks into the
+  //    other's artifact: only the shared authoring catalogs are compiled
+  //    twice, once per pool.
+  const linkRegistry = createPoolLinkRegistry(rawCards, shippedLinkRegistry());
   const compiled = rawCards.map((raw) => {
     const card = compileCard(raw, rawCards.map((r) => ({ name: r.name, cardId: r.cardId })), linkRegistry);
     card.cardId = raw.cardId;
@@ -143,8 +154,15 @@ export async function compileFixtures() {
     card.slug = normalizeName(card.name);
   }
 
-  // 4b. Stamp relations from the compiled text links and machine references.
-  stampRelatedCards(compiled);
+  // 4b. Stamp relations from the compiled text links, the machine references,
+  //     and the mentions of the shared catalog copy each card carries or
+  //     names. Fixture compilation produces the test-owned catalog copy so no
+  //     suite ever reads the shipped compiled artifacts.
+  const catalogCopy = compileSharedCatalogCopy(linkRegistry);
+  const catalogMentions = packageCatalogMentions(compiled, rawCards, {
+    mentions: buildCatalogMentions(catalogCopy),
+  });
+  stampRelatedCards(compiled, catalogMentions);
 
   // 5. Clean up temporary/empty fields to the sparse compiled contract.
   const finalCards = compiled.map(cleanCompiled);
@@ -166,8 +184,11 @@ export async function compileFixtures() {
   // 7. Write the artifact.
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, JSON.stringify(output, null, 2) + "\n", "utf-8");
+  await fs.writeFile(catalogCopyPath, serializeArtifact(catalogCopy), "utf-8");
+  await fs.writeFile(catalogMentionsPath, serializeArtifact(catalogMentions), "utf-8");
 
   console.log(`✓ Compiled ${finalCards.length} fixture cards to ${path.relative(projectRoot, outputPath)}`);
+  console.log(`  Shared catalog copy: ${path.relative(projectRoot, catalogCopyPath)}`);
   return finalCards;
 }
 

@@ -84,6 +84,8 @@ Fixtures are **authored as YAML** in `tests/fixtures/yaml/{units,skills,equipmen
 
 Run `npm run compile:fixtures` to normalize and schema-validate them through the real compiler (`scripts/compile-fixtures.js` reuses `compileCard`/`cleanCompiled`/`resolveEvolve*`/`resolveIgnite*` from `card-compile.js`) and regenerate `tests/fixtures/cards.json`. **Never hand-edit the compiled JSON** — the compiler is the single path from YAML source to artifact.
 
+The same run writes the test-owned shared-catalog copy to `tests/fixtures/catalog-copy.json` (and its mention index to `catalog-mentions.json`), so suites never read `server/data/compiled/`. Shared catalog copy is authored against the shipped pool, so the fixture compile resolves it with the fixture pool first and the shipped pool as fallback; fixture card text likewise resolves fixture-first. `tests/utils.js` registers that artifact through `setCompiledCatalogCopy`, which is what every card view, condition projection, and catalog route in the suite then serves.
+
 Id assignment:
 
 - Generic fillers keep ids **1–40** (generated in code, never authored).
@@ -101,7 +103,7 @@ One deliberate deviation from `card-compile.js`:
 - `Fire Core` keeps its exact name (`HwayeomsaEngine` hardcodes it); `series: "incinerate"` / `"thorn-fragment"` are kept so engines resolve them structurally.
 - Structural codes (`series`, trait/position/affiliation/attribute codes) reuse the shipped catalog vocabulary (`server/data/*.json`).
 
-`FixtureCardAudit.test.js` validates the compiled `cards.json` against `schemas/compiled-cards.schema.json`, checks id/name uniqueness, resolves codes against the shipped vocab, asserts ≥30 eligible cards, checks transformation cross-references, and forbids `custom`/`handler` DSL.
+`FixtureCardAudit.test.js` validates the compiled `cards.json` against `schemas/compiled-cards.schema.json`, checks id/name uniqueness, resolves codes against the shipped vocab, asserts ≥30 eligible cards, checks transformation cross-references, forbids `custom`/`handler` DSL, and checks the fixture shared-catalog copy against the shipped one (same catalogs, entries, and prose fields, so a display path can never find a field missing only in fixtures).
 
 ---
 
@@ -137,10 +139,11 @@ One deliberate deviation from `card-compile.js`:
 
 | File                                                  | Role                                              |
 | ----------------------------------------------------- | ------------------------------------------------- |
-| `server/game/tests/utils.js`                          | Shared test helpers (deck/game construction)      |
+| `server/game/tests/utils.js`                          | Shared test helpers (deck/game construction); registers the fixture shared-catalog copy |
 | `server/game/tests/net/harness.js`                    | Real-transport net harness (app + sockets, login) |
 | `server/game/tests/fixtures/yaml/**`                  | Fixture source (YAML, same shape as `data/cards`) |
 | `server/game/tests/fixtures/cards.json`               | Compiled fixture artifact (generated)             |
+| `server/game/tests/fixtures/catalog-copy.json`        | Compiled fixture shared-catalog copy (generated)  |
 | `server/game/tests/fixtures/cards.js`                 | Thin importer of `cards.json` + `byName`          |
 | `server/game/tests/fixtures/FixtureCardAudit.test.js` | Fixture contract/audit gate                       |
 | `scripts/compile-fixtures.js`                         | Fixture compiler (`npm run compile:fixtures`)     |

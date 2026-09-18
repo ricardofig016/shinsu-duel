@@ -1,5 +1,6 @@
 import {
   buildAttributeTooltipEntries,
+  buildCatalogTooltipEntries,
   buildDeckTooltipText,
   buildPositionTooltipEntries,
   buildRankTooltip,
@@ -32,19 +33,19 @@ const glossary = {
 
 describe("normalizeTooltipEntries", () => {
   test("wraps a plain string into one unstyled entry", () => {
-    expect(normalizeTooltipEntries("hello")).toEqual([{ text: "hello", style: null }]);
+    expect(normalizeTooltipEntries("hello")).toEqual([{ text: "hello" }]);
   });
 
   test("accepts styled entries and drops unknown styles", () => {
     expect(normalizeTooltipEntries([{ text: "a", style: "italic" }, { text: "b", style: "blink" }])).toEqual([
       { text: "a", style: "italic" },
-      { text: "b", style: null },
+      { text: "b" },
     ]);
   });
 
   test("filters empty, whitespace-only, and invalid entries", () => {
     expect(normalizeTooltipEntries(["", "  ", null, 3, { text: "  " }, { text: "keep" }])).toEqual([
-      { text: "keep", style: null },
+      { text: "keep" },
     ]);
   });
 
@@ -61,7 +62,7 @@ describe("normalizeTooltipEntries", () => {
       { segments, style: "italic" },
       { segments: "junk" },
     ])).toEqual([
-      { segments, style: null },
+      { segments },
       { segments, style: "italic" },
     ]);
   });
@@ -103,6 +104,25 @@ describe("buildPositionTooltipEntries", () => {
     expect(buildPositionTooltipEntries({ description: "only" }, glossary)).toEqual([{ text: "only" }]);
     expect(buildPositionTooltipEntries(null, glossary)).toEqual([]);
   });
+
+  test("keeps a compiled position description as segments, suffix and all", () => {
+    const compiled = {
+      line: "frontline",
+      description: { segments: ["Durable units that tank ", { type: "trait", ref: "taunt", text: "Taunt" }] },
+      verboseDescription: { segments: ["The long lore text."] },
+    };
+
+    expect(buildPositionTooltipEntries(compiled, glossary)).toEqual([
+      { text: "Frontline", style: "label" },
+      { segments: compiled.description.segments },
+      { segments: compiled.verboseDescription.segments, style: "italic" },
+    ]);
+
+    // The chosen variant composes one plain line, so it projects the prose.
+    expect(buildPositionTooltipEntries(compiled, glossary, { chosen: true })[1]).toEqual({
+      text: "Durable units that tank Taunt (chosen)",
+    });
+  });
 });
 
 describe("buildAttributeTooltipEntries", () => {
@@ -124,6 +144,30 @@ describe("buildAttributeTooltipEntries", () => {
       { text: "only prose", style: "italic" },
     ]);
     expect(buildAttributeTooltipEntries(null)).toEqual([]);
+  });
+
+  test("keeps compiled prose (and its links) as segment entries", () => {
+    const segments = ["gain 1 ", { type: "rule", ref: "fire-charge", text: "Fire Charge" }];
+    const attribute = {
+      description: { segments: ["Hwayeomsa are flame users."] },
+      effect: [{ segments }],
+    };
+
+    expect(buildAttributeTooltipEntries(attribute)).toEqual([
+      { segments: ["Hwayeomsa are flame users."], style: "italic" },
+      { segments },
+    ]);
+    expect(buildCatalogTooltipEntries(attribute)).toEqual(buildAttributeTooltipEntries(attribute));
+  });
+});
+
+describe("buildCatalogTooltipEntries", () => {
+  test("leads with the italic description and drops empty fields", () => {
+    expect(buildCatalogTooltipEntries({ description: "I take x damage", effect: [] })).toEqual([
+      { text: "I take x damage", style: "italic" },
+    ]);
+    expect(buildCatalogTooltipEntries({ effect: ["only effect"] })).toEqual([{ text: "only effect" }]);
+    expect(buildCatalogTooltipEntries(null)).toEqual([]);
   });
 });
 
@@ -176,32 +220,63 @@ describe("buildRankTooltip", () => {
     expect(buildRankTooltip("ranker", {})).toBeNull();
     expect(buildRankTooltip("ranker", { title: "Rank", list: [] })).toBeNull();
   });
+
+  test("keeps a compiled rank description's links after the cost label", () => {
+    const ranks = {
+      title: "Rank",
+      concept: ["How the person is ranked."],
+      list: [
+        { code: "regular", name: "Regular", description: ["Someone chosen by ", { type: "rule", ref: "decks", text: "Headon" }], minCost: 0, maxCost: 5 },
+      ],
+    };
+
+    expect(buildRankTooltip("regular", ranks).texts).toEqual([
+      { segments: ["How the person is ranked."], style: "italic" },
+      { segments: [{ text: "Regular (cost 0-5): " }, "Someone chosen by ", { type: "rule", ref: "decks", text: "Headon" }], style: "strong" },
+    ]);
+  });
 });
 
 describe("buildTypeLetterTooltip", () => {
   test("units show their kind: standard as Unit, special kinds by kind name", () => {
     expect(buildTypeLetterTooltip({ type: "unit", kind: "standard" }, glossary)).toEqual({
       title: "Unit",
-      texts: ["The default kind."],
+      texts: [{ text: "The default kind." }],
     });
     expect(buildTypeLetterTooltip({ type: "unit", kind: "shinheuh" }, glossary)).toEqual({
       title: "Shinheuh",
-      texts: ["Summoned by Animas."],
+      texts: [{ text: "Summoned by Animas." }],
     });
     expect(buildTypeLetterTooltip({ type: "unit", kind: "landmark" }, glossary)).toEqual({
       title: "Landmark",
-      texts: ["Battlefield rules."],
+      texts: [{ text: "Battlefield rules." }],
     });
   });
 
   test("non-units show their type entry, and unknown kinds or types yield null", () => {
     expect(buildTypeLetterTooltip({ type: "skill" }, glossary)).toEqual({
       title: "Skill",
-      texts: ["Single-use."],
+      texts: [{ text: "Single-use." }],
     });
     expect(buildTypeLetterTooltip({ type: "unit", kind: "no-such" }, glossary)).toBeNull();
     expect(buildTypeLetterTooltip({ type: "no-such" }, glossary)).toBeNull();
     expect(buildTypeLetterTooltip({ type: "skill" }, null)).toBeNull();
+  });
+
+  test("keeps a compiled kind description's links", () => {
+    const linked = {
+      kinds: {
+        standard: {
+          name: "Unit",
+          description: { segments: ["Units occupy a ", { type: "rule", ref: "positions", text: "Position" }] },
+        },
+      },
+    };
+
+    expect(buildTypeLetterTooltip({ type: "unit", kind: "standard" }, linked)).toEqual({
+      title: "Unit",
+      texts: [{ segments: linked.kinds.standard.description.segments }],
+    });
   });
 });
 
@@ -209,5 +284,28 @@ describe("buildDeckTooltipText", () => {
   test("fills the server-owned template with the live count", () => {
     expect(buildDeckTooltipText(17, glossary.hud.deck)).toBe("17 cards remaining");
     expect(buildDeckTooltipText(17, null)).toBeNull();
+  });
+});
+
+/**
+ * A payload is normally a list of entries, but catalog prose compiles to
+ * segment objects, so a call site can hand a single field over by mistake. That
+ * mistake threw `raw is not iterable` inside a card's tooltip, which rejected
+ * the card's render, which rejected the grid mount, which left the cards page
+ * with no facet options and no sorting, because the page's setup never finished.
+ */
+describe("normalizeTooltipEntries payload shapes", () => {
+  test("takes a lone segment field as one entry instead of throwing", () => {
+    const field = { segments: ["Spend 1, ", { type: "keyword", ref: "free", text: "Free" }] };
+    expect(normalizeTooltipEntries(field)).toEqual([{ segments: field.segments }]);
+  });
+
+  test("takes a lone text entry, a lone string, and a missing payload", () => {
+    expect(normalizeTooltipEntries({ text: "Durable units.", style: "italic" })).toEqual([
+      { text: "Durable units.", style: "italic" },
+    ]);
+    expect(normalizeTooltipEntries("Durable units.")).toEqual([{ text: "Durable units." }]);
+    expect(normalizeTooltipEntries(null)).toEqual([]);
+    expect(normalizeTooltipEntries(undefined)).toEqual([]);
   });
 });

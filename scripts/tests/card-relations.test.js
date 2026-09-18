@@ -5,10 +5,11 @@ import { tokenizeSegments } from "../../public/utils/card-text.js";
 // Compiled card factories covering every relation edge. Cards carry the
 // fields stampRelatedCards consumes: final cardId, slug, series, resolved
 // evolve/ignite cross-references, and text segments on the DSL nodes whose
-// references count as mentions.
+// references count as mentions. Every stamped entry names the tagged card's
+// own relation to its peer: the card the edge was traversed from.
 
 const registry = createLinkRegistry({
-  names: ["A", "B", "C", "Wielded"],
+  names: ["A", "B", "C", "Wielded", "S One"],
   series: ["Orbit", "Flame"],
 });
 
@@ -48,24 +49,24 @@ function passiveMentioningSeries(series) {
 }
 
 describe("stampRelatedCards", () => {
-  test("stamps the evolution pair on both cards", () => {
+  test("stamps the evolution pair on both cards, each from its own side", () => {
     const base = card({ cardId: 1, slug: "base", name: "Base" });
     const evolved = card({ cardId: 2, slug: "base_ii", name: "Base II", evolvedFrom: 1 });
     base.evolveInto = { triggers: [], cardId: 2 };
     stampRelatedCards([base, evolved]);
 
-    expect(base.relatedCards).toEqual([{ cardId: 2, kind: "evolution" }]);
-    expect(evolved.relatedCards).toEqual([{ cardId: 1, kind: "evolution" }]);
+    expect(base.relatedCards).toEqual([{ cardId: 2, kind: "evolves-from", peerCardId: 1 }]);
+    expect(evolved.relatedCards).toEqual([{ cardId: 1, kind: "evolves-into", peerCardId: 2 }]);
   });
 
-  test("stamps the ignition pair on both cards", () => {
+  test("stamps the ignition pair on both cards, each from its own side", () => {
     const base = card({ cardId: 3, slug: "weapon", name: "Weapon", type: "equipment" });
     base.igniteInto = { triggers: [], cardId: 4 };
     const ignited = card({ cardId: 4, slug: "weapon_ignited", name: "Weapon - Ignited", type: "equipment", ignitedFrom: 3 });
     stampRelatedCards([base, ignited]);
 
-    expect(base.relatedCards).toEqual([{ cardId: 4, kind: "ignition" }]);
-    expect(ignited.relatedCards).toEqual([{ cardId: 3, kind: "ignition" }]);
+    expect(base.relatedCards).toEqual([{ cardId: 4, kind: "ignited-from", peerCardId: 3 }]);
+    expect(ignited.relatedCards).toEqual([{ cardId: 3, kind: "ignites-into", peerCardId: 4 }]);
   });
 
   test("card links in text segments become mention edges", () => {
@@ -73,8 +74,8 @@ describe("stampRelatedCards", () => {
     const b = card({ cardId: 2, slug: "b", name: "B" });
     stampRelatedCards([a, b]);
 
-    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mention" }]);
-    expect(b.relatedCards).toEqual([{ cardId: 1, kind: "mentioned-by" }]);
+    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }]);
+    expect(b.relatedCards).toEqual([{ cardId: 1, kind: "mentions", peerCardId: 2 }]);
   });
 
   test("machine-readable DSL references count as mentions", () => {
@@ -87,8 +88,8 @@ describe("stampRelatedCards", () => {
     const b = card({ cardId: 2, slug: "b", name: "B", type: "skill" });
     stampRelatedCards([a, b]);
 
-    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mention" }]);
-    expect(b.relatedCards).toEqual([{ cardId: 1, kind: "mentioned-by" }]);
+    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }]);
+    expect(b.relatedCards).toEqual([{ cardId: 1, kind: "mentions", peerCardId: 2 }]);
   });
 
   test("singular target and source descriptors count as mentions", () => {
@@ -112,20 +113,20 @@ describe("stampRelatedCards", () => {
     stampRelatedCards([a, b, c]);
 
     expect(a.relatedCards).toEqual([
-      { cardId: 2, kind: "mention" },
-      { cardId: 3, kind: "mentioned-by" },
+      { cardId: 2, kind: "mentioned-in", peerCardId: 1 },
+      { cardId: 3, kind: "mentions", peerCardId: 2 },
     ]);
     expect(c.relatedCards).toEqual([
-      { cardId: 2, kind: "mention" },
-      { cardId: 1, kind: "mentioned-by" },
+      { cardId: 2, kind: "mentioned-in", peerCardId: 3 },
+      { cardId: 1, kind: "mentions", peerCardId: 2 },
     ]);
     expect(b.relatedCards).toEqual([
-      { cardId: 1, kind: "mentioned-by" },
-      { cardId: 3, kind: "mentioned-by" },
+      { cardId: 1, kind: "mentions", peerCardId: 2 },
+      { cardId: 3, kind: "mentions", peerCardId: 2 },
     ]);
   });
 
-  test("a series reference mentions every card in the series, and series siblings link", () => {
+  test("a series reference stamps every member with the series it names, and each member sees the namer in reverse", () => {
     const a = card({
       cardId: 1,
       slug: "a",
@@ -136,18 +137,31 @@ describe("stampRelatedCards", () => {
     const s2 = card({ cardId: 3, slug: "s_two", name: "S Two", type: "skill", series: "flame" });
     stampRelatedCards([a, s1, s2]);
 
+    // Every member is reached by the series reference itself, not one at a
+    // time through the siblings of the member processed first.
     expect(a.relatedCards).toEqual([
-      { cardId: 2, kind: "mention" },
-      { cardId: 3, kind: "mention" },
+      { cardId: 2, kind: "series-mentioned", peerCardId: 1, seriesCode: "flame" },
+      { cardId: 3, kind: "series-mentioned", peerCardId: 1, seriesCode: "flame" },
     ]);
-    // The series siblings see each other and also "mention" A in reverse.
     expect(s1.relatedCards).toEqual([
-      { cardId: 1, kind: "mentioned-by" },
-      { cardId: 3, kind: "series" },
+      { cardId: 1, kind: "mentions", peerCardId: 2 },
+      { cardId: 3, kind: "same-series-as", peerCardId: 2, seriesCode: "flame" },
     ]);
     expect(s2.relatedCards).toEqual([
-      { cardId: 1, kind: "mentioned-by" },
-      { cardId: 2, kind: "series" },
+      { cardId: 1, kind: "mentions", peerCardId: 3 },
+      { cardId: 2, kind: "same-series-as", peerCardId: 3, seriesCode: "flame" },
+    ]);
+  });
+
+  test("a member reached by name brings its own series siblings in behind it", () => {
+    const a = card({ cardId: 1, slug: "a", name: "A", abilities: [abilityWithLink("s_one")] });
+    const s1 = card({ cardId: 2, slug: "s_one", name: "S One", type: "skill", series: "flame" });
+    const s2 = card({ cardId: 3, slug: "s_two", name: "S Two", type: "skill", series: "flame" });
+    stampRelatedCards([a, s1, s2]);
+
+    expect(a.relatedCards).toEqual([
+      { cardId: 2, kind: "mentioned-in", peerCardId: 1 },
+      { cardId: 3, kind: "same-series-as", peerCardId: 2, seriesCode: "flame" },
     ]);
   });
 
@@ -158,16 +172,16 @@ describe("stampRelatedCards", () => {
     stampRelatedCards([a, b, c]);
 
     expect(a.relatedCards).toEqual([
-      { cardId: 2, kind: "mention" },
-      { cardId: 3, kind: "mention" },
+      { cardId: 2, kind: "mentioned-in", peerCardId: 1 },
+      { cardId: 3, kind: "mentioned-in", peerCardId: 2 },
     ]);
     expect(b.relatedCards).toEqual([
-      { cardId: 3, kind: "mention" },
-      { cardId: 1, kind: "mentioned-by" },
+      { cardId: 3, kind: "mentioned-in", peerCardId: 2 },
+      { cardId: 1, kind: "mentions", peerCardId: 2 },
     ]);
     expect(c.relatedCards).toEqual([
-      { cardId: 2, kind: "mentioned-by" },
-      { cardId: 1, kind: "mentioned-by" },
+      { cardId: 2, kind: "mentions", peerCardId: 3 },
+      { cardId: 1, kind: "mentions", peerCardId: 2 },
     ]);
   });
 
@@ -177,7 +191,7 @@ describe("stampRelatedCards", () => {
     const wielded = card({ cardId: 3, slug: "wielded", name: "Wielded" });
     stampRelatedCards([bearer, equip, wielded]);
 
-    expect(equip.relatedCards).toEqual([{ cardId: 3, kind: "mention" }]);
+    expect(equip.relatedCards).toEqual([{ cardId: 3, kind: "mentioned-in", peerCardId: 2 }]);
     expect(bearer.relatedCards).toBeUndefined();
   });
 
@@ -190,9 +204,9 @@ describe("stampRelatedCards", () => {
     stampRelatedCards([a, b, bBase, sibling]);
 
     expect(a.relatedCards).toEqual([
-      { cardId: 2, kind: "mention" },
-      { cardId: 3, kind: "evolution" },
-      { cardId: 4, kind: "series" },
+      { cardId: 2, kind: "mentioned-in", peerCardId: 1 },
+      { cardId: 3, kind: "evolves-into", peerCardId: 2 },
+      { cardId: 4, kind: "same-series-as", peerCardId: 3, seriesCode: "orbit" },
     ]);
   });
 
@@ -201,8 +215,8 @@ describe("stampRelatedCards", () => {
     const b = card({ cardId: 2, slug: "b", name: "B", abilities: [abilityWithLink("a")] });
     stampRelatedCards([a, b]);
 
-    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mention" }]);
-    expect(b.relatedCards).toEqual([{ cardId: 1, kind: "mention" }]);
+    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }]);
+    expect(b.relatedCards).toEqual([{ cardId: 1, kind: "mentioned-in", peerCardId: 2 }]);
   });
 
   test("the first edge kind to reach a card wins over later discoveries", () => {
@@ -216,7 +230,7 @@ describe("stampRelatedCards", () => {
     const b = card({ cardId: 2, slug: "b", name: "B" });
     stampRelatedCards([a, b]);
 
-    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mention" }]);
+    expect(a.relatedCards).toEqual([{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }]);
   });
 
   test("candidates are ordered by cardId within an edge kind", () => {

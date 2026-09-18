@@ -7,27 +7,32 @@ import { normalizeName } from "./normalize-name.js";
  * Every compiled card carries `relatedCards` — the deduplicated, recursively
  * closed, deterministically ordered list of cards it relates to. The list is
  * what the client detail view renders as the related-card carousel, so its
- * order is a data contract: breadth-first traversal over all edge kinds,
- * edges examined from each card in a fixed priority (evolution/ignition
- * links first, then mentions, then reverse mentions, then series siblings),
- * ties broken by cardId (the name-sorted index). A card is never repeated:
- * the first edge that reaches it wins its relation kind.
+ * order is a data contract: breadth-first traversal from the card, edges
+ * examined in a fixed priority, ties broken by cardId (the name-sorted
+ * index). A card is never repeated: the first edge that reaches it wins its
+ * entry.
  *
- * Edge kinds and their sources:
+ * An entry is `{ cardId, kind, peerCardId }`, plus `seriesCode` on the two
+ * series kinds. `kind` is directional and describes the entry's own card:
+ * each tagged card states its relation to the peer it was reached from.
  *
- * - `evolution` — `evolvedFrom` / `evolveInto.cardId`, stamped by the
- *   compiler's evolution resolution.
- * - `ignition` — `ignitedFrom` / `igniteInto.cardId`.
- * - `mention` — this card's text points at the target: explicit text links
- *   (`card` and `series` segments) plus the machine-readable references the
- *   DSL already carries: `name`/`series` on the target descriptors shaped
- *   under `card`, `target`, `targets`, and `source`, plus `cardName`,
- *   `cardNames`, and `has_all_equipped` series. A series reference counts
- *   as a mention of every card in that series.
- * - `mentioned-by` — the reverse of `mention`, computed from every card's
- *   forward references.
- * - `series` — cards sharing the card's `series` code, with no reference
- *   between them.
+ * - `evolves-into` / `evolves-from` — the tagged card is the later / earlier
+ *   stage of the pair (`evolvedFrom` and `evolveInto.cardId` name the peer).
+ * - `ignites-into` / `ignited-from` — the same for the ignition pair
+ *   (`ignitedFrom` / `igniteInto.cardId`).
+ * - `mentions` — the tagged card's copy names the peer. A named series
+ *   counts as naming every member.
+ * - `mentioned-in` — the peer's copy names the tagged card.
+ * - `series-mentioned` — the peer's copy names a series the tagged card
+ *   belongs to; one entry per member, carrying the series code.
+ * - `same-series-as` — the tagged card shares a series with the peer, the
+ *   card whose `series` field reached the tagged card.
+ *
+ * Edge priority per card is evolution, ignition, card mentions, series
+ * mentions, reverse mentions, then series siblings. A card's copy naming a
+ * series expands to every member at that step, before the traversal recurses
+ * into any of them, so each member keeps the series mention rather than being
+ * claimed later as a sibling.
  *
  * References that resolve to no compiled card (an unlinked machine reference
  * the compiler never validated) contribute nothing; link targets are already
@@ -118,70 +123,140 @@ export function collectForwardReferences(card) {
   return { cardSlugs, seriesCodes };
 }
 
+const compareByCardId = (a, b) => a.cardId - b.cardId;
+
+function isCardId(value) {
+  return Number.isInteger(value);
+}
+
 /**
  * Stamp `relatedCards` on every card (omitted when a card relates to
  * nothing). Cards must already carry final `cardId`, `slug`, stamped text
  * segments, and resolved evolve/ignite cross-references.
  *
+ * `extraReferences` extends a card's own forward references with the ones its
+ * shared catalog copy carries or names (see
+ * `scripts/lib/catalog-mentions.js`): `"slug:<slug>"` for a card and
+ * `"series:<code>"` for a series. They join the card's own references at the
+ * mention edge, so an inherited mention behaves exactly like one the card
+ * makes itself.
+ *
  * @param {object[]} cards - compiled cards (array form, pre-keying)
+ * @param {((card: object) => string[] | Record<string, string[]>) | null}
+ *   [extraReferences] - per-card inherited reference keys, keyed by cardId
+ * @returns {Map<number, { cardSlugs: Set<string>, seriesCodes: Set<string> }>}
+ *   resolved forward references per cardId
  */
-export function stampRelatedCards(cards) {
+export function stampRelatedCards(cards, extraReferences = null) {
   const byId = new Map(cards.map((card) => [card.cardId, card]));
   const bySlug = new Map(cards.map((card) => [card.slug, card]));
+
   const seriesGroups = new Map();
   for (const card of cards) {
-    if (card.series) {
-      if (!seriesGroups.has(card.series)) seriesGroups.set(card.series, []);
-      seriesGroups.get(card.series).push(card.cardId);
-    }
+    if (!card.series) continue;
+    if (!seriesGroups.has(card.series)) seriesGroups.set(card.series, []);
+    seriesGroups.get(card.series).push(card.cardId);
   }
   for (const members of seriesGroups.values()) members.sort((a, b) => a - b);
 
-  // Mention edges resolve through both slug (link segments) and the
-  // normalized authored names of machine references.
-  const mentionEdges = new Map();
+  // Inherited references are keyed by cardId; the hook accepts a map or a
+  // lookup function so both compile pipelines can pass what they have.
+  const inheritedFor = (card) => {
+    if (!extraReferences) return [];
+    if (typeof extraReferences === "function") return extraReferences(card) ?? [];
+    return extraReferences[card.cardId] ?? [];
+  };
+
+  const ownReferences = new Map();
+  for (const card of cards) {
+    ownReferences.set(card.cardId, collectForwardReferences(card));
+  }
+
+  // Split one reference key list into card slugs and series codes.
+  const splitReferences = (references) => {
+    const cardSlugs = new Set();
+    const seriesCodes = new Set();
+    for (const reference of references) {
+      if (typeof reference !== "string") continue;
+      if (reference.startsWith("slug:")) cardSlugs.add(reference.slice("slug:".length));
+      else if (reference.startsWith("series:")) seriesCodes.add(reference.slice("series:".length));
+    }
+    return { cardSlugs, seriesCodes };
+  };
+
+  // Forward references resolve through both slug (link segments) and the
+  // normalized authored names of machine references. Naming a card and
+  // naming a series that contains it are separate edges: the named card gets
+  // the direct `mentioned-in`, the other members the `series-mentioned`.
+  // A card's own references are examined before the ones it inherits.
+  const namedEdges = new Map();
+  const seriesEdges = new Map();
+  for (const card of cards) {
+    const own = ownReferences.get(card.cardId);
+    const inherited = splitReferences(inheritedFor(card));
+
+    const named = new Set();
+    for (const slug of own.cardSlugs) {
+      const target = bySlug.get(slug);
+      if (target && target.cardId !== card.cardId) named.add(target.cardId);
+    }
+    for (const slug of inherited.cardSlugs) {
+      const target = bySlug.get(slug);
+      if (target && target.cardId !== card.cardId) named.add(target.cardId);
+    }
+    namedEdges.set(card.cardId, [...named].sort((a, b) => a - b));
+
+    const series = [];
+    for (const code of [...new Set([...own.seriesCodes, ...inherited.seriesCodes])].sort()) {
+      const members = (seriesGroups.get(code) ?? []).filter((cardId) => cardId !== card.cardId);
+      if (members.length > 0) series.push({ seriesCode: code, cardIds: members });
+    }
+    seriesEdges.set(card.cardId, series);
+  }
+
+  // Reverse mentions: every card whose copy names this one, directly or
+  // through a series it names.
   const mentionedByEdges = new Map();
   for (const card of cards) {
-    const targets = new Set();
-    const { cardSlugs, seriesCodes } = collectForwardReferences(card);
-    for (const slug of cardSlugs) {
-      const target = bySlug.get(slug);
-      if (target) targets.add(target.cardId);
+    const targets = new Set(namedEdges.get(card.cardId));
+    for (const { cardIds } of seriesEdges.get(card.cardId)) {
+      for (const cardId of cardIds) targets.add(cardId);
     }
-    for (const code of seriesCodes) {
-      for (const cardId of seriesGroups.get(code) ?? []) targets.add(cardId);
-    }
-    targets.delete(card.cardId);
-    mentionEdges.set(card.cardId, [...targets].sort((a, b) => a - b));
-  }
-  for (const [sourceId, targets] of mentionEdges) {
     for (const targetId of targets) {
       if (!mentionedByEdges.has(targetId)) mentionedByEdges.set(targetId, []);
-      mentionedByEdges.get(targetId).push(sourceId);
+      mentionedByEdges.get(targetId).push(card.cardId);
     }
   }
   for (const sources of mentionedByEdges.values()) sources.sort((a, b) => a - b);
 
+  // Edges out of one card, in the priority the traversal examines them. A
+  // target's kind describes the target, so it reads as the reverse of the
+  // direction this card relates to it in.
   function edgeGroups(card) {
     const evolution = [];
-    if (card.evolvedFrom !== null && card.evolvedFrom !== undefined) evolution.push(card.evolvedFrom);
-    if (card.evolveInto?.cardId !== null && card.evolveInto?.cardId !== undefined) {
-      evolution.push(card.evolveInto.cardId);
-    }
+    if (isCardId(card.evolvedFrom)) evolution.push({ cardId: card.evolvedFrom, kind: "evolves-into" });
+    if (isCardId(card.evolveInto?.cardId)) evolution.push({ cardId: card.evolveInto.cardId, kind: "evolves-from" });
 
     const ignition = [];
-    if (card.ignitedFrom !== null && card.ignitedFrom !== undefined) ignition.push(card.ignitedFrom);
-    if (card.igniteInto?.cardId !== null && card.igniteInto?.cardId !== undefined) {
-      ignition.push(card.igniteInto.cardId);
+    if (isCardId(card.ignitedFrom)) ignition.push({ cardId: card.ignitedFrom, kind: "ignites-into" });
+    if (isCardId(card.igniteInto?.cardId)) ignition.push({ cardId: card.igniteInto.cardId, kind: "ignited-from" });
+
+    const mentions = namedEdges.get(card.cardId).map((cardId) => ({ cardId, kind: "mentioned-in" }));
+
+    const series = [];
+    for (const { seriesCode, cardIds } of seriesEdges.get(card.cardId)) {
+      for (const cardId of cardIds) series.push({ cardId, kind: "series-mentioned", seriesCode });
     }
 
-    return [
-      ["evolution", evolution.sort((a, b) => a - b)],
-      ["ignition", ignition.sort((a, b) => a - b)],
-      ["mention", mentionEdges.get(card.cardId) ?? []],
-      ["mentioned-by", mentionedByEdges.get(card.cardId) ?? []],
-      ["series", (seriesGroups.get(card.series) ?? []).filter((cardId) => cardId !== card.cardId)],
-    ];
+    const mentionedBy = (mentionedByEdges.get(card.cardId) ?? [])
+      .map((cardId) => ({ cardId, kind: "mentions" }));
+
+    const siblings = (seriesGroups.get(card.series) ?? [])
+      .filter((cardId) => cardId !== card.cardId)
+      .map((cardId) => ({ cardId, kind: "same-series-as", seriesCode: card.series }));
+
+    return [evolution, ignition, mentions, series, mentionedBy, siblings]
+      .map((group) => group.sort(compareByCardId));
   }
 
   for (const card of cards) {
@@ -190,12 +265,14 @@ export function stampRelatedCards(cards) {
     const queue = [card.cardId];
     while (queue.length > 0) {
       const current = byId.get(queue.shift());
-      for (const [kind, targets] of edgeGroups(current)) {
-        for (const targetId of targets) {
-          if (seen.has(targetId)) continue;
-          seen.add(targetId);
-          related.push({ cardId: targetId, kind });
-          queue.push(targetId);
+      for (const group of edgeGroups(current)) {
+        for (const edge of group) {
+          if (seen.has(edge.cardId)) continue;
+          seen.add(edge.cardId);
+          const entry = { cardId: edge.cardId, kind: edge.kind, peerCardId: current.cardId };
+          if (edge.seriesCode !== undefined) entry.seriesCode = edge.seriesCode;
+          related.push(entry);
+          queue.push(edge.cardId);
         }
       }
     }

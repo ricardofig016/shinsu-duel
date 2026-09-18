@@ -29,6 +29,14 @@ client through two channels:
   files are engine data too (conditions and attributes drive mechanics), not
   only tooltip copy.
 
+Every prose field in those catalogs is authored with the same inline-link
+syntax as card text and compiled into display segments at build time. The
+engine keeps reading the authoring files for mechanics; the card views and the
+content routes serve the compiled copy from
+`server/data/compiled/catalog-copy.json` (see
+[COMPILED_CARD_DSL.md](./COMPILED_CARD_DSL.md#shared-catalog-copy)). The
+`affiliations` catalog stays plain text and carries no links.
+
 When the glossary is unavailable, tooltips degrade to what the card views
 still carry: glossary-only tooltips (type letter, rank, header concepts, HUD)
 are skipped, and no copy is substituted from the frontend.
@@ -137,18 +145,25 @@ from the enforced ones.
 | Board combat slot, card positions  | Position name               | Line label, description, italic verbose description; the chosen variant appends the glossary chosen suffix |
 | Deployed unit artwork (`unit-card-horizontal`) | Unit name | The unit's own abilities as segment entries, then its equipment-granted abilities in italic — both keep their inline links |
 | Type letter (card-vertical)        | Kind name (standard shows "Unit") or type name | Kind or type summary from the glossary  |
-| Rank trapezoid                     | "Rank"                      | Italic concept, then every rank with cost range and description; the card's own rank is strong |
+| Rank trapezoid                     | "Rank" (glossary rank title) | Italic concept, then every rank with cost range and description; the card's own rank is strong |
 | Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | Italic prose description, then the attribute's effect lines (the RULES.md core-mechanic block) |
 | Evolve / Ignition / Passives / Requirements header icons | Glossary concept name | Italic concept description, then the card's printed texts |
 | HUD (shinsu, recharged, HP, lighthouses, fire charges, deck) | Glossary name | Glossary texts; the deck count fills the `{count}` template |
 
+Every prose field above arrives as compiled display segments, so a link
+authored in shared catalog copy renders in the tooltip. The entries are
+assembled by the builders in `public/utils/tooltip-entries.js`.
+
 ---
 
-## RULES.md alignment
+## Copy sources
 
-`server/game/tests/integration/DataDescriptionsAudit.test.js` verifies that
-every shipped condition, trait, and position description, every attribute
-description and effect line, and the glossary rank descriptions appear
-verbatim in `RULES.md` (markdown stripped, compared sentence by sentence). A
-rule change must update the display data in the same change as `RULES.md`, or
-the audit fails.
+Condition, trait, attribute, position, and glossary copy is authored in
+`server/data/*.json` and compiled into `server/data/compiled/catalog-copy.json`
+by `npm run compile:cards`; the card views and the content routes serve the
+compiled form. The artifact, its layout, and the projection into card views are
+documented once in
+[COMPILED_CARD_DSL.md](./COMPILED_CARD_DSL.md#shared-catalog-copy). No test
+compares this copy against `RULES.md`: the data files are the authoring source,
+and a rule change updates them in the same change.
+

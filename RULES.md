@@ -458,7 +458,7 @@ Hwayeomsa are flame users who are able to convert shinsu into fire. They deal te
 **Core in-game mechanic:**
 
 ```md
-spend 1, Free: gain 1 Fire Charge and create Fire Core in your hand if you don't already have one
+Spend 1, Free: gain 1 Fire Charge and create Fire Core in your hand if you don't already have one
 Fire Core: Quick: spend Fire Charges to create the highest affordable Incinerate in your hand
 Incinerate I: create me by spending 1 Fire Charge. deal 1 to an enemy
 Incinerate II: create me by spending 3 Fire Charges. deal 2 to 2 enemies

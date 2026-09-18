@@ -115,6 +115,27 @@ describe("buildSearchableText", () => {
     expect(text).not.toContain("[[");
   });
 
+  test("searches compiled catalog prose by its plain projection", () => {
+    const view = {
+      name: "Compiled",
+      printedTraits: [{ code: "lethal", name: "Lethal", description: { segments: ["Kill what I damage."] } }],
+      attributes: [
+        {
+          code: "hwayeomsa",
+          name: "Hwayeomsa",
+          description: { segments: ["Flame users who convert ", { type: "rule", ref: "shinsu", text: "Shinsu" }, " into fire."] },
+        },
+      ],
+      positions: { scout: { name: "Scout", description: { segments: ["The scout line."] } } },
+    };
+
+    const text = buildSearchableText(view);
+    expect(text).toContain("kill what i damage.");
+    expect(text).toContain("flame users who convert shinsu into fire.");
+    expect(text).toContain("the scout line.");
+    expect(text).not.toContain("[[");
+  });
+
   test("tolerates sparse views", () => {
     expect(buildSearchableText({ name: "Lone" })).toBe("lone");
     expect(buildSearchableText({})).toBe("");

@@ -55,9 +55,9 @@ export function buildSearchableText(view) {
     ...(view.evolveTriggers ?? []).map(segmentsText),
     ...(view.igniteTriggers ?? []).map(segmentsText),
     ...(view.affiliations ?? []).map((affiliation) => asString(affiliation.name)),
-    ...(view.printedTraits ?? []).flatMap((trait) => [asString(trait.name), asString(trait.description)]),
-    ...(view.attributes ?? []).flatMap((attribute) => [asString(attribute.name), asString(attribute.description)]),
-    ...Object.values(view.positions ?? {}).flatMap((position) => [asString(position.name), asString(position.description)]),
+    ...(view.printedTraits ?? []).flatMap((trait) => [asString(trait.name), segmentsText(trait.description)]),
+    ...(view.attributes ?? []).flatMap((attribute) => [asString(attribute.name), segmentsText(attribute.description)]),
+    ...Object.values(view.positions ?? {}).flatMap((position) => [asString(position.name), segmentsText(position.description)]),
   ];
   return parts.filter((part) => part !== "").join(" ").toLowerCase();
 }

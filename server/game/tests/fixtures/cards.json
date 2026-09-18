@@ -20,11 +20,13 @@
     "relatedCards": [
       {
         "cardId": 10031,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 1
       },
       {
         "cardId": 10032,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10031
       }
     ]
   },
@@ -850,19 +852,23 @@
     "relatedCards": [
       {
         "cardId": 10057,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       },
       {
         "cardId": 10066,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       },
       {
         "cardId": 10067,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       },
       {
         "cardId": 10072,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10067
       }
     ]
   },
@@ -901,19 +907,37 @@
     "relatedCards": [
       {
         "cardId": 10052,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10053,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10055,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10018,
+        "kind": "mentions",
+        "peerCardId": 10001
+      },
+      {
+        "cardId": 10047,
+        "kind": "mentions",
+        "peerCardId": 10001
       }
     ]
   },
@@ -1149,27 +1173,33 @@
     "relatedCards": [
       {
         "cardId": 10016,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10029,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10033,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10015,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10016
       },
       {
         "cardId": 10017,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10016
       },
       {
         "cardId": 10034,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10033
       }
     ]
   },
@@ -1413,7 +1443,8 @@
     "relatedCards": [
       {
         "cardId": 10021,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10014
       }
     ]
   },
@@ -1449,27 +1480,33 @@
     "relatedCards": [
       {
         "cardId": 10016,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10015
       },
       {
         "cardId": 10017,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10016
       },
       {
         "cardId": 10008,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10016
       },
       {
         "cardId": 10029,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10033,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10034,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10033
       }
     ]
   },
@@ -1507,27 +1544,33 @@
     "relatedCards": [
       {
         "cardId": 10015,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10016
       },
       {
         "cardId": 10017,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10016
       },
       {
         "cardId": 10008,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10016
       },
       {
         "cardId": 10029,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10033,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10034,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10033
       }
     ]
   },
@@ -1553,27 +1596,33 @@
     "relatedCards": [
       {
         "cardId": 10016,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10017
       },
       {
         "cardId": 10015,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10016
       },
       {
         "cardId": 10008,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10016
       },
       {
         "cardId": 10029,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10033,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10034,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10033
       }
     ]
   },
@@ -1606,7 +1655,43 @@
         ]
       }
     ],
-    "slug": "test_compress_skill"
+    "slug": "test_compress_skill",
+    "relatedCards": [
+      {
+        "cardId": 10001,
+        "kind": "mentioned-in",
+        "peerCardId": 10018
+      },
+      {
+        "cardId": 10052,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10053,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10054,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10055,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10047,
+        "kind": "mentions",
+        "peerCardId": 10001
+      }
+    ]
   },
   "10019": {
     "cardId": 10019,
@@ -1716,7 +1801,8 @@
     "relatedCards": [
       {
         "cardId": 10014,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10021
       }
     ]
   },
@@ -1760,7 +1846,8 @@
     "relatedCards": [
       {
         "cardId": 10023,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10022
       }
     ]
   },
@@ -1790,7 +1877,8 @@
     "relatedCards": [
       {
         "cardId": 10022,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10023
       }
     ]
   },
@@ -1885,7 +1973,8 @@
     "relatedCards": [
       {
         "cardId": 10027,
-        "kind": "ignition"
+        "kind": "ignited-from",
+        "peerCardId": 10026
       }
     ]
   },
@@ -1933,7 +2022,8 @@
     "relatedCards": [
       {
         "cardId": 10026,
-        "kind": "ignition"
+        "kind": "ignites-into",
+        "peerCardId": 10027
       }
     ]
   },
@@ -2004,27 +2094,33 @@
     "relatedCards": [
       {
         "cardId": 10008,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10029
       },
       {
         "cardId": 10016,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10033,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10015,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10016
       },
       {
         "cardId": 10017,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10016
       },
       {
         "cardId": 10034,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10033
       }
     ]
   },
@@ -2093,11 +2189,13 @@
     "relatedCards": [
       {
         "cardId": 10032,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10031
       },
       {
         "cardId": 1,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10031
       }
     ]
   },
@@ -2123,11 +2221,13 @@
     "relatedCards": [
       {
         "cardId": 10031,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10032
       },
       {
         "cardId": 1,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10031
       }
     ]
   },
@@ -2185,27 +2285,33 @@
     "relatedCards": [
       {
         "cardId": 10034,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10033
       },
       {
         "cardId": 10008,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10033
       },
       {
         "cardId": 10016,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10029,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10015,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10016
       },
       {
         "cardId": 10017,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10016
       }
     ]
   },
@@ -2266,27 +2372,33 @@
     "relatedCards": [
       {
         "cardId": 10033,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10034
       },
       {
         "cardId": 10008,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10033
       },
       {
         "cardId": 10016,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10029,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10008
       },
       {
         "cardId": 10015,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10016
       },
       {
         "cardId": 10017,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10016
       }
     ]
   },
@@ -2687,7 +2799,8 @@
     "relatedCards": [
       {
         "cardId": 10085,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10044
       }
     ]
   },
@@ -2820,7 +2933,43 @@
         ]
       }
     ],
-    "slug": "test_hwayeomsa"
+    "slug": "test_hwayeomsa",
+    "relatedCards": [
+      {
+        "cardId": 10001,
+        "kind": "mentioned-in",
+        "peerCardId": 10047
+      },
+      {
+        "cardId": 10052,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10053,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10054,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10055,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10018,
+        "kind": "mentions",
+        "peerCardId": 10001
+      }
+    ]
   },
   "10048": {
     "cardId": 10048,
@@ -2857,7 +3006,8 @@
     "relatedCards": [
       {
         "cardId": 10049,
-        "kind": "ignition"
+        "kind": "ignited-from",
+        "peerCardId": 10048
       }
     ]
   },
@@ -2899,7 +3049,8 @@
     "relatedCards": [
       {
         "cardId": 10048,
-        "kind": "ignition"
+        "kind": "ignites-into",
+        "peerCardId": 10049
       }
     ]
   },
@@ -2935,7 +3086,8 @@
     "relatedCards": [
       {
         "cardId": 10051,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10050
       }
     ]
   },
@@ -2965,7 +3117,8 @@
     "relatedCards": [
       {
         "cardId": 10050,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10051
       }
     ]
   },
@@ -3007,19 +3160,36 @@
     "relatedCards": [
       {
         "cardId": 10001,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10052
       },
       {
         "cardId": 10053,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10052,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10052,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10055,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10052,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10018,
+        "kind": "mentions",
+        "peerCardId": 10001
+      },
+      {
+        "cardId": 10047,
+        "kind": "mentions",
+        "peerCardId": 10001
       }
     ]
   },
@@ -3062,19 +3232,36 @@
     "relatedCards": [
       {
         "cardId": 10001,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10053
       },
       {
         "cardId": 10052,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10053,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10053,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10055,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10053,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10018,
+        "kind": "mentions",
+        "peerCardId": 10001
+      },
+      {
+        "cardId": 10047,
+        "kind": "mentions",
+        "peerCardId": 10001
       }
     ]
   },
@@ -3132,19 +3319,36 @@
     "relatedCards": [
       {
         "cardId": 10001,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10054
       },
       {
         "cardId": 10052,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10054,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10053,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10054,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10055,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10054,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10018,
+        "kind": "mentions",
+        "peerCardId": 10001
+      },
+      {
+        "cardId": 10047,
+        "kind": "mentions",
+        "peerCardId": 10001
       }
     ]
   },
@@ -3201,19 +3405,36 @@
     "relatedCards": [
       {
         "cardId": 10001,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10055
       },
       {
         "cardId": 10052,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10055,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10053,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10055,
+        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10055,
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10018,
+        "kind": "mentions",
+        "peerCardId": 10001
+      },
+      {
+        "cardId": 10047,
+        "kind": "mentions",
+        "peerCardId": 10001
       }
     ]
   },
@@ -3300,19 +3521,23 @@
     "relatedCards": [
       {
         "cardId": 10000,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10057
       },
       {
         "cardId": 10066,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       },
       {
         "cardId": 10067,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       },
       {
         "cardId": 10072,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10067
       }
     ]
   },
@@ -3456,11 +3681,15 @@
     "relatedCards": [
       {
         "cardId": 10092,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10062,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 10103,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10062,
+        "seriesCode": "jeonsul-baang"
       }
     ]
   },
@@ -3634,19 +3863,23 @@
     "relatedCards": [
       {
         "cardId": 10067,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10066
       },
       {
         "cardId": 10000,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10066
       },
       {
         "cardId": 10072,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10067
       },
       {
         "cardId": 10057,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       }
     ]
   },
@@ -3724,19 +3957,23 @@
     "relatedCards": [
       {
         "cardId": 10066,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10067
       },
       {
         "cardId": 10000,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10067
       },
       {
         "cardId": 10072,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10067
       },
       {
         "cardId": 10057,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       }
     ]
   },
@@ -3925,19 +4162,23 @@
     "relatedCards": [
       {
         "cardId": 10067,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10072
       },
       {
         "cardId": 10066,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10067
       },
       {
         "cardId": 10000,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10067
       },
       {
         "cardId": 10057,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10000
       }
     ]
   },
@@ -4220,7 +4461,8 @@
     "relatedCards": [
       {
         "cardId": 10082,
-        "kind": "ignition"
+        "kind": "ignited-from",
+        "peerCardId": 10081
       }
     ]
   },
@@ -4262,7 +4504,8 @@
     "relatedCards": [
       {
         "cardId": 10081,
-        "kind": "ignition"
+        "kind": "ignites-into",
+        "peerCardId": 10082
       }
     ]
   },
@@ -4393,7 +4636,8 @@
     "relatedCards": [
       {
         "cardId": 10044,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10085
       }
     ]
   },
@@ -4492,11 +4736,13 @@
     "relatedCards": [
       {
         "cardId": 10089,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10088
       },
       {
         "cardId": 10090,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10089
       }
     ]
   },
@@ -4549,11 +4795,13 @@
     "relatedCards": [
       {
         "cardId": 10088,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10089
       },
       {
         "cardId": 10090,
-        "kind": "evolution"
+        "kind": "evolves-from",
+        "peerCardId": 10089
       }
     ]
   },
@@ -4579,11 +4827,13 @@
     "relatedCards": [
       {
         "cardId": 10089,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10090
       },
       {
         "cardId": 10088,
-        "kind": "evolution"
+        "kind": "evolves-into",
+        "peerCardId": 10089
       }
     ]
   },
@@ -4650,11 +4900,15 @@
     "relatedCards": [
       {
         "cardId": 10062,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10092,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 10103,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10092,
+        "seriesCode": "jeonsul-baang"
       }
     ]
   },
@@ -4856,19 +5110,23 @@
     "relatedCards": [
       {
         "cardId": 10097,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10096
       },
       {
         "cardId": 10098,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10096
       },
       {
         "cardId": 10099,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10096
       },
       {
         "cardId": 10100,
-        "kind": "mentioned-by"
+        "kind": "mentions",
+        "peerCardId": 10096
       }
     ]
   },
@@ -4937,19 +5195,26 @@
     "relatedCards": [
       {
         "cardId": 10096,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10097
       },
       {
         "cardId": 10098,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10097,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10099,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10097,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10100,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10097,
+        "seriesCode": "thorn-fragment"
       }
     ]
   },
@@ -5018,19 +5283,26 @@
     "relatedCards": [
       {
         "cardId": 10096,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10098
       },
       {
         "cardId": 10097,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10098,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10099,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10098,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10100,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10098,
+        "seriesCode": "thorn-fragment"
       }
     ]
   },
@@ -5099,19 +5371,26 @@
     "relatedCards": [
       {
         "cardId": 10096,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10099
       },
       {
         "cardId": 10097,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10099,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10098,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10099,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10100,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10099,
+        "seriesCode": "thorn-fragment"
       }
     ]
   },
@@ -5180,19 +5459,26 @@
     "relatedCards": [
       {
         "cardId": 10096,
-        "kind": "mention"
+        "kind": "mentioned-in",
+        "peerCardId": 10100
       },
       {
         "cardId": 10097,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10100,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10098,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10100,
+        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10099,
-        "kind": "mention"
+        "kind": "series-mentioned",
+        "peerCardId": 10100,
+        "seriesCode": "thorn-fragment"
       }
     ]
   },
@@ -5231,7 +5517,8 @@
     "relatedCards": [
       {
         "cardId": 10102,
-        "kind": "ignition"
+        "kind": "ignited-from",
+        "peerCardId": 10101
       }
     ]
   },
@@ -5259,7 +5546,8 @@
     "relatedCards": [
       {
         "cardId": 10101,
-        "kind": "ignition"
+        "kind": "ignites-into",
+        "peerCardId": 10102
       }
     ]
   },
@@ -5287,11 +5575,15 @@
     "relatedCards": [
       {
         "cardId": 10062,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10103,
+        "seriesCode": "jeonsul-baang"
       },
       {
         "cardId": 10092,
-        "kind": "series"
+        "kind": "same-series-as",
+        "peerCardId": 10103,
+        "seriesCode": "jeonsul-baang"
       }
     ]
   },
