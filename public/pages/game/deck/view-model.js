@@ -10,7 +10,7 @@
 import { DECK_TABLE_COLUMNS, DEFAULT_DECK_LIMITS, buildDeckTableRow } from "../../../utils/deck-model.js";
 
 /** How long the versus reveal stays up before the board takes over. */
-export const VERSUS_BEAT_MS = 5000;
+export const VERSUS_BEAT_MS = 1000;
 
 /**
  * The columns this step's table shows: the deck list's columns without the two
