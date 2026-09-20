@@ -6,8 +6,8 @@
 }
 
 #rules-container {
+  /* the page's scroll host: global.css sizes it under the navbar and the tabs */
   padding: 0 8rem 12rem 8rem;
-  max-height: calc(100vh - 11rem);
 }
 
 #rules-container img {

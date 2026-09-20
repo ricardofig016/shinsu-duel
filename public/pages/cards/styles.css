@@ -1,6 +1,6 @@
 #cards-page-container {
+  /* the page's scroll host: global.css sizes it under the navbar */
   padding: 0 2rem 6rem 2rem;
-  max-height: 100vh;
   overflow-x: clip;
 }
 

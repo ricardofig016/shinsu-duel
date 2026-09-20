@@ -47,8 +47,28 @@ h1 {
   font-weight: normal;
 }
 
+/* Pages whose content outgrows the viewport mark their scroll host
+   `.allow-scroll`: the board owns the clipping `html/body` rule and does not
+   link this. The host fills what the blocks above it leave (the navbar, the
+   rules tabs), because a host sized against the viewport is taller than the
+   space it has: its bottom — and the scrollbar it owns — hangs below the window
+   by exactly the height of those blocks (measured: a 70px navbar put the host's
+   bottom 70px past the viewport, and everything under the overhang could never
+   be scrolled into view). The flex sizing is for the page-level host only: a
+   nested `.allow-scroll`, such as the hand peek list, is a flex item of a panel
+   that sizes it already. */
 .allow-scroll {
   overflow-y: auto;
+}
+
+body:has(> .allow-scroll) {
+  display: flex;
+  flex-direction: column;
+}
+
+body > .allow-scroll {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 /* Inline text links inside compiled display segments (card prose, tooltips).

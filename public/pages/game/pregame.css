@@ -1,5 +1,9 @@
 /* Shared shell of the two pre-game steps: the waiting room and the deck step.
-   The board is a full-screen page of its own and links none of this. */
+   The board is a full-screen page of its own and links none of this.
+
+   Both steps host the shell as the page's scroll host (`.allow-scroll`, see
+   global.css): the deck step lists every deck the player owns, which outgrows
+   the viewport. */
 
 .pregame-container {
   display: flex;
