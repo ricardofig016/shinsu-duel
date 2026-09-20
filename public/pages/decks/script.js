@@ -434,7 +434,7 @@ const buildDeckRowElements = async () => {
     });
 
     tbody.appendChild(tr);
-    state.deckRows.set(deck.id, { deck, tr });
+    state.deckRows.set(deck.id, { deck, row, tr });
     mounts.push(mountDeckFan(cells.get("fan"), row.fan));
   }
   await Promise.all(mounts);
@@ -445,16 +445,19 @@ const syncDeckTable = () => {
   const tbody = byId("decks-table-body");
   const needle = state.deckSearch.trim().toLowerCase();
   const visible = [];
-  for (const { deck, tr } of state.deckRows.values()) {
+  for (const { deck, row, tr } of state.deckRows.values()) {
     const matches =
       (needle === "" || deck.name.toLowerCase().includes(needle)) &&
       (state.deckLegality === "all" || (state.deckLegality === "legal" ? deck.legal : !deck.legal)) &&
       deckMatchesCardCriteria(deck.cards, state.entriesBySlug, state.deckCardCriteria);
     tr.classList.toggle("hidden", !matches);
-    if (matches) visible.push({ tr, sortView: { id: deck.id, name: deck.name, cardCount: (deck.cards ?? []).length } });
+    if (matches) visible.push({ row, tr });
   }
-  const ordered = [...visible].sort(compareDecks(state.deckSortKey));
-  for (const { tr } of ordered) tbody.appendChild(tr); // reorder
+  // The comparator reads the row model (name, size, id); handing it the DOM
+  // wrappers instead ties every comparison on undefined and the list keeps
+  // whatever order it was built in.
+  visible.sort((a, b) => compareDecks(state.deckSortKey)(a.row, b.row));
+  for (const { tr } of visible) tbody.appendChild(tr); // reorder
 
   byId("decks-empty").classList.toggle("hidden", state.decks.length > 0);
   byId("decks-no-match").classList.toggle("hidden", state.decks.length === 0 || visible.length > 0);
