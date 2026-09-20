@@ -3,7 +3,7 @@ import loadTooltip from "/components/tooltip/script.js";
 import loadUnitCardHorizontal from "/components/unit-card-horizontal/script.js";
 import loadCardVertical from "/components/card-vertical/script.js";
 import loadCardDetailOverlay from "/components/card-detail-overlay/script.js";
-import { isStaleTooltip } from "/utils/tooltip-lifetime.js";
+import { staleTooltips } from "/utils/tooltip-lifetime.js";
 
 const components = {
   navbar: { load: loadNavbar },
@@ -87,22 +87,36 @@ export const loadComponent = async (container, component, data = null) => {
  * nearest positioned ancestor rather than the page origin.
  *
  * Mounting on the body costs the host's own cleanup: a host removes its
- * subtree, and a body-mounted tooltip is not in it. A page that opens and
- * closes the overlay mounts a tooltip per card face each time, so a tooltip
- * whose target has left the document is dropped as soon as the next one
- * mounts. That keeps at most one dead host alive, and the layer never grows
- * past the tooltips of the surfaces currently on the page.
+ * subtree, and a body-mounted tooltip is not in it. The layer therefore watches
+ * the document and drops a tooltip whose target has left, in the same task it
+ * left in — a host that removes its subtree never fires the `mouseout` that
+ * hides the frame, so nothing else would take it off the screen until another
+ * tooltip mounted. The layer never grows past the tooltips of the surfaces
+ * currently on the page.
  */
 const mountedTooltips = new Set();
 
 const pruneTooltips = () => {
-  for (const tooltip of [...mountedTooltips]) {
-    const targetConnected = tooltip.target.isConnected;
-    if (targetConnected) tooltip.attached = true;
-    if (!isStaleTooltip({ settled: tooltip.settled, attached: tooltip.attached, targetConnected })) continue;
+  for (const tooltip of staleTooltips([...mountedTooltips], (target) => target.isConnected)) {
     tooltip.element.remove();
     mountedTooltips.delete(tooltip);
   }
+};
+
+/**
+ * Prune on every change to the document, so a target's removal is enough on its
+ * own. One observer per page, installed with the first tooltip and kept:
+ * pruning is one pass over the mounted set and removes nothing while none of
+ * them is stale. Mutation callbacks run once per synchronous DOM change, after
+ * it has finished, so a target that a host moved is connected again by the time
+ * the rule reads it and its tooltip survives.
+ */
+let documentObserver = null;
+
+const observeTooltipTargets = () => {
+  if (documentObserver || typeof MutationObserver !== "function") return;
+  documentObserver = new MutationObserver(() => pruneTooltips());
+  documentObserver.observe(document.body, { childList: true, subtree: true });
 };
 
 /**
@@ -119,12 +133,16 @@ export const mountTooltip = (hoverContainer, options = {}) => {
   document.body.appendChild(element);
   const mounted = { target: hoverContainer, element, settled: false, attached: hoverContainer.isConnected };
   mountedTooltips.add(mounted);
+  observeTooltipTargets();
   const loaded = loadComponent(element, "tooltip", { ...options, hoverContainer });
   // the settled mark is bookkeeping for the prune pass; the caller still owns
-  // the load's rejection
+  // the load's rejection. The prune here is what drops a tooltip whose target
+  // left while it was loading: that removal is deferred until the load settles,
+  // because aborting the load would strand the caller waiting on it.
   loaded
     .finally(() => {
       mounted.settled = true;
+      pruneTooltips();
     })
     .catch(() => {});
   return { element, loaded };

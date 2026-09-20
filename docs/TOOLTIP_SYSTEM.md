@@ -93,12 +93,19 @@ are both load-bearing:
 - a tooltip that is still loading is never removed, because its renderer waits
   on its own stylesheet and removing the element aborts that load, which leaves
   the caller that mounted it waiting forever. One card's tooltip could deadlock
-  another card's render, and with it a page's whole setup;
+  another card's render, and with it a page's whole setup. A target that leaves
+  while its tooltip is loading is therefore dropped when that load settles;
 - a target that has never been in the document has not left it, because callers
   build an element and then append it. Mounting a tooltip on an element that has
   not joined the tree yet is still wrong for the first reason's sake: put the
   element in its parent first, as `card-vertical` does for its header icons,
   strip icons, paged tooltip rows, and position icons.
+
+The layer observes the document, because the target's own events cannot report
+its removal: a host that deletes a subtree never fires the `mouseout` that hides
+the frame, so the frame would stay painted over the page until something else
+mounted a tooltip. Pruning on the body's changes drops it in the same task its
+target left, before the next paint, so no host has to release its tooltips.
 
 The tooltip's stylesheet only ever targets the tooltip's own classes. Its
 frame can host a whole component as an entry node, so an element selector such

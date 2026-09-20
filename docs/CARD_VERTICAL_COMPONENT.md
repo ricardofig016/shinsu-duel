@@ -153,6 +153,9 @@ would land short by exactly the distance still in flight.
 - wheel/trackpad scroll steps the focus one card at a time (snapped, no wrap),
 - clicking a card focuses it,
 - left/right arrow keys move the focus while the overlay is open,
+- clicking an ability line of the focus card runs the page's ability handler and
+  closes the overlay: the ability is played on the board underneath, which the
+  overlay would otherwise hide while the player picks its target,
 - Escape, a right-click anywhere in the overlay, or a click outside a card
   closes it.
 

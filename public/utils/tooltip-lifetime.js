@@ -30,3 +30,21 @@
  */
 export const isStaleTooltip = ({ settled, attached, targetConnected }) =>
   settled && attached && !targetConnected;
+
+/**
+ * The tooltips to drop from a mounted batch. The caller observes the document
+ * and this decides; `attached` latches here, because a target that was in the
+ * document and left has left. Mutates the entries it is handed and touches no
+ * DOM itself.
+ *
+ * @param {Array<object>} mounted entries carrying `target`, `settled`, and `attached`
+ * @param {(target: object) => boolean} isConnected whether that target is in the document right now
+ * @returns {Array<object>} the entries the caller may remove
+ */
+export const staleTooltips = (mounted, isConnected) => {
+  for (const tooltip of mounted) {
+    tooltip.targetConnected = isConnected(tooltip.target);
+    if (tooltip.targetConnected) tooltip.attached = true;
+  }
+  return mounted.filter(isStaleTooltip);
+};

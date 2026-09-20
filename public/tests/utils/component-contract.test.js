@@ -131,3 +131,45 @@ describe("render order", () => {
     expect(host).toBeLessThan(load);
   });
 });
+
+/**
+ * Tooltip lifetime has two halves: the rule (pure, in `tooltip-lifetime.js`) and
+ * the observation that feeds it. A host that removes its subtree never fires the
+ * `mouseout` that hides the frame, so a body-mounted tooltip stays painted over
+ * the page; pruning only inside the next mount left a closed overlay's tooltip
+ * on screen until something else mounted one. The layer must therefore watch the
+ * document itself — and still keep a loading tooltip alive, because removing it
+ * aborts the stylesheet its renderer waits on.
+ */
+describe("tooltip lifetime trigger", () => {
+  test("the layer prunes on the document's changes, not only on mount", () => {
+    expect(source).toMatch(/new MutationObserver\(\(\) => pruneTooltips\(\)\)/);
+    expect(source).toMatch(/\.observe\(document\.body, \{ childList: true, subtree: true \}\)/);
+  });
+
+  test("a tooltip that settles after its target left is dropped then", () => {
+    const settledAt = source.indexOf("mounted.settled = true");
+    expect(settledAt).toBeGreaterThan(-1);
+    expect(source.slice(settledAt, settledAt + 200)).toMatch(/pruneTooltips\(\)/);
+  });
+});
+
+/**
+ * An ability clicked in the card detail overlay is an action on the board the
+ * overlay covers: the page's handler plays it, and the overlay then has to get
+ * out of the way of the target the player picks next.
+ */
+describe("overlay ability clicks", () => {
+  const overlay = fs.readFileSync(path.join(root, "public/components/card-detail-overlay/script.js"), "utf-8");
+
+  test("run the page's handler and dismiss the overlay", () => {
+    const wrapper = /const abilityClick = onAbilityClick([\s\S]*?)\n    : null;/.exec(overlay);
+    expect(wrapper).not.toBeNull();
+    expect(wrapper[1]).toMatch(/onAbilityClick\(/);
+    expect(wrapper[1]).toMatch(/close\(\)/);
+  });
+
+  test("the focus unit is rendered with that handler", () => {
+    expect(overlay).toMatch(/onAbilityClick: abilityClick/);
+  });
+});

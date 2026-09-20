@@ -106,6 +106,19 @@ export async function openCardDetail({
   });
   const { left, right, focusIndex } = assembleDetailRow(model, catalog);
 
+  // An ability click plays the ability on the board the overlay covers, so the
+  // overlay dismisses itself: left up, it hides the field the player has to
+  // pick the ability's target on. The handler runs first — the ability is the
+  // action and the dismissal is what follows it. `close` belongs to the
+  // lifecycle declared below and is only ever reached from a click, which the
+  // overlay cannot receive while it is still assembling.
+  const abilityClick = onAbilityClick
+    ? (unitId, abilityCode) => {
+        onAbilityClick(unitId, abilityCode);
+        close();
+      }
+    : null;
+
   // One slot per row entry, focus included; side slots carry their relation
   // tag under the card. Every slot joins the row in order first, then the cards
   // render: each card mounts about ten tooltips and fits two blocks of text, and
@@ -134,7 +147,7 @@ export async function openCardDetail({
     entries.map(async (entry, index) => {
       const isFocus = entry.kind === "focus";
       await loadComponent(slots[index].firstElementChild, "card-vertical", isFocus && unit
-        ? { unit, isSmall: false, onAbilityClick }
+        ? { unit, isSmall: false, onAbilityClick: abilityClick }
         : { card: isFocus ? model : entry.card, isSmall: false });
       frames[index] = slots[index].querySelector(".card-vertical-frame");
     })
