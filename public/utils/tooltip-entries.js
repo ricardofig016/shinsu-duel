@@ -13,8 +13,10 @@
  * - `{ node }` — a pre-built DOM element (e.g. a card preview), appended as
  *   is; callers build elements, never markup strings.
  *
- * Nothing here authors copy; when the glossary is unavailable the entries
- * degrade to the data the card views still carry.
+ * Entries are built in the order the tooltip renders them: what the entry does
+ * in the game first, the flavor that explains it (the italic descriptions and
+ * concept lines) after. Nothing here authors copy; when the glossary is
+ * unavailable the entries degrade to the data the card views still carry.
  */
 
 import { segmentsToPlainText, TITLE_VALUE_FALLBACK } from "./card-text.js";
@@ -148,35 +150,25 @@ export const buildPositionTooltipEntries = (position, glossary, { chosen = false
 };
 
 /**
- * Attribute tooltip entries: the attribute's prose description in italic,
- * then its effect lines (the core mechanic) as plain entries.
- */
-export const buildAttributeTooltipEntries = (attribute) => {
-  if (!attribute) return [];
-  const entries = [];
-  const description = buildProseEntry(attribute.description, "italic");
-  if (description) entries.push(description);
-  for (const line of attribute.effect ?? []) {
-    const entry = buildProseEntry(line);
-    if (entry) entries.push(entry);
-  }
-  return entries;
-};
-
-/**
- * A code-keyed catalog entry's tooltip entries: its prose description in
- * italic, then its effect lines. Conditions, traits, and positions all
- * display this way; positions additionally use the position builder above.
+ * A catalog entry's tooltip entries: its effect lines first, then its own prose
+ * in italic. That prose is the entry's flavor — an attribute's lore — or the
+ * concept line that explains the entry, and flavor never leads the tooltip:
+ * someone hovering wants what the entry does to the game before what it is. An
+ * entry carrying only prose (a condition, trait, position, keyword, or rank)
+ * reads as that one italic entry.
+ *
+ * Serves both the attribute icon on a card face and every catalog link hover
+ * (`public/utils/card-text-dom.js`), which must read identically.
  */
 export const buildCatalogTooltipEntries = (entry) => {
   if (!entry) return [];
   const entries = [];
-  const description = buildProseEntry(entry.description, "italic");
-  if (description) entries.push(description);
   for (const line of entry.effect ?? []) {
     const item = buildProseEntry(line);
     if (item) entries.push(item);
   }
+  const description = buildProseEntry(entry.description, "italic");
+  if (description) entries.push(description);
   return entries;
 };
 
@@ -212,9 +204,10 @@ const proseSegments = (value) => {
 };
 
 /**
- * Rank tooltip: the italic concept line, then one entry per rank with its
- * cost range and description; the card's own rank is strong. Returns null
- * when the glossary carries no ranks.
+ * Rank tooltip: one entry per rank with its cost range and description, the
+ * card's own rank strong, then the italic concept line. The ranks and their
+ * ranges are the game-relevant part, so they open the tooltip and the concept
+ * follows them. Returns null when the glossary carries no ranks.
  *
  * The rank title is compiled prose like the rest of the glossary copy, but a
  * tooltip title is a plain string field, so it is projected here; handing the
@@ -223,8 +216,6 @@ const proseSegments = (value) => {
 export const buildRankTooltip = (rankCode, ranks) => {
   if (!ranks?.title || !Array.isArray(ranks.list) || ranks.list.length === 0) return null;
   const texts = [];
-  const concept = buildProseEntry(ranks.concept, "italic");
-  if (concept) texts.push(concept);
   for (const rank of ranks.list) {
     const style = rank.code === rankCode ? "strong" : null;
     // The label is prose, not a reference: as a string segment it renders as
@@ -233,6 +224,8 @@ export const buildRankTooltip = (rankCode, ranks) => {
     const segments = [label, ...proseSegments(rank.description)];
     texts.push(style ? { segments, style } : { segments });
   }
+  const concept = buildProseEntry(ranks.concept, "italic");
+  if (concept) texts.push(concept);
   return { title: segmentsToPlainText(ranks.title), texts };
 };
 

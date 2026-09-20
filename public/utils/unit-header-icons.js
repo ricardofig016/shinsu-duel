@@ -14,7 +14,7 @@
  * own texts (see docs/TOOLTIP_SYSTEM.md).
  */
 
-import { buildAttributeTooltipEntries, proseEntries } from "./tooltip-entries.js";
+import { buildCatalogTooltipEntries, proseEntries } from "./tooltip-entries.js";
 
 /**
  * The concept clauses of the list, in the order the card-vertical header draws
@@ -45,9 +45,11 @@ const textForClause = (model, field) => {
   return value.map((item) => ({ segments: field === "passiveAbilities" ? item.text : item }));
 };
 
-/** One clause of the list: the glossary's own name and italic description, then
- * the card's printed text for that concept. Null when there is nothing to
- * explain, so the caller contributes no icon.
+/** One clause of the list: the card's printed text for that concept, then the
+ * glossary's italic description of it (the glossary name titles the tooltip).
+ * The card's text is the game-relevant part, so it leads and the concept
+ * follows it. Null when there is nothing to explain, so the caller contributes
+ * no icon.
  */
 const conceptClause = (concepts, { concept, iconPath }, texts) => {
   const copy = concepts?.[concept];
@@ -55,7 +57,7 @@ const conceptClause = (concepts, { concept, iconPath }, texts) => {
   return {
     iconPath,
     title: copy.name,
-    texts: [...proseEntries(copy.description, null, "italic"), ...texts],
+    texts: [...texts, ...proseEntries(copy.description, null, "italic")],
   };
 };
 
@@ -88,7 +90,7 @@ export const buildUnitHeaderIcons = (model, glossary) => {
   }
 
   for (const attribute of model?.attributes ?? []) {
-    add(attribute.iconPath, attribute.title ?? attribute.name, buildAttributeTooltipEntries(attribute));
+    add(attribute.iconPath, attribute.title ?? attribute.name, buildCatalogTooltipEntries(attribute));
   }
 
   for (const clause of CLAUSES) {

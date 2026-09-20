@@ -1,5 +1,4 @@
 import {
-  buildAttributeTooltipEntries,
   buildCatalogTooltipEntries,
   buildDeckTooltipEntries,
   buildEntryTitle,
@@ -152,25 +151,18 @@ describe("buildPositionTooltipEntries", () => {
   });
 });
 
-describe("buildAttributeTooltipEntries", () => {
-  test("leads with the italic description, then the plain effect lines", () => {
+describe("buildCatalogTooltipEntries", () => {
+  test("leads with the effect lines and closes with the italic flavor", () => {
     const attribute = {
       description: "Hwayeomsa are flame users.",
       effect: ["spend 1, Free: gain 1 Fire Charge", "Fire Core: Quick: spend Fire Charges"],
     };
-    expect(buildAttributeTooltipEntries(attribute)).toEqual([
-      { text: "Hwayeomsa are flame users.", style: "italic" },
+
+    expect(buildCatalogTooltipEntries(attribute)).toEqual([
       { text: "spend 1, Free: gain 1 Fire Charge" },
       { text: "Fire Core: Quick: spend Fire Charges" },
+      { text: "Hwayeomsa are flame users.", style: "italic" },
     ]);
-  });
-
-  test("survives a missing description or effect list", () => {
-    expect(buildAttributeTooltipEntries({ effect: ["only effect"] })).toEqual([{ text: "only effect" }]);
-    expect(buildAttributeTooltipEntries({ description: "only prose" })).toEqual([
-      { text: "only prose", style: "italic" },
-    ]);
-    expect(buildAttributeTooltipEntries(null)).toEqual([]);
   });
 
   test("keeps compiled prose (and its links) as segment entries", () => {
@@ -180,19 +172,20 @@ describe("buildAttributeTooltipEntries", () => {
       effect: [{ segments }],
     };
 
-    expect(buildAttributeTooltipEntries(attribute)).toEqual([
-      { segments: ["Hwayeomsa are flame users."], style: "italic" },
+    expect(buildCatalogTooltipEntries(attribute)).toEqual([
       { segments },
+      { segments: ["Hwayeomsa are flame users."], style: "italic" },
     ]);
-    expect(buildCatalogTooltipEntries(attribute)).toEqual(buildAttributeTooltipEntries(attribute));
   });
-});
 
-describe("buildCatalogTooltipEntries", () => {
-  test("leads with the italic description and drops empty fields", () => {
+  test("reads an entry that carries only prose as that one italic entry", () => {
+    // conditions, traits, positions, keywords, and ranks have no effect lines
     expect(buildCatalogTooltipEntries({ description: "I take x damage", effect: [] })).toEqual([
       { text: "I take x damage", style: "italic" },
     ]);
+  });
+
+  test("survives a missing description, effect list, or entry", () => {
     expect(buildCatalogTooltipEntries({ effect: ["only effect"] })).toEqual([{ text: "only effect" }]);
     expect(buildCatalogTooltipEntries(null)).toEqual([]);
   });
@@ -232,13 +225,13 @@ describe("buildUnitAbilityTooltipEntries", () => {
 });
 
 describe("buildRankTooltip", () => {
-  test("titles the tooltip, opens with the italic concept, and lists every rank", () => {
+  test("titles the tooltip, lists every rank, and closes with the italic concept", () => {
     const tooltip = buildRankTooltip("ranker", glossary.ranks);
     expect(tooltip.title).toBe("Rank");
     expect(tooltip.texts).toEqual([
-      { text: "Rank enforces a cost range.", style: "italic" },
       { segments: ["Regular (cost 0-5): ", "a Regular"] },
       { segments: ["Ranker (cost 3-7): ", "a Ranker"], style: "strong" },
+      { text: "Rank enforces a cost range.", style: "italic" },
     ]);
   });
 
@@ -264,9 +257,9 @@ describe("buildRankTooltip", () => {
     const tooltip = buildRankTooltip("ranker", ranks);
     expect(tooltip.title).toBe("Rank");
     expect(tooltip.texts).toEqual([
-      { segments: ["How the person is ranked."], style: "italic" },
       { segments: ["Regular (cost 0-5): ", "a Regular"] },
       { segments: ["Ranker (cost 3-7): ", "a Ranker"], style: "strong" },
+      { segments: ["How the person is ranked."], style: "italic" },
     ]);
   });
 
@@ -280,8 +273,8 @@ describe("buildRankTooltip", () => {
     };
 
     expect(buildRankTooltip("regular", ranks).texts).toEqual([
-      { segments: ["How the person is ranked."], style: "italic" },
       { segments: ["Regular (cost 0-5): ", "Someone chosen by ", { type: "rule", ref: "decks", text: "Headon" }], style: "strong" },
+      { segments: ["How the person is ranked."], style: "italic" },
     ]);
   });
 });

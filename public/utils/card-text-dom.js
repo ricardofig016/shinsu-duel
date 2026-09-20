@@ -133,10 +133,13 @@ async function buildLinkHover(segment) {
       (rank) => rank.code === segment.ref || rank.name?.toLowerCase() === segment.ref
     );
     if (!entry) return null;
-    const entries = buildCatalogTooltipEntries(entry);
+    // the cost range is what the rank does to the game, so it opens the tooltip
+    // and the rank's own prose follows it
+    const entries = [];
     if (entry.minCost != null && entry.maxCost != null) {
       entries.push({ text: `Cost range: ${entry.minCost}-${entry.maxCost}` });
     }
+    entries.push(...buildCatalogTooltipEntries(entry));
     return { title: buildEntryTitle(entry), entries };
   }
 

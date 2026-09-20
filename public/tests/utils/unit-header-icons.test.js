@@ -59,24 +59,24 @@ describe("buildUnitHeaderIcons", () => {
     ]);
   });
 
-  test("explains a concept icon with the glossary description and the card's own texts", () => {
+  test("explains a concept icon with the card's own text, then the glossary description", () => {
     const entries = buildUnitHeaderIcons({ passiveAbilities: [{ text: ["Always watching."] }] }, glossary);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].title).toBe("Passives");
     expect(entries[0].texts).toEqual([
-      { segments: ["Always active."], style: "italic" },
       { segments: ["Always watching."] },
+      { segments: ["Always active."], style: "italic" },
     ]);
   });
 
-  test("states an attribute's own title, description, and effect lines", () => {
+  test("states an attribute's title, its effect lines, then its flavor", () => {
     const [entry] = buildUnitHeaderIcons({ attributes: [attribute] }, glossary);
 
     expect(entry.title).toBe("Guide - Hwayeomsa");
     expect(entry.texts).toEqual([
-      { segments: ["A fire user."], style: "italic" },
       { segments: ["Generates a fire charge."] },
+      { segments: ["A fire user."], style: "italic" },
     ]);
   });
 

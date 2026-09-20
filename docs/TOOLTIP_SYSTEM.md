@@ -61,6 +61,11 @@ entries. An entry is a plain string, or `{ text, style }` with one of:
 | `strong` | Emphasis (the card's own rank in the rank tooltip)    |
 | `label`  | The battlefield line label (uppercase, small)         |
 
+Entries read in that order too: what the tooltip is about in the game comes
+first — the card's own printed text, an entry's effect lines, a rank's cost
+range, a deployed unit's own abilities — and the italic flavor that explains it
+follows. A concept line or a lore description never opens a tooltip.
+
 Two further entry shapes serve card-prose tooltips:
 
 - `{ segments }` — compiled display segments (see
@@ -132,9 +137,10 @@ hover tooltip built from server-owned data:
 | Link type                                | Hover shows                                                                 |
 | ---------------------------------------- | --------------------------------------------------------------------------- |
 | `card`                                   | A card preview: the card face rendered through card-vertical, shown bare (the card is the whole tooltip, no frame chrome or title) |
-| `condition`, `trait`, `attribute`, `position` | The catalog entry's name, description, and effect lines (`GET /conditions`, `/traits`, `/attributes`, `/positions`) |
+| `condition`, `trait`, `attribute`, `position` | The catalog entry's name, then its effect lines, then its own prose in italic (`GET /conditions`, `/traits`, `/attributes`, `/positions`) |
 | `keyword`, `rule`                        | The glossary `keywords`/`terms` copy (`GET /glossary`)                      |
 | `series`, `affiliation`                  | The names of every card in that group, computed from the card catalog (`GET /cards/data`) |
+| `rank`                                   | The rank's cost range, then its prose (`GET /glossary`)                     |
 
 The `value` slot is the exception: it is a link in the copy, but not a
 reference, so it renders as plain text with no highlight and no hover — see
@@ -165,9 +171,9 @@ from the enforced ones.
 | Equipment header icon (both card faces) | Equipment (the glossary type name) | The names of the unit's attachments |
 | Deployed unit hp (`unit-card-horizontal`) | "<current>/<max> HP", or "<current> HP" when the card states no maximum | The glossary's current-hp copy |
 | Type letter (card-vertical)        | Kind name (standard shows "Unit") or type name | Kind or type summary from the glossary  |
-| Rank trapezoid                     | "Rank" (glossary rank title) | Italic concept, then every rank with cost range and description; the card's own rank is strong |
-| Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | Italic prose description, then the attribute's effect lines (the RULES.md core-mechanic block) |
-| Evolve / Ignition / Passives / Requirements header icons | Glossary concept name | Italic concept description, then the card's printed texts |
+| Rank trapezoid                     | "Rank" (glossary rank title) | Every rank with its cost range and description, the card's own rank strong, then the italic concept |
+| Attribute header icon              | Server-composed (guide attributes get "Guide - <name>") | The attribute's effect lines (the RULES.md core-mechanic block), then its italic prose description |
+| Evolve / Ignition / Passives / Requirements header icons | Glossary concept name | The card's printed texts, then the italic concept description |
 | Trait / condition icon (both card faces) | Catalog name, plus the entry's value for a numeric entry ("Resilient 3", or "Resilient X" where no instance supplies one) | The entry's compiled prose, with its value slots filled from the instance |
 | HUD (shinsu, recharged, HP, lighthouses, fire charges, deck) | Glossary name | Glossary texts; the deck copy's `[[value:count]]` slot fills with the viewer's remaining count |
 
