@@ -95,23 +95,36 @@ describe("deckMatchesCardCriteria", () => {
 
 describe("compareDecks", () => {
   const decks = [
-    { id: "b", name: "Beta", cardCount: 30 },
-    { id: "a", name: "Alpha", cardCount: 10 },
-    { id: "c", name: "Alpha", cardCount: 20 },
+    { id: "b", name: "Beta", averageCost: 3.2 },
+    { id: "a", name: "Alpha", averageCost: 4.8 },
+    { id: "c", name: "Alpha", averageCost: 4.8 },
+    { id: "d", name: "Delta", averageCost: null },
   ];
 
-  test("supports name and size ordering with id tie-breaks", () => {
+  test("supports name and average-cost ordering", () => {
     for (const { key, expected } of [
-      { key: "name-asc", expected: ["a", "c", "b"] },
-      { key: "name-desc", expected: ["b", "a", "c"] },
-      { key: "size-asc", expected: ["a", "c", "b"] },
-      { key: "size-desc", expected: ["b", "c", "a"] },
+      { key: "name-asc", expected: ["a", "c", "b", "d"] },
+      { key: "name-desc", expected: ["d", "b", "a", "c"] },
+      { key: "cost-asc", expected: ["b", "a", "c", "d"] },
+      { key: "cost-desc", expected: ["a", "c", "b", "d"] },
     ]) {
       expect([...decks].sort(compareDecks(key)).map((deck) => deck.id)).toEqual(expected);
     }
   });
 
-  test("exposes its keys with name ascending as the first entry", () => {
+  test("sorts a deck with no cards, and so no average cost, last either way", () => {
+    expect([...decks].sort(compareDecks("cost-asc")).at(-1).id).toBe("d");
+    expect([...decks].sort(compareDecks("cost-desc")).at(-1).id).toBe("d");
+  });
+
+  test("refuses the retired size keys", () => {
+    // the collection sorts by the cost its rows print, so a stale key must fail
+    // rather than quietly falling back to name order
+    expect(() => compareDecks("size-desc")).toThrow(/Unknown deck sort key/);
+  });
+
+  test("offers name and average cost, both directions", () => {
+    expect(DECK_SORT_KEYS.map((entry) => entry.key)).toEqual(["name-asc", "name-desc", "cost-asc", "cost-desc"]);
     expect(DECK_SORT_KEYS[0]).toEqual({ key: "name-asc", label: "Name A-Z" });
   });
 });

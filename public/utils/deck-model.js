@@ -299,8 +299,8 @@ export const DECK_TABLE_COLUMNS = [
 export const DECK_SORT_KEYS = [
   { key: "name-asc", label: "Name A-Z" },
   { key: "name-desc", label: "Name Z-A" },
-  { key: "size-desc", label: "Size high-low" },
-  { key: "size-asc", label: "Size low-high" },
+  { key: "cost-asc", label: "Avg cost low-high" },
+  { key: "cost-desc", label: "Avg cost high-low" },
 ];
 
 /**
@@ -322,14 +322,27 @@ export function deckFanTransforms(count, { spreadRem = 2.2, angleDeg = 14, scale
   });
 }
 
-/** Comparator for the deck list order; `size` means total card count. */
+/**
+ * Comparator for the deck list order. `cost` means the average card cost the
+ * row prints, so the column and the order it is read in cannot disagree; a deck
+ * with no cards has no average cost and sorts last in both directions rather
+ * than reading as the cheapest. Unknown keys fail instead of guessing.
+ */
 export function compareDecks(sortKey = "name-asc") {
+  if (!DECK_SORT_KEYS.some((entry) => entry.key === sortKey)) {
+    throw new TypeError(`Unknown deck sort key: ${String(sortKey)}`);
+  }
   const direction = sortKey.endsWith("-desc") ? -1 : 1;
-  const bySize = sortKey.startsWith("size");
+  const byCost = sortKey.startsWith("cost");
   return (a, b) => {
-    if (bySize) {
-      const delta = ((a.cardCount ?? 0) - (b.cardCount ?? 0)) * direction;
+    if (byCost) {
+      const missing = (a.averageCost == null ? 1 : 0) - (b.averageCost == null ? 1 : 0);
+      if (missing !== 0) return missing;
+      const delta = ((a.averageCost ?? 0) - (b.averageCost ?? 0)) * direction;
       if (delta !== 0) return delta;
+      // decks that average alike read by name, ascending in both directions
+      const byName = nameCollator.compare(a.name ?? "", b.name ?? "");
+      if (byName !== 0) return byName;
     } else {
       const byName = nameCollator.compare(a.name ?? "", b.name ?? "") * direction;
       if (byName !== 0) return byName;
