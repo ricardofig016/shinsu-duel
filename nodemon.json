@@ -1,3 +1,10 @@
 {
-  "ignore": ["server/data/rooms.json", "server/data/users.json", "server/data/decks.json"]
+  "ignore": [
+    "server/data/rooms.json",
+    "server/data/users.json",
+    "server/data/decks.json",
+    "temp/",
+    "reports/",
+    "coverage/"
+  ]
 }

@@ -173,6 +173,17 @@ On disconnect the socket is detached from its seat and nothing else changes: the
 
 ---
 
+## Client Rendering
+
+`public/pages/game/script.js` renders every snapshot as the whole board rather than as a patch, and two rules keep that from flashing the screen:
+
+- **Snapshots coalesce.** A snapshot replaces the previous one entirely, so an update that arrives while a render is running becomes the pending state and every earlier one is dropped. A turn change delivers several in a row (the player's action, then the opponent's or the bot's), and painting each of them would repaint the same board several times.
+- **Mounted elements are reconciled, never rebuilt.** Hand cards are keyed by the card they show (a hidden card by its slot), field units by unit id and are remounted only when what they show changed, deck backs are a pool of plain frames rather than mounted components, and combat slots are keyed by position code. Mounting a card fits its text and mounts about ten tooltips, so rebuilding the board per snapshot painted the hand half-built, re-created the deck stack on every update, and re-mounted every tooltip on the board.
+
+Because the elements are kept, state a card holds in the DOM survives an update, which is what lets a card that was turned over stay turned over while the board re-renders (see [CARD_VERTICAL_COMPONENT](CARD_VERTICAL_COMPONENT.md#card-back-and-flipping)).
+
+---
+
 ## Bot Seats
 
 A bot opponent occupies a seat like any other occupant and needs no socket. The bot system lives in `server/bots/` and is documented in [BOTS](BOTS.md); the net layer's part of the contract:

@@ -20,14 +20,32 @@ const components = {
  * link's own load would only add a task round-trip per component instance. The
  * overlay mounts about ten tooltips per card, which made a ten-card row wait on
  * a hundred of those before its opening animation could start.
+ *
+ * The answer is cached per link, because a component instance re-links the same
+ * sheet: asking meant walking every sheet the document holds, and a ten-card row
+ * asked about a hundred times.
  */
-const sheetAlreadyApplied = (link) =>
-  [...document.styleSheets].some(
-    (sheet) =>
-      !sheet.disabled &&
-      sheet.href === link.href &&
-      (sheet.media?.mediaText ?? "") === (link.media ?? "")
-  );
+let appliedSheets = null;
+
+const keyOf = (href, media) => `${href}|${media ?? ""}`;
+
+const scanAppliedSheets = () => {
+  const keys = new Set();
+  for (const sheet of document.styleSheets) {
+    if (!sheet.disabled) keys.add(keyOf(sheet.href, sheet.media?.mediaText));
+  }
+  return keys;
+};
+
+const sheetAlreadyApplied = (link) => {
+  if (!appliedSheets) appliedSheets = scanAppliedSheets();
+  const key = keyOf(link.href, link.media);
+  if (appliedSheets.has(key)) return true;
+  // a sheet that arrived since the cache was built is the only thing that can
+  // change the answer, so a miss rescans once rather than reporting stale
+  appliedSheets = scanAppliedSheets();
+  return appliedSheets.has(key);
+};
 
 /**
  * Resolve once every stylesheet the markup just inserted links is applied.
@@ -96,7 +114,21 @@ export const loadComponent = async (container, component, data = null) => {
  */
 const mountedTooltips = new Set();
 
+/**
+ * Whether a prune pass was skipped because something in the mounted set was
+ * still loading and could not be judged yet. It latches, so the pass is not
+ * lost: whichever load settles next runs it.
+ */
+let pruneDeferred = false;
+
 const pruneTooltips = () => {
+  if (mountedTooltips.size === 0) {
+    pruneDeferred = false;
+    return;
+  }
+  // a tooltip that is still loading is never dropped, so a pass that meets one
+  // has to be repeated once it settles rather than decided on a half-known set
+  pruneDeferred = [...mountedTooltips].some((tooltip) => !tooltip.settled);
   for (const tooltip of staleTooltips([...mountedTooltips], (target) => target.isConnected)) {
     tooltip.element.remove();
     mountedTooltips.delete(tooltip);
@@ -110,12 +142,28 @@ const pruneTooltips = () => {
  * them is stale. Mutation callbacks run once per synchronous DOM change, after
  * it has finished, so a target that a host moved is connected again by the time
  * the rule reads it and its tooltip survives.
+ *
+ * Overlapping changes coalesce into one pass at the end of the task. A row of
+ * cards mounts about ten tooltips each and every one of them changes the
+ * document, so a pass per change walked a set of hundreds on each of hundreds of
+ * changes; the pass is the same whichever of them runs it, and by the end of the
+ * task every removal has already happened.
  */
 let documentObserver = null;
+let pruneScheduled = false;
+
+const schedulePrune = () => {
+  if (pruneScheduled) return;
+  pruneScheduled = true;
+  queueMicrotask(() => {
+    pruneScheduled = false;
+    pruneTooltips();
+  });
+};
 
 const observeTooltipTargets = () => {
   if (documentObserver || typeof MutationObserver !== "function") return;
-  documentObserver = new MutationObserver(() => pruneTooltips());
+  documentObserver = new MutationObserver(schedulePrune);
   documentObserver.observe(document.body, { childList: true, subtree: true });
 };
 
@@ -127,7 +175,6 @@ const observeTooltipTargets = () => {
  * the hover target: `title`, `textList`, `iconPath`, and `bare`.
  */
 export const mountTooltip = (hoverContainer, options = {}) => {
-  pruneTooltips();
   const element = document.createElement("div");
   element.classList.add("tooltip-component");
   document.body.appendChild(element);
@@ -135,17 +182,43 @@ export const mountTooltip = (hoverContainer, options = {}) => {
   mountedTooltips.add(mounted);
   observeTooltipTargets();
   const loaded = loadComponent(element, "tooltip", { ...options, hoverContainer });
-  // the settled mark is bookkeeping for the prune pass; the caller still owns
-  // the load's rejection. The prune here is what drops a tooltip whose target
-  // left while it was loading: that removal is deferred until the load settles,
-  // because aborting the load would strand the caller waiting on it.
+  // A mount is not what makes a tooltip stale — the observer installed above
+  // prunes on every change to the document, which is the same task a removed
+  // target leaves in. Pruning here as well made every mount walk every mounted
+  // tooltip: a card mounts about ten, so a ten-card row walked a set of hundreds
+  // on each of about a hundred mounts.
+  //
+  // What a mount does own is the tooltip that was still loading when its target
+  // left: the prune pass cannot drop it yet, so the check is repeated for it once
+  // it settles. The settle latch also means a pass skipped then is not lost.
   loaded
     .finally(() => {
       mounted.settled = true;
-      pruneTooltips();
+      if (!mounted.target.isConnected) {
+        mounted.element.remove();
+        mountedTooltips.delete(mounted);
+        return;
+      }
+      if (pruneDeferred) pruneTooltips();
     })
     .catch(() => {});
   return { element, loaded };
+};
+
+/**
+ * Drop one mounted tooltip whose hover target is still on the page, which the
+ * layer's own rule would keep: the caller knows it is replacing that tooltip
+ * (a value its copy carries changed), so the layer must forget it too. Returns
+ * whether the element was one of the layer's.
+ */
+export const releaseTooltip = (element) => {
+  for (const tooltip of mountedTooltips) {
+    if (tooltip.element !== element) continue;
+    mountedTooltips.delete(tooltip);
+    tooltip.element.remove();
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -158,6 +231,13 @@ export const addTooltip = async (hoverContainer, title, textList, iconPath = nul
   await loaded;
   return element;
 };
+
+/**
+ * Whether the user asked for reduced motion. Every animation in the shared
+ * components respects it, and they read the preference from here so the check
+ * has one home.
+ */
+export const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * Shrink the font size of the elements until the caller's overflow test stops

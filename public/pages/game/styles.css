@@ -487,6 +487,6 @@ hr {
   pointer-events: none;
 }
 
-body.no-interaction .tooltip-frame {
+body.dragging .tooltip-frame {
   display: none !important;
 }

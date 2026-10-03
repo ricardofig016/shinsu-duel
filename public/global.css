@@ -33,10 +33,14 @@ body {
   background-color: #f0f0f0;
   overflow: hidden;
 }
-body.no-interaction {
+/* A card being dragged: the ghost follows the pointer, so the page must not
+   select or drag text under it. Pointer events stay on. Taking them away for the
+   length of a drag cancels hover across the page, and the browser does not
+   re-hit-test until the pointer moves again — which left a card clicked in the
+   hand resting at its un-hovered size under a motionless cursor. */
+body.dragging {
   -webkit-user-select: none;
   user-select: none;
-  pointer-events: none;
 }
 
 h1 {

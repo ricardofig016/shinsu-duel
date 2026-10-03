@@ -184,9 +184,13 @@ const config = {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "\\\\node_modules\\\\"
-  // ],
+  testPathIgnorePatterns: [
+    "\\\\node_modules\\\\",
+    // temp/ is scratch space (gitignored): a browser probe writes a Chrome
+    // profile there, and a profile carries whatever extensions are installed,
+    // extension test files included, which jest would otherwise run
+    "[/\\\\]temp[/\\\\]",
+  ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],

@@ -1,4 +1,4 @@
-import { loadComponent, addTooltip } from "/utils/component-util.js";
+import { loadComponent, addTooltip, releaseTooltip } from "/utils/component-util.js";
 import { redirectToLogin } from "/utils/auth-redirect.js";
 import { EVENTS, ERROR_CODES } from "/game/protocol.js";
 import { createGameStore } from "/game/store.js";
@@ -26,12 +26,17 @@ import {
 import { STEP, roomCodeFromPath, followRoomStep } from "/game/steps.js";
 import { getGlossary } from "/utils/glossary.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
+import { toggleCardFlip } from "/utils/card-flip.js";
 import {
   buildDeckTooltipEntries,
   buildPositionTooltipEntries,
 } from "/utils/tooltip-entries.js";
 
 const store = createGameStore();
+
+// How far the pointer may travel before a press counts as a drag rather than a
+// click; a click on a hand card turns it over.
+const DRAG_THRESHOLD_PX = 4;
 
 let draggedCardHandId = null;
 let draggedSkillHandId = null;
@@ -100,6 +105,11 @@ const alignHandCards = () => {
     const cards = handContainer.querySelectorAll(".card-vertical-component");
     if (cards.length === 0) return;
     const cardWidth = cards[0].offsetWidth;
+    // the fan's overlap is rebuilt from scratch: cards are reused now, so an
+    // offset left over from a larger hand would keep the fan spread
+    cards.forEach((card) => {
+      card.style.marginLeft = "";
+    });
     if (cards.length * cardWidth < handContainerWidth) handContainer.style.justifyContent = "center";
     else {
       const cardOffset = (handContainerWidth - cardWidth) / (cards.length - 1);
@@ -119,6 +129,51 @@ const showGameOver = (gameOver) => {
   }
 };
 
+/* ── mounted elements ─────────────────────────────────────────────────── */
+
+/**
+ * The board reconciles what it shows instead of rebuilding it. Mounting a card
+ * measures layout (text fitting) and mounts about ten tooltips, so recreating
+ * the whole board per snapshot made every update flash: the hand was even
+ * painted half-built, briefly showing fewer cards than the player holds, and a
+ * turn change delivers several snapshots in a row. Elements are kept per
+ * container, keyed by what they show, so something that is still there keeps
+ * its element and whatever state it carries, and only what changed is
+ * remounted.
+ */
+const mountedElements = new WeakMap();
+
+/** The element registry of one board container, created on first use. */
+const elementsOf = (container) => {
+  let registry = mountedElements.get(container);
+  if (!registry) {
+    registry = new Map();
+    mountedElements.set(container, registry);
+  }
+  return registry;
+};
+
+/** Drop every mounted element whose key is no longer wanted. */
+const dropUnwanted = (registry, wanted) => {
+  for (const [key, mounted] of [...registry]) {
+    if (wanted.has(key)) continue;
+    mounted.element.remove();
+    registry.delete(key);
+  }
+};
+
+/**
+ * Put `elements`, then `trailing`, in the container in that order. Only moves
+ * what is out of place: a reorder must not remount anything, and `trailing`
+ * keeps elements that belong after the cards (the position drop zones) last.
+ */
+const orderChildren = (container, elements, trailing = []) => {
+  const desired = [...elements, ...trailing];
+  const current = [...container.children];
+  if (current.length === desired.length && desired.every((element, index) => current[index] === element)) return;
+  for (const element of desired) container.appendChild(element);
+};
+
 /* ── renderers ────────────────────────────────────────────────────────── */
 
 const renderRound = (state) => {
@@ -126,30 +181,73 @@ const renderRound = (state) => {
   document.querySelector("#round-number").textContent = model.round;
 };
 
+/**
+ * Combat slots are reconciled like every other mounted element: a slot keeps
+ * its element and its tooltip (position copy does not change), and only its
+ * used state and its place are updated.
+ */
 const renderCombatSlots = (state, positions, glossary) => {
   for (let player of ["you", "opponent"]) {
     const slotsContainer = document.querySelector(`#${player}-container .combat-slots-container`);
-    slotsContainer.innerHTML = "";
+    const registry = elementsOf(slotsContainer);
+    const wanted = new Set();
+    const order = [];
     for (let code of state[player].combatSlotCodes) {
-      const position = positions[code];
-      const iconPath = position?.iconPath ?? `/assets/icons/positions/${code}.png`;
-      const slot = document.createElement("div");
-      slot.classList.add("combat-slot");
-      slot.classList.toggle("used", buildCombatSlotViewModel(state[player], code).used);
-      slot.dataset.positionCode = code;
-      const icon = document.createElement("div");
-      icon.classList.add("combat-slot-icon");
-      icon.style.backgroundImage = `url(${iconPath})`;
-      slot.appendChild(icon);
-      slotsContainer.appendChild(slot);
-      addTooltip(
-        slot,
-        position?.name ?? code,
-        buildPositionTooltipEntries(position, glossary),
-        iconPath
-      );
+      const key = `slot-${code}`;
+      wanted.add(key);
+      let mounted = registry.get(key);
+      if (!mounted) {
+        const position = positions[code];
+        const iconPath = position?.iconPath ?? `/assets/icons/positions/${code}.png`;
+        const slot = document.createElement("div");
+        slot.classList.add("combat-slot");
+        slot.dataset.positionCode = code;
+        const icon = document.createElement("div");
+        icon.classList.add("combat-slot-icon");
+        icon.style.backgroundImage = `url(${iconPath})`;
+        slot.appendChild(icon);
+        slotsContainer.appendChild(slot);
+        mounted = { element: slot };
+        registry.set(key, mounted);
+        addTooltip(slot, position?.name ?? code, buildPositionTooltipEntries(position, glossary), iconPath);
+      }
+      mounted.element.classList.toggle("used", buildCombatSlotViewModel(state[player], code).used);
+      order.push(mounted.element);
     }
+    dropUnwanted(registry, wanted);
+    orderChildren(slotsContainer, order);
   }
+};
+
+/* ── the deck stack ───────────────────────────────────────────────────── */
+
+/** One deck back: a styled frame, so a stack of them costs no component mount. */
+const buildDeckBack = () => {
+  const element = document.createElement("div");
+  element.classList.add("card-vertical-component", "deck-card");
+  const frame = document.createElement("div");
+  frame.classList.add("card-vertical-frame", "card-vertical-small", "no-hover");
+  frame.style.backgroundImage = `url("/assets/images/card/back.png")`;
+  element.appendChild(frame);
+  return element;
+};
+
+/**
+ * The deck tooltip of one container. Its copy carries the remaining count, so
+ * it is mounted once and replaced only when that count changes; the replaced
+ * one is released, because its hover target (the deck) stays on the page.
+ */
+const deckTooltips = new WeakMap();
+
+const syncDeckTooltip = async (deckContainer, deckSize, deckTooltip) => {
+  const mounted = deckTooltips.get(deckContainer);
+  if (mounted?.size === deckSize) return;
+  if (mounted) releaseTooltip(mounted.element);
+  deckTooltips.delete(deckContainer);
+  if (!deckTooltip) return;
+  const entries = buildDeckTooltipEntries(deckSize, deckTooltip);
+  if (entries.length === 0) return;
+  deckTooltips.set(deckContainer, { size: deckSize, element: await addTooltip(deckContainer, deckTooltip.name, entries) });
 };
 
 const renderDecks = async (state, glossary) => {
@@ -158,22 +256,28 @@ const renderDecks = async (state, glossary) => {
   const maxDeckSize = 20;
   const deckTooltip = glossary?.hud?.deck ?? null;
   for (let player of ["you", "opponent"]) {
-    const outerDiv = document.querySelector(`#${player}-container .deck-outer-container`);
-    const deckContainer = outerDiv.querySelector(`.deck-container`);
-    deckContainer.innerHTML = "";
+    const deckContainer = document.querySelector(`#${player}-container .deck-outer-container .deck-container`);
+    const registry = elementsOf(deckContainer);
     const cardAmount = Math.min(state[player].deckSize, maxDeckSize);
+    const wanted = new Set();
+    const order = [];
     for (let i = 0; i < cardAmount; i++) {
-      const newDiv = document.createElement("div");
-      newDiv.classList.add("card-vertical-component", "deck-card");
-      deckContainer.appendChild(newDiv);
-      await loadComponent(newDiv, "card-vertical", {});
-      newDiv.style.bottom = `${basePosition[0] + i * positionOffset}%`;
-      newDiv.style.left = `${basePosition[1] - i * positionOffset}%`;
-      if (i === cardAmount - 1 && deckTooltip) {
-        const entries = buildDeckTooltipEntries(state[player].deckSize, deckTooltip);
-        if (entries.length > 0) await addTooltip(newDiv, deckTooltip.name, entries);
+      const key = `back-${i}`;
+      wanted.add(key);
+      let mounted = registry.get(key);
+      if (!mounted) {
+        const element = buildDeckBack();
+        deckContainer.appendChild(element);
+        mounted = { element };
+        registry.set(key, mounted);
       }
+      mounted.element.style.bottom = `${basePosition[0] + i * positionOffset}%`;
+      mounted.element.style.left = `${basePosition[1] - i * positionOffset}%`;
+      order.push(mounted.element);
     }
+    dropUnwanted(registry, wanted);
+    orderChildren(deckContainer, order);
+    await syncDeckTooltip(deckContainer, state[player].deckSize, deckTooltip);
   }
 };
 
@@ -189,23 +293,43 @@ const renderFields = async (state, socket) => {
     const interactive = player === "you";
     for (let line in state[player].field) {
       const lineContainer = document.querySelector(`#${player}-container .${line}-container`);
-      const existingDivs = lineContainer.querySelectorAll(".unit-card-horizontal-component");
-      existingDivs.forEach((div) => div.remove());
-      // units are prepended so the position drop zones stay at the end
-      const units = [...state[player].field[line]].reverse();
-      for (let unitView of units) {
-        const newDiv = document.createElement("div");
-        newDiv.classList.add("unit-card-horizontal-component");
-        newDiv.dataset.unitId = unitView.id;
-        lineContainer.prepend(newDiv);
-        await loadComponent(newDiv, "unit-card-horizontal", {
-          unit: buildUnitViewModel(unitView),
-          interactive,
-          onAbilityClick: interactive
-            ? (unitId, abilityCode) => socket.emit(EVENTS.GAME_ACTION, buildUseAbilityAction(unitId, abilityCode))
-            : null,
-        });
+      const registry = elementsOf(lineContainer);
+      const trailing = [...lineContainer.children].filter(
+        (child) => !child.classList.contains("unit-card-horizontal-component")
+      );
+      const wanted = new Set();
+      const order = [];
+      for (let unitView of state[player].field[line]) {
+        const key = `unit-${unitView.id}`;
+        wanted.add(key);
+        // A unit's element is remounted only when what it shows changed; the
+        // signature is the whole view, so hp, conditions, and chosen positions
+        // all count.
+        const unit = buildUnitViewModel(unitView);
+        const signature = JSON.stringify({ unit, interactive });
+        let mounted = registry.get(key);
+        if (!mounted) {
+          const element = document.createElement("div");
+          element.classList.add("unit-card-horizontal-component");
+          element.dataset.unitId = unitView.id;
+          mounted = { element, signature: null };
+          registry.set(key, mounted);
+        }
+        if (mounted.signature !== signature) {
+          await loadComponent(mounted.element, "unit-card-horizontal", {
+            unit,
+            interactive,
+            onAbilityClick: interactive
+              ? (unitId, abilityCode) => socket.emit(EVENTS.GAME_ACTION, buildUseAbilityAction(unitId, abilityCode))
+              : null,
+          });
+          mounted.signature = signature;
+        }
+        order.push(mounted.element);
       }
+      dropUnwanted(registry, wanted);
+      // units lead the line container so the position drop zones stay at the end
+      orderChildren(lineContainer, order, trailing);
     }
   }
 };
@@ -228,9 +352,7 @@ const beginCardDrag = (event, cardDiv, handCard, cardType) => {
   // position dragging card
   cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
   cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
-  document.body.classList.add("no-interaction");
-  // hide original card
-  cardDiv.classList.add("invisible");
+  document.body.classList.add("dragging");
 
   // reveal the drop targets this card type accepts
   let cleanupDropTargets = () => {};
@@ -272,10 +394,23 @@ const beginCardDrag = (event, cardDiv, handCard, cardType) => {
       dropTargets.forEach((target) => target.classList.remove("equip-drop-active"));
   }
 
-  // events
-  const onMouseMove = (event) => {
-    cardDrag.style.left = `${event.clientX - cardDrag.offsetWidth / 2}px`;
-    cardDrag.style.top = `${event.clientY - cardDrag.offsetHeight / 2}px`;
+  // A press that never moves is a click, not a drag: the card it lands on turns
+  // over, and until the pointer moves the card is left where it is. Hiding the
+  // card it was pressed on is what the drag does once it starts — doing it on
+  // mousedown instead made a `visibility: hidden` card stop matching `:hover`,
+  // and the browser does not re-hit-test until the pointer moves again, so a
+  // card clicked in the hand came to rest at its un-hovered size under a
+  // motionless cursor.
+  const startX = event.clientX;
+  const startY = event.clientY;
+  let moved = false;
+  const onMouseMove = (moveEvent) => {
+    if (!moved && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > DRAG_THRESHOLD_PX) {
+      moved = true;
+      cardDiv.classList.add("invisible");
+    }
+    cardDrag.style.left = `${moveEvent.clientX - cardDrag.offsetWidth / 2}px`;
+    cardDrag.style.top = `${moveEvent.clientY - cardDrag.offsetHeight / 2}px`;
   };
   const onMouseUp = () => {
     // remove dragging card
@@ -283,45 +418,62 @@ const beginCardDrag = (event, cardDiv, handCard, cardType) => {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
     if (onWindowResize) window.removeEventListener("resize", onWindowResize);
-    document.body.classList.remove("no-interaction");
+    document.body.classList.remove("dragging");
     cardDiv.classList.remove("invisible");
     cleanupDropTargets();
+    if (!moved) toggleCardFlip(cardDiv);
   };
   document.addEventListener("mousemove", onMouseMove);
   document.addEventListener("mouseup", onMouseUp);
   if (onWindowResize) window.addEventListener("resize", onWindowResize);
 };
 
-const renderHands = async (state, socket) => {
+const renderHands = async (state) => {
   for (let player of ["you", "opponent"]) {
     const handContainer = document.querySelector(`#${player}-container .hand-container`);
-    handContainer.innerHTML = "";
+    const registry = elementsOf(handContainer);
+    const wanted = new Set();
+    const order = [];
     for (let i = 0; i < state[player].hand.length; i++) {
       const handCard = buildHandCardViewModel(state[player].hand[i], i);
-      const newDiv = document.createElement("div");
-      newDiv.classList.add("card-vertical-component");
-      if (handCard.isHidden) newDiv.classList.add("no-focus");
-      if (player === "you") newDiv.dataset.handId = i;
-      handContainer.appendChild(newDiv);
-      await loadComponent(newDiv, "card-vertical", {
-        card: handCard.card,
-        isSmall: true,
-      });
+      // a readable card is keyed by the card itself, so it survives a draw or a
+      // play that shifts the hand; a hidden card is one of several identical
+      // backs and is keyed by its slot
+      const key = `${player}:${handCard.isHidden ? `slot-${i}` : `card-${handCard.card.cardId}`}`;
+      wanted.add(key);
+      let mounted = registry.get(key);
+      if (!mounted) {
+        const element = document.createElement("div");
+        element.classList.add("card-vertical-component");
+        if (handCard.isHidden) element.classList.add("no-focus");
+        handContainer.appendChild(element);
+        mounted = { element };
+        registry.set(key, mounted);
+        await loadComponent(element, "card-vertical", {
+          card: handCard.card,
+          isSmall: true,
+        });
 
-      // your own cards drag: units deploy onto position zones, skills play
-      // onto either board, equipments equip onto one of your deployed units
-      if (player !== "you" || handCard.isHidden) continue;
-      const cardType = handCard.card.type;
-      if (cardType !== "unit" && cardType !== "skill" && cardType !== "equipment") continue;
-      newDiv.addEventListener("mousedown", (event) => {
-        beginCardDrag(event, newDiv, handCard, cardType);
-      });
+        // your own cards drag: units deploy onto position zones, skills play
+        // onto either board, equipments equip onto one of your deployed units
+        const cardType = handCard.card.type;
+        const draggable = player === "you" && !handCard.isHidden && ["unit", "skill", "equipment"].includes(cardType);
+        if (draggable) {
+          element.addEventListener("mousedown", (event) => {
+            // the hand index moves as cards are played, so it is read from the
+            // element at drag time rather than captured here
+            beginCardDrag(event, element, { card: handCard.card, index: Number(element.dataset.handId) }, cardType);
+          });
+        }
+      }
+      if (player === "you") mounted.element.dataset.handId = String(i);
+      order.push(mounted.element);
     }
+    dropUnwanted(registry, wanted);
+    orderChildren(handContainer, order);
   }
 
-  // align cards
-  setTimeout(alignHandCards, 0);
-  setTimeout(alignHandCards, 300); // very rarely the cards dont align late enough
+  alignHandCards();
 };
 
 const renderShinsu = (state) => {
@@ -411,7 +563,7 @@ const render = async (state, data, socket) => {
   await renderDecks(state, data.glossary);
   renderLighthouses(state);
   await renderFields(state, socket);
-  await renderHands(state, socket);
+  await renderHands(state);
   renderShinsu(state);
   renderPassButton(state);
   renderFireCharge(state);
@@ -550,13 +702,17 @@ const prepareBoard = async (positionData, glossary, socket) => {
     socket.emit(EVENTS.GAME_ACTION, buildGenerateFireChargeAction());
   });
 
-  // hand focus follows the cursor; attached once so re-renders never stack listeners
+  // hand focus follows the cursor; attached once so re-renders never stack
+  // listeners. The hover class the card styles itself from is set here too: the
+  // hand is what knows which card the pointer is on, and it keeps knowing while
+  // a card is turned, which the browser's own hover does not.
   for (let player of ["you", "opponent"]) {
     const handContainer = document.querySelector(`#${player}-container .hand-container`);
     handContainer.addEventListener("mousemove", (event) => {
       let closestCard = null;
       let closestDistance = Infinity;
-      handContainer.querySelectorAll(".card-vertical-component").forEach((card) => {
+      const cards = handContainer.querySelectorAll(".card-vertical-component");
+      cards.forEach((card) => {
         card.classList.remove("focused");
         const cardRect = card.getBoundingClientRect();
         const cardCenterX = cardRect.left + cardRect.width / 2;
@@ -567,11 +723,12 @@ const prepareBoard = async (positionData, glossary, socket) => {
         }
       });
       if (closestCard) closestCard.classList.add("focused");
+      cards.forEach((card) => card.classList.toggle("card-vertical-hovered", card === closestCard));
     });
     handContainer.addEventListener("mouseleave", () => {
       handContainer
         .querySelectorAll(".card-vertical-component")
-        .forEach((card) => card.classList.remove("focused"));
+        .forEach((card) => card.classList.remove("focused", "card-vertical-hovered"));
     });
   }
 
@@ -654,13 +811,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   // board hands the browser over to whichever step the server names.
   followRoomStep(socket, roomCode, STEP.BOARD, { ignore: [EVENTS.GAME_INIT] });
 
-  // Renders are serialized: each snapshot rebuilds the whole page, so
-  // overlapping deliveries must not interleave half-finished rebuilds.
-  let renderChain = Promise.resolve();
+  // Every snapshot is the whole board, so updates that arrive while a render is
+  // running collapse into it: rendering each one would paint the same board
+  // again, and a turn change delivers several in a row (its own action, then
+  // the opponent's or the bot's), which is what made the board flash.
+  let pendingState = null;
+  let rendering = false;
   const scheduleRender = (payload) => {
-    renderChain = renderChain
-      .then(() => render(payload, data, socket))
-      .catch((error) => console.error(`Game render failed: ${error.message}`));
+    pendingState = payload;
+    if (rendering) return;
+    rendering = true;
+    void (async () => {
+      while (pendingState) {
+        const next = pendingState;
+        pendingState = null;
+        try {
+          await render(next, data, socket);
+        } catch (error) {
+          console.error(`Game render failed: ${error.message}`);
+        }
+      }
+      rendering = false;
+    })();
   };
 
   socket.on(EVENTS.GAME_INIT, scheduleRender);
