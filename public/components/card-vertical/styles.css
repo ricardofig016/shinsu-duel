@@ -1,6 +1,9 @@
 .card-vertical-frame {
   width: 30em;
   height: 45em;
+  /* The card is its own size: a host laying cards out in a row must not shrink
+     one, or the card it shows is not the card its text was fitted to. */
+  flex: none;
   padding: 0.5em;
   border-radius: 4px;
   background-image: url("/assets/images/card/frame.png");
@@ -16,22 +19,157 @@
   isolation: isolate;
 }
 
-/* Big cards render inside the card detail overlay, which owns their
-   placement (see card-detail-overlay/styles.css). */
+/* Turning the card over. The turn is an animation on the frame's own `rotate`
+   property, driven by `public/utils/card-flip.js`: a transition here would be
+   at the mercy of whatever transition a host set on the frame, and the card
+   detail overlay switches transitions off. Rotating the frame itself rather
+   than replacing its transform is what lets the turn compose with the hand
+   fan's tilt and the overlay slot's scale. */
+
+/* The back face is the front's panel again, inside the frame's own border: this
+   is only the face's box, so a turned card shows one frame rather than a frame
+   inside a frame. It is out of the layout until the card is turned. */
+.card-vertical-back-frame {
+  display: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.card-vertical-frame.card-vertical-flipped > .card-vertical {
+  display: none;
+}
+
+.card-vertical-frame.card-vertical-flipped > .card-vertical-back-frame {
+  display: flex;
+}
+
+.card-vertical-back {
+  width: 100%;
+  height: 100%;
+  padding: 1em;
+  gap: 0.5em;
+  border-radius: 4px;
+  justify-content: flex-start;
+  background-image: url("/assets/images/card/background.png");
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* The faces' text. These are scoped to the frame rather than left as single
+   classes because a host page's own typography can be more specific than one
+   class and would otherwise reach inside the card: the cards page styles
+   `.cards-section h2`, which beat `.card-vertical-back-label` and drew the
+   back's section labels at the page's heading size (25.6px) inside a card whose
+   own type is 4.8px. The card states its type scale; no page states it for it. */
+.card-vertical-frame .card-vertical-back-title {
+  height: 3em;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5em;
+  overflow: hidden;
+}
+
+.card-vertical-frame .card-vertical-back-type-letter {
+  height: 1.45em;
+  flex: 0 0 auto;
+}
+
+/* The name is the title row's only flexible element, exactly as on the front:
+   it shrinks to the room left by the type icon and the page counter. */
+.card-vertical-frame .card-vertical-back-name {
+  font-size: 2.4em;
+  margin: 0 0.2em 0 0;
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: top;
+  text-align: left;
+}
+
+.card-vertical-frame .card-vertical-back-pages {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: normal;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* The face's content box. A face holds whole sections and never splits one,
+   which is the rule `paginateSections` applies; the list is the box it fits
+   them into. */
+.card-vertical-frame .card-vertical-back-sections {
+  width: 100%;
+  flex: 1;
+  gap: 0.9em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card-vertical-frame .card-vertical-back-section {
+  /* Natural content height, like the front's text lines: nothing here may
+     resize a section to force it into a face. */
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.card-vertical-frame .card-vertical-back-label {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.card-vertical-frame .card-vertical-back-line {
+  margin: 0;
+  padding: 0.2em 0;
+  font-size: 1em;
+}
+
+/* The card's two sizes are fixed, in rem, so the card is the same size wherever
+   it is mounted and whatever the surface's own font size is. Everything on the
+   card is laid out in em, so a card's geometry and the way its text wraps are
+   then properties of the card, not of the page it happens to be on — which is
+   what lets the back divide the same card into the same faces everywhere. Big
+   cards render inside the card detail overlay, which owns their placement (see
+   card-detail-overlay/styles.css). */
+
+.card-vertical-frame.card-vertical-big {
+  font-size: 1rem;
+}
 
 .card-vertical-frame.card-vertical-small {
   font-size: 0.3rem;
 }
 
-.card-vertical-frame.card-vertical-small:not(.no-hover):hover {
+/* A small card grows while the pointer is on it. The class is the host's own
+   reading of where the pointer is (see `trackCardHover` in
+   `public/utils/card-flip.js`) alongside the browser's, because a card being
+   turned paints nothing while it is edge-on and loses the browser's hover on the
+   way through. */
+.card-vertical-frame.card-vertical-small:not(.no-hover):hover,
+.card-vertical-component.card-vertical-hovered .card-vertical-frame.card-vertical-small:not(.no-hover) {
   scale: 1.6;
 }
 
-#opponent-container .card-vertical-frame.card-vertical-small:not(.no-hover):hover {
+#opponent-container .card-vertical-frame.card-vertical-small:not(.no-hover):hover,
+#opponent-container .card-vertical-component.card-vertical-hovered .card-vertical-frame.card-vertical-small:not(.no-hover) {
   transform: translateY(3.5rem);
 }
 
-#you-container .card-vertical-frame.card-vertical-small:not(.no-hover):hover {
+#you-container .card-vertical-frame.card-vertical-small:not(.no-hover):hover,
+#you-container .card-vertical-component.card-vertical-hovered .card-vertical-frame.card-vertical-small:not(.no-hover) {
   transform: translateY(-3.5rem);
 }
 
@@ -341,8 +479,8 @@
   justify-content: space-between;
 }
 
-.card-vertical-shinsu,
-.card-vertical-hp {
+.card-vertical-frame .card-vertical-shinsu,
+.card-vertical-frame .card-vertical-hp {
   width: 3em;
   height: 3em;
   background-size: contain;
@@ -353,11 +491,11 @@
   font-size: 2em;
 }
 
-.card-vertical-shinsu {
+.card-vertical-frame .card-vertical-shinsu {
   background-image: url("/assets/images/card/shinsu-frame.png");
 }
 
-.card-vertical-hp {
+.card-vertical-frame .card-vertical-hp {
   background-image: url("/assets/images/card/hp-frame.png");
 }
 

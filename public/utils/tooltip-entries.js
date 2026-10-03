@@ -150,6 +150,18 @@ export const buildPositionTooltipEntries = (position, glossary, { chosen = false
 };
 
 /**
+ * A catalog entry's copy split into its two parts: the game-relevant effect
+ * lines and the flavor entry that explains them. `buildCatalogTooltipEntries`
+ * is their concatenation, so a tooltip and a surface showing only the game text
+ * (the card's back face) read the same split instead of each deciding where the
+ * flavor begins.
+ */
+export const buildCatalogEntryParts = (entry) => ({
+  gameTexts: (entry?.effect ?? []).map((line) => buildProseEntry(line)).filter(Boolean),
+  flavor: buildProseEntry(entry?.description, "italic"),
+});
+
+/**
  * A catalog entry's tooltip entries: its effect lines first, then its own prose
  * in italic. That prose is the entry's flavor — an attribute's lore — or the
  * concept line that explains the entry, and flavor never leads the tooltip:
@@ -161,15 +173,8 @@ export const buildPositionTooltipEntries = (position, glossary, { chosen = false
  * (`public/utils/card-text-dom.js`), which must read identically.
  */
 export const buildCatalogTooltipEntries = (entry) => {
-  if (!entry) return [];
-  const entries = [];
-  for (const line of entry.effect ?? []) {
-    const item = buildProseEntry(line);
-    if (item) entries.push(item);
-  }
-  const description = buildProseEntry(entry.description, "italic");
-  if (description) entries.push(description);
-  return entries;
+  const { gameTexts, flavor } = buildCatalogEntryParts(entry);
+  return flavor ? [...gameTexts, flavor] : gameTexts;
 };
 
 /**

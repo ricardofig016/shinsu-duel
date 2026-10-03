@@ -151,6 +151,8 @@ const mountPool = async () => {
     countElement: byId("pool-count"),
     views: state.entries.map((entry) => entry.view),
     decorate: decoratePoolCard,
+    // a left click here picks a copy, so the card must not also turn over
+    flipOnClick: false,
   });
 };
 

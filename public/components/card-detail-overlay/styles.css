@@ -35,16 +35,21 @@
   margin-inline: -2.5rem;
 }
 
-/* The overlay owns the big card's placement: centered in its slot, shrunk
-   by the slot's graded scale — no page-specific positioning overrides. Its
-   own transition is off: the slot footprint already animates the graded
-   scale, and the card's placement must land without motion when the overlay
-   opens. */
+/* The overlay owns the big card's placement: centered in its slot, shrunk by
+   the slot's graded scale — no page-specific positioning overrides. The centring
+   offset is the frame's own `translate` property rather than a `transform`
+   function, because the card's turn rotates it: `rotate` and `translate` compose
+   as separate properties (translate, then rotate, then scale), whereas a
+   `translate()` inside `transform` shifts the centre the rotation turns about and
+   the card swings around its left edge instead of its middle. Its own transition
+   is off so the placement lands without motion when the overlay opens, and the
+   graded scale animates on the slot's footprint. */
 .card-detail-slot .card-vertical-frame.card-vertical-big {
   position: absolute;
   bottom: 50%;
   right: 50%;
-  transform: translate(50%, 50%) scale(var(--s, 1));
+  translate: 50% 50%;
+  transform: scale(var(--s, 1));
   transition: none;
 }
 

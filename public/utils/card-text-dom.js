@@ -96,8 +96,9 @@ async function buildLinkHover(segment) {
     const host = document.createElement("div");
     host.className = "card-text-link-preview";
     offscreenHost().appendChild(host);
-    await loadComponent(host, "card-vertical", { card: buildCardViewModel(view), isSmall: true });
-    // suppress the hand-hover zoom: a preview is read, not interacted with
+    await loadComponent(host, "card-vertical", { card: buildCardViewModel(view), isSmall: true, flipOnClick: false });
+    // suppress the hand-hover zoom: a preview is read, not interacted with, and
+    // a preview that turned over would be gone before it could be read
     host.querySelector(".card-vertical-frame")?.classList.add("no-hover");
     // bare: the card face is the whole tooltip, so the frame adds no chrome
     return { bare: true, title: view.name, entries: [{ node: host }] };

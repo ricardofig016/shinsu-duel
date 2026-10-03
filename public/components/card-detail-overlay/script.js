@@ -1,4 +1,5 @@
-import { loadComponent } from "/utils/component-util.js";
+import { loadComponent, prefersReducedMotion } from "/utils/component-util.js";
+import { setCardFlipClickable, resetCardFlip } from "/utils/card-flip.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
 import { assembleDetailRow, relationTag } from "/utils/card-detail-row.js";
 import { focusCenterOffset } from "/utils/card-detail-layout.js";
@@ -19,10 +20,10 @@ const MOTION_MS = 140;
 // How long the cards beside the focus take to travel from behind it to their
 // own slots (and back on close).
 const SIDE_MOTION_MS = 140;
-const BASE_TRANSFORM = "translate(50%, 50%) scale(1)";
-
-/** Whether the user asked for reduced motion; every animation here respects it. */
-const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// The focus card's settled placement, as the entrance/exit zoom animates it: the
+// frame's resting centring is its own `translate` property, so this is the scale
+// alone and the two never state the same offset twice.
+const BASE_TRANSFORM = "scale(1)";
 
 /**
  * FLIP zoom of the focus card between the focus position and the source card
@@ -119,11 +120,10 @@ export async function openCardDetail({
       }
     : null;
 
-  // One slot per row entry, focus included; side slots carry their relation
-  // tag under the card. Every slot joins the row in order first, then the cards
-  // render: each card mounts about ten tooltips and fits two blocks of text, and
-  // building them one after another made a long row sit still for about a second
-  // before its opening animation could start.
+  // One slot per row entry, focus included; side slots carry their relation tag
+  // under the card. The slots are cheap and fixed in size by the stylesheet, so
+  // the row's geometry is known before any card is built and every card can be
+  // measured against it.
   const row = root.querySelector(".card-detail-overlay-row");
   const entries = [...left, { kind: "focus", card: model }, ...right];
   const slots = [];
@@ -143,15 +143,25 @@ export async function openCardDetail({
     row.appendChild(slot);
     slots.push(slot);
   }
-  await Promise.all(
-    entries.map(async (entry, index) => {
-      const isFocus = entry.kind === "focus";
-      await loadComponent(slots[index].firstElementChild, "card-vertical", isFocus && unit
-        ? { unit, isSmall: false, onAbilityClick: abilityClick }
-        : { card: isFocus ? model : entry.card, isSmall: false });
-      frames[index] = slots[index].querySelector(".card-vertical-frame");
-    })
-  );
+
+  /**
+   * Mount one row entry's card. A card fits two blocks of text and mounts about
+   * ten tooltips, so this is the row's real cost.
+   */
+  const mountEntry = async (entry, index) => {
+    const isFocus = entry.kind === "focus";
+    await loadComponent(slots[index].firstElementChild, "card-vertical", isFocus && unit
+      ? { unit, isSmall: false, onAbilityClick: abilityClick }
+      : { card: isFocus ? model : entry.card, isSmall: false });
+    frames[index] = slots[index].querySelector(".card-vertical-frame");
+  };
+
+  // The focus card alone is enough to open with: it is what the entrance zoom
+  // flies from the source card, and it hides every side card while they are
+  // parked behind it. Building the whole row first left the reader looking at
+  // nothing for the length of about eleven card mounts, so the focus card is
+  // built now and the rest are mounted once the row is already on screen.
+  await mountEntry(entries[focusIndex], focusIndex);
 
   // Slot geometry at scale 1, read once before any scale is applied: the
   // stylesheet owns the slot's size and overlap, and every row offset below
@@ -201,6 +211,16 @@ export async function openCardDetail({
     const baseTx = FOCUS_X_RATIO * window.innerWidth
       - focusCenterOffset({ cardWidth, baseAdvance, slotInset, scales, focusIndex: focusSlotIndex });
     row.style.transform = `translateY(-50%) translateX(${baseTx}px)`;
+
+    // Only the card in focus may be turned over, and a card that was showing its
+    // back returns to its front when the focus leaves it: a back belongs to the
+    // card being read, not to a card shrinking into the row. Placing a card is
+    // not a turn, so this is done without one.
+    slots.forEach((slot, index) => {
+      const focused = index === focusSlotIndex;
+      setCardFlipClickable(slot, focused);
+      if (!focused) resetCardFlip(slot);
+    });
   };
   const setFocus = (index) => {
     focusSlotIndex = Math.max(0, Math.min(slots.length - 1, index));
@@ -344,6 +364,17 @@ export async function openCardDetail({
   const entranceMotion = animateFocusCard(frames[focusIndex], focusTarget(), source, "open");
   if (entranceMotion) entranceMotion.finished.catch(() => {}).then(travelSides);
   else travelSides();
+
+  // The rest of the row mounts behind the focus card while it is flying out. They
+  // are parked at the focus slot's centre and invisible there, so nothing the
+  // reader sees depends on them, and the row's geometry never does: the slots are
+  // sized by the stylesheet. Queued so this turn ends first, which is what lets
+  // the entrance start in the frame the overlay appears in.
+  queueMicrotask(() => {
+    void Promise.all(entries.map((entry, index) => (index === focusIndex ? null : mountEntry(entry, index)))).catch(
+      (error) => console.error(`Card detail row failed to mount: ${error.message}`)
+    );
+  });
 
   // closing
   const close = ({ animated = true } = {}) => {

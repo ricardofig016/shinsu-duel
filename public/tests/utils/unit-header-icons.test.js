@@ -1,4 +1,4 @@
-import { buildUnitHeaderIcons } from "../../utils/unit-header-icons.js";
+import { buildCardBackSections, buildUnitHeaderIcons } from "../../utils/unit-header-icons.js";
 
 /**
  * The header-icon list is the one thing both card faces draw from, so its
@@ -116,5 +116,62 @@ describe("buildUnitHeaderIcons", () => {
 
   test("drops a concept whose own text list is empty", () => {
     expect(buildUnitHeaderIcons({ evolveTriggers: [], requirements: [] }, glossary)).toEqual([]);
+  });
+});
+
+describe("the card's back sections", () => {
+  test("reads the header list in order, keeping only the card's game text", () => {
+    const sections = buildCardBackSections(
+      {
+        equipmentAttachments: ["Narumada"],
+        attributes: [attribute],
+        evolveTriggers: [["On deploy."]],
+        passiveAbilities: [{ text: ["Always watching."] }],
+        requirements: [["A Viole unit."]],
+      },
+      glossary
+    );
+
+    expect(sections.map((section) => section.title)).toEqual([
+      "Guide - Hwayeomsa",
+      "Evolve",
+      "Passives",
+      "Requirements",
+    ]);
+    // the attribute keeps its effect line and drops its lore; a concept keeps
+    // the card's own text and drops the glossary description
+    expect(sections[0].texts).toEqual([{ segments: ["Generates a fire charge."] }]);
+    expect(sections[1].texts).toEqual([{ segments: ["On deploy."] }]);
+    expect(sections[2].texts).toEqual([{ segments: ["Always watching."] }]);
+    expect(sections[3].texts).toEqual([{ segments: ["A Viole unit."] }]);
+  });
+
+  test("keeps an equipment attachment off the back, whatever it holds", () => {
+    const sections = buildCardBackSections({ equipmentAttachments: ["Narumada"] }, glossary);
+
+    expect(sections).toEqual([]);
+  });
+
+  test("drops a section with no game text, and reads nothing as no back at all", () => {
+    // an attribute with no effect line has nothing to say on the back; the card
+    // face still draws its icon, and the card simply does not turn over
+    const loreOnly = { ...attribute, effect: [] };
+    expect(buildCardBackSections({ attributes: [loreOnly] }, glossary)).toEqual([]);
+    expect(buildCardBackSections({}, glossary)).toEqual([]);
+    expect(buildCardBackSections(null, glossary)).toEqual([]);
+  });
+
+  test("states a card's attributes without the glossary, which the concepts need", () => {
+    const sections = buildCardBackSections({ attributes: [attribute], requirements: ["A Viole unit."] }, null);
+
+    expect(sections.map((section) => section.title)).toEqual(["Guide - Hwayeomsa"]);
+  });
+
+  test("describes each entry with the same kind and game text the icon list carries", () => {
+    const icons = buildUnitHeaderIcons({ equipmentAttachments: ["Narumada"], attributes: [attribute] }, glossary);
+
+    expect(icons.map((icon) => icon.kind)).toEqual(["equipment", "attribute"]);
+    expect(icons[0].gameTexts).toEqual(["Narumada"]);
+    expect(icons[1].gameTexts).toEqual([{ segments: ["Generates a fire charge."] }]);
   });
 });

@@ -93,7 +93,9 @@ export function buildDeckRowElement({ row, deck, columns, extraCells = {} }) {
 /**
  * Mount the fan cards into a fan cell. Slugs missing from the pool simply do
  * not appear; an empty fan leaves the cell empty (the shared stylesheet draws
- * the "No units" placeholder with an `:empty` rule).
+ * the "No units" placeholder with an `:empty` rule). A fan card sits inside a
+ * row that owns the left click (opening a deck, locking one in), so it does not
+ * turn over on one.
  * @param {HTMLTableCellElement} cell
  * @param {object[]} fanEntries pool entries, cheapest first, from buildDeckFan
  * @returns {Promise<void>}
@@ -107,7 +109,7 @@ export async function mountDeckFan(cell, fanEntries) {
       element.style.transform = transforms[index].transform;
       element.style.zIndex = String(transforms[index].zIndex);
       cell.appendChild(element);
-      await loadComponent(element, "card-vertical", { card: entry.view, isSmall: true });
+      await loadComponent(element, "card-vertical", { card: entry.view, isSmall: true, flipOnClick: false });
     })
   );
 }

@@ -1,5 +1,6 @@
 import { loadComponent } from "./component-util.js";
 import { planGrid } from "./card-browse.js";
+import { trackCardHover } from "./card-flip.js";
 
 /**
  * The catalog card grid shared by the cards page and the deck builder.
@@ -20,22 +21,35 @@ import { planGrid } from "./card-browse.js";
  *   countElement?: HTMLElement|null,
  *   views: object[],
  *   fixedSortKey?: string,
+ *   flipOnClick?: boolean,
  *   decorate?: (element: HTMLElement, view: object, mounted: object) => (void|Promise<void>),
- * }} options `decorate` receives each wrapper element after its component
- *   mounted and is the seam for per-card extras (badges, buttons); extras live
- *   inside the wrapper because the wrapper is what syncing hides and moves.
+ * }} options `flipOnClick` is false for a grid whose cards own their left click
+ *   (the deck builder's pool adds a copy on one). `decorate` receives each
+ *   wrapper element after its component mounted and is the seam for per-card
+ *   extras (badges, buttons); extras live inside the wrapper because the wrapper
+ *   is what syncing hides and moves.
  * @returns {Promise<{ views: object[], byCardId: Map<string|number, { view: object, element: HTMLElement }>, show: (options?: object) => object[] }>}
  *   `show({ criteria, sortKey, predicate })` syncs the grid and
  *   returns the visible views in display order.
  */
-export async function mountCardGrid({ gridElement, countElement = null, views, fixedSortKey = null, decorate = null }) {
+export async function mountCardGrid({
+  gridElement,
+  countElement = null,
+  views,
+  fixedSortKey = null,
+  flipOnClick = true,
+  decorate = null,
+}) {
   const byCardId = new Map();
+  // the grid owns where the pointer is for its cards, so a card's hover survives
+  // the turn it makes on a click
+  trackCardHover(gridElement);
   await Promise.all(
     views.map(async (view) => {
       const element = document.createElement("div");
       element.classList.add("card-vertical-component");
       gridElement.appendChild(element);
-      await loadComponent(element, "card-vertical", { card: view, isSmall: true });
+      await loadComponent(element, "card-vertical", { card: view, isSmall: true, flipOnClick });
       const mounted = { view, element };
       byCardId.set(view.cardId, mounted);
       if (decorate) await decorate(element, view, mounted);

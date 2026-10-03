@@ -1,4 +1,5 @@
 import {
+  buildCatalogEntryParts,
   buildCatalogTooltipEntries,
   buildDeckTooltipEntries,
   buildEntryTitle,
@@ -152,6 +153,29 @@ describe("buildPositionTooltipEntries", () => {
 });
 
 describe("buildCatalogTooltipEntries", () => {
+  test("splits the entry's copy into its game text and its flavor", () => {
+    // the card's back face shows the game text alone, so where the flavor
+    // begins is decided here and nowhere else
+    const attribute = { description: "Hwayeomsa are flame users.", effect: ["gain 1 Fire Charge"] };
+
+    expect(buildCatalogEntryParts(attribute)).toEqual({
+      gameTexts: [{ text: "gain 1 Fire Charge" }],
+      flavor: { text: "Hwayeomsa are flame users.", style: "italic" },
+    });
+    expect(buildCatalogTooltipEntries(attribute)).toEqual([
+      { text: "gain 1 Fire Charge" },
+      { text: "Hwayeomsa are flame users.", style: "italic" },
+    ]);
+  });
+
+  test("reads an entry without effects as game text only, and an empty one as nothing", () => {
+    expect(buildCatalogEntryParts({ description: "I take x damage" })).toEqual({
+      gameTexts: [],
+      flavor: { text: "I take x damage", style: "italic" },
+    });
+    expect(buildCatalogEntryParts(null)).toEqual({ gameTexts: [], flavor: null });
+  });
+
   test("leads with the effect lines and closes with the italic flavor", () => {
     const attribute = {
       description: "Hwayeomsa are flame users.",
