@@ -3,6 +3,7 @@
 ## Tasks
 
 - [ ] bug: its possible to have 2 of the same unit deployed if they're in different evolution stages (Khun and Khun II)
+- [ ] bug: switching positions doesnt require source position combat slot to be available
 - [ ] rules: add contracts from `todo\contracts.md`
 - [ ] units: rethink `conduit` kind - maybe generalize as `construct`
 - [ ] rules: reaudit ambiguities in RULES.md (`plans\prompts\find_ambiguities_in_rules.md`)
@@ -10,9 +11,6 @@
 - [ ] frontend: make the board background match the game's contract
 - [ ] rules: remove "Slay" keyword - redundant
 - [ ] game: completely remove "keywords" (see `docs\COMPILED_CARD_DSL.md`)
-
-## In Progress
-
 
 ## Completed
 
@@ -58,7 +56,7 @@
 - [x] add a new negative trait around silencing
 - [x] add unit test for too many fields in ActionHandler.validateSchema
 - [x] refactor GameState processAction method to an ActionHandler interface class
-- [x] refactor 'abilityCodes' to 'abilities' in cards.json (flattened all *Code(s) suffixes)
+- [x] refactor 'abilityCodes' to 'abilities' in cards.json (flattened all \*Code(s) suffixes)
 - [x] refactor "combat indicator" everywhere to "combat slots"
 - [x] change how turn switching works at round end to align with new rules: players should always alternate turns, even after round end
 - [x] switch places of the position indicators from the beggining of the line to the end of the line, to align with the unit card when it is played, as new units are placed after the existing units on that line
