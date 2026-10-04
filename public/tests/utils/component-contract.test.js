@@ -104,9 +104,214 @@ describe("overlay row rendering", () => {
 });
 
 /**
- * Wiring order that the browser depends on, checked here because a mistake is
- * invisible until the page is slow or a stylesheet is cold.
+ * The overlay's two relation tiers. The primary tier is the row; the secondary
+ * one sits behind a slot the reader clicks. Both halves are wiring that a
+ * mistake would hide until someone opened the right card, so the shape is
+ * pinned here: the row builder splits the tiers, the overlay substitutes the
+ * slot for the cards it stood for, and the slot is a card's footprint or the
+ * row's centring arithmetic stops describing the row.
  */
+describe("overlay relation tiers", () => {
+  const script = fs.readFileSync(path.join(root, "public/components/card-detail-overlay/script.js"), "utf-8");
+  const styles = fs
+    .readFileSync(path.join(root, "public/components/card-detail-overlay/styles.css"), "utf-8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const rule = (selector) => {
+    const start = styles.indexOf(`${selector} {`);
+    return start === -1 ? "" : styles.slice(start, styles.indexOf("}", start));
+  };
+
+  test("the row builder hands back both tiers", () => {
+    const row = fs.readFileSync(path.join(root, "public/utils/card-detail-row.js"), "utf-8");
+    expect(row).toMatch(/return \{ left, right, more, focusIndex: left\.length \}/);
+    // an entry with no tier is held back rather than shown, so a stamp written
+    // before the field existed cannot add a card to the default tier
+    expect(row).toMatch(/const sinkFor = \(tier\) => \(tier === "primary" \? right : more\)/);
+  });
+
+  test("the button is not a slot", () => {
+    // A slot is a place a card can be, and the button holds no card. Making it a
+    // slot is what put it in reach of the focus, made the row's centering count
+    // it, and left a slot-shaped hole in `slots` after the reveal that every
+    // later index had to be corrected for.
+    expect(script).not.toMatch(/kind: "reveal"/);
+    expect(script).not.toMatch(/card-detail-reveal"\s*:/);
+    expect(script).not.toMatch(/slots\[revealIndex\]/);
+    expect(script).toMatch(/const entries = \[\.\.\.left, \{ kind: "focus", card: model \}, \.\.\.right\];/);
+    // it is one element of its own, appended to the overlay rather than to the
+    // row, so the row's layout cannot see it
+    expect(script).toMatch(/const buildReveal = \(\) => \{[\s\S]{0,700}?root\.appendChild\(button\);/);
+    expect(script).toMatch(/const revealButton = more\.length > 0 \? buildReveal\(\) : null;/);
+    expect(script).not.toMatch(/row\.appendChild\(button\)/);
+    // and nothing classifies slots by whether they hold a card any more
+    expect(script).not.toMatch(/isCardSlot/);
+    expect(script).not.toMatch(/revealSlotIndex/);
+    expect(script).not.toMatch(/nearestCardSlot/);
+  });
+
+  test("a step of the focus is a step of one card", () => {
+    // A revealed card keeps its true row index, so there is one index space and
+    // no translation between the two tiers: this is what the previous version
+    // got wrong, where one scroll step from the card before the button landed
+    // one card backwards.
+    expect(script).toMatch(/const setFocus = \(index\) => \{[\s\S]{0,260}?focusSlotIndex = Math\.max\(0, Math\.min\(slots\.length - 1, index\)\);/);
+    expect(script).toMatch(/const secondary = more\.map\(\(entry, offset\) => \(\{ entry, index: revealIndex \+ offset \}\)\)/);
+    expect(script).toMatch(/const revealIndex = left\.length \+ right\.length \+ 1;/);
+  });
+
+  test("the control is a full-height fade over the right edge", () => {
+    // It read as one more card that did not fit, then as a button with a visible
+    // left border and the page's own button colour. It is neither: a fade from
+    // fully transparent at its left to opaque at the screen edge, top to bottom,
+    // with no border and no corner for the eye to read as an edge of its own.
+    const rule = (selector) => {
+      const at = styles.indexOf(`${selector} {`);
+      return at === -1 ? "" : styles.slice(at, styles.indexOf("}", at));
+    };
+    const fade = rule(".card-detail-reveal");
+    expect(fade).toMatch(/position: fixed;/);
+    expect(fade).toMatch(/top: 0;/);
+    expect(fade).toMatch(/bottom: 0;/);
+    expect(fade).toMatch(/right: 0;/);
+    expect(fade).toMatch(/linear-gradient\(to right, rgba\(0, 0, 0, 0\), rgba\(0, 0, 0, 0?\.[0-9]+\)\)/);
+    expect(fade).toMatch(/cursor: pointer;/);
+    // The page styles every `button`, so this must be a div and must reset the
+    // chrome either way: the colour and the corner both leaked in once.
+    expect(script).toMatch(/const button = document\.createElement\("div"\);\s*\n\s*button\.className = "card-detail-reveal";/);
+    expect(fade).toMatch(/all: unset;/);
+    expect(fade).toMatch(/background-color: transparent;/);
+    expect(fade).not.toMatch(/border-radius/);
+    // no card footprint, no card panel, no graded scale
+    expect(fade).not.toMatch(/30rem|45rem/);
+    expect(fade).not.toMatch(/--s/);
+    expect(fade).not.toMatch(/card\/background\.png/);
+  });
+
+  test("the button's click opens the tier instead of closing the overlay", () => {
+    // the row's click handler closes the overlay for a click that is not on a
+    // slot, so the button's own handler has to stop the event there
+    expect(script).toMatch(/revealButton\.addEventListener\("click", \(event\) => \{\s*\n\s*event\.stopPropagation\(\);\s*\n\s*void revealMore\(\);/);
+  });
+
+  test("the button leaves the row in the frame its click arrives in", () => {
+    // Removing it after the cards mount left it on screen beside its own answer
+    // for as long as the mounts took, and a guard that could return early in
+    // between left it there for good, with nothing left to press.
+    expect(script).toMatch(/revealButton\.remove\(\);/);
+    expect(script).not.toMatch(/const origin = revealButton/);
+    // and nothing between the click and the removal waits on anything
+    const beforeMount = script.slice(script.indexOf("revealButton.remove()"), script.indexOf("await Promise.all("));
+    expect(beforeMount).not.toMatch(/await /);
+  });
+
+  test("opening the tier leaves the focus on the card that took the button's place", () => {
+    // the first revealed card stands exactly where the button stood, so the
+    // reader keeps their place and the focus lands on a card
+    expect(script).toMatch(/revealButton\.remove\(\);[\s\S]*?setFocus\(revealIndex\)/);
+    // and the cards come in from beyond the screen edge the fade covers, which is
+    // what makes it read as the row continuing into that space
+    expect(script).toMatch(/const entryEdge = \(\) => window\.innerWidth;/);
+  });
+
+  test("the focus can only ever name a card", () => {
+    // every index in the row is a card, so nothing has to be skipped or
+    // corrected: the click handler is the only caller of the reveal
+    const revealCalls = script.match(/revealMore\(\)/g) ?? [];
+    expect(revealCalls).toHaveLength(1);
+    expect(script).not.toMatch(/if \(index === revealIndex/);
+  });
+
+  test("the button takes no part in the row's layout", () => {
+    // It used to be appended to the row, which meant a revealed slot had to be
+    // inserted in front of it and the row's order depended on creation order.
+    // Outside the row there is no order to get wrong.
+    expect(script).not.toMatch(/insertBefore/);
+    expect(script).not.toMatch(/row\.appendChild\(button\)/);
+    expect(script).toMatch(/row\.appendChild\(slot\);/);
+    // and the row's geometry is the stylesheet's declaration, not a slot position
+    expect(script).not.toMatch(/unscaledSlot/);
+  });
+
+  test("the park and the travel walk the row's own slots", () => {
+    // No slot is ever detached, so no walk over the slots skips one for being
+    // gone, and the button is not in these sets to begin with.
+    const parkBlock = script.slice(script.indexOf("const sideSlots ="), script.indexOf("const gatherSides"));
+    expect(parkBlock).not.toMatch(/isConnected/);
+    expect(script).toMatch(/const sideSlots = slots\.filter\(\(slot, index\) => index !== focusIndex\);/);
+  });
+
+  test("no row position is ever built twice", () => {
+    // A slot is appended to the row by `buildSlot`, and the array it lands in is
+    // keyed by row index. Building the tier's slots up front and then building
+    // them again at the same indices on the reveal appended a second element for
+    // every position, so each secondary card was in the row twice while `slots`
+    // showed only the newer one. `buildSlot` runs once for the row's own entries
+    // and once per secondary entry on the reveal, and nowhere else.
+    const calls = script.match(/buildSlot\b/g) ?? [];
+    // the definition, the initial pass over the row's entries, and the one
+    // inside the reveal
+    expect(calls).toHaveLength(3);
+    expect(script).toMatch(/entries\.forEach\(buildSlot\);/);
+    expect(script).toMatch(/const secondary = more\.map\(\(entry, offset\) => \(\{ entry, index: revealIndex \+ offset \}\)\);\s*\n\s*const fresh = secondary\.map\(\(\{ entry, index \}\) => \{\s*\n\s*const slot = buildSlot\(entry, index\);/);
+    // the tier is not in the entries the first pass walks
+    expect(script).not.toMatch(/\.\.\.more,\s*\n\s*\];/);
+  });
+
+  test("nothing in the row has to survive a slot being gone", () => {
+    // the slot array keeps its shape after the reveal because nothing is
+    // detached from it: the button was never in it
+    expect(script).not.toMatch(/slots\[revealIndex\] = null/);
+    expect(script).toMatch(/const slots = \[\];/);
+    // and the graded scale applies to every slot, because every slot is a card
+    expect(script).toMatch(/slot\.style\.setProperty\("--s", scale\.toFixed\(3\)\);/);
+  });
+
+  test("the row's geometry is read in pixels, never converted by hand", () => {
+    // The overlay's arithmetic runs on pixels. Reading a declaration that the
+    // browser has already resolved and multiplying it by the root font size a
+    // second time is what put the focused card off centre on every card of a
+    // machine whose numbers did not line up that way, so nothing here converts
+    // units and nothing assumes the slot's font size is the root's.
+    expect(styles).toMatch(/--card-slot-width: 30;/);
+    expect(styles).toMatch(/--card-slot-overlap: 2\.5;/);
+    expect(styles).toMatch(/width: calc\(var\(--card-slot-width, 30\) \* 1rem \* var\(--s, 1\)\);/);
+    expect(styles).toMatch(/margin-inline: calc\(var\(--card-slot-overlap, 2\.5\) \* -1rem\);/);
+    expect(script).not.toMatch(/rootFontSize/);
+    expect(script).not.toMatch(/getPropertyValue\("--card-slot-width"\)/);
+    expect(script).not.toMatch(/getPropertyValue\("--card-slot-height"\)/);
+    // the footprint is the width the browser resolved, divided by the scale it
+    // applied, so a slot that is mid-transition cannot skew it
+    expect(script).toMatch(/const slotWidth = slots\[0\]\.getBoundingClientRect\(\)\.width;/);
+    expect(script).toMatch(/const cardWidth = slotWidth > 0 \? slotWidth \/ slotScale : 0;/);
+    expect(script).not.toMatch(/unscaledSlot/);
+    expect(script).not.toMatch(/slots\[1\]\.getBoundingClientRect/);
+  });
+
+  test("the overlap counts both sides of the slot's margin", () => {
+    // `margin-inline` is negative and applies to the slot's start and its end, so
+    // two neighbours overlap by twice the margin. Counting one side is a silent
+    // error in every offset, and it put the focused card off the middle of the
+    // screen on every card at once.
+    expect(script).toMatch(/const inlineMarginOf = \(element\) => \{/);
+    expect(script).toMatch(/const marginPerSide = Math\.abs\(inlineMarginOf\(slots\[0\]\)\);/);
+    expect(script).toMatch(/const slotOverlap = marginPerSide \* 2;/);
+    expect(script).toMatch(/const slotInset = -marginPerSide;/);
+    expect(script).toMatch(/const baseAdvance = cardWidth - slotOverlap;/);
+    // margin-inline is shorthand for two longhands, and which one a browser
+    // reports is not something to build arithmetic on
+    expect(script).toMatch(/Math\.abs\(px\(style\.marginInlineStart\) \|\| px\(style\.marginLeft\)\)/);
+    expect(script).toMatch(/Math\.abs\(px\(style\.marginInlineEnd\) \|\| px\(style\.marginRight\)\)/);
+  });
+
+  test("the fade over the right edge stays narrow", () => {
+    // It was a quarter of the viewport wide, which read as a panel laid over the
+    // row rather than as the screen's edge.
+    const at = styles.indexOf(".card-detail-reveal {");
+    const fade = at === -1 ? "" : styles.slice(at, styles.indexOf("}", at));
+    expect(fade).toMatch(/width: min\(12rem, 14vw\);/);
+  });
+});
+
 describe("render order", () => {
   test("a component renders only after its own stylesheet is applied", () => {
     // Markup is laid out unstyled until its <link> loads, and renderers measure
@@ -172,12 +377,6 @@ describe("tooltip lifetime trigger", () => {
   });
 });
 
-/**
- * The card's back face and the click that turns it over. The card is DOM code
- * without a harness, so the wiring is pinned here: the markup the back renders
- * into, the module that owns the turn, and the hosts that must not turn a card
- * over because they already own the left click.
- */
 /**
  * The card's back face and the click that turns it over. The card is DOM code
  * without a harness, so the wiring is pinned here: the markup the back renders

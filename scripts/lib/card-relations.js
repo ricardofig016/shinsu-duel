@@ -29,6 +29,17 @@ import { normalizeName } from "./normalize-name.js";
  * - `same-series-as` — the tagged card shares a series with the peer, the
  *   card whose `series` field reached the tagged card.
  *
+ * Entries also carry `tier`, which says whether the card is a relation the
+ * stamped card owns. Arrows run from the card that names to the card it names,
+ * and `primary` is every card reachable from the stamped card by following
+ * those arrows, however many steps that takes; `secondary` is everything else
+ * the closure holds, which means the cards reached by travelling against an
+ * arrow. A kind's arrow does not decide it, and neither does the edge that
+ * happened to claim the card: entry and reach are computed apart, so an entry
+ * can carry a kind pointing the other way and still be primary. As a rule the
+ * two ends of a pair land in opposite tiers, and they need not, because a card
+ * can name the other end twice.
+ *
  * Edge priority per card is evolution, ignition, card mentions, series
  * mentions, reverse mentions, then series siblings. A card's copy naming a
  * series expands to every member at that step, before the traversal recurses
@@ -50,6 +61,10 @@ import { normalizeName } from "./normalize-name.js";
 
 const NODE_LISTS = ["abilities", "passives", "effects", "requirements", "rules", "deckConstraints"];
 const TRANSFORMATION_LISTS = ["evolveInto", "igniteInto"];
+
+// The tier names are the only vocabulary the stamp shares with its readers.
+const SECONDARY = "secondary";
+const PRIMARY = "primary";
 
 function isLinkSegment(value) {
   return (
@@ -148,13 +163,12 @@ function isCardId(value) {
  * `scripts/lib/catalog-mentions.js`): `"slug:<slug>"` for a card and
  * `"series:<code>"` for a series. They join the card's own references at the
  * mention edge, so an inherited mention behaves exactly like one the card
- * makes itself.
+ * makes itself, tier included: it is the peer's copy that names the card.
  *
  * @param {object[]} cards - compiled cards (array form, pre-keying)
  * @param {((card: object) => string[] | Record<string, string[]>) | null}
  *   [extraReferences] - per-card inherited reference keys, keyed by cardId
- * @returns {Map<number, { cardSlugs: Set<string>, seriesCodes: Set<string> }>}
- *   resolved forward references per cardId
+ * @returns {void} `relatedCards` is stamped onto the cards in place
  */
 export function stampRelatedCards(cards, extraReferences = null) {
   // The pool the graph is built over: every card the client can be served.
@@ -244,17 +258,23 @@ export function stampRelatedCards(cards, extraReferences = null) {
 
   // Edges out of one card, in the priority the traversal examines them. A
   // target's kind describes the target, so it reads as the reverse of the
-  // direction this card relates to it in.
+  // direction this card relates to it in. The kind says nothing about the tier:
+  // that is decided by whether the stamped card reaches this one forward, and a
+  // pair's two ends can both be reached that way.
   function edgeGroups(card) {
-    const evolution = [];
-    if (isCardId(card.evolvedFrom)) evolution.push({ cardId: card.evolvedFrom, kind: "evolves-into" });
-    if (isCardId(card.evolveInto?.cardId)) evolution.push({ cardId: card.evolveInto.cardId, kind: "evolves-from" });
+    const evolution = [
+      ...(isCardId(card.evolvedFrom) ? [{ cardId: card.evolvedFrom, kind: "evolves-into" }] : []),
+      ...(isCardId(card.evolveInto?.cardId) ? [{ cardId: card.evolveInto.cardId, kind: "evolves-from" }] : []),
+    ];
 
-    const ignition = [];
-    if (isCardId(card.ignitedFrom)) ignition.push({ cardId: card.ignitedFrom, kind: "ignites-into" });
-    if (isCardId(card.igniteInto?.cardId)) ignition.push({ cardId: card.igniteInto.cardId, kind: "ignited-from" });
+    const ignition = [
+      ...(isCardId(card.ignitedFrom) ? [{ cardId: card.ignitedFrom, kind: "ignites-into" }] : []),
+      ...(isCardId(card.igniteInto?.cardId) ? [{ cardId: card.igniteInto.cardId, kind: "ignited-from" }] : []),
+    ];
 
-    const mentions = namedEdges.get(card.cardId).map((cardId) => ({ cardId, kind: "mentioned-in" }));
+    const mentions = namedEdges
+      .get(card.cardId)
+      .map((cardId) => ({ cardId, kind: "mentioned-in" }));
 
     const series = [];
     for (const { seriesCode, cardIds } of seriesEdges.get(card.cardId)) {
@@ -272,23 +292,97 @@ export function stampRelatedCards(cards, extraReferences = null) {
       .map((group) => group.sort(compareByCardId));
   }
 
+  /**
+   * The arrows leaving one card: the cards its own copy names. Naming an
+   * explicit card link or a machine-readable reference is an arrow to that
+   * card; naming a series code is an arrow to the code and then one to each of
+   * its members, which is why a member is reached in one forward walk.
+   *
+   * A card that is named in someone else's copy is not an arrow leaving here.
+   * That is the whole difference between the tiers: the arrow points from the
+   * namer to the named, so a card the focus does not name is reached by
+   * travelling against an arrow.
+   */
+  function forwardTargets(card) {
+    const targets = new Set(namedEdges.get(card.cardId));
+    for (const { cardIds } of seriesEdges.get(card.cardId)) {
+      for (const cardId of cardIds) targets.add(cardId);
+    }
+    const evolveInto = card.evolveInto?.cardId;
+    if (isCardId(evolveInto) && evolveInto !== card.cardId) targets.add(evolveInto);
+    const igniteInto = card.igniteInto?.cardId;
+    if (isCardId(igniteInto) && igniteInto !== card.cardId) targets.add(igniteInto);
+    targets.delete(card.cardId);
+    return [...targets].sort((a, b) => a - b);
+  }
+
+  /**
+   * Every card reachable from `from` by following arrows forward, the root
+   * included. These are the relations the root owns: what its copy names, what
+   * those name, and so on. Everything else in a card's closure was reached
+   * against an arrow and is the revealed tier.
+   */
+  function forwardReach(from) {
+    const reached = new Set([from]);
+    const queue = [from];
+    while (queue.length > 0) {
+      for (const target of forwardTargets(byId.get(queue.shift()))) {
+        if (reached.has(target)) continue;
+        reached.add(target);
+        queue.push(target);
+      }
+    }
+    return reached;
+  }
+
   for (const card of pool) {
-    const related = [];
     const seen = new Set([card.cardId]);
     const queue = [card.cardId];
+    // One entry per card reached, in the order the traversal reaches them, each
+    // carrying the edge that reached it. Dedup gives a card to the first edge
+    // that reaches it, so this is the same closure, in the same order, the edge
+    // priority alone produced; only the tier below is new.
+    //
+    // `tier` is membership of the stamped card's forward reach, not a property
+    // of the edge that happened to claim the card. Entry and reach are computed
+    // independently, so an entry can carry a kind whose arrow points the other
+    // way and still be primary, because another reference of the same card
+    // reaches it forward. Khun Ran II is the live example: its own copy names
+    // Khun Ran, so the evolution pair is primary from both ends.
+    //
+    // What this card's own copy reaches, forward. A card in here is a relation
+    // the card owns; everything else in the closure was reached by travelling
+    // against an arrow.
+    const owns = forwardReach(card.cardId);
+
+    const claimed = [];
     while (queue.length > 0) {
       const current = byId.get(queue.shift());
       for (const group of edgeGroups(current)) {
         for (const edge of group) {
           if (seen.has(edge.cardId)) continue;
           seen.add(edge.cardId);
-          const entry = { cardId: edge.cardId, kind: edge.kind, peerCardId: current.cardId };
-          if (edge.seriesCode !== undefined) entry.seriesCode = edge.seriesCode;
-          related.push(entry);
+          claimed.push({
+            cardId: edge.cardId,
+            kind: edge.kind,
+            peerCardId: current.cardId,
+            tier: owns.has(edge.cardId) ? PRIMARY : SECONDARY,
+            ...(edge.seriesCode !== undefined ? { seriesCode: edge.seriesCode } : {}),
+          });
           queue.push(edge.cardId);
         }
       }
     }
+
+    // The row reads the primary tier first, so the entries are partitioned
+    // here, once, in the order the traversal produced them. The traversal
+    // itself is untouched: the closure still holds every card the edge
+    // priority reaches, and each keeps the entry of the edge that reached it
+    // first.
+    const related = [
+      ...claimed.filter((entry) => entry.tier === PRIMARY),
+      ...claimed.filter((entry) => entry.tier === SECONDARY),
+    ];
     if (related.length > 0) card.relatedCards = related;
   }
 }

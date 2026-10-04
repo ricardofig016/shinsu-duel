@@ -4,13 +4,25 @@
  *
  * The carousel row is the focused card plus every card it relates to, laid
  * out as: attached equipment (left of the focus, in the unit's attachment
- * order), the focus card, then the focus's compiled `relatedCards` order.
- * Attached equipment recursion folds into the right-hand list at open time:
- * each attachment's own relatedCards appends after the focus's, with the
- * same never-repeat rule — a card already in the row keeps its first
- * position, so a card both attached and statically related stays in the
- * equipment column. The list is fully static for the overlay's lifetime;
- * changing focus never rebuilds it.
+ * order), the focus card, then the focus's compiled `relatedCards`, split into
+ * the tier the overlay shows by default and the tier one click reveals.
+ *
+ * `right` holds the primary entries, in the order the stamp carries them:
+ * the focus's children in the relation tree, meaning the cards its own copy
+ * names and the stages it transforms into (see
+ * `docs/CARD_RELATIONS.md`). `more` holds the secondary entries in the same
+ * order: the cards that name the focus, the stages it came from, series
+ * siblings, and every card the closure reached past the first step.
+ *
+ * Attached equipment recursion folds into the same two lists at open time:
+ * each attachment's own relatedCards appends after the focus's, with the same
+ * never-repeat rule — a card already in the row keeps its first position, so
+ * a card both attached and statically related stays in the equipment column.
+ * An attachment is a second root, so its entries are tiered against the
+ * attachment that produced them rather than against the focus: a card the
+ * attachment names is primary even though it is two hops from the focus. The
+ * list is fully static for the overlay's lifetime; changing focus never
+ * rebuilds it.
  *
  * Pure data shaping over the flattened card view models and the catalog
  * index from `public/utils/card-catalog.js`; no DOM access.
@@ -70,12 +82,13 @@ export function relationTag(entry) {
  *   for (the focus card; a unit view resolves its name-only
  *   `equipmentAttachments` through the catalog)
  * @param {{ byId: Map<number, object>, byName: Map<string, object> } | null} catalogIndex
- * @returns {{ left: Array<object>, right: Array<object>, focusIndex: number }}
+ * @returns {{ left: Array<object>, right: Array<object>, more: Array<object>, focusIndex: number }}
  *   Row entries shaped `{ kind, seriesCode, peerName, focusName, card }` —
- *   `left` holds the equipment column, `right` the related cards in display
- *   order, and `focusIndex` is the focus card's index in
- *   `[...left, focus, ...right]`. Every entry in `right` carries a tag: one
- *   whose relation cannot be stated is dropped rather than shown untagged.
+ *   `left` holds the equipment column, `right` the primary related cards in
+ *   display order, `more` the secondary ones in the same order, and
+ *   `focusIndex` is the focus card's index in `[...left, focus, ...right]`.
+ *   Every entry in `right` and `more` carries a tag: one whose relation
+ *   cannot be stated is dropped rather than shown untagged.
  */
 export function assembleDetailRow(model, catalogIndex) {
   const byId = catalogIndex?.byId ?? new Map();
@@ -111,7 +124,12 @@ export function assembleDetailRow(model, catalogIndex) {
   // equipment's own closure folded in. Each entry carries its own peer and
   // series code — the card whose closure produced it.
   const right = [];
-  const addRelated = (kind, seriesCode, peerCardId, cardId) => {
+  const more = [];
+  // A stamp without a tier predates the field or was hand-edited. It goes to
+  // the revealed tier: a dropped entry would lose a relation the overlay has
+  // always shown, and the default tier is the one the reader asked for.
+  const sinkFor = (tier) => (tier === "primary" ? right : more);
+  const addRelated = (kind, seriesCode, peerCardId, cardId, sink) => {
     if (seen.has(cardId)) return;
     const view = byId.get(cardId);
     if (!view) return;
@@ -122,16 +140,19 @@ export function assembleDetailRow(model, catalogIndex) {
     // it is dropped and the next edge that reaches the card takes the slot.
     if (relationTag(entry) === "") return;
     seen.add(cardId);
-    right.push(entry);
+    sink.push(entry);
   };
-  for (const { cardId, kind, peerCardId, seriesCode } of model.relatedCards ?? []) {
-    addRelated(kind, seriesCode ?? null, peerCardId, cardId);
+  for (const { cardId, kind, peerCardId, seriesCode, tier } of model.relatedCards ?? []) {
+    addRelated(kind, seriesCode ?? null, peerCardId, cardId, sinkFor(tier));
   }
   for (const attachment of left) {
-    for (const { cardId, kind, peerCardId, seriesCode } of attachment.card.relatedCards ?? []) {
-      addRelated(kind, seriesCode ?? null, peerCardId, cardId);
+    // The stamp's tiers were computed with the attachment as the root, so each
+    // entry already states whether the attachment owns that relation. The
+    // overlay only re-routes them, because here the focus owns the row.
+    for (const { cardId, kind, peerCardId, seriesCode, tier } of attachment.card.relatedCards ?? []) {
+      addRelated(kind, seriesCode ?? null, peerCardId, cardId, sinkFor(tier));
     }
   }
 
-  return { left, right, focusIndex: left.length };
+  return { left, right, more, focusIndex: left.length };
 }

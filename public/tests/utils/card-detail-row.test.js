@@ -74,20 +74,26 @@ describe("relationTag", () => {
 });
 
 describe("assembleDetailRow", () => {
+  // A stamp mixing both tiers, so every assertion below can name the list an
+  // entry belongs to and why.
   const focus = buildCardViewModel({
     cardId: 1,
     type: "unit",
     name: "Focus",
     series: "incinerate",
     relatedCards: [
-      { cardId: 2, kind: "evolves-from", peerCardId: 1 },
-      { cardId: 3, kind: "mentioned-in", peerCardId: 1 },
-      { cardId: 6, kind: "mentioned-in", peerCardId: 1 }, // also attached: stays in the equipment column
-      { cardId: 4, kind: "same-series-as", peerCardId: 1, seriesCode: "incinerate" },
+      // primary: the focus's own copy names this card
+      { cardId: 3, kind: "mentioned-in", peerCardId: 1, tier: "primary" },
+      // primary: the focus grows into this card
+      { cardId: 2, kind: "evolves-from", peerCardId: 1, tier: "primary" },
+      // also attached: stays in the equipment column
+      { cardId: 6, kind: "mentioned-in", peerCardId: 1, tier: "primary" },
+      // secondary: this card shares the focus's series
+      { cardId: 4, kind: "same-series-as", peerCardId: 1, seriesCode: "incinerate", tier: "secondary" },
     ],
   });
 
-  test("orders attached equipment left, then the focus, then related cards", () => {
+  test("orders attached equipment left, then the focus, then the primary related cards", () => {
     const unit = {
       ...focus,
       equipmentAttachments: ["Heavy Weights"],
@@ -95,7 +101,8 @@ describe("assembleDetailRow", () => {
     const row = assembleDetailRow(unit, catalogIndex);
 
     expect(row.left.map((entry) => entry.card.cardId)).toEqual([6]);
-    expect(row.right.map((entry) => entry.card.cardId)).toEqual([2, 3, 4]);
+    expect(row.right.map((entry) => entry.card.cardId)).toEqual([3, 2]);
+    expect(row.more.map((entry) => entry.card.cardId)).toEqual([4]);
     expect(row.focusIndex).toBe(1);
     expect(relationTag(row.left[0])).toBe("Equipped to Focus");
   });
@@ -104,10 +111,129 @@ describe("assembleDetailRow", () => {
     const row = assembleDetailRow(focus, catalogIndex);
 
     expect(row.right.map((entry) => [entry.card.cardId, relationTag(entry)])).toEqual([
-      [2, "Evolves from Focus"],
       [3, "Mentioned in Focus"],
+      [2, "Evolves from Focus"],
       [6, "Mentioned in Focus"],
+    ]);
+    expect(row.more.map((entry) => [entry.card.cardId, relationTag(entry)])).toEqual([
       [4, "Same series as Focus"],
+    ]);
+  });
+
+  test("shows only the primary tier by default and hides the rest", () => {
+    const row = assembleDetailRow(focus, catalogIndex);
+
+    const shown = row.right.map((entry) => entry.card.cardId);
+    const hidden = row.more.map((entry) => entry.card.cardId);
+    // The two tiers never overlap: a card is revealed or it is on screen.
+    expect(shown.filter((cardId) => hidden.includes(cardId))).toEqual([]);
+    // Every related card the stamp carries is in exactly one of them.
+    expect([...shown, ...hidden].sort()).toEqual([2, 3, 4, 6]);
+  });
+
+  test("a stamp with no secondary tier has nothing to reveal", () => {
+    const primaryOnly = buildCardViewModel({
+      cardId: 1,
+      type: "unit",
+      name: "Focus",
+      relatedCards: [
+        { cardId: 2, kind: "mentioned-in", peerCardId: 1, tier: "primary" },
+        { cardId: 3, kind: "series-mentioned", peerCardId: 1, seriesCode: "incinerate", tier: "primary" },
+      ],
+    });
+    const row = assembleDetailRow(primaryOnly, catalogIndex);
+
+    expect(row.right.map((entry) => entry.card.cardId)).toEqual([2, 3]);
+    expect(row.more).toEqual([]);
+  });
+
+  test("a stamp with no primary tier shows nothing until the reveal", () => {
+    const secondaryOnly = buildCardViewModel({
+      cardId: 1,
+      type: "unit",
+      name: "Focus",
+      relatedCards: [
+        { cardId: 2, kind: "mentions", peerCardId: 1, tier: "secondary" },
+        { cardId: 3, kind: "evolves-into", peerCardId: 1, tier: "secondary" },
+      ],
+    });
+    const row = assembleDetailRow(secondaryOnly, catalogIndex);
+
+    expect(row.right).toEqual([]);
+    expect(row.more.map((entry) => entry.card.cardId)).toEqual([2, 3]);
+  });
+
+  test("a card whose relations are all secondary still has a row", () => {
+    // Baang's shape in the shipped catalog: every related card names it or is
+    // reached through one that does, so the row builder hands back nothing for
+    // the owned tier and everything for the revealed one. The overlay renders
+    // the focus and its button in that case, which is the shape that used to
+    // throw while the overlay was opening.
+    const namer = buildCardViewModel({
+      cardId: 2,
+      type: "unit",
+      name: "Card 2",
+      relatedCards: [{ cardId: 3, kind: "mentions", peerCardId: 2, tier: "secondary" }],
+    });
+    // a fresh index, because assembling a row consumes its `seen` set
+    const index = {
+      byId: new Map([...catalogIndex.byId, [2, namer]]),
+      byName: new Map(catalogIndex.byName),
+    };
+    const focus = buildCardViewModel({
+      cardId: 1,
+      type: "unit",
+      name: "Focus",
+      relatedCards: [
+        { cardId: 2, kind: "mentions", peerCardId: 1, tier: "secondary" },
+        { cardId: 3, kind: "mentions", peerCardId: 1, tier: "secondary" },
+      ],
+    });
+
+    const row = assembleDetailRow(focus, index);
+
+    expect(row.right).toEqual([]);
+    expect(row.more.map((entry) => entry.card.cardId)).toEqual([2, 3]);
+    // the focus is the only owned card, so it is the whole row until the button
+    // is pressed, and the row builder says so by putting it at the front
+    expect(row.focusIndex).toBe(row.left.length);
+    expect(row.left).toEqual([]);
+  });
+
+  test("an entry with no tier is held back rather than lost", () => {
+    // A stamp written before the tier existed, or hand-edited without it, has
+    // no claim to the default tier, but dropping it would lose a relation the
+    // overlay used to show.
+    const unstamped = buildCardViewModel({
+      cardId: 1,
+      type: "unit",
+      name: "Focus",
+      relatedCards: [{ cardId: 2, kind: "mentioned-in", peerCardId: 1 }],
+    });
+    const row = assembleDetailRow(unstamped, catalogIndex);
+
+    expect(row.right).toEqual([]);
+    expect(row.more.map((entry) => entry.card.cardId)).toEqual([2]);
+  });
+
+  test("an entry the primary tier dropped is claimable by a secondary edge", () => {
+    const unit = {
+      ...focus,
+      relatedCards: [
+        { cardId: 2, kind: "mentioned-in", peerCardId: 99, tier: "primary" }, // peer 99 is not in the catalog
+        { cardId: 2, kind: "mentions", peerCardId: 1, tier: "secondary" }, // same card, a statable edge
+        { cardId: 3, kind: "custom", peerCardId: 1, tier: "primary" }, // unknown kind
+        { cardId: 4, kind: "series-mentioned", peerCardId: 1, tier: "secondary" }, // series entry with no series
+        { cardId: 7, kind: "mentioned-in", peerCardId: 1, tier: "primary" },
+      ],
+    };
+    const row = assembleDetailRow(unit, catalogIndex);
+
+    // 2 is claimed by its second, statable edge, which is secondary; 3 and 4
+    // would sit in the row claiming nothing, so they are not shown at all.
+    expect(row.right.map((entry) => entry.card.cardId)).toEqual([7]);
+    expect(row.more.map((entry) => [entry.card.cardId, relationTag(entry)])).toEqual([
+      [2, "Mentions Focus"],
     ]);
   });
 
@@ -115,11 +241,11 @@ describe("assembleDetailRow", () => {
     const unit = {
       ...focus,
       relatedCards: [
-        { cardId: 2, kind: "mentions", peerCardId: 99 }, // peer 99 is not in the catalog
-        { cardId: 2, kind: "evolves-from", peerCardId: 1 }, // same card, a statable edge
-        { cardId: 3, kind: "custom", peerCardId: 1 }, // unknown kind
-        { cardId: 4, kind: "series-mentioned", peerCardId: 1 }, // series entry with no series
-        { cardId: 7, kind: "mentioned-in", peerCardId: 1 },
+        { cardId: 2, kind: "mentions", peerCardId: 99, tier: "secondary" }, // peer 99 is not in the catalog
+        { cardId: 2, kind: "evolves-from", peerCardId: 1, tier: "primary" }, // same card, a statable edge
+        { cardId: 3, kind: "custom", peerCardId: 1, tier: "primary" }, // unknown kind
+        { cardId: 4, kind: "series-mentioned", peerCardId: 1, tier: "primary" }, // series entry with no series
+        { cardId: 7, kind: "mentioned-in", peerCardId: 1, tier: "primary" },
       ],
     };
     const row = assembleDetailRow(unit, catalogIndex);
@@ -130,6 +256,7 @@ describe("assembleDetailRow", () => {
       [2, "Evolves from Focus"],
       [7, "Mentioned in Focus"],
     ]);
+    expect(row.more).toEqual([]);
   });
 
   test("folds each attachment's own related cards into the right list", () => {
@@ -137,8 +264,8 @@ describe("assembleDetailRow", () => {
       ...heavyWeights,
       series: "weights",
       relatedCards: [
-        { cardId: 3, kind: "mentioned-in", peerCardId: 6 }, // already related by the focus: skipped
-        { cardId: 5, kind: "mentions", peerCardId: 6 },
+        { cardId: 3, kind: "mentioned-in", peerCardId: 6, tier: "primary" }, // already related by the focus: skipped
+        { cardId: 5, kind: "mentions", peerCardId: 6, tier: "primary" },
       ],
     };
     const index = {
@@ -151,21 +278,59 @@ describe("assembleDetailRow", () => {
     const unit = { ...focus, equipmentAttachments: ["Heavy Weights"] };
     const row = assembleDetailRow(unit, index);
 
-    expect(row.right.map((entry) => [entry.card.cardId, entry.kind])).toEqual([
-      [2, "evolves-from"],
+    expect([...row.right, ...row.more].map((entry) => [entry.card.cardId, entry.kind])).toEqual([
       [3, "mentioned-in"],
-      [4, "same-series-as"],
+      [2, "evolves-from"],
       [5, "mentions"],
+      [4, "same-series-as"],
     ]);
     // The folded entry's peer is the attachment whose closure produced it.
-    expect(relationTag(row.right[3])).toBe("Mentions Heavy Weights");
+    const folded = row.right.find((entry) => entry.card.cardId === 5);
+    expect(relationTag(folded)).toBe("Mentions Heavy Weights");
+  });
+
+  test("tiers an attachment's own closure against the attachment, not the focus", () => {
+    // An attachment is a second root of the relation tree. A card it names is
+    // its primary relation even though it is two hops from the focus, so it
+    // belongs in the default tier rather than behind the reveal.
+    const equipment = {
+      ...heavyWeights,
+      series: "weights",
+      relatedCards: [
+        { cardId: 5, kind: "mentioned-in", peerCardId: 6, tier: "primary" },
+        { cardId: 7, kind: "same-series-as", peerCardId: 6, seriesCode: "weights", tier: "secondary" },
+      ],
+    };
+    const index = {
+      byId: new Map(catalogIndex.byId),
+      byName: new Map(catalogIndex.byName),
+    };
+    index.byId.set(6, equipment);
+    index.byName.set("heavy weights", equipment);
+
+    const unit = { ...focus, equipmentAttachments: ["Heavy Weights"] };
+    const row = assembleDetailRow(unit, index);
+    const right = row.right.map((entry) => entry.card.cardId);
+    const more = row.more.map((entry) => entry.card.cardId);
+
+    // 5 is primary because the attachment names it: two hops from the focus,
+    // and still on screen. 7 is secondary because the attachment only shares a
+    // series with it, and 4 is the focus's own secondary entry.
+    expect(right).toContain(5);
+    expect(more).not.toContain(5);
+    expect(more).toContain(7);
+    expect(right).not.toContain(7);
+    expect(more).toContain(4);
+    expect([...right, ...more].sort()).toEqual([2, 3, 4, 5, 7]);
   });
 
   test("resolves each entry's peer to the focus, a row card, or an attachment", () => {
     const equipment = {
       ...heavyWeights,
       series: "weights",
-      relatedCards: [{ cardId: 4, kind: "same-series-as", peerCardId: 6, seriesCode: "weights" }],
+      relatedCards: [
+        { cardId: 4, kind: "same-series-as", peerCardId: 6, seriesCode: "weights", tier: "secondary" },
+      ],
     };
     const index = {
       byId: new Map(catalogIndex.byId),
@@ -177,13 +342,13 @@ describe("assembleDetailRow", () => {
     const unit = {
       ...focus,
       relatedCards: [
-        { cardId: 2, kind: "mentions", peerCardId: 3 }, // peer is a row card
-        { cardId: 5, kind: "mentions", peerCardId: 1 }, // peer is the focused model
+        { cardId: 2, kind: "mentions", peerCardId: 3, tier: "primary" }, // peer is a row card
+        { cardId: 5, kind: "mentions", peerCardId: 1, tier: "primary" }, // peer is the focused model
       ],
       equipmentAttachments: ["Heavy Weights"],
     };
     const row = assembleDetailRow(unit, index);
-    const byCardId = new Map(row.right.map((entry) => [entry.card.cardId, entry]));
+    const byCardId = new Map([...row.right, ...row.more].map((entry) => [entry.card.cardId, entry]));
 
     // The focused model may be a unit view, so its own name wins over the
     // catalog entry for the same cardId.
@@ -196,7 +361,9 @@ describe("assembleDetailRow", () => {
     const weights = {
       ...heavyWeights,
       series: "weights",
-      relatedCards: [{ cardId: 5, kind: "same-series-as", peerCardId: 6, seriesCode: "weights" }],
+      relatedCards: [
+        { cardId: 5, kind: "same-series-as", peerCardId: 6, seriesCode: "weights", tier: "secondary" },
+      ],
     };
     const index = {
       byId: new Map(catalogIndex.byId),
@@ -207,7 +374,8 @@ describe("assembleDetailRow", () => {
     const unit = { ...focus, relatedCards: [], equipmentAttachments: ["Heavy Weights"] };
     const row = assembleDetailRow(unit, index);
 
-    expect(row.right.map((entry) => relationTag(entry))).toEqual(["Same series as Heavy Weights"]);
+    expect(row.right).toEqual([]);
+    expect(row.more.map((entry) => relationTag(entry))).toEqual(["Same series as Heavy Weights"]);
   });
 
   test("never repeats a card and keeps the first edge's position", () => {
@@ -217,7 +385,7 @@ describe("assembleDetailRow", () => {
     };
     const sharpened = {
       ...sharpenedBlade,
-      relatedCards: [{ cardId: 2, kind: "mentions", peerCardId: 7 }], // focus already relates to 2
+      relatedCards: [{ cardId: 2, kind: "mentions", peerCardId: 7, tier: "secondary" }], // focus already relates to 2
     };
     const index = {
       byId: new Map(catalogIndex.byId),
@@ -229,7 +397,7 @@ describe("assembleDetailRow", () => {
     index.byId.set(7, sharpened);
 
     const row = assembleDetailRow(unit, index);
-    const ids = [...row.left, ...row.right].map((entry) => entry.card.cardId);
+    const ids = [...row.left, ...row.right, ...row.more].map((entry) => entry.card.cardId);
 
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).not.toContain(1); // the focus never repeats
@@ -239,12 +407,12 @@ describe("assembleDetailRow", () => {
     const unit = { ...focus, equipmentAttachments: ["Heavy Weights"] };
     const row = assembleDetailRow(unit, catalogIndex);
 
-    for (const entry of [...row.left, ...row.right]) {
+    for (const entry of [...row.left, ...row.right, ...row.more]) {
       expect(Array.isArray(entry.card.abilities)).toBe(true); // flattened shape
       expect(entry.card.cardId).toEqual(expect.any(Number));
     }
     expect(row.left[0].card.name).toBe("Heavy Weights");
-    expect(row.right[0].card.name).toBe("Card 2");
+    expect(row.right[0].card.name).toBe("Card 3");
   });
 
   test("degrades without a catalog: focus only", () => {
@@ -252,19 +420,21 @@ describe("assembleDetailRow", () => {
 
     expect(row.left).toEqual([]);
     expect(row.right).toEqual([]);
+    expect(row.more).toEqual([]);
     expect(row.focusIndex).toBe(0);
   });
 
   test("unresolvable relations and attachments contribute nothing", () => {
     const unit = {
       ...focus,
-      relatedCards: [{ cardId: 99, kind: "mentioned-in", peerCardId: 1 }],
+      relatedCards: [{ cardId: 99, kind: "mentioned-in", peerCardId: 1, tier: "primary" }],
       equipmentAttachments: ["Not In Catalog"],
     };
     const row = assembleDetailRow(unit, catalogIndex);
 
     expect(row.left).toEqual([]);
     expect(row.right).toEqual([]);
+    expect(row.more).toEqual([]);
   });
 
   test("drops a relation whose peer is not in the catalog instead of showing it untagged", () => {
@@ -274,10 +444,11 @@ describe("assembleDetailRow", () => {
     // catalog filters dev cards out, so their id never resolves here.
     const unit = {
       ...focus,
-      relatedCards: [{ cardId: 2, kind: "mentions", peerCardId: 99 }],
+      relatedCards: [{ cardId: 2, kind: "mentions", peerCardId: 99, tier: "secondary" }],
     };
     const row = assembleDetailRow(unit, catalogIndex);
 
     expect(row.right).toEqual([]);
+    expect(row.more).toEqual([]);
   });
 });

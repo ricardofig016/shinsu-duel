@@ -51,8 +51,9 @@ export default class Card {
     // The persistent card identifier, stamped by the compiler; the runtime
     // cardId is a compile-time index that shifts when the catalog changes.
     this.slug = cardData.slug ?? null;
-    // The compiler's related-card stamp (see docs/COMPILED_CARD_DSL.md);
-    // entries are { cardId, kind } resolved client-side against the catalog.
+    // The compiler's related-card stamp (see docs/CARD_RELATIONS.md); entries
+    // are { cardId, kind, peerCardId, tier }, with a seriesCode on the series
+    // kinds, resolved client-side against the catalog.
     this.relatedCards = cardData.relatedCards ?? null;
     // Resolved by the compiler from the card slug (`<normalizeName(name)>.png`);
     // null for cards without artwork, which the frontend renders as placeholder.

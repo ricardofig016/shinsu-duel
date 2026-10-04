@@ -20,6 +20,16 @@
 /**
  * Distance from the row's left edge to the focused slot's center.
  *
+ * A slot is a card's footprint scaled by its graded scale, and the stylesheet
+ * overlaps neighbors by a constant margin that does not scale with it. Two
+ * slots therefore advance by the scaled width minus that constant, which is
+ * `(cardWidth - overlap) * scale`, not `baseAdvance + (scale - 1) * cardWidth`:
+ * the overlap is a fixed length, so shrinking a slot removes scale-proportional
+ * width from it and leaves the overlap where it was. The difference is five
+ * hundredths of a slot's width per step at the floor scale, and it accumulates
+ * in every slot before the focus, which is what put the focused card off the
+ * middle of the viewport on a long row.
+ *
  * @param {object} geometry
  * @param {number} geometry.cardWidth Slot footprint at scale 1 (the card's
  *   full-size width).
@@ -34,11 +44,14 @@
  *   edge, in the same units as `cardWidth`.
  */
 export function focusCenterOffset({ cardWidth, baseAdvance, slotInset, scales, focusIndex }) {
+  // The overlap the stylesheet gives each pair of neighbors, as a positive
+  // length. It is what does not scale, so it is what the advance is measured
+  // against: a slot advances by its own scaled width less that overlap.
+  const overlap = cardWidth - baseAdvance;
   let offset = slotInset;
   for (let index = 0; index < focusIndex; index++) {
-    // A slot advances by its own scaled width plus the constant overlap, so
-    // only the slots before the focus shift the focus slot's position.
-    offset += baseAdvance + (scales[index] - 1) * cardWidth;
+    // Only the slots before the focus shift the focus slot's position.
+    offset += cardWidth * scales[index] - overlap;
   }
   return offset + (cardWidth * scales[focusIndex]) / 2;
 }

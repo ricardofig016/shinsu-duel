@@ -237,17 +237,21 @@ describe("buildUnitViewModel", () => {
     expect(model.igniteTriggers).toBeNull();
   });
 
-  test("carries the card's relatedCards stamp through", () => {
+  test("carries the card's relatedCards stamp through, tier included", () => {
     const model = buildCardViewModel({
       cardId: 10005,
       type: "unit",
       name: "Related",
       series: "incinerate",
-      relatedCards: [{ cardId: 10003, kind: "same-series-as", peerCardId: 10004, seriesCode: "incinerate" }],
+      relatedCards: [
+        { cardId: 10003, kind: "same-series-as", peerCardId: 10004, seriesCode: "incinerate", tier: "secondary" },
+        { cardId: 10004, kind: "mentioned-in", peerCardId: 10005, tier: "primary" },
+      ],
     });
 
     expect(model.relatedCards).toEqual([
-      { cardId: 10003, kind: "same-series-as", peerCardId: 10004, seriesCode: "incinerate" },
+      { cardId: 10003, kind: "same-series-as", peerCardId: 10004, seriesCode: "incinerate", tier: "secondary" },
+      { cardId: 10004, kind: "mentioned-in", peerCardId: 10005, tier: "primary" },
     ]);
     expect(model.series).toBe("incinerate");
     expect(buildCardViewModel({ cardId: 10006, name: "Bare" }).relatedCards).toBeNull();

@@ -123,10 +123,34 @@ positions or mounts one.
 **Row assembly** is pure (`public/utils/card-detail-row.js`): attached
 equipment left of the focus (resolved from the wire's name-only
 `equipmentAttachments` through the catalog), the focus card, then the
-card's compiled `relatedCards` (see [CARD_RELATIONS.md](./CARD_RELATIONS.md)),
-with each attachment's own closure folded in at open time under the same
-never-repeat rule. The list is static for the overlay's lifetime — changing
-focus never rebuilds it.
+card's compiled `relatedCards` (see [CARD_RELATIONS.md](./CARD_RELATIONS.md))
+split into two lists by `tier` (see [CARD_RELATIONS.md](./CARD_RELATIONS.md)
+for what the tier means). `right` is the owned tier and is what the row shows.
+`more` is the revealed tier, and it stays behind the reveal button until the
+reader asks for it. Each attachment's own closure folds into the same two lists
+at open time under the same never-repeat rule. The lists are static for the
+overlay's lifetime — changing focus never rebuilds them.
+
+**The reveal button** is not a slot and not a card. It is a narrow fade pinned to
+the right edge of the overlay, full height, reaching transparent at its left, with
+the text `Show more` near the edge. Nothing about the row's cards applies to it:
+it is outside the slot list, so it has no row index, the focus cannot move onto
+it, the graded scale never touches it, and the centering arithmetic never counts
+it. It reads as the edge the row continues past rather than as one more card that
+did not fit. Its own click stops there, because the row's click handler closes the
+overlay for a click that is not on a slot. A click is the only thing that opens
+the tier.
+
+The button leaves the row in the frame its click arrives in, and the tier's first
+card takes the place it held, so the position is never empty and the button is
+never still there beside its own answer. The cards and their slots are built on
+that click rather than at open, so the tier never delays the entrance and no row
+position is ever filled twice. The first revealed card also takes the row index
+the button stood in front of, which is the index the focus moves to, so the row
+centres on a real card. A card in the tier is a row card in every respect:
+focusable by click, wheel, arrow key, and card link, with its tag, its graded
+scale, and its z-index, and a step of the focus is a step of one card with no
+translation between the two tiers.
 
 **Layout and sizing:** the focus slot sits at the middle of the viewport, with
 the equipment column to its left. Every card is a full-size card-vertical in a
@@ -134,17 +158,29 @@ slot; non-focus slots shrink by a slight graded scale per step of distance from
 the focus (−5% per step with a 0.65 floor), neighbors overlap their slots
 slightly, and z-index falls off with distance from the focus — both recomputed
 on every focus change. The scale falloff, overlap, and focus position are
-component constants tuned in the browser.
+component constants tuned in the browser. The reveal button is outside that
+arithmetic altogether: it is fixed to the right edge of the screen, so the row's
+footprint, its scales, and its centering are all computed as though the button
+were not there.
 
-**Opening order:** the slots are created first and the focus card is mounted
-before anything else, because the focus card is what the entrance zoom flies from
-the source card and it hides every side card while they are parked behind it. The
-rest of the row mounts once the row is already on screen, behind the focus card
-and invisible there. Slot footprints come from the stylesheet rather than from
-the cards inside them, so the row's geometry — and therefore the entrance — does
-not wait on the side cards at all. Building the whole row first cost the reader
-the length of about eleven card mounts (each fits two blocks of text and mounts
-about ten tooltips) before the first frame could paint.
+The geometry the arithmetic runs on is read from the browser in pixels: the slot's
+footprint is its resolved width at scale 1, and its overlap is the inline margin
+the browser computed, doubled because that margin sits on both sides of a slot.
+Nothing converts between rem and pixels by hand and nothing assumes the slot's
+font size is the root's, because a declaration says `30rem` and only the browser
+knows what that comes to.
+
+**Opening order:** the reveal button is created first, then the row's slots, and
+the focus card is mounted before anything else, because it is what the entrance
+zoom flies from the source card and it hides every side card while they are parked
+behind it. The rest of the row mounts once the row is already on screen, behind
+the focus card and invisible there. Slot footprints come from the stylesheet
+rather than from the cards inside them, so the row's geometry — and therefore the
+entrance — does not wait on the side cards at all. Building the whole row first
+cost the reader the length of about eleven card mounts (each fits two blocks of
+text and mounts about ten tooltips) before the first frame could paint. The
+revealed tier is not in that first wave either, and has no slots to mount into
+until the button is pressed: its cards are built on the click that opens it.
 
 The row is deliberately not kept promoted: `will-change: transform` on it made
 the browser rasterize the cards inside at whatever scale the graded animation
@@ -163,6 +199,9 @@ would land short by exactly the distance still in flight.
 - wheel/trackpad scroll steps the focus one card at a time (snapped, no wrap),
 - clicking a card focuses it,
 - left/right arrow keys move the focus while the overlay is open,
+- clicking the reveal button opens the revealed tier, which replaces the button
+  with the tier's first card and moves the focus to it. The button is not a slot,
+  so the focus cannot reach it and no scroll step ever lands on it,
 - clicking an ability line of the focus card runs the page's ability handler and
   closes the overlay: the ability is played on the board underneath, which the
   overlay would otherwise hide while the player picks its target,
@@ -178,7 +217,8 @@ overlay's left edge, and the entrance zoom would measure a card that is still
 travelling. Card links inside the rendered text navigate: clicking one moves
 the row's focus when the target is in it, and otherwise opens the overlay for
 that card (see [TOOLTIP_SYSTEM.md](./TOOLTIP_SYSTEM.md) for the link hover
-sources).
+sources). A link to a card still behind the reveal is not in the row yet, so it
+takes the second path and opens that card's own overlay.
 
 ## Card back and flipping
 

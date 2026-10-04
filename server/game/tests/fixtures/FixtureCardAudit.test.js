@@ -108,17 +108,20 @@ describe("fixture card audit (contract coupling only)", () => {
       " 1",
     ]);
 
-    // The card link stamps a mention; the skill sees it in reverse. The
-    // condition link names no card, so it contributes no relation.
+    // The card link stamps a mention; the skill sees it in reverse, which is
+    // the upward edge and so the revealed tier. The condition link names no
+    // card, so it contributes no relation.
     expect(burner.relatedCards).toContainEqual({
       cardId: damageSkill.cardId,
       kind: "mentioned-in",
       peerCardId: burner.cardId,
+      tier: "primary",
     });
     expect(damageSkill.relatedCards).toContainEqual({
       cardId: burner.cardId,
       kind: "mentions",
       peerCardId: damageSkill.cardId,
+      tier: "secondary",
     });
   });
 
@@ -148,7 +151,14 @@ describe("fixture card audit (contract coupling only)", () => {
     );
     expect(carriers.length).toBeGreaterThan(0);
     expect(fireCore.relatedCards).toEqual(
-      expect.arrayContaining(carriers.map((card) => ({ cardId: card.cardId, kind: "mentions", peerCardId: fireCore.cardId })))
+      expect.arrayContaining(
+        carriers.map((card) => ({
+          cardId: card.cardId,
+          kind: "mentions",
+          peerCardId: fireCore.cardId,
+          tier: "secondary",
+        }))
+      )
     );
   });
 });

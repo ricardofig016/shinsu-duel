@@ -42,7 +42,9 @@ const animateFocusCard = (frame, target, source, direction) => {
     prefersReducedMotion() ||
     !sourceRect ||
     sourceRect.width === 0 ||
-    typeof frame.animate !== "function"
+    // A frame that never mounted has nothing to animate, and the overlay still
+    // has to be able to close over it.
+    typeof frame?.animate !== "function"
   ) {
     return null;
   }
@@ -105,7 +107,7 @@ export async function openCardDetail({
     console.error(`Card catalog unavailable: ${error.message}`);
     return null;
   });
-  const { left, right, focusIndex } = assembleDetailRow(model, catalog);
+  const { left, right, more, focusIndex } = assembleDetailRow(model, catalog);
 
   // An ability click plays the ability on the board the overlay covers, so the
   // overlay dismisses itself: left up, it hides the field the player has to
@@ -121,14 +123,26 @@ export async function openCardDetail({
     : null;
 
   // One slot per row entry, focus included; side slots carry their relation tag
-  // under the card. The slots are cheap and fixed in size by the stylesheet, so
-  // the row's geometry is known before any card is built and every card can be
+  // under the card. The revealed tier has no slots here at all: it has none
+  // anywhere until the reader opens it, and the button that opens it is not a
+  // slot either. The slots are cheap and fixed in size by the stylesheet, so the
+  // row's geometry is known before any card is built and every card can be
   // measured against it.
   const row = root.querySelector(".card-detail-overlay-row");
+  // The row is its cards, and nothing else. The button that opens the revealed
+  // tier is a sibling of the row rather than a slot in it: a slot is a place a
+  // card can be, and that button holds no card, so making it a slot is what put
+  // it in reach of the focus and of the row's own arithmetic.
   const entries = [...left, { kind: "focus", card: model }, ...right];
+  // The index the revealed tier starts at, which is also where the button sits
+  // between the two tiers. A revealed card keeps its true row index: there is no
+  // second index space and so nothing to translate between them.
+  const revealIndex = left.length + right.length + 1;
   const slots = [];
-  const frames = new Array(entries.length);
-  for (const [index, entry] of entries.entries()) {
+  const frames = new Array(entries.length + more.length);
+  let revealed = false;
+
+  const buildSlot = (entry, index) => {
     const slot = document.createElement("div");
     slot.className = "card-detail-slot";
     slot.dataset.index = String(index);
@@ -141,8 +155,34 @@ export async function openCardDetail({
       slot.appendChild(tag);
     }
     row.appendChild(slot);
-    slots.push(slot);
-  }
+    slots[index] = slot;
+    return slot;
+  };
+
+  /**
+   * The button that opens the revealed tier. It is appended to the overlay
+   * rather than to the row, and the stylesheet pins it to the right edge of the
+   * screen as a faded strip: it holds no card, so it must not read as one more
+   * card, and it is outside the row's layout, so the row's geometry cannot
+   * depend on it. The click that opens the tier is attached further down.
+   */
+  const buildReveal = () => {
+    // A div rather than a button on purpose: the page styles every `button`
+    // element globally, and none of that chrome belongs on a fade.
+    const button = document.createElement("div");
+    button.className = "card-detail-reveal";
+    const label = document.createElement("span");
+    label.className = "card-detail-reveal-label";
+    label.textContent = "Show more";
+    const arrow = document.createElement("span");
+    arrow.className = "card-detail-reveal-arrow";
+    arrow.textContent = ">";
+    button.append(label, arrow);
+    root.appendChild(button);
+    return button;
+  };
+  const revealButton = more.length > 0 ? buildReveal() : null;
+  entries.forEach(buildSlot);
 
   /**
    * Mount one row entry's card. A card fits two blocks of text and mounts about
@@ -160,24 +200,91 @@ export async function openCardDetail({
   // flies from the source card, and it hides every side card while they are
   // parked behind it. Building the whole row first left the reader looking at
   // nothing for the length of about eleven card mounts, so the focus card is
-  // built now and the rest are mounted once the row is already on screen.
+  // built now and the rest are mounted once the row is already on screen. The
+  // secondary tier is not mounted even then: it is built when the reader asks
+  // for it.
   await mountEntry(entries[focusIndex], focusIndex);
 
-  // Slot geometry at scale 1, read once before any scale is applied: the
-  // stylesheet owns the slot's size and overlap, and every row offset below
-  // is derived from these numbers instead of re-read from layout. The row has
-  // no transform yet, so its rect is the untransformed origin.
-  const unscaledSlot = slots[0].getBoundingClientRect();
-  const cardWidth = unscaledSlot.width;
-  const cardHeight = unscaledSlot.height;
-  const slotInset = unscaledSlot.left - row.getBoundingClientRect().left;
-  const baseAdvance = slots.length > 1
-    ? slots[1].getBoundingClientRect().left - unscaledSlot.left
-    : 0;
+  // Slot geometry at scale 1. The stylesheet owns the slot's size and its
+  // overlap, and every row offset below is derived from these numbers rather
+  // than re-read from layout, because the slots and the cards inside them are
+  // both transitioning and a measurement taken mid-flight reports the layout
+  // that is leaving.
+  //
+  // Every number here is asked of the browser in the unit the layout works in,
+  // pixels. Nothing is converted between rem and pixels by hand, and nothing
+  // assumes the slot's font size is the root's: a declaration says `30rem` and
+  // the browser is the only thing that knows what that comes to, so the answers
+  // are read back through their computed style. Doing that arithmetic here is
+  // what put the focused card 40px off centre on every card, because on the
+  // machine it was tested on the numbers did not line up that way.
+  const slotStyle = getComputedStyle(slots[0]);
+  const px = (value) => {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const scaleOf = (element) => {
+    const scale = Number.parseFloat(getComputedStyle(element).getPropertyValue("--s"));
+    return Number.isFinite(scale) && scale > 0 ? scale : 1;
+  };
+  /**
+   * The slot's own inline margin, in pixels. `margin-inline` is shorthand for
+   * two longhands, and which of them a browser reports for a single
+   * `margin-inline` declaration is not something to build arithmetic on, so
+   * both are read and the larger wins.
+   */
+  const inlineMarginOf = (element) => {
+    const style = getComputedStyle(element);
+    return Math.max(
+      Math.abs(px(style.marginInlineStart) || px(style.marginLeft)),
+      Math.abs(px(style.marginInlineEnd) || px(style.marginRight))
+    );
+  };
+
+  // The slot's footprint at scale 1, taken from the width the browser resolved
+  // for it while `--s` is unset. This is the one live read in the whole
+  // geometry, and it cannot be mid-flight: with no `--s` there is no scale to be
+  // part way through.
+  const slotWidth = slots[0].getBoundingClientRect().width;
+  const slotScale = scaleOf(slots[0]);
+  const cardWidth = slotWidth > 0 ? slotWidth / slotScale : 0;
+
+  // The leading edge of the first slot, relative to the row's left edge: its own
+  // negative margin, one side's worth.
+  const marginPerSide = Math.abs(inlineMarginOf(slots[0]));
+  const slotInset = -marginPerSide;
+  // Two neighbours overlap by twice one side's margin, because the margin sits on
+  // the end of one slot and on the start of the next. Counting it once is a
+  // silent 2.5rem error in every offset.
+  const slotOverlap = marginPerSide * 2;
+  const baseAdvance = cardWidth - slotOverlap;
+  // The card's height comes from the same declaration as its width, at the same
+  // scale, so it is the width's ratio rather than a second guess.
+  const cardHeight = cardWidth * (45 / 30);
+
+  // What the row was built with, on the element itself: the overlay's geometry
+  // is arithmetic over these numbers, so a row that comes out off centre is a
+  // question of which numbers it used, and they are not otherwise visible.
+  row.dataset.geometry = JSON.stringify({
+    cardWidth,
+    cardHeight,
+    marginPerSide,
+    slotOverlap,
+    baseAdvance,
+    slotInset,
+    slotScale,
+    viewportWidth: window.innerWidth,
+  });
 
   // Focus state: which slot is focused. Changing focus only re-grades scales,
   // z-indexes, and the row offset — the list itself never rebuilds.
   let focusSlotIndex = focusIndex;
+  /**
+   * Whether this overlay is still the open one. Declared here because the
+   * reveal needs it after its own awaits, and an overlay closed during a mount
+   * must not be written to afterwards.
+   */
+  const stillOpen = () => active?.root === root;
 
   const scaleFor = (index) => {
     const distance = Math.abs(index - focusSlotIndex);
@@ -223,11 +330,16 @@ export async function openCardDetail({
     });
   };
   const setFocus = (index) => {
+    // Every index in the row is a card, so the focus simply lands on one. A
+    // revealed card keeps its true index, which is what makes one step one card.
     focusSlotIndex = Math.max(0, Math.min(slots.length - 1, index));
     unparkSides();
     applyFocus();
   };
-  // Card-link navigation: move the focus to the row entry for a card.
+  // Card-link navigation: move the focus to the row entry for a card. A card
+  // still behind the reveal is not in the row yet, so it cannot be focused:
+  // the link opens its own overlay instead, which is what a link to any card
+  // outside the row already does.
   const slotByCardId = new Map();
   entries.forEach((entry, index) => {
     const cardId = entry.card?.cardId;
@@ -240,6 +352,83 @@ export async function openCardDetail({
     return true;
   };
 
+  /**
+   * Open the revealed tier: the button gives up its place to the cards it stood
+   * for, which travel out from where it sat. The cards and their slots are built
+   * here, so nothing in the tier exists before the reader asks for it and no row
+   * position is ever filled twice.
+   *
+   * The focus takes the first of them, so the row centres on a real card. That
+   * card takes the index the button stood in front of, which is why the focus can
+   * simply name it.
+   */
+  const revealMore = async () => {
+    if (!revealButton || revealed) return;
+    revealed = true;
+    // The button leaves now, in the frame its click arrives in, and the tier's
+    // first card takes its place as it goes. Removing it before the cards mount
+    // is what makes the substitution the reader asked for: the position is never
+    // empty and the button is never still there beside its own answer.
+    revealButton.remove();
+
+    const secondary = more.map((entry, offset) => ({ entry, index: revealIndex + offset }));
+    const fresh = secondary.map(({ entry, index }) => {
+      const slot = buildSlot(entry, index);
+      // hidden until the cards are in: the row is laid out, so the new slots hold
+      // their places, but nothing is painted at a size the mount has not settled
+      slot.style.visibility = "hidden";
+      return slot;
+    });
+
+    try {
+      await Promise.all(
+        secondary.map(async ({ entry, index }) => {
+          await mountEntry(entry, index);
+          const cardId = entry.card?.cardId;
+          if (cardId != null && !slotByCardId.has(cardId)) slotByCardId.set(cardId, index);
+        })
+      );
+    } catch (error) {
+      // the button is already out of the row, so a failed card mount leaves a
+      // short row rather than a button that cannot be pressed again
+      console.error(`Card detail reveal failed to mount: ${error.message}`);
+    }
+    if (!active || active.root !== root) return;
+
+    // The revealed cards travel in from the strip they were behind, which is a
+    // fixed point on the right edge rather than a place in the row, so the
+    // travel reads as the row continuing into the space the strip marked.
+    const animate = !prefersReducedMotion();
+    // The fade covers the screen's right edge, so the cards behind it are beyond
+    // that edge: they travel in from off-screen rather than from the middle of
+    // the fade.
+    const entryEdge = () => window.innerWidth;
+    for (const slot of fresh) {
+      slot.style.visibility = "";
+      if (animate) {
+        const rect = slot.getBoundingClientRect();
+        slot.animate(
+          [
+            { transform: `translateX(${entryEdge() - (rect.left + rect.width / 2)}px)`, opacity: 0 },
+            { transform: "translateX(0px)", opacity: 1 },
+          ],
+          { duration: SIDE_MOTION_MS, easing: "ease-out" }
+        );
+      }
+    }
+    // The opening park's offsets were measured for the slots the row had then,
+    // so they are abandoned with the reveal rather than run over cards that
+    // arrived after them. `unparkSides` is what clears the park's inline
+    // transforms and opacities and drops the flag itself; clearing the flag
+    // first made it return immediately and left every side card hidden behind
+    // the focus, which is what happened when the tier was opened during the
+    // entrance.
+    unparkSides();
+    // the first of the new cards stands exactly where the button stood, so the
+    // reader keeps their place and the focus lands on the card that replaced it
+    setFocus(revealIndex);
+  };
+
   // Motion of the cards beside the focus. They wait parked at the focus slot's
   // centre, where the focus card hides them (every side card is smaller than
   // it), and travel to their own slots together once the focus card has
@@ -247,11 +436,19 @@ export async function openCardDetail({
   // backwards, so the cards return behind the focus card before it shrinks
   // away. A focus change abandons the park: the row must never animate cards
   // from a position the row has already left.
-  const stillOpen = () => active?.root === root;
-  // The slots parked at open: every slot except the one focused then. A focus
-  // change abandons the park, so this set is only ever used by the opening.
+  // The slots the opening parks and travels: every slot the row has except the
+  // focused one. Captured once rather than read back from the row, because a
+  // reveal replaces the button with cards, and a detached element left in this
+  // set would be measured as a zero rectangle.
   const sideSlots = slots.filter((slot, index) => index !== focusIndex);
-  const sideTags = sideSlots.map((slot) => slot.querySelector(".card-detail-tag"));
+  /**
+   * A slot's relation tag, or null where it has none. The reveal slot states an
+   * action rather than a relation, so it carries no tag, and every park, travel,
+   * and close below has to leave it out: on a card whose relations are all in the
+   * revealed tier it is the only side slot there is.
+   */
+  const tagOf = (slot) => slot?.querySelector(".card-detail-tag") ?? null;
+  const sideTags = sideSlots.map(tagOf);
   /**
    * Every slot except the one focused right now, with its tag. Closing recomputes
    * this rather than reusing the opening set: once the focus has moved, the
@@ -261,7 +458,7 @@ export async function openCardDetail({
   const besideFocus = () =>
     slots
       .filter((_, index) => index !== focusSlotIndex)
-      .map((slot) => ({ slot, tag: slot.querySelector(".card-detail-tag") }));
+      .map((slot) => ({ slot, tag: tagOf(slot) }));
   let parked = false;
   let parkedOffsets = [];
 
@@ -281,7 +478,7 @@ export async function openCardDetail({
       slot.style.transform = `translateX(${parkedOffsets[index]}px)`;
       slot.style.opacity = "0";
     });
-    for (const tag of sideTags) tag.style.opacity = "0";
+    for (const tag of sideTags) if (tag) tag.style.opacity = "0";
     parked = true;
   };
   const unparkSides = () => {
@@ -291,7 +488,7 @@ export async function openCardDetail({
       slot.style.transform = "";
       slot.style.opacity = "";
     }
-    for (const tag of sideTags) tag.style.opacity = "";
+    for (const tag of sideTags) if (tag) tag.style.opacity = "";
   };
   const travelSides = () => {
     if (!parked || !stillOpen()) return;
@@ -306,6 +503,7 @@ export async function openCardDetail({
       );
     });
     for (const tag of sideTags) {
+      if (!tag) continue;
       // the park wrote an inline opacity of 0, and the animation must not hand
       // the tag back to it when it ends: clear it and animate from 0 instead
       tag.style.opacity = "";
@@ -365,15 +563,30 @@ export async function openCardDetail({
   if (entranceMotion) entranceMotion.finished.catch(() => {}).then(travelSides);
   else travelSides();
 
+  // The button's own click opens the tier, which is the only thing that opens
+  // it: it is not a slot, so the focus cannot reach it and nothing else can
+  // press it.
+  if (revealButton) {
+    revealButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      void revealMore();
+    });
+  }
+
   // The rest of the row mounts behind the focus card while it is flying out. They
   // are parked at the focus slot's centre and invisible there, so nothing the
   // reader sees depends on them, and the row's geometry never does: the slots are
   // sized by the stylesheet. Queued so this turn ends first, which is what lets
-  // the entrance start in the frame the overlay appears in.
+  // the entrance start in the frame the overlay appears in. The secondary tier is
+  // deliberately absent: it has no slots and no entries until the reader opens
+  // it.
   queueMicrotask(() => {
-    void Promise.all(entries.map((entry, index) => (index === focusIndex ? null : mountEntry(entry, index)))).catch(
-      (error) => console.error(`Card detail row failed to mount: ${error.message}`)
-    );
+    void Promise.all(
+      entries.map((entry, index) => {
+        if (index === focusIndex) return null;
+        return mountEntry(entry, index);
+      })
+    ).catch((error) => console.error(`Card detail row failed to mount: ${error.message}`));
   });
 
   // closing

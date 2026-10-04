@@ -96,12 +96,16 @@ describe("shared catalog copy compilation (shipped pool)", () => {
         cardId: fireCore.cardId,
         kind: "mentioned-in",
         peerCardId: card.cardId,
+        tier: "primary",
       });
       // The peer is the card itself, so it renders as "Mentioned in <card>".
+      // Fire Core's side of the mention is the upward edge, so it is the
+      // revealed tier even though the mention is the card's own.
       expect(fireCore.relatedCards).toContainEqual({
         cardId: card.cardId,
         kind: "mentions",
         peerCardId: fireCore.cardId,
+        tier: "secondary",
       });
     }
   });
