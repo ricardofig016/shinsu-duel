@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Theme preview</title>
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/styles/theme-preview.css" />
+  </head>
+  <body>
+    <main class="allow-scroll">
+      <header class="preview-header">
+        <h1>Theme preview</h1>
+        <p>
+          Dark theme candidates for the site pages, built from the existing card textures
+          (black wall + gold rock) with CSS processing only. Hover the buttons: every state
+          is also shown side by side. Nothing here is applied to the real pages yet.
+        </p>
+      </header>
+
+      <section class="preview-section">
+        <h2>Page background</h2>
+        <p class="preview-note">
+          Three treatments of the card background texture. The live page background behind
+          this preview is treatment A. Cards sit on top for scale and contrast.
+        </p>
+        <div class="bg-treatment bg-a">
+          <p class="bg-label">A. Veiled wall: blurred, faded, gradient veil</p>
+        </div>
+        <div class="bg-treatment bg-b">
+          <p class="bg-label">B. Tiled wall: visible texture, vignette</p>
+        </div>
+        <div class="bg-treatment bg-c">
+          <p class="bg-label">C. Ember glow: near-flat dark, faint gold glow at the top</p>
+        </div>
+      </section>
+
+      <section class="preview-section">
+        <h2>Buttons</h2>
+        <p class="preview-note">
+          Two texture-driven candidates replacing the blue. Both keep real hover behavior;
+          the labeled states are painted so you can see them side by side.
+        </p>
+        <div class="preview-row">
+          <span class="state-label">A default</span>
+          <button type="button" class="btn-gold-face button">Play</button>
+          <span class="state-label">A hover</span>
+          <button type="button" class="btn-gold-face button is-hover">Play</button>
+          <span class="state-label">A active</span>
+          <button type="button" class="btn-gold-face button is-active">Cards</button>
+          <span class="state-label">A disabled</span>
+          <button type="button" class="btn-gold-face button" disabled>Decks</button>
+        </div>
+        <div class="preview-row">
+          <span class="state-label">B default</span>
+          <button type="button" class="btn-obsidian-edge button">Play</button>
+          <span class="state-label">B hover</span>
+          <button type="button" class="btn-obsidian-edge button is-hover">Play</button>
+          <span class="state-label">B active</span>
+          <button type="button" class="btn-obsidian-edge button is-active">Cards</button>
+          <span class="state-label">B disabled</span>
+          <button type="button" class="btn-obsidian-edge button" disabled>Decks</button>
+        </div>
+        <div class="preview-row">
+          <span class="state-label">Today</span>
+          <button type="button" class="button">Play</button>
+          <span class="preview-note" style="margin: 0">current blue, for comparison</span>
+        </div>
+      </section>
+
+      <section class="preview-section">
+        <h2>Navbar</h2>
+        <p class="preview-note">
+          The real navbar as it is today, then the two candidates. Links reuse the matching
+          button treatment.
+        </p>
+        <p class="preview-note">Today:</p>
+        <div id="real-navbar"></div>
+        <p class="preview-note">A. Textured bar, gold edge, gold-face links:</p>
+        <nav class="mocknav mocknav-a">
+          <ul>
+            <li><a class="button btn-gold-face" href="#">Home</a></li>
+            <li><a class="button btn-gold-face" href="#">Play</a></li>
+            <li><a class="button btn-gold-face" href="#">Cards</a></li>
+            <li><a class="button btn-gold-face" href="#">Decks</a></li>
+            <li><a class="button btn-gold-face" href="#">Rules</a></li>
+          </ul>
+          <ul>
+            <li><span class="nav-user">player</span><a class="button btn-gold-face" href="#">Logout</a></li>
+          </ul>
+        </nav>
+        <p class="preview-note">B. Flat dark bar, thin gold line, obsidian links:</p>
+        <nav class="mocknav mocknav-b">
+          <ul>
+            <li><a class="button btn-obsidian-edge" href="#">Home</a></li>
+            <li><a class="button btn-obsidian-edge" href="#">Play</a></li>
+            <li><a class="button btn-obsidian-edge" href="#">Cards</a></li>
+            <li><a class="button btn-obsidian-edge" href="#">Decks</a></li>
+            <li><a class="button btn-obsidian-edge" href="#">Rules</a></li>
+          </ul>
+          <ul>
+            <li><span class="nav-user">player</span><a class="button btn-obsidian-edge" href="#">Logout</a></li>
+          </ul>
+        </nav>
+      </section>
+
+      <section class="preview-section">
+        <h2>Panels and forms</h2>
+        <p class="preview-note">
+          The approved direction: dark textured panels with gold edges. The login form as it
+          would look, plus the catalog toolbar pieces (search, select, facet fieldset) and an
+          error box.
+        </p>
+        <div class="preview-row" style="align-items: flex-start">
+          <div class="panel">
+            <form class="preview-form" onsubmit="return false">
+              <h2 style="font-size: 1.3rem; margin: 0">Sign in</h2>
+              <input class="preview-input" type="text" placeholder="Username" />
+              <button type="submit" class="button btn-gold-face">Enter the Tower</button>
+              <div class="preview-error">That name is already carved into the ledger.</div>
+            </form>
+          </div>
+          <div class="panel" style="flex: 1 1 20rem; max-width: 30rem">
+            <div style="display: flex; flex-direction: column; gap: 0.9rem">
+              <input class="preview-input" type="search" placeholder="Search cards..." />
+              <select class="preview-select">
+                <option>Sort: name</option>
+                <option>Sort: cost</option>
+              </select>
+              <fieldset class="preview-fieldset">
+                <legend>Positions</legend>
+                <label><input type="checkbox" checked /> Fisherman</label>
+                <label><input type="checkbox" /> Spear bearer</label>
+                <label><input type="checkbox" /> Light bearer</label>
+                <label><input type="checkbox" /> Scout</label>
+              </fieldset>
+              <button type="button" class="button btn-obsidian-edge" style="align-self: flex-start">
+                Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-section">
+        <h2>Table and badges</h2>
+        <p class="preview-note">
+          The deck table in dark mode: gold headers, quiet row borders, and status badges
+          that keep the legal versus problem distinction readable.
+        </p>
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th>Card</th>
+              <th>Cost</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Twenty-Fifth Baam</td>
+              <td>3</td>
+              <td><span class="badge badge-legal">legal</span></td>
+            </tr>
+            <tr>
+              <td><span class="mark-unreachable">Zahard</span></td>
+              <td>8</td>
+              <td><span class="badge badge-problem">unreachable</span></td>
+            </tr>
+            <tr>
+              <td><span class="mark-test">Test Console Log</span></td>
+              <td>1</td>
+              <td><span class="badge badge-problem">test card</span></td>
+            </tr>
+            <tr>
+              <td><span class="mark-unknown">Unknown presence</span></td>
+              <td>?</td>
+              <td><span class="badge badge-problem">unknown</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="preview-section" style="padding-bottom: 4rem">
+        <h2>Cards</h2>
+        <p class="preview-note">
+          Real card components on the live page background, to check that the chrome stays
+          quiet around them.
+        </p>
+        <div id="preview-cards" class="preview-cards"></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { loadComponent } from "/utils/component-util.js";
+
+      await loadComponent(document.getElementById("real-navbar"), "navbar");
+
+      const payload = await (await fetch("/cards/data/")).json();
+      const units = payload.cards.filter((card) => card.type === "unit");
+      const picks = [units.find((card) => card.name.includes("Baam")), units[1]].filter(Boolean);
+      const host = document.getElementById("preview-cards");
+      for (const view of picks) {
+        const element = document.createElement("div");
+        element.classList.add("card-vertical-component");
+        host.appendChild(element);
+        await loadComponent(element, "card-vertical", { card: view, isSmall: true, flipOnClick: true });
+      }
+      document.title = "ready";
+    </script>
+  </body>
+</html>
