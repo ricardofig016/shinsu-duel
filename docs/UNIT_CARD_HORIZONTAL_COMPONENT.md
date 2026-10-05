@@ -30,7 +30,10 @@ loadComponent(container, "unit-card-horizontal", { unit, interactive, onAbilityC
 The component consumes the flattened unit view only; it never reads the wire
 payload or the card catalog, and it never mutates the view. Everything it
 draws is either a printed card field, the unit's runtime state, or a catalog
-entry the view already carries:
+entry the view already carries. The one catalog it fetches for itself is the
+placement registry behind the position stat (`public/utils/positions.js`, the
+page's cached `GET /positions/`), which is what a unit holding no placed
+position draws its chip from:
 
 - `artworkPath`, `name`, `abilities`, `grantedAbilities` — the artwork and its
   hover tooltip (the unit's abilities, then its equipment-granted ones in
@@ -38,13 +41,26 @@ entry the view already carries:
 - `equipmentAttachments`, `attributes`, `evolveTriggers`, `igniteTriggers`,
   `passiveAbilities`, `requirements` — the header ribbons.
 - `runtimeTraits`, `conditions` — the live-state strip.
-- `placedPositionCode`, `chosenPositionCode`, `positions` — the position stat.
+- `placedPositionCode`, `chosenPositionCode`, `positions`, `line` — the position
+  stat. A deployed unit that holds no placed position shows the placement slot
+  for the line it occupies, resolved from the registry `GET /positions/` serves
+  through the shared `public/utils/positions.js` accessor
+  (`getPlacementSlots`). The slot is the whole source of the chip — its icon and
+  its name come from the registry entry, never from a path derived out of the
+  kind and the line, because a kind paints per line only where the icon folder
+  carries that line's icon. Its tooltip carries the slot name and the line
+  label; a printed position's chip additionally carries the position's
+  description and its italic verbose copy (the copy map is
+  [TOOLTIP_SYSTEM.md](./TOOLTIP_SYSTEM.md#tooltip-copy-map)).
 - `currentHp`, `maxHp` — the hp stat.
 
-Both icon rows and the position stat degrade to a catalog placeholder icon
-when an entry carries no `iconPath` (`/assets/icons/traits/placeholder.png`,
-`/assets/icons/conditions/placeholder.png`,
-`/assets/icons/positions/placeholder.png`).
+Both icon rows degrade to a catalog placeholder icon when an entry carries no
+`iconPath` (`/assets/icons/traits/placeholder.png`,
+`/assets/icons/conditions/placeholder.png`), and the position stat degrades to
+`/assets/icons/positions/placeholder.png` when it names neither a placed
+position nor a placement slot — a standard kind, which the registry answers an
+empty list for because its printed positions are its own, or an entry the
+registry has none for.
 
 ## Layout
 
@@ -74,9 +90,14 @@ The card splits into three vertical parts, in this order:
   no traits and no conditions keeps the same artwork and stats geometry as its
   neighbours.
 - **Stats:** the position the unit stands in, plus the position a landmark
-  choice moved it to when that differs (outlined), and its hp. The two are one
-  flex share each, so neither can take width from the other as the card's own
-  width changes. The hp stat draws only the unit's current hp; below its
+  choice moved it to when that differs (outlined), and its hp. A unit that
+  stands outside a printed position — a landmark, a shinheuh — shows the
+  placement slot for the line it occupies instead of the placeholder icon, so a
+  deployed landmark reads as a landmark and a frontline shinheuh as a frontline
+  shinheuh: to the player these are positions, and occupying no combat slot is
+  the only difference (RULES.md §Kinds). The two are one flex share each, so
+  neither can take width from the other as the card's own width changes. The hp
+  stat draws only the unit's current hp; below its
   maximum the number renders in the card faces' accent yellow, and the
   tooltip titles itself with the current and maximum ("3/5 HP") over the
   glossary's hp copy.
@@ -119,4 +140,8 @@ line gives it.
 The two icon-list modules are pure and covered by
 `public/tests/utils/unit-header-icons.test.js` and
 `public/tests/utils/unit-trait-strip.test.js`. The component script itself is
-DOM code without a test harness, like the other card faces.
+DOM code without a test harness, like the other card faces. The special-kind
+position path it shares with the vertical face
+(`public/components/card-vertical/script.js`) is pinned as source text in
+`public/tests/utils/component-contract.test.js`, and the slot narrowing it calls
+by `public/tests/utils/positions.test.js`.

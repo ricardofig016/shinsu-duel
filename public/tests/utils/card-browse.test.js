@@ -104,10 +104,15 @@ describe("buildSearchableText", () => {
     expect(buildSearchableText(units[2])).toContain("deal 5 damage");
   });
 
-  test("searches linked segment text without link markers", () => {
+  test("searches a requirement view's prose, which sits beside its check", () => {
     const view = {
       name: "Linked",
-      requirements: [["strike ", { type: "card", ref: "kranos", text: "Kranos" }]],
+      requirements: [
+        {
+          text: ["strike ", { type: "card", ref: "kranos", text: "Kranos" }],
+          check: { type: "unit_on_board", name: "Kranos" },
+        },
+      ],
     };
 
     const text = buildSearchableText(view);

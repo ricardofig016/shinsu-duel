@@ -82,17 +82,23 @@ describe("bot rooms over the wire", () => {
   };
 
   /**
-   * Alice passes whenever it is her turn, once per turn. Returns a poll step
-   * the test calls in its wait loops so the bot's turns keep coming.
+   * Alice passes whenever it is her turn, once per delivered snapshot. Returns
+   * a poll step the test calls in its wait loops so the bot's turns keep coming.
+   *
+   * The marker is the payload's `revision`, which the session bumps on every
+   * accepted action and stamps onto every snapshot, so the helper tracks
+   * delivered updates. Keying it on `round:currentTurn` tracked round-turn pairs
+   * instead, and `currentTurn` is always Alice when this emits — so Alice could
+   * pass at most once a round, and a bot that acts more than once in a round
+   * would find her marker already spent on its second turn and stall the game.
    */
   const alicePasses = (alice) => {
     let lastPass = null;
     return () => {
       const update = alice.lastPayloadOf(EVENTS.GAME_UPDATE);
       if (!update || update.currentTurn !== "Alice") return;
-      const marker = `${update.round}:${update.currentTurn}`;
-      if (marker === lastPass) return;
-      lastPass = marker;
+      if (update.revision === lastPass) return;
+      lastPass = update.revision;
       alice.emit(EVENTS.GAME_ACTION, { type: "pass-turn-action", data: {} });
     };
   };

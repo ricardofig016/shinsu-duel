@@ -1,0 +1,12 @@
+type: skill
+name: Test On Board Skill
+cost: 1
+requirements:
+  - type: unit_on_board
+    name: Test Fisherman Unit
+    raw: "Test Fisherman Unit is on your board"
+effects:
+  - type: give_condition
+    condition: doomed
+    target: { side: enemy }
+    raw: "give an enemy Doomed"

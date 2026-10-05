@@ -19,15 +19,15 @@
     "slug": "test_filler_1",
     "relatedCards": [
       {
-        "cardId": 10031,
+        "cardId": 10033,
         "kind": "mentions",
         "peerCardId": 1,
         "tier": "secondary"
       },
       {
-        "cardId": 10032,
+        "cardId": 10034,
         "kind": "evolves-from",
-        "peerCardId": 10031,
+        "peerCardId": 10033,
         "tier": "secondary"
       }
     ]
@@ -853,27 +853,27 @@
     "slug": "conduit",
     "relatedCards": [
       {
-        "cardId": 10057,
+        "cardId": 10059,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       },
       {
-        "cardId": 10066,
+        "cardId": 10068,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       },
       {
-        "cardId": 10067,
+        "cardId": 10069,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       },
       {
-        "cardId": 10072,
+        "cardId": 10075,
         "kind": "mentioned-in",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "secondary"
       }
     ]
@@ -912,20 +912,6 @@
     "slug": "fire_core",
     "relatedCards": [
       {
-        "cardId": 10052,
-        "kind": "series-mentioned",
-        "peerCardId": 10001,
-        "tier": "primary",
-        "seriesCode": "incinerate"
-      },
-      {
-        "cardId": 10053,
-        "kind": "series-mentioned",
-        "peerCardId": 10001,
-        "tier": "primary",
-        "seriesCode": "incinerate"
-      },
-      {
         "cardId": 10054,
         "kind": "series-mentioned",
         "peerCardId": 10001,
@@ -940,13 +926,27 @@
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10018,
+        "cardId": 10056,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "tier": "primary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10057,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "tier": "primary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10019,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       },
       {
-        "cardId": 10047,
+        "cardId": 10049,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
@@ -1066,6 +1066,35 @@
   },
   "10006": {
     "cardId": 10006,
+    "type": "skill",
+    "name": "Test Ally Affiliation Skill",
+    "cost": 1,
+    "deckConstraints": [],
+    "requirements": [
+      {
+        "type": "has_ally",
+        "affiliation": "team-novick",
+        "text": [
+          "have an ally team novick member"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "type": "give_condition",
+        "condition": "doomed",
+        "target": {
+          "side": "enemy"
+        },
+        "text": [
+          "give an enemy Doomed"
+        ]
+      }
+    ],
+    "slug": "test_ally_affiliation_skill"
+  },
+  "10007": {
+    "cardId": 10007,
     "type": "unit",
     "name": "Test Ally Dies Passive Unit",
     "cost": 1,
@@ -1095,8 +1124,8 @@
     ],
     "slug": "test_ally_dies_passive_unit"
   },
-  "10007": {
-    "cardId": 10007,
+  "10008": {
+    "cardId": 10008,
     "type": "unit",
     "name": "Test Anima Unit",
     "cost": 6,
@@ -1143,8 +1172,8 @@
     "passives": [],
     "slug": "test_anima_unit"
   },
-  "10008": {
-    "cardId": 10008,
+  "10009": {
+    "cardId": 10009,
     "type": "equipment",
     "name": "Test Armor",
     "cost": 4,
@@ -1184,45 +1213,45 @@
     "slug": "test_armor",
     "relatedCards": [
       {
-        "cardId": 10016,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10029,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10033,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10015,
-        "kind": "evolves-into",
-        "peerCardId": 10016,
-        "tier": "secondary"
-      },
-      {
         "cardId": 10017,
-        "kind": "evolves-from",
-        "peerCardId": 10016,
+        "kind": "mentions",
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10034,
+        "cardId": 10031,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10035,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10016,
+        "kind": "evolves-into",
+        "peerCardId": 10017,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10018,
         "kind": "evolves-from",
-        "peerCardId": 10033,
+        "peerCardId": 10017,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10036,
+        "kind": "evolves-from",
+        "peerCardId": 10035,
         "tier": "secondary"
       }
     ]
   },
-  "10009": {
-    "cardId": 10009,
+  "10010": {
+    "cardId": 10010,
     "type": "unit",
     "name": "Test Backline High Ranker",
     "cost": 4,
@@ -1242,8 +1271,8 @@
     "passives": [],
     "slug": "test_backline_high_ranker"
   },
-  "10010": {
-    "cardId": 10010,
+  "10011": {
+    "cardId": 10011,
     "type": "unit",
     "name": "Test Bearer Unit",
     "cost": 8,
@@ -1284,8 +1313,8 @@
     "passives": [],
     "slug": "test_bearer_unit"
   },
-  "10011": {
-    "cardId": 10011,
+  "10012": {
+    "cardId": 10012,
     "type": "unit",
     "name": "Test Big Hitter",
     "cost": 1,
@@ -1324,8 +1353,8 @@
     "passives": [],
     "slug": "test_big_hitter"
   },
-  "10012": {
-    "cardId": 10012,
+  "10013": {
+    "cardId": 10013,
     "type": "unit",
     "name": "Test Bloodthirsty Unit",
     "cost": 1,
@@ -1359,8 +1388,8 @@
     "passives": [],
     "slug": "test_bloodthirsty_unit"
   },
-  "10013": {
-    "cardId": 10013,
+  "10014": {
+    "cardId": 10014,
     "type": "equipment",
     "name": "Test Blue Thryssa",
     "cost": 2,
@@ -1390,8 +1419,8 @@
     ],
     "slug": "test_blue_thryssa"
   },
-  "10014": {
-    "cardId": 10014,
+  "10015": {
+    "cardId": 10015,
     "type": "unit",
     "name": "Test Burn Passive Unit",
     "cost": 2,
@@ -1460,15 +1489,15 @@
     "slug": "test_burn_passive_unit",
     "relatedCards": [
       {
-        "cardId": 10021,
+        "cardId": 10022,
         "kind": "mentioned-in",
-        "peerCardId": 10014,
+        "peerCardId": 10015,
         "tier": "primary"
       }
     ]
   },
-  "10015": {
-    "cardId": 10015,
+  "10016": {
+    "cardId": 10016,
     "type": "unit",
     "name": "Test Chain Unit",
     "cost": 1,
@@ -1493,16 +1522,10 @@
           ]
         }
       ],
-      "cardId": 10016
+      "cardId": 10017
     },
     "slug": "test_chain_unit",
     "relatedCards": [
-      {
-        "cardId": 10016,
-        "kind": "evolves-from",
-        "peerCardId": 10015,
-        "tier": "primary"
-      },
       {
         "cardId": 10017,
         "kind": "evolves-from",
@@ -1510,33 +1533,39 @@
         "tier": "primary"
       },
       {
-        "cardId": 10008,
-        "kind": "mentioned-in",
-        "peerCardId": 10016,
+        "cardId": 10018,
+        "kind": "evolves-from",
+        "peerCardId": 10017,
         "tier": "primary"
       },
       {
-        "cardId": 10029,
+        "cardId": 10009,
+        "kind": "mentioned-in",
+        "peerCardId": 10017,
+        "tier": "primary"
+      },
+      {
+        "cardId": 10031,
         "kind": "mentions",
-        "peerCardId": 10008,
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10033,
+        "cardId": 10035,
         "kind": "mentions",
-        "peerCardId": 10008,
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10034,
+        "cardId": 10036,
         "kind": "evolves-from",
-        "peerCardId": 10033,
+        "peerCardId": 10035,
         "tier": "secondary"
       }
     ]
   },
-  "10016": {
-    "cardId": 10016,
+  "10017": {
+    "cardId": 10017,
     "type": "unit",
     "name": "Test Chain Unit II",
     "cost": 1,
@@ -1562,51 +1591,51 @@
           ]
         }
       ],
-      "cardId": 10017
+      "cardId": 10018
     },
-    "evolvedFrom": 10015,
+    "evolvedFrom": 10016,
     "slug": "test_chain_unit_ii",
     "relatedCards": [
       {
-        "cardId": 10017,
+        "cardId": 10018,
         "kind": "evolves-from",
-        "peerCardId": 10016,
+        "peerCardId": 10017,
         "tier": "primary"
       },
       {
-        "cardId": 10008,
+        "cardId": 10009,
         "kind": "mentioned-in",
-        "peerCardId": 10016,
+        "peerCardId": 10017,
         "tier": "primary"
       },
       {
-        "cardId": 10015,
+        "cardId": 10016,
         "kind": "evolves-into",
-        "peerCardId": 10016,
+        "peerCardId": 10017,
         "tier": "secondary"
       },
       {
-        "cardId": 10029,
+        "cardId": 10031,
         "kind": "mentions",
-        "peerCardId": 10008,
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10033,
+        "cardId": 10035,
         "kind": "mentions",
-        "peerCardId": 10008,
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10034,
+        "cardId": 10036,
         "kind": "evolves-from",
-        "peerCardId": 10033,
+        "peerCardId": 10035,
         "tier": "secondary"
       }
     ]
   },
-  "10017": {
-    "cardId": 10017,
+  "10018": {
+    "cardId": 10018,
     "type": "unit",
     "name": "Test Chain Unit III",
     "cost": 1,
@@ -1622,9 +1651,15 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 10016,
+    "evolvedFrom": 10017,
     "slug": "test_chain_unit_iii",
     "relatedCards": [
+      {
+        "cardId": 10017,
+        "kind": "evolves-into",
+        "peerCardId": 10018,
+        "tier": "secondary"
+      },
       {
         "cardId": 10016,
         "kind": "evolves-into",
@@ -1632,39 +1667,33 @@
         "tier": "secondary"
       },
       {
-        "cardId": 10015,
-        "kind": "evolves-into",
-        "peerCardId": 10016,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10008,
+        "cardId": 10009,
         "kind": "mentioned-in",
-        "peerCardId": 10016,
+        "peerCardId": 10017,
         "tier": "secondary"
       },
       {
-        "cardId": 10029,
+        "cardId": 10031,
         "kind": "mentions",
-        "peerCardId": 10008,
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10033,
+        "cardId": 10035,
         "kind": "mentions",
-        "peerCardId": 10008,
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10034,
+        "cardId": 10036,
         "kind": "evolves-from",
-        "peerCardId": 10033,
+        "peerCardId": 10035,
         "tier": "secondary"
       }
     ]
   },
-  "10018": {
-    "cardId": 10018,
+  "10019": {
+    "cardId": 10019,
     "type": "skill",
     "name": "Test Compress Skill",
     "cost": 2,
@@ -1697,22 +1726,8 @@
       {
         "cardId": 10001,
         "kind": "mentioned-in",
-        "peerCardId": 10018,
+        "peerCardId": 10019,
         "tier": "primary"
-      },
-      {
-        "cardId": 10052,
-        "kind": "series-mentioned",
-        "peerCardId": 10001,
-        "tier": "primary",
-        "seriesCode": "incinerate"
-      },
-      {
-        "cardId": 10053,
-        "kind": "series-mentioned",
-        "peerCardId": 10001,
-        "tier": "primary",
-        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
@@ -1729,15 +1744,29 @@
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10047,
+        "cardId": 10056,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "tier": "primary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10057,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "tier": "primary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10049,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       }
     ]
   },
-  "10019": {
-    "cardId": 10019,
+  "10020": {
+    "cardId": 10020,
     "type": "unit",
     "name": "Test Conduit",
     "cost": 0,
@@ -1758,8 +1787,8 @@
     "passives": [],
     "slug": "test_conduit"
   },
-  "10020": {
-    "cardId": 10020,
+  "10021": {
+    "cardId": 10021,
     "type": "unit",
     "name": "Test Copy Ability Unit",
     "cost": 4,
@@ -1805,8 +1834,8 @@
     "passives": [],
     "slug": "test_copy_ability_unit"
   },
-  "10021": {
-    "cardId": 10021,
+  "10022": {
+    "cardId": 10022,
     "type": "skill",
     "name": "Test Damage Skill",
     "cost": 0,
@@ -1843,15 +1872,15 @@
     "slug": "test_damage_skill",
     "relatedCards": [
       {
-        "cardId": 10014,
+        "cardId": 10015,
         "kind": "mentions",
-        "peerCardId": 10021,
+        "peerCardId": 10022,
         "tier": "secondary"
       }
     ]
   },
-  "10022": {
-    "cardId": 10022,
+  "10023": {
+    "cardId": 10023,
     "type": "unit",
     "name": "Test Deploy Evolve",
     "cost": 1,
@@ -1884,20 +1913,20 @@
           ]
         }
       ],
-      "cardId": 10023
+      "cardId": 10024
     },
     "slug": "test_deploy_evolve",
     "relatedCards": [
       {
-        "cardId": 10023,
+        "cardId": 10024,
         "kind": "evolves-from",
-        "peerCardId": 10022,
+        "peerCardId": 10023,
         "tier": "primary"
       }
     ]
   },
-  "10023": {
-    "cardId": 10023,
+  "10024": {
+    "cardId": 10024,
     "type": "unit",
     "name": "Test Deploy Evolve II",
     "cost": 1,
@@ -1917,19 +1946,19 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 10022,
+    "evolvedFrom": 10023,
     "slug": "test_deploy_evolve_ii",
     "relatedCards": [
       {
-        "cardId": 10022,
+        "cardId": 10023,
         "kind": "evolves-into",
-        "peerCardId": 10023,
+        "peerCardId": 10024,
         "tier": "secondary"
       }
     ]
   },
-  "10024": {
-    "cardId": 10024,
+  "10025": {
+    "cardId": 10025,
     "type": "unit",
     "name": "Test Dies Passive Unit",
     "cost": 1,
@@ -1958,8 +1987,8 @@
     ],
     "slug": "test_dies_passive_unit"
   },
-  "10025": {
-    "cardId": 10025,
+  "10026": {
+    "cardId": 10026,
     "type": "equipment",
     "name": "Test Dionysos Wings",
     "cost": 2,
@@ -1978,8 +2007,8 @@
     ],
     "slug": "test_dionysos_wings"
   },
-  "10026": {
-    "cardId": 10026,
+  "10027": {
+    "cardId": 10027,
     "type": "equipment",
     "name": "Test Disarm Lance",
     "cost": 4,
@@ -2013,20 +2042,20 @@
           ]
         }
       ],
-      "cardId": 10027
+      "cardId": 10028
     },
     "slug": "test_disarm_lance",
     "relatedCards": [
       {
-        "cardId": 10027,
+        "cardId": 10028,
         "kind": "ignited-from",
-        "peerCardId": 10026,
+        "peerCardId": 10027,
         "tier": "primary"
       }
     ]
   },
-  "10027": {
-    "cardId": 10027,
+  "10028": {
+    "cardId": 10028,
     "type": "equipment",
     "name": "Test Disarm Lance - Ignited",
     "cost": 4,
@@ -2064,19 +2093,19 @@
         ]
       }
     ],
-    "ignitedFrom": 10026,
+    "ignitedFrom": 10027,
     "slug": "test_disarm_lance_ignited",
     "relatedCards": [
       {
-        "cardId": 10026,
+        "cardId": 10027,
         "kind": "ignites-into",
-        "peerCardId": 10027,
+        "peerCardId": 10028,
         "tier": "secondary"
       }
     ]
   },
-  "10028": {
-    "cardId": 10028,
+  "10029": {
+    "cardId": 10029,
     "type": "unit",
     "name": "Test Draw Passive Unit",
     "cost": 1,
@@ -2106,8 +2135,37 @@
     ],
     "slug": "test_draw_passive_unit"
   },
-  "10029": {
-    "cardId": 10029,
+  "10030": {
+    "cardId": 10030,
+    "type": "skill",
+    "name": "Test Enemy Target Skill",
+    "cost": 1,
+    "deckConstraints": [],
+    "requirements": [
+      {
+        "type": "target_side",
+        "side": "enemy",
+        "text": [
+          "target is an enemy"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "type": "give_condition",
+        "condition": "doomed",
+        "target": {
+          "side": "enemy"
+        },
+        "text": [
+          "give an enemy Doomed"
+        ]
+      }
+    ],
+    "slug": "test_enemy_target_skill"
+  },
+  "10031": {
+    "cardId": 10031,
     "type": "unit",
     "name": "Test Equip Passive Unit",
     "cost": 1,
@@ -2141,45 +2199,45 @@
     "slug": "test_equip_passive_unit",
     "relatedCards": [
       {
-        "cardId": 10008,
+        "cardId": 10009,
         "kind": "mentioned-in",
-        "peerCardId": 10029,
+        "peerCardId": 10031,
         "tier": "primary"
       },
       {
-        "cardId": 10016,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10033,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10015,
-        "kind": "evolves-into",
-        "peerCardId": 10016,
-        "tier": "secondary"
-      },
-      {
         "cardId": 10017,
-        "kind": "evolves-from",
-        "peerCardId": 10016,
+        "kind": "mentions",
+        "peerCardId": 10009,
         "tier": "secondary"
       },
       {
-        "cardId": 10034,
+        "cardId": 10035,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10016,
+        "kind": "evolves-into",
+        "peerCardId": 10017,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10018,
         "kind": "evolves-from",
-        "peerCardId": 10033,
+        "peerCardId": 10017,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10036,
+        "kind": "evolves-from",
+        "peerCardId": 10035,
         "tier": "secondary"
       }
     ]
   },
-  "10030": {
-    "cardId": 10030,
+  "10032": {
+    "cardId": 10032,
     "type": "equipment",
     "name": "Test Equipment Filler",
     "cost": 1,
@@ -2198,8 +2256,8 @@
     ],
     "slug": "test_equipment_filler"
   },
-  "10031": {
-    "cardId": 10031,
+  "10033": {
+    "cardId": 10033,
     "type": "unit",
     "name": "Test Evolve Passive Unit",
     "cost": 1,
@@ -2237,26 +2295,26 @@
           ]
         }
       ],
-      "cardId": 10032
+      "cardId": 10034
     },
     "slug": "test_evolve_passive_unit",
     "relatedCards": [
       {
-        "cardId": 10032,
+        "cardId": 10034,
         "kind": "evolves-from",
-        "peerCardId": 10031,
+        "peerCardId": 10033,
         "tier": "primary"
       },
       {
         "cardId": 1,
         "kind": "mentioned-in",
-        "peerCardId": 10031,
+        "peerCardId": 10033,
         "tier": "primary"
       }
     ]
   },
-  "10032": {
-    "cardId": 10032,
+  "10034": {
+    "cardId": 10034,
     "type": "unit",
     "name": "Test Evolve Passive Unit II",
     "cost": 1,
@@ -2272,25 +2330,25 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 10031,
+    "evolvedFrom": 10033,
     "slug": "test_evolve_passive_unit_ii",
     "relatedCards": [
       {
-        "cardId": 10031,
+        "cardId": 10033,
         "kind": "evolves-into",
-        "peerCardId": 10032,
+        "peerCardId": 10034,
         "tier": "secondary"
       },
       {
         "cardId": 1,
         "kind": "mentioned-in",
-        "peerCardId": 10031,
+        "peerCardId": 10033,
         "tier": "secondary"
       }
     ]
   },
-  "10033": {
-    "cardId": 10033,
+  "10035": {
+    "cardId": 10035,
     "type": "unit",
     "name": "Test Evolve Unit",
     "cost": 7,
@@ -2337,50 +2395,50 @@
           ]
         }
       ],
-      "cardId": 10034
+      "cardId": 10036
     },
     "slug": "test_evolve_unit",
     "relatedCards": [
       {
-        "cardId": 10034,
+        "cardId": 10036,
         "kind": "evolves-from",
-        "peerCardId": 10033,
+        "peerCardId": 10035,
         "tier": "primary"
       },
       {
-        "cardId": 10008,
+        "cardId": 10009,
         "kind": "mentioned-in",
-        "peerCardId": 10033,
+        "peerCardId": 10035,
         "tier": "primary"
-      },
-      {
-        "cardId": 10016,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10029,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10015,
-        "kind": "evolves-into",
-        "peerCardId": 10016,
-        "tier": "secondary"
       },
       {
         "cardId": 10017,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10031,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10016,
+        "kind": "evolves-into",
+        "peerCardId": 10017,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10018,
         "kind": "evolves-from",
-        "peerCardId": 10016,
+        "peerCardId": 10017,
         "tier": "secondary"
       }
     ]
   },
-  "10034": {
-    "cardId": 10034,
+  "10036": {
+    "cardId": 10036,
     "type": "unit",
     "name": "Test Evolve Unit II",
     "cost": 7,
@@ -2431,49 +2489,49 @@
         ]
       }
     ],
-    "evolvedFrom": 10033,
+    "evolvedFrom": 10035,
     "slug": "test_evolve_unit_ii",
     "relatedCards": [
       {
-        "cardId": 10033,
+        "cardId": 10035,
         "kind": "evolves-into",
-        "peerCardId": 10034,
+        "peerCardId": 10036,
         "tier": "secondary"
       },
       {
-        "cardId": 10008,
+        "cardId": 10009,
         "kind": "mentioned-in",
-        "peerCardId": 10033,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10016,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10029,
-        "kind": "mentions",
-        "peerCardId": 10008,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10015,
-        "kind": "evolves-into",
-        "peerCardId": 10016,
+        "peerCardId": 10035,
         "tier": "secondary"
       },
       {
         "cardId": 10017,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10031,
+        "kind": "mentions",
+        "peerCardId": 10009,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10016,
+        "kind": "evolves-into",
+        "peerCardId": 10017,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10018,
         "kind": "evolves-from",
-        "peerCardId": 10016,
+        "peerCardId": 10017,
         "tier": "secondary"
       }
     ]
   },
-  "10035": {
-    "cardId": 10035,
+  "10037": {
+    "cardId": 10037,
     "type": "skill",
     "name": "Test Expensive Skill",
     "cost": 3,
@@ -2533,8 +2591,8 @@
     ],
     "slug": "test_expensive_skill"
   },
-  "10036": {
-    "cardId": 10036,
+  "10038": {
+    "cardId": 10038,
     "type": "unit",
     "name": "Test Expensive Unit",
     "cost": 9,
@@ -2555,8 +2613,8 @@
     "passives": [],
     "slug": "test_expensive_unit"
   },
-  "10037": {
-    "cardId": 10037,
+  "10039": {
+    "cardId": 10039,
     "type": "unit",
     "name": "Test Filler Unit",
     "cost": 4,
@@ -2593,8 +2651,8 @@
     "passives": [],
     "slug": "test_filler_unit"
   },
-  "10038": {
-    "cardId": 10038,
+  "10040": {
+    "cardId": 10040,
     "type": "unit",
     "name": "Test Fisherman Unit",
     "cost": 4,
@@ -2645,10 +2703,18 @@
         ]
       }
     ],
-    "slug": "test_fisherman_unit"
+    "slug": "test_fisherman_unit",
+    "relatedCards": [
+      {
+        "cardId": 10073,
+        "kind": "mentions",
+        "peerCardId": 10040,
+        "tier": "secondary"
+      }
+    ]
   },
-  "10039": {
-    "cardId": 10039,
+  "10041": {
+    "cardId": 10041,
     "type": "unit",
     "name": "Test Floor of Death",
     "cost": 2,
@@ -2680,8 +2746,8 @@
     ],
     "slug": "test_floor_of_death"
   },
-  "10040": {
-    "cardId": 10040,
+  "10042": {
+    "cardId": 10042,
     "type": "unit",
     "name": "Test Free Ability Landmark",
     "cost": 2,
@@ -2707,8 +2773,8 @@
     ],
     "slug": "test_free_ability_landmark"
   },
-  "10041": {
-    "cardId": 10041,
+  "10043": {
+    "cardId": 10043,
     "type": "unit",
     "name": "Test Free Keyword Unit",
     "cost": 1,
@@ -2767,8 +2833,8 @@
     ],
     "slug": "test_free_keyword_unit"
   },
-  "10042": {
-    "cardId": 10042,
+  "10044": {
+    "cardId": 10044,
     "type": "unit",
     "name": "Test Global Trait Landmark",
     "cost": 2,
@@ -2792,8 +2858,8 @@
     "passives": [],
     "slug": "test_global_trait_landmark"
   },
-  "10043": {
-    "cardId": 10043,
+  "10045": {
+    "cardId": 10045,
     "type": "unit",
     "name": "Test Global Trait Landmark Two",
     "cost": 2,
@@ -2817,8 +2883,8 @@
     "passives": [],
     "slug": "test_global_trait_landmark_two"
   },
-  "10044": {
-    "cardId": 10044,
+  "10046": {
+    "cardId": 10046,
     "type": "equipment",
     "name": "Test Grant Ability Equip",
     "cost": 3,
@@ -2868,15 +2934,15 @@
     "slug": "test_grant_ability_equip",
     "relatedCards": [
       {
-        "cardId": 10085,
+        "cardId": 10088,
         "kind": "mentions",
-        "peerCardId": 10044,
+        "peerCardId": 10046,
         "tier": "secondary"
       }
     ]
   },
-  "10045": {
-    "cardId": 10045,
+  "10047": {
+    "cardId": 10047,
     "type": "skill",
     "name": "Test Heal",
     "cost": 2,
@@ -2895,8 +2961,8 @@
     ],
     "slug": "test_heal"
   },
-  "10046": {
-    "cardId": 10046,
+  "10048": {
+    "cardId": 10048,
     "type": "unit",
     "name": "Test Hwa Ryun",
     "cost": 3,
@@ -2956,8 +3022,8 @@
     ],
     "slug": "test_hwa_ryun"
   },
-  "10047": {
-    "cardId": 10047,
+  "10049": {
+    "cardId": 10049,
     "type": "unit",
     "name": "Test Hwayeomsa",
     "cost": 5,
@@ -3009,22 +3075,8 @@
       {
         "cardId": 10001,
         "kind": "mentioned-in",
-        "peerCardId": 10047,
+        "peerCardId": 10049,
         "tier": "primary"
-      },
-      {
-        "cardId": 10052,
-        "kind": "series-mentioned",
-        "peerCardId": 10001,
-        "tier": "primary",
-        "seriesCode": "incinerate"
-      },
-      {
-        "cardId": 10053,
-        "kind": "series-mentioned",
-        "peerCardId": 10001,
-        "tier": "primary",
-        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
@@ -3041,15 +3093,29 @@
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10018,
+        "cardId": 10056,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "tier": "primary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10057,
+        "kind": "series-mentioned",
+        "peerCardId": 10001,
+        "tier": "primary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10019,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       }
     ]
   },
-  "10048": {
-    "cardId": 10048,
+  "10050": {
+    "cardId": 10050,
     "type": "equipment",
     "name": "Test Ignite Weapon",
     "cost": 2,
@@ -3077,20 +3143,20 @@
           ]
         }
       ],
-      "cardId": 10049
+      "cardId": 10051
     },
     "slug": "test_ignite_weapon",
     "relatedCards": [
       {
-        "cardId": 10049,
+        "cardId": 10051,
         "kind": "ignited-from",
-        "peerCardId": 10048,
+        "peerCardId": 10050,
         "tier": "primary"
       }
     ]
   },
-  "10049": {
-    "cardId": 10049,
+  "10051": {
+    "cardId": 10051,
     "type": "equipment",
     "name": "Test Ignite Weapon - Ignited",
     "cost": 2,
@@ -3122,19 +3188,19 @@
         ]
       }
     ],
-    "ignitedFrom": 10048,
+    "ignitedFrom": 10050,
     "slug": "test_ignite_weapon_ignited",
     "relatedCards": [
       {
-        "cardId": 10048,
+        "cardId": 10050,
         "kind": "ignites-into",
-        "peerCardId": 10049,
+        "peerCardId": 10051,
         "tier": "secondary"
       }
     ]
   },
-  "10050": {
-    "cardId": 10050,
+  "10052": {
+    "cardId": 10052,
     "type": "unit",
     "name": "Test Ignition Evolver",
     "cost": 5,
@@ -3159,20 +3225,20 @@
           ]
         }
       ],
-      "cardId": 10051
+      "cardId": 10053
     },
     "slug": "test_ignition_evolver",
     "relatedCards": [
       {
-        "cardId": 10051,
+        "cardId": 10053,
         "kind": "evolves-from",
-        "peerCardId": 10050,
+        "peerCardId": 10052,
         "tier": "primary"
       }
     ]
   },
-  "10051": {
-    "cardId": 10051,
+  "10053": {
+    "cardId": 10053,
     "type": "unit",
     "name": "Test Ignition Evolver II",
     "cost": 5,
@@ -3192,19 +3258,19 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 10050,
+    "evolvedFrom": 10052,
     "slug": "test_ignition_evolver_ii",
     "relatedCards": [
       {
-        "cardId": 10050,
+        "cardId": 10052,
         "kind": "evolves-into",
-        "peerCardId": 10051,
+        "peerCardId": 10053,
         "tier": "secondary"
       }
     ]
   },
-  "10052": {
-    "cardId": 10052,
+  "10054": {
+    "cardId": 10054,
     "type": "skill",
     "name": "Test Incinerate I",
     "series": "incinerate",
@@ -3242,46 +3308,46 @@
       {
         "cardId": 10001,
         "kind": "mentions",
-        "peerCardId": 10052,
+        "peerCardId": 10054,
         "tier": "secondary"
-      },
-      {
-        "cardId": 10053,
-        "kind": "same-series-as",
-        "peerCardId": 10052,
-        "tier": "secondary",
-        "seriesCode": "incinerate"
-      },
-      {
-        "cardId": 10054,
-        "kind": "same-series-as",
-        "peerCardId": 10052,
-        "tier": "secondary",
-        "seriesCode": "incinerate"
       },
       {
         "cardId": 10055,
         "kind": "same-series-as",
-        "peerCardId": 10052,
+        "peerCardId": 10054,
         "tier": "secondary",
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10018,
+        "cardId": 10056,
+        "kind": "same-series-as",
+        "peerCardId": 10054,
+        "tier": "secondary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10057,
+        "kind": "same-series-as",
+        "peerCardId": 10054,
+        "tier": "secondary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10019,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       },
       {
-        "cardId": 10047,
+        "cardId": 10049,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       }
     ]
   },
-  "10053": {
-    "cardId": 10053,
+  "10055": {
+    "cardId": 10055,
     "type": "skill",
     "name": "Test Incinerate II",
     "series": "incinerate",
@@ -3320,46 +3386,46 @@
       {
         "cardId": 10001,
         "kind": "mentions",
-        "peerCardId": 10053,
+        "peerCardId": 10055,
         "tier": "secondary"
-      },
-      {
-        "cardId": 10052,
-        "kind": "same-series-as",
-        "peerCardId": 10053,
-        "tier": "secondary",
-        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
         "kind": "same-series-as",
-        "peerCardId": 10053,
+        "peerCardId": 10055,
         "tier": "secondary",
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10055,
+        "cardId": 10056,
         "kind": "same-series-as",
-        "peerCardId": 10053,
+        "peerCardId": 10055,
         "tier": "secondary",
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10018,
+        "cardId": 10057,
+        "kind": "same-series-as",
+        "peerCardId": 10055,
+        "tier": "secondary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10019,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       },
       {
-        "cardId": 10047,
+        "cardId": 10049,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       }
     ]
   },
-  "10054": {
-    "cardId": 10054,
+  "10056": {
+    "cardId": 10056,
     "type": "skill",
     "name": "Test Incinerate III",
     "series": "incinerate",
@@ -3413,46 +3479,46 @@
       {
         "cardId": 10001,
         "kind": "mentions",
-        "peerCardId": 10054,
+        "peerCardId": 10056,
         "tier": "secondary"
       },
       {
-        "cardId": 10052,
+        "cardId": 10054,
         "kind": "same-series-as",
-        "peerCardId": 10054,
-        "tier": "secondary",
-        "seriesCode": "incinerate"
-      },
-      {
-        "cardId": 10053,
-        "kind": "same-series-as",
-        "peerCardId": 10054,
+        "peerCardId": 10056,
         "tier": "secondary",
         "seriesCode": "incinerate"
       },
       {
         "cardId": 10055,
         "kind": "same-series-as",
-        "peerCardId": 10054,
+        "peerCardId": 10056,
         "tier": "secondary",
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10018,
+        "cardId": 10057,
+        "kind": "same-series-as",
+        "peerCardId": 10056,
+        "tier": "secondary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10019,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       },
       {
-        "cardId": 10047,
+        "cardId": 10049,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       }
     ]
   },
-  "10055": {
-    "cardId": 10055,
+  "10057": {
+    "cardId": 10057,
     "type": "skill",
     "name": "Test Incinerate IV",
     "series": "incinerate",
@@ -3505,46 +3571,46 @@
       {
         "cardId": 10001,
         "kind": "mentions",
-        "peerCardId": 10055,
+        "peerCardId": 10057,
         "tier": "secondary"
-      },
-      {
-        "cardId": 10052,
-        "kind": "same-series-as",
-        "peerCardId": 10055,
-        "tier": "secondary",
-        "seriesCode": "incinerate"
-      },
-      {
-        "cardId": 10053,
-        "kind": "same-series-as",
-        "peerCardId": 10055,
-        "tier": "secondary",
-        "seriesCode": "incinerate"
       },
       {
         "cardId": 10054,
         "kind": "same-series-as",
-        "peerCardId": 10055,
+        "peerCardId": 10057,
         "tier": "secondary",
         "seriesCode": "incinerate"
       },
       {
-        "cardId": 10018,
+        "cardId": 10055,
+        "kind": "same-series-as",
+        "peerCardId": 10057,
+        "tier": "secondary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10056,
+        "kind": "same-series-as",
+        "peerCardId": 10057,
+        "tier": "secondary",
+        "seriesCode": "incinerate"
+      },
+      {
+        "cardId": 10019,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       },
       {
-        "cardId": 10047,
+        "cardId": 10049,
         "kind": "mentions",
         "peerCardId": 10001,
         "tier": "secondary"
       }
     ]
   },
-  "10056": {
-    "cardId": 10056,
+  "10058": {
+    "cardId": 10058,
     "type": "unit",
     "name": "Test Irregular Unit",
     "cost": 2,
@@ -3564,8 +3630,8 @@
     "passives": [],
     "slug": "test_irregular_unit"
   },
-  "10057": {
-    "cardId": 10057,
+  "10059": {
+    "cardId": 10059,
     "type": "unit",
     "name": "Test Khun Ran",
     "cost": 3,
@@ -3627,31 +3693,31 @@
       {
         "cardId": 10000,
         "kind": "mentioned-in",
-        "peerCardId": 10057,
+        "peerCardId": 10059,
         "tier": "primary"
       },
       {
-        "cardId": 10066,
+        "cardId": 10068,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       },
       {
-        "cardId": 10067,
+        "cardId": 10069,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       },
       {
-        "cardId": 10072,
+        "cardId": 10075,
         "kind": "mentioned-in",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "secondary"
       }
     ]
   },
-  "10058": {
-    "cardId": 10058,
+  "10060": {
+    "cardId": 10060,
     "type": "unit",
     "name": "Test Landmark Rules",
     "cost": 2,
@@ -3673,8 +3739,8 @@
     "passives": [],
     "slug": "test_landmark_rules"
   },
-  "10059": {
-    "cardId": 10059,
+  "10061": {
+    "cardId": 10061,
     "type": "unit",
     "name": "Test Landmark Unit",
     "cost": 2,
@@ -3711,8 +3777,8 @@
     ],
     "slug": "test_landmark_unit"
   },
-  "10060": {
-    "cardId": 10060,
+  "10062": {
+    "cardId": 10062,
     "type": "unit",
     "name": "Test Light Bearer",
     "cost": 1,
@@ -3732,8 +3798,8 @@
     "passives": [],
     "slug": "test_light_bearer"
   },
-  "10061": {
-    "cardId": 10061,
+  "10063": {
+    "cardId": 10063,
     "type": "unit",
     "name": "Test Light Bearer Only",
     "cost": 0,
@@ -3766,8 +3832,8 @@
     "passives": [],
     "slug": "test_light_bearer_only"
   },
-  "10062": {
-    "cardId": 10062,
+  "10064": {
+    "cardId": 10064,
     "type": "skill",
     "name": "Test Lightning Baang",
     "series": "jeonsul-baang",
@@ -3789,23 +3855,23 @@
     "slug": "test_lightning_baang",
     "relatedCards": [
       {
-        "cardId": 10092,
+        "cardId": 10095,
         "kind": "same-series-as",
-        "peerCardId": 10062,
+        "peerCardId": 10064,
         "tier": "secondary",
         "seriesCode": "jeonsul-baang"
       },
       {
-        "cardId": 10103,
+        "cardId": 10106,
         "kind": "same-series-as",
-        "peerCardId": 10062,
+        "peerCardId": 10064,
         "tier": "secondary",
         "seriesCode": "jeonsul-baang"
       }
     ]
   },
-  "10063": {
-    "cardId": 10063,
+  "10065": {
+    "cardId": 10065,
     "type": "skill",
     "name": "Test Mass Silence Skill",
     "cost": 0,
@@ -3824,8 +3890,8 @@
     ],
     "slug": "test_mass_silence_skill"
   },
-  "10064": {
-    "cardId": 10064,
+  "10066": {
+    "cardId": 10066,
     "type": "unit",
     "name": "Test Mixed Rule Landmark",
     "cost": 2,
@@ -3866,8 +3932,8 @@
     ],
     "slug": "test_mixed_rule_landmark"
   },
-  "10065": {
-    "cardId": 10065,
+  "10067": {
+    "cardId": 10067,
     "type": "equipment",
     "name": "Test Modify Ability Equip",
     "cost": 3,
@@ -3913,8 +3979,8 @@
     ],
     "slug": "test_modify_ability_equip"
   },
-  "10066": {
-    "cardId": 10066,
+  "10068": {
+    "cardId": 10068,
     "type": "unit",
     "name": "Test Multi Position",
     "cost": 3,
@@ -3968,38 +4034,38 @@
           ]
         }
       ],
-      "cardId": 10067
+      "cardId": 10069
     },
     "slug": "test_multi_position",
     "relatedCards": [
       {
-        "cardId": 10067,
+        "cardId": 10069,
         "kind": "evolves-from",
-        "peerCardId": 10066,
+        "peerCardId": 10068,
         "tier": "primary"
       },
       {
         "cardId": 10000,
         "kind": "mentioned-in",
-        "peerCardId": 10066,
+        "peerCardId": 10068,
         "tier": "primary"
       },
       {
-        "cardId": 10072,
+        "cardId": 10075,
         "kind": "mentioned-in",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "primary"
       },
       {
-        "cardId": 10057,
+        "cardId": 10059,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       }
     ]
   },
-  "10067": {
-    "cardId": 10067,
+  "10069": {
+    "cardId": 10069,
     "type": "unit",
     "name": "Test Multi Position II",
     "cost": 3,
@@ -4067,37 +4133,37 @@
         ]
       }
     ],
-    "evolvedFrom": 10066,
+    "evolvedFrom": 10068,
     "slug": "test_multi_position_ii",
     "relatedCards": [
       {
-        "cardId": 10066,
+        "cardId": 10068,
         "kind": "evolves-into",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "primary"
       },
       {
         "cardId": 10000,
         "kind": "mentioned-in",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "primary"
       },
       {
-        "cardId": 10072,
+        "cardId": 10075,
         "kind": "mentioned-in",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "primary"
       },
       {
-        "cardId": 10057,
+        "cardId": 10059,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       }
     ]
   },
-  "10068": {
-    "cardId": 10068,
+  "10070": {
+    "cardId": 10070,
     "type": "unit",
     "name": "Test Name Hunt Station",
     "cost": 2,
@@ -4145,8 +4211,8 @@
     ],
     "slug": "test_name_hunt_station"
   },
-  "10069": {
-    "cardId": 10069,
+  "10071": {
+    "cardId": 10071,
     "type": "unit",
     "name": "Test No Undying Unit",
     "cost": 1,
@@ -4175,8 +4241,8 @@
     "passives": [],
     "slug": "test_no_undying_unit"
   },
-  "10070": {
-    "cardId": 10070,
+  "10072": {
+    "cardId": 10072,
     "type": "unit",
     "name": "Test Novick",
     "cost": 5,
@@ -4226,8 +4292,45 @@
     ],
     "slug": "test_novick"
   },
-  "10071": {
-    "cardId": 10071,
+  "10073": {
+    "cardId": 10073,
+    "type": "skill",
+    "name": "Test On Board Skill",
+    "cost": 1,
+    "deckConstraints": [],
+    "requirements": [
+      {
+        "type": "unit_on_board",
+        "name": "Test Fisherman Unit",
+        "text": [
+          "Test Fisherman Unit is on your board"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "type": "give_condition",
+        "condition": "doomed",
+        "target": {
+          "side": "enemy"
+        },
+        "text": [
+          "give an enemy Doomed"
+        ]
+      }
+    ],
+    "slug": "test_on_board_skill",
+    "relatedCards": [
+      {
+        "cardId": 10040,
+        "kind": "mentioned-in",
+        "peerCardId": 10073,
+        "tier": "primary"
+      }
+    ]
+  },
+  "10074": {
+    "cardId": 10074,
     "type": "unit",
     "name": "Test Overkill Dummy",
     "cost": 1,
@@ -4249,8 +4352,8 @@
     "passives": [],
     "slug": "test_overkill_dummy"
   },
-  "10072": {
-    "cardId": 10072,
+  "10075": {
+    "cardId": 10075,
     "type": "skill",
     "name": "Test Poison Skill",
     "cost": 1,
@@ -4280,33 +4383,33 @@
     "slug": "test_poison_skill",
     "relatedCards": [
       {
-        "cardId": 10067,
+        "cardId": 10069,
         "kind": "mentions",
-        "peerCardId": 10072,
+        "peerCardId": 10075,
         "tier": "secondary"
       },
       {
-        "cardId": 10066,
+        "cardId": 10068,
         "kind": "evolves-into",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "secondary"
       },
       {
         "cardId": 10000,
         "kind": "mentioned-in",
-        "peerCardId": 10067,
+        "peerCardId": 10069,
         "tier": "secondary"
       },
       {
-        "cardId": 10057,
+        "cardId": 10059,
         "kind": "mentions",
         "peerCardId": 10000,
         "tier": "secondary"
       }
     ]
   },
-  "10073": {
-    "cardId": 10073,
+  "10076": {
+    "cardId": 10076,
     "type": "unit",
     "name": "Test Prevent Equip Landmark",
     "cost": 2,
@@ -4329,8 +4432,8 @@
     "passives": [],
     "slug": "test_prevent_equip_landmark"
   },
-  "10074": {
-    "cardId": 10074,
+  "10077": {
+    "cardId": 10077,
     "type": "unit",
     "name": "Test Prevent Evolve Landmark",
     "cost": 2,
@@ -4353,8 +4456,8 @@
     "passives": [],
     "slug": "test_prevent_evolve_landmark"
   },
-  "10075": {
-    "cardId": 10075,
+  "10078": {
+    "cardId": 10078,
     "type": "unit",
     "name": "Test Princess Unit",
     "cost": 6,
@@ -4390,8 +4493,8 @@
     "passives": [],
     "slug": "test_princess_unit"
   },
-  "10076": {
-    "cardId": 10076,
+  "10079": {
+    "cardId": 10079,
     "type": "unit",
     "name": "Test Random Target Unit",
     "cost": 2,
@@ -4421,8 +4524,8 @@
     "passives": [],
     "slug": "test_random_target_unit"
   },
-  "10077": {
-    "cardId": 10077,
+  "10080": {
+    "cardId": 10080,
     "type": "unit",
     "name": "Test Reclaim Passive Unit",
     "cost": 1,
@@ -4455,8 +4558,8 @@
     ],
     "slug": "test_reclaim_passive_unit"
   },
-  "10078": {
-    "cardId": 10078,
+  "10081": {
+    "cardId": 10081,
     "type": "skill",
     "name": "Test Reclaim Skill",
     "cost": 0,
@@ -4475,8 +4578,8 @@
     ],
     "slug": "test_reclaim_skill"
   },
-  "10079": {
-    "cardId": 10079,
+  "10082": {
+    "cardId": 10082,
     "type": "equipment",
     "name": "Test Repeat Equip",
     "cost": 0,
@@ -4502,8 +4605,8 @@
     ],
     "slug": "test_repeat_equip"
   },
-  "10080": {
-    "cardId": 10080,
+  "10083": {
+    "cardId": 10083,
     "type": "unit",
     "name": "Test Retaining Returner",
     "cost": 2,
@@ -4549,8 +4652,8 @@
     ],
     "slug": "test_retaining_returner"
   },
-  "10081": {
-    "cardId": 10081,
+  "10084": {
+    "cardId": 10084,
     "type": "equipment",
     "name": "Test Return Equipment",
     "cost": 1,
@@ -4578,20 +4681,20 @@
           ]
         }
       ],
-      "cardId": 10082
+      "cardId": 10085
     },
     "slug": "test_return_equipment",
     "relatedCards": [
       {
-        "cardId": 10082,
+        "cardId": 10085,
         "kind": "ignited-from",
-        "peerCardId": 10081,
+        "peerCardId": 10084,
         "tier": "primary"
       }
     ]
   },
-  "10082": {
-    "cardId": 10082,
+  "10085": {
+    "cardId": 10085,
     "type": "equipment",
     "name": "Test Return Equipment - Ignited",
     "cost": 1,
@@ -4623,19 +4726,19 @@
         ]
       }
     ],
-    "ignitedFrom": 10081,
+    "ignitedFrom": 10084,
     "slug": "test_return_equipment_ignited",
     "relatedCards": [
       {
-        "cardId": 10081,
+        "cardId": 10084,
         "kind": "ignites-into",
-        "peerCardId": 10082,
+        "peerCardId": 10085,
         "tier": "secondary"
       }
     ]
   },
-  "10083": {
-    "cardId": 10083,
+  "10086": {
+    "cardId": 10086,
     "type": "unit",
     "name": "Test Returner",
     "cost": 2,
@@ -4664,8 +4767,8 @@
     "passives": [],
     "slug": "test_returner"
   },
-  "10084": {
-    "cardId": 10084,
+  "10087": {
+    "cardId": 10087,
     "type": "unit",
     "name": "Test Scout",
     "cost": 1,
@@ -4707,8 +4810,8 @@
     "passives": [],
     "slug": "test_scout"
   },
-  "10085": {
-    "cardId": 10085,
+  "10088": {
+    "cardId": 10088,
     "type": "unit",
     "name": "Test Scout Ranker",
     "cost": 3,
@@ -4760,15 +4863,15 @@
     "slug": "test_scout_ranker",
     "relatedCards": [
       {
-        "cardId": 10044,
+        "cardId": 10046,
         "kind": "mentioned-in",
-        "peerCardId": 10085,
+        "peerCardId": 10088,
         "tier": "primary"
       }
     ]
   },
-  "10086": {
-    "cardId": 10086,
+  "10089": {
+    "cardId": 10089,
     "type": "unit",
     "name": "Test Shinheuh",
     "cost": 3,
@@ -4795,8 +4898,8 @@
     "passives": [],
     "slug": "test_shinheuh"
   },
-  "10087": {
-    "cardId": 10087,
+  "10090": {
+    "cardId": 10090,
     "type": "skill",
     "name": "Test Silence Skill",
     "cost": 0,
@@ -4814,8 +4917,8 @@
     ],
     "slug": "test_silence_skill"
   },
-  "10088": {
-    "cardId": 10088,
+  "10091": {
+    "cardId": 10091,
     "type": "unit",
     "name": "Test Skill Evo Unit",
     "cost": 1,
@@ -4856,26 +4959,26 @@
           ]
         }
       ],
-      "cardId": 10089
+      "cardId": 10092
     },
     "slug": "test_skill_evo_unit",
     "relatedCards": [
       {
-        "cardId": 10089,
+        "cardId": 10092,
         "kind": "evolves-from",
-        "peerCardId": 10088,
+        "peerCardId": 10091,
         "tier": "primary"
       },
       {
-        "cardId": 10090,
+        "cardId": 10093,
         "kind": "evolves-from",
-        "peerCardId": 10089,
+        "peerCardId": 10092,
         "tier": "primary"
       }
     ]
   },
-  "10089": {
-    "cardId": 10089,
+  "10092": {
+    "cardId": 10092,
     "type": "unit",
     "name": "Test Skill Evo Unit II",
     "cost": 1,
@@ -4916,27 +5019,27 @@
           ]
         }
       ],
-      "cardId": 10090
+      "cardId": 10093
     },
-    "evolvedFrom": 10088,
+    "evolvedFrom": 10091,
     "slug": "test_skill_evo_unit_ii",
     "relatedCards": [
       {
-        "cardId": 10090,
+        "cardId": 10093,
         "kind": "evolves-from",
-        "peerCardId": 10089,
+        "peerCardId": 10092,
         "tier": "primary"
       },
       {
-        "cardId": 10088,
+        "cardId": 10091,
         "kind": "evolves-into",
-        "peerCardId": 10089,
+        "peerCardId": 10092,
         "tier": "secondary"
       }
     ]
   },
-  "10090": {
-    "cardId": 10090,
+  "10093": {
+    "cardId": 10093,
     "type": "unit",
     "name": "Test Skill Evo Unit III",
     "cost": 1,
@@ -4952,25 +5055,25 @@
     "affiliations": [],
     "abilities": [],
     "passives": [],
-    "evolvedFrom": 10089,
+    "evolvedFrom": 10092,
     "slug": "test_skill_evo_unit_iii",
     "relatedCards": [
       {
-        "cardId": 10089,
+        "cardId": 10092,
         "kind": "evolves-into",
-        "peerCardId": 10090,
+        "peerCardId": 10093,
         "tier": "secondary"
       },
       {
-        "cardId": 10088,
+        "cardId": 10091,
         "kind": "evolves-into",
-        "peerCardId": 10089,
+        "peerCardId": 10092,
         "tier": "secondary"
       }
     ]
   },
-  "10091": {
-    "cardId": 10091,
+  "10094": {
+    "cardId": 10094,
     "type": "unit",
     "name": "Test Spear Bearer",
     "cost": 2,
@@ -5008,8 +5111,8 @@
     "passives": [],
     "slug": "test_spear_bearer"
   },
-  "10092": {
-    "cardId": 10092,
+  "10095": {
+    "cardId": 10095,
     "type": "skill",
     "name": "Test Static Baang",
     "series": "jeonsul-baang",
@@ -5031,23 +5134,23 @@
     "slug": "test_static_baang",
     "relatedCards": [
       {
-        "cardId": 10062,
+        "cardId": 10064,
         "kind": "same-series-as",
-        "peerCardId": 10092,
+        "peerCardId": 10095,
         "tier": "secondary",
         "seriesCode": "jeonsul-baang"
       },
       {
-        "cardId": 10103,
+        "cardId": 10106,
         "kind": "same-series-as",
-        "peerCardId": 10092,
+        "peerCardId": 10095,
         "tier": "secondary",
         "seriesCode": "jeonsul-baang"
       }
     ]
   },
-  "10093": {
-    "cardId": 10093,
+  "10096": {
+    "cardId": 10096,
     "type": "unit",
     "name": "Test Stone Doll",
     "cost": 0,
@@ -5100,8 +5203,8 @@
     ],
     "slug": "test_stone_doll"
   },
-  "10094": {
-    "cardId": 10094,
+  "10097": {
+    "cardId": 10097,
     "type": "unit",
     "name": "Test Switch Position Unit",
     "cost": 6,
@@ -5151,8 +5254,8 @@
     "passives": [],
     "slug": "test_switch_position_unit"
   },
-  "10095": {
-    "cardId": 10095,
+  "10098": {
+    "cardId": 10098,
     "type": "skill",
     "name": "Test Target Ally Skill",
     "cost": 1,
@@ -5181,8 +5284,8 @@
     ],
     "slug": "test_target_ally_skill"
   },
-  "10096": {
-    "cardId": 10096,
+  "10099": {
+    "cardId": 10099,
     "type": "equipment",
     "name": "Test Thorn",
     "cost": 0,
@@ -5243,33 +5346,33 @@
     "slug": "test_thorn",
     "relatedCards": [
       {
-        "cardId": 10097,
-        "kind": "mentions",
-        "peerCardId": 10096,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10098,
-        "kind": "mentions",
-        "peerCardId": 10096,
-        "tier": "secondary"
-      },
-      {
-        "cardId": 10099,
-        "kind": "mentions",
-        "peerCardId": 10096,
-        "tier": "secondary"
-      },
-      {
         "cardId": 10100,
         "kind": "mentions",
-        "peerCardId": 10096,
+        "peerCardId": 10099,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10101,
+        "kind": "mentions",
+        "peerCardId": 10099,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10102,
+        "kind": "mentions",
+        "peerCardId": 10099,
+        "tier": "secondary"
+      },
+      {
+        "cardId": 10103,
+        "kind": "mentions",
+        "peerCardId": 10099,
         "tier": "secondary"
       }
     ]
   },
-  "10097": {
-    "cardId": 10097,
+  "10100": {
+    "cardId": 10100,
     "type": "equipment",
     "name": "Test Thorn Fragment I",
     "series": "thorn-fragment",
@@ -5332,36 +5435,36 @@
     "slug": "test_thorn_fragment_i",
     "relatedCards": [
       {
-        "cardId": 10096,
+        "cardId": 10099,
         "kind": "mentioned-in",
-        "peerCardId": 10097,
+        "peerCardId": 10100,
         "tier": "primary"
       },
       {
-        "cardId": 10098,
+        "cardId": 10101,
         "kind": "series-mentioned",
-        "peerCardId": 10097,
+        "peerCardId": 10100,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       },
       {
-        "cardId": 10099,
+        "cardId": 10102,
         "kind": "series-mentioned",
-        "peerCardId": 10097,
+        "peerCardId": 10100,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       },
       {
-        "cardId": 10100,
+        "cardId": 10103,
         "kind": "series-mentioned",
-        "peerCardId": 10097,
+        "peerCardId": 10100,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       }
     ]
   },
-  "10098": {
-    "cardId": 10098,
+  "10101": {
+    "cardId": 10101,
     "type": "equipment",
     "name": "Test Thorn Fragment II",
     "series": "thorn-fragment",
@@ -5424,36 +5527,36 @@
     "slug": "test_thorn_fragment_ii",
     "relatedCards": [
       {
-        "cardId": 10096,
-        "kind": "mentioned-in",
-        "peerCardId": 10098,
-        "tier": "primary"
-      },
-      {
-        "cardId": 10097,
-        "kind": "series-mentioned",
-        "peerCardId": 10098,
-        "tier": "primary",
-        "seriesCode": "thorn-fragment"
-      },
-      {
         "cardId": 10099,
-        "kind": "series-mentioned",
-        "peerCardId": 10098,
-        "tier": "primary",
-        "seriesCode": "thorn-fragment"
+        "kind": "mentioned-in",
+        "peerCardId": 10101,
+        "tier": "primary"
       },
       {
         "cardId": 10100,
         "kind": "series-mentioned",
-        "peerCardId": 10098,
+        "peerCardId": 10101,
+        "tier": "primary",
+        "seriesCode": "thorn-fragment"
+      },
+      {
+        "cardId": 10102,
+        "kind": "series-mentioned",
+        "peerCardId": 10101,
+        "tier": "primary",
+        "seriesCode": "thorn-fragment"
+      },
+      {
+        "cardId": 10103,
+        "kind": "series-mentioned",
+        "peerCardId": 10101,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       }
     ]
   },
-  "10099": {
-    "cardId": 10099,
+  "10102": {
+    "cardId": 10102,
     "type": "equipment",
     "name": "Test Thorn Fragment III",
     "series": "thorn-fragment",
@@ -5516,36 +5619,36 @@
     "slug": "test_thorn_fragment_iii",
     "relatedCards": [
       {
-        "cardId": 10096,
+        "cardId": 10099,
         "kind": "mentioned-in",
-        "peerCardId": 10099,
+        "peerCardId": 10102,
         "tier": "primary"
-      },
-      {
-        "cardId": 10097,
-        "kind": "series-mentioned",
-        "peerCardId": 10099,
-        "tier": "primary",
-        "seriesCode": "thorn-fragment"
-      },
-      {
-        "cardId": 10098,
-        "kind": "series-mentioned",
-        "peerCardId": 10099,
-        "tier": "primary",
-        "seriesCode": "thorn-fragment"
       },
       {
         "cardId": 10100,
         "kind": "series-mentioned",
-        "peerCardId": 10099,
+        "peerCardId": 10102,
+        "tier": "primary",
+        "seriesCode": "thorn-fragment"
+      },
+      {
+        "cardId": 10101,
+        "kind": "series-mentioned",
+        "peerCardId": 10102,
+        "tier": "primary",
+        "seriesCode": "thorn-fragment"
+      },
+      {
+        "cardId": 10103,
+        "kind": "series-mentioned",
+        "peerCardId": 10102,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       }
     ]
   },
-  "10100": {
-    "cardId": 10100,
+  "10103": {
+    "cardId": 10103,
     "type": "equipment",
     "name": "Test Thorn Fragment IV",
     "series": "thorn-fragment",
@@ -5608,36 +5711,36 @@
     "slug": "test_thorn_fragment_iv",
     "relatedCards": [
       {
-        "cardId": 10096,
+        "cardId": 10099,
         "kind": "mentioned-in",
-        "peerCardId": 10100,
+        "peerCardId": 10103,
         "tier": "primary"
       },
       {
-        "cardId": 10097,
+        "cardId": 10100,
         "kind": "series-mentioned",
-        "peerCardId": 10100,
+        "peerCardId": 10103,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       },
       {
-        "cardId": 10098,
+        "cardId": 10101,
         "kind": "series-mentioned",
-        "peerCardId": 10100,
+        "peerCardId": 10103,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       },
       {
-        "cardId": 10099,
+        "cardId": 10102,
         "kind": "series-mentioned",
-        "peerCardId": 10100,
+        "peerCardId": 10103,
         "tier": "primary",
         "seriesCode": "thorn-fragment"
       }
     ]
   },
-  "10101": {
-    "cardId": 10101,
+  "10104": {
+    "cardId": 10104,
     "type": "equipment",
     "name": "Test Threshold Igniter",
     "cost": 2,
@@ -5665,20 +5768,20 @@
           ]
         }
       ],
-      "cardId": 10102
+      "cardId": 10105
     },
     "slug": "test_threshold_igniter",
     "relatedCards": [
       {
-        "cardId": 10102,
+        "cardId": 10105,
         "kind": "ignited-from",
-        "peerCardId": 10101,
+        "peerCardId": 10104,
         "tier": "primary"
       }
     ]
   },
-  "10102": {
-    "cardId": 10102,
+  "10105": {
+    "cardId": 10105,
     "type": "equipment",
     "name": "Test Threshold Igniter - Ignited",
     "cost": 2,
@@ -5696,19 +5799,19 @@
         ]
       }
     ],
-    "ignitedFrom": 10101,
+    "ignitedFrom": 10104,
     "slug": "test_threshold_igniter_ignited",
     "relatedCards": [
       {
-        "cardId": 10101,
+        "cardId": 10104,
         "kind": "ignites-into",
-        "peerCardId": 10102,
+        "peerCardId": 10105,
         "tier": "secondary"
       }
     ]
   },
-  "10103": {
-    "cardId": 10103,
+  "10106": {
+    "cardId": 10106,
     "type": "skill",
     "name": "Test Thunder Baang",
     "series": "jeonsul-baang",
@@ -5730,23 +5833,23 @@
     "slug": "test_thunder_baang",
     "relatedCards": [
       {
-        "cardId": 10062,
+        "cardId": 10064,
         "kind": "same-series-as",
-        "peerCardId": 10103,
+        "peerCardId": 10106,
         "tier": "secondary",
         "seriesCode": "jeonsul-baang"
       },
       {
-        "cardId": 10092,
+        "cardId": 10095,
         "kind": "same-series-as",
-        "peerCardId": 10103,
+        "peerCardId": 10106,
         "tier": "secondary",
         "seriesCode": "jeonsul-baang"
       }
     ]
   },
-  "10104": {
-    "cardId": 10104,
+  "10107": {
+    "cardId": 10107,
     "type": "unit",
     "name": "Test Trait Dummy",
     "cost": 1,
@@ -5772,8 +5875,8 @@
     "passives": [],
     "slug": "test_trait_dummy"
   },
-  "10105": {
-    "cardId": 10105,
+  "10108": {
+    "cardId": 10108,
     "type": "unit",
     "name": "Test Trait Thief",
     "cost": 5,
@@ -5818,8 +5921,8 @@
     ],
     "slug": "test_trait_thief"
   },
-  "10106": {
-    "cardId": 10106,
+  "10109": {
+    "cardId": 10109,
     "type": "unit",
     "name": "Test Trait Unit",
     "cost": 1,
@@ -5904,8 +6007,8 @@
     "passives": [],
     "slug": "test_trait_unit"
   },
-  "10107": {
-    "cardId": 10107,
+  "10110": {
+    "cardId": 10110,
     "type": "skill",
     "name": "Test Unreachable Skill",
     "cost": 4,
@@ -5940,8 +6043,8 @@
     ],
     "slug": "test_unreachable_skill"
   },
-  "10108": {
-    "cardId": 10108,
+  "10111": {
+    "cardId": 10111,
     "type": "unit",
     "name": "Test Water Stadium",
     "cost": 2,
@@ -5964,8 +6067,8 @@
     "passives": [],
     "slug": "test_water_stadium"
   },
-  "10109": {
-    "cardId": 10109,
+  "10112": {
+    "cardId": 10112,
     "type": "unit",
     "name": "Test Water Stadium Two",
     "cost": 2,
@@ -5988,8 +6091,8 @@
     "passives": [],
     "slug": "test_water_stadium_two"
   },
-  "10110": {
-    "cardId": 10110,
+  "10113": {
+    "cardId": 10113,
     "type": "unit",
     "name": "Test Yeo Goseng",
     "cost": 1,

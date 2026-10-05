@@ -20,6 +20,19 @@ describe("WhateverPlaystyle", () => {
     }
   });
 
+  test("takes an exclusion set without changing what it plays", () => {
+    const view = { you: { passButton: { isEnabled: true } } };
+    const excluded = new Set(['["pass-turn-action"]', '["deploy-unit-action",0,"scout"]']);
+    expect(playstyle.decideTurn(view, { next: () => 0.5 }, excluded)).toEqual({ type: "pass-turn-action", data: {} });
+  });
+
+  test("retries with the same pass, whatever it is told to exclude", () => {
+    const excluded = new Set(['["pass-turn-action"]']);
+    for (const view of [null, undefined, {}, { you: { passButton: { isEnabled: true } } }]) {
+      expect(playstyle.resolveRetry(view, excluded, { next: () => 0.5 })).toEqual({ type: "pass-turn-action", data: {} });
+    }
+  });
+
   test("resolves a decision with the first free candidates up to minChoices", () => {
     expect(playstyle.resolveDecision(decision())).toEqual({ decisionId: "d1", choices: ["a"] });
     expect(playstyle.resolveDecision(decision({ minChoices: 2, maxChoices: 2 }))).toEqual({

@@ -37,6 +37,7 @@ const unitView = {
       scout: { name: "Scout", description: "Front line scout.", line: "frontline", iconPath: "/assets/icons/positions/scout.png" },
       light_bearer: { name: "Light Bearer", description: "Back line support.", line: "backline", iconPath: "/assets/icons/positions/light-bearer.png" },
     },
+    deployLines: ["frontline", "backline"],
   },
   conditions: [{ key: "poisoned", magnitude: 2, name: "Poisoned", description: "Turn end: I take x damage", iconPath: "/assets/icons/conditions/poisoned.png" }],
   equipmentAttachments: ["Test Equipment"],
@@ -219,7 +220,7 @@ describe("buildUnitViewModel", () => {
       kind: "standard",
       name: "Test Ranker",
       rank: "ranker",
-      requirements: [["you control a fisherman"]],
+      requirements: [{ text: ["you control a fisherman"], check: { type: "deployed_as", position: "fisherman" } }],
       effects: [],
       rules: [["passives have no effect"]],
       evolveTriggers: [["when i am deployed"]],
@@ -231,7 +232,11 @@ describe("buildUnitViewModel", () => {
     });
 
     expect(model.rank).toBe("ranker");
-    expect(model.requirements).toEqual([["you control a fisherman"]]);
+    // A requirement ships its display segments beside the compiled check, and
+    // the check survives the flattening with its own parameters intact.
+    expect(model.requirements).toEqual([
+      { text: ["you control a fisherman"], check: { type: "deployed_as", position: "fisherman" } },
+    ]);
     expect(model.rules).toEqual([["passives have no effect"]]);
     expect(model.evolveTriggers).toEqual([["when i am deployed"]]);
     expect(model.igniteTriggers).toBeNull();
@@ -278,6 +283,12 @@ describe("buildUnitViewModel", () => {
     expect(Object.keys(model.positions)).toEqual(["scout", "light_bearer"]);
   });
 
+  test("carries the deploy lines of the unit's card", () => {
+    const model = buildUnitViewModel(unitView);
+
+    expect(model.deployLines).toEqual(["frontline", "backline"]);
+  });
+
   test("defaults missing optional fields for landmark-style units", () => {
     const model = buildUnitViewModel({
       id: "unit-2",
@@ -321,9 +332,52 @@ describe("buildCardViewModel", () => {
     expect(model.affiliations).toEqual([]);
   });
 
+  test("carries the deploy lines a standard card's printed positions resolve to", () => {
+    const deployLines = ["frontline", "backline"];
+    const model = buildCardViewModel({
+      cardId: 10007,
+      type: "unit",
+      kind: "standard",
+      name: "Test Multi Position",
+      positions: {
+        scout: { name: "Scout", line: "frontline" },
+        light_bearer: { name: "Light Bearer", line: "backline" },
+      },
+      deployLines,
+    });
+
+    expect(model.deployLines).toEqual(["frontline", "backline"]);
+    // The model copies the list rather than aliasing the payload's array.
+    expect(model.deployLines).not.toBe(deployLines);
+  });
+
+  test("carries a landmark's backline deploy line with no printed positions", () => {
+    const model = buildCardViewModel({
+      cardId: 10008,
+      type: "unit",
+      kind: "landmark",
+      name: "Test Landmark Unit",
+      positions: {},
+      deployLines: ["backline"],
+    });
+
+    expect(model.positions).toEqual({});
+    expect(model.deployLines).toEqual(["backline"]);
+  });
+
+  test("defaults a missing deployLines to an empty array like the other list fields", () => {
+    const model = buildCardViewModel({ cardId: 10009, name: "Bare", type: "unit" });
+
+    expect(Array.isArray(model.deployLines)).toBe(true);
+    expect(model.deployLines).toEqual([]);
+    expect(model.requirements).toEqual([]);
+    expect(model.effects).toEqual([]);
+  });
+
   test("marks a hidden card view through its null card id", () => {
     const model = buildCardViewModel({});
     expect(model.cardId).toBeNull();
+    expect(model.deployLines).toEqual([]);
   });
 
   test("rejects non-object views", () => {

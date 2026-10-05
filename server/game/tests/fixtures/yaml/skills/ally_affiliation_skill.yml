@@ -1,0 +1,12 @@
+type: skill
+name: Test Ally Affiliation Skill
+cost: 1
+requirements:
+  - type: has_ally
+    affiliation: team novick
+    raw: "have an ally team novick member"
+effects:
+  - type: give_condition
+    condition: doomed
+    target: { side: enemy }
+    raw: "give an enemy Doomed"

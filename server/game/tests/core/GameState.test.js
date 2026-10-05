@@ -95,6 +95,7 @@ describe.each([1, 3, 10, 25])("core rules at round %i", (round) => {
       "combatSlots",
       "deckSize",
       "lighthouses",
+      "shinheuhSlot",
       "field",
       "hand",
       "shinsu",
@@ -551,6 +552,129 @@ describe("client state projections", () => {
     expect(traitKeys()).not.toContain("strong");
   });
 
+  test("unit keywords and runtime affiliations and attributes reach both seats' views", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+
+    game.modifierStack.apply({
+      sourceId: "Equip#free", sourceType: "equipment", targetId: unit.id,
+      type: "keyword", key: "free", value: 1, meta: { first: false },
+    });
+    game.modifierStack.apply({
+      sourceId: "Passive#aff", sourceType: "passive", targetId: unit.id,
+      type: "affiliation", key: "wolhaiksong", value: 1,
+    });
+    game.modifierStack.apply({
+      sourceId: "Passive#attr", sourceType: "passive", targetId: unit.id,
+      type: "attribute", key: "anima", value: 1,
+    });
+
+    const ownView = () =>
+      game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id);
+    const opponentView = () =>
+      game.getClientState("Bob").opponent.field.frontline.find((u) => u.id === unit.id);
+
+    for (const view of [ownView, opponentView]) {
+      expect([...view().keywords].sort()).toEqual(["free"]);
+      expect(view().runtimeAffiliations).toEqual([
+        { key: "wolhaiksong", name: "Wolhaiksong", type: "organization", iconPath: "/assets/icons/affiliations/wolhaiksong.png" },
+      ]);
+      expect(view().runtimeAttributes).toEqual([
+        expect.objectContaining({
+          key: "anima",
+          name: "Anima",
+          iconPath: "/assets/icons/attributes/anima.png",
+          description: expect.objectContaining({ segments: expect.any(Array) }),
+        }),
+      ]);
+    }
+
+    // The seat's own view resolves granted abilities; the opponent's does not.
+    expect(ownView()).toHaveProperty("grantedAbilities");
+    expect(opponentView()).not.toHaveProperty("grantedAbilities");
+
+    // Removing the granting sources takes the derived state with them.
+    game.modifierStack.removeBySource("Equip#free");
+    game.modifierStack.removeBySource("Passive#aff");
+    game.modifierStack.removeBySource("Passive#attr");
+
+    for (const view of [ownView, opponentView]) {
+      expect(view().keywords).toEqual([]);
+      expect(view().runtimeAffiliations).toEqual([]);
+      expect(view().runtimeAttributes).toEqual([]);
+    }
+  });
+
+  test("runtime codes the unit's card already prints are not repeated, and duplicates squash", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    // Test Scout prints `team-chang`; the stack now carries the same code.
+    game.modifierStack.apply({
+      sourceId: "Passive#dup-one", sourceType: "passive", targetId: unit.id,
+      type: "affiliation", key: "team-chang", value: 1,
+    });
+    // Two distinct sources grant the same unprinted code: one entry, not two.
+    for (const sourceId of ["Passive#dup-two", "Passive#dup-three"]) {
+      game.modifierStack.apply({
+        sourceId, sourceType: "passive", targetId: unit.id,
+        type: "attribute", key: "anima", value: 1,
+      });
+    }
+
+    const view = game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id);
+    expect(view.runtimeAffiliations).toEqual([]);
+    expect(view.runtimeAttributes).toHaveLength(1);
+    expect(view.runtimeAttributes[0].key).toBe("anima");
+  });
+
+  test("a first-scoped keyword grant is reported until the unit's first ability of the round", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout"] });
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    game.modifierStack.apply({
+      sourceId: "Passive#first", sourceType: "passive", targetId: unit.id,
+      type: "keyword", key: "free", value: 1, meta: { first: true },
+    });
+
+    const keywords = () => game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id).keywords;
+    expect(keywords()).toEqual(["free"]);
+    expect(game.hasUsedAbilityThisRound(unit.id)).toBe(false);
+    expect(game.effectiveKeywords(unit.id).has("free")).toBe(true);
+
+    game.markAbilityUsed(unit.id);
+    expect(keywords()).toEqual([]);
+    expect(game.hasUsedAbilityThisRound(unit.id)).toBe(true);
+    expect(game.effectiveKeywords(unit.id).has("free")).toBe(false);
+    expect(game.effectiveKeywords("Unit#does-not-exist").size).toBe(0);
+
+    game.modifierStack.removeBySource("Passive#first");
+    expect(game.effectiveKeywords(unit.id).has("free")).toBe(false);
+  });
+
+  test("the seat's own cards carry the engine-resolved cost in hand and on the field", () => {
+    const game = setupGameWithHands({ Alice: ["Test Scout", "Test Scout"] });
+    const handCard = () => game.getClientState("Alice").you.hand[0];
+    expect(handCard().effectiveCost).toBe(1);
+
+    // A board cost modifier on the owner is what the engine charges and what
+    // the seat now reads, in both places a card appears.
+    game.modifierStack.apply({
+      sourceId: "Passive#cost", sourceType: "passive", targetId: "Alice",
+      type: "stat", key: "cost", value: -1,
+    });
+    expect(handCard().effectiveCost).toBe(0);
+    expect(handCard().cost).toBe(1);
+
+    const unit = deployUnit(game, "Alice", "Test Scout", "scout");
+    const fieldUnit = () => game.getClientState("Alice").you.field.frontline.find((u) => u.id === unit.id);
+    expect(fieldUnit().card.effectiveCost).toBe(0);
+    expect(fieldUnit().card.cost).toBe(1);
+
+    // Without the modifier both addresses report the printed cost.
+    game.modifierStack.removeBySource("Passive#cost");
+    expect(handCard().effectiveCost).toBe(1);
+    expect(fieldUnit().card.effectiveCost).toBe(1);
+  });
+
   test("gameOver is projected as a copy once the game has ended", () => {
     const game = new GameState(ROOM_CODE, USERNAMES, {}, null, { rng: new SeededRng(1), cards });
     expect(game.getClientState("Alice").gameOver).toBeNull();
@@ -567,6 +691,53 @@ describe("client state projections", () => {
     // Mutating the projection must not corrupt the authoritative result.
     gameOver.winner = "tampered";
     expect(game.gameOver.winner).toBe("Bob");
+  });
+
+  // RULES.md §Combat Slots: the Shinheuh slot exists only while an Anima
+  // created it. Its `{ available, used }` pair carries that on its own:
+  // `{ false, false }` is no slot, `{ true, false }` is a slot that exists and
+  // is unspent, `{ false, true }` is a slot that exists and was spent this
+  // round. Both seats must read the same distinction.
+  test("both seats read the Shinheuh slot's no-slot, unspent, and spent states", () => {
+    const game = setupGameWithHands({});
+
+    // No Anima has created the slot yet.
+    expect(game.getClientState("Alice").you.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(game.getClientState("Bob").opponent.shinheuhSlot).toEqual({ available: false, used: false });
+
+    CombatSlotService.grantShinheuhSlot(game.playerStates.Alice, game.eventBus, "Alice");
+    expect(game.getClientState("Alice").you.shinheuhSlot).toEqual({ available: true, used: false });
+    expect(game.getClientState("Bob").opponent.shinheuhSlot).toEqual({ available: true, used: false });
+    // Alice holding the slot says nothing about Bob's own slot.
+    expect(game.getClientState("Alice").opponent.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(game.getClientState("Bob").you.shinheuhSlot).toEqual({ available: false, used: false });
+
+    expect(CombatSlotService.consumeShinheuhSlot(game.playerStates.Alice)).toBe(true);
+    expect(game.getClientState("Alice").you.shinheuhSlot).toEqual({ available: false, used: true });
+    expect(game.getClientState("Bob").opponent.shinheuhSlot).toEqual({ available: false, used: true });
+  });
+
+  test("a revoked Shinheuh slot reads as no slot in both seats", () => {
+    const game = setupGameWithHands({});
+    CombatSlotService.grantShinheuhSlot(game.playerStates.Bob, game.eventBus, "Bob");
+    expect(game.getClientState("Alice").opponent.shinheuhSlot).toEqual({ available: true, used: false });
+
+    // AnimaEngine revokes at round start when no Anima unit is on the field.
+    CombatSlotService.revokeShinheuhSlot(game.playerStates.Bob);
+    expect(game.getClientState("Bob").you.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(game.getClientState("Alice").opponent.shinheuhSlot).toEqual({ available: false, used: false });
+  });
+
+  test("the projected Shinheuh slot is a copy, not the authoritative slot", () => {
+    const game = setupGameWithHands({});
+    CombatSlotService.grantShinheuhSlot(game.playerStates.Alice, game.eventBus, "Alice");
+
+    const opponentView = game.getClientState("Bob").opponent.shinheuhSlot;
+    opponentView.available = false;
+    opponentView.used = true;
+
+    expect(game.playerStates.Alice.shinheuhSlot).toEqual({ available: true, used: false });
+    expect(CombatSlotService.isShinheuhSlotAvailable(game.playerStates.Alice)).toBe(true);
   });
 });
 

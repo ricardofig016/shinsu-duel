@@ -175,12 +175,38 @@ On disconnect the socket is detached from its seat and nothing else changes: the
 
 ## Client Rendering
 
-`public/pages/game/script.js` renders every snapshot as the whole board rather than as a patch, and two rules keep that from flashing the screen:
+`public/pages/game/script.js` renders every snapshot as the whole board rather than as a patch, and three rules keep that from flashing the screen:
 
 - **Snapshots coalesce.** A snapshot replaces the previous one entirely, so an update that arrives while a render is running becomes the pending state and every earlier one is dropped. A turn change delivers several in a row (the player's action, then the opponent's or the bot's), and painting each of them would repaint the same board several times.
-- **Mounted elements are reconciled, never rebuilt.** Hand cards are keyed by the card they show (a hidden card by its slot), field units by unit id and are remounted only when what they show changed, deck backs are a pool of plain frames rather than mounted components, and combat slots are keyed by position code. Mounting a card fits its text and mounts about ten tooltips, so rebuilding the board per snapshot painted the hand half-built, re-created the deck stack on every update, and re-mounted every tooltip on the board.
+- **Mounted elements are reconciled, never rebuilt.** Hand cards are keyed by the card they show (a hidden card by its slot), field units by unit id and are remounted only when what they show changed, deck backs are a pool of plain frames rather than mounted components, and the five position combat slots are keyed by position code. Mounting a card fits its text and mounts about ten tooltips, so rebuilding the board per snapshot painted the hand half-built, re-created the deck stack on every update, and re-mounted every tooltip on the board.
+- **One-time chrome is mounted once.** A boot-time setup (`setupBoard`) mounts the tooltips whose copy never changes and binds the listeners that outlive a snapshot; re-binding them per snapshot would stack handlers and mount a second tooltip per container. Everything state-dependent stays in the render path and reconciles like the mounted elements above — the placement slots included.
 
 Because the elements are kept, state a card holds in the DOM survives an update, which is what lets a card that was turned over stay turned over while the board re-renders (see [CARD_VERTICAL_COMPONENT](CARD_VERTICAL_COMPONENT.md#card-back-and-flipping)).
+
+The Shinheuh combat slot reconciles the same way, under one extra condition. It is a resource rather than a position, so it mounts under a registry key outside the `slot-<position code>` family and no position code can claim it. The page mounts it for both seats, after the five position slots so a rare arrival never moves them, and only while that seat's projection says the slot exists (`available || used`, see [GAMESTATE_ARCHITECTURE](GAMESTATE_ARCHITECTURE.md#client-projection)). The five position slots are the slots a seat always has; the Shinheuh slot is an Anima resource present in a minority of games, and an always-present frame would be bloat a seat can do nothing with. A spent slot keeps its element and paints the `used` class the position slots already use, and its tooltip copy is in [TOOLTIP_SYSTEM](TOOLTIP_SYSTEM.md#tooltip-copy-map).
+
+---
+
+## Board Placement
+
+The board takes its drop targets from the server's placement data, never from a list the page maintains.
+
+**The deploy-line rule** (`server/game/placement.js`) answers **every line a card may occupy**, not one position: `deployLinesFor(card, positionCode, positions)`. A standard unit occupies the line of the position that was chosen — or, with no position given, every line its printed positions resolve to. A shinheuh occupies the lines its own card names, and one that names none throws, exactly as the engine always has. A landmark and the Conduit occupy the backline. The kinds that occupy a line of their own are declared in one map (`KIND_LINES`), one entry per kind, so a two-line shinheuh or a new kind is data rather than a branch. The module is a leaf that imports nothing, because `Card` already imports the display catalogs and an engine reaching them would close a cycle: the catalogs are passed in. `LifecycleEngine._lineForCard` keeps the engine's authority and error text, delegates to the rule, and takes its first line as the unit's line.
+
+**The placement registry** composes the position catalog with the kinds the deploy rule classifies, per line. A slot is `{ code, kind, lines, name, iconPath }` in both shapes, so a consumer paints and labels either shape the same way:
+
+- a **position slot** selects the `standard` kind and names one position code;
+- a **kind slot** selects a non-standard kind — its `code` is the kind code — and names the one line that instance sits on. `KIND_LINES[kind].slot` marks the kinds a player may deploy from hand onto their own board: `landmark` and `shinheuh`, because the Jeonsulsa engine summons the Conduit onto the *enemy* backline.
+
+`GET /positions/` serves the five position entries exactly as before, plus one reserved `placement` key: `{ <position code>: entry, ..., placement: { frontline: Slot[], backline: Slot[] } }`. Each line lists its position slots first, in catalog order, then the kind slots whose lines include it — one slot per line, so a shinheuh offers a frontline and a backline slot and each paints its own line's icon (`frontline-shinheuh.png`, else the kind's own). Riding the existing payload rather than adding a second route is what keeps the slots and the catalog they describe from disagreeing. `public/pages/game/script.js` reads it through `public/utils/positions.js`, the page-level cached fetch the card faces read the same registry through, and takes the `placement` key apart from the position entries by name.
+
+**Why the position catalog stays at five.** `GameState.positions` is the *combat-position* catalog: its keys define `combatSlotCodes` and `combatSlots`, fixed at five by RULES.md §Combat Slots. A landmark entry there would mint a sixth combat slot on every player. A position is a place on a line *with* a combat slot; a shinheuh is a line. The registry composes the two meanings instead of merging them, which is the shape that survives a new kind or a player choice between lines.
+
+**The board's reveal rule** is the match the bot's pool makes too: a slot accepts the dragged card when the slot's `kind` is the card's kind, the card's `deployLines` include the line the slot sits on, and — for a position slot — the card prints that slot's position code. The last clause is what keeps a fisherman-only unit off the scout slot beside it on the same line, and the kind clause is what keeps a landmark off the standard backline slots. Nothing enumerates a card's printed positions to decide where it may go; the server resolves them into `deployLines` and the board reads that same answer.
+
+**A full line is not a prohibition.** RULES.md §Battlefield 6 lets a deployment into a line of five choose a unit to Discard, which the engine implements as its `line_overflow` decision, so no slot ever hides for capacity and an overflowing drop stays legal. Substitution is destructive, which is the one thing the board does say: while a landmark is dragged and one already stands, the landmark slot is marked as replacing it.
+
+`prepareBoard` builds one drop target per placeable slot per line from the registry, keeps it hidden until a matching card is dragged, and reconciles it so a second snapshot leaves exactly one element per slot. It re-runs on every snapshot because the replacement marking is board state. A drop sends `deploy-unit-action` with the slot's own code as `placedPositionCode`: for a position slot that is the position, and for a kind slot it is symbolic — the resolved line decides the destination, and the engine stores no placed position for a non-standard unit.
 
 ---
 

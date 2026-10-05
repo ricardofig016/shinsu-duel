@@ -25,13 +25,16 @@ import { buildCatalogEntryParts, buildProseEntry } from "./tooltip-entries.js";
 /**
  * The concept clauses of the list, in the order the card-vertical header draws
  * them. Each names the glossary concept that explains it, the icon it draws,
- * and the card-view field that carries its printed text.
+ * the card-view field that carries its printed text, and how one entry of that
+ * field states its display segments. A trigger field holds one segment list
+ * per entry; a passive ability and a requirement hold an object whose `text`
+ * is that list, the requirement stating the compiled `check` beside it.
  */
 const CLAUSES = [
-  { concept: "evolve", iconPath: "/assets/icons/other/evolve.png", field: "evolveTriggers" },
-  { concept: "ignition", iconPath: "/assets/icons/other/ignition.png", field: "igniteTriggers" },
-  { concept: "passives", iconPath: "/assets/icons/other/passive.png", field: "passiveAbilities" },
-  { concept: "requirements", iconPath: "/assets/icons/other/requirements.png", field: "requirements" },
+  { concept: "evolve", iconPath: "/assets/icons/other/evolve.png", field: "evolveTriggers", textOf: (entry) => entry },
+  { concept: "ignition", iconPath: "/assets/icons/other/ignition.png", field: "igniteTriggers", textOf: (entry) => entry },
+  { concept: "passives", iconPath: "/assets/icons/other/passive.png", field: "passiveAbilities", textOf: (entry) => entry?.text },
+  { concept: "requirements", iconPath: "/assets/icons/other/requirements.png", field: "requirements", textOf: (entry) => entry?.text },
 ];
 
 /** One icon for a unit's equipment attachments, whatever they are. */
@@ -41,14 +44,14 @@ const isUsablePath = (path) =>
   typeof path === "string" && path.trim() !== "" && path !== "undefined" && path !== "null";
 
 /**
- * A clause's text from the card view, as tooltip entries. Trigger and
- * requirement fields carry one display-segment list each; passive abilities
- * carry an object with a `text` list.
+ * A clause's text from the card view, as tooltip entries. The clause names the
+ * field that holds its prose and how one entry of that field states it, so no
+ * caller restates either.
  */
-const textForClause = (model, field) => {
+const textForClause = (model, { field, textOf }) => {
   const value = model?.[field];
   if (!Array.isArray(value) || value.length === 0) return [];
-  return value.map((item) => ({ segments: field === "passiveAbilities" ? item.text : item }));
+  return value.map((item) => ({ segments: textOf(item) }));
 };
 
 /** A tooltip's text list: the game-relevant entries, then the flavor entry. */
@@ -118,7 +121,7 @@ export const buildUnitHeaderIcons = (model, glossary) => {
   }
 
   for (const clause of CLAUSES) {
-    const texts = textForClause(model, clause.field);
+    const texts = textForClause(model, clause);
     if (texts.length === 0) continue;
     const entry = conceptClause(concepts, clause, texts);
     if (entry) add(entry);

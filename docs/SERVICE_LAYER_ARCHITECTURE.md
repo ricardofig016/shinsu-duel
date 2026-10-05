@@ -40,7 +40,7 @@ CompressionService.clearReduction(card);
 
 ## CombatSlotService
 
-Owns **all** combat slots: the five position slots plus the Shinheuh slot. Position slots reset each round and are consumed by non-Free ability use. The Shinheuh slot operations (grant/consume/reset) are driven by the Anima engine, which only decides when they happen — see `ATTRIBUTE_SYSTEM_ARCHITECTURE.md`.
+Owns **all** combat slots: the five position slots plus the Shinheuh slot, a single-use per-round slot for Shinheuh abilities. Position slots reset each round and are consumed by non-Free ability use. The service owns all four Shinheuh slot operations; the deciding caller differs per operation. `AnimaEngine` grants the slot from its round-start handler when its owner has an Anima unit on the field, and revokes it when they do not. `UseAbilityAction` consumes it for a non-Free Shinheuh ability. `GameState`'s round-end handler resets it for every player. `AnimaEngine`'s `consumeSlot` and `resetSlot` are static wrappers over this service with no production caller. The owner of grant/revoke timing and of what each flag combination means to a client is [ATTRIBUTE_SYSTEM_ARCHITECTURE.md](./ATTRIBUTE_SYSTEM_ARCHITECTURE.md#anima-engine) and [GAMESTATE_ARCHITECTURE.md](./GAMESTATE_ARCHITECTURE.md#client-projection).
 
 ```js
 CombatSlotService.isAvailable(playerState, "fisherman");
@@ -49,9 +49,10 @@ CombatSlotService.resetAll(playerState);
 
 // Shinheuh slot
 CombatSlotService.isShinheuhSlotAvailable(playerState);
-CombatSlotService.grantShinheuhSlot(playerState, eventBus, owner);
-CombatSlotService.consumeShinheuhSlot(playerState);
-CombatSlotService.resetShinheuhSlot(playerState);
+CombatSlotService.grantShinheuhSlot(playerState, eventBus, owner); // → emits shinheuh:slot:granted
+CombatSlotService.revokeShinheuhSlot(playerState);                 // → clears available, leaves used
+CombatSlotService.consumeShinheuhSlot(playerState);                // → available = false, used = true
+CombatSlotService.resetShinheuhSlot(playerState);                  // → clears both flags
 ```
 
 ## LighthouseService

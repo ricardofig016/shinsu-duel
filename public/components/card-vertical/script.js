@@ -4,6 +4,7 @@ import { renderSegments } from "/utils/card-text-dom.js";
 import { setCardFlipClickable, wireCardFlipClick } from "/utils/card-flip.js";
 import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import { buildCardBackSections, buildUnitHeaderIcons } from "/utils/unit-header-icons.js";
+import { getPlacementSlots } from "/utils/positions.js";
 import {
   buildEntryTitle,
   buildPositionTooltipEntries,
@@ -327,6 +328,16 @@ const loadText = (container, model, unit, onAbilityClick) => {
   fitFontSize(listItems, () => list.clientHeight > 0 && list.scrollHeight > list.clientHeight + 1);
 };
 
+/**
+ * The card's position row: the position a deployed unit was placed in, the
+ * position a landmark choice moved it to, and — for a unit that prints no
+ * position of its own — the placement slot that stands for it.
+ *
+ * A special kind occupies no printed position: the placement registry states
+ * the one it shows, being the line the unit occupies on the field or, while the
+ * card is still in hand, every line it may deploy to. A standard unit's printed
+ * positions are the whole answer, so the registry adds nothing to them.
+ */
 const loadPositions = async (container, model, unit, glossary) => {
   const positionsList = container.querySelector(".card-vertical-positions");
   positionsList.innerHTML = "";
@@ -342,6 +353,13 @@ const loadPositions = async (container, model, unit, glossary) => {
   } else {
     for (const code of Object.keys(model.positions)) {
       entries.push({ position: model.positions[code], chosen: false });
+    }
+  }
+  // Only a row the card prints nothing for can gain a slot, so a standard card
+  // never waits on the registry for a position it already states itself.
+  if (entries.length === 0) {
+    for (const slot of await getPlacementSlots(model, { line: unit?.line ?? null })) {
+      entries.push({ position: slot, chosen: false });
     }
   }
   for (const { position, chosen } of entries) {

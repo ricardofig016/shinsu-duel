@@ -15,10 +15,10 @@ registry.register("hwayeomsa", new HwayeomsaEngine(eventBus, cards));
 registry.register("jeonsulsa", new JeonsulsaEngine(eventBus, cards));
 ```
 
-When a unit is deployed, `GameState` calls:
+`LifecycleEngine` calls the registry when it deploys a unit, and again after a transformation re-evaluates the unit's attributes:
 
 ```js
-this._attributeRegistry.onUnitDeployed(unit, this);
+gameState._attributeRegistry.onUnitDeployed(unit, gameState);
 ```
 
 Each engine subscribes to its own EventBus events and manages cleanup independently.
@@ -33,30 +33,31 @@ Each engine subscribes to its own EventBus events and manages cleanup independen
 
 ### State
 
-Per-player: `shinheuhSlot: { available: boolean, used: boolean }` — owned by `CombatSlotService`; the engine only decides _when_ to grant.
+Per-player: `shinheuhSlot: { available: boolean, used: boolean }` — owned by `CombatSlotService`; the engine decides only when to grant or revoke.
 
 ### Lifecycle
 
-1. **Round start:** If an Anima unit is on the field and no Shinheuh slot exists, `AnimaEngine` asks `CombatSlotService.grantShinheuhSlot()` to create one (`available = true`).
-2. **Shinheuh ability use:** `AnimaEngine.consumeSlot()` delegates to `CombatSlotService.consumeShinheuhSlot()` (`available = false, used = true`).
-3. **Round end:** `CombatSlotService.resetShinheuhSlot()` clears both flags.
+1. **Round start.** Each deployed Anima unit subscribes `AnimaEngine._grantShinheuhSlot` to `round:started`. The engine asks whether its owner's field holds an Anima unit, counting an `anima` attribute granted through the `ModifierStack` as well as a printed one. Yes: `CombatSlotService.grantShinheuhSlot()` sets `available = true` and emits `shinheuh:slot:granted`, but only while both flags are false, so a spent slot is never re-granted. No: `CombatSlotService.revokeShinheuhSlot()` clears `available` and leaves `used` untouched, so a revoked unspent slot ends at `{ available: false, used: false }`, indistinguishable from no slot at all, while a spent slot stays `{ available: false, used: true }`.
+2. **Shinheuh ability use.** `UseAbilityAction` refuses a non-Free Shinheuh ability unless `CombatSlotService.isShinheuhSlotAvailable()`, then calls `CombatSlotService.consumeShinheuhSlot()`, which sets `available = false, used = true`.
+3. **Round end.** `GameState`'s `round:ended` handler calls `CombatSlotService.resetShinheuhSlot()` for every player, clearing both flags.
+4. **Anima unit leaves play.** `LifecycleEngine` calls `AttributeRegistry.onUnitRemoved`, which unsubscribes that unit's round-start listener. The flags are untouched.
 
-All Shinheuh slot mutations go through `CombatSlotService` — the engine never touches `playerState.shinheuhSlot` directly.
+All Shinheuh slot mutations go through `CombatSlotService` — the engine never touches `playerState.shinheuhSlot` directly. What the flag combinations tell a client is documented in [GAMESTATE_ARCHITECTURE.md](./GAMESTATE_ARCHITECTURE.md#client-projection).
 
 ### API
 
 ```js
-// Called by GameState when Anima unit is deployed
+// Called by LifecycleEngine when the Anima unit is deployed
 animaEngine.onDeploy(unit, gameState);
-
-// Called when a Shinheuh uses an ability (delegates to CombatSlotService)
-AnimaEngine.consumeSlot(owner, gameState) → boolean;
-
-// Called at round end (delegates to CombatSlotService)
-AnimaEngine.resetSlot(owner, gameState);
 
 // Called when unit leaves play
 animaEngine.cleanup(unit);
+
+// Static wrappers over CombatSlotService, with no production caller:
+// UseAbilityAction consumes the slot and GameState's round-end handler
+// resets it.
+AnimaEngine.consumeSlot(owner, gameState) → boolean;
+AnimaEngine.resetSlot(owner, gameState);
 ```
 
 ---

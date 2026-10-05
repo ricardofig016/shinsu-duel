@@ -18,6 +18,15 @@ describe("CombatSlotService", () => {
     expect(CombatSlotService.isAvailable(player, "fisherman")).toBe(true);
   });
 
+  test("isAvailable reads a slot the state does not carry as available", () => {
+    // A caller gating on a position with no entry of its own must not read a
+    // missing slot as spent.
+    const player = game.playerStates.Alice;
+    expect(CombatSlotService.isAvailable(player, "nonexistent")).toBe(true);
+    expect(CombatSlotService.isAvailable({}, "fisherman")).toBe(true);
+    expect(CombatSlotService.isAvailable(undefined, "fisherman")).toBe(true);
+  });
+
   test("consume marks slot unavailable", () => {
     const player = game.playerStates.Alice;
     expect(CombatSlotService.consume(player, "fisherman")).toBe(true);

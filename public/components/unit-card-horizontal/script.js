@@ -3,6 +3,7 @@ import { getGlossary } from "/utils/glossary.js";
 import { openCardDetail } from "/components/card-detail-overlay/script.js";
 import { buildUnitHeaderIcons } from "/utils/unit-header-icons.js";
 import { buildTraitStripEntries } from "/utils/unit-trait-strip.js";
+import { getPlacementSlots } from "/utils/positions.js";
 import { buildPositionTooltipEntries, buildUnitAbilityTooltipEntries } from "/utils/tooltip-entries.js";
 
 const DEFAULT_ARTWORK = "/assets/images/placeholder.png";
@@ -74,6 +75,14 @@ const loadStrip = async (container, unit) => {
 };
 
 /**
+ * The placement slot that stands for a unit which holds no placed position: a
+ * special kind occupies no position, so its line is the position it shows. A
+ * standard unit has no such slot and answers null, which is what keeps the
+ * placeholder icon it has always drawn while unplaced.
+ */
+const linePosition = async (unit) => (await getPlacementSlots(unit, { line: unit.line }))[0] ?? null;
+
+/**
  * The card's two stats, one flex share each: the position the unit stands in,
  * plus the position a landmark choice moved it to when that differs, and the
  * unit's hp. Only the current hp is drawn; the tooltip states it out of the
@@ -87,14 +96,18 @@ const loadStats = async (container, unit, glossary) => {
     unit.chosenPositionCode && unit.chosenPositionCode !== unit.placedPositionCode
       ? unit.positions[unit.chosenPositionCode]
       : null;
+  // To the player a landmark and a shinheuh stand on a line like anything else,
+  // so a unit that holds no position shows the placement slot for its line
+  // through the same chip and the same tooltip a placed position gets.
+  const shownPosition = placedPosition ?? (await linePosition(unit));
   positionContainer.innerHTML = "";
-  if (placedPosition) {
-    const positionIcon = safePath(placedPosition.iconPath, DEFAULT_POSITION_ICON);
+  if (shownPosition) {
+    const positionIcon = safePath(shownPosition.iconPath, DEFAULT_POSITION_ICON);
     positionContainer.style.backgroundImage = `url("${positionIcon}")`;
     await addTooltip(
       positionContainer,
-      placedPosition.name,
-      buildPositionTooltipEntries(placedPosition, glossary),
+      shownPosition.name,
+      buildPositionTooltipEntries(shownPosition, glossary),
       positionIcon
     );
   } else {

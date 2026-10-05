@@ -12,13 +12,17 @@ import AnimaEngine from "./attributes/AnimaEngine.js";
 import HwayeomsaEngine from "./attributes/HwayeomsaEngine.js";
 import JeonsulsaEngine from "./attributes/JeonsulsaEngine.js";
 import AbilityRegistry from "./registries/abilityRegistry.js";
+import KeywordResolver from "./services/KeywordResolver.js";
+import ModifierService from "./services/ModifierService.js";
 import * as IdFactory from "./IdFactory.js";
 import EVT from "./EventCatalog.js";
 import cards from "../data/cards.json" with { type: "json" };
 import conditions from "../data/conditions.json" with { type: "json" };
 import positions from "../data/positions.json" with { type: "json" };
 import traitsSource from "../data/traits.json" with { type: "json" };
-import { getConditions, getTraits } from "./displayCatalogs.js";
+import attributesSource from "../data/attributes.json" with { type: "json" };
+import affiliationsSource from "../data/affiliations.json" with { type: "json" };
+import { getAttributes, getConditions, getTraits } from "./displayCatalogs.js";
 import GameClock from "./GameClock.js";
 import EventBus from "./EventBus.js";
 import ModifierStack, { getModifierCounter } from "./ModifierStack.js";
@@ -463,21 +467,15 @@ export default class GameState {
         : null,
       field: {
         frontline: playerState.field.frontline.map((unit) => ({
-          ...unit.toSanitizedObject(),
-          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: this.#getConditionViews(unit.id),
-          traits: this.#getTraitViews(unit.id),
+          ...this.#projectPublicUnit(unit, username),
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
         backline: playerState.field.backline.map((unit) => ({
-          ...unit.toSanitizedObject(),
-          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: this.#getConditionViews(unit.id),
-          traits: this.#getTraitViews(unit.id),
+          ...this.#projectPublicUnit(unit, username),
           grantedAbilities: this.#getGrantedAbilities(unit.id),
         })),
       },
-      hand: playerState.hand.map((card) => card.toSanitizedObject()),
+      hand: playerState.hand.map((card) => this.#projectCard(card, username)),
       shinsu: playerState.shinsu,
       username: playerState.username,
       passButton: {
@@ -546,6 +544,93 @@ export default class GameState {
     });
   }
 
+  /**
+   * Project a field unit's engine-derived public state. Both seat views use
+   * this one projection, so a unit's derived readout cannot differ by viewer;
+   * the seat's own view adds only `grantedAbilities`, and the nested card view
+   * (the field address of a card) is projected for that seat.
+   *
+   * `keywords` is the shared `KeywordResolver` answer, so the keywords a seat
+   * reads are the keywords the engine acts on. Affiliations and attributes
+   * carry the codes the ModifierStack grants the unit on top of the ones its
+   * card prints, because those are the codes the engine's requirement checks
+   * see (a printed code is already on the card view and is not repeated).
+   *
+   * @param {object} unit
+   * @param {string} [seat] the viewer whose cost the nested card resolves for
+   */
+  #projectPublicUnit(unit, seat = null) {
+    return {
+      ...unit.toSanitizedObject(),
+      card: seat ? this.#projectCard(unit.card, seat) : unit.card.toSanitizedObject(),
+      equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
+      conditions: this.#getConditionViews(unit.id),
+      traits: this.#getTraitViews(unit.id),
+      keywords: [...this.effectiveKeywords(unit.id)],
+      runtimeAffiliations: this.#getRuntimeAffiliationViews(unit),
+      runtimeAttributes: this.#getRuntimeAttributeViews(unit),
+    };
+  }
+
+  /**
+   * Project a card for the seat that plays it, with the cost the engine will
+   * charge that seat, through `ModifierService.getEffectiveCost` — the single
+   * cost authority for play, deploy, and equip. Both addresses of a card (the
+   * hand card and a field unit's nested card) go through this helper, so a
+   * player reads the same number wherever the card appears.
+   */
+  #projectCard(card, username) {
+    return {
+      ...card.toSanitizedObject(),
+      effectiveCost: ModifierService.getEffectiveCost(card, username, this),
+    };
+  }
+
+  /**
+   * Catalog-backed views for codes the engine derived at runtime. The entry
+   * uses the projected catalog's shape, exactly as `#getTraitViews` does, so a
+   * consumer renders a granted code like a printed one; an unknown code
+   * degrades to its raw key instead of crashing the projection.
+   */
+  #getCodeViews(entries, iconDirectory) {
+    return entries.map(([code, entry, source]) => ({
+      ...(entry ?? {}),
+      key: code,
+      name: entry?.name ?? code,
+      iconPath: source[code] ? `/assets/icons/${iconDirectory}/${code}.png` : null,
+    }));
+  }
+
+  /**
+   * Affiliations the ModifierStack granted a unit, in the order the stack
+   * reports them, limited to codes its card does not already print.
+   */
+  #getRuntimeAffiliationViews(unit) {
+    const printed = new Set(Object.keys(unit.card?.affiliations || {}));
+    const codes = [...this.modifierStack.getActiveKeys(unit.id, "affiliation")]
+      .filter((code) => !printed.has(code));
+    return this.#getCodeViews(
+      codes.map((code) => [code, affiliationsSource[code], affiliationsSource]),
+      "affiliations"
+    );
+  }
+
+  /**
+   * Attributes the ModifierStack granted a unit, limited to codes its card
+   * does not already print. Attribute prose carries compiled display segments
+   * on the projected catalog entry, so a tooltip keeps its inline links.
+   */
+  #getRuntimeAttributeViews(unit) {
+    const printed = new Set(unit.card?.attributes || []);
+    const catalog = getAttributes();
+    const codes = [...this.modifierStack.getActiveKeys(unit.id, "attribute")]
+      .filter((code) => !printed.has(code));
+    return this.#getCodeViews(
+      codes.map((code) => [code, catalog[code], attributesSource]),
+      "attributes"
+    );
+  }
+
   #getOpponentUsername(username) {
     const opponent = this.usernames.find((u) => u !== username);
     if (!opponent) throw new Error(`Opponent for ${username} not found.`);
@@ -554,6 +639,8 @@ export default class GameState {
 
   #filterOpponentState(username) {
     const opponentState = this.playerStates[this.#getOpponentUsername(username)];
+    // The opponent's hand stays face down, and a card a peek revealed is a
+    // card view like any other: it carries no cost resolved for this viewer.
     const hand = opponentState.hand.map((card) => {
       if (card.visible) return card.toSanitizedObject();
       else return {};
@@ -564,19 +651,10 @@ export default class GameState {
       combatSlots: opponentState.combatSlots,
       deckSize: opponentState.deck.length,
       lighthouses: opponentState.lighthouses,
+      shinheuhSlot: opponentState.shinheuhSlot ? { ...opponentState.shinheuhSlot } : null,
       field: {
-        frontline: opponentState.field.frontline.map((unit) => ({
-          ...unit.toSanitizedObject(),
-          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: this.#getConditionViews(unit.id),
-          traits: this.#getTraitViews(unit.id),
-        })),
-        backline: opponentState.field.backline.map((unit) => ({
-          ...unit.toSanitizedObject(),
-          equipmentAttachments: (unit.equipmentAttachments || []).map((card) => card.name),
-          conditions: this.#getConditionViews(unit.id),
-          traits: this.#getTraitViews(unit.id),
-        })),
+        frontline: opponentState.field.frontline.map((unit) => this.#projectPublicUnit(unit)),
+        backline: opponentState.field.backline.map((unit) => this.#projectPublicUnit(unit)),
       },
       hand: hand,
       shinsu: opponentState.shinsu,
@@ -1035,6 +1113,17 @@ export default class GameState {
   /** Whether `unitId` has already used an ability this round. */
   hasUsedAbilityThisRound(unitId) {
     return this._abilitiesUsedThisRound.has(unitId);
+  }
+
+  /**
+   * The keyword set `unitId` currently carries, through the shared
+   * `KeywordResolver`. This is the same call `UseAbilityAction` makes, so the
+   * keywords a seat reads off the board are the keywords the engine acts on.
+   * `first: true` keyword grants count while the unit has taken no ability
+   * this round and stop counting once it has. An unknown unit carries none.
+   */
+  effectiveKeywords(unitId) {
+    return KeywordResolver.forUnit(this, unitId);
   }
 
   /**

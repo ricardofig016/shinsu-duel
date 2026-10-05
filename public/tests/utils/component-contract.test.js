@@ -586,3 +586,73 @@ describe("overlay ability clicks", () => {
     expect(overlay).toMatch(/onAbilityClick: abilityClick/);
   });
 });
+
+/**
+ * The special-kind position path on the two card faces. Both faces are DOM code
+ * without a harness, and each draws the position of a unit that prints none from
+ * the shared placement registry: the compact face paints a deployed landmark's
+ * or shinheuh's line rather than the placeholder icon, and the vertical face
+ * fills a position row its card would otherwise leave empty.
+ * Reverting either face to its own fallback — the placeholder, an empty row, or
+ * an icon derived from the kind and the line — leaves a landmark and a shinheuh
+ * looking like a standard unit with no position, and nothing else would catch
+ * it. The narrowing itself is pinned in
+ * `public/tests/utils/positions.test.js`; this pins that both faces reach it
+ * through the page's cached accessor rather than a fetch or an icon path of
+ * their own.
+ */
+describe("special-kind position chips", () => {
+  const read = (...parts) => fs.readFileSync(path.join(root, ...parts), "utf-8");
+  const horizontal = read("public/components/unit-card-horizontal/script.js");
+  const vertical = read("public/components/card-vertical/script.js");
+
+  test("the compact face resolves an unplaced unit's line, then the placeholder", () => {
+    // The unit's own line is the whole query, and a standard kind is answered an
+    // empty list, so this face needs no kind test of its own: adding one is how
+    // the special-kind path would come back out.
+    const resolver = horizontal.slice(horizontal.indexOf("const linePosition"), horizontal.indexOf("const loadStats"));
+    expect(horizontal).toMatch(/import \{ getPlacementSlots \} from "\/utils\/positions\.js";/);
+    expect(resolver).toMatch(/getPlacementSlots\(unit, \{ line: unit\.line \}\)/);
+    expect(resolver).not.toMatch(/\bkind\b/);
+    // The resolved slot is what an unplaced unit shows, and it is tried before
+    // the placeholder: a face that reads only the placed position paints the
+    // placeholder for every landmark and shinheuh again.
+    const resolveAt = horizontal.indexOf("const shownPosition = placedPosition ?? (await linePosition(unit))");
+    const placeholderAt = horizontal.indexOf('positionContainer.style.backgroundImage = `url("${DEFAULT_POSITION_ICON}")`');
+    expect(horizontal).toMatch(/const positionIcon = safePath\(shownPosition\.iconPath, DEFAULT_POSITION_ICON\);/);
+    expect(resolveAt).toBeGreaterThan(-1);
+    expect(placeholderAt).toBeGreaterThan(resolveAt);
+    // The slot's `iconPath` is the chip's icon, so no position filename is
+    // derived here: a kind's icon is per line, and there is no
+    // backline-landmark.png to derive from the kind and the line.
+    expect(horizontal).not.toMatch(/positions\/(?:frontline-shinheuh|backline-shinheuh|landmark)\.png/);
+    // and the registry arrives through the page's cached accessor
+    expect(horizontal).not.toMatch(/fetchPositions/);
+    expect(horizontal).not.toMatch(/fetch\(/);
+  });
+
+  test("the full face fills an otherwise-empty position row from the registry", () => {
+    expect(vertical).toMatch(/import \{ getPlacementSlots \} from "\/utils\/positions\.js";/);
+    // A row the card already holds printed positions for is left to them: the
+    // fill sits after the loop that reads them and before the chips are drawn,
+    // so only an empty row can gain a slot.
+    const printedAt = vertical.indexOf("entries.push({ position: model.positions[code], chosen: false })");
+    const fillAt = vertical.indexOf("if (entries.length === 0) {");
+    const renderAt = vertical.indexOf("positionsList.appendChild(li)");
+    expect(fillAt).toBeGreaterThan(printedAt);
+    expect(renderAt).toBeGreaterThan(fillAt);
+    // A deployed unit narrows to its own line; a card still in hand passes none
+    // and is offered every line it may deploy to, in the order the card names
+    // them, and none of those chips is the chosen one.
+    expect(vertical).toMatch(/for \(const slot of await getPlacementSlots\(model, \{ line: unit\?\.line \?\? null \}\)\) \{/);
+    expect(vertical).toMatch(/entries\.push\(\{ position: slot, chosen: false \}\)/);
+    // What filled the row never decides whether it is shown: the row's
+    // visibility is the card's type.
+    expect(vertical).toMatch(/\.card-vertical-positions"\)\.classList\.toggle\("hidden", !isUnitCard\)/);
+    // An icon of its own here would be a second source of the chip, for the same
+    // per-line reason as above.
+    expect(vertical).not.toMatch(/positions\/(?:frontline-shinheuh|backline-shinheuh|landmark)\.png/);
+    expect(vertical).not.toMatch(/fetchPositions/);
+    expect(vertical).not.toMatch(/fetch\(/);
+  });
+});

@@ -1,5 +1,5 @@
 import { EVENTS } from "../game/net/protocol.js";
-import { choiceCountRange, freeCandidateIds } from "./playstyles/decisions.js";
+import { moveKey } from "./turnOptions.js";
 
 /**
  * How long a bot seat waits before submitting a move. The humanized-delay
@@ -13,8 +13,6 @@ export const BOT_ACTION_DELAY_MS = 0;
 
 const defaultScheduler = (delayMs, task) => setTimeout(task, delayMs);
 
-const PASS_ACTION = { type: "pass-turn-action", data: {} };
-
 /**
  * A bot seat's connection and driver.
  *
@@ -27,11 +25,24 @@ const PASS_ACTION = { type: "pass-turn-action", data: {} };
  * engine.
  *
  * One move is in flight at a time: a scheduled move always reads the newest
- * view seen so far. A rejection of its own input triggers at most one
- * recovery move (a first-valid decision resolution, or a pass while the
- * turn is open), and never more than one per snapshot, so a rejected move
- * can neither stall the game nor loop. The controller goes quiet for good
- * on game over.
+ * view seen so far.
+ *
+ * A rejection does not spend the turn. The controller keeps the set of moves
+ * it has attempted for the current snapshot — cleared on every snapshot — and
+ * adds a refused move's key to it before asking the playstyle for another
+ * move that excludes everything already attempted. The bound is structural
+ * rather than a counter: a playstyle may only offer a move the projection has
+ * not offered before for that snapshot, and the projection's pool is finite,
+ * so the retry drains to a pass on its own. When a playstyle has nothing new
+ * to offer — or offers a move already refused — the controller goes quiet
+ * until the next snapshot.
+ *
+ * The controller owns no fallback of its own: on a rejection it asks the
+ * playstyle, through `resolveRetry(view, excluded, rng)`, which may answer
+ * with a turn action or with a pending-decision resolution. It never picks a
+ * move itself.
+ *
+ * The driver goes quiet for good on game over.
  */
 export default class BotSeatController {
   #roomCode;
@@ -45,7 +56,8 @@ export default class BotSeatController {
   #onLog;
   #latestView = null;
   #inFlight = false;
-  #recoveryUsed = false;
+  #attempted = new Set();
+  #lastMove = null;
   #stopped = false;
 
   /**
@@ -67,8 +79,14 @@ export default class BotSeatController {
         throw new TypeError(`${label} must be a non-empty string.`);
       }
     }
-    if (typeof playstyle?.decideTurn !== "function" || typeof playstyle?.resolveDecision !== "function") {
-      throw new TypeError("playstyle must expose decideTurn(view, rng) and resolveDecision(decision, rng).");
+    if (
+      typeof playstyle?.decideTurn !== "function" ||
+      typeof playstyle?.resolveRetry !== "function" ||
+      typeof playstyle?.resolveDecision !== "function"
+    ) {
+      throw new TypeError(
+        "playstyle must expose decideTurn(view, rng, excluded), resolveRetry(view, excluded, rng), and resolveDecision(decision, rng)."
+      );
     }
     if (!rng || typeof rng.next !== "function") {
       throw new TypeError("rng must be a seeded rng with next().");
@@ -111,9 +129,9 @@ export default class BotSeatController {
   }
 
   /**
-   * Deliver one outbound event to the seat. State views drive the move
-   * loop, a rejection triggers at most one recovery move, game over stops
-   * the driver for good, and everything else (hand peeks, deck status, the
+   * Deliver one outbound event to the seat. State views drive the move loop,
+   * a rejection triggers a retry from the newest view, game over stops the
+   * driver for good, and everything else (hand peeks, deck status, the
    * reveal, firehose lines) is not bot business.
    *
    * @param {string} event an event name from `EVENTS`
@@ -134,6 +152,7 @@ export default class BotSeatController {
     }
   }
 
+  /** A new snapshot re-arms the seat: the moves attempted for the old one are spent. */
   #onStateView(payload) {
     if (!payload || typeof payload !== "object") return;
     if (payload.gameOver) {
@@ -142,34 +161,33 @@ export default class BotSeatController {
       return;
     }
     this.#latestView = payload;
-    this.#recoveryUsed = false;
-    this.#scheduleMove();
+    this.#attempted.clear();
+    this.#lastMove = null;
+    this.#schedule(() => this.#act());
   }
 
+  /**
+   * A rejection adds the refused move to the attempted set and hands the
+   * choice of the next move back to the playstyle, excluding that set.
+   */
   #onGameError(payload) {
     this.#log("warn", "Bot move rejected", { seatName: this.#seatName, reason: payload?.message ?? "unknown" });
     if (this.#stopped || this.#inFlight) return;
-    this.#recoverOnce();
+    if (this.#lastMove) this.#attempted.add(moveKey(this.#lastMove));
+    this.#schedule(() => this.#retry());
   }
 
-  #scheduleMove() {
+  /** Schedule one task, never more than one at a time. */
+  #schedule(task) {
     if (this.#stopped || this.#inFlight) return;
     this.#inFlight = true;
     this.#scheduler(this.#delayMs, () => {
       this.#inFlight = false;
-      this.#act();
+      task();
     });
   }
 
-  #scheduleRecovery() {
-    if (this.#stopped || this.#inFlight) return;
-    this.#inFlight = true;
-    this.#scheduler(this.#delayMs, () => {
-      this.#inFlight = false;
-      this.#recover();
-    });
-  }
-
+  /** The seat's first move for the snapshot it was handed. */
   #act() {
     const view = this.#latestView;
     if (!view || this.#stopped) return;
@@ -177,76 +195,87 @@ export default class BotSeatController {
     if (!session) return;
 
     const decision = view.you?.pendingDecision;
+    let move;
     try {
       if (decision) {
         this.#log("debug", "Bot resolves decision", { seatName: this.#seatName });
-        this.#submitter.submitDecision({
-          session,
-          username: this.#seatName,
-          connection: this,
-          decision: this.#playstyle.resolveDecision(decision, this.#rng),
-        });
+        move = this.#playstyle.resolveDecision(decision, this.#rng);
+      } else if (view.you?.passButton?.isEnabled) {
+        move = this.#playstyle.decideTurn(view, this.#rng, this.#attempted);
+      } else {
         return;
       }
-
-      if (view.you?.passButton?.isEnabled) {
-        this.#submitter.submitAction({
-          session,
-          username: this.#seatName,
-          connection: this,
-          action: this.#playstyle.decideTurn(view, this.#rng),
-        });
-      }
     } catch (error) {
-      // A playstyle bug is a failed move like an engine rejection: recover
-      // once from the newest view, never crashing the broadcast stack frame
+      // A playstyle bug is a failed move like an engine rejection: try the
+      // playstyle's retry path once, never crashing the broadcast stack frame
       // the scheduled move runs in.
       this.#log("error", "Bot playstyle failed", { seatName: this.#seatName, error: error?.message ?? String(error) });
-      this.#recoverOnce();
+      this.#schedule(() => this.#retry());
+      return;
     }
+
+    this.#submit(session, move, decision ? "decision" : "action");
   }
 
   /**
-   * The one-move fallback after a rejection: resolve an open decision with
-   * the first valid choices, or pass while the turn is open. A pass is
-   * always legal on the bot's own turn, so this cannot make things worse.
+   * The retry after a refusal: the playstyle answers with the next move,
+   * excluding everything attempted. A move already attempted, a move the view
+   * cannot submit right now, or a playstyle with nothing left all end the
+   * retry quietly — the drain that replaces a retry counter.
    */
-  #recover() {
+  #retry() {
     const view = this.#latestView;
     if (!view || this.#stopped) return;
     const session = this.#playableSession();
     if (!session) return;
 
-    const decision = view.you?.pendingDecision;
+    const decision = view.you?.pendingDecision ?? null;
+    let move;
     try {
-      if (decision) {
-        const { min } = choiceCountRange(decision);
-        this.#submitter.submitDecision({
-          session,
-          username: this.#seatName,
-          connection: this,
-          decision: { decisionId: decision.decisionId, choices: freeCandidateIds(decision).slice(0, min) },
-        });
-        return;
-      }
-
-      if (view.you?.passButton?.isEnabled) {
-        this.#submitter.submitAction({ session, username: this.#seatName, connection: this, action: PASS_ACTION });
-      }
+      move = this.#playstyle.resolveRetry(view, this.#attempted, this.#rng);
     } catch (error) {
-      // The recovery must never be the thing that kills the process.
-      this.#log("error", "Bot recovery failed", { seatName: this.#seatName, error: error?.message ?? String(error) });
+      this.#log("error", "Bot retry failed", { seatName: this.#seatName, error: error?.message ?? String(error) });
+      return;
     }
+
+    if (!move || typeof move !== "object") {
+      this.#log("debug", "Bot retry exhausted", { seatName: this.#seatName });
+      return;
+    }
+
+    const isDecision = typeof move.decisionId === "string";
+    if (isDecision) {
+      if (!decision) return;
+    } else if (decision || !view.you?.passButton?.isEnabled) {
+      return;
+    }
+
+    const key = moveKey(move);
+    if (this.#attempted.has(key)) {
+      this.#log("debug", "Bot retry exhausted", { seatName: this.#seatName });
+      return;
+    }
+
+    this.#submit(session, move, isDecision ? "decision" : "action");
   }
 
   /**
-   * Recover at most once per snapshot. A rejection or a failed move marks
-   * the snapshot's recovery as spent; the next accepted snapshot re-arms it.
+   * Submit one move through the gateway's validated path. A throw here is an
+   * infrastructure failure rather than an engine refusal, so it is logged and
+   * ends the snapshot's attempt rather than looping.
    */
-  #recoverOnce() {
-    if (this.#recoveryUsed) return;
-    this.#recoveryUsed = true;
-    this.#scheduleRecovery();
+  #submit(session, move, kind) {
+    this.#lastMove = move;
+    this.#attempted.add(moveKey(move));
+    try {
+      if (kind === "decision") {
+        this.#submitter.submitDecision({ session, username: this.#seatName, connection: this, decision: move });
+      } else {
+        this.#submitter.submitAction({ session, username: this.#seatName, connection: this, action: move });
+      }
+    } catch (error) {
+      this.#log("error", "Bot submission failed", { seatName: this.#seatName, error: error?.message ?? String(error) });
+    }
   }
 
   /** The room's live session, or null while it is absent or not started. */

@@ -1,6 +1,7 @@
 import * as IdFactory from "./IdFactory.js";
 import affiliations from "../data/affiliations.json" with { type: "json" };
 import { getAttributes, getPositions, getTraits } from "./displayCatalogs.js";
+import { deployLinesFor } from "./placement.js";
 
 // Guide attributes carry their category in the tooltip title (RULES.md §Guide).
 const GUIDE_ATTRIBUTES = new Set(["silver-dwarf", "red-witch"]);
@@ -111,6 +112,25 @@ export default class Card {
   }
 
   /**
+   * Requirement views: each compiled requirement node beside the display
+   * segments that state it. `text` is the same segment list the card's other
+   * prose fields ship, so the card face renders it identically; `check` is the
+   * node with `text` removed, so a consumer reads the requirement's `type` and
+   * its own parameters (`position`, `side`, `affiliation`, `attribute`, `name`)
+   * as data instead of parsing prose. The node is copied rather than stripped
+   * in place: the compiled catalog is shared, and deleting from it would
+   * corrupt every other view of the same card.
+   */
+  #requirementViews() {
+    return (this.requirements || [])
+      .filter((entry) => Array.isArray(entry.text) && entry.text.length > 0)
+      .map((entry) => {
+        const { text, ...check } = entry;
+        return { text, check };
+      });
+  }
+
+  /**
    * Attribute views in canonical catalog order. Name and prose come from the
    * shared catalog projection, where prose fields carry compiled display
    * segments (see `docs/COMPILED_CARD_DSL.md`), so an attribute tooltip keeps
@@ -171,16 +191,26 @@ export default class Card {
       entryHp: this.entryHp,
       cost: this.cost,
       costReduction: this.costReduction,
+      // Printed cost minus in-hand compression, clamped at zero. This is a
+      // display value, not a legality input: the engine charges
+      // `ModifierService.getEffectiveCost`, which also applies the card's own
+      // `modify_cost` nodes and every board-wide `stat:"cost"` modifier. A bare
+      // card carries neither a username nor a game state, so it cannot resolve
+      // that number itself; the seat projection overwrites this field with the
+      // engine's answer for the seat's own hand and field cards.
       effectiveCost: Math.max(0, this.cost - this.costReduction),
       rank: this.rank,
       visible: this.visible,
       affiliations: this.affiliations,
       positions: this.positions,
+      // Where the card may go, from the shared deploy-line rule; `positions` is
+      // what it prints, `deployLines` is the lines those positions resolve to.
+      deployLines: deployLinesFor(this),
       traits: this.#traitViews(),
       attributes: this.#attributeViews(),
       abilities: this.abilities,
       passiveAbilities: this.passiveAbilities,
-      requirements: this.#textSegments(this.requirements),
+      requirements: this.#requirementViews(),
       effects: this.#textSegments(this.effects),
       rules: this.#textSegments(this.rules),
       evolveTriggers: this.evolveInto ? this.#textSegments(this.evolveInto.triggers) : null,

@@ -1,0 +1,12 @@
+type: skill
+name: Test Enemy Target Skill
+cost: 1
+requirements:
+  - type: target_side
+    side: enemy
+    raw: "target is an enemy"
+effects:
+  - type: give_condition
+    condition: doomed
+    target: { side: enemy }
+    raw: "give an enemy Doomed"

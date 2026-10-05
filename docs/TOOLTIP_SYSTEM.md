@@ -167,6 +167,8 @@ from the enforced ones.
 | Tooltip                            | Title                       | Text                                                        |
 | ---------------------------------- | --------------------------- | ----------------------------------------------------------- |
 | Board combat slot, card positions  | Position name               | Line label, description, italic verbose description; the chosen variant appends the glossary chosen suffix |
+| Shinheuh combat slot (board)       | The `kinds` glossary entry's name (`Shinheuh`) | That entry's description, with no line label and no italic verbose tail |
+| Special-kind position chip (a Landmark or Shinheuh on the board or a card face) | The placement slot's name | Line label, then the kind's own glossary description as compiled display segments — no italic verbose tail, because a kind authors no verbose copy |
 | Deployed unit artwork (`unit-card-horizontal`) | Unit name | The unit's own abilities as segment entries, then its equipment-granted abilities in italic — both keep their inline links |
 | Equipment header icon (both card faces) | Equipment (the glossary type name) | The names of the unit's attachments |
 | Deployed unit hp (`unit-card-horizontal`) | "<current>/<max> HP", or "<current> HP" when the card states no maximum | The glossary's current-hp copy |
@@ -176,6 +178,12 @@ from the enforced ones.
 | Evolve / Ignition / Passives / Requirements header icons | Glossary concept name | The card's printed texts, then the italic concept description |
 | Trait / condition icon (both card faces) | Catalog name, plus the entry's value for a numeric entry ("Resilient 3", or "Resilient X" where no instance supplies one) | The entry's compiled prose, with its value slots filled from the instance |
 | HUD (shinsu, recharged, HP, lighthouses, fire charges, deck) | Glossary name | Glossary texts; the deck copy's `[[value:count]]` slot fills with the viewer's remaining count |
+
+A special-kind chip and a position chip share the position builder in
+`public/utils/tooltip-entries.js`, so the only difference is the copy behind
+them: the registry attaches a kind slot's description in
+`server/game/displayCatalogs.js`, and `public/utils/positions.js` states the
+served slot shape.
 
 Every prose field above arrives as compiled display segments, so a link
 authored in shared catalog copy renders in the tooltip. The entries are

@@ -37,6 +37,13 @@ export function artworkDisplayName(stem) {
 const asString = (value) => (typeof value === "string" ? value : "");
 const segmentsText = (segments) => segmentsToPlainText(segments ?? []);
 
+/**
+ * A requirement view's prose. A requirement entry is `{ text, check }` — the
+ * display segments a card face renders beside the compiled node the engine
+ * matches the requirement with — so only `text` is searchable copy.
+ */
+const requirementText = (requirement) => segmentsText(requirement?.text);
+
 /** Every text a card can be searched by, lowercased into one string. Printed
  * prose arrives as display segments; the search text is their plain
  * projection, with no link markers by construction. */
@@ -49,7 +56,7 @@ export function buildSearchableText(view) {
     asString(view.rank),
     ...(view.abilities ?? []).map((ability) => segmentsText(ability.text)),
     ...(view.passiveAbilities ?? []).map((passive) => segmentsText(passive.text)),
-    ...(view.requirements ?? []).map(segmentsText),
+    ...(view.requirements ?? []).map(requirementText),
     ...(view.effects ?? []).map(segmentsText),
     ...(view.rules ?? []).map(segmentsText),
     ...(view.evolveTriggers ?? []).map(segmentsText),

@@ -2,6 +2,7 @@ import ActionHandler from "../ActionHandler.js";
 import RequirementValidator from "../services/RequirementValidator.js";
 import ShinsuService from "../services/ShinsuService.js";
 import CombatSlotService from "../services/CombatSlotService.js";
+import KeywordResolver from "../services/KeywordResolver.js";
 import EVT from "../EventCatalog.js";
 import { resolveEffect } from "../EffectResolver.js";
 
@@ -56,14 +57,20 @@ export default class UseAbilityAction extends ActionHandler {
       throw new Error("A Stunned unit cannot use abilities.");
     }
 
-    const isFree = Boolean(ability.free) || UseAbilityAction.effectiveKeywords(gameState, unit).has("free");
+    const keywords = UseAbilityAction.effectiveKeywords(gameState, unit, ability);
+    const isFree = keywords.has("free");
 
     const isShinheuh = unit.card.kind === "shinheuh";
-    if (isShinheuh) {
-      if (!CombatSlotService.isShinheuhSlotAvailable(playerState)) throw new Error("Shinheuh combat slot is unavailable.");
-    } else if (!isFree) {
-      const slot = playerState.combatSlots?.[unit.placedPositionCode];
-      if (slot && !slot.available) throw new Error(`Combat slot for ${unit.placedPositionCode} is already used this round.`);
+    // Free is the keyword that stops an ability spending a combat slot, and a
+    // Shinheuh combat slot is a combat slot (RULES.md §Shinheuh 3, §Combat
+    // Slots 4). A non-Free Shinheuh ability still requires its own slot.
+    if (!isFree) {
+      if (isShinheuh) {
+        if (!CombatSlotService.isShinheuhSlotAvailable(playerState)) throw new Error("Shinheuh combat slot is unavailable.");
+      } else {
+        const slot = playerState.combatSlots?.[unit.placedPositionCode];
+        if (slot && !slot.available) throw new Error(`Combat slot for ${unit.placedPositionCode} is already used this round.`);
+      }
     }
 
     const baseCost = ability.type === "spend_shinsu" ? ability.amount : 0;
@@ -75,11 +82,14 @@ export default class UseAbilityAction extends ActionHandler {
   }
 
   /**
-   * Keyword overrides on a unit (quick/free, including `first`-scoped ones
-   * before the unit's first ability use of the round).
+   * The effective keyword set for a unit, optionally using `ability`.
+   *
+   * Delegates to the shared `KeywordResolver`, so the keywords this action
+   * acts on are the same set the seat view projects. `ability` is omitted by
+   * callers that only want the unit's own keywords.
    */
-  static effectiveKeywords(gameState, unit) {
-    return gameState.modifierStack.getKeywords(unit, !gameState.hasUsedAbilityThisRound(unit.id));
+  static effectiveKeywords(gameState, unit, ability = null) {
+    return KeywordResolver.resolve(gameState, unit, ability);
   }
 
   execute(data, gameState) {
@@ -88,17 +98,20 @@ export default class UseAbilityAction extends ActionHandler {
     const unit = gameState._findUnit(unitId);
     const { ability } = UseAbilityAction.resolveAbility(gameState, unit, abilityCode);
 
-    const keywords = UseAbilityAction.effectiveKeywords(gameState, unit);
-    const isFree = Boolean(ability.free) || keywords.has("free");
-    const isQuick = Boolean(ability.quick) || keywords.has("quick");
+    const keywords = UseAbilityAction.effectiveKeywords(gameState, unit, ability);
+    const isFree = keywords.has("free");
+    const isQuick = keywords.has("quick");
 
     gameState.markAbilityUsed(unitId);
 
     const isShinheuh = unit.card.kind === "shinheuh";
-    if (isShinheuh) {
-      CombatSlotService.consumeShinheuhSlot(playerState);
-    } else if (!isFree) {
-      CombatSlotService.consume(playerState, unit.placedPositionCode);
+    // Mirrors validate: a Free ability spends no combat slot of either shape.
+    if (!isFree) {
+      if (isShinheuh) {
+        CombatSlotService.consumeShinheuhSlot(playerState);
+      } else {
+        CombatSlotService.consume(playerState, unit.placedPositionCode);
+      }
     }
 
     const baseCost = ability.type === "spend_shinsu" ? ability.amount : 0;

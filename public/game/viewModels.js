@@ -82,6 +82,11 @@ const flattenCard = (card) => ({
     name: affiliation.name,
   })),
   positions: Object.fromEntries(Object.entries(card.positions ?? {}).map(([code, position]) => [code, { ...position }])),
+  // The lines this card may deploy to, resolved server-side by the deploy
+  // rule: the distinct lines a standard unit's printed positions resolve to,
+  // the card's own line for a shinheuh, and the backline for a landmark or the
+  // Conduit. A view that carries none deploys nowhere.
+  deployLines: [...(card.deployLines ?? [])],
 });
 
 /**

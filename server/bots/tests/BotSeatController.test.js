@@ -2,11 +2,14 @@ import { jest } from "@jest/globals";
 import SeededRng from "../../game/utils/SeededRng.js";
 import { EVENTS } from "../../game/net/protocol.js";
 import BotSeatController, { BOT_ACTION_DELAY_MS } from "../BotSeatController.js";
+import { moveKey } from "../turnOptions.js";
 
 const EVENT_INIT = EVENTS.GAME_INIT;
 const EVENT_UPDATE = EVENTS.GAME_UPDATE;
 const EVENT_ERROR = EVENTS.GAME_ERROR;
 const EVENT_OVER = EVENTS.GAME_OVER;
+
+const PASS_ACTION = { type: "pass-turn-action", data: {} };
 
 /** A manual scheduler: captures `(delayMs, task)` and flushes on demand. */
 function manualScheduler() {
@@ -54,11 +57,37 @@ function fakeSubmitter() {
 }
 
 /** A stub playstyle recording every call and returning fixed output. */
-function stubPlaystyle(turnAction = null, decisionChoices = null) {
+function stubPlaystyle(turnAction = null) {
+  const action = () => turnAction ?? { type: "pass-turn-action", data: {} };
   return {
-    decideTurn: jest.fn(() => turnAction ?? { type: "pass-turn-action", data: {} }),
+    decideTurn: jest.fn(action),
+    resolveRetry: jest.fn(action),
     resolveDecision: jest.fn(() => ({ decisionId: "d1", choices: ["a"] })),
   };
+}
+
+/**
+ * A playstyle whose first move and whose retries are scripted, recording what
+ * each call was told to exclude. A script shorter than the calls made repeats
+ * its last entry, which is how a test pins "the pool has nothing new to offer".
+ */
+function scriptedPlaystyle({ first = PASS_ACTION, retries = [PASS_ACTION], decision = null } = {}) {
+  const turnCalls = [];
+  const retryCalls = [];
+  const playstyle = {
+    turnCalls,
+    retryCalls,
+    decideTurn: jest.fn((view, rng, excluded) => {
+      turnCalls.push({ view, excluded: new Set(excluded ?? []) });
+      return first;
+    }),
+    resolveRetry: jest.fn((view, excluded, rng) => {
+      retryCalls.push({ view, excluded: new Set(excluded ?? []) });
+      return retries[Math.min(retryCalls.length - 1, retries.length - 1)];
+    }),
+    resolveDecision: jest.fn(() => decision ?? { decisionId: "d1", choices: ["a"] }),
+  };
+  return playstyle;
 }
 
 const seatView = (overrides = {}) => ({
@@ -94,11 +123,18 @@ function controllerFor({ playstyle = stubPlaystyle(), registry = fakeRegistry(),
 
 const startedSession = () => ({ isStarted: true });
 
+/** Drive one rejection plus the retry it schedules. */
+function rejectAndRetry(bot, scheduler, message = "refused") {
+  bot.send(EVENT_ERROR, { message });
+  scheduler.flush();
+}
+
 describe("BotSeatController", () => {
   test("is its own connection: attaching is passing the controller itself", () => {
     const { bot, registry } = controllerFor();
     expect(bot.connection).toBe(bot);
     expect(typeof bot.send).toBe("function");
+    void registry;
   });
 
   test("submits a playstyle turn action once its turn is enabled", () => {
@@ -217,90 +253,218 @@ describe("BotSeatController", () => {
     expect(submitter.actions).toHaveLength(0);
   });
 
-  test("recovers exactly once per snapshot after its own move is rejected", () => {
-    const { bot, submitter, scheduler, registry } = controllerFor();
-    registry.sessions.set("ROOM01", startedSession());
-    bot.send(EVENT_INIT, seatView());
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(1); // the bot's own move
+  describe("the refusal retry", () => {
+    test("retries a refused move with the refused key excluded and submits the playstyle's next move", () => {
+      const refused = { type: "deploy-unit-action", data: { handId: 0, placedPositionCode: "scout" } };
+      const next = { type: "generate-fire-charge-action", data: {} };
+      const playstyle = scriptedPlaystyle({ first: refused, retries: [next] });
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
 
-    bot.send(EVENT_ERROR, { message: "Not enough shinsu to deploy this unit." });
-    expect(scheduler.pendingCount()).toBe(1);
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(2); // the recovery move
-    expect(submitter.actions[1].action).toEqual({ type: "pass-turn-action", data: {} });
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+      expect(submitter.actions[0].action).toEqual(refused);
 
-    // A second rejection in the same snapshot never schedules another move.
-    bot.send(EVENT_ERROR, { message: "still broken" });
-    expect(scheduler.pendingCount()).toBe(0);
+      rejectAndRetry(bot, scheduler, "You already have \"Grinder\" deployed.");
+
+      expect(submitter.actions).toHaveLength(2);
+      expect(submitter.actions[1].action).toEqual(next);
+      expect(playstyle.retryCalls).toHaveLength(1);
+      expect(playstyle.retryCalls[0].excluded.has(moveKey(refused))).toBe(true);
+    });
+
+    test("never submits a move already refused for the current snapshot", () => {
+      const repeated = { type: "generate-fire-charge-action", data: {} };
+      const playstyle = scriptedPlaystyle({ first: repeated, retries: [repeated, repeated, repeated] });
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
+
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+      for (let attempt = 0; attempt < 3; attempt++) rejectAndRetry(bot, scheduler);
+
+      expect(submitter.actions).toHaveLength(1);
+      expect(scheduler.pendingCount()).toBe(0);
+    });
+
+    test("a fully refused pool drains to a pass and terminates", () => {
+      const moves = [
+        { type: "generate-fire-charge-action", data: {} },
+        { type: "play-skill-action", data: { handId: 0 } },
+        { type: "deploy-unit-action", data: { handId: 1, placedPositionCode: "scout" } },
+        { type: "switch-position-action", data: { unitId: "Unit#1", positionCode: "backline" } },
+      ];
+      const playstyle = scriptedPlaystyle({ first: moves[0], retries: [...moves.slice(1), PASS_ACTION, PASS_ACTION] });
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
+
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+      for (let attempt = 0; attempt < 8; attempt++) rejectAndRetry(bot, scheduler);
+
+      const submitted = submitter.actions.map((entry) => moveKey(entry.action));
+      expect(submitted).toEqual([...moves, PASS_ACTION].map(moveKey));
+      expect(new Set(submitted).size).toBe(submitted.length);
+      expect(submitted[submitted.length - 1]).toBe(moveKey(PASS_ACTION));
+    });
+
+    test("clears the attempted set on the next snapshot", () => {
+      const firstMove = { type: "play-skill-action", data: { handId: 0 } };
+      const retryMove = { type: "generate-fire-charge-action", data: {} };
+      const playstyle = scriptedPlaystyle({ first: firstMove, retries: [retryMove] });
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
+
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+      rejectAndRetry(bot, scheduler, "nope");
+      expect(submitter.actions).toHaveLength(2);
+
+      bot.send(EVENT_UPDATE, seatView());
+      scheduler.flush();
+
+      // The new snapshot re-arms the seat: the move the last one refused is
+      // offered again, and the playstyle is handed an empty exclusion set.
+      expect(submitter.actions).toHaveLength(3);
+      expect(playstyle.turnCalls[1].excluded.size).toBe(0);
+      expect(submitter.actions[2].action).toEqual(firstMove);
+    });
+
+    test("a middle rejection after a success does not re-attempt an earlier move", () => {
+      const firstMove = { type: "play-skill-action", data: { handId: 0 } };
+      const secondMove = { type: "deploy-unit-action", data: { handId: 1, placedPositionCode: "scout" } };
+      const playstyle = scriptedPlaystyle({ first: firstMove, retries: [secondMove, firstMove] });
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
+
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush(); // the first move is submitted
+      rejectAndRetry(bot, scheduler, "refused"); // and refused; the retry offers the second
+      expect(submitter.actions[1].action).toEqual(secondMove);
+
+      rejectAndRetry(bot, scheduler, "refused again"); // the retry offers the first move again
+
+      // The first move is the one this snapshot already refused, so it is not
+      // submitted a second time and the snapshot ends quietly.
+      const submitted = submitter.actions.map((entry) => moveKey(entry.action));
+      expect(submitted).toEqual([moveKey(firstMove), moveKey(secondMove)]);
+      expect(new Set(submitted).size).toBe(submitted.length);
+      expect(scheduler.pendingCount()).toBe(0);
+    });
+
+    test("a refused decision is retried through the playstyle's resolveRetry", () => {
+      const playstyle = {
+        decideTurn: jest.fn(() => PASS_ACTION),
+        resolveRetry: jest.fn(() => ({ decisionId: "d7", choices: ["b"] })),
+        resolveDecision: jest.fn(() => ({ decisionId: "d7", choices: ["a"] })),
+      };
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
+
+      bot.send(EVENT_INIT, seatView({
+        you: {
+          passButton: { isEnabled: true, text: "Pass Turn" },
+          pendingDecision: { decisionId: "d7", candidates: [{ id: "a" }, { id: "b" }], minChoices: 1, maxChoices: 1, lockedIds: [] },
+        },
+      }));
+      scheduler.flush();
+      expect(submitter.decisions[0].decision).toEqual({ decisionId: "d7", choices: ["a"] });
+
+      rejectAndRetry(bot, scheduler, "Decision contains an invalid candidate.");
+      expect(submitter.decisions).toHaveLength(2);
+      expect(submitter.decisions[1].decision).toEqual({ decisionId: "d7", choices: ["b"] });
+      expect(playstyle.resolveRetry.mock.calls[0][1].has(moveKey({ decisionId: "d7", choices: ["a"] }))).toBe(true);
+    });
+
+    test("goes quiet when the playstyle has nothing new to offer", () => {
+      const onLog = jest.fn();
+      const same = { type: "generate-fire-charge-action", data: {} };
+      const playstyle = scriptedPlaystyle({ first: same, retries: [same] });
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle, onLog });
+      registry.sessions.set("ROOM01", startedSession());
+
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+      rejectAndRetry(bot, scheduler);
+
+      expect(submitter.actions).toHaveLength(1);
+      expect(onLog).toHaveBeenCalledWith("debug", "Bot retry exhausted", expect.objectContaining({ seatName: "[BOT] Whatever" }));
+    });
+
+    test("does nothing when the bot has nothing to do", () => {
+      const { bot, submitter, scheduler, registry } = controllerFor();
+      registry.sessions.set("ROOM01", startedSession());
+      bot.send(EVENT_INIT, seatView({ you: { passButton: { isEnabled: false, text: "" } } }));
+      scheduler.flush();
+      expect(submitter.actions).toHaveLength(0);
+
+      bot.send(EVENT_ERROR, { message: "someone else's problem" });
+      scheduler.flush();
+      expect(submitter.actions).toHaveLength(0);
+    });
+
+    test("a playstyle that throws is treated as a failed move and retried once", () => {
+      const playstyle = {
+        decideTurn: jest.fn(() => { throw new Error("boom"); }),
+        resolveRetry: jest.fn(() => PASS_ACTION),
+        resolveDecision: jest.fn(),
+      };
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
+      registry.sessions.set("ROOM01", startedSession());
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+
+      expect(playstyle.decideTurn).toHaveBeenCalledTimes(1);
+      expect(submitter.actions).toHaveLength(0);
+      expect(scheduler.pendingCount()).toBe(1); // the retry
+      scheduler.flush();
+      expect(playstyle.resolveRetry).toHaveBeenCalledTimes(1);
+      expect(submitter.actions).toHaveLength(1);
+      expect(submitter.actions[0].action).toEqual(PASS_ACTION);
+    });
+
+    test("a retry that throws is logged and ends the snapshot", () => {
+      const onLog = jest.fn();
+      const playstyle = {
+        decideTurn: jest.fn(() => PASS_ACTION),
+        resolveRetry: jest.fn(() => { throw new Error("boom"); }),
+        resolveDecision: jest.fn(),
+      };
+      const { bot, submitter, scheduler, registry } = controllerFor({ playstyle, onLog });
+      registry.sessions.set("ROOM01", startedSession());
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+
+      rejectAndRetry(bot, scheduler);
+
+      expect(submitter.actions).toHaveLength(1);
+      expect(onLog).toHaveBeenCalledWith("error", "Bot retry failed", expect.objectContaining({ seatName: "[BOT] Whatever" }));
+      expect(scheduler.pendingCount()).toBe(0);
+    });
+
+    test("a submission that throws is logged, never fatal", () => {
+      const onLog = jest.fn();
+      const { bot, registry, scheduler } = controllerFor({
+        onLog,
+        submitter: {
+          submitAction: () => { throw new Error("gateway is broken"); },
+          submitDecision: () => {},
+        },
+      });
+      registry.sessions.set("ROOM01", startedSession());
+      bot.send(EVENT_INIT, seatView());
+      scheduler.flush();
+
+      expect(onLog).toHaveBeenCalledWith("error", "Bot submission failed", expect.objectContaining({ seatName: "[BOT] Whatever" }));
+      expect(scheduler.pendingCount()).toBe(0);
+    });
   });
 
-  test("recovery resolves an open decision with the first valid choices", () => {
-    const { bot, submitter, scheduler, registry } = controllerFor();
-    registry.sessions.set("ROOM01", startedSession());
-    bot.send(EVENT_INIT, seatView({
-      you: {
-        passButton: { isEnabled: true, text: "Pass Turn" },
-        pendingDecision: { decisionId: "d7", candidates: [{ id: "a" }, { id: "b" }], minChoices: 1, maxChoices: 1, lockedIds: [] },
-      },
-    }));
-    scheduler.flush();
-    expect(submitter.decisions).toHaveLength(1);
-
-    bot.send(EVENT_ERROR, { message: "Decision contains an invalid candidate." });
-    scheduler.flush();
-    expect(submitter.decisions).toHaveLength(2);
-    expect(submitter.decisions[1].decision).toEqual({ decisionId: "d7", choices: ["a"] });
-  });
-
-  test("recovery does nothing when the bot has nothing to do", () => {
-    const { bot, submitter, scheduler, registry } = controllerFor();
-    registry.sessions.set("ROOM01", startedSession());
-    bot.send(EVENT_INIT, seatView({ you: { passButton: { isEnabled: false, text: "" } } }));
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(0);
-
-    bot.send(EVENT_ERROR, { message: "someone else's problem" });
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(0);
-  });
-
-  test("recovery re-arms when a new snapshot arrives", () => {
-    const { bot, submitter, scheduler, registry } = controllerFor();
-    registry.sessions.set("ROOM01", startedSession());
-    bot.send(EVENT_INIT, seatView());
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(1); // the bot's own move
-
-    bot.send(EVENT_ERROR, { message: "nope" });
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(2); // the recovery
-
-    bot.send(EVENT_UPDATE, seatView());
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(3); // a fresh move on the new snapshot
-
-    bot.send(EVENT_ERROR, { message: "nope again" });
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(4); // recovery re-armed
-  });
-
-  test("a playstyle that throws is treated as a failed move and recovered once", () => {
-    const playstyle = {
-      decideTurn: jest.fn(() => { throw new Error("boom"); }),
-      resolveDecision: jest.fn(),
-    };
-    const { bot, submitter, scheduler, registry } = controllerFor({ playstyle });
-    registry.sessions.set("ROOM01", startedSession());
-    bot.send(EVENT_INIT, seatView());
-    scheduler.flush();
-
-    expect(playstyle.decideTurn).toHaveBeenCalledTimes(1);
-    expect(submitter.actions).toHaveLength(0);
-    expect(scheduler.pendingCount()).toBe(1); // the recovery move
-    scheduler.flush();
-    expect(submitter.actions).toHaveLength(1);
-    expect(submitter.actions[0].action).toEqual({ type: "pass-turn-action", data: {} });
+  test("logs rejections through onLog when one is provided", () => {
+    const onLog = jest.fn();
+    const { bot } = controllerFor({ onLog });
+    bot.send(EVENT_ERROR, { message: "Broken" });
+    expect(onLog).toHaveBeenCalledWith("warn", "Bot move rejected", expect.objectContaining({ seatName: "[BOT] Whatever" }));
   });
 
   test("ignores events that are not bot business", () => {
@@ -316,36 +480,6 @@ describe("BotSeatController", () => {
     expect(submitter.decisions).toHaveLength(0);
   });
 
-  test("logs rejections through onLog when one is provided", () => {
-    const onLog = jest.fn();
-    const { bot } = controllerFor({ onLog });
-    bot.send(EVENT_ERROR, { message: "Broken" });
-    expect(onLog).toHaveBeenCalledWith("warn", "Bot move rejected", expect.objectContaining({ seatName: "[BOT] Whatever" }));
-  });
-
-  test("a recovery submission that throws is logged, never fatal", () => {
-    const onLog = jest.fn();
-    let submissions = 0;
-    const { bot, registry, scheduler } = controllerFor({
-      onLog,
-      submitter: {
-        submitAction: () => {
-          if (++submissions >= 2) throw new Error("gateway is broken");
-        },
-        submitDecision: () => {},
-      },
-    });
-    registry.sessions.set("ROOM01", startedSession());
-    bot.send(EVENT_INIT, seatView());
-    scheduler.flush(); // the bot's own move goes through
-    expect(submissions).toBe(1);
-
-    bot.send(EVENT_ERROR, { message: "rejected" });
-    scheduler.flush(); // the recovery submission throws inside the gateway
-
-    expect(onLog).toHaveBeenCalledWith("error", "Bot recovery failed", expect.objectContaining({ seatName: "[BOT] Whatever" }));
-  });
-
   describe("constructor validation", () => {
     const valid = () => ({
       roomCode: "ROOM01",
@@ -359,6 +493,10 @@ describe("BotSeatController", () => {
     test("rejects a missing playstyle contract", () => {
       expect(() => new BotSeatController({ ...valid(), playstyle: {} })).toThrow(TypeError);
       expect(() => new BotSeatController({ ...valid(), playstyle: { decideTurn() {} } })).toThrow(TypeError);
+      expect(() => new BotSeatController({ ...valid(), playstyle: { decideTurn() {}, resolveDecision() {} } })).toThrow(
+        TypeError
+      );
+      expect(() => new BotSeatController({ ...valid(), playstyle: { decideTurn() {}, resolveRetry() {} } })).toThrow(TypeError);
     });
 
     test("rejects a rng without next()", () => {

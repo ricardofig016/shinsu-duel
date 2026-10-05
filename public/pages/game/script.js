@@ -26,6 +26,7 @@ import {
 import { STEP, roomCodeFromPath, followRoomStep } from "/game/steps.js";
 import { getGlossary } from "/utils/glossary.js";
 import { getCardCatalog } from "/utils/card-catalog.js";
+import { getPositions } from "/utils/positions.js";
 import { toggleCardFlip } from "/utils/card-flip.js";
 import {
   buildDeckTooltipEntries,
@@ -45,17 +46,18 @@ let activeDecisionId = null;
 let selectedDecisionChoices = [];
 let activeDecisionPrompt = null;
 
-const fetchFromPath = async (path) => {
-  const response = await fetch(`/${path}/`);
-  if (!response.ok) {
-    console.error(`Failed to fetch /${path}/: ${await response.text()}`);
-    return null;
-  }
-  return await response.json();
-};
-
 const prepareData = async () => {
-  const positions = await fetchFromPath("positions");
+  // The positions payload serves the combat-position catalog and, under its own
+  // `placement` key, the registry the board builds its drop targets from. The
+  // two are read apart, by name: a registry entry carries no `.line`, so nothing
+  // may find positions by iterating the payload's keys. The page-level cache is
+  // the shared fetch the card faces read the same registry through, and failure
+  // degrades like the glossary.
+  const payload = await getPositions().catch((error) => {
+    console.error(`Positions catalog unavailable: ${error.message}`);
+    return null;
+  });
+  const { placement = {}, ...positions } = payload ?? {};
   // Tooltip copy is server-owned; the HUD tooltips degrade silently without it.
   const glossary = await getGlossary().catch((error) => {
     console.error(`Tooltip glossary unavailable: ${error.message}`);
@@ -69,7 +71,7 @@ const prepareData = async () => {
     console.error(`Card catalog unavailable: ${error.message}`);
     return null;
   });
-  return { positions, glossary, catalog };
+  return { positions, placement, glossary, catalog };
 };
 
 const findUnit = (state, player, unitId) => {
@@ -176,6 +178,49 @@ const orderChildren = (container, elements, trailing = []) => {
 
 /* ── renderers ────────────────────────────────────────────────────────── */
 
+// The Shinheuh combat slot is one resource, not tied to a line, so it paints
+// the generic Shinheuh icon rather than a shinheuh unit chip's per-line badge
+// (public/assets/icons/README.md). Its registry key sits outside the
+// `slot-<position code>` family, so no position code can ever claim it.
+const SHINHEUH_SLOT_KEY = "shinheuh-slot";
+const SHINHEUH_SLOT_ICON_PATH = "/assets/icons/positions/shinheuh.png";
+
+/**
+ * How a seat's Shinheuh slot reads, or null when the seat has none.
+ *
+ * The wire always carries the field, so its flags are the signal:
+ * `CombatSlotService.grantShinheuhSlot` leaves `{ available: true, used:
+ * false }`, `consumeShinheuhSlot` leaves `{ available: false, used: true }`,
+ * and a slot that was never granted, was revoked because no Anima stood on the
+ * board, or was reset at round end reads `{ available: false, used: false }`.
+ * Only the two live states earn an element: a slot is a rare Anima resource,
+ * and an empty frame beside the five position slots would be noise the seat
+ * can do nothing with.
+ *
+ * Spent is `available === false`, the same rule `buildCombatSlotViewModel`
+ * applies to a position slot and the same answer `isShinheuhSlotAvailable`
+ * gives the engine, which refuses a Shinheuh ability once
+ * `consumeShinheuhSlot` cleared the flag. The two flags cannot disagree while
+ * the slot lives: consuming clears `available` and sets `used` together.
+ */
+const buildShinheuhSlotViewModel = (playerState) => {
+  const slot = playerState?.shinheuhSlot;
+  if (!slot || (slot.available !== true && slot.used !== true)) return null;
+  return { used: slot.available === false };
+};
+
+/** One combat slot frame: the icon div the slot's used state paints. */
+const buildCombatSlotElement = (code, iconPath) => {
+  const slot = document.createElement("div");
+  slot.classList.add("combat-slot");
+  slot.dataset.positionCode = code;
+  const icon = document.createElement("div");
+  icon.classList.add("combat-slot-icon");
+  icon.style.backgroundImage = `url(${iconPath})`;
+  slot.appendChild(icon);
+  return slot;
+};
+
 const renderRound = (state) => {
   const model = buildRoundViewModel(state);
   document.querySelector("#round-number").textContent = model.round;
@@ -184,7 +229,9 @@ const renderRound = (state) => {
 /**
  * Combat slots are reconciled like every other mounted element: a slot keeps
  * its element and its tooltip (position copy does not change), and only its
- * used state and its place are updated.
+ * used state and its place are updated. The Shinheuh slot is ordered after the
+ * five position slots: those are the slots a seat always has, so the rare
+ * Shinheuh slot appearing must not move them.
  */
 const renderCombatSlots = (state, positions, glossary) => {
   for (let player of ["you", "opponent"]) {
@@ -199,19 +246,34 @@ const renderCombatSlots = (state, positions, glossary) => {
       if (!mounted) {
         const position = positions[code];
         const iconPath = position?.iconPath ?? `/assets/icons/positions/${code}.png`;
-        const slot = document.createElement("div");
-        slot.classList.add("combat-slot");
-        slot.dataset.positionCode = code;
-        const icon = document.createElement("div");
-        icon.classList.add("combat-slot-icon");
-        icon.style.backgroundImage = `url(${iconPath})`;
-        slot.appendChild(icon);
+        const slot = buildCombatSlotElement(code, iconPath);
         slotsContainer.appendChild(slot);
         mounted = { element: slot };
         registry.set(key, mounted);
         addTooltip(slot, position?.name ?? code, buildPositionTooltipEntries(position, glossary), iconPath);
       }
       mounted.element.classList.toggle("used", buildCombatSlotViewModel(state[player], code).used);
+      order.push(mounted.element);
+    }
+    const shinheuh = buildShinheuhSlotViewModel(state[player]);
+    if (shinheuh) {
+      wanted.add(SHINHEUH_SLOT_KEY);
+      let mounted = registry.get(SHINHEUH_SLOT_KEY);
+      if (!mounted) {
+        const slot = buildCombatSlotElement("shinheuh", SHINHEUH_SLOT_ICON_PATH);
+        slotsContainer.appendChild(slot);
+        mounted = { element: slot };
+        registry.set(SHINHEUH_SLOT_KEY, mounted);
+        // The slot carries no line, so the position builder leaves out its line
+        // label and keeps the kind's own copy: the Shinheuh name as the title,
+        // the Shinheuh description as the body. Without the glossary there is
+        // no copy to show, and the slot mounts without a tooltip.
+        const kind = glossary?.kinds?.shinheuh;
+        if (kind) {
+          addTooltip(slot, kind.name, buildPositionTooltipEntries(kind, glossary), SHINHEUH_SLOT_ICON_PATH);
+        }
+      }
+      mounted.element.classList.toggle("used", shinheuh.used);
       order.push(mounted.element);
     }
     dropUnwanted(registry, wanted);
@@ -337,6 +399,17 @@ const renderFields = async (state, socket) => {
 /* ── card dragging ────────────────────────────────────────────────────── */
 
 /**
+ * Every drag ends by clearing the ids no drop handler consumed. A release that
+ * lands on nothing is still the end of that drag, and an id left behind makes
+ * the next click anywhere on the board read as that card's drop.
+ */
+const clearDraggedHandIds = () => {
+  draggedCardHandId = null;
+  draggedSkillHandId = null;
+  draggedEquipmentHandId = null;
+};
+
+/**
  * Shared ghost-drag for hand cards. Each card type reveals its own drop
  * targets and stamps its module-level hand id; the targets themselves own
  * the mouseup handlers that emit actions (guarded by that hand id).
@@ -358,13 +431,9 @@ const beginCardDrag = (event, cardDiv, handCard, cardType) => {
   let cleanupDropTargets = () => {};
   let onWindowResize = null;
   if (cardType === "unit") {
-    const positionCodes = Object.keys(handCard.card.positions);
-    const dropZones = document.querySelectorAll(".position-drop-zone");
-    dropZones.forEach((zone) => {
-      if (positionCodes.includes(zone.dataset.positionCode)) zone.classList.remove("hidden");
-    });
+    revealPlacementSlots(handCard.card);
     draggedCardHandId = handCard.index;
-    cleanupDropTargets = () => dropZones.forEach((zone) => zone.classList.add("hidden"));
+    cleanupDropTargets = hidePlacementSlots;
   } else if (cardType === "skill") {
     draggedSkillHandId = handCard.index;
     const opponentContainer = document.querySelector("#opponent-container");
@@ -421,6 +490,7 @@ const beginCardDrag = (event, cardDiv, handCard, cardType) => {
     document.body.classList.remove("dragging");
     cardDiv.classList.remove("invisible");
     cleanupDropTargets();
+    clearDraggedHandIds();
     if (!moved) toggleCardFlip(cardDiv);
   };
   document.addEventListener("mousemove", onMouseMove);
@@ -562,6 +632,9 @@ const render = async (state, data, socket) => {
   renderCombatSlots(state, positions, data.glossary);
   await renderDecks(state, data.glossary);
   renderLighthouses(state);
+  // the drop targets answer to the board the snapshot describes: a landmark slot
+  // says so while the player already fields a landmark
+  prepareBoard(data.placement ?? {}, state, socket);
   await renderFields(state, socket);
   await renderHands(state);
   renderShinsu(state);
@@ -571,9 +644,160 @@ const render = async (state, data, socket) => {
   showGameOver(state.gameOver);
 };
 
+/* ── the board's placement slots ──────────────────────────────────────── */
+
+/**
+ * Whether one placement slot accepts the card being dragged. A slot selects a
+ * kind — a position slot selects `standard`, a kind slot selects its own kind —
+ * and the card's resolved deploy lines must take in the line the slot sits on.
+ * A standard slot additionally names a position the card prints: a unit printed
+ * with the fisherman alone may not be dropped on the scout slot beside it, even
+ * though both slots sit on the frontline.
+ *
+ * This is the board's whole reveal rule. Nothing enumerates a card's printed
+ * positions to decide where it may go: the server resolves those into
+ * `deployLines`, and the board reads the same answer the engine deploys by.
+ */
+const matchPlacementSlot = (card, slot) => {
+  const kind = card?.kind ?? "standard";
+  if (slot?.kind !== kind) return false;
+  if (!(slot.lines ?? []).some((line) => (card?.deployLines ?? []).includes(line))) return false;
+  if (kind !== "standard") return true;
+  return Object.hasOwn(card.positions ?? {}, slot.code);
+};
+
+/**
+ * Whether dropping on a slot replaces a unit the player already has on the
+ * field. The engine keeps at most one landmark per player and destroys the
+ * standing one when the next landmark deploys, so the landmark slot is the one
+ * drop that substitutes rather than adds; the board marks it while a landmark
+ * is dragged.
+ */
+const replacesFieldUnit = (slot, fieldUnits) => {
+  if (slot?.kind !== "landmark") return false;
+  return (fieldUnits ?? []).some((unit) => (unit.card?.kind ?? "standard") === "landmark");
+};
+
+/**
+ * The placement slots mounted in one line container, kept per container and
+ * apart from the units' registry: a line holds both, and the unit renderer
+ * drops every element it did not mount itself.
+ */
+const placementZones = new WeakMap();
+
+const placementZonesOf = (lineContainer) => {
+  let registry = placementZones.get(lineContainer);
+  if (!registry) {
+    registry = new Map();
+    placementZones.set(lineContainer, registry);
+  }
+  return registry;
+};
+
+/** Every mounted placement slot of the player's own board, in board order. */
+const placementSlotEntries = () => {
+  const entries = [];
+  for (const line of ["frontline", "backline"]) {
+    const lineContainer = document.querySelector(`#you-container .${line}-container`);
+    entries.push(...placementZonesOf(lineContainer).values());
+  }
+  return entries;
+};
+
+/** Reveal the slots the dragged card may deploy into, and no others. */
+const revealPlacementSlots = (card) => {
+  for (const mounted of placementSlotEntries()) {
+    mounted.element.classList.toggle("hidden", !matchPlacementSlot(card, mounted.slot));
+  }
+};
+
+/** Hide every placement slot again: a slot shows only while a card is dragged. */
+const hidePlacementSlots = () => {
+  for (const mounted of placementSlotEntries()) mounted.element.classList.add("hidden");
+};
+
+/**
+ * One drop target per placeable slot per line, built from the placement
+ * registry and the board the last snapshot described. A position slot sends the
+ * position code it names; a kind slot selects a line-targeted kind and sends its
+ * own code, which the engine ignores for a non-standard kind — the resolved line
+ * decides the destination.
+ *
+ * Idempotent, and re-run on every snapshot: the landmark slot carries whether a
+ * drop on it replaces the landmark already on the field, which is board state.
+ * Slots are reconciled like every other mounted element, so a slot keeps its
+ * element across snapshots and a second snapshot leaves exactly one element per
+ * placeable thing.
+ */
+const prepareBoard = (placement, state, socket) => {
+  const fieldUnits = ["frontline", "backline"].flatMap((line) => state?.you?.field?.[line] ?? []);
+  for (let line of ["frontline", "backline"]) {
+    const lineContainer = document.querySelector(`#you-container .${line}-container`);
+    const registry = placementZonesOf(lineContainer);
+    const wanted = new Set();
+    const order = [];
+    for (let slot of placement?.[line] ?? []) {
+      const key = `${slot.kind}:${slot.code}`;
+      wanted.add(key);
+      let mounted = registry.get(key);
+      if (!mounted) {
+        const dropZoneContainer = document.createElement("div");
+        dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
+        dropZoneContainer.dataset.positionCode = slot.code;
+        dropZoneContainer.dataset.slotKind = slot.kind;
+        // only set background-image when iconPath is present and valid to avoid
+        // requesting invalid URLs
+        const iconDiv = document.createElement("div");
+        iconDiv.classList.add("position-drop-zone-icon");
+        if (
+          typeof slot.iconPath === "string" &&
+          slot.iconPath.trim() !== "" &&
+          slot.iconPath !== "undefined" &&
+          slot.iconPath !== "null"
+        ) {
+          iconDiv.style.backgroundImage = `url(${slot.iconPath})`;
+        }
+        dropZoneContainer.appendChild(iconDiv);
+        // the slot's code is read at drop time, like the hand index, so a
+        // reconciled element always drops what it currently stands for
+        dropZoneContainer.addEventListener("mouseup", () => {
+          if (draggedCardHandId === null) return;
+          socket.emit(
+            EVENTS.GAME_ACTION,
+            buildDeployUnitAction(draggedCardHandId, dropZoneContainer.dataset.positionCode)
+          );
+          draggedCardHandId = null;
+        });
+        lineContainer.appendChild(dropZoneContainer);
+        mounted = { element: dropZoneContainer, slot };
+        registry.set(key, mounted);
+      }
+      // the registry is the authority for what a slot accepts, so a reused
+      // element reads the slot of this snapshot
+      mounted.slot = slot;
+      mounted.element.classList.toggle("replacing-landmark", replacesFieldUnit(slot, fieldUnits));
+      order.push(mounted.element);
+    }
+    dropUnwanted(registry, wanted);
+    // units lead the line container so the placement slots stay at the end,
+    // exactly as the unit renderer orders it
+    const units = [...lineContainer.children].filter((child) =>
+      child.classList.contains("unit-card-horizontal-component")
+    );
+    orderChildren(lineContainer, units, order);
+  }
+};
+
 /* ── one-time board setup ─────────────────────────────────────────────── */
 
-const prepareBoard = async (positionData, glossary, socket) => {
+/**
+ * Everything the board mounts or binds once: the tooltips whose copy never
+ * changes, and the listeners that outlive a snapshot. Re-binding these on every
+ * snapshot would stack handlers and mount a second tooltip per container, so
+ * they stay out of the render path; the placement slots, which do re-render,
+ * keep to themselves.
+ */
+const setupBoard = async (glossary, socket) => {
   for (let player of ["you", "opponent"]) {
     // lighthouses
     const lighthouseTooltip = glossary?.hud?.lighthouses;
@@ -595,36 +819,6 @@ const prepareBoard = async (positionData, glossary, socket) => {
       await addTooltip(normalContainer, shinsuTooltip.name, shinsuTooltip.texts);
       const rechargedContainer = shinsuContainer.querySelector(".recharged-shinsu");
       await addTooltip(rechargedContainer, rechargedTooltip.name, rechargedTooltip.texts);
-    }
-  }
-
-  // position drop zones
-  for (let line of ["frontline", "backline"]) {
-    const lineContainer = document.querySelector(`#you-container .${line}-container`);
-    const positionCodes = Object.keys(positionData).filter((code) => positionData[code].line === line);
-    for (let code of positionCodes) {
-      const dropZoneContainer = document.createElement("div");
-      dropZoneContainer.classList.add("position-drop-zone", "container-horizontal", "hidden");
-      // only set background-image when iconPath is present and valid to avoid requesting invalid URLs
-      const iconPath = positionData[code] && positionData[code].iconPath;
-      const iconDiv = document.createElement("div");
-      iconDiv.classList.add("position-drop-zone-icon");
-      if (
-        typeof iconPath === "string" &&
-        iconPath.trim() !== "" &&
-        iconPath !== "undefined" &&
-        iconPath !== "null"
-      ) {
-        iconDiv.style.backgroundImage = `url(${iconPath})`;
-      }
-      dropZoneContainer.appendChild(iconDiv);
-      dropZoneContainer.dataset.positionCode = code;
-      dropZoneContainer.addEventListener("mouseup", () => {
-        if (draggedCardHandId === null) return;
-        socket.emit(EVENTS.GAME_ACTION, buildDeployUnitAction(draggedCardHandId, code));
-        draggedCardHandId = null;
-      });
-      lineContainer.appendChild(dropZoneContainer);
     }
   }
 
@@ -853,5 +1047,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   // for the current state view
   socket.on("connect", () => socket.emit(EVENTS.GAME_STATE_REQUEST));
 
-  await prepareBoard(data.positions ?? {}, data.glossary, socket);
+  await setupBoard(data.glossary, socket);
 });

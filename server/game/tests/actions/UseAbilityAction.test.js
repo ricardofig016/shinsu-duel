@@ -199,5 +199,36 @@ describe("UseAbilityAction", () => {
     expect(unit.currentHp).toBe(2);
     expect(game.playerStates.Alice.shinheuhSlot.available).toBe(false);
   });
+
+  test("a Free shinheuh ability is accepted with no Shinheuh slot and spends none", () => {
+    const game = setupGameWithHands({ Alice: ["Test Shinheuh"] });
+    const unit = deployUnit(game, "Alice", "Test Shinheuh", "frontline");
+    game.currentTurn = "Alice";
+    unit.card.abilities[0] = { type: "heal", amount: 1, target: "self", free: true, quick: true };
+    unit.currentHp = 1;
+    expect(game.playerStates.Alice.shinheuhSlot.available).toBe(false);
+
+    game.processAction({
+      type: "use-ability-action",
+      data: { source: "player", username: "Alice", unitId: unit.id, abilityCode: "0" },
+    });
+
+    expect(unit.currentHp).toBe(2);
+    expect(game.playerStates.Alice.shinheuhSlot).toEqual({ available: false, used: false });
+  });
+
+  test("a Free standard ability spends no position slot", () => {
+    const { game, unit } = deployMonkeymanAsFisherman();
+    unit.card.abilities[1] = { type: "heal", amount: 1, target: "self", free: true, position: "fisherman" };
+    unit.currentHp = 1;
+
+    game.processAction({
+      type: "use-ability-action",
+      data: { source: "player", username: "Alice", unitId: unit.id, abilityCode: "1" },
+    });
+
+    expect(unit.currentHp).toBe(2);
+    expect(game.playerStates.Alice.combatSlots.fisherman.available).toBe(true);
+  });
   });
 });

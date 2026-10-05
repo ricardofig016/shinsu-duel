@@ -31,9 +31,10 @@ measures geometry, and freshly inserted markup is laid out unstyled until its
 
 ## Data contract
 
-The component consumes only the flattened view models from
+The component consumes the flattened view models from
 `public/game/viewModels.js`, which mirror the server card view produced by
-`Card.toSanitizedObject()` (`server/game/Card.js`):
+`Card.toSanitizedObject()` (`server/game/Card.js`), plus the placement registry
+the position row falls back to:
 
 - Printed content arrives as compiled display segments: `rank`,
   `requirements`, `effects`, `rules`, `evolveTriggers`, `igniteTriggers`, and
@@ -53,6 +54,16 @@ The component consumes only the flattened view models from
 - Tooltip copy outside the card views (type/kind summaries, rank entries,
   header concept descriptions, HUD strings) comes from the glossary route —
   see `docs/TOOLTIP_SYSTEM.md` for the copy map and the styled entry contract.
+- The position row draws the unit's printed `positions`; a unit that prints none
+  is filled from the placement registry instead — on the field, the slot for the
+  line the unit occupies, and in hand one slot per entry of the card's
+  `deployLines`, in that order, each an unchosen chip. The slots come
+  from `public/utils/positions.js`, the page's cached `GET /positions/` fetch
+  the board reads the same registry through. The deploy-line rule, the registry,
+  and the board's drop targets are
+  [Board Placement](./NET_PROTOCOL_ARCHITECTURE.md#board-placement); `deployLines`
+  and the rest of the seat's derived fields are
+  [Client Projection](./GAMESTATE_ARCHITECTURE.md#client-projection).
 
 The component renders placeholders for missing artwork/icons but never
 mutates the view models.
@@ -106,7 +117,13 @@ mutates the view models.
   font shrinks from 2em toward 0.8em until the content fits its own box, so
   missing or long content can never shift the artwork geometry.
 - **Stats:** cost circle always; position icons and the hp circle for unit
-  cards only.
+  cards only. What fills the position row never decides whether it is shown: the
+  row is keyed on the card's type, so a unit card shows it whether or not the
+  registry has a chip for it. A standard unit shows the positions it prints, the
+  one it was placed in and the one a landmark choice moved it to; a landmark or
+  a shinheuh prints none, so the registry fills the row as above, each chip
+  keeping the shared position tooltip (the copy map is
+  [TOOLTIP_SYSTEM.md](./TOOLTIP_SYSTEM.md#tooltip-copy-map)).
 
 The card frame is an isolated stacking context (`isolation: isolate`), so
 positioned descendants (trapezoids, overlays) can never paint above
@@ -330,4 +347,6 @@ The view models and wire projections behind the component are covered by
 overlay's row assembly and layout geometry are pure and unit-tested in
 `public/tests/utils/card-detail-row.test.js` and
 `public/tests/utils/card-detail-layout.test.js`; the component scripts
-themselves are DOM code without a test harness.
+themselves are DOM code without a test harness. The special-kind position row
+is pinned as source text in `public/tests/utils/component-contract.test.js`, and
+the slot narrowing it calls by `public/tests/utils/positions.test.js`.

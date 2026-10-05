@@ -17,6 +17,7 @@ import EVT from "../EventCatalog.js";
 import { resolveEffect, resolveEffects } from "../EffectResolver.js";
 import ModifierService from "./ModifierService.js";
 import { meetsDamageThreshold } from "../utils/damageThreshold.js";
+import { deployLinesFor } from "../placement.js";
 
 export default class LifecycleEngine {
   /**
@@ -139,23 +140,16 @@ export default class LifecycleEngine {
   }
 
   /**
-   * Resolve the field line a card occupies.
+   * Resolve the field line a card occupies, through the shared deploy-line rule
+   * (`server/game/placement.js`). This engine is the authority for placement;
+   * the rule is the single vocabulary it and every other consumer reads.
    *
    * Standard units occupy the line of their chosen position; shinheuh occupy
    * their authored `line`; landmarks and the conduit always occupy the
    * backline. `positionCode` is only meaningful for standard units.
    */
   static _lineForCard(gameState, card, positionCode) {
-    if (card.kind === "shinheuh") {
-      if (!card.line) throw new Error(`Shinheuh "${card.name}" has no line.`);
-      return card.line;
-    }
-    if (card.kind === "landmark" || card.kind === "conduit") {
-      return "backline";
-    }
-    const positionDef = gameState.constructor.positions[positionCode];
-    if (!positionDef) throw new Error(`Invalid position: "${positionCode}"`);
-    return positionDef.line;
+    return deployLinesFor(card, positionCode, gameState.constructor.positions)[0];
   }
 
   /**

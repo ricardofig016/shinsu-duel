@@ -26,6 +26,16 @@ const attribute = {
   iconPath: "/assets/icons/attributes/hwayeomsa.png",
 };
 
+/**
+ * A requirement view as `Card.toSanitizedObject()` ships it: the prose the card
+ * face renders under `text`, beside the compiled `check` node the engine
+ * matches the requirement with.
+ */
+const violeRequirement = {
+  text: ["A Viole unit."],
+  check: { type: "unit_on_board", name: "Viole" },
+};
+
 describe("buildUnitHeaderIcons", () => {
   test("draws one equipment icon for any number of attachments", () => {
     const entries = buildUnitHeaderIcons({ equipmentAttachments: ["Narumada", "Blue Thryssa"] }, glossary);
@@ -44,7 +54,7 @@ describe("buildUnitHeaderIcons", () => {
         evolveTriggers: [[{ segments: ["On deploy."] }]],
         igniteTriggers: ["On death."],
         passiveAbilities: [{ text: ["Always watching."] }],
-        requirements: ["A Viole unit."],
+        requirements: [violeRequirement],
       },
       glossary
     );
@@ -67,6 +77,18 @@ describe("buildUnitHeaderIcons", () => {
     expect(entries[0].texts).toEqual([
       { segments: ["Always watching."] },
       { segments: ["Always active."], style: "italic" },
+    ]);
+  });
+
+  test("explains a requirement icon with the card's own text, not its check", () => {
+    const entries = buildUnitHeaderIcons({ requirements: [violeRequirement] }, glossary);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].title).toBe("Requirements");
+    expect(entries[0].gameTexts).toEqual([{ segments: ["A Viole unit."] }]);
+    expect(entries[0].texts).toEqual([
+      { segments: ["A Viole unit."] },
+      { segments: ["Must be met."], style: "italic" },
     ]);
   });
 
@@ -127,7 +149,7 @@ describe("the card's back sections", () => {
         attributes: [attribute],
         evolveTriggers: [["On deploy."]],
         passiveAbilities: [{ text: ["Always watching."] }],
-        requirements: [["A Viole unit."]],
+        requirements: [violeRequirement],
       },
       glossary
     );
@@ -162,7 +184,7 @@ describe("the card's back sections", () => {
   });
 
   test("states a card's attributes without the glossary, which the concepts need", () => {
-    const sections = buildCardBackSections({ attributes: [attribute], requirements: ["A Viole unit."] }, null);
+    const sections = buildCardBackSections({ attributes: [attribute], requirements: [violeRequirement] }, null);
 
     expect(sections.map((section) => section.title)).toEqual(["Guide - Hwayeomsa"]);
   });

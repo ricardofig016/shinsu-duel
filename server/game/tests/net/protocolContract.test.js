@@ -2,6 +2,8 @@ import { jest } from "@jest/globals";
 import { EVENTS, buildStateView } from "../../net/protocol.js";
 import { createNetHarness } from "./harness.js";
 import { deployUnit } from "../utils.js";
+import ModifierService from "../../services/ModifierService.js";
+import CombatSlotService from "../../services/CombatSlotService.js";
 
 jest.setTimeout(15000);
 
@@ -17,6 +19,13 @@ beforeEach(async () => {
 afterEach(async () => {
   await harness.close();
 });
+
+/** Ask a seat for its current view and read the state the gateway sends back. */
+async function requestView(seat) {
+  const received = seat.next(EVENTS.GAME_INIT);
+  seat.emit(EVENTS.GAME_STATE_REQUEST);
+  return received;
+}
 
 /** Create a pending target-selection decision for Alice on the live game. */
 function createTargetDecision(session) {
@@ -80,6 +89,36 @@ describe("game-init: the exact per-player projection on start", () => {
     expect(bobInit.currentTurn).toBe("Alice");
     expect(bobInit.you.passButton).toEqual({ isEnabled: false, text: "Bob" });
     expect(bobInit.opponent.passButton).toEqual({ isEnabled: false, text: "Alice" });
+  });
+
+  // RULES.md §Combat Slots: the Shinheuh slot exists only while an Anima
+  // created it. `{ available: false, used: false }` is no slot, `available` is
+  // an existing unspent slot, `used` is an existing spent slot. A client can
+  // only tell those apart if the pair survives the wire for both seats.
+  test("the Shinheuh slot reaches both seats over the wire in every state", async () => {
+    const { roomCode, alice, bob } = await harness.seatPlayers();
+    const game = harness.registry.get(roomCode).game;
+
+    let aliceView = await requestView(alice);
+    let bobView = await requestView(bob);
+    expect(aliceView.you.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(aliceView.opponent.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(bobView.you.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(bobView.opponent.shinheuhSlot).toEqual({ available: false, used: false });
+
+    CombatSlotService.grantShinheuhSlot(game.playerStates.Bob, game.eventBus, "Bob");
+    aliceView = await requestView(alice);
+    bobView = await requestView(bob);
+    expect(aliceView.opponent.shinheuhSlot).toEqual({ available: true, used: false });
+    expect(bobView.you.shinheuhSlot).toEqual({ available: true, used: false });
+    expect(aliceView.you.shinheuhSlot).toEqual({ available: false, used: false });
+    expect(bobView.opponent.shinheuhSlot).toEqual({ available: false, used: false });
+
+    expect(CombatSlotService.consumeShinheuhSlot(game.playerStates.Bob)).toBe(true);
+    aliceView = await requestView(alice);
+    bobView = await requestView(bob);
+    expect(aliceView.opponent.shinheuhSlot).toEqual({ available: false, used: true });
+    expect(bobView.you.shinheuhSlot).toEqual({ available: false, used: true });
   });
 });
 
@@ -182,6 +221,94 @@ describe("per-player decision and condition projections", () => {
         iconPath: "/assets/icons/conditions/poisoned.png",
       },
     ]);
+  });
+
+  test("derived unit keywords, runtime affiliations and attributes survive the wire in both seats", async () => {
+    const { roomCode, alice, bob } = await harness.seatPlayers({ hands: { Alice: ["Test Scout"] } });
+    const session = harness.registry.get(roomCode);
+    const game = session.game;
+    const scout = deployUnit(game, "Alice", "Test Scout", "scout");
+    game.modifierStack.apply({
+      sourceId: "Equip#free",
+      sourceType: "equipment",
+      targetId: scout.id,
+      type: "keyword",
+      key: "free",
+      value: 1,
+      meta: { first: false },
+    });
+    game.modifierStack.apply({
+      sourceId: "Passive#aff",
+      sourceType: "passive",
+      targetId: scout.id,
+      type: "affiliation",
+      key: "wolhaiksong",
+      value: 1,
+    });
+    game.modifierStack.apply({
+      sourceId: "Passive#attr",
+      sourceType: "passive",
+      targetId: scout.id,
+      type: "attribute",
+      key: "anima",
+      value: 1,
+    });
+
+    alice.emit(EVENTS.GAME_STATE_REQUEST);
+    const aliceView = await alice.next(EVENTS.GAME_INIT);
+    const ownUnit = aliceView.you.field.frontline.find((unit) => unit.id === scout.id);
+    expect(ownUnit.keywords).toEqual(["free"]);
+    expect(ownUnit.runtimeAffiliations).toEqual([
+      { key: "wolhaiksong", name: "Wolhaiksong", type: "organization", iconPath: "/assets/icons/affiliations/wolhaiksong.png" },
+    ]);
+    expect(ownUnit.runtimeAttributes).toEqual([
+      expect.objectContaining({ key: "anima", name: "Anima", iconPath: "/assets/icons/attributes/anima.png" }),
+    ]);
+    expect([...ownUnit.runtimeAttributes[0].description.segments]).toEqual(expect.any(Array));
+
+    bob.emit(EVENTS.GAME_STATE_REQUEST);
+    const bobView = await bob.next(EVENTS.GAME_INIT);
+    const opponentUnit = bobView.opponent.field.frontline.find((unit) => unit.id === scout.id);
+    expect(opponentUnit.keywords).toEqual(ownUnit.keywords);
+    expect(opponentUnit.runtimeAffiliations).toEqual(ownUnit.runtimeAffiliations);
+    expect(opponentUnit.runtimeAttributes).toEqual(ownUnit.runtimeAttributes);
+    expect(opponentUnit).not.toHaveProperty("grantedAbilities");
+
+    // Removing the granting sources clears the projected fields on the wire too.
+    game.modifierStack.removeBySource("Equip#free");
+    game.modifierStack.removeBySource("Passive#aff");
+    game.modifierStack.removeBySource("Passive#attr");
+    alice.emit(EVENTS.GAME_STATE_REQUEST);
+    const afterRemoval = await alice.next(EVENTS.GAME_INIT);
+    const removedUnit = afterRemoval.you.field.frontline.find((unit) => unit.id === scout.id);
+    expect(removedUnit.keywords).toEqual([]);
+    expect(removedUnit.runtimeAffiliations).toEqual([]);
+    expect(removedUnit.runtimeAttributes).toEqual([]);
+  });
+
+  test("the seat's own cards carry the engine-resolved cost on the wire", async () => {
+    const { roomCode, alice } = await harness.seatPlayers({ hands: { Alice: ["Test Scout"] } });
+    const session = harness.registry.get(roomCode);
+    const game = session.game;
+
+    let view = await requestView(alice);
+    let handCard = view.you.hand.find((card) => card.name === "Test Scout");
+    expect(handCard.effectiveCost).toBe(handCard.cost);
+
+    game.modifierStack.apply({
+      sourceId: "Passive#cost",
+      sourceType: "passive",
+      targetId: "Alice",
+      type: "stat",
+      key: "cost",
+      value: -1,
+    });
+    expect(ModifierService.getEffectiveCost(game.playerStates.Alice.hand[0], "Alice", game)).toBe(0);
+
+    view = await requestView(alice);
+    handCard = view.you.hand.find((card) => card.name === "Test Scout");
+    expect(handCard.cost).toBe(1);
+    expect(handCard.effectiveCost).toBe(0);
   });
 
   test("the pending decision is exposed to its owner only", async () => {

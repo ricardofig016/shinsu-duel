@@ -91,6 +91,10 @@ The command surface, the arguments each type takes, and what a mutation records 
 
 Non-Free abilities mark the position's combat slot spent; Shinheuh abilities consume the Anima Shinheuh slot instead. `Heavy` condition adds to the ability cost; `Poisoned` triggers after resolution if the unit survives.
 
+### Position switches
+
+The slot cost belongs to the action, not to moving a unit: `SwitchPositionAction` spends the combat slot of the position the unit leaves and is refused when that slot is already spent this round. The destination's slot is never read, so a unit may switch into a position whose slot is spent, and use that slot once there. An effect-driven forced switch (`switch_position`) is not an action and spends nothing; `CombatSlotService` owns the slots themselves (see [Service Layer](SERVICE_LAYER_ARCHITECTURE.md#combatslotservice)).
+
 ---
 
 ## Decision Continuations

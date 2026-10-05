@@ -3,7 +3,6 @@
 ## Tasks
 
 - [ ] bug: its possible to have 2 of the same unit deployed if they're in different evolution stages (Khun and Khun II)
-- [ ] bug: switching positions doesnt require source position combat slot to be available
 - [ ] cards: redan: ally target should not be a requirement, should be part of the text
 - [ ] cards: baang: migrate to "deal 2 for each ally wave controller"
 - [ ] rules: add contracts from `todo\contracts.md`
@@ -16,6 +15,7 @@
 
 ## Completed
 
+- [x] bug: switching positions doesnt require source position combat slot to be available
 - [x] ui: add numbers to numeric traits and conditions
 - [x] decision engine: remove auto decisions when there's only 1 choice - the player should still actively make it
 - [x] game: add random bot and pass bot
