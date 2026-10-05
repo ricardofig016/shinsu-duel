@@ -8,3 +8,9 @@
 #waiting-copy-hint {
   font-size: 0.9rem;
 }
+
+/* The simple panel centers in the viewport; the auto margins collapse when
+   the window is too short, so the panel scrolls instead of clipping. */
+.pregame-container > .pregame-panel {
+  margin: auto;
+}

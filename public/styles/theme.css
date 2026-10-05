@@ -1,0 +1,72 @@
+/* Theme tokens for the site pages.
+ *
+ * One place defines every color and surface the site chrome uses; page and
+ * component sheets read these custom properties instead of hardcoding values.
+ * The palette is the approved dark theme: near-black page with the card
+ * background texture as a blurred, veiled layer (applied in global.css), dark
+ * textured panels with gold edges, and warm parchment text.
+ *
+ * `--border-color` and `--accent-color` exist for pregame.css, which reads
+ * them with fallbacks. The game board page opts out of the themed button in
+ * global.css and keeps its own image-driven styling.
+ */
+:root {
+  /* page backdrop and raised surfaces */
+  --page-bg: #0a0b0e;
+  --surface: #101216;
+  --surface-input: #0b0c0f;
+  --surface-border: rgba(230, 184, 76, 0.4);
+  --surface-texture: url("/assets/images/card/background.png");
+  --texture-veil: linear-gradient(rgba(12, 13, 16, 0.7), rgba(12, 13, 16, 0.85));
+
+  /* text */
+  --text: #e8e6e0;
+  --text-muted: #9a978e;
+
+  /* gold accent, shared with the card faces' link color */
+  --gold: #e6b84c;
+  --gold-dim: rgba(230, 184, 76, 0.35);
+
+  /* feedback and status pairs */
+  --danger: #d64545;
+  --danger-bg: rgba(160, 32, 32, 0.22);
+  --danger-border: rgba(214, 69, 69, 0.5);
+  --danger-text: #e89a9a;
+  --status-legal-bg: rgba(28, 122, 50, 0.25);
+  --status-legal-text: #7cc98c;
+  --status-problem-bg: rgba(160, 32, 32, 0.3);
+  --status-problem-text: #e08585;
+  --mark-unreachable-bg: rgba(207, 166, 75, 0.18);
+  --mark-unreachable-text: #cfa64b;
+  --mark-test-bg: rgba(143, 168, 232, 0.16);
+  --mark-test-text: #8fa8e8;
+  --mark-unknown-bg: rgba(224, 133, 133, 0.16);
+  --mark-unknown-text: #e08585;
+
+  /* deck tables */
+  --table-bg: #0f1115;
+  --table-hover: rgba(230, 184, 76, 0.05);
+  --table-selected: rgba(230, 184, 76, 0.12);
+  --table-selected-bar: var(--gold);
+  --table-row-border: rgba(255, 255, 255, 0.06);
+  --table-header-text: #b8a15e;
+
+  /* rules page code blocks */
+  --code-bg: #1a1c21;
+
+  /* the themed site button: dark textured face, gold rock edge, warm text.
+     The board page resets these in global.css. */
+  --button-text: #ecd9a0;
+  --button-bg: #0e1013;
+  --button-face: var(--surface-texture);
+  --button-border: 3px solid;
+  --button-border-image: url("/assets/images/card/frame.png") 60 round;
+  --button-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --button-hover: brightness(1.2);
+  --button-active: brightness(0.8);
+  --button-active-ring: inset 0 0 0 2px rgba(230, 184, 76, 0.7);
+
+  /* consumed by pregame.css's fallback reads */
+  --border-color: var(--surface-border);
+  --accent-color: var(--gold);
+}

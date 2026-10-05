@@ -1,7 +1,16 @@
 /* The bot picker's personality blurb sits between the roster and the deck
    method picker and reads as the bot speaking for itself. */
+/* The panel lays its sections out like the pre-game panel: one column, an
+   even gap between the heading and the pickers. */
+.page-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
 #bot-blurb {
-  color: #555555;
+  color: var(--text-muted);
   font-style: italic;
   margin: 4px 0;
 }

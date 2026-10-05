@@ -9,7 +9,18 @@
 }
 
 #deck-toolbar input[type="search"] {
+  all: unset;
   flex: 1 1 auto;
+  padding: 8px 12px;
+  background-color: var(--surface-input);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  color: var(--text);
+}
+
+#deck-toolbar input[type="search"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim);
 }
 
 #deck-table {
@@ -35,7 +46,11 @@
   align-items: center;
   padding: 2rem;
   border-radius: 0.5rem;
-  background-color: #ffffff;
+  background-color: var(--surface);
+  background-image: var(--texture-veil), var(--surface-texture);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--surface-border);
 }
 
 .versus-seat {

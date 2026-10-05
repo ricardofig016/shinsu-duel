@@ -1,0 +1,22 @@
+/* Home page hero: the welcome line over the game's logo image, centered as a
+   unit by the shared `.panel-host`. */
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin: auto;
+}
+
+.home-hero-welcome {
+  font-family: "New Rocker", Arial, sans-serif;
+  font-size: 2rem;
+  font-weight: normal;
+}
+
+.home-hero-logo {
+  display: block;
+  width: min(50vw, 20rem);
+  height: auto;
+  border-radius: 8px;
+}

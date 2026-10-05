@@ -20,6 +20,10 @@
   align-items: center;
   width: min(48rem, 100%);
   padding: 1.5rem;
+  background-color: var(--surface);
+  background-image: var(--texture-veil), var(--surface-texture);
+  background-size: cover;
+  background-position: center;
   border: 1px solid var(--border-color, #333);
   border-radius: 0.5rem;
 }

@@ -17,10 +17,17 @@
 #cards-toolbar select {
   all: unset;
   padding: 8px 12px;
-  background-color: #ffffff;
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
-  color: #222222;
+  background-color: var(--surface-input);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  color: var(--text);
+}
+
+#cards-toolbar input[type="search"]:focus,
+#cards-toolbar input[type="number"]:focus,
+#cards-toolbar select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim);
 }
 
 #cards-toolbar input[type="search"] {
@@ -43,10 +50,15 @@
 }
 
 #cards-facets fieldset {
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
   padding: 0.5rem 0.75rem;
   max-width: 24rem;
+}
+
+#cards-facets fieldset legend {
+  color: var(--text-muted);
+  padding: 0 0.35rem;
 }
 
 .cards-section {
@@ -67,10 +79,10 @@
 .cards-section h2 span {
   font-family: "Roboto", Arial, sans-serif;
   font-size: 1rem;
-  color: #555555;
+  color: var(--text-muted);
 }
 
 #cards-error {
   padding: 2rem 0;
-  color: #a02020;
+  color: var(--danger);
 }

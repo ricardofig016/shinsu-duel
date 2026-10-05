@@ -14,6 +14,31 @@
   max-width: 100%;
 }
 
+/* The rendered markdown carries the theme's gold on its structure: headings,
+   the divider after every h2, and bold text. Body prose stays parchment so
+   the gold keeps marking hierarchy. */
+#rules-container h1,
+#rules-container h2 {
+  font-family: "New Rocker", Arial, sans-serif;
+  font-weight: normal;
+  color: var(--gold);
+}
+
+#rules-container h3,
+#rules-container h4 {
+  color: var(--gold);
+}
+
+#rules-container hr {
+  border: none;
+  border-top: 1px solid var(--gold-dim);
+  margin: 1.25rem 0;
+}
+
+#rules-container strong {
+  color: var(--gold);
+}
+
 #rules-container ul {
   display: block;
   list-style-type: disc;
@@ -36,21 +61,21 @@
 
 #rules-container th,
 #rules-container td {
-  border: 1px solid #444;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 0.4rem 0.6rem;
   text-align: left;
 }
 
 #rules-container code {
   font-family: Consolas, "Courier New", monospace;
-  background-color: #e2e2e2;
+  background-color: var(--code-bg);
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
 }
 
 #rules-container pre {
-  background-color: #e2e2e2;
-  border-radius: 5px;
+  background-color: var(--code-bg);
+  border-radius: 3px;
   padding: 0.75rem 1rem;
   margin: 1rem 0;
   overflow-x: auto;

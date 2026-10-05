@@ -1,3 +1,5 @@
+@import url("/styles/theme.css");
+
 @font-face {
   font-family: "Roboto";
   src: url("/assets/fonts/Roboto-Regular.ttf") format("truetype");
@@ -12,15 +14,18 @@
   font-style: normal;
 }
 
-:root {
-  --primary-color: #007bff;
-  --primary-color-dark: #0056b3;
-}
-
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* The base color lives on html alone: a body background would paint in the
+   normal flow layer, above body's own negative-z-index backdrop layers, and
+   cover them with flat color. On html it propagates to the canvas, which sits
+   beneath everything. */
+html {
+  background-color: var(--page-bg);
 }
 
 html,
@@ -30,8 +35,45 @@ body {
   height: 100vh;
   margin: 0;
   padding: 0;
-  background-color: #f0f0f0;
+  color: var(--text);
   overflow: hidden;
+}
+
+/* Page backdrop: the card background texture as a fixed layer, blurred and
+   veiled by a gradient. The layers are fixed and sit behind everything, so
+   the blur never softens page content; a page that paints its own full-screen
+   background (the game board) simply covers them. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--surface-texture) center / cover no-repeat;
+  filter: blur(10px) brightness(0.85);
+  transform: scale(1.08);
+  opacity: 0.62;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(10, 11, 14, 0.22), rgba(10, 11, 14, 0.82));
+}
+
+/* The board page keeps its own image-driven chrome: it opts out of the themed
+   button and the page text color, leaving its visuals exactly as they were. */
+body:has(#game-container) {
+  color: initial;
+  --button-text: #ffffff;
+  --button-face: none;
+  --button-border: none;
+  --button-border-image: none;
+  --button-text-shadow: none;
+  --button-hover: none;
+  --button-active: none;
+  --button-active-ring: none;
 }
 /* A card being dragged: the ghost follows the pointer, so the page must not
    select or drag text under it. Pointer events stay on. Taking them away for the
@@ -73,6 +115,64 @@ body:has(> .allow-scroll) {
 body > .allow-scroll {
   flex: 1 1 0;
   min-height: 0;
+}
+
+/* Themed scrollbars: dark track, stone thumb, gold on hover. Chromium and
+   Safari style through the WebKit pseudos; Firefox has no WebKit pseudo
+   support and gets the standard properties. The standard properties switch
+   the WebKit pseudos off where both are understood, so they hide behind the
+   @supports test. */
+@supports not selector(::-webkit-scrollbar) {
+  :root {
+    scrollbar-color: #33363e rgba(0, 0, 0, 0);
+    scrollbar-width: thin;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #33363e;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 184, 76, 0.45);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Shared centered panel for the simple content pages: the textured surface
+   with a gold edge, centered in the viewport by its `.panel-host`. A panel
+   taller than the viewport stays reachable because the auto margins collapse
+   to zero instead of clipping. */
+.page-panel {
+  padding: 1.5rem 2.5rem;
+  background-color: var(--surface);
+  background-image: var(--texture-veil), var(--surface-texture);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--surface-border);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.panel-host {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-host > * {
+  margin: auto;
 }
 
 /* Inline text links inside compiled display segments (card prose, tooltips).
@@ -121,23 +221,27 @@ button {
   all: unset;
   display: inline-block;
   padding: 10px 20px;
-  text-decoration: none;
-  color: white;
-  background-color: var(--primary-color);
-  border-radius: 5px;
+  color: var(--button-text);
+  background-color: var(--button-bg);
+  background-image: var(--button-face);
+  background-size: cover;
+  background-position: center;
+  border: var(--button-border);
+  border-image: var(--button-border-image);
+  text-shadow: var(--button-text-shadow);
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: filter 0.3s;
 }
 
 .button:hover,
 button:hover {
-  background-color: var(--primary-color-dark);
+  filter: var(--button-hover);
 }
 
 .button.active,
 button.active {
-  background-color: var(--primary-color-dark);
-  border: 2px solid var(--primary-color);
+  filter: var(--button-active);
+  box-shadow: var(--button-active-ring);
 }
 
 ul {
@@ -152,6 +256,17 @@ ul {
 ul li {
   width: 100%;
   flex-grow: 1;
+}
+
+/* Text links: gold and underlined, so they stay identifiable next to gold
+   bold text. Buttons styled through `.button`/`button` keep their own face. */
+a {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+a:hover {
+  filter: brightness(1.15);
 }
 
 .tooltip {

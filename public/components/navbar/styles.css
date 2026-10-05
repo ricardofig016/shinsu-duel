@@ -1,10 +1,11 @@
 nav {
-  font-family: "Arial", sans-serif;
-  background-color: #1e1e2f;
-  padding: 1rem;
+  font-family: "Roboto", Arial, sans-serif;
+  background-color: #101216;
+  padding: 0.7rem 1.2rem;
   display: flex;
   justify-content: space-between;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  align-items: center;
+  border-bottom: 1px solid rgba(230, 184, 76, 0.4);
 }
 
 nav ul {

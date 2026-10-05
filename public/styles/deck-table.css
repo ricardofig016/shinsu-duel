@@ -3,22 +3,22 @@
 .deck-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #bbbbbb;
+  background-color: var(--table-bg);
+  border: 1px solid var(--surface-border);
   border-radius: 5px;
 }
 
 .deck-table th {
   text-align: left;
   font-size: 0.9rem;
-  color: #555555;
+  color: var(--table-header-text);
   padding: 0.6rem 0.75rem;
-  border-bottom: 2px solid #bbbbbb;
+  border-bottom: 2px solid var(--gold-dim);
 }
 
 .deck-table td {
   padding: 0.9rem 0.75rem;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid var(--table-row-border);
   vertical-align: middle;
 }
 
@@ -31,13 +31,13 @@
 }
 
 .deck-table tbody tr.deck-row:hover {
-  background-color: #f6f9ff;
+  background-color: var(--table-hover);
 }
 
 /* The deck step marks the row the seat has locked in. */
 .deck-table tbody tr.deck-row.selected {
-  background-color: #eaf2ff;
-  box-shadow: inset 3px 0 0 #3b6fd4;
+  background-color: var(--table-selected);
+  box-shadow: inset 3px 0 0 var(--table-selected-bar);
 }
 
 .deck-table tbody tr.deck-row.not-selectable {
@@ -61,7 +61,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #999999;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -87,13 +87,13 @@
 }
 
 .deck-flag.legal {
-  background-color: #e2f4e5;
-  color: #1c7a32;
+  background-color: var(--status-legal-bg);
+  color: var(--status-legal-text);
 }
 
 .deck-flag.problems {
-  background-color: #fbe3e3;
-  color: #a02020;
+  background-color: var(--status-problem-bg);
+  color: var(--status-problem-text);
 }
 
 .deck-row-actions {

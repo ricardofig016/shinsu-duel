@@ -20,11 +20,11 @@
 #decks-message {
   margin: 1rem 0 0 0;
   padding: 0.75rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #bbbbbb;
-  border-left: 4px solid #a02020;
-  border-radius: 5px;
-  color: #a02020;
+  background-color: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-left: 4px solid var(--danger);
+  border-radius: 3px;
+  color: var(--danger-text);
   white-space: pre-line;
 }
 
@@ -48,10 +48,21 @@
 #decks-card-filter select {
   all: unset;
   padding: 8px 12px;
-  background-color: #ffffff;
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
-  color: #222222;
+  background-color: var(--surface-input);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  color: var(--text);
+}
+
+#decks-toolbar input[type="search"]:focus,
+#decks-toolbar select:focus,
+#pool-toolbar input[type="search"]:focus,
+#pool-toolbar input[type="number"]:focus,
+#pool-toolbar select:focus,
+#decks-card-filter input[type="search"]:focus,
+#decks-card-filter select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim);
 }
 
 #pool-toolbar input[type="search"] {
@@ -68,15 +79,15 @@
 }
 
 #decks-card-filter {
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
   padding: 0.5rem 0.75rem 0.75rem 0.75rem;
   margin-bottom: 1rem;
 }
 
 #decks-card-filter legend {
   padding: 0 0.4rem;
-  color: #555555;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -88,21 +99,21 @@
 }
 
 #decks-card-filter fieldset {
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
   padding: 0.35rem 0.6rem;
   max-width: 30rem;
 }
 
 #decks-card-filter fieldset legend {
-  color: #555555;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
 #decks-empty,
 #decks-no-match {
   padding: 1rem 0;
-  color: #555555;
+  color: var(--text-muted);
 }
 
 .deck-name {
@@ -116,7 +127,8 @@
 
 .small-button:disabled,
 button:disabled {
-  background-color: #999999;
+  filter: grayscale(0.8) brightness(0.7);
+  opacity: 0.6;
   cursor: default;
 }
 
@@ -134,10 +146,15 @@ button:disabled {
   all: unset;
   flex: 1 1 14rem;
   padding: 8px 12px;
-  background-color: #ffffff;
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
-  color: #222222;
+  background-color: var(--surface-input);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  color: var(--text);
+}
+
+#deck-name:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim);
 }
 
 #deck-size {
@@ -145,25 +162,25 @@ button:disabled {
 }
 
 #deck-size.over {
-  color: #a02020;
+  color: var(--danger);
 }
 
 #deck-legal {
   padding: 1px 8px;
   border-radius: 10px;
-  background-color: #e2f4e5;
-  color: #1c7a32;
+  background-color: var(--status-legal-bg);
+  color: var(--status-legal-text);
   font-size: 0.85rem;
 }
 
 #deck-legal.problems {
-  background-color: #fbe3e3;
-  color: #a02020;
+  background-color: var(--status-problem-bg);
+  color: var(--status-problem-text);
 }
 
 #save-hint {
   flex: 1 1 12rem;
-  color: #a02020;
+  color: var(--danger);
 }
 
 #builder-panels {
@@ -177,9 +194,12 @@ button:disabled {
 #deck-contents-panel,
 #deck-pool-panel {
   padding: 0.75rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
+  background-color: var(--surface);
+  background-image: var(--texture-veil), var(--surface-texture);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--surface-border);
+  border-radius: 3px;
   overflow-y: auto;
 }
 
@@ -200,11 +220,11 @@ button:disabled {
 #deck-pool-panel h2 span {
   font-family: "Roboto", Arial, sans-serif;
   font-size: 1rem;
-  color: #555555;
+  color: var(--text-muted);
 }
 
 #deck-contents-empty {
-  color: #555555;
+  color: var(--text-muted);
 }
 
 .pool-toggle {
@@ -224,15 +244,19 @@ button:disabled {
 }
 
 #pool-facets fieldset {
-  border: 1px solid #bbbbbb;
-  border-radius: 5px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
   padding: 0.5rem 0.75rem;
   max-width: 24rem;
 }
 
+#pool-facets fieldset legend {
+  color: var(--text-muted);
+}
+
 #pool-empty {
   padding: 1rem 0;
-  color: #555555;
+  color: var(--text-muted);
 }
 
 /* One pool card: the face plus its control bar. */
@@ -256,19 +280,19 @@ button:disabled {
   padding: 1px 6px;
   border-radius: 8px;
   font-size: 0.85rem;
-  background-color: #eeeeee;
-  color: #555555;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
 }
 
 .pool-copy-badge.has-copies {
-  background-color: #e2f4e5;
-  color: #1c7a32;
+  background-color: var(--status-legal-bg);
+  color: var(--status-legal-text);
 }
 
 /* Contents panel */
 
 #deck-problems {
-  color: #a02020;
+  color: var(--danger);
 }
 
 #deck-problems li {
@@ -280,7 +304,7 @@ button:disabled {
   align-items: center;
   gap: 0.5rem;
   padding: 4px 0;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .contents-row:last-child {
@@ -294,11 +318,11 @@ button:disabled {
 }
 
 .contents-cost {
-  color: #555555;
+  color: var(--text-muted);
 }
 
 .contents-count {
-  color: #555555;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -310,18 +334,18 @@ button:disabled {
 }
 
 .mark-unreachable {
-  background-color: #fdf1d8;
-  color: #8a5a00;
+  background-color: var(--mark-unreachable-bg);
+  color: var(--mark-unreachable-text);
 }
 
 .mark-test {
-  background-color: #e3e9fb;
-  color: #2a3f8f;
+  background-color: var(--mark-test-bg);
+  color: var(--mark-test-text);
 }
 
 .mark-unknown {
-  background-color: #fbe3e3;
-  color: #a02020;
+  background-color: var(--mark-unknown-bg);
+  color: var(--mark-unknown-text);
 }
 
 .deck-card-button {
